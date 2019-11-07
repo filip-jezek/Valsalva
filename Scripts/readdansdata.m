@@ -1,10 +1,10 @@
-dataset = import_txt_data('Dan_lyingdown.txt');
+dataset = import_txt_data('data/Dan_lyingdown.txt');
 
 % decimation factor
 d = 20;
 
 t = (dataset.Time - 7.09958)*60;
-bp = dataset.BP*0.75;
+bp = dataset.BP;
 bps = smooth(bp, 100);
 % blood pressure smooth decimated
 bpsd = bps(1:d:end);
@@ -24,6 +24,7 @@ td = t(1:d:end);
      
      figure(2);
 clf; hold on;
+plot(t, bp, 'linewidth', 1);
 plot(t, bps, 'linewidth', 1);
 
 % debug peak detection for HR
@@ -38,7 +39,7 @@ legend('Blood pressure, scaled by 0.75 [mmHg]', 'detected peaks', 'HR [bpm]');
 
 
 %%
-figure(1);
+figure(2);
 clf; hold on;
 plot(td, bpsd, 'r-', 'linewidth', 1);
 plot(t, bp, 'linewidth', 1);
