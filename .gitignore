@@ -7,9 +7,7 @@
 /*.mat
 *.exe
 *.fmu
-*.xlsx
 *.mof
-*.csv
 *.c
 buildlog.txt
 dbg
@@ -17,8 +15,6 @@ dsfinal.txt
 dsin.txt
 dslog.txt
 dsmodel.c
-
-
 *.code-workspace
 *.obj
 *.manifest
