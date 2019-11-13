@@ -1939,93 +1939,122 @@ public
 
       model compliance_dataFit1
         "Fit of venous PV data from Moreno 1970 by Ben (ebrandal@umich.edu)"
-        extends compliance_base( V0 = Modelica.Constants.pi*r_n^2*l, V_min = Modelica.Constants.pi*r_0^2*l);
-        type Tension = Real(quantity = "Tension", unit="N/m");
+        extends compliance_base(
+          V0 = Modelica.Constants.pi*r_n^2*l,
+          V_min = Modelica.Constants.pi*r_0^2*l);
+        type Tension =   Real (final quantity = "Tension", final unit = "N/m");
+        type Radius =   Modelica.SIunits.Radius(final nominal =   1e-6);
+        type CircumferentialLength =   Modelica.SIunits.Length(final nominal =   1e-3);
         // GENERAL INPUT PARAMETERS
         parameter Boolean useViscoElasticDelay = false;
-        parameter Physiolibrary.Types.Fraction gamma "Fraction of minimal collapsing diameter to nominal diameter";
+        parameter Physiolibrary.Types.Fraction gamma =   0.5
+          "Fraction of minimal collapsing diameter to nominal diameter";
 
         // TENSIONS
         Tension T = T_p + T_a;
         Tension T_p = a*f_L + b*g_L "Passive vessel wall tension";
-        Tension T_a = A*h_L "Active vessel wall tension";
-        Tension f_L=L*(L - L_0)/L_0^2
+        Tension T_a_max = c*h_L "Maximal active vessel wall tension";
+        Tension T_a = A*T_a_max "Actual active vessel wall tension";
+        Real f_L = L*(L - L_0)/L_0 "Tension function on circumferential wall length";
+        Real g_L = L_0*(exp(d*(L - L_0)/L_0) - 1)
           "Tension function on circumferential wall length";
-        Tension g_L=exp(c*(L - L_0)/L_0) - 1
+        Real h_L = (L - L_0)*exp(-e*((L - L_0)/L_0)^2)
           "Tension function on circumferential wall length";
-        Tension h_L=(L - L_0)/L_0 "Tension function on circumferential wall length";
+
         // TENSION PARAMETERS
-      //   parameter Real a;
-      //   parameter Real b;
-         constant Real c = 11.5 "identified by Matlab's cftool and fixed";
-      //   parameter Real d;
+        constant Real mmHg2Pa = 133.32;
+        parameter Tension a = mmHg2Pa*1.2 "identified by Matlab's cftool and fixed";
+        parameter Tension b = mmHg2Pa*6e-5 "identified by Matlab's cftool and fixed";
+        parameter Tension c = mmHg2Pa*26.25 "identified by Matlab's cftool and fixed";
+        parameter Real d = 11.5 "identified by Matlab's cftool and fixed";
+        parameter Real e = 1.5;
 
-      // DIAMETERS AND LENGTHS
-        Modelica.SIunits.Radius r(start=r_n, fixed=false) "Actual vessel radius";
-        parameter Modelica.SIunits.Radius r_n "nominal vessel radius";
-        parameter Modelica.SIunits.Radius r_0 = gamma*r_n "Zero-pressure vessel radius";
-        Modelica.SIunits.Length L = r / (2*Modelica.Constants.pi) "Actual circumferential wall length";
-        parameter Modelica.SIunits.Length L_n = r_n/(2*Modelica.Constants.pi) "nominal circumferential wall length";
-        parameter Modelica.SIunits.Length L_0= r_0/(2*Modelica.Constants.pi);
+        // DIAMETERS AND LENGTHS
+        Radius r(start = r_n, fixed = false) "Actual vessel radius";
+        parameter Radius r_n "nominal vessel radius";
+        parameter Radius r_0 = sqrt(V_0/(l*Modelica.Constants.pi)) "Zero-pressure vessel radius";
+        CircumferentialLength L = r*(2*Modelica.Constants.pi)
+          "Actual circumferential wall length";
+        parameter CircumferentialLength L_n = r_n*(2*Modelica.Constants.pi)
+          "nominal circumferential wall length";
+        parameter CircumferentialLength L_0 = r_0*(2*Modelica.Constants.pi)
+          "Zero-pressure circumferential wall length";
+        parameter Physiolibrary.Types.Volume V_0 =   V_n*gamma "Zero-pressure volume";
+        parameter Physiolibrary.Types.Volume V_n =   V0 "nominal aka initial volume";
 
-      // ACTIVE REGULATION
-        Physiolibrary.Types.Fraction A(start = A_nominal) "Activation fraction";
-        parameter Physiolibrary.Types.Fraction A_nominal = 0.25 "nominal activation fraction";
+        // ACTIVE REGULATION
+        Physiolibrary.Types.Fraction A(start=A_n) "Activation fraction";
+        parameter Physiolibrary.Types.Fraction A_n=0.25 "nominal activation fraction";
         parameter Modelica.SIunits.Time tau = 0.1;
 
+
+        // INITIALIZATION - calculations of the nominal tensions and pressures
+        Tension T_n = a*f_L_n + b*g_L_n + A_n*c*h_L_n;
+        Real f_L_n = L_n*(L_n - L_0)/L_0 "Tension function on circumferential wall length";
+        Real g_L_n = L_0*(exp(d*(L_n - L_0)/L_0) - 1)
+          "Tension function on circumferential wall length";
+        Real h_L_n = (L_n - L_0)*exp(-e*((L_n - L_0)/L_0)^2)
+          "Tension function on circumferential wall length";
+
+        Physiolibrary.Types.Pressure p_n;
+
         // ASSUMPTIONS used for parameter identification
-        parameter Tension T_n = p0 * r_n "Tension at nominal pressure of p0";
-        parameter Physiolibrary.Types.Pressure P_dm = 30*133.32 "Data point - maximal pressure";
-        parameter Physiolibrary.Types.Volume V_dm = 4*V0 "Volume data point, corresponding to P_dm";
-        parameter Modelica.SIunits.Length L_dm = 2*Modelica.Constants.pi*r_dm;
-        parameter Modelica.SIunits.Radius r_dm = sqrt(V_dm/Modelica.Constants.pi/l);
-        parameter Tension T_dm = P_dm * r_dm;
-        parameter Physiolibrary.Types.Fraction alpha = 2.5;
+        //  parameter Tension T_n  =  p0 * r_n "Tension at nominal pressure of p0";
+        //  parameter Physiolibrary.Types.Pressure P_dm  =  30*133.32 "Data point - maximal pressure";
+        //  parameter Physiolibrary.Types.Volume V_dm  =  4*V0 "Volume data point, corresponding to P_dm";
+        //   parameter Modelica.SIunits.Length L_dm  =  2*Modelica.Constants.pi*r_dm;
+        //   parameter Modelica.SIunits.Radius r_dm  =  sqrt(V_dm/Modelica.Constants.pi/l);
+        //   parameter Tension T_dm  =  P_dm * r_dm;
+        //   parameter Physiolibrary.Types.Fraction alpha  =  2.5;
 
-        function f
-          input Modelica.SIunits.Length L_i;
-          input Modelica.SIunits.Length L0;
-          output Tension T;
-        algorithm
-          T := L_i*(L_i - L0)/ L0^2;
-        end f;
+        //   function f
+        //     input Modelica.SIunits.Length L_i;
+        //     input Modelica.SIunits.Length L0;
+        //     output Tension T;
+        //   algorithm
+        //     T : =  L_i*(L_i - L0)/ L0^2;
+        //   end f;
+        //
+        //   function g
+        //     input Modelica.SIunits.Length L_i;
+        //     input Modelica.SIunits.Length L0;
+        //     output Tension T;
+        //   algorithm
+        //     T : =  exp(c*(L_i-L0)/L0) - 1;
+        //   end g;
+        //
+        //   function h
+        //     input Modelica.SIunits.Length L_i;
+        //     input Modelica.SIunits.Length L0;
+        //     output Tension T;
+        //   algorithm
+        //     T : =  (L_i-L0) / L0;
+        //   end h;
 
-        function g
-          input Modelica.SIunits.Length L_i;
-          input Modelica.SIunits.Length L0;
-          output Tension T;
-        algorithm
-          T := exp(c*(L_i-L0)/L0) - 1;
-        end g;
-
-        function h
-          input Modelica.SIunits.Length L_i;
-          input Modelica.SIunits.Length L0;
-          output Tension T;
-        algorithm
-          T := (L_i-L0) / L0;
-        end h;
-
-        Real a=(T_n/(1 + A_nominal*(alpha - 1)) - b*g(L_n, L_0))/f(L_n, L_0);
-        Real b=(T_dm - T_n/(1 + A_nominal*(alpha - 1))*f(L_dm, L_0)/f(L_n, L_0))/(g(
-            L_dm, L_0) - g(L_n, L_0)*f(L_dm, L_0)/f(L_n, L_0));
-        Real d=T_n*(alpha - 1)/(h(L_n, L_0)*(1 + A_nominal*(alpha - 1)));
-      //  Real helper = T_n/(1+ A_nominal*(alpha -1));
-      //  Real helper2 = f(L_dm)/f(L_n);
+        //   Real a = (T_n/(1 + A_nominal*(alpha - 1)) - b*g(L_n, L_0))/f(L_n, L_0);
+        //   Real b = (T_dm - T_n/(1 + A_nominal*(alpha - 1))*f(L_dm, L_0)/f(L_n, L_0))/(g(
+        //       L_dm, L_0) - g(L_n, L_0)*f(L_dm, L_0)/f(L_n, L_0));
+        //   Real d = T_n*(alpha - 1)/(h(L_n, L_0)*(1 + A_nominal*(alpha - 1)));
+        //  Real helper  =  T_n/(1+ A_nominal*(alpha -1));
+        //  Real helper2  =  f(L_dm)/f(L_n);
 
       equation
 
+
         if useViscoElasticDelay then
-          der(A)*tau = phi - A;
+          der(A)*tau  =  phi - A;
         else
-          A = phi;
+          A  =  phi;
         end if;
 
         // VOLUME equation
-        Modelica.Constants.pi * r^2 * l = V;
+        Modelica.Constants.pi*r^2*l  =  V;
 
         // pressure-tension equation
-        p*r = T;
+        p*r  =  T;
+
+        // nominal pressure-tension equatino
+        p_n*r_n = T_n;
 
       end compliance_dataFit1;
     end Interfaces;
@@ -2118,7 +2147,8 @@ public
       zpv = l*Modelica.Constants.pi*((r*venous_diameter_correction)^2),
       R = 8*mu*l/(Modelica.Constants.pi*((r*venous_diameter_correction)^4)),
       I = rho*l/(Modelica.Constants.pi*(r*venous_diameter_correction)^2),
-      V_min = compliant_vessel.V_min);
+      V_min = compliant_vessel.V_min,
+      volume(start = compliant_vessel.V0, fixed = true));
 
       input Physiolibrary.Types.Fraction phi "a systemic acitvation fraction, 1 being maximal possible. Normal resting is believed to be 1/4 of the maximum (0.25)";
       outer Modelica.SIunits.Angle Tilt;
@@ -18506,14 +18536,14 @@ public
         annotation (Placement(transformation(extent={{100,-10},{80,10}})));
       Modelica.Blocks.Sources.Trapezoid
                                    trapezoid(
-        amplitude=-5320.0 - 5320,
+        amplitude=5320.0 + 1330,
         rising=100.0,
-        width=100.0,
+        width=50.0,
         falling=100.0,
         period=2000.0,
         nperiod=1,
-        offset=5320.0,
-        startTime=0)
+        offset=-1330,
+        startTime=-10)
         annotation (Placement(transformation(extent={{-100,-40},{-80,-20}})));
         Components.Vessel_modules.vp_type_dataFit
                       superior_vena_cava_C88(
@@ -18528,10 +18558,10 @@ public
         Parameters_Venous1
         annotation (Placement(transformation(extent={{-69,-87},{-49,-82}})));
       Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
-            displayUnit="(mmHg.min)/l")=7999340.0)
+            displayUnit="(mmHg.min)/l") = 79993400.0)
         annotation (Placement(transformation(extent={{-4,-10},{16,10}})));
       Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
-            displayUnit="(mmHg.min)/l")=7999340.0)
+            displayUnit="(mmHg.min)/l") = 79993400.0)
         annotation (Placement(transformation(extent={{52,-10},{72,10}})));
       Modelica.Blocks.Sources.Trapezoid
                                    phi_ramp(
@@ -18570,7 +18600,7 @@ public
         experiment(
           StopTime=300,
           Interval=0.01,
-          Tolerance=1e-09,
+          Tolerance=1e-06,
           __Dymola_Algorithm="Cvode"));
     end testPVchars;
 
@@ -24508,8 +24538,11 @@ public
     model CVS_7af
       replaceable Components.AdanVenousRed.Systemic_baroreflex
                                                         Systemic1(
+        gamma=0.8,
           UseThoracic_PressureInput=false,
         UsePhi_Input=true,
+        redeclare model Systemic_vein =
+            ADAN_main.Components.Vessel_modules.vp_type_dataFit,
         redeclare
           Components.AdanVenousRed.SystemicTissueParameters.SystemicTissueParameters_Calculated
           tissueParameters,
@@ -25238,16 +25271,16 @@ public
         startTime=20)
         annotation (Placement(transformation(extent={{-98,-48},{-78,-28}})));
     equation
-      connect(phi.y, Systemic1.thoracic_pressure_input) annotation (Line(points=
-             {{-77,-38},{-54,-38},{-54,20},{-28,20}}, color={0,0,127}));
+      connect(phi.y, Systemic1.thoracic_pressure_input) annotation (Line(points={{-49,4},
+              {-54,4},{-54,20},{-28,20}},             color={0,0,127}));
       connect(pulmonaryComponent.thoracic_pressure_input, phi.y) annotation (
-          Line(points={{-26,-60},{-62,-60},{-62,-38},{-77,-38}}, color={0,0,127}));
+          Line(points={{-26,-60},{-62,-60},{-62,4},{-49,4}},     color={0,0,127}));
       connect(Systemic1.phi_input, conditionalConnection.y) annotation (Line(
             points={{-14,20},{-10,20},{-10,8},{-9,8}},     color={0,0,127}));
       connect(Systemic1.phi_baroreflex, conditionalConnection.u) annotation (
           Line(points={{-27.4,45.4},{-27.4,28},{14,28},{14,8}}, color={0,0,127}));
       connect(phi.y, heartComponent.thoracic_pressure_input) annotation (Line(
-            points={{-77,-38},{-26,-38},{-26,-32}}, color={0,0,127}));
+            points={{-49,4},{-26,4},{-26,-32}},     color={0,0,127}));
       connect(conditionalConnection1.u, Systemic1.HR) annotation (Line(points={{-6,54},
               {-19.6,54},{-19.6,45.6}}, color={0,0,127}));
       connect(conditionalConnection1.y, heartComponent.frequency_input) annotation (
