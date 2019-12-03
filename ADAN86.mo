@@ -694,8 +694,8 @@ type"),         Text(
         Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b sa
           annotation (Placement(transformation(extent={{90,90},{110,110}})));
 
-        Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit="1/min")
-             = HR) if
+        Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit="1/min")=
+               HR) if
              not UseFrequencyInput
           annotation (Placement(transformation(extent={{-84,-4},{-76,4}})));
         Physiolibrary.Types.Constants.PressureConst P0(k=0) if
@@ -1407,7 +1407,8 @@ public
         extends bg_base(final terminator=false);
         parameter Boolean UseDistentionOutput = false annotation(choices(checkBox=true));
         parameter Boolean UseNonLinearCompliance = false annotation(choices(checkBox=true),Dialog(group = "Parameters"));
-        parameter Boolean UseSinAlphaInput = false annotation(choices(checkBox=true),Dialog(group = "Parameters"));
+        parameter Boolean UseSinAlphaInput = false "Vessel vertical angle, 0 is supine and 1 is facing upwards, -1 downwards respectively"  annotation(choices(checkBox=true),Dialog(group = "Parameters"));
+        parameter Boolean UseVasoconstrictionEffect = false annotation(choices(checkBox=true),Dialog(group = "Parameters"));
 
         parameter Real a(unit = "1") = 0.2802 annotation (Dialog(tab = "Defaults", group = "Vessel parameter computations"));
         parameter Real b(unit = "m-1") = -505.3 annotation (Dialog(tab = "Defaults", group = "Vessel parameter computations"));
@@ -1445,11 +1446,24 @@ public
                   30}}), iconTransformation(extent={{-20,-20},{20,20}},
               rotation=90,
               origin={-80,-20})));
+
+        Physiolibrary.Types.HydraulicCompliance compliance "Real compliance after all effects";
+        parameter Physiolibrary.Types.Fraction R_vc = 0 "Effect fraction of venoconstriction on compliance";
+        Physiolibrary.Types.Fraction vc_effect = 1 - R_vc*(phi - phi0);
+
+        input Physiolibrary.Types.Fraction phi;
+        outer parameter Physiolibrary.Types.Fraction phi0 = 0.25;
         protected
         Real _sinAlpha;
       equation
         if not UseSinAlphaInput then
           _sinAlpha = sinAlpha;
+        end if;
+
+        if UseVasoconstrictionEffect then
+          compliance = 2*Modelica.Constants.pi*((r*vc_effect)^3) *l/(E*h);
+        else
+          compliance = C;
         end if;
       //  h = r*(a*exp(b*r)+c*exp(d*r));
       //  I = rho*l/(Modelica.Constants.pi*(r)^2);
@@ -1841,7 +1855,7 @@ public
       Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs "Output pressure including the hydrostatic pressure";
 
     equation
-      volume = (u_C)  *C + zpv "Lim 2013";
+      volume = (u_C)  *compliance + zpv "Lim 2013";
 
       if UseInertance then
         der(v_in) = (u_in-u_out_hs-R*v_in)/I;
@@ -1849,7 +1863,7 @@ public
         0 = u_in-u_out_hs-R*v_in;
       end if;
 
-      der(u_C) = (v_in-v_out)/C;
+      der(volume) = (v_in-v_out);
       if UseOuter_thoracic_pressure then
           u_out_hs = u_C+R_v*(v_in-v_out) + thoracic_pressure;
       else
@@ -14252,7 +14266,7 @@ public
         inner parameter Real alpha = 5;// = T_pass/(T_pass + T_act_max);
         inner parameter Physiolibrary.Types.Fraction Ra_factor = 1 "Exponential factor affecting arterioles resistance";
 
-        parameter Physiolibrary.Types.Fraction phi0 = 0.25 "default value of phi. Also used for normalization";
+        inner parameter Physiolibrary.Types.Fraction phi0 = 0.25 "default value of phi. Also used for normalization";
         Physiolibrary.Types.Fraction phi "a systemic acitvation fraction, 1 being maximal possible. Normal resting is believed to be 1/4 of the maximum (0.25)";
 
         parameter Boolean UseThoracic_PressureInput = false annotation(choices(checkBox=true));
@@ -16278,11 +16292,11 @@ public
               transformation(extent={{-176,134},{-156,154}}),
                                                           iconTransformation(extent={{-24,164},
                   {-4,184}})));
-        Baroreflex.Baroreceptor baroreceptor_aortic(epsilon_start=0.76, s_start
-            =0.91) annotation (Placement(transformation(extent={{-236,124},{-216,
+        Baroreflex.Baroreceptor baroreceptor_aortic(epsilon_start=0.76, s_start=
+             0.91) annotation (Placement(transformation(extent={{-236,124},{-216,
                   144}})));
-        Baroreflex.Baroreceptor baroreceptor_carotid(epsilon_start=0.4, s_start
-            =0.95) annotation (Placement(transformation(extent={{-236,152},{-216,
+        Baroreflex.Baroreceptor baroreceptor_carotid(epsilon_start=0.4, s_start=
+             0.95) annotation (Placement(transformation(extent={{-236,152},{-216,
                   172}})));
       equation
         connect(baroreflex.phi,phi_baroreflex)  annotation (Line(points={{-185.8,146},
@@ -16608,7 +16622,8 @@ public
           l=Parameters_Systemic1.l_ascending_aorta_A,
           E=Parameters_Systemic1.E_ascending_aorta_A,
           r=Parameters_Systemic1.r_ascending_aorta_A,
-          UseInertance=false)
+          UseInertance=true,
+          phi = phi)
             annotation (Placement(
               transformation(extent={{-263,85},{-243,90}})),
             __Dymola_choicesAllMatching=true);
@@ -16617,7 +16632,8 @@ public
           UseDistentionOutput=true,
           l=0.0025,
           E = Parameters_Systemic1.E_ascending_aorta_B,
-          r=0.007)
+          r=0.007,
+          phi = phi)
         annotation (Placement(transformation(extent={{-238,85},{-218,90}})));
 
         Systemic_tissue posterior_tibial_T4_R236(
@@ -16668,11 +16684,11 @@ public
 
         Baroreflex.Baroreflex baroreflex annotation (Placement(transformation(
                 extent={{-150,152},{-130,132}})));
-        Baroreflex.Baroreceptor baroreceptor_aortic(epsilon_start=0.76, s_start
-            =0.91) annotation (Placement(transformation(extent={{-180,120},{-160,
+        Baroreflex.Baroreceptor baroreceptor_aortic(epsilon_start=0.76, s_start=
+             0.91) annotation (Placement(transformation(extent={{-180,120},{-160,
                   140}})));
-        Baroreflex.Baroreceptor baroreceptor_carotid(epsilon_start=0.4, s_start
-            =0.95) annotation (Placement(transformation(extent={{-180,148},{-160,
+        Baroreflex.Baroreceptor baroreceptor_carotid(epsilon_start=0.4, s_start=
+             0.95) annotation (Placement(transformation(extent={{-180,148},{-160,
                   168}})));
         Physiolibrary.Types.RealIO.FractionOutput  phi_baroreflex
                                                       annotation (Placement(
@@ -24958,11 +24974,14 @@ public
           baroreceptor_aortic(epsilon_start=1.19, delta0=0.3),
           baroreceptor_carotid(epsilon_start=1.06, s_start=0.96),
           alphaC=0,
-          ascending_aorta_B(UseInertance=false, l(displayUnit="m") = 2.5),
+          ascending_aorta_B(UseInertance=false,
+            UseVasoconstrictionEffect=true,     l(displayUnit="m") = 2.5,
+            R_vc=0.25),
           inferior_vena_cava_C8(
             l=2.5,
             r(displayUnit="mm") = 0.008,
-            compliant_vessel(tau(displayUnit="s") = 1e-3))),
+            compliant_vessel(useViscoElasticDelay=true, tau(displayUnit="d") =
+                604800))),
         phi(
           amplitude=0.74,
           rising=200,
@@ -24985,8 +25004,8 @@ public
         offset=0,
         startTime=40)
         annotation (Placement(transformation(extent={{-110,-50},{-90,-30}})));
-      Components.ConditionalConnection condTP(disconnectedValue=0, disconnected
-          =true) annotation (Placement(transformation(extent={{-77,-45.3333},{
+      Components.ConditionalConnection condTP(disconnectedValue=0, disconnected=
+           true) annotation (Placement(transformation(extent={{-77,-45.3333},{
                 -63,-33.3333}})));
       Components.Baroreflex.HeartRate heartRate
         annotation (Placement(transformation(extent={{8,-28},{-4,-16}})));
@@ -25152,8 +25171,8 @@ public
         startTime=0,
         duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
         annotation (Placement(transformation(extent={{-70,0},{-50,20}})));
-      Components.ConditionalConnection conditionalConnection2(disconnectedValue
-          =0.25, disconnected=true)
+      Components.ConditionalConnection conditionalConnection2(disconnectedValue=
+           0.25, disconnected=true)
         annotation (Placement(transformation(extent={{4,-18},{-4,-14}})));
     equation
       connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-49,10},{
@@ -25196,8 +25215,8 @@ public
     equation
       connect(condHR.u, Systemic1.HR) annotation (Line(points={{-6,54},{-19.6,
               54},{-19.6,45.6}}, color={0,0,127}));
-      connect(condHR.y, heartComponent.frequency_input) annotation (Line(points
-            ={{17,54},{52,54},{52,-22},{-16,-22}}, color={0,0,127}));
+      connect(condHR.y, heartComponent.frequency_input) annotation (Line(points=
+             {{17,54},{52,54},{52,-22},{-16,-22}}, color={0,0,127}));
       connect(Systemic1.phi_input, condPhi.y) annotation (Line(points={{-14,20},
               {-10,20},{-10,8},{-9,8}}, color={0,0,127}));
       connect(Systemic1.phi_baroreflex, condPhi.u) annotation (Line(points={{-27.4,
