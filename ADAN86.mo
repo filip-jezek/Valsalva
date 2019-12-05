@@ -24810,14 +24810,15 @@ public
               inferior_vena_cava_C8(compliant_vessel(tau(displayUnit="s") = 3))));
       end phi_venousTone;
 
-      model phi_art_res
-        extends simple_base(Systemic1(Ra_factor=1));
-      end phi_art_res;
+      model phi_artRes
+        extends simple_base(Systemic1(Ra_factor=1), condPhi(disconnected=false));
+      end phi_artRes;
 
-      model phi_art_compl
+      model phi_artComp
         extends simple_base(Systemic1(redeclare model Systemic_artery =
-                Components.Vessel_modules.pv_type (R_vc=0.25)));
-      end phi_art_compl;
+                Components.Vessel_modules.pv_type (R_vc=0.25)), condPhi(
+              disconnected=false));
+      end phi_artComp;
 
       model tree_base
         parameter Boolean VenousToneEffect = false;
@@ -24964,19 +24965,19 @@ public
       end tree_base;
 
       model tree_HR
-        extends tree_base(condPhi(disconnected=false));
+        extends tree_base(condPhi(disconnected=true), condHR(disconnected=false));
       end tree_HR;
 
     model tree_venousTone
-      extends tree_base(VenousToneEffect=true);
+      extends tree_base(VenousToneEffect=true, condPhi(disconnected=false));
     end tree_venousTone;
 
     model tree_artRes
-      extends tree_base(Systemic1(Ra_factor=1));
+      extends tree_base(Systemic1(Ra_factor=1), condPhi(disconnected=false));
     end tree_artRes;
 
     model tree_artComp
-      Physiolibrary.Types.Fraction venoconstrictionResistanceEffect = 0.25;
+      parameter Physiolibrary.Types.Fraction venoconstrictionResistanceEffect = 0.25;
       extends tree_base(Systemic1(
           ascending_aorta_B(R_vc=venoconstrictionResistanceEffect),
           ascending_aorta_C(R_vc=venoconstrictionResistanceEffect),
@@ -25033,7 +25034,8 @@ public
           internal_carotid_L50_B(R_vc=venoconstrictionResistanceEffect),
           mesenteric_artery(R_vc=venoconstrictionResistanceEffect),
           coronary_arteries(R_vc=venoconstrictionResistanceEffect),
-          abdominal_aorta_C114(R_vc=venoconstrictionResistanceEffect)));
+          abdominal_aorta_C114(R_vc=venoconstrictionResistanceEffect)), condPhi(
+            disconnected=false));
     end tree_artComp;
 
     end Experiments;
