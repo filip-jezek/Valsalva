@@ -1517,7 +1517,9 @@ public
       end HydraulicPort_b_leveled;
 
       partial model systemic_tissue_base
-        extends ADAN_main.Components.Vessel_modules.Interfaces.bg_base(UseInertance = false);
+        extends ADAN_main.Components.Vessel_modules.Interfaces.bg_base(UseInertance = false, volume(start = V_n, fixed = false));
+
+        parameter Boolean UseNonLinearCompliance = false;
         parameter Real I(unit = "J.s2.m-6");
         parameter Real C(unit = "m6.J-1");
         parameter Real Ra(unit="J.s.m-6") "Arteriole resistance";
@@ -1541,6 +1543,15 @@ public
         Physiolibrary.Types.HydraulicResistance Ra_phi(start = Ra, fixed = true) "Delayed arterioles resistance dependent on phi";
 
         Physiolibrary.Types.HydraulicResistance Rv_phi = Rv*exp((phi-phi0)*Rv_factor) "Arterioles resistance dependent on phi";
+
+        parameter Real k = C / (V_max - V_n) "For Pstras non-linear PV characteristics";
+        parameter Physiolibrary.Types.Volume V_max = V_n + (V_n - zpv)*gamma
+          " V_n is between zpv and V_max, parameterized by gamma. 1 means its in the center. For Pstras non-linear PV characteristics";
+        parameter Physiolibrary.Types.Volume V_n = nominal_pressure*C + zpv
+          "nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization";
+        parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * C / (V_max - V_n))
+          "nonlinear zero-pressure volume";
+        parameter Physiolibrary.Types.Fraction gamma = 1;
 
       initial equation
       //  volume = nominal_pressure*C + zpv;
@@ -1566,7 +1577,11 @@ public
               u =u_C + Rvis*(v_in - v_out);
             end if;
 
-        volume = (u_C) *C + zpv;
+            if not UseNonLinearCompliance then
+              volume = (u_C) *C + zpv;
+            else
+              u_C = 1/k*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+            end if;
 
         annotation (Icon(graphics={
               Rectangle(
@@ -24804,7 +24819,8 @@ public
             inferior_vena_cava_C8(
               l=2.5,
               r(displayUnit="mm") = 0.008,
-              compliant_vessel(useViscoElasticDelay=true, tau(displayUnit="d") = 604800))),
+              compliant_vessel(useViscoElasticDelay=true, tau(displayUnit="d") = 604800)),
+            posterior_tibial_T4_R236(UseNonLinearCompliance=true)),
           phi(
             amplitude=0.74,
             rising=200,
@@ -25429,8 +25445,8 @@ public
           Compliance(displayUnit="ml/mmHg") = 1.1625954425608e-08)
           annotation (Placement(transformation(extent={{-60,-20},{-40,0}})));
         Physiolibrary.Hydraulic.Components.Conductor
-                             resistance(Conductance(displayUnit="l/(mmHg.min)")
-             = 6.2755151845753e-09)
+                             resistance(Conductance(displayUnit="ml/(mmHg.min)")
+             = 3.75031E-09)
           annotation (Placement(transformation(extent={{-84,-20},{-64,0}})));
         Physiolibrary.Hydraulic.Sources.UnlimitedVolume SystemicTissues(P=
               533.28954966)
