@@ -1589,7 +1589,14 @@ public
                 lineThickness=0.5,
                 fillColor={244,125,35},
                 fillPattern=FillPattern.Solid,
-                pattern=LinePattern.None)}));
+                pattern=LinePattern.None)}), Documentation(info="<html>
+<p>When <span style=\"font-family: Courier New;\">UseNonLinearCompliance</span> is true, then this formula is applied (from <span style=\"font-family: Courier New; color: #006400;\">Pstras, Math Med Biol 2017,&nbsp;10.1093/imammb/dqw008):</span></p>
+<p><img src=\"modelica://ADAN_main/Resources/tissuePV.png\"/></p>
+<p>Otherwise, the linear (green) relation is used instead.</p>
+<p><br>Unlike the original Pstras publication, when the VMax is set as Vn + 500ml for veins, resp. Vn + 100 ml for Vena Cava, the Vmax difference here is delta-times the ZPV-Vn:</p>
+<p><img src=\"modelica://ADAN_main/Resources/Images/equations/equation-sfHOF1Pk.png\" alt=\"Vmax = Vn + delta*(Vn-ZPV)\"/> </p>
+<p>and thus shares the linear parametrization.</p>
+</html>"));
       end systemic_tissue_base;
 
       partial model compliance_base
@@ -17102,9 +17109,9 @@ public
 
       model Smith_VentricularInteraction_flat
           import Physiolibrary.Types.*;
-        Volume Vsept(start=0.000002), Vrv(start=0.0001042), Vlv(start=
+        Volume Vsept(start=V0sept), Vrv(start=0.0001042), Vlv(start=
               0.0001042), Vperi;
-        parameter Volume V0sept=0.000002, V0peri = 0.0002;
+        parameter Volume V0sept=2e-06, V0peri = 0.0002;
 
         Pressure Psept, Pperi;
         parameter Pressure Pi0sept=148.00118226939, Pi0rv=28.757638965416, Pi0lv=16.038683206025, Pi0peri=66.701190423724
@@ -24959,8 +24966,8 @@ public
                 60},{60,-22},{8,-22}}, color={0,0,127}));
         connect(Systemic1.phi_baroreflex, condPhi.u) annotation (Line(points={{
                 -27.4,45.4},{-22,45.4},{-22,4},{-15.2,4}}, color={0,0,127}));
-        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{
-                -27.4,45.4},{2.3,45.4},{2.3,60},{32.8,60}}, color={0,0,127}));
+        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{-27.4,
+                45.4},{2.3,45.4},{2.3,60},{32.8,60}},       color={0,0,127}));
         connect(unlimitedOutflowPump.q_in, Systemic1.port_b) annotation (Line(
             points={{80,28},{18,28}},
             color={0,0,0},
@@ -25124,11 +25131,6 @@ public
       equation
         connect(Systemic1.phi_input, condPhi.y) annotation (Line(points={{-14,20},
                 {8,20},{8,4},{-1.4,4}}, color={0,0,127}));
-        connect(condPhi.u, phi.y)
-          annotation (Line(points={{-15.2,4},{-49,4}}, color={0,0,127}));
-        connect(condHR.u, phi.y) annotation (Line(points={{32.8,60},{-28,60},{
-                -28,4},{-49,4}},
-                             color={0,0,127}));
         connect(thoracic_pressure.y, condTP.u) annotation (Line(points={{-89,-40},
                 {-84,-40},{-84,-40},{-78.4,-40}}, color={0,0,127}));
         connect(condTP.y, Systemic1.thoracic_pressure_input) annotation (Line(
@@ -25161,8 +25163,8 @@ public
     end tree_artRes;
 
     model tree_artComp
-        parameter Physiolibrary.Types.Fraction vasoconstrictionResistanceEffect
-          =0.25;
+        parameter Physiolibrary.Types.Fraction vasoconstrictionResistanceEffect=
+           0.25;
       extends tree_base(Systemic1(
             UseArterialConstrictionEffect=true,
           ascending_aorta_B(R_vc=vasoconstrictionResistanceEffect),
@@ -25311,7 +25313,8 @@ public
             radial_vein_T3_L154(compliant_vessel(UsePhiEffect=VenousToneEffect)),
             splachnic_vein(compliant_vessel(UsePhiEffect=VenousToneEffect)),
             coronary_veins(compliant_vessel(UsePhiEffect=VenousToneEffect)),
-            superior_vena_cava_C2(compliant_vessel(UsePhiEffect=VenousToneEffect))),
+            superior_vena_cava_C2(compliant_vessel(UsePhiEffect=VenousToneEffect)),
+            mesenteric_artery(LimitBackflow=false)),
           phi(
             amplitude=0.74,
             rising=200,
@@ -25376,14 +25379,61 @@ public
           annotation (Line(points={{77,82},{90,82},{90,35}}, color={0,0,127}));
         connect(Systemic1.phi_baroreflex, condPhi.u) annotation (Line(points={{
                 -27.4,45.4},{-20,45.4},{-20,4},{-15.2,4}}, color={0,0,127}));
-        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{
-                -27.4,45.4},{2.3,45.4},{2.3,60},{32.8,60}}, color={0,0,127}));
+        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{-27.4,
+                45.4},{2.3,45.4},{2.3,60},{32.8,60}},       color={0,0,127}));
         annotation (experiment(
             StopTime=500,
             Interval=0.11,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end tree_hemorrhage;
+
+      model tree_nonlinTiss
+        extends tree_base( Systemic1(
+            celiac_trunk_C116(UseNonLinearCompliance=true, gamma=gamma),
+            renal_L166(UseNonLinearCompliance=true, gamma=gamma),
+            renal_R178(UseNonLinearCompliance=true, gamma=gamma),
+            internal_iliac_T1_R218(UseNonLinearCompliance=true, gamma=gamma),
+            profundus_T2_R224(UseNonLinearCompliance=true, gamma=gamma),
+            anterior_tibial_T3_R230(UseNonLinearCompliance=true, gamma=gamma),
+            posterior_tibial_T4_R236(UseNonLinearCompliance=true, gamma=gamma),
+            internal_iliac_T1_L196(UseNonLinearCompliance=true, gamma=gamma),
+            profundus_T2_L202(UseNonLinearCompliance=true, gamma=gamma),
+            anterior_tibial_T3_L208(UseNonLinearCompliance=true, gamma=gamma),
+            posterior_tibial_T4_L214(UseNonLinearCompliance=true, gamma=gamma),
+            ulnar_T2_R42(UseNonLinearCompliance=true, gamma=gamma),
+            radial_T1_R44(UseNonLinearCompliance=true, gamma=gamma),
+            ulnar_T2_L90(UseNonLinearCompliance=true, gamma=gamma),
+            radial_T1_L92(UseNonLinearCompliance=true, gamma=gamma),
+            internal_carotid_R8_C(UseNonLinearCompliance=true, gamma=gamma),
+            external_carotid_T2_R26(UseNonLinearCompliance=true, gamma=gamma),
+            internal_carotid_L50_C(UseNonLinearCompliance=true, gamma=gamma),
+            external_carotid_T2_L62(UseNonLinearCompliance=true, gamma=gamma),
+            vertebral_L2(UseNonLinearCompliance=true, gamma=gamma),
+            vertebral_R272(UseNonLinearCompliance=true, gamma=gamma),
+            splachnic_tissue(UseNonLinearCompliance=true, gamma=gamma),
+            cardiac_tissue(UseNonLinearCompliance=true, gamma=gamma)));
+
+        parameter Physiolibrary.Types.Fraction gamma=1
+          "affecting Vmax and therefore nonlinearity of the tissues compliance";
+      end tree_nonlinTiss;
+
+      model tree_nonlinTiss_valsalva
+        extends tree_nonlinTiss(condTP(disconnected=false),
+          condPhi(disconnected=false),
+          condHR(disconnected=false),
+          Systemic1(alpha=5, Ra_factor=1));
+      equation
+        connect(Systemic1.phi_baroreflex, condPhi.u) annotation (Line(points={{
+                -27.4,45.4},{-22,45.4},{-22,4},{-15.2,4}}, color={0,0,127}));
+        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{
+                -27.4,45.4},{2.3,45.4},{2.3,60},{32.8,60}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=80,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end tree_nonlinTiss_valsalva;
 
       model heartRig_base
         parameter Boolean VenousToneEffect = false;
@@ -25408,22 +25458,16 @@ public
           annotation (Placement(transformation(extent={{8,-28},{-4,-16}})));
         replaceable
         Components.AdanVenousRed._7af7a4.HeartComponent heartComponent(
+          HR=1,
           UseFrequencyInput=true,
-          UseThoracicPressureInput=true,
-          HR=1)
-          constrainedby Components.AdanVenousRed._7af7a4.HeartComponent
+          UseThoracicPressureInput=true) constrainedby
+          Components.Auxiliary.HeartBase(UseFrequencyInput=true,
+            UseThoracicPressureInput=true)
           annotation (Placement(transformation(extent={{-12,-32},{-32,-12}})));
         replaceable
         Components.AdanVenousRed.PulmonaryComponent pulmonaryComponent(
-            UseThoracic_PressureInput=true, pulmonary(
-            u_pas(start=3871.5508),
-            u_pat(start=3871.314),
-            u_par(start=3863.3025),
-            u_pcp(start=3634.0552),
-            u_pvn(start=1266.1965),
-            v_pas(start=1.0003076e-06),
-            v_pat(start=2.2090626e-05))) constrainedby
-          Components.AdanVenousRed.PulmonaryComponent
+            UseThoracic_PressureInput=true) constrainedby
+          Components.Auxiliary.PulmonaryBase
           annotation (Placement(transformation(extent={{-30,-62},{-10,-42}})));
       Modelica.Blocks.Sources.Trapezoid phi(
           amplitude=0.74,
@@ -25445,8 +25489,8 @@ public
           Compliance(displayUnit="ml/mmHg") = 1.1625954425608e-08)
           annotation (Placement(transformation(extent={{-60,-20},{-40,0}})));
         Physiolibrary.Hydraulic.Components.Conductor
-                             resistance(Conductance(displayUnit="ml/(mmHg.min)")
-             = 3.75031E-09)
+                             resistance(Conductance(displayUnit="ml/(mmHg.min)")=
+               3.75031E-09)
           annotation (Placement(transformation(extent={{-84,-20},{-64,0}})));
         Physiolibrary.Hydraulic.Sources.UnlimitedVolume SystemicTissues(P=
               533.28954966)
@@ -25459,10 +25503,11 @@ public
           startTime=50,
           falling=2,
           nperiod=1,
-          offset=0.25)
+          offset=4*133)
           annotation (Placement(transformation(extent={{-60,20},{-40,40}})));
         Components.ConditionalConnection condHR1(disconnectedValue=4*133,
-            disconnected=true) annotation (Placement(transformation(extent={{-18,
+            disconnected=false)
+                               annotation (Placement(transformation(extent={{-18,
                   25.2592},{-6,35.9259}})));
       equation
         connect(thoracic_pressure.y, condTP.u) annotation (Line(points={{-89,-40},
@@ -25502,14 +25547,22 @@ public
             thickness=1));
         connect(venousPressure.y, condHR1.u) annotation (Line(points={{-39,30},
                 {-30,30},{-30,30},{-19.2,30}}, color={0,0,127}));
-        connect(condHR1.y, SystemicVeins.pressure) annotation (Line(points={{
-                -5.4,30},{30,30},{30,10},{20,10}}, color={0,0,127}));
+        connect(condHR1.y, SystemicVeins.pressure) annotation (Line(points={{-5.4,30},
+                {30,30},{30,10},{20,10}},          color={0,0,127}));
         annotation (experiment(
             StopTime=500,
             Interval=0.06,
             Tolerance=1e-07,
             __Dymola_Algorithm="Dassl"));
       end heartRig_base;
+
+      model heartRig_smith
+        extends heartRig_base(
+          redeclare Components.Smith.HeartSmith heartComponent(
+              UseFrequencyInput=true, UseThoracicPressureInput=true),
+          redeclare Components.Smith.PulmonarySmith pulmonaryComponent,
+          venousPressure(offset=4*133));
+      end heartRig_smith;
     end Experiments;
 
     model CVS_7af
@@ -25842,10 +25895,11 @@ public
     equation
       connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-49,10},{
               -21.4,10},{-21.4,20}}, color={0,0,127}));
-      connect(conditionalConnection2.u, condPhi.u) annotation (Line(points={{8,
-              -15.3333},{14,-15.3333},{14,8}}, color={0,0,127}));
+      connect(conditionalConnection2.u, condPhi.u) annotation (Line(points={{4.8,
+              -16.2222},{-15.2,-16.2222},{-15.2,4}},
+                                               color={0,0,127}));
       connect(heartComponent.phi, conditionalConnection2.y) annotation (Line(
-            points={{-16,-16},{-12,-16},{-12,-15.3333},{-7.33333,-15.3333}},
+            points={{-16,-16},{-12,-16},{-12,-16.2222},{-4.4,-16.2222}},
             color={0,0,127}));
     end CVS_7af_leveled;
 
