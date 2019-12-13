@@ -1528,10 +1528,10 @@ public
         parameter Real Rv(unit="J.s.m-6") "venule resistance";
 
         parameter Physiolibrary.Types.Volume zpv = 0 "Zero-pressure volume";
-        parameter Physiolibrary.Types.Pressure nominal_pressure = settings.nominal_tissues_pressure;
-        Real u_C(unit = "Pa", start = nominal_pressure, nominal = 1000, fixed = true);
+        parameter Physiolibrary.Types.Pressure nominal_pressure = settings.tissues_nominal_pressure;
+        Physiolibrary.Types.Pressure u_C(start = nominal_pressure, nominal = 1000, fixed = true);
 
-        Real u(unit = "Pa", nominal = 1000);
+        Physiolibrary.Types.Pressure u(nominal = 1000);
 
         Physiolibrary.Types.Pressure u_out_hs "Output pressure including the hydrostatic pressure";
 
@@ -1547,9 +1547,11 @@ public
           "nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization";
         parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * C / (V_max - V_n))
           "nonlinear Un-Stressed volume";
-          Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
-              *(phi - phi0))
-            "Nonlinear compliance unstressed volume affected by phi";
+        Physiolibrary.Types.Volume V_us_phi = V_us * (1 - settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi";
+        Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras";
+      //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
+      //       *(phi - phi0)) "Nonlinear compliance unstressed volume affected by phi";
+
       initial equation
       //  volume = nominal_pressure*C + zpv;
       equation
@@ -1577,7 +1579,9 @@ public
             if settings.UseNonLinear_TissuesCompliance then
               volume = (u_C) *C + zpv;
             else
-              u_C = 1/k*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+      //        u_C = 1/k*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+              u_C = 1/k*log((V_max_phi - V_us_phi)/max(1e-9, V_max_phi - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+
             end if;
 
         annotation (Icon(graphics={
@@ -1926,7 +1930,7 @@ public
       outer Modelica.SIunits.Angle Tilt;
       parameter Physiolibrary.Types.Fraction venous_diameter_correction = settings.venous_diameter_correction;
 
-      parameter Physiolibrary.Types.Pressure p0= settings.venous_p0 "nominal venous pressure";
+      parameter Physiolibrary.Types.Pressure p0= settings.tissues_nominal_venules_pressure "nominal venous pressure";
     //  parameter Boolean ignoreViscosityResistance = true;
     //  parameter Boolean limitExternalPressure =  true;
 
@@ -17268,40 +17272,56 @@ public
     model Settings
       import Physiolibrary.Types.*;
 
-      parameter Fraction phi0 = 0.25;
-      parameter Fraction R_vc = 0 "Effect fraction of venoconstriction on compliance";
-      parameter Boolean UseNonLinear_VenousCompliance = false;
-      parameter Boolean UseNonLinear_TissuesCompliance = false;
-      parameter Pressure nominal_tissues_pressure = 2666.4;
-      parameter Fraction Ra_factor = 1 "Exponential factor affecting arterioles resistance";
-      parameter Fraction Rv_factor = 0 "Exponential factor affecting arterioles resistance";
+      // general
+      parameter Fraction phi0=0.25   "Baseline resting phi";
 
-      parameter Time tissues_Ra_tau = 12e-6 "guess from Pstras, Math Med Biol 2017";
-      parameter Fraction tissues_gamma = 1 "used for nonlinear tissues compliance to set Vmax. Vmax = Vn + gamma*(Vn - zpv)";
-      parameter Fraction tissues_compliance_phi_shift=0
-        "complinace dependency on phi";
-      parameter Pressure tissues_nominal_pressure=2660;
-      parameter Pressure tissues_nominal_arterioles_pressure=13332;
-      parameter Pressure tissues_nominal_venules_pressure=666.6;
-      parameter Volume tissues_nominal_zpv=0.002304;
-      parameter Volume tissues_nominal_stressed_volume=0.000795;
-      parameter VolumeFlowRate tissues_nominal_cardiac_output=9.98e-5;
+      // arteries
+      parameter Pressure tissues_nominal_arterioles_pressure=13332.2387415
+                                                                   "Nominal arterial pressure for initialization and calculation of arterioles pressure" annotation(Dialog(group = "Arteries"));
+      parameter Boolean arteries_UseVasoconstrictionEffect=false "Change compliance of large arteries by phi" annotation(choices(checkBox=true), Dialog(group = "Arteries"));
+      parameter Fraction R_vc = 0 "Effect fraction of venoconstriction on compliance" annotation(Dialog(group = "Arteries", enable = arteries_UseVasoconstrictionEffect));
 
-      parameter Boolean veins_UsePhiEffect=true;
-      parameter Pressure venous_p0 = 666.6 "Venous pressure used for initialization";
+    // tissues
+      parameter Pressure tissues_nominal_pressure=2666.4477483
+                                                       annotation(Dialog(group = "Tissues"));
+      parameter Volume tissues_nominal_zpv=0.002304 annotation(Dialog(group = "Tissues"));
+      parameter Volume tissues_nominal_stressed_volume=0.000795 annotation(Dialog(group = "Tissues"));
+      parameter VolumeFlowRate tissues_nominal_cardiac_output=9.98e-05
+                                                                      annotation(Dialog(group = "Tissues"));
+
+      parameter Fraction Ra_factor=1   "Exponential factor affecting arterioles resistance" annotation(Dialog(group = "Tissues"));
+      parameter Time tissues_Ra_tau=1.2e-05 "guess from Pstras, Math Med Biol 2017" annotation(Dialog(group = "Tissues"));
+      parameter Fraction Rv_factor = 0 "Exponential factor affecting venules resistance" annotation(Dialog(group = "Tissues"));
+
+      parameter Boolean UseNonLinear_TissuesCompliance = false annotation(choices(checkBox=true), Dialog(group = "Tissues"));
+    //  parameter Boolean UseNonLinear_TissuesCompliance_PhiEffect = false annotation(choices(checkBox=true), Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
+      parameter Fraction tissuesCompliance_PhiEffect = 0 annotation(Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
+
+      parameter Fraction tissues_gamma=1   "used for nonlinear tissues compliance to set Vmax. Vmax = Vn + gamma*(Vn - zpv)"
+        annotation (Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
+    //  parameter Fraction tissues_compliance_phi_shift=0 "complinace dependency on phi" annotation(Dialog(group = "Tissues"));
+
+
+    // veins
+      parameter Pressure tissues_nominal_venules_pressure=666.611937075
+                                                                "Venous pressure used for initialization and calculation of tissue venules resistances"
+        annotation(Dialog(group = "Veins"));
+      parameter Boolean UseNonLinear_VenousCompliance = false annotation(choices(checkBox=true), Dialog(group = "Veins"));
+      parameter Boolean veins_UsePhiEffect=true annotation(choices(checkBox=true), Dialog(group = "Veins"));
+    //  parameter Pressure venous_p0 = 666.6 "Venous pressure used for initialization"    annotation(Dialog(group = "Veins"));
       // parameter Real gamma;
       // parameter Real alpha;
-      parameter Fraction veins_gamma = 0.5  "Fraction of minimal collapsing diameter to nominal diameter";
-      parameter Fraction veins_alpha = 5 "ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter";
-      parameter Time veins_activation_tau = 0.1 "Integration delay for venous tone activation";
-      parameter Fraction venous_diameter_correction = 1.5;
+      parameter Fraction veins_gamma=0.5    "Fraction of minimal collapsing diameter to nominal diameter"    annotation(Dialog(group = "Veins"));
+      parameter Fraction veins_alpha=5   "ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter"    annotation(Dialog(group = "Veins"));
+      parameter Time veins_activation_tau(displayUnit="s")=0.1
+                                                "Integration delay for venous tone activation"    annotation(Dialog(group = "Veins"));
+      parameter Fraction venous_diameter_correction=1.5      annotation(Dialog(group = "Veins"));
 
-      parameter Boolean veins_ignoreViscosityResistance = true;
-      parameter Boolean veins_limitExternalPressure =  true;
+      parameter Boolean veins_ignoreViscosityResistance = true annotation(choices(checkBox=true), Dialog(group = "Veins"));
+      parameter Boolean veins_limitExternalPressure =  true annotation(choices(checkBox=true), Dialog(group = "Veins"));
     //  parameter Boolean veins_UseViscoElasticDelay = false;
     //   parameter Fraction gamma =   0.5
 
-      parameter Boolean arteries_UseVasoconstrictionEffect=false;
     //
 
       annotation (defaultComponentName =     "settings",
@@ -19159,6 +19179,44 @@ public
           StopTime=20,
           __Dymola_Algorithm="Dassl"));
     end aplhaGamma;
+
+    model Tisues_PVchars
+      inner Components.Settings settings(UseNonLinear_TissuesCompliance=true,
+          tissuesCompliance_PhiEffect(displayUnit="1") = -0.25)
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+
+      parameter Physiolibrary.Types.Pressure nominal_pressure=2666.4477483;
+
+      Physiolibrary.Types.Pressure u_C(start = nominal_pressure, nominal = 1000, fixed = false);
+
+      parameter Real k = C / (V_max - V_n) "For Pstras non-linear PV characteristics";
+      parameter Physiolibrary.Types.Volume V_max = V_n + (V_n - zpv)*settings.tissues_gamma
+        " V_n is between zpv and V_max, parameterized by gamma. 1 means its in the center. For Pstras non-linear PV characteristics";
+      parameter Physiolibrary.Types.Volume V_n = nominal_pressure*C + zpv
+        "nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization";
+      parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * C / (V_max - V_n))
+        "nonlinear Un-Stressed volume";
+      Physiolibrary.Types.Volume V_us_phi = V_us * (1 + settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi";
+      Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras";
+    //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
+    //       *(phi - phi0)) "Nonlinear compliance unstressed volume affected by phi";
+    parameter Physiolibrary.Types.Volume volume=0.000285;
+
+      // parametrization from celiac trunk
+      parameter Physiolibrary.Types.HydraulicCompliance C = 3.69E-08 annotation(Dialog(tab="Tissue parametrization", group="Compliances"));
+      parameter Physiolibrary.Types.Volume zpv = 280e-6;
+      parameter Physiolibrary.Types.Fraction phi = 0.25;
+      parameter Real eps = Modelica.Constants.eps;
+      parameter Real eps0 = Modelica.Constants.epsilon_0;
+
+    initial equation
+    //  volume = nominal_pressure*C + zpv;
+    equation
+            u_C = 1/k*log((V_max_phi - V_us_phi)/max(1e-9, V_max_phi - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)));
+    end Tisues_PVchars;
   end tests;
 
   package Experiments
@@ -24955,6 +25013,7 @@ public
             startTime=50),
           condPhi(disconnected=true),
           settings(
+            tissues_nominal_arterioles_pressure=13332.2387415,
             UseNonLinear_VenousCompliance=true,
             UseNonLinear_TissuesCompliance=false,
             Ra_factor=0,
@@ -25089,6 +25148,15 @@ public
         parameter Physiolibrary.Types.Fraction gamma=1
           "affecting Vmax and therefore nonlinearity of the tissues compliance";
       end tree_nonlinTiss;
+
+      model tree_phi_tissuesCompliance
+        extends tree_phi_base(settings(UseNonLinear_TissuesCompliance=true,
+              tissuesCompliance_PhiEffect=1), condPhi(disconnected=false));
+        annotation (experiment(
+            StopTime=500,
+            Interval=0.02,
+            __Dymola_Algorithm="Cvode"));
+      end tree_phi_tissuesCompliance;
 
       model tree_autonomic_base
         extends AdanVenousRed_Safaei.CVS_7af(
