@@ -1547,8 +1547,12 @@ public
           "nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization";
         parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * C / (V_max - V_n))
           "nonlinear Un-Stressed volume";
-        Physiolibrary.Types.Volume V_us_phi = V_us * (1 - settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi";
+
+        Real k_phi = C / (V_max - V_n_phi) "For Pstras non-linear PV characteristics";
         Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras";
+        Physiolibrary.Types.Volume V_n_phi = V_n * (1 - settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi";
+        Physiolibrary.Types.Volume V_us_phi = V_us * (1 - settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi";
+
       //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
       //       *(phi - phi0)) "Nonlinear compliance unstressed volume affected by phi";
 
@@ -1576,11 +1580,14 @@ public
               u =u_C + Rvis*(v_in - v_out);
             end if;
 
-            if settings.UseNonLinear_TissuesCompliance then
+            if not settings.UseNonLinear_TissuesCompliance then
               volume = (u_C) *C + zpv;
+            elseif settings.tissues_UseStraighteningReaction2Phi then
+              // my expression based on straightening
             else
+              // from Pstras
       //        u_C = 1/k*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
-              u_C = 1/k*log((V_max_phi - V_us_phi)/max(1e-9, V_max_phi - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+              u_C = 1/k_phi*log((V_max - V_us)/max(1e-9, V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
 
             end if;
 
@@ -17293,7 +17300,8 @@ public
       parameter Time tissues_Ra_tau=1.2e-05 "guess from Pstras, Math Med Biol 2017" annotation(Dialog(group = "Tissues"));
       parameter Fraction Rv_factor = 0 "Exponential factor affecting venules resistance" annotation(Dialog(group = "Tissues"));
 
-      parameter Boolean UseNonLinear_TissuesCompliance = false annotation(choices(checkBox=true), Dialog(group = "Tissues"));
+      parameter Boolean UseNonLinear_TissuesCompliance = false "Use nonlinear tissues PV chars, using the log Vmax suggested by Hardy and collins and used in Pstras 2017" annotation(choices(checkBox=true), Dialog(group = "Tissues"));
+      parameter Boolean tissues_UseStraighteningReaction2Phi = false "Use V_n dependency on phi (instead of V_u and V_max as used in Pstras)" annotation(choices(checkBox=true), Dialog(group = "Tissues"));
     //  parameter Boolean UseNonLinear_TissuesCompliance_PhiEffect = false annotation(choices(checkBox=true), Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
       parameter Fraction tissuesCompliance_PhiEffect = 0 annotation(Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
 
@@ -25559,12 +25567,10 @@ public
           Ra_factor=0,
           redeclare model Systemic_artery_thoracic =
               ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic_leveled,
-
           redeclare model Systemic_artery =
               ADAN_main.Components.Vessel_modules.pv_type_leveled,
           redeclare model Systemic_vein =
               ADAN_main.Components.Vessel_modules.vp_type_tension_based_leveled,
-
           redeclare model Systemic_tissue =
               ADAN_main.Components.Vessel_modules.systemic_tissue_leveled,
           redeclare
