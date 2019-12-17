@@ -25012,7 +25012,10 @@ public
           redeclare Components.Smith.HeartSmith heartComponent(
               UseFrequencyInput=true, UseThoracicPressureInput=true),
           redeclare Components.AdanVenousRed.Systemic_baroreflex Systemic1(
-              UseThoracic_PressureInput=true, UsePhi_Input=true),
+              UseThoracic_PressureInput=true, UsePhi_Input=true,
+            baroreceptor_aortic(delta0=0.6),
+            baroreceptor_carotid(delta0=0.3),
+            baroreflex(fsn=0.021)),
           phi(
             amplitude=0.74,
             rising=200,
@@ -25035,7 +25038,7 @@ public
                       color={0,0,127}));
         annotation (experiment(
             StopTime=500,
-            Interval=0.11,
+            Interval=0.02,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end tree_phi_base;
@@ -25192,8 +25195,8 @@ public
         connect(Systemic1.phi_baroreflex, condPhi.u) annotation (Line(points={{
                 -27.4,45.4},{-36,45.4},{-36,4.00002},{-27.2,4.00002}}, color={0,
                 0,127}));
-        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{
-                -27.4,45.4},{-27.4,60},{40.8,60}}, color={0,0,127}));
+        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{-27.4,
+                45.4},{-27.4,60},{40.8,60}},       color={0,0,127}));
         annotation (experiment(
             StopTime=500,
             Interval=0.11,
@@ -26376,7 +26379,7 @@ public
       Physiomodel(version="1.0.0")),
                        experiment(
       StopTime=80,
-      __Dymola_NumberOfIntervals=1500,
+      Interval=0.02,
       Tolerance=0.0005,
       __Dymola_Algorithm="Dassl"));
 end ADAN_main;
