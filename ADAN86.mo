@@ -1584,10 +1584,12 @@ public
               volume = (u_C) *C + zpv;
             elseif settings.tissues_UseStraighteningReaction2Phi then
               // my expression based on straightening
+              u_C = 1/k_phi*log((V_max - V_us)/max(1e-9, V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+
             else
               // from Pstras
       //        u_C = 1/k*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
-              u_C = 1/k_phi*log((V_max - V_us)/max(1e-9, V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+              u_C = 1/k*log((V_max_phi - V_us_phi)/max(1e-9, V_max_phi - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
 
             end if;
 
@@ -25166,6 +25168,41 @@ public
             __Dymola_Algorithm="Cvode"));
       end tree_phi_tissuesCompliance;
 
+      model tree_phi_tissuesComplianceAlternative
+        extends tree_phi_base(settings(UseNonLinear_TissuesCompliance=true,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=1),   condPhi(disconnected=false));
+        annotation (experiment(
+            StopTime=500,
+            Interval=0.02,
+            __Dymola_Algorithm="Cvode"));
+      end tree_phi_tissuesComplianceAlternative;
+
+      model tree_phi_tissuesCompliance_Valsalva
+        extends tree_phi_tissuesCompliance(thoracic_pressure(
+            rising=1,
+            width=18,
+            falling=1,
+            period=80,
+            nperiod=2,
+            startTime=260), condTP(disconnected=false));
+        annotation (experiment(
+            StopTime=400,
+            Interval=0.06,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end tree_phi_tissuesCompliance_Valsalva;
+
+      model tree_phi_tissuesComplianceAlternative_Valsalva
+        extends tree_phi_tissuesComplianceAlternative(thoracic_pressure(
+            rising=1,
+            width=18,
+            falling=1,
+            period=80,
+            nperiod=2,
+            startTime=260), condTP(disconnected=false));
+      end tree_phi_tissuesComplianceAlternative_Valsalva;
+
       model tree_autonomic_base
         extends AdanVenousRed_Safaei.CVS_7af(
           redeclare Components.Smith.PulmonarySmith pulmonaryComponent(
@@ -25186,14 +25223,15 @@ public
             UseNonLinear_TissuesCompliance=true,
             Ra_factor=0,
             veins_UsePhiEffect=false),
-          condHR(disconnected=false));
+          condHR(disconnected=false),
+          condTP(disconnected=true));
 
       equation
         connect(Systemic1.phi_baroreflex, condPhi.u) annotation (Line(points={{
                 -27.4,45.4},{-36,45.4},{-36,4.00002},{-27.2,4.00002}}, color={0,
                 0,127}));
-        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{
-                -27.4,45.4},{-27.4,60},{40.8,60}}, color={0,0,127}));
+        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{-27.4,
+                45.4},{-27.4,60},{40.8,60}},       color={0,0,127}));
         annotation (experiment(
             StopTime=500,
             Interval=0.11,
@@ -25379,6 +25417,32 @@ public
           redeclare Components.Smith.PulmonarySmith pulmonaryComponent,
           venousPressure(offset=4*133));
       end heartRig_smith;
+
+      model tree_phi_tissuesComplianceAlternative_Valsalva_plus
+        extends tree_phi_tissuesComplianceAlternative(thoracic_pressure(
+            rising=1,
+            width=18,
+            falling=1,
+            period=80,
+            nperiod=2,
+            startTime=260), condTP(disconnected=false),
+          settings(veins_UsePhiEffect=true));
+      end tree_phi_tissuesComplianceAlternative_Valsalva_plus;
+
+      model tree_auto_valsalva_all
+        extends tree_autonomic_base(condTP(disconnected=false), settings(
+            arteries_UseVasoconstrictionEffect=true,
+            R_vc=0.2,
+            Ra_factor=0.2,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=1,
+            veins_UsePhiEffect=true));
+        annotation (experiment(
+            StopTime=80,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end tree_auto_valsalva_all;
     end Experiments;
 
     partial model CVS_7af
