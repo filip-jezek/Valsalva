@@ -17133,10 +17133,14 @@ public
                               beat = tm >= pre(HP)
                                  annotation (Placement(transformation(extent={{-28,-120},
                   {12,-80}}),           iconTransformation(extent={{-60,-80},{-100,-40}})));
-                  Physiolibrary.Types.Volume ESV;
-                  Physiolibrary.Types.Volume EDV;
-                  Physiolibrary.Types.Volume SV;
-                  Physiolibrary.Types.VolumeFlowRate CO = SV/HP;
+                  Physiolibrary.Types.Volume ESV_LV;
+                  Physiolibrary.Types.Volume ESV_RV;
+                  Physiolibrary.Types.Volume EDV_LV;
+                  Physiolibrary.Types.Volume EDV_RV;
+                  Physiolibrary.Types.Volume SV_LV;
+                  Physiolibrary.Types.Volume SV_RV;
+                  Physiolibrary.Types.VolumeFlowRate CO_LV = SV_LV/HP;
+                  Physiolibrary.Types.VolumeFlowRate CO_RV = SV_RV/HP;
       equation
         //timing
         tm = time - pre(t0);
@@ -17144,12 +17148,15 @@ public
           HP = 1/HR;
           t0 = time;
           ts = 0.16 + 0.3*HP;
-          EDV = Vlv;
+          EDV_LV = Vlv;
+          EDV_RV = Vrv;
         end when;
 
         when time > t0 + ts then
-          ESV = Vlv;
-          SV = EDV - ESV;
+          ESV_LV = Vlv;
+          ESV_RV = Vrv;
+          SV_LV = EDV_LV - ESV_LV;
+          SV_RV = EDV_RV - ESV_RV;
         end when;
         //  septum
         Psept = lvflow.pressure - rvflow.pressure;
@@ -25013,11 +25020,8 @@ public
               UseThoracic_PressureInput=true),
           redeclare Components.Smith.HeartSmith heartComponent(
               UseFrequencyInput=true, UseThoracicPressureInput=true),
-          redeclare Components.AdanVenousRed.Systemic_baroreflex Systemic1(
-              UseThoracic_PressureInput=true, UsePhi_Input=true,
-            baroreceptor_aortic(delta0=0.6),
-            baroreceptor_carotid(delta0=0.3),
-            baroreflex(fsn=0.021)),
+          Systemic1(
+              UseThoracic_PressureInput=true, UsePhi_Input=true),
           phi(
             amplitude=0.74,
             rising=200,
@@ -25040,7 +25044,7 @@ public
                       color={0,0,127}));
         annotation (experiment(
             StopTime=500,
-            Interval=0.02,
+            Interval=0.11,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end tree_phi_base;
@@ -25212,7 +25216,7 @@ public
               UseThoracic_PressureInput=true),
           redeclare Components.Smith.HeartSmith heartComponent(
               UseFrequencyInput=true, UseThoracicPressureInput=true),
-          redeclare Components.AdanVenousRed.Systemic_baroreflex Systemic1(
+          Systemic1(
               UseThoracic_PressureInput=true, UsePhi_Input=true),
           phi(
             amplitude=0.74,
@@ -25220,13 +25224,13 @@ public
             width=50,
             period=1000,
             startTime=50),
-          condPhi(disconnected=false),
+          condPhi(disconnected=true),
           settings(
             UseNonLinear_VenousCompliance=true,
             UseNonLinear_TissuesCompliance=true,
             Ra_factor=0,
             veins_UsePhiEffect=false),
-          condHR(disconnected=false),
+          condHR(disconnected=true),
           condTP(disconnected=true));
 
       equation
@@ -25236,8 +25240,8 @@ public
         connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{-27.4,
                 45.4},{-27.4,60},{40.8,60}},       color={0,0,127}));
         annotation (experiment(
-            StopTime=500,
-            Interval=0.11,
+            StopTime=200,
+            Interval=0.02,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end tree_autonomic_base;
@@ -25339,16 +25343,6 @@ public
         Physiolibrary.Hydraulic.Sources.UnlimitedVolume SystemicVeins(
             usePressureInput=true, P=533.28954966)
           annotation (Placement(transformation(extent={{20,0},{0,20}})));
-        Physiolibrary.Hydraulic.Components.ElasticVessel
-                       arteries(
-          volume_start(displayUnit="l") = 0.001,
-          ZeroPressureVolume(displayUnit="l") = 0.00085,
-          Compliance(displayUnit="ml/mmHg") = 1.1625954425608e-08)
-          annotation (Placement(transformation(extent={{-60,-20},{-40,0}})));
-        Physiolibrary.Hydraulic.Components.Conductor
-                             resistance(Conductance(displayUnit="ml/(mmHg.min)")=
-               3.75031E-09)
-          annotation (Placement(transformation(extent={{-84,-20},{-64,0}})));
         Physiolibrary.Hydraulic.Sources.UnlimitedVolume SystemicTissues(P=
               533.28954966)
           annotation (Placement(transformation(extent={{-120,-20},{-100,0}})));
@@ -25366,6 +25360,18 @@ public
             disconnected=false)
                                annotation (Placement(transformation(extent={{-18,
                   25.2592},{-6,35.9259}})));
+      Physiolibrary.Hydraulic.Components.ElasticVesselElastance
+                             aorta(
+          ZeroPressureVolume=0,
+          volume_start=0.0001241,
+          Elastance=92165766.41999) annotation (Placement(transformation(extent={{-52,-20},
+                  {-32,0}})));
+        Physiolibrary.Hydraulic.Components.Resistor
+                 Rsys(Resistance(displayUnit="(mmHg.s)/ml") = 145054757.50752)
+          annotation (Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=180,
+              origin={-70,-10})));
       equation
         connect(thoracic_pressure.y, condTP.u) annotation (Line(points={{-89,-40},
                 {-84,-40},{-84,-40},{-78.4,-40}}, color={0,0,127}));
@@ -25391,21 +25397,22 @@ public
             points={{-12,-12},{-6,-12},{-6,10},{0,10}},
             color={0,0,0},
             thickness=1));
-        connect(arteries.q_in,resistance. q_out) annotation (Line(
-            points={{-50,-10},{-64,-10}},
-            thickness=1));
-        connect(arteries.q_in, heartComponent.sa) annotation (Line(
-            points={{-50,-10},{-42,-10},{-42,-12},{-32,-12}},
-            color={0,0,0},
-            thickness=1));
-        connect(resistance.q_in, SystemicTissues.y) annotation (Line(
-            points={{-84,-10},{-100,-10}},
-            color={0,0,0},
-            thickness=1));
         connect(venousPressure.y, condHR1.u) annotation (Line(points={{-39,30},
                 {-30,30},{-30,30},{-19.2,30}}, color={0,0,127}));
         connect(condHR1.y, SystemicVeins.pressure) annotation (Line(points={{-5.4,30},
                 {30,30},{30,10},{20,10}},          color={0,0,127}));
+        connect(SystemicTissues.y, Rsys.q_out) annotation (Line(
+            points={{-100,-10},{-80,-10}},
+            color={0,0,0},
+            thickness=1));
+        connect(Rsys.q_in, aorta.q_in) annotation (Line(
+            points={{-60,-10},{-42,-10}},
+            color={0,0,0},
+            thickness=1));
+        connect(aorta.q_in, heartComponent.sa) annotation (Line(
+            points={{-42,-10},{-38,-10},{-38,-12},{-32,-12}},
+            color={0,0,0},
+            thickness=1));
         annotation (experiment(
             StopTime=500,
             Interval=0.06,
@@ -25418,7 +25425,17 @@ public
           redeclare Components.Smith.HeartSmith heartComponent(
               UseFrequencyInput=true, UseThoracicPressureInput=true),
           redeclare Components.Smith.PulmonarySmith pulmonaryComponent,
-          venousPressure(offset=4*133));
+          venousPressure(
+            rising=50,
+            width=49,
+            falling=1,
+            offset=9*133,
+            startTime=100));
+        annotation (experiment(
+            StopTime=300,
+            Interval=0.06,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Dassl"));
       end heartRig_smith;
 
       model tree_phi_tissuesComplianceAlternative_Valsalva_plus
@@ -25450,6 +25467,13 @@ public
 
     partial model CVS_7af
       replaceable Components.AdanVenousRed.Systemic_baroreflex Systemic1(
+                baroreceptor_aortic(delta0=0.6,
+          epsilon_start=1.23,
+          s_start=0.922),
+                baroreceptor_carotid(delta0=0.3,
+          epsilon_start=1.07,
+          s_start=0.945),
+                baroreflex(fsn=0.021),
         UseThoracic_PressureInput=true,
         UsePhi_Input=true,
         redeclare model Systemic_vein =
@@ -26443,7 +26467,7 @@ public
       Physiomodel(version="1.0.0")),
                        experiment(
       StopTime=80,
-      Interval=0.02,
+      __Dymola_NumberOfIntervals=1500,
       Tolerance=0.0005,
       __Dymola_Algorithm="Dassl"));
 end ADAN_main;
