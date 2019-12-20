@@ -25185,6 +25185,27 @@ public
             __Dymola_Algorithm="Cvode"));
       end tree_phi_tissuesComplianceAlternative;
 
+      model tree_phi_tissuesComplianceAlternative_Valsalva
+        extends tree_phi_tissuesComplianceAlternative(thoracic_pressure(
+            rising=1,
+            width=18,
+            falling=1,
+            period=80,
+            nperiod=2,
+            startTime=260), condTP(disconnected=false));
+      end tree_phi_tissuesComplianceAlternative_Valsalva;
+
+      model tree_phi_tissuesComplianceAlternative_veins_Valsalva
+        extends tree_phi_tissuesComplianceAlternative(thoracic_pressure(
+            rising=1,
+            width=18,
+            falling=1,
+            period=80,
+            nperiod=2,
+            startTime=260), condTP(disconnected=false),
+          settings(veins_UsePhiEffect=true));
+      end tree_phi_tissuesComplianceAlternative_veins_Valsalva;
+
       model tree_phi_tissuesCompliance_Valsalva
         extends tree_phi_tissuesCompliance(thoracic_pressure(
             rising=1,
@@ -25199,16 +25220,6 @@ public
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end tree_phi_tissuesCompliance_Valsalva;
-
-      model tree_phi_tissuesComplianceAlternative_Valsalva
-        extends tree_phi_tissuesComplianceAlternative(thoracic_pressure(
-            rising=1,
-            width=18,
-            falling=1,
-            period=80,
-            nperiod=2,
-            startTime=260), condTP(disconnected=false));
-      end tree_phi_tissuesComplianceAlternative_Valsalva;
 
       model tree_autonomic_base
         extends AdanVenousRed_Safaei.CVS_7af(
@@ -25246,16 +25257,16 @@ public
             __Dymola_Algorithm="Cvode"));
       end tree_autonomic_base;
 
-      model tree_nonlinTiss_valsalva
+      model tree_auto_nonlinTiss_valsalva
         extends tree_autonomic_base(condTP(disconnected=false));
         annotation (experiment(
             StopTime=80,
             Interval=0.02,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
-      end tree_nonlinTiss_valsalva;
+      end tree_auto_nonlinTiss_valsalva;
 
-      model tree_autonomic_hemorrhage
+      model tree_auto_hemorrhage
         extends tree_autonomic_base(
           redeclare Components.Smith.PulmonarySmith pulmonaryComponent(
               UseThoracic_PressureInput=true),
@@ -25294,7 +25305,37 @@ public
             Interval=0.11,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
-      end tree_autonomic_hemorrhage;
+      end tree_auto_hemorrhage;
+
+      model tree_auto_allRegulations
+        extends tree_autonomic_base(settings(
+            arteries_UseVasoconstrictionEffect=true,
+            R_vc=0.2,
+            Ra_factor=0.2,
+            tissues_Ra_tau(displayUnit="s") = 1e-3,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=1,
+            veins_UsePhiEffect=true));
+        annotation (experiment(
+            StopTime=300,
+            Interval=0.02,
+            __Dymola_Algorithm="Cvode"));
+      end tree_auto_allRegulations;
+
+      model tree_auto_valsalva_all
+        extends tree_autonomic_base(condTP(disconnected=false), settings(
+            arteries_UseVasoconstrictionEffect=true,
+            R_vc=0.2,
+            Ra_factor=0.2,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=1,
+            veins_UsePhiEffect=true));
+        annotation (experiment(
+            StopTime=80,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end tree_auto_valsalva_all;
 
       model heartRig_base
         parameter Boolean VenousToneEffect = false;
@@ -25438,31 +25479,68 @@ public
             __Dymola_Algorithm="Dassl"));
       end heartRig_smith;
 
-      model tree_phi_tissuesComplianceAlternative_Valsalva_plus
-        extends tree_phi_tissuesComplianceAlternative(thoracic_pressure(
+      model tree_tilt_base
+        extends CVS_7af_leveled(redeclare Components.Smith.PulmonarySmith pulmonaryComponent(
+              UseThoracic_PressureInput=true),
+          redeclare Components.Smith.HeartSmith heartComponent(
+              UseFrequencyInput=true, UseThoracicPressureInput=true),
+          condPhi(disconnected=true),
+          settings(
+            arteries_UseVasoconstrictionEffect=true,
+            UseNonLinear_TissuesCompliance=true,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=1,
+            UseNonLinear_VenousCompliance=true),
+          Tilt_ramp(height=(Modelica.Constants.pi/2)/90*80, startTime=100));
+      equation
+        connect(Systemic1.phi_baroreflex, condPhi.u) annotation (Line(points={{
+                -27.4,45.4},{-38,45.4},{-38,4.00002},{-27.2,4.00002}}, color={0,
+                0,127}));
+        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{-27.4,
+                45.4},{-18,45.4},{-18,60},{40.8,60}},       color={0,0,127}));
+        annotation (experiment(
+            StopTime=500,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end tree_tilt_base;
+
+      model tree_tilt_all
+        extends tree_tilt_base(condHR(disconnected=false), condPhi(disconnected=
+               false));
+      end tree_tilt_all;
+
+      model tree_tilt_all_Matsushima
+        extends tree_tilt_base(
+          condHR(disconnected=false),
+          condPhi(disconnected=false),
+          Tilt_ramp(height=(Modelica.Constants.pi/2)/90*60, duration=4),
+          settings(arteries_UseVasoconstrictionEffect=true));
+        annotation (experiment(
+            StopTime=500,
+            Interval=0.04,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end tree_tilt_all_Matsushima;
+
+      model tree_tilt_all_valsalva
+        extends tree_tilt_base(
+          condPhi(disconnected=false),
+          condHR(disconnected=false),
+          condTP(disconnected=false),
+          thoracic_pressure(
             rising=1,
             width=18,
             falling=1,
-            period=80,
-            nperiod=2,
-            startTime=260), condTP(disconnected=false),
-          settings(veins_UsePhiEffect=true));
-      end tree_phi_tissuesComplianceAlternative_Valsalva_plus;
-
-      model tree_auto_valsalva_all
-        extends tree_autonomic_base(condTP(disconnected=false), settings(
-            arteries_UseVasoconstrictionEffect=true,
-            R_vc=0.2,
-            Ra_factor=0.2,
-            tissues_UseStraighteningReaction2Phi=true,
-            tissuesCompliance_PhiEffect=1,
-            veins_UsePhiEffect=true));
+            period=300,
+            nperiod=-1,
+            startTime=150));
         annotation (experiment(
-            StopTime=80,
-            Interval=0.02,
-            Tolerance=1e-06,
+            StopTime=400,
+            Interval=0.06,
+            Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
-      end tree_auto_valsalva_all;
+      end tree_tilt_all_valsalva;
     end Experiments;
 
     partial model CVS_7af
@@ -25654,8 +25732,7 @@ public
     end CVS_7af_baro;
 
     model CVS_7af_leveled
-      extends CVS_7af_baro(Systemic1(
-          Ra_factor=0,
+      extends CVS_7af(Systemic1(
           redeclare model Systemic_artery_thoracic =
               ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic_leveled,
           redeclare model Systemic_artery =
@@ -25779,25 +25856,16 @@ public
           inferior_vena_cava_C16(sinAlpha=1),
           inferior_vena_cava_C12(sinAlpha=1),
           inferior_vena_cava_C8(sinAlpha=1),
-          UseTiltInput=true), heartComponent(UsePhiInput=true));
+          UseTiltInput=true), heartComponent(UseFrequencyInput=true, UsePhiInput=false));
 
       replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
         height=Modelica.Constants.pi/2,
         startTime=0,
         duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
-        annotation (Placement(transformation(extent={{-70,0},{-50,20}})));
-      Components.ConditionalConnection conditionalConnection2(disconnectedValue=
-           0.25, disconnected=true)
-        annotation (Placement(transformation(extent={{4,-18},{-4,-14}})));
+        annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
     equation
-      connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-49,10},{
-              -21.4,10},{-21.4,20}}, color={0,0,127}));
-      connect(conditionalConnection2.u, condPhi.u) annotation (Line(points={{4.8,
-              -16.2222},{-27.2,-16.2222},{-27.2,4.00002}},
-                                               color={0,0,127}));
-      connect(heartComponent.phi, conditionalConnection2.y) annotation (Line(
-            points={{-16,-16},{-12,-16},{-12,-16.2222},{-4.4,-16.2222}},
-            color={0,0,127}));
+      connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-79,32},{
+              -21.4,32},{-21.4,20}}, color={0,0,127}));
     end CVS_7af_leveled;
 
     model CVS_7af_sit_stand
