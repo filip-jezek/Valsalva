@@ -16978,13 +16978,16 @@ public
               extent={{-10,-10},{10,10}},
               rotation=180,
               origin={70,-20})));
-        Smith_VentricularInteraction_flat smith_VentricularInteraction_flat
+        Smith_VentricularInteraction_flat smith_VentricularInteraction_flat(alphaE=
+              settings.heart_alphaE)
           annotation (Placement(transformation(extent={{-14,-10},{16,28}})));
         Physiolibrary.Types.RealIO.FractionInput phi if UsePhiInput
           annotation (Placement(transformation(extent={{-120,50},{-80,90}}),
               iconTransformation(extent={{-120,40},{-80,80}})));
         Physiolibrary.Types.Constants.FractionConst phi0(k=0.25) if not UsePhiInput
           annotation (Placement(transformation(extent={{-88,82},{-80,90}})));
+        outer Settings settings
+          annotation (Placement(transformation(extent={{40,80},{60,100}})));
       equation
         connect(Lav.q_out,aorticValve. q_in) annotation (Line(
             points={{-54,-20},{-68,-20}},
@@ -17083,7 +17086,7 @@ public
         parameter Physiolibrary.Types.Volume VS0rv = 1e-3 "Volume Threshold for linear Frank-starling effect";
 
         parameter Real Escale = 1;
-        Physiolibrary.Types.Fraction PhiEffect = 1/(1 + alphaE*(phi - phi0));
+        Physiolibrary.Types.Fraction PhiEffect = (1 + alphaE*(phi - phi0));
 
         HydraulicElastance Essept = Essept0*PhiEffect;
         HydraulicElastance Esrv = Esrv0*PhiEffect;
@@ -17124,10 +17127,11 @@ public
                                  annotation (Placement(transformation(extent={{-80,-100},
                   {-40,-60}}),          iconTransformation(extent={{-100,60},{-60,100}})));
         Physiolibrary.Types.Fraction phi0 = 0.25;
-        parameter Real alphaE = 1;//2.5;
+        parameter Physiolibrary.Types.Fraction alphaE = 0 "linear dependency of elastance on phi";//2.5;
         Physiolibrary.Types.Pressure Prv = rvflow.pressure - Pperi;
         Physiolibrary.Types.Pressure Plv = lvflow.pressure - Pperi;
-        Real driving = (1 + alphaE*(phi - phi0))*A*exp(-B*(tm - CC)^2);
+        parameter Physiolibrary.Types.Fraction alphaDriving = 0;
+        Real driving = (1 + alphaDriving*(phi - phi0))*A*exp(-B*(tm - CC)^2) "Linear dependency of driving on phi";
 
         Modelica.Blocks.Interfaces.BooleanOutput
                               beat = tm >= pre(HP)
@@ -17288,8 +17292,14 @@ public
     model Settings
       import Physiolibrary.Types.*;
 
+
+
+
       // general
       parameter Fraction phi0=0.25   "Baseline resting phi";
+
+      // HEART
+      parameter Physiolibrary.Types.Fraction heart_alphaE = 0 "linear dependency of elastance on phi" annotation(Dialog(group = "Heart"));
 
       // arteries
       parameter Pressure tissues_nominal_arterioles_pressure=13332.2387415
@@ -25478,6 +25488,37 @@ public
             Tolerance=1e-06,
             __Dymola_Algorithm="Dassl"));
       end heartRig_smith;
+
+      model heartRig_smith_phi
+        extends heartRig_base(
+          redeclare Components.Smith.HeartSmith heartComponent(
+              UseFrequencyInput=true, UseThoracicPressureInput=true,
+            UsePhiInput=true),
+          redeclare Components.Smith.PulmonarySmith pulmonaryComponent,
+          venousPressure(
+            rising=50,
+            width=49,
+            falling=1,
+            offset=9*133,
+            startTime=100),
+          condHR1(disconnected=true, disconnectedValue=8*133));
+        Components.ConditionalConnection condHR2(disconnectedValue=0.25,
+            disconnected=false)
+                               annotation (Placement(transformation(extent={{34,
+                  37.2592},{46,47.9259}})));
+        inner Components.Settings settings(heart_alphaE=2)
+          annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+      equation
+        connect(condHR2.u, phi.y) annotation (Line(points={{32.8,42},{6,42},{6,
+                60},{-79,60}}, color={0,0,127}));
+        connect(condHR2.y, heartComponent.phi) annotation (Line(points={{46.6,
+                42},{50,42},{50,-16},{-12,-16}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=300,
+            Interval=0.06,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Dassl"));
+      end heartRig_smith_phi;
 
       model tree_tilt_base
         extends CVS_7af_leveled(redeclare Components.Smith.PulmonarySmith pulmonaryComponent(
