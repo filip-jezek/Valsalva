@@ -1220,9 +1220,9 @@ type"),         Text(
         connect(readData.thoracic_pressure, add.u1) annotation (Line(points={{-79.8,14},
                 {-74,14},{-74,46},{-64,46}}, color={0,0,127}));
         connect(baroreceptorAortic.fbr, baroreflex.aortic_BR)
-          annotation (Line(points={{12.2,34},{42,34}}, color={0,0,127}));
+          annotation (Line(points={{12,34},{42,34}},   color={0,0,127}));
         connect(baroreceptorCarotid.fbr, baroreflex.carotid_BR) annotation (Line(
-              points={{12.2,10},{28,10},{28,14},{42,14}}, color={0,0,127}));
+              points={{12,10},{28,10},{28,14},{42,14}},   color={0,0,127}));
         connect(add.y, BPa)
           annotation (Line(points={{-41,40},{-24,40}}, color={0,0,127}));
         connect(readData.arterial_pressure, BPc)
@@ -16940,7 +16940,7 @@ public
         extends Auxiliary.HeartBase;
         parameter Boolean UsePhiInput = false;
 
-        Physiolibrary.Hydraulic.Components.IdealValveResistance
+        IdealValveResistanceWithMeasurements
                              aorticValve(Pknee=0, _Ron(displayUnit="(mmHg.s)/ml")=
                2399802.97347)
           annotation (Placement(transformation(extent={{-68,-30},{-88,-10}})));
@@ -17198,6 +17198,55 @@ public
                 lineColor={0,0,255},
                 textString="phi")}));
       end Smith_VentricularInteraction_flat;
+
+      model IdealValveResistanceWithMeasurements
+        "Adds additional output calculations"
+        extends Physiolibrary.Hydraulic.Components.IdealValveResistance;
+
+        Physiolibrary.Types.Pressure BPp;
+        Physiolibrary.Types.Pressure BPs;
+        Physiolibrary.Types.Pressure BPd;
+
+
+        Physiolibrary.Types.Pressure BP_max(start = 0);
+        Physiolibrary.Types.Pressure BP_min(start = 200*133);
+
+        Physiolibrary.Types.Pressure BPao = q_out.pressure;
+
+        parameter Physiolibrary.Types.Time tau = 1e-3;
+      equation
+      //   if open then
+      //     BP_max = max(BPao, BP_max);
+      //   else
+      //     BP_max = 0;
+      //   end if;
+
+        if open and BP_max < BPao then
+          der(BP_max)*tau = BPao - BP_max;
+        else
+          der(BP_max) = 0;
+        end if;
+
+        if not open and BP_min > BPao then
+          der(BP_min)*tau = BPao - BP_min;
+        else
+          der(BP_min) = 0;
+        end if;
+
+        when open then
+          BPd = pre(BP_min);
+          reinit(BP_min, 200*133);
+          BPp = BPs - BPd;
+        end when;
+
+        when not open then
+          BPs = pre(BP_max);
+          reinit(BP_max, 0);
+      //     BPp = BPs - BPd;
+        end when;
+
+
+      end IdealValveResistanceWithMeasurements;
     end Smith;
 
     package Baroreflex
@@ -17292,27 +17341,24 @@ public
     model Settings
       import Physiolibrary.Types.*;
 
-
-
-
       // general
       parameter Fraction phi0=0.25   "Baseline resting phi";
 
       // HEART
-      parameter Physiolibrary.Types.Fraction heart_alphaE = 0 "linear dependency of elastance on phi" annotation(Dialog(group = "Heart"));
+      parameter Physiolibrary.Types.Fraction heart_alphaE = 0 "linear dependency of active elastance on phi" annotation(Dialog(group = "Heart"));
 
       // arteries
       parameter Pressure tissues_nominal_arterioles_pressure=13332.2387415
-                                                                   "Nominal arterial pressure for initialization and calculation of arterioles pressure" annotation(Dialog(group = "Arteries"));
+                                                                   "Nominal arterial pressure for initialization and calculation of arterioles resistance" annotation(Dialog(group = "Arteries"));
       parameter Boolean arteries_UseVasoconstrictionEffect=false "Change compliance of large arteries by phi" annotation(choices(checkBox=true), Dialog(group = "Arteries"));
       parameter Fraction R_vc = 0 "Effect fraction of venoconstriction on compliance" annotation(Dialog(group = "Arteries", enable = arteries_UseVasoconstrictionEffect));
 
     // tissues
-      parameter Pressure tissues_nominal_pressure=2666.4477483
+      parameter Pressure tissues_nominal_pressure=2666.4477483 "Tissues and small arteries and veins nominal pressure. Used for calculation of arteriole and venule resistances and tissues compliance"
                                                        annotation(Dialog(group = "Tissues"));
-      parameter Volume tissues_nominal_zpv=0.002304 annotation(Dialog(group = "Tissues"));
-      parameter Volume tissues_nominal_stressed_volume=0.000795 annotation(Dialog(group = "Tissues"));
-      parameter VolumeFlowRate tissues_nominal_cardiac_output=9.98e-05
+      parameter Volume tissues_nominal_zpv=0.002304 "Tissues and small arteries and veins nominal pressure. Used for calculation of tissues total volume" annotation(Dialog(group = "Tissues"));
+      parameter Volume tissues_nominal_stressed_volume=0.000795 "Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance"  annotation(Dialog(group = "Tissues"));
+      parameter VolumeFlowRate tissues_nominal_cardiac_output=9.98e-05 "Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances."
                                                                       annotation(Dialog(group = "Tissues"));
 
       parameter Fraction Ra_factor=1   "Exponential factor affecting arterioles resistance" annotation(Dialog(group = "Tissues"));
@@ -17322,9 +17368,9 @@ public
       parameter Boolean UseNonLinear_TissuesCompliance = false "Use nonlinear tissues PV chars, using the log Vmax suggested by Hardy and collins and used in Pstras 2017" annotation(choices(checkBox=true), Dialog(group = "Tissues"));
       parameter Boolean tissues_UseStraighteningReaction2Phi = false "Use V_n dependency on phi (instead of V_u and V_max as used in Pstras)" annotation(choices(checkBox=true), Dialog(group = "Tissues"));
     //  parameter Boolean UseNonLinear_TissuesCompliance_PhiEffect = false annotation(choices(checkBox=true), Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
-      parameter Fraction tissuesCompliance_PhiEffect = 0 annotation(Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
+      parameter Fraction tissuesCompliance_PhiEffect = 0 "Effect on tissue's compliance" annotation(Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
 
-      parameter Fraction tissues_gamma=1   "used for nonlinear tissues compliance to set Vmax. Vmax = Vn + gamma*(Vn - zpv)"
+      parameter Fraction tissues_gamma=1   "Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv)"
         annotation (Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
     //  parameter Fraction tissues_compliance_phi_shift=0 "complinace dependency on phi" annotation(Dialog(group = "Tissues"));
 
@@ -17333,8 +17379,8 @@ public
       parameter Pressure tissues_nominal_venules_pressure=666.611937075
                                                                 "Venous pressure used for initialization and calculation of tissue venules resistances"
         annotation(Dialog(group = "Veins"));
-      parameter Boolean UseNonLinear_VenousCompliance = false annotation(choices(checkBox=true), Dialog(group = "Veins"));
-      parameter Boolean veins_UsePhiEffect=true annotation(choices(checkBox=true), Dialog(group = "Veins"));
+      parameter Boolean UseNonLinear_VenousCompliance = false "Use nonlinear compliance model in all large veins" annotation(choices(checkBox=true), Dialog(group = "Veins"));
+      parameter Boolean veins_UsePhiEffect=true "Use venoconstriction in all large veins" annotation(choices(checkBox=true), Dialog(group = "Veins"));
     //  parameter Pressure venous_p0 = 666.6 "Venous pressure used for initialization"    annotation(Dialog(group = "Veins"));
       // parameter Real gamma;
       // parameter Real alpha;
@@ -17342,10 +17388,10 @@ public
       parameter Fraction veins_alpha=5   "ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter"    annotation(Dialog(group = "Veins"));
       parameter Time veins_activation_tau(displayUnit="s")=0.1
                                                 "Integration delay for venous tone activation"    annotation(Dialog(group = "Veins"));
-      parameter Fraction venous_diameter_correction=1.5      annotation(Dialog(group = "Veins"));
+      parameter Fraction venous_diameter_correction=1.5 "Venous diameter enlargement to correspond to the arterial side" annotation(Dialog(group = "Veins"));
 
-      parameter Boolean veins_ignoreViscosityResistance = true annotation(choices(checkBox=true), Dialog(group = "Veins"));
-      parameter Boolean veins_limitExternalPressure =  true annotation(choices(checkBox=true), Dialog(group = "Veins"));
+      parameter Boolean veins_ignoreViscosityResistance = true "Ignore viscoelastic resistance in all large veins (negligible, but computation-heavy)" annotation(choices(checkBox=true), Dialog(group = "Veins"));
+      parameter Boolean veins_limitExternalPressure =  true "limit Pext in large veins, when they are already empty" annotation(choices(checkBox=true), Dialog(group = "Veins"));
     //  parameter Boolean veins_UseViscoElasticDelay = false;
     //   parameter Fraction gamma =   0.5
 
