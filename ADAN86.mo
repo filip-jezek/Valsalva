@@ -1410,8 +1410,13 @@ public
 
       partial model bg_vessel
         extends bg_base(final terminator=false);
-        parameter Boolean UseDistentionOutput = false annotation(choices(checkBox=true));
-        parameter Boolean UseNonLinearCompliance = false annotation(Dialog(group = "Parameters"));
+        outer Modelica.SIunits.Angle Tilt;
+        Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure";
+        Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs "Output pressure including the hydrostatic pressure";
+
+        parameter Boolean UseDistentionOutput = false "Provides relative distention fraction output, otherwise hidden and not calculated" annotation(choices(checkBox=true));
+        parameter Boolean CalculateMeans = false "uses additional calculations" annotation(choices(checkBox=true));
+      //  parameter Boolean UseNonLinearCompliance = false annotation(Dialog(group = "Parameters"));
         parameter Boolean UseSinAlphaInput = false "Vessel vertical angle, 0 is supine and 1 is facing upwards, -1 downwards respectively"  annotation(choices(checkBox=true),Dialog(group = "Parameters"));
         parameter Boolean UseVasoconstrictionEffect = false annotation(Dialog(group = "Parameters"));
 
@@ -1487,7 +1492,7 @@ public
                 arrow={Arrow.None,Arrow.Filled})}));
       end bg_vessel;
 
-      model bg_vessel_thoracic
+      partial model bg_vessel_thoracic
         extends bg_vessel;
         annotation (Icon(graphics={Rectangle(
                 extent={{-100,20},{100,-20}},
@@ -1643,13 +1648,12 @@ public
 
       model compliance_nonLinear
         "Non-linear compliance model by Melchiort"
-        extends compliance_base(V_min = zpv/2);
+        extends compliance_base(V_min = zpv/2, p0=665);
         parameter Physiolibrary.Types.HydraulicCompliance C "compliance";
         parameter Physiolibrary.Types.Volume zpv "Zero pressure V";
         parameter Boolean explicitVolumeRelation=false
           "if the equation should be inverted (solely for numerical reasons)";
         parameter Physiolibrary.Types.Volume Vmax = 2*zpv;
-        parameter Physiolibrary.Types.Pressure p0=665 "nominal venous pressure";
 
         outer Physiolibrary.Types.Fraction C_effect;
         outer Physiolibrary.Types.Fraction ZPV_effect;
@@ -1881,10 +1885,7 @@ public
 
       Real u_C(unit = "Pa", start = 10000.0, fixed = true);
 
-    //  Physiolibrary.Types.Height height_mean =  (port_a.position + port_b.position)/2;
-      outer Modelica.SIunits.Angle Tilt(unit= "deg");
-      Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure";
-      Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs "Output pressure including the hydrostatic pressure";
+
 
     equation
       volume = (u_C)  *compliance + zpv "Lim 2013";
@@ -1929,14 +1930,13 @@ public
       extends Interfaces.bg_vessel(
           UseOuter_thoracic_pressure=false,
       UseInertance = false,
-      UseNonLinearCompliance = true,
       zpv = l*Modelica.Constants.pi*((r*venous_diameter_correction)^2),
       R = 8*mu*l/(Modelica.Constants.pi*((r*venous_diameter_correction)^4)),
       I = rho*l/(Modelica.Constants.pi*(r*venous_diameter_correction)^2),
       V_min = compliant_vessel.V_min,
       volume(start = compliant_vessel.V0, fixed = true));
 
-      outer Modelica.SIunits.Angle Tilt;
+    //   outer Modelica.SIunits.Angle Tilt;
       parameter Physiolibrary.Types.Fraction venous_diameter_correction = settings.venous_diameter_correction;
 
       parameter Physiolibrary.Types.Pressure p0= settings.tissues_nominal_venules_pressure "nominal venous pressure";
@@ -1944,8 +1944,8 @@ public
     //  parameter Boolean limitExternalPressure =  true;
 
 
-      Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure";
-      Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs "Output pressure including the hydrostatic pressure";
+    //   Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure";
+    //   Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs "Output pressure including the hydrostatic pressure";
 
       Physiolibrary.Types.Pressure external_pressure;
       Physiolibrary.Types.VolumeFlowRate netFlow = v_in-v_out;
@@ -15190,7 +15190,6 @@ public
           l=1.00E-01,
           r=7.50E-03) annotation (Placement(transformation(extent={{60,47},{80,52}})));
         Systemic_artery_thoracic                  coronary_arteries(
-          UseNonLinearCompliance=false,
           C(displayUnit="m3/Pa") = 3e-11,
           R(displayUnit="(Pa.s)/m3") = 7e8)
           annotation (Placement(transformation(extent={{10,74},{30,78}})));
@@ -15206,7 +15205,6 @@ public
         replaceable
         Systemic_vein coronary_veins(
           UseOuter_thoracic_pressure=true,
-          UseNonLinearCompliance=false,
           C(displayUnit="m3/Pa") = 7e-10,
           R(displayUnit="(Pa.s)/m3") = 2e8)
           annotation (Placement(transformation(extent={{60,74},{80,78}})));
@@ -17104,6 +17102,7 @@ public
           discrete Time HP "heart period";
           discrete Time t0 "time of beginning of the cardiac cycle";
           discrete Time ts "duration of systole";
+          Time td = HP - ts "duration of diastole";
           parameter Real lambdas= 435000;
           parameter Real lambdarv = 23000;
           parameter Real lambdalv = 33000;
@@ -17151,7 +17150,8 @@ public
         when {initial(),beat} then
           HP = 1/HR;
           t0 = time;
-          ts = 0.16 + 0.3*HP;
+          //    ts = 0.16 + 0.3*HP;
+          ts = 0.1 + 0.2*HP "Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
           EDV_LV = Vlv;
           EDV_RV = Vrv;
         end when;
@@ -25547,10 +25547,11 @@ public
             falling=1,
             offset=9*133,
             startTime=100),
-          condHR1(disconnected=true, disconnectedValue=8*133));
+          condHR1(disconnected=true, disconnectedValue=8*133),
+          condHR(disconnected=false),
+          phi(amplitude=0.9, offset=0.1));
         Components.ConditionalConnection condHR2(disconnectedValue=0.25,
-            disconnected=false)
-                               annotation (Placement(transformation(extent={{34,
+            disconnected=true) annotation (Placement(transformation(extent={{34,
                   37.2592},{46,47.9259}})));
         inner Components.Settings settings(heart_alphaE=2)
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
