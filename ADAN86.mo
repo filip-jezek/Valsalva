@@ -1308,6 +1308,10 @@ type"),         Text(
         outer Physiolibrary.Types.Pressure thoracic_pressure;
         parameter Physiolibrary.Types.Fraction thoracic_pressure_ratio=1 annotation (Dialog(enable=UseOuter_thoracic_pressure));
 
+        parameter Boolean UseExercise = false;
+        outer Physiolibrary.Types.Fraction Exercise;
+        Physiolibrary.Types.Fraction exercise;
+
         Physiolibrary.Types.Pressure u_in = port_a.pressure;
         Physiolibrary.Types.VolumeFlowRate v_in = port_a.q;
 
@@ -1347,6 +1351,13 @@ public
         constant Physiolibrary.Types.Pressure unitPressure=1;
         constant Physiolibrary.Types.VolumeFlowRate unitFlow=1;
       equation
+       if UseExercise then
+         exercise = Exercise;
+       else
+         exercise = 0;
+       end if;
+
+
         v_out + v_out_valved = 0;
 
         if LimitBackflow then
@@ -1411,6 +1422,7 @@ public
       partial model bg_vessel
         extends bg_base(final terminator=false);
         outer Modelica.SIunits.Angle Tilt;
+        outer Physiolibrary.Types.Fraction Exercise;
         Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure";
         Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs "Output pressure including the hydrostatic pressure";
 
@@ -1468,7 +1480,7 @@ public
         end if;
 
         if UseVasoconstrictionEffect then
-          compliance = 2*Modelica.Constants.pi*((r*vc_effect)^3) *l/(E*h);
+          compliance = 2*Modelica.Constants.pi*((r*vc_effect)^3) *l/(E*h)/exp(Exercise*settings.exercise_factor_on_arterial_compliance);
         else
           compliance = C;
         end if;
@@ -1540,7 +1552,7 @@ public
 
         Physiolibrary.Types.Pressure u_out_hs "Output pressure including the hydrostatic pressure";
 
-        Physiolibrary.Types.HydraulicResistance Ra_phi_inf = Ra*exp((phi-phi0)*settings.Ra_factor) "Arterioles resistance dependent on phi";
+        Physiolibrary.Types.HydraulicResistance Ra_phi_inf = Ra*exp((phi-phi0)*settings.Ra_factor)/exp(exercise*settings.exercise_factor) "Arterioles resistance dependent on phi";
         Physiolibrary.Types.HydraulicResistance Ra_phi(start = Ra, fixed = true) "Delayed arterioles resistance dependent on phi";
 
         Physiolibrary.Types.HydraulicResistance Rv_phi = Rv*exp((phi-phi0)*settings.Rv_factor) "Arterioles resistance dependent on phi";
@@ -1560,6 +1572,7 @@ public
 
       //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
       //       *(phi - phi0)) "Nonlinear compliance unstressed volume affected by phi";
+
 
       initial equation
       //  volume = nominal_pressure*C + zpv;
@@ -1598,7 +1611,13 @@ public
 
             end if;
 
-        annotation (Icon(graphics={
+        annotation (Icon(graphics={Polygon(
+                points={{-20,-26},{-2,2},{-18,2},{12,30},{8,30},{24,36},{30,30},{26,30},
+                    {6,10},{18,10},{-6,-24},{-20,-26}},
+                fillColor={0,0,0},
+                fillPattern=FillPattern.Solid,
+                pattern=LinePattern.None,
+                visible=DynamicSelect(false, UseExercise)),
               Rectangle(
                 extent={{-20,20},{20,0}},
                 lineThickness=0.5,
@@ -1881,7 +1900,8 @@ public
 
     model pv_type
         extends ADAN_main.Components.Vessel_modules.Interfaces.bg_vessel(
-            UseVasoconstrictionEffect=settings.arteries_UseVasoconstrictionEffect);
+            UseVasoconstrictionEffect=settings.arteries_UseVasoconstrictionEffect,
+            UseExercise = true);
 
       Real u_C(unit = "Pa", start = 10000.0, fixed = true);
 
@@ -14293,11 +14313,14 @@ public
         inner Modelica.SIunits.Angle Tilt;
         inner Physiolibrary.Types.Pressure thoracic_pressure;
         inner Physiolibrary.Types.Fraction phi "a systemic acitvation fraction, 1 being maximal possible. Normal resting is believed to be 1/4 of the maximum (0.25)";
+        inner Physiolibrary.Types.Fraction Exercise;
         parameter Physiolibrary.Types.Fraction phi0 = 0.25;
 
         parameter Boolean UseThoracic_PressureInput = false annotation(choices(checkBox=true));
         parameter Boolean UsePhi_Input = false annotation(choices(checkBox=true));
         parameter Boolean UseTiltInput = false annotation(choices(checkBox=true));
+        parameter Boolean UseExerciseInput = false annotation(choices(checkBox=true));
+
 
         replaceable model Systemic_artery_thoracic =
             ADAN_main.Components.Vessel_modules.pv_type_thoracic
@@ -14348,6 +14371,9 @@ public
       //             {150,182}})));
 
 
+        Physiolibrary.Types.RealIO.PressureInput exercise_input=Exercise if            UseExerciseInput
+          annotation (Placement(transformation(extent={{-320,-90},{-280,-50}}),
+              iconTransformation(extent={{-40,60},{0,100}})));
       equation
         if not UseThoracic_PressureInput then
           thoracic_pressure = 0;
@@ -14357,6 +14383,9 @@ public
         end if;
         if not UseTiltInput then
           Tilt = 0;
+        end if;
+        if not UseExerciseInput then
+          Exercise = 0;
         end if;
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})),
                          choices(choice=ADAN_main.Components.Vessel_modules.vp_type
@@ -17350,7 +17379,8 @@ public
       // arteries
       parameter Pressure tissues_nominal_arterioles_pressure=13332.2387415
                                                                    "Nominal arterial pressure for initialization and calculation of arterioles resistance" annotation(Dialog(group = "Arteries"));
-      parameter Boolean arteries_UseVasoconstrictionEffect=false "Change compliance of large arteries by phi" annotation(choices(checkBox=true), Dialog(group = "Arteries"));
+      parameter Boolean arteries_UseVasoconstrictionEffect=false "Change compliance of large arteries by phi and exercise" annotation(choices(checkBox=true), Dialog(group = "Arteries"));
+      parameter Fraction exercise_factor_on_arterial_compliance = 0 "Effect of venoconstriction";
       parameter Fraction R_vc = 0 "Effect fraction of venoconstriction on compliance" annotation(Dialog(group = "Arteries", enable = arteries_UseVasoconstrictionEffect));
 
     // tissues
@@ -17372,7 +17402,8 @@ public
 
       parameter Fraction tissues_gamma=1   "Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv)"
         annotation (Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
-    //  parameter Fraction tissues_compliance_phi_shift=0 "complinace dependency on phi" annotation(Dialog(group = "Tissues"));
+      parameter Fraction exercise_factor = 1 annotation (Dialog(group = "Tissues"));
+        //  parameter Fraction tissues_compliance_phi_shift=0 "complinace dependency on phi" annotation(Dialog(group = "Tissues"));
 
 
     // veins
@@ -25629,6 +25660,46 @@ public
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end tree_tilt_all_valsalva;
+
+      model tree_auto_allRegulations_Exercise
+        extends tree_autonomic_base(settings(
+            arteries_UseVasoconstrictionEffect=true,
+            R_vc=0.2,
+            Ra_factor=0.2,
+            tissues_Ra_tau(displayUnit="s") = 1e-3,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=1,
+            exercise_factor(displayUnit="1") = 10,
+            veins_UsePhiEffect=true),
+          Systemic1(
+            UseExerciseInput=true,
+            anterior_tibial_T3_R230(UseExercise=true),
+            posterior_tibial_T4_R236(UseExercise=true),
+            posterior_tibial_T4_L214(UseExercise=true),
+            anterior_tibial_T3_L208(UseExercise=true),
+            profundus_T2_R224(UseExercise=true),
+            profundus_T2_L202(UseExercise=true)),
+          condHR(disconnected=false),
+          condPhi(disconnected=false));
+      Modelica.Blocks.Sources.Trapezoid Exercfise(
+          amplitude=1,
+          rising=200,
+          width=20,
+          falling=2,
+          period=500,
+          nperiod=1,
+          offset=0,
+          startTime=5)
+          annotation (Placement(transformation(extent={{-98,36},{-78,56}})));
+      equation
+        connect(Exercfise.y, Systemic1.exercise_input) annotation (Line(points=
+                {{-77,46},{-28,46},{-28,36}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=300,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end tree_auto_allRegulations_Exercise;
     end Experiments;
 
     partial model CVS_7af
