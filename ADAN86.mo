@@ -1567,7 +1567,7 @@ public
 
         Real k_phi = C / (V_max - V_n_phi) "For Pstras non-linear PV characteristics";
         Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras";
-        Physiolibrary.Types.Volume V_n_phi = V_n * (1 - settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi";
+        Physiolibrary.Types.Volume V_n_phi = V_n * (1 - settings.tissuesCompliance_PhiEffect*(phi - settings.phi0))/exp(exercise*settings.exercise_factor_on_arterial_compliance) "Linearly dependent on phi";
         Physiolibrary.Types.Volume V_us_phi = V_us * (1 - settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi";
 
       //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
@@ -14314,7 +14314,6 @@ public
         inner Physiolibrary.Types.Pressure thoracic_pressure;
         inner Physiolibrary.Types.Fraction phi "a systemic acitvation fraction, 1 being maximal possible. Normal resting is believed to be 1/4 of the maximum (0.25)";
         inner Physiolibrary.Types.Fraction Exercise;
-        parameter Physiolibrary.Types.Fraction phi0 = 0.25;
 
         parameter Boolean UseThoracic_PressureInput = false annotation(choices(checkBox=true));
         parameter Boolean UsePhi_Input = false annotation(choices(checkBox=true));
@@ -14374,12 +14373,15 @@ public
         Physiolibrary.Types.RealIO.PressureInput exercise_input=Exercise if            UseExerciseInput
           annotation (Placement(transformation(extent={{-320,-90},{-280,-50}}),
               iconTransformation(extent={{-40,60},{0,100}})));
+        outer Settings settings annotation (Placement(transformation(extent={{
+                  -318,180},{-298,200}})));
+
       equation
         if not UseThoracic_PressureInput then
           thoracic_pressure = 0;
         end if;
         if not UsePhi_Input then
-          phi = phi0;
+          phi = settings.phi0;
         end if;
         if not UseTiltInput then
           Tilt = 0;
@@ -15237,8 +15239,6 @@ public
           C(displayUnit="m3/Pa") = 7e-10,
           R(displayUnit="(Pa.s)/m3") = 2e8)
           annotation (Placement(transformation(extent={{60,74},{80,78}})));
-        outer Settings settings annotation (Placement(transformation(extent={{
-                  -318,180},{-298,200}})));
       equation
 
         connect(internal_iliac_T1_R218.port_b,internal_iliac_vein_T1_R30.port_a) annotation (Line(points={{55,29.5},
@@ -17011,7 +17011,7 @@ public
         Physiolibrary.Types.RealIO.FractionInput phi if UsePhiInput
           annotation (Placement(transformation(extent={{-120,50},{-80,90}}),
               iconTransformation(extent={{-120,40},{-80,80}})));
-        Physiolibrary.Types.Constants.FractionConst phi0(k=0.25) if not UsePhiInput
+        Physiolibrary.Types.Constants.FractionConst phi0(k=settings.phi0) if not UsePhiInput
           annotation (Placement(transformation(extent={{-88,82},{-80,90}})));
         outer Settings settings
           annotation (Placement(transformation(extent={{40,80},{60,100}})));
@@ -17108,11 +17108,11 @@ public
 
         parameter HydraulicElastance Essept0 = 6499999676.0309, Esrv0= 77993596.637775, Eslv0=383941811.27772;
 
-        parameter Physiolibrary.Types.Volume VS0sept = 1e-3 "Volume Threshold for linear Frank-starling effect";
-        parameter Physiolibrary.Types.Volume VS0lv = 1e-3 "Volume Threshold for linear Frank-starling effect";
-        parameter Physiolibrary.Types.Volume VS0rv = 1e-3 "Volume Threshold for linear Frank-starling effect";
+      //   parameter Physiolibrary.Types.Volume VS0sept = 1e-3 "Volume Threshold for linear Frank-starling effect";
+      //   parameter Physiolibrary.Types.Volume VS0lv = 1e-3 "Volume Threshold for linear Frank-starling effect";
+      //   parameter Physiolibrary.Types.Volume VS0rv = 1e-3 "Volume Threshold for linear Frank-starling effect";
 
-        parameter Real Escale = 1;
+      //   parameter Real Escale = 1;
         Physiolibrary.Types.Fraction PhiEffect = (1 + alphaE*(phi - phi0));
 
         HydraulicElastance Essept = Essept0*PhiEffect;
@@ -17122,20 +17122,20 @@ public
         // HydraulicElastance Esrv = Esrv0*(1 + alphaE*(phi - phi0))*(1 + (Escale*Vrv/VS0rv-1)*(tanh(Vrv/VS0rv-2)+1)/2);
         // HydraulicElastance Eslv = Eslv0*(1 + alphaE*(phi - phi0))*(1 + (Escale*Vlv/VS0lv-1)*(tanh(Vlv/VS0lv-2)+1)/2)
         //   "elastance of systole";
-        parameter Real A=1;
+        parameter Real A=1 "Multiplier of driving function";
         Real B= 60/HP;
         // Real CC=HP*SystolicFraction;
         Real CC=HP*ts;
-        parameter Physiolibrary.Types.Fraction SystolicFraction = 0.5;
+      //  parameter Physiolibrary.Types.Fraction SystolicFraction = 0.5;
           Time tm;
           discrete Time HP "heart period";
           discrete Time t0 "time of beginning of the cardiac cycle";
           discrete Time ts "duration of systole";
           Time td = HP - ts "duration of diastole";
-          parameter Real lambdas= 435000;
-          parameter Real lambdarv = 23000;
-          parameter Real lambdalv = 33000;
-          parameter Real lambdaperi = 30000;
+          parameter Real lambdas= 435000 "Lambda of septum [1/m3]";
+          parameter Real lambdarv = 23000 "Lambda of RV [1/m3]";
+          parameter Real lambdalv = 33000 "Lambda of LV [1/m3]";
+          parameter Real lambdaperi = 30000 "Lambda of pericardium [1/m3]";
         Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a rvflow annotation (
            Placement(transformation(extent={{-48,20},{-28,40}}),
               iconTransformation(extent={{-12,90},{8,110}})));
@@ -17155,10 +17155,10 @@ public
                                  annotation (Placement(transformation(extent={{-80,-100},
                   {-40,-60}}),          iconTransformation(extent={{-100,60},{-60,100}})));
         Physiolibrary.Types.Fraction phi0 = 0.25;
-        parameter Physiolibrary.Types.Fraction alphaE = 0 "linear dependency of elastance on phi";//2.5;
+        parameter Physiolibrary.Types.Fraction alphaE = 0 "linear dependency of elastances (Essept, Esrv, Eslv) on phi";
         Physiolibrary.Types.Pressure Prv = rvflow.pressure - Pperi;
         Physiolibrary.Types.Pressure Plv = lvflow.pressure - Pperi;
-        parameter Physiolibrary.Types.Fraction alphaDriving = 0;
+        parameter Physiolibrary.Types.Fraction alphaDriving = 0 "Experimental sensitivity of driving funtion on phi";
         Real driving = (1 + alphaDriving*(phi - phi0))*A*exp(-B*(tm - CC)^2) "Linear dependency of driving on phi";
 
         Modelica.Blocks.Interfaces.BooleanOutput
@@ -17173,6 +17173,8 @@ public
                   Physiolibrary.Types.Volume SV_RV;
                   Physiolibrary.Types.VolumeFlowRate CO_LV = SV_LV/HP;
                   Physiolibrary.Types.VolumeFlowRate CO_RV = SV_RV/HP;
+                  parameter Time ts_a1 = 0.1 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
+                  parameter Real ts_a2 = 0.2 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
       equation
         //timing
         tm = time - pre(t0);
@@ -17180,7 +17182,7 @@ public
           HP = 1/HR;
           t0 = time;
           //    ts = 0.16 + 0.3*HP;
-          ts = 0.1 + 0.2*HP "Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
+          ts = ts_a1 + ts_a2*HP "Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
           EDV_LV = Vlv;
           EDV_RV = Vrv;
         end when;
@@ -17380,7 +17382,8 @@ public
       parameter Pressure tissues_nominal_arterioles_pressure=13332.2387415
                                                                    "Nominal arterial pressure for initialization and calculation of arterioles resistance" annotation(Dialog(group = "Arteries"));
       parameter Boolean arteries_UseVasoconstrictionEffect=false "Change compliance of large arteries by phi and exercise" annotation(choices(checkBox=true), Dialog(group = "Arteries"));
-      parameter Fraction exercise_factor_on_arterial_compliance = 0 "Effect of venoconstriction";
+      parameter Fraction exercise_factor_on_arterial_compliance = 0 "Effect of venoconstriction"  annotation(Dialog(group = "Arteries", enable = arteries_UseVasoconstrictionEffect));
+
       parameter Fraction R_vc = 0 "Effect fraction of venoconstriction on compliance" annotation(Dialog(group = "Arteries", enable = arteries_UseVasoconstrictionEffect));
 
     // tissues
@@ -17399,6 +17402,7 @@ public
       parameter Boolean tissues_UseStraighteningReaction2Phi = false "Use V_n dependency on phi (instead of V_u and V_max as used in Pstras)" annotation(choices(checkBox=true), Dialog(group = "Tissues"));
     //  parameter Boolean UseNonLinear_TissuesCompliance_PhiEffect = false annotation(choices(checkBox=true), Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
       parameter Fraction tissuesCompliance_PhiEffect = 0 "Effect on tissue's compliance" annotation(Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
+      parameter Fraction exercise_factor_on_tissue_compliance = 0 "Effect of venoconstriction"  annotation(Dialog(group = "Tissues", enable = UseNonLinear_TissuesCompliance));
 
       parameter Fraction tissues_gamma=1   "Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv)"
         annotation (Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
@@ -25700,6 +25704,47 @@ public
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end tree_auto_allRegulations_Exercise;
+
+      model tree_auto_allRegulations_Exercise_compliance
+        extends tree_autonomic_base(settings(
+            arteries_UseVasoconstrictionEffect=true,
+            exercise_factor_on_arterial_compliance=1,
+            R_vc=0.2,
+            Ra_factor=0.2,
+            tissues_Ra_tau(displayUnit="s") = 1e-3,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=1,
+            exercise_factor(displayUnit="1") = 10,
+            veins_UsePhiEffect=true),
+          Systemic1(
+            UseExerciseInput=true,
+            anterior_tibial_T3_R230(UseExercise=true),
+            posterior_tibial_T4_R236(UseExercise=true),
+            posterior_tibial_T4_L214(UseExercise=true),
+            anterior_tibial_T3_L208(UseExercise=true),
+            profundus_T2_R224(UseExercise=true),
+            profundus_T2_L202(UseExercise=true)),
+          condHR(disconnected=false),
+          condPhi(disconnected=false));
+      Modelica.Blocks.Sources.Trapezoid Exercfise(
+          amplitude=1,
+          rising=200,
+          width=20,
+          falling=2,
+          period=500,
+          nperiod=1,
+          offset=0,
+          startTime=5)
+          annotation (Placement(transformation(extent={{-98,36},{-78,56}})));
+      equation
+        connect(Exercfise.y, Systemic1.exercise_input) annotation (Line(points=
+                {{-77,46},{-28,46},{-28,36}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=300,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end tree_auto_allRegulations_Exercise_compliance;
     end Experiments;
 
     partial model CVS_7af
