@@ -1422,7 +1422,12 @@ public
                 smooth=Smooth.Bezier,
                 thickness=0.5,
                 visible = DynamicSelect(true, LimitBackflow))}),                 Diagram(coordinateSystem(extent={{-100,
-                  -20},{100,20}})));
+                  -20},{100,20}})),
+            experiment(
+              StopTime=3,
+              Interval=0.001,
+              Tolerance=1e-05,
+              __Dymola_Algorithm="Cvode"));
       end bg_base;
 
       partial model bg_vessel
@@ -1455,6 +1460,7 @@ public
        parameter Modelica.SIunits.Radius r = 1e-3 "Vessel radius" annotation (Dialog(tab = "General", group = "Vessel properties"));
 
         parameter Modelica.SIunits.Thickness h = r*(a*exp(b*r)+c*exp(d*r)) "Thickness" annotation (Dialog(tab = "General", group = "Vessel properties"));
+
 
         parameter Physiolibrary.Types.HydraulicInertance I = rho*l/(Modelica.Constants.pi*(r)^2) annotation (Dialog(tab = "General", group = "Calculated parameters"));
         parameter Physiolibrary.Types.HydraulicCompliance C = 2*Modelica.Constants.pi*(r^3) *l/(E*h) annotation (Dialog(tab = "General", group = "Calculated parameters", enable = not UseNonLinearCompliance));
@@ -1543,12 +1549,12 @@ public
       partial model systemic_tissue_base
         extends ADAN_main.Components.Vessel_modules.Interfaces.bg_base(UseInertance = false, volume(start = V_n, fixed = false));
 
-        parameter Real I(unit = "J.s2.m-6");
-        parameter Real C(unit = "m6.J-1");
-        parameter Real Ra(unit="J.s.m-6") "Arteriole resistance";
-        Real Rvis(unit="J.s.m-6") "Elastic viscosity using Voigt model of in-series resistance";
-        Real I_e(unit = "J.s2.m-6");
-        parameter Real Rv(unit="J.s.m-6") "venule resistance";
+        parameter Physiolibrary.Types.HydraulicInertance I;
+        parameter Physiolibrary.Types.HydraulicCompliance C;
+        parameter Physiolibrary.Types.HydraulicResistance Ra "Arteriole resistance";
+        Physiolibrary.Types.HydraulicResistance Rvis "Elastic viscosity using Voigt model of in-series resistance";
+        Physiolibrary.Types.HydraulicInertance I_e;
+        parameter Physiolibrary.Types.HydraulicResistance Rv "venule resistance";
 
         parameter Physiolibrary.Types.Volume zpv = 0 "Zero-pressure volume";
         parameter Physiolibrary.Types.Pressure nominal_pressure = settings.tissues_nominal_pressure;
@@ -1558,7 +1564,7 @@ public
 
         Physiolibrary.Types.Pressure u_out_hs "Output pressure including the hydrostatic pressure";
 
-        // Physiolibrary.Types.HydraulicResistance Ra_phi_inf = Ra*exp((phi-phi0)*settings.Ra_factor)/exp(exercise*settings.exercise_factor) "Arterioles resistance dependent on phi";
+        // Physiolibrary.Types.HydraulicResistancse Ra_phi_inf = Ra*exp((phi-phi0)*settings.Ra_factor)/exp(exercise*settings.exercise_factor) "Arterioles resistance dependent on phi";
         Physiolibrary.Types.HydraulicResistance Ra_phi_inf = Ra
             *(1 + (phi - 0.25)*settings.Ra_factor)
             /(1 + exercise*settings.exercise_factor) "Arterioles resistance dependent on phi and exercise";
@@ -1587,7 +1593,11 @@ public
       //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
       //       *(phi - phi0)) "Nonlinear compliance unstressed volume affected by phi";
 
-      Physiolibrary.Types.VolumeFlowRate q_mc = Rv*exercise*settings.exercise_venous_pumping_factor*v_out "Flow  given by muscle contractions during exercise";
+      parameter Boolean UseMuscleVenousPump = false;
+      parameter Physiolibrary.Types.VolumeFlowRate nominalFlow = ((settings.tissues_nominal_pressure - settings.tissues_nominal_venules_pressure)/Rv) "Backcalculated nominal flow";
+      Physiolibrary.Types.VolumeFlowRate q_mc = if UseMuscleVenousPump then
+          nominalFlow*exercise*settings.exercise_venous_pumping_factor
+          else 0 "Flow given by muscle contractions during exercise is proportional to Rv";
 
       initial equation
       //  volume = nominal_pressure*C + zpv;
@@ -1603,9 +1613,9 @@ public
               der(v_in) =(u_in - u - Ra_phi*v_in)/I;
               der(v_out) =(u - u_out_hs - Rv_phi*(v_out - q_mc))/I_e;
             else
-              0 =(u_in - u - Ra_phi *v_in);
+              0 = u_in - u - Ra_phi *(v_in - q_mc);
               0 =(u - u_out_hs - Rv_phi *(v_out - q_mc));
-              // u - u_out_hs + q_mc = v_out;
+              // (u - u_out_hs)/Rv + q_mc = v_out;
             end if;
 
             der(volume) = (v_in-v_out);
@@ -25708,17 +25718,19 @@ public
 
       model tree_auto_allRegulations_Exercise
         extends tree_phi_base(settings(
-            arteries_UseVasoconstrictionEffect=true,
-            R_vc=0.2,
-            Ra_factor=0.3,
+            heart_alphaE(displayUnit="1") = 4,
+            tissues_nominal_arterioles_pressure(displayUnit="mmHg"),
+            arteries_UseVasoconstrictionEffect=false,
+            R_vc=0,
+            Ra_factor=0.1,
             tissues_Ra_tau(displayUnit="s") = 1e-3,
-            Rv_factor=0.3,
+            Rv_factor=settings.Ra_factor,
             UseNonLinear_TissuesCompliance=true,
             tissues_UseStraighteningReaction2Phi=true,
             tissuesCompliance_PhiEffect=0.6,
             exercise_factor_on_tissue_compliance=1,
-            exercise_factor(displayUnit="%") = 1,
-            exercise_venous_pumping_factor=0,
+            exercise_factor(displayUnit="%") = 10,
+            exercise_venous_pumping_factor=0.2,
             tissues_nominal_venules_pressure=1066.57909932,
             veins_UsePhiEffect=true),
           Systemic1(
@@ -25726,10 +25738,10 @@ public
             UseExerciseInput=true,
             anterior_tibial_T3_R230(UseExercise=true),
             posterior_tibial_T4_R236(UseExercise=true),
-            posterior_tibial_T4_L214(UseExercise=true),
-            anterior_tibial_T3_L208(UseExercise=true),
+            posterior_tibial_T4_L214(UseExercise=true, UseMuscleVenousPump=true),
+            anterior_tibial_T3_L208(UseExercise=true, UseMuscleVenousPump=true),
             profundus_T2_R224(UseExercise=true),
-            profundus_T2_L202(UseExercise=true),
+            profundus_T2_L202(UseExercise=true, UseMuscleVenousPump=true),
             profunda_femoris_vein_T2_R40(
               UseOuter_external_pressure=true,
               LimitBackflow=true,
@@ -25783,10 +25795,10 @@ public
           startTime=40)
           annotation (Placement(transformation(extent={{-100,50},{-80,70}})));
       Modelica.Blocks.Sources.Trapezoid LegMuscleContractions(
-          amplitude=40000,
-          rising=0.1,
-          width=0.2,
-          falling=0.1,
+          amplitude=80000,
+          rising=0.15,
+          width=0.1,
+          falling=0.15,
           period=1,
           nperiod=-1,
           offset=0,
