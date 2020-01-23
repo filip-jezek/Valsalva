@@ -1,9 +1,7 @@
-*/__pycache__/*
-/__pycache__/*
-*/.vscode/*
-/.vscode/*
-/scripts/~FMUOutput/*
-/~FMUOutput/*
+__pycache__/
+.vscode/
+~FMUOutput/
+Resources/
 /*.mat
 *.exe
 *.fmu
@@ -24,3 +22,5 @@ dsmodel.c
 /request
 /status
 *.asv
+/Identification/status
+/Identification/success

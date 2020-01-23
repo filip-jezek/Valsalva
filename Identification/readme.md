@@ -23,7 +23,7 @@
 * 2nd column of the data struct means the value
 
 ** Objective function **
-The objective function (`cost-function.py` by default) and takes the results filename as an argument
+The objective function (`cost-function.py` by default) and takes dict of variables names and numpy.ndarray
 
 ** Varying the objective function **
 The file in the Template section in the command might be changed and it still should be copied with rename automatically, thus we can easily switch between different cost objectives.
