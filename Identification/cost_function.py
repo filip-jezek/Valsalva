@@ -13,12 +13,12 @@ def WriteCost(vars_set):
 
 def calculateCost(vars_set):
 
-    Pa = vars_set['Systemic1.aortic_arch_C2.port_a.pressure']
-    
-    interval = findInterval(280, 300, vars_set['time'])
+    # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
+    Pa = vars_set['Pa']
+    interval = findInterval(380, 400, vars_set['time'])
     Pa_avg = sum(Pa[interval]) / len(interval)
 
-    cost = Pa_avg - 100*133.32
+    cost = (Pa_avg - 100*133.32)**2
 
     return cost
 # // write the outputfiles

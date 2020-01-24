@@ -16675,9 +16675,11 @@ public
           annotation (Placement(transformation(extent={{-69,-87},{-49,-82}})));
 
         replaceable SystemicTissueParameters.SystemicTissueParameters_Calculated
-          tissueParameters(
-              total_zpv=0.0027,
-              stressed_volume=0.0004,
+            tissueParameters(
+          tissue_pressure=settings.tissues_nominal_pressure,
+          arterioles_pressure=settings.tissues_nominal_arterioles_pressure,
+          venules_pressure=settings.tissues_nominal_venules_pressure,
+          cardiac_output=settings.tissues_nominal_cardiac_output,
               qf_posterior_tibial_T4_R236=1) constrainedby
           SystemicTissueParameters.SystemicTissueParameters annotation (
             Placement(transformation(extent={{-140,-98},{-120,-78}})),
@@ -25049,7 +25051,10 @@ public
             rising=200,
             width=50,
             period=1000,
-            startTime=50));
+            startTime=50),
+          settings(
+              tissues_nominal_zpv=0.0027,
+              tissues_nominal_stressed_volume=0.0004));
       equation
         connect(phi.y, condPhi.u) annotation (Line(points={{-49,4},{-38,4},{-38,
                 4.00002},{-27.2,4.00002}}, color={0,0,127}));
@@ -26717,6 +26722,58 @@ public
           Tolerance=1e-05,
           __Dymola_Algorithm="Cvode"));
     end Lumped_simple;
+
+    package Identification
+      model simple_phi_base
+        extends CVS_7af(
+          redeclare Components.Smith.PulmonarySmith pulmonaryComponent(
+              UseThoracic_PressureInput=true),
+          redeclare Components.Smith.HeartSmith heartComponent(UseFrequencyInput=
+                true, UseThoracicPressureInput=true),
+          redeclare Components.AdanVenousRed.Systemic_simplest Systemic1(
+            UseThoracic_PressureInput=true,
+            UsePhi_Input=true,
+            baroreflex(resetAt=-1,
+              fsn=0.025,
+              g=1.0),
+            baroreceptor_aortic(epsilon_start=1.19, delta0=0.3),
+            baroreceptor_carotid(epsilon_start=1.06, s_start=0.96),
+            ascending_aorta_B(
+              UseInertance=false,
+              UseVasoconstrictionEffect=false,
+              l(displayUnit="m") = 2.5),
+            inferior_vena_cava_C8(
+              l=2.5,
+              r(displayUnit="mm") = 0.008,
+              compliant_vessel(tau(displayUnit="d") = 604800))),
+          phi(
+            amplitude=0.74,
+            rising=200,
+            width=50,
+            period=1000,
+            startTime=50),
+          settings(
+              tissues_nominal_zpv=0.0027,
+              tissues_nominal_stressed_volume=0.0004,
+            heart_alphaE=3,
+            Rv_factor=1,
+            UseNonLinear_TissuesCompliance=true,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=1));
+            output Physiolibrary.Types.Pressure Pa = Systemic1.ascending_aorta_B.u_C;
+      equation
+        connect(Systemic1.phi_baroreflex, condHR.u) annotation (Line(points={{-27.4,
+                45.4},{7.3,45.4},{7.3,60},{40.8,60}},
+                                                color={0,0,127}));
+        connect(Systemic1.phi_baroreflex, condPhi.u) annotation (Line(points={{-27.4,45.4},
+                {-27.4,24.7},{-27.2,24.7},{-27.2,4.00002}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=400,
+            Interval=0.11,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end simple_phi_base;
+    end Identification;
   annotation(preferredView="info",
   version="2.3.2-beta",
   versionBuild=1,
