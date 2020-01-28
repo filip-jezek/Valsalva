@@ -1311,7 +1311,9 @@ type"),         Text(
         outer Physiolibrary.Types.Pressure outer_pressure;
         parameter Physiolibrary.Types.Fraction thoracic_pressure_ratio=1 annotation (Dialog(enable=UseOuter_thoracic_pressure));
 
-        parameter Boolean UseExercise = false;
+        parameter Boolean UseExercise = false annotation(choices(checkBox=true));
+        parameter Physiolibrary.Types.Fraction exercise_ratio=1 annotation (Dialog(enable=UseExercise));
+
         outer Physiolibrary.Types.Fraction Exercise;
         Physiolibrary.Types.Fraction exercise;
 
@@ -1355,7 +1357,7 @@ public
         constant Physiolibrary.Types.VolumeFlowRate unitFlow=1;
       equation
        if UseExercise then
-         exercise = Exercise;
+         exercise = Exercise*exercise_ratio;
        else
          exercise = 0;
        end if;
@@ -1650,7 +1652,13 @@ public
                 lineThickness=0.5,
                 fillColor={244,125,35},
                 fillPattern=FillPattern.Solid,
-                pattern=LinePattern.None)}), Documentation(info="<html>
+                pattern=LinePattern.None),
+              Text(
+                extent={{-40,20},{40,40}},
+                lineColor={0,0,0},
+                textString="%exercise_ratio%",
+                visible=DynamicSelect(false, UseExercise and not exercise_ratio == 1))}),
+                                             Documentation(info="<html>
 <p>When <span style=\"font-family: Courier New;\">UseNonLinearCompliance</span> is true, then this formula is applied (from <span style=\"font-family: Courier New; color: #006400;\">Pstras, Math Med Biol 2017,&nbsp;10.1093/imammb/dqw008):</span></p>
 <p><img src=\"modelica://ADAN_main/Resources/tissuePV.png\"/></p>
 <p>Otherwise, the linear (green) relation is used instead.</p>
@@ -17057,7 +17065,7 @@ public
               rotation=180,
               origin={70,-20})));
         Smith_VentricularInteraction_flat smith_VentricularInteraction_flat(alphaE=
-              settings.heart_alphaE)
+              settings.heart_alphaE, gammaE=settings.gammaE)
           annotation (Placement(transformation(extent={{-14,-10},{16,28}})));
         Physiolibrary.Types.RealIO.FractionInput phi if UsePhiInput
           annotation (Placement(transformation(extent={{-120,50},{-80,90}}),
@@ -25642,9 +25650,10 @@ public
           condHR(disconnected=false),
           phi(amplitude=0.9, offset=0.1));
         Components.ConditionalConnection condHR2(disconnectedValue=0.25,
-            disconnected=true) annotation (Placement(transformation(extent={{34,
+            disconnected=false)
+                               annotation (Placement(transformation(extent={{34,
                   37.2592},{46,47.9259}})));
-        inner Components.Settings settings(heart_alphaE=2)
+        inner Components.Settings settings(heart_alphaE=1)
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
       equation
         connect(condHR2.u, phi.y) annotation (Line(points={{32.8,42},{6,42},{6,
@@ -25653,9 +25662,9 @@ public
                 {50,42},{50,-16},{-12,-16}},     color={0,0,127}));
         annotation (experiment(
             StopTime=300,
-            Interval=0.06,
+            Interval=0.02,
             Tolerance=1e-06,
-            __Dymola_Algorithm="Dassl"));
+            __Dymola_Algorithm="Cvode"));
       end heartRig_smith_phi;
 
       model tree_tilt_base
@@ -25723,7 +25732,7 @@ public
 
       model tree_auto_allRegulations_Exercise
         extends tree_phi_base(settings(
-            heart_alphaE(displayUnit="1") = 4,
+            heart_alphaE(displayUnit="1") = 1,
             tissues_nominal_arterioles_pressure(displayUnit="mmHg"),
             arteries_UseVasoconstrictionEffect=false,
             R_vc=0,
@@ -25743,23 +25752,23 @@ public
             UseExerciseInput=true,
             anterior_tibial_T3_R230(UseExercise=true),
             posterior_tibial_T4_R236(UseExercise=true),
-            posterior_tibial_T4_L214(UseExercise=true, UseMuscleVenousPump=true),
-            anterior_tibial_T3_L208(UseExercise=true, UseMuscleVenousPump=true),
+            posterior_tibial_T4_L214(UseExercise=true),
+            anterior_tibial_T3_L208(UseExercise=true),
             profundus_T2_R224(UseExercise=true),
-            profundus_T2_L202(UseExercise=true, UseMuscleVenousPump=true),
+            profundus_T2_L202(UseExercise=true),
             profunda_femoris_vein_T2_R40(
-              UseOuter_external_pressure=true,
-              LimitBackflow=true,
+              UseOuter_external_pressure=false,
+              LimitBackflow=false,
               G_off(displayUnit="ml/(mmHg.min)") = 1.2501026264094e-10,
               Pknee(displayUnit="Pa") = 10),
             anterior_tibial_vein_T4_R50(
-              UseOuter_external_pressure=true,
-              LimitBackflow=true,
+              UseOuter_external_pressure=false,
+              LimitBackflow=false,
               G_off(displayUnit="ml/(mmHg.min)") = 1.2501026264094e-10,
               Pknee(displayUnit="Pa") = 10),
             posterior_tibial_vein_T6_R54(
-              UseOuter_external_pressure=true,
-              LimitBackflow=true,
+              UseOuter_external_pressure=false,
+              LimitBackflow=false,
               G_off(displayUnit="ml/(mmHg.min)") = 1.2501026264094e-10,
               Pknee(displayUnit="Pa") = 10),
             posterior_tibial_vein_T6_L84(
@@ -25784,7 +25793,14 @@ public
             popliteal_vein_L78(UseOuter_external_pressure=false, LimitBackflow=
                   false),
             popliteal_vein_R48(UseOuter_external_pressure=false, LimitBackflow=
-                  false)),
+                  false),
+            radial_T1_R44(UseExercise=true, exercise_ratio=0.4),
+            ulnar_T2_R42(UseExercise=true, exercise_ratio=0.4),
+            ulnar_T2_L90(UseExercise=true, exercise_ratio=0.4),
+            radial_T1_L92(UseExercise=true, exercise_ratio=0.4),
+            cardiac_tissue(UseExercise=true),
+            internal_iliac_T1_R218(UseExercise=true, exercise_ratio=0.4),
+            internal_iliac_T1_L196(UseExercise=true, exercise_ratio=0.4)),
           condHR(disconnected=false),
           condPhi(disconnected=false),
           phi(amplitude=0.75),
@@ -25878,9 +25894,6 @@ public
         UsePhi_Input=true,
         redeclare model Systemic_vein =
             ADAN_main.Components.Vessel_modules.vp_type_tension_based,
-        redeclare
-          Components.AdanVenousRed.SystemicTissueParameters.SystemicTissueParameters_Calculated
-          tissueParameters,
         femoral_vein_R34(LimitBackflow=true),
         femoral_vein_L64(LimitBackflow=true),
         superior_vena_cava_C88(UseOuter_thoracic_pressure=true),
@@ -26769,7 +26782,7 @@ public
                 {-27.4,24.7},{-27.2,24.7},{-27.2,4.00002}}, color={0,0,127}));
         annotation (experiment(
             StopTime=400,
-            Interval=0.11,
+            Interval=0.03,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end simple_phi_base;
