@@ -17074,7 +17074,60 @@ public
           annotation (Placement(transformation(extent={{-88,82},{-80,90}})));
         outer Settings settings
           annotation (Placement(transformation(extent={{40,80},{60,100}})));
+
+        // Modelica.Blocks.Interfaces.BooleanOutput
+        //                       beat = tm >= pre(HP)
+        //                          annotation (Placement(transformation(extent={{-28,-120},
+        //           {12,-80}}),           iconTransformation(extent={{-60,-80},{-100,-40}})));
+                   Physiolibrary.Types.Volume ESV_LV;
+                   Physiolibrary.Types.Volume ESV_RV;
+                   Physiolibrary.Types.Volume EDV_LV;
+                   Physiolibrary.Types.Volume EDV_RV;
+                   Physiolibrary.Types.Volume SV_LV;
+                   Physiolibrary.Types.Volume SV_RV;
+                   Boolean ac_rv(start=false) "antichatter for RV. When true, prevents calculation of ESV until the next beat";
+                   Boolean ac_lv(start=false) "antichatter for LV. When true, prevents calculation of ESV until the next beat";
+                   Physiolibrary.Types.VolumeFlowRate CO_LV = SV_LV/smith_VentricularInteraction_flat.HP;
+                   Physiolibrary.Types.VolumeFlowRate CO_RV = SV_RV/smith_VentricularInteraction_flat.HP;
       equation
+
+      //    when tricuspidValve.open then
+      //      ESV_RV = smith_VentricularInteraction_flat.Vrv;
+      //      SV_RV = EDV_RV - ESV_RV;
+      //      ac_rv = false;
+      //    end when;
+
+         // double condition to avoid chatter
+         when {tricuspidValve.open, (not pre(ac_rv) and pulmonaryValve.open)} then
+            if pulmonaryValve.open then
+             ESV_RV = pre(ESV_RV);
+             SV_RV = pre(SV_RV);
+             EDV_RV = smith_VentricularInteraction_flat.Vrv;
+             ac_rv = true;
+            else
+             ESV_RV = smith_VentricularInteraction_flat.Vrv;
+             SV_RV = EDV_RV - ESV_RV;
+             EDV_RV = pre(EDV_RV);
+             ac_rv = false;
+            end if;
+         end when;
+
+         // double condition to avoid chatter
+         when {mitralValve.open, (not pre(ac_lv) and aorticValve.open)} then
+            if aorticValve.open then
+             ESV_LV = pre(ESV_LV);
+             SV_LV = pre(SV_LV);
+             EDV_LV = smith_VentricularInteraction_flat.Vlv;
+             ac_lv = true;
+            else
+             ESV_LV = smith_VentricularInteraction_flat.Vlv;
+             SV_LV = EDV_LV - ESV_LV;
+             EDV_LV = pre(EDV_LV);
+             ac_lv = false;
+            end if;
+         end when;
+
+
         connect(Lav.q_out,aorticValve. q_in) annotation (Line(
             points={{-54,-20},{-68,-20}},
             color={0,0,0},
@@ -17164,6 +17217,8 @@ public
         Pressure Psept, Pperi;
         parameter Pressure Pi0sept=148.00118226939, Pi0rv=28.757638965416, Pi0lv=16.038683206025, Pi0peri=66.701190423724
           "peak isovolumic pressure";
+        Pressure Pirv = Pi0rv*PhiEffect_passEl;
+        Pressure Pilv = Pi0lv*PhiEffect_passEl;
 
         parameter HydraulicElastance Essept0 = 6499999676.0309, Esrv0= 77993596.637775, Eslv0=383941811.27772;
 
@@ -17172,11 +17227,15 @@ public
       //   parameter Physiolibrary.Types.Volume VS0rv = 1e-3 "Volume Threshold for linear Frank-starling effect";
 
       //   parameter Real Escale = 1;
-        Physiolibrary.Types.Fraction PhiEffect = (1 + alphaE*(phi - phi0));
+        Physiolibrary.Types.Fraction PhiEffect_activeEl=(1 + alphaE*(phi - phi0))
+          "Effect of Phi on active elastances, i.e. decreasing ESV";
+        Physiolibrary.Types.Fraction PhiEffect_passEl=(1 - gammaE*(phi - phi0))
+          "Effect of Phi on passiveElastances, i.e. increasing EDV";
 
-        HydraulicElastance Essept = Essept0*PhiEffect;
-        HydraulicElastance Esrv = Esrv0*PhiEffect;
-        HydraulicElastance Eslv = Eslv0*PhiEffect    "elastance of systole";
+
+        HydraulicElastance Essept=Essept0*PhiEffect_activeEl;
+        HydraulicElastance Esrv=Esrv0*PhiEffect_activeEl;
+        HydraulicElastance Eslv=Eslv0*PhiEffect_activeEl "elastance of systole";
         // HydraulicElastance Essept = Essept0*(1 + alphaE*(phi - phi0))*(1 + (Escale*Vsept/VS0sept-1)*(tanh(Vsept/VS0sept-2)+1)/2);
         // HydraulicElastance Esrv = Esrv0*(1 + alphaE*(phi - phi0))*(1 + (Escale*Vrv/VS0rv-1)*(tanh(Vrv/VS0rv-2)+1)/2);
         // HydraulicElastance Eslv = Eslv0*(1 + alphaE*(phi - phi0))*(1 + (Escale*Vlv/VS0lv-1)*(tanh(Vlv/VS0lv-2)+1)/2)
@@ -17184,7 +17243,7 @@ public
         parameter Real A=1 "Multiplier of driving function";
         Real B= 60/HP;
         // Real CC=HP*SystolicFraction;
-        Real CC=HP*ts;
+        Real CC=ts/2;
       //  parameter Physiolibrary.Types.Fraction SystolicFraction = 0.5;
           Time tm;
           discrete Time HP "heart period";
@@ -17214,9 +17273,13 @@ public
                                  annotation (Placement(transformation(extent={{-80,-100},
                   {-40,-60}}),          iconTransformation(extent={{-100,60},{-60,100}})));
         Physiolibrary.Types.Fraction phi0 = 0.25;
-        parameter Physiolibrary.Types.Fraction alphaE = 0 "linear dependency of elastances (Essept, Esrv, Eslv) on phi";
+        parameter Physiolibrary.Types.Fraction alphaE(min = 0, max = 4) = 0 "linear dependency of active elastances (Essept, Esrv, Eslv) on phi";
+        parameter Physiolibrary.Types.Fraction gammaE(min = 0, max = 1.33) = 0 "linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi";
+
         Physiolibrary.Types.Pressure Prv = rvflow.pressure - Pperi;
         Physiolibrary.Types.Pressure Plv = lvflow.pressure - Pperi;
+          Physiolibrary.Types.Pressure Plv_passive = (1 - driving)*Pi0lv*(exp(PhiEffect_passEl*lambdalv*(Vlv - Vsept)) - 1);
+
         parameter Physiolibrary.Types.Fraction alphaDriving = 0 "Experimental sensitivity of driving funtion on phi";
         Real driving = (1 + alphaDriving*(phi - phi0))*A*exp(-B*(tm - CC)^2) "Linear dependency of driving on phi";
 
@@ -17224,14 +17287,14 @@ public
                               beat = tm >= pre(HP)
                                  annotation (Placement(transformation(extent={{-28,-120},
                   {12,-80}}),           iconTransformation(extent={{-60,-80},{-100,-40}})));
-                  Physiolibrary.Types.Volume ESV_LV;
-                  Physiolibrary.Types.Volume ESV_RV;
-                  Physiolibrary.Types.Volume EDV_LV;
-                  Physiolibrary.Types.Volume EDV_RV;
-                  Physiolibrary.Types.Volume SV_LV;
-                  Physiolibrary.Types.Volume SV_RV;
-                  Physiolibrary.Types.VolumeFlowRate CO_LV = SV_LV/HP;
-                  Physiolibrary.Types.VolumeFlowRate CO_RV = SV_RV/HP;
+      //             Physiolibrary.Types.Volume ESV_LV;
+      //             Physiolibrary.Types.Volume ESV_RV;
+      //             Physiolibrary.Types.Volume EDV_LV;
+      //             Physiolibrary.Types.Volume EDV_RV;
+      //             Physiolibrary.Types.Volume SV_LV;
+      //             Physiolibrary.Types.Volume SV_RV;
+      //             Physiolibrary.Types.VolumeFlowRate CO_LV = SV_LV/HP;
+      //             Physiolibrary.Types.VolumeFlowRate CO_RV = SV_RV/HP;
                   parameter Time ts_a1 = 0.1 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
                   parameter Real ts_a2 = 0.2 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
       equation
@@ -17242,27 +17305,27 @@ public
           t0 = time;
           //    ts = 0.16 + 0.3*HP;
           ts = ts_a1 + ts_a2*HP "Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
-          EDV_LV = Vlv;
-          EDV_RV = Vrv;
+      //     EDV_LV = Vlv;
+      //     EDV_RV = Vrv;
         end when;
 
-        when time > t0 + ts then
-          ESV_LV = Vlv;
-          ESV_RV = Vrv;
-          SV_LV = EDV_LV - ESV_LV;
-          SV_RV = EDV_RV - ESV_RV;
-        end when;
+      //   when time > t0 + ts then
+      //     ESV_LV = Vlv;
+      //     ESV_RV = Vrv;
+      //     SV_LV = EDV_LV - ESV_LV;
+      //     SV_RV = EDV_RV - ESV_RV;
+      //   end when;
         //  septum
         Psept = lvflow.pressure - rvflow.pressure;
         Psept = (Vsept - V0sept)*driving*Essept +
           (1 - driving)*Pi0sept*(exp(lambdas*Vsept) - 1);
         // rightventricle
         rvflow.pressure - Pperi = (Vrv + Vsept)*driving*Esrv +
-          (1 - driving)*Pi0rv*(exp(lambdarv*(Vrv + Vsept)) - 1);
+          (1 - driving)*Pi0rv*(exp(PhiEffect_passEl*lambdarv*(Vrv + Vsept)) - 1);
         der(Vrv) = rvflow.q;
         //leftventricle
         lvflow.pressure - Pperi = (Vlv - Vsept)*driving*Eslv +
-          (1 - driving)*Pi0lv*(exp(lambdalv*(Vlv - Vsept)) - 1);
+          Plv_passive;
         der(Vlv) = lvflow.q;
         //pericardium
         Vperi = Vrv + Vlv;
@@ -17435,7 +17498,8 @@ public
       parameter Fraction phi0=0.25   "Baseline resting phi";
 
       // HEART
-      parameter Physiolibrary.Types.Fraction heart_alphaE = 0 "linear dependency of active elastance on phi" annotation(Dialog(group = "Heart"));
+      parameter Physiolibrary.Types.Fraction heart_alphaE(min = 0, max = 1.33) = 0 "linear dependency of active elastance on phi" annotation(Dialog(group = "Heart"));
+      parameter Physiolibrary.Types.Fraction gammaE(min = 0, max = 1.33) = 0 "linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi" annotation(Dialog(group = "Heart"));
 
       // arteries
       parameter Pressure tissues_nominal_arterioles_pressure=13332.2387415
