@@ -17850,6 +17850,13 @@ public
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)));
       end HeartRate;
+
+      model HeartRate2
+        extends HeartRate(H0 = HR_nom - H1*phi0, H1 = HR_max - H0);
+        parameter Physiolibrary.Types.Fraction phi0;
+        parameter Physiolibrary.Types.Frequency HR_max = 3;
+        parameter Physiolibrary.Types.Frequency HR_nom = 1;
+      end HeartRate2;
     end Baroreflex;
 
     model Settings
@@ -19814,6 +19821,39 @@ public
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
             coordinateSystem(preserveAspectRatio=false)));
     end Tisues_PVchars;
+
+    model HR2Phi
+      Components.Baroreflex.HeartRate heartRate
+        annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+      Components.Baroreflex.HeartRate2 heartRate2_1(phi0(displayUnit="1") =
+          0.25, HR_max=3.1666666666667)
+        annotation (Placement(transformation(extent={{-60,40},{-40,60}})));
+      replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
+        height=0.75,
+        offset=0.25,
+        startTime=0,
+        duration=1)   constrainedby Modelica.Blocks.Sources.Ramp
+        annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
+      Components.Baroreflex.HeartRate2 HR_BC(phi0=0.0025)
+        annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
+      Modelica.Blocks.Math.InverseBlockConstraints inverseBlockConstraints
+        annotation (Placement(transformation(extent={{-22,-46},{-76,-14}})));
+      Physiolibrary.Types.Constants.FrequencyConst frequency(k=1.3333333333333)
+        annotation (Placement(transformation(extent={{0,-34},{-8,-26}})));
+    equation
+      connect(heartRate2_1.phi, Tilt_ramp.y) annotation (Line(points={{-60,50},
+              {-70,50},{-70,30},{-79,30}}, color={0,0,127}));
+      connect(heartRate.phi, Tilt_ramp.y) annotation (Line(points={{-60,10},{
+              -70,10},{-70,30},{-79,30}}, color={0,0,127}));
+      connect(inverseBlockConstraints.y2, HR_BC.phi)
+        annotation (Line(points={{-71.95,-30},{-60,-30}}, color={0,0,127}));
+      connect(HR_BC.HR, inverseBlockConstraints.u2)
+        annotation (Line(points={{-39.8,-30},{-27.4,-30}}, color={0,0,127}));
+      connect(inverseBlockConstraints.u1, frequency.y)
+        annotation (Line(points={{-19.3,-30},{-9,-30}}, color={0,0,127}));
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)));
+    end HR2Phi;
   end tests;
 
   package Experiments
@@ -25591,7 +25631,16 @@ public
 
       model phi_smithContract
         extends simple_phi_base(
-                            heartComponent(UsePhiInput=true));
+                            heartComponent(UsePhiInput=true),
+          condHR(disconnected=false),
+          settings(
+            heart_alphaE=1,
+            arteries_UseVasoconstrictionEffect=false,
+            UseNonLinear_TissuesCompliance=true,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=0.6,
+            UseNonLinear_VenousCompliance=true),
+          phi(rising=600, width=200));
       equation
         connect(heartComponent.phi, phi.y) annotation (Line(points={{-16,-16},{
                 -8,-16},{-8,-6},{-28,-6},{-28,4},{-49,4}}, color={0,0,127}));
@@ -26204,8 +26253,8 @@ public
         extends tree_phi_base(settings(
             heart_alphaE(displayUnit="1") = 1,
             tissues_nominal_arterioles_pressure(displayUnit="mmHg"),
-            arteries_UseVasoconstrictionEffect=false,
-            R_vc=0,
+            arteries_UseVasoconstrictionEffect=true,
+            R_vc=1,
             Ra_factor=0.1,
             tissues_Ra_tau(displayUnit="s") = 1e-3,
             Rv_factor=settings.Ra_factor,
