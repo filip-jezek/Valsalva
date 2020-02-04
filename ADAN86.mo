@@ -1315,16 +1315,16 @@ type"),         Text(
         parameter Physiolibrary.Types.Fraction exercise_ratio=1 annotation (Dialog(enable=UseExercise));
 
         outer Physiolibrary.Types.Fraction Exercise;
-        Physiolibrary.Types.Fraction exercise;
+        Physiolibrary.Types.Fraction exercise annotation(HideResult = settings.hideLevel1);
 
-        Physiolibrary.Types.Pressure u_in = port_a.pressure;
-        Physiolibrary.Types.VolumeFlowRate v_in = port_a.q;
+        Physiolibrary.Types.Pressure u_in = port_a.pressure  annotation(HideResult = settings.hideLevel0);
+        Physiolibrary.Types.VolumeFlowRate v_in = port_a.q annotation(HideResult = settings.hideLevel0);
 
-        Physiolibrary.Types.Pressure u_out_valved = port_b.pressure if not terminator;
-        Physiolibrary.Types.VolumeFlowRate v_out_valved = port_b.q if not terminator;
+        Physiolibrary.Types.Pressure u_out_valved = port_b.pressure if not terminator  annotation(HideResult = settings.hideLevel0);
+        Physiolibrary.Types.VolumeFlowRate v_out_valved = port_b.q if not terminator annotation(HideResult = settings.hideLevel0);
 
-        Physiolibrary.Types.Pressure u_out;
-        Physiolibrary.Types.VolumeFlowRate v_out;
+        Physiolibrary.Types.Pressure u_out annotation(HideResult = settings.hideLevel0);
+        Physiolibrary.Types.VolumeFlowRate v_out annotation(HideResult = settings.hideLevel0);
 
         Physiolibrary.Types.Volume volume(nominal = 1e-6);
         parameter Physiolibrary.Types.Volume V_min = 0;
@@ -1341,14 +1341,14 @@ public
     annotation (Placement(transformation(extent={{40,0},{60,20}})));
     */
         Real passableVariable(start=0, final unit="1")
-          "Auxiliary variable for actual position on the ideal diode characteristic";
+          "Auxiliary variable for actual position on the ideal diode characteristic" annotation(HideResult = not LimitBackflow);
         parameter Physiolibrary.Types.HydraulicResistance R_on(final min=0, displayUnit="l/(mmHg.min)") = 0
           "Forward state-on conductance (open valve resistance)" annotation (Dialog(enable=LimitBackflow));
         parameter Physiolibrary.Types.HydraulicConductance G_off(final min=0, displayUnit="l/(mmHg.min)") = 1.2501026264094e-12
           "Backward state-off conductance (closed valve conductance)" annotation (Dialog(enable=LimitBackflow));
         parameter Physiolibrary.Types.Pressure Pknee(final min=0) = 0
           "Forward threshold pressure" annotation (Dialog(enable=LimitBackflow));
-        Boolean open(start = true);
+        Boolean open(start = true) annotation(HideResult = settings.hideLevel1);
         Physiolibrary.Types.Pressure dp = u_out - u_out_valved;
         outer Settings settings
           annotation (Placement(transformation(extent={{-80,0},{-60,20}})));
@@ -1436,8 +1436,8 @@ public
         extends bg_base(final terminator=false);
         outer Modelica.SIunits.Angle Tilt;
         outer Physiolibrary.Types.Fraction Exercise;
-        Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure";
-        Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs "Output pressure including the hydrostatic pressure";
+        Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure"  annotation(HideResult = settings.hideLevel1);
+        Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs "Output pressure including the hydrostatic pressure"  annotation(HideResult = settings.hideLevel1);
 
         parameter Boolean UseDistentionOutput = false "Provides relative distention fraction output, otherwise hidden and not calculated" annotation(choices(checkBox=true));
         parameter Boolean CalculateMeans = false "uses additional calculations" annotation(choices(checkBox=true));
@@ -1554,27 +1554,27 @@ public
         parameter Physiolibrary.Types.HydraulicInertance I;
         parameter Physiolibrary.Types.HydraulicCompliance C;
         parameter Physiolibrary.Types.HydraulicResistance Ra "Arteriole resistance";
-        Physiolibrary.Types.HydraulicResistance Rvis "Elastic viscosity using Voigt model of in-series resistance";
-        Physiolibrary.Types.HydraulicInertance I_e;
+        parameter Physiolibrary.Types.HydraulicResistance Rvis = 0.01/C "Elastic viscosity using Voigt model of in-series resistance";
+        parameter Physiolibrary.Types.HydraulicInertance I_e = I*1e-6;
         parameter Physiolibrary.Types.HydraulicResistance Rv "venule resistance";
 
         parameter Physiolibrary.Types.Volume zpv = 0 "Zero-pressure volume";
         parameter Physiolibrary.Types.Pressure nominal_pressure = settings.tissues_nominal_pressure;
         Physiolibrary.Types.Pressure u_C(start = nominal_pressure, nominal = 1000, fixed = true);
 
-        Physiolibrary.Types.Pressure u(nominal = 1000);
+        Physiolibrary.Types.Pressure u(nominal = 1000) annotation(HideResult = settings.hideLevel1);
 
-        Physiolibrary.Types.Pressure u_out_hs "Output pressure including the hydrostatic pressure";
+        Physiolibrary.Types.Pressure u_out_hs "Output pressure including the hydrostatic pressure" annotation(HideResult = settings.hideLevel1);
 
         // Physiolibrary.Types.HydraulicResistancse Ra_phi_inf = Ra*exp((phi-phi0)*settings.Ra_factor)/exp(exercise*settings.exercise_factor) "Arterioles resistance dependent on phi";
         Physiolibrary.Types.HydraulicResistance Ra_phi_inf = Ra
             *(1 + (phi - 0.25)*settings.Ra_factor)
-            /(1 + exercise*settings.exercise_factor) "Arterioles resistance dependent on phi and exercise";
-        Physiolibrary.Types.HydraulicResistance Ra_phi(start = Ra, fixed = true) "Delayed arterioles resistance dependent on phi";
+            /(1 + exercise*settings.exercise_factor) "Arterioles resistance dependent on phi and exercise" annotation(HideResult = settings.hideLevel1);
+        Physiolibrary.Types.HydraulicResistance Ra_phi(start = Ra, fixed = true) "Delayed arterioles resistance dependent on phi" annotation(HideResult = settings.hideLevel1);
       //  Physiolibrary.Types.HydraulicResistance Rv_phi = Rv*exp((phi-phi0)*settings.Rv_factor) "Arterioles resistance dependent on phi";
         Physiolibrary.Types.HydraulicResistance Rv_phi = Rv
             *(1 + (phi - settings.phi0) * settings.Rv_factor)
-            /(1 + exercise*settings.exercise_factor) "Venules resistance dependent on phi and exercise";
+            /(1 + exercise*settings.exercise_factor) "Venules resistance dependent on phi and exercise" annotation(HideResult = settings.hideLevel1);
 
         parameter Real k = C / (V_max - V_n) "For Pstras non-linear PV characteristics";
         parameter Physiolibrary.Types.Volume V_max = V_n + (V_n - zpv)*settings.tissues_gamma
@@ -1584,13 +1584,13 @@ public
         parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * C / (V_max - V_n))
           "nonlinear Un-Stressed volume";
 
-        Real k_phi = C / (V_max - V_n_phi) "For Pstras non-linear PV characteristics";
-        Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras";
+        Real k_phi = C / (V_max - V_n_phi) "For Pstras non-linear PV characteristics" annotation(HideResult = settings.hideLevel1);
+        Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras" annotation(HideResult = settings.hideLevel1);
         Physiolibrary.Types.Volume V_n_phi = V_n
             / (1 + (phi - settings.phi0)*settings.tissuesCompliance_PhiEffect)
-            * (1 + (phi - settings.phi0)*exercise*settings.exercise_factor_on_arterial_compliance) "Linearly dependent on phi";
+            * (1 + (phi - settings.phi0)*exercise*settings.exercise_factor_on_arterial_compliance) "Linearly dependent on phi" annotation(HideResult = settings.hideLevel1);
         Physiolibrary.Types.Volume V_us_phi = V_us
-          / (1 + settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi";
+          / (1 + settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi" annotation(HideResult = settings.hideLevel1);
 
       //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
       //       *(phi - phi0)) "Nonlinear compliance unstressed volume affected by phi";
@@ -1607,9 +1607,6 @@ public
         assert(Rv_phi > 0, "The exercise_factor too high, driving the venous resistance negative!");
 
           der(Ra_phi)*settings.tissues_Ra_tau =  Ra_phi_inf - Ra_phi;
-
-            I_e = I*1e-6;
-            Rvis = 0.01/C;
 
             if UseInertance then
               der(v_in) =(u_in - u - Ra_phi*v_in)/I;
@@ -16973,7 +16970,7 @@ public
           annotation (Placement(transformation(extent={{-44,-10},{-24,10}})));
         Physiolibrary.Hydraulic.Components.Resistor
                  Rpul(Resistance(displayUnit="(mmHg.s)/ml") = 20691634.526808)
-          annotation (Placement(transformation(
+          annotation (HideResult = false, Placement(transformation(
               extent={{-10,-10},{10,10}},
               rotation=0,
               origin={0,0})));
@@ -17410,8 +17407,9 @@ public
 
       model SmithOlufson_VentricularInteraction_flat_
           import Physiolibrary.Types.*;
-        Volume Vsept(start=V0sept), Vrv(start=0.0001042), Vlv(start=
-              0.0001042), Vperi;
+        Volume Vsept(start=V0sept), Vperi;
+        output Volume Vrv(start=0.0001042), Vlv(start=
+              0.0001042);
         parameter Volume V0sept=2e-06, V0peri = 0.0002;
 
         Pressure Psept, Pperi;
@@ -17475,13 +17473,13 @@ public
         parameter Physiolibrary.Types.Fraction alphaE(min = 0, max = 4) = 0 "linear dependency of active elastances (Essept, Esrv, Eslv) on phi";
         parameter Physiolibrary.Types.Fraction gammaE(min = 0, max = 1.33) = 0 "linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi";
 
-        Physiolibrary.Types.Pressure Prv = rvflow.pressure - Pperi;
-        Physiolibrary.Types.Pressure Plv = lvflow.pressure - Pperi;
+        output Physiolibrary.Types.Pressure Prv = rvflow.pressure - Pperi;
+        output Physiolibrary.Types.Pressure Plv = lvflow.pressure - Pperi;
           Physiolibrary.Types.Pressure Plv_passive = (1 - driving)*Pi0lv*(exp(PhiEffect_passEl*lambdalv*(Vlv - Vsept)) - 1);
 
         parameter Physiolibrary.Types.Fraction alphaDriving = 0 "Experimental sensitivity of driving funtion on phi";
       //   Real driving = (1 + alphaDriving*(phi - phi0))*A*exp(-B*(tm - CC)^2) "Linear dependency of driving on phi";
-        Real driving;
+        Physiolibrary.Types.Fraction driving;
 
         Modelica.Blocks.Interfaces.BooleanOutput
                               beat = tm >= HP
@@ -17495,19 +17493,26 @@ public
       //             Physiolibrary.Types.Volume SV_RV;
       //             Physiolibrary.Types.VolumeFlowRate CO_LV = SV_LV/HP;
       //             Physiolibrary.Types.VolumeFlowRate CO_RV = SV_RV/HP;
-                  parameter Time ts_a1 = 0.1 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
-                  parameter Real ts_a2 = 0.2 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
-                  parameter Physiolibrary.Types.Time k_TS = 0.38*72/60;
-                  parameter Physiolibrary.Types.Time k_TR = 0.18*72/60;
-                  Real TS, TR;
+        parameter Time ts_a1 = 0.1 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
+        parameter Real ts_a2 = 0.2 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
+        parameter Physiolibrary.Types.Time k_TS = 0.3 "systolic contraction, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
+        parameter Physiolibrary.Types.Time k_TR = 0.15 "Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
+        Physiolibrary.Types.Time k_TR_phi = k_TR*(1-k_RS*(phi - phi0));
+        Real k_RS( fixed = false) "Relaxation slope dependent on phi linearly";
+        parameter Physiolibrary.Types.Time k_TR_min = 0.05
+          "minimal time for muscle relaxation at maximal activation. Guessed value";
+        Real TS, TR;
+        Boolean systolicContraction = tm >= 0 and tm < TS;
+        Boolean systolicRelaxation = tm >= TS and tm < TR + TS;
       equation
+        k_TR_min = k_TR*(1-k_RS*(1 - phi0));
       //T = 1/HR;
       TS = k_TS*HP;
-      TR = k_TR*HP;
+      TR = k_TR_phi*HP;
 
-      if tm >= 0 and tm < TS then
+      if systolicContraction then
           driving = 0.5*(1 - cos(Modelica.Constants.pi*tm/TS));
-      elseif tm >= TS and tm < TR + TS then
+      elseif systolicRelaxation then
           driving = 0.5*(1 + cos(Modelica.Constants.pi*(tm - TS)/TR));
       else
           driving = 0;
@@ -17761,6 +17766,361 @@ public
                 lineColor={0,0,0},
                 textString="Smith-Olufsen")}));
       end HeartSmithOlufsen;
+
+      model HeartSmithOlufsenMynard
+        extends Auxiliary.HeartBase;
+        parameter Boolean UsePhiInput = false;
+
+        replaceable
+        ValveMynard          aorticValve(
+          ARef_init(displayUnit="cm2") = 0.00049827,
+          l(displayUnit="cm") = 0.0201,
+          Ko=0.12,
+          Kc=0.12) constrainedby Physiolibrary.Hydraulic.Interfaces.OnePort
+          annotation (Placement(transformation(extent={{-68,-30},{-88,-10}})));
+        replaceable
+        ValveMynard          tricuspidValve(
+          ARef_init(displayUnit="cm2") = 0.00074785,
+          l(displayUnit="cm") = 0.0246,
+          Ko=0.3,
+          Kc=0.4,
+          rho(displayUnit="kg/dm3")) constrainedby
+          Physiolibrary.Hydraulic.Interfaces.OnePort
+          annotation (Placement(transformation(extent={{-62,24},{-42,44}})));
+        Physiolibrary.Hydraulic.Components.Inertia
+                Lav(I(displayUnit="mmHg.s2/ml") = 16250.665802014,
+            volumeFlow_start(displayUnit="m3/s") = -1.4e-8) annotation (
+            Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=180,
+              origin={-44,-20})));
+        Physiolibrary.Hydraulic.Components.Inertia
+                Lpv(I(displayUnit="mmHg.s2/ml") = 19822.372560862,
+            volumeFlow_start(displayUnit="m3/s") = -1.9e-9)
+          annotation (Placement(transformation(extent={{32,24},{52,44}})));
+        replaceable
+        ValveMynard          pulmonaryValve(
+          ARef_init(displayUnit="cm2") = 0.00049857,
+          l(displayUnit="cm") = 0.0201,
+          Ko=0.2,
+          Kc=0.2) constrainedby Physiolibrary.Hydraulic.Interfaces.OnePort
+          annotation (Placement(transformation(extent={{62,24},{82,44}})));
+        replaceable
+        ValveMynard          mitralValve(
+          ARef_init=0.0007474,
+          l(displayUnit="cm") = 0.0246,
+          Ko=0.3,
+          Kc=0.4) constrainedby Physiolibrary.Hydraulic.Interfaces.OnePort
+          annotation (Placement(transformation(extent={{52,-30},{32,-10}})));
+        Physiolibrary.Hydraulic.Components.Inertia
+                Ltc(I(displayUnit="mmHg.s2/ml") = 10678.18997523,
+            volumeFlow_start(displayUnit="m3/s") = 0.0001372)
+          annotation (Placement(transformation(extent={{-88,24},{-68,44}})));
+        Physiolibrary.Hydraulic.Components.Inertia
+                Lmt(I(displayUnit="mmHg.s2/ml") = 10261.557514558,
+            volumeFlow_start(displayUnit="m3/s") = 0.0001141) annotation (
+            Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=180,
+              origin={70,-20})));
+        SmithOlufson_VentricularInteraction_flat_
+                                          smithOttesen_VentricularInteraction_flat_(
+            alphaE=settings.heart_alphaE, gammaE=settings.heart_gammaE)
+          annotation (Placement(transformation(extent={{-14,-10},{16,28}})));
+        Physiolibrary.Types.RealIO.FractionInput phi if UsePhiInput
+          annotation (Placement(transformation(extent={{-120,50},{-80,90}}),
+              iconTransformation(extent={{-120,40},{-80,80}})));
+        Physiolibrary.Types.Constants.FractionConst phi0(k=settings.phi0) if not UsePhiInput
+          annotation (Placement(transformation(extent={{-88,82},{-80,90}})));
+        outer Settings settings
+          annotation (Placement(transformation(extent={{40,80},{60,100}})));
+
+        // Modelica.Blocks.Interfaces.BooleanOutput
+        //                       beat = tm >= pre(HP)
+        //                          annotation (Placement(transformation(extent={{-28,-120},
+        //           {12,-80}}),           iconTransformation(extent={{-60,-80},{-100,-40}})));
+      //               Physiolibrary.Types.Volume ESV_LV;
+      //               Physiolibrary.Types.Volume ESV_RV = 0;
+      //               Physiolibrary.Types.Volume EDV_LV;
+      //               Physiolibrary.Types.Volume EDV_RV = 0;
+                     Physiolibrary.Types.Volume SV_LV;
+      //               Physiolibrary.Types.Volume SV_RV = 0;
+      //               Boolean ac_rv(start=false) "antichatter for RV. When true, prevents calculation of ESV until the next beat";
+      //               Boolean ac_lv(start=false) "antichatter for LV. When true, prevents calculation of ESV until the next beat";
+          Physiolibrary.Types.VolumeFlowRate CO_LV=SV_LV/
+              smithOttesen_VentricularInteraction_flat_.HP;
+      //    Physiolibrary.Types.VolumeFlowRate CO_RV=SV_RV/
+      //        smithOttesen_VentricularInteraction_flat_.HP;
+      //       Integer savedTheDay;
+      //        Boolean ejectionPhase;
+      //        Boolean fillingPhase;
+        Physiolibrary.Types.Volume ESV_LV_m annotation (HideResult= not settings.EvaluateFunctionalParams);
+           Physiolibrary.Types.Volume ESV_LV annotation (HideResult= not settings.EvaluateFunctionalParams);
+        Physiolibrary.Types.Volume EDV_LV_m annotation (HideResult=not settings.EvaluateFunctionalParams);
+           Physiolibrary.Types.Volume EDV_LV annotation (HideResult= not settings.EvaluateFunctionalParams);
+           parameter Physiolibrary.Types.Time tau = 1e-3 "integration time for claculation ESV and EDV" annotation (HideResult= not settings.EvaluateFunctionalParams);
+      equation
+
+         if settings.EvaluateFunctionalParams and smithOttesen_VentricularInteraction_flat_.Vlv > EDV_LV_m then
+           der(EDV_LV_m)*tau = smithOttesen_VentricularInteraction_flat_.Vlv - EDV_LV_m;
+         else
+           der(EDV_LV_m) = 0;
+         end if;
+
+         if settings.EvaluateFunctionalParams and smithOttesen_VentricularInteraction_flat_.Vlv < ESV_LV_m then
+           der(ESV_LV_m)*tau = smithOttesen_VentricularInteraction_flat_.Vlv - ESV_LV_m;
+         else
+           der(ESV_LV_m) = 0;
+         end if;
+
+        when smithOttesen_VentricularInteraction_flat_.systolicContraction then
+           EDV_LV = EDV_LV_m;
+           reinit(EDV_LV_m, 0);
+        end when;
+
+        when smithOttesen_VentricularInteraction_flat_.systolicRelaxation then
+          ESV_LV = ESV_LV_m;
+          reinit(ESV_LV_m, 1e-3);
+          SV_LV = EDV_LV - ESV_LV;
+        end when;
+
+      //
+      //   when {aorticValve.open, mitralValve.open} then
+      //
+      //     if aorticValve.open and not mitralValve.open and not pre(ejectionPhase) then
+      //       EDV_LV = smithOttesen_VentricularInteraction_flat_.Vlv;
+      //     else
+      //       // we are not here!
+      //       EDV_LV = pre(EDV_LV);
+      //     end if;
+      //
+      //     if mitralValve.open and not aorticValve.open and not pre(fillingPhase) then
+      //       ESV_LV = smithOttesen_VentricularInteraction_flat_.Vlv;
+      //     else
+      //       // we are not here!
+      //       ESV_LV = pre(ESV_LV);
+      //     end if;
+      //
+      //     if aorticValve.open and not mitralValve.open then
+      //       ejectionPhase = true;
+      //     elseif mitralValve.open and not aorticValve.open then
+      //       ejectionPhase = false;
+      //     else
+      //       ejectionPhase = pre(ejectionPhase);
+      //     end if;
+      //
+      //     if mitralValve.open and not aorticValve.open then
+      //       fillingPhase = true;
+      //     elseif aorticValve.open and not mitralValve.open then
+      //       fillingPhase = false;
+      //     else
+      //       fillingPhase = pre(fillingPhase);
+      //     end if;
+      //
+      //     SV_LV = EDV_LV - ESV_LV;
+      //   end when;
+
+      //     when tricuspidValve.open then
+      //       ESV_RV = smith_VentricularInteraction_flat.Vrv;
+      //       SV_RV = EDV_RV - ESV_RV;
+      //       ac_rv = false;
+      //     end when;
+      //
+      //     // double condition to avoid chatter
+      //     when {tricuspidValve.open, (not pre(ac_rv) and pulmonaryValve.open)} then
+      //        if pulmonaryValve.open then
+      //         ESV_RV = pre(ESV_RV);
+      //         SV_RV = pre(SV_RV);
+      //         EDV_RV =smithOttesen_VentricularInteraction_flat_.Vrv;
+      //         ac_rv = true;
+      //        else
+      //         ESV_RV =smithOttesen_VentricularInteraction_flat_.Vrv;
+      //         SV_RV = EDV_RV - ESV_RV;
+      //         EDV_RV = pre(EDV_RV);
+      //         ac_rv = false;
+      //        end if;
+      //     end when;
+      //
+      //     // double condition to avoid chatter
+      //     when {mitralValve.open, (not pre(ac_lv) and aorticValve.open)} then
+      //        if aorticValve.open then
+      //         ESV_LV = pre(ESV_LV);
+      //         SV_LV = pre(SV_LV);
+      //         EDV_LV =smithOttesen_VentricularInteraction_flat_.Vlv;
+      //         ac_lv = true;
+      //        else
+      //         ESV_LV =smithOttesen_VentricularInteraction_flat_.Vlv;
+      //         SV_LV = EDV_LV - ESV_LV;
+      //         EDV_LV = pre(EDV_LV);
+      //         ac_lv = false;
+      //        end if;
+      //     end when;
+
+        connect(Lav.q_out,aorticValve. q_in) annotation (Line(
+            points={{-54,-20},{-68,-20}},
+            color={0,0,0},
+            thickness=1,
+            smooth=Smooth.None));
+        connect(Ltc.q_out,tricuspidValve. q_in) annotation (Line(
+            points={{-68,34},{-62,34}},
+            color={0,0,0},
+            thickness=1,
+            smooth=Smooth.None));
+        connect(Lpv.q_out,pulmonaryValve. q_in) annotation (Line(
+            points={{52,34},{62,34}},
+            color={0,0,0},
+            thickness=1,
+            smooth=Smooth.None));
+        connect(mitralValve.q_in,Lmt. q_out) annotation (Line(
+            points={{52,-20},{60,-20}},
+            color={0,0,0},
+            thickness=1,
+            smooth=Smooth.None));
+        connect(mitralValve.q_out,Lav. q_in) annotation (Line(
+            points={{32,-20},{-34,-20}},
+            color={0,0,0},
+            thickness=1,
+            smooth=Smooth.None));
+        connect(sa, aorticValve.q_out) annotation (Line(
+            points={{100,100},{100,-60},{-96,-60},{-96,-20},{-88,-20}},
+            color={0,0,0},
+            thickness=1));
+        connect(Lmt.q_in, pv) annotation (Line(
+            points={{80,-20},{80,-82},{-100,-82},{-100,-100}},
+            color={0,0,0},
+            thickness=1));
+        connect(sv, Ltc.q_in) annotation (Line(
+            points={{-100,100},{-100,34},{-88,34}},
+            color={0,0,0},
+            thickness=1));
+        connect(pulmonaryValve.q_out, pa) annotation (Line(
+            points={{82,34},{92,34},{92,-100},{100,-100}},
+            color={0,0,0},
+            thickness=1));
+        connect(tricuspidValve.q_out, smithOttesen_VentricularInteraction_flat_.rvflow)
+          annotation (Line(
+            points={{-42,34},{-20,34},{-20,28},{0.7,28}},
+            color={0,0,0},
+            thickness=1));
+        connect(Lpv.q_in, smithOttesen_VentricularInteraction_flat_.rvflow)
+          annotation (Line(
+            points={{32,34},{16,34},{16,28},{0.7,28}},
+            color={0,0,0},
+            thickness=1));
+        connect(Lav.q_in, smithOttesen_VentricularInteraction_flat_.lvflow)
+          annotation (Line(
+            points={{-34,-20},{2,-20},{2,-10},{1,-10}},
+            color={0,0,0},
+            thickness=1));
+        connect(mitralValve.q_out, smithOttesen_VentricularInteraction_flat_.lvflow)
+          annotation (Line(
+            points={{32,-20},{2,-20},{2,-10},{1,-10}},
+            color={0,0,0},
+            thickness=1));
+        connect(smithOttesen_VentricularInteraction_flat_.HR, frequency_input)
+          annotation (Line(points={{-11,9},{-55.5,9},{-55.5,0},{-106,0}}, color={0,0,127}));
+        connect(smithOttesen_VentricularInteraction_flat_.Pth,
+          thoracic_pressure_input) annotation (Line(points={{13.3,9},{13.3,-44.5},{-8,
+                -44.5},{-8,-100}}, color={0,0,127}));
+        connect(phi, smithOttesen_VentricularInteraction_flat_.phi) annotation (Line(
+              points={{-100,70},{-56,70},{-56,24.2},{-11,24.2}}, color={0,0,127}));
+        connect(phi0.y, smithOttesen_VentricularInteraction_flat_.phi) annotation (
+            Line(points={{-79,86},{-20,86},{-20,24.2},{-11,24.2}}, color={0,0,127}));
+        connect(smithOttesen_VentricularInteraction_flat_.Pth, P0.y) annotation (Line(
+              points={{13.3,9},{13.3,-44.5},{-8,-44.5},{-8,-74},{-4,-74},{-4,-75},{9.4369e-16,
+                -75}}, color={0,0,127}));
+        connect(smithOttesen_VentricularInteraction_flat_.HR, HR0.y) annotation (Line(
+              points={{-11,9},{-55.5,9},{-55.5,0},{-75,0}}, color={0,0,127}));
+        annotation (Diagram(graphics={  Rectangle(extent={{-84,54},{92,-46}},
+                lineColor={28,108,200})}), Icon(graphics={Text(
+                extent={{-100,0},{100,100}},
+                lineColor={0,0,0},
+                textString="Smith-Olufsen
++
+Mynard")}));
+      end HeartSmithOlufsenMynard;
+
+      model ValveMynard "Valve by Mynard et al 2012, doi 10.1002/cnm.1466"
+        extends Physiolibrary.Hydraulic.Interfaces.OnePort;
+        type Area = Modelica.SIunits.Area(nominal = 1e-4);
+
+        Area ARef=ARef_init;
+
+        parameter Area ARef_init
+          "Starting value of reference cross-sectional area";
+        parameter Modelica.SIunits.Length l "Length of valve segment";
+        parameter Physiolibrary.Types.Pressure dpO=0 "Opening pressure";
+        parameter Physiolibrary.Types.Pressure dpC=0 "Closing pressure";
+        parameter Real Ko(unit="m2/(N.s)") "Opening rate coefficient";
+        parameter Real Kc(unit="m2/(N.s)") "Closing rate coefficient";
+        parameter Physiolibrary.Types.Fraction Mrg=0 "Ratio of valve regurgitation";
+        parameter Physiolibrary.Types.Fraction Mst=0 "Valve stenosis ratio";
+        parameter Physiolibrary.Types.Density rho = 1060;
+        parameter Area AMin_eps = 1e-6 "Anular area left open during maximally closed valve to prevent numerical issues.";
+
+        Area A=(AMax - AMin)*s + AMin
+          "Current cross-sectional area";
+        Area AMin=Mrg*ARef + AMin_eps
+          "Cross-sectional area when closed, with miniature hole to prevent zero division";
+        Area AMax=(1 - Mst)*ARef
+          "Cross-sectional area when open";
+
+        Physiolibrary.Types.Fraction s(start=1, fixed=true)
+          "Opening state (1 = open .. 0 = closed)";
+        Boolean open(start = true);
+        Real R(unit="kg/m7", nominal = 1e12) = rho/2/A^2 "Bernoulli resistance";
+        Physiolibrary.Types.HydraulicInertance L = rho*l/A "Inertance";
+      equation
+        assert(A > 0, "C'mon, the valve openin area could not be negative..", AssertionLevel.warning);
+
+      //   if noEvent(A > 0) then
+          dp = R*volumeFlowRate *abs(volumeFlowRate) + L*der(volumeFlowRate);
+
+      //   else
+      //     volumeFlowRate = 0;
+      //     R = Modelica.Constants.inf;
+      //     L = Modelica.Constants.inf;
+      //   end if;
+
+        if dp > dpO then
+          open = true;
+          der(s) = (1 - s)*Ko*(dp - dpO);
+        elseif dp < dpC then
+          open = false;
+          der(s) = s*Kc*(dp - dpC);
+        else
+          open = pre(open);
+          der(s) = 0;
+        end if;
+
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,
+                  -100},{100,100}}),
+                               graphics={Polygon(
+                points={{-76,66},{-76,-82},{34,-10},{34,12},{-66,68},{-76,74},{
+                    -76,66}},
+                lineColor={0,0,127},
+                fillColor={0,0,255},
+                fillPattern=FillPattern.Solid),
+              Text(
+                extent={{-188,-96},{192,-118}},
+                lineColor={255,0,0},
+                fillPattern=FillPattern.Sphere,
+                fillColor={255,85,85},
+                textString="%name"),
+              Polygon(
+                points={{40,100},{20,40},{40,-40},{20,-100},{42,-100},{60,-40},{40,40},
+                    {60,100},{40,100}},
+                lineColor={0,0,127},
+                fillColor={0,0,255},
+                fillPattern=FillPattern.Solid,
+                smooth=Smooth.Bezier)}),
+          Documentation(info="<html>
+<p>Ideal Valve allows a volumetric flow in one direction in case of pressure gradient is greater. </p>
+</html>",   revisions="<html>
+<p><i>2014</i></p>
+<p>Tomas Kulhanek, Charles University, Prague, Czech Republic </p>
+</html>"));
+      end ValveMynard;
     end Smith;
 
     package Baroreflex
@@ -17926,7 +18286,21 @@ public
     //  parameter Boolean veins_UseViscoElasticDelay = false;
     //   parameter Fraction gamma =   0.5
 
-    //
+    // Limit result set
+      parameter Boolean hideSystemic = false "Suppress writing output from systemic circulation, unless allowed by low level variables"
+        annotation(choices(checkBox=true), Dialog(tab = "Hide results from dataset", group = "Systems"));
+      parameter Boolean hidePulmonary = false "Suppress writing output from pulmonary circulation, unless allowed by low level variables"
+        annotation(choices(checkBox=true), Dialog(tab = "Hide results from dataset", group = "Systems"));
+      parameter Boolean hideHeart = false "Suppress writing output from heart, unless allowed by low level variables"
+        annotation(choices(checkBox=true), Dialog(tab = "Hide results from dataset", group = "Systems"));
+
+      parameter Boolean hideLevel0 = false "Suppress writing output of non-physiological variables, used for debugging the model."
+        annotation(choices(checkBox=true), Dialog(tab = "Hide results from dataset", group = "Levels"));
+      parameter Boolean hideLevel1 = false "Suppress writing output of physiological, but non-important variables, used for deeper insight."
+        annotation(choices(checkBox=true), Dialog(tab = "Hide results from dataset", group = "Levels"));
+      parameter Boolean EvaluateFunctionalParams = true "Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation."
+        annotation(choices(checkBox=true), Dialog(tab = "Hide results from dataset", group = "Other"));
+
 
       annotation (defaultComponentName =     "settings",
                  defaultComponentPrefixes = "inner",
@@ -26249,7 +26623,7 @@ public
             __Dymola_Algorithm="Cvode"));
       end tree_tilt_all_valsalva;
 
-      model tree_auto_allRegulations_ExerciseNoArms
+      model tree_Exercise
         extends tree_phi_base(settings(
             heart_alphaE(displayUnit="1") = 1,
             tissues_nominal_arterioles_pressure(displayUnit="mmHg"),
@@ -26356,9 +26730,9 @@ public
             Interval=0.02,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
-      end tree_auto_allRegulations_ExerciseNoArms;
+      end tree_Exercise;
 
-      model tree_auto_allRegulations_Exercise
+      model tree_ExercisePlusArms
         extends tree_phi_base(settings(
             heart_alphaE(displayUnit="1") = 1,
             tissues_nominal_arterioles_pressure(displayUnit="mmHg"),
@@ -26465,7 +26839,7 @@ public
             Interval=0.02,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
-      end tree_auto_allRegulations_Exercise;
+      end tree_ExercisePlusArms;
 
       model tree_auto_allRegulations_Exercise_compliance
         extends tree_autonomic_base(settings(
@@ -26508,8 +26882,8 @@ public
             __Dymola_Algorithm="Cvode"));
       end tree_auto_allRegulations_Exercise_compliance;
 
-      model tree_auto_allRegulations_Exercise_venousPump
-        extends tree_auto_allRegulations_Exercise(Systemic1(
+      model tree_ExercisePlusArms_venousPump
+        extends tree_ExercisePlusArms(            Systemic1(
             profundus_T2_R224(LimitBackflow=true),
             anterior_tibial_T3_R230(LimitBackflow=true),
             posterior_tibial_T4_R236(LimitBackflow=true),
@@ -26537,20 +26911,39 @@ public
             Interval=0.02,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
-      end tree_auto_allRegulations_Exercise_venousPump;
+      end tree_ExercisePlusArms_venousPump;
 
-      model tree_auto_allRegulations_Exercise_contMuscPump
-        extends tree_auto_allRegulations_Exercise(Systemic1(
+      model tree_ExercisePlusArms_contMuscPump
+        extends tree_ExercisePlusArms(Systemic1(
             profundus_T2_R224(UseMuscleVenousPump=true),
             anterior_tibial_T3_R230(UseMuscleVenousPump=true),
             posterior_tibial_T4_R236(UseMuscleVenousPump=true),
             posterior_tibial_T4_L214(UseMuscleVenousPump=true),
             anterior_tibial_T3_L208(UseMuscleVenousPump=true),
             profundus_T2_L202(UseMuscleVenousPump=true)));
-      end tree_auto_allRegulations_Exercise_contMuscPump;
+      end tree_ExercisePlusArms_contMuscPump;
+
+      model tree_exercise_mynardValves
+        extends tree_Exercise(
+          redeclare Components.Smith.HeartSmithOlufsenMynard heartComponent(
+              UseFrequencyInput=true, UseThoracicPressureInput=true),
+          phi(rising=20),
+          Exercfise(rising=20),
+          settings(
+            hidePulmonary=false,
+            hideLevel0=false,
+            hideLevel1=false,
+            EvaluateFunctionalParams=false));
+        annotation (experiment(
+            StopTime=100,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end tree_exercise_mynardValves;
     end Experiments;
 
     partial model CVS_7af
+    protected
       replaceable Components.AdanVenousRed.Systemic_baroreflex Systemic1(
                 baroreceptor_aortic(delta0=0.6,
           epsilon_start=1.23,
@@ -26608,6 +27001,7 @@ public
                                                annotation (Placement(
             transformation(extent={{-58,18},{18,48}})),
           __Dymola_choicesAllMatching=true);
+    public
       replaceable
       Components.AdanVenousRed._7af7a4.HeartComponent heartComponent(
         UseFrequencyInput=true,
@@ -26626,7 +27020,7 @@ public
           v_pas(start=1.0003076e-06),
           v_pat(start=2.2090626e-05))) constrainedby
         Components.Auxiliary.PulmonaryBase
-        annotation (Placement(transformation(extent={{-34,-62},{-14,-42}})));
+        annotation (HideResult = true, Placement(transformation(extent={{-34,-62},{-14,-42}})));
     Modelica.Blocks.Sources.Trapezoid phi(
         amplitude=0.75,
         rising=2,
@@ -26636,7 +27030,7 @@ public
         nperiod=1,
         offset=0.25,
         startTime=20)
-        annotation (Placement(transformation(extent={{-70,-6},{-50,14}})));
+        annotation (HideResult = true, Placement(transformation(extent={{-70,-6},{-50,14}})));
       inner Components.Settings settings
         annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
       Components.ConditionalConnection condHR(disconnectedValue=0.25, disconnected=true)
