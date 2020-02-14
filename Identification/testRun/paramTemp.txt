@@ -1,0 +1,2 @@
+Pa_nom; CO_nom;
+%Pa_nom%; %CO_nom%;
