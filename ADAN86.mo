@@ -21439,11 +21439,12 @@ Mynard")}));
         startTime=0,
         duration=1)   constrainedby Modelica.Blocks.Sources.Ramp
         annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
-      Components.Baroreflex.HeartRate2 HR_BC(phi0=0.0025)
+      Components.Baroreflex.HeartRate2 HR_BC(phi0(displayUnit="%") = 0.25,
+          HR_nom=1.1666666666667)
         annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
       Modelica.Blocks.Math.InverseBlockConstraints inverseBlockConstraints
         annotation (Placement(transformation(extent={{-22,-46},{-76,-14}})));
-      Physiolibrary.Types.Constants.FrequencyConst frequency(k=1.3333333333333)
+      Physiolibrary.Types.Constants.FrequencyConst frequency(k=1.4833333333333)
         annotation (Placement(transformation(extent={{0,-34},{-8,-26}})));
     equation
       connect(heartRate2_1.phi, Tilt_ramp.y) annotation (Line(points={{-60,50},
@@ -27786,9 +27787,9 @@ Mynard")}));
       end heartRig_smith_phi;
 
       model tree_tilt_base
-        extends CVS_7af_leveled(redeclare Components.Smith.PulmonarySmith pulmonaryComponent(
+        extends CVS_7af_leveled(redeclare replaceable Components.Smith.PulmonarySmith pulmonaryComponent(
               UseThoracic_PressureInput=true),
-          redeclare Components.Smith.HeartSmith heartComponent(
+          redeclare replaceable Components.Smith.HeartSmith heartComponent(
               UseFrequencyInput=true, UseThoracicPressureInput=true),
           condPhi(disconnected=true),
           settings(
@@ -29044,7 +29045,7 @@ Mynard")}));
     end Lumped_simple;
 
     package Identification
-      model simple_phi_base
+      model TestRun
         extends CVS_7af(
           redeclare Components.Smith.PulmonarySmith pulmonaryComponent(
               UseThoracic_PressureInput=true),
@@ -29088,20 +29089,27 @@ Mynard")}));
             Interval=0.03,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
-      end simple_phi_base;
+      end TestRun;
+
+      model OptimizeBaseline
+        extends Baseline.base_fastBaro;
+      end OptimizeBaseline;
     end Identification;
 
     package Baseline
       model base
         extends CVS_7af(
+          Systemic1(Parameters_Systemic1(k_E=0.4)),
           redeclare Components.Smith.HeartSmithOlufsenMynard heartComponent(
             UseFrequencyInput=true,
             UseThoracicPressureInput=true,
             UsePhiInput=true),
           redeclare Components.Smith.PulmonarySmith pulmonaryComponent,
-          redeclare Components.Baroreflex.HeartRate2 heartRate(phi0=settings.phi0),
+          redeclare Components.Baroreflex.HeartRate2 heartRate(HR_nom(displayUnit="1/min") = 1.16667, phi0=settings.phi0),
           condHR(disconnected=false),
           settings(
+          tissues_nominal_cardiac_output(displayUnit="l/min")=
+              0.00010666666666667,
             heart_alphaE=0.2,
             arteries_UseVasoconstrictionEffect=true,
             exercise_factor_on_arterial_compliance=0.2,
@@ -29152,11 +29160,7 @@ Mynard")}));
         extends base(
           Systemic1(
             baroreceptor_carotid(Ts(displayUnit="s") = 3),
-            baroreceptor_aortic(Ts(displayUnit="s") = 3),
-            Parameters_Systemic1(k_E=0.4)),
-          heartRate(HR_nom(displayUnit="1/min") = 1.16667),
-          settings(tissues_nominal_cardiac_output(displayUnit="l/min") =
-              0.00010666666666667));
+            baroreceptor_aortic(Ts(displayUnit="s") = 3)));
 
         parameter Modelica.SIunits.Length speedSegmentLength=
        Systemic1.common_carotid_L48_A.l +
@@ -29179,8 +29183,87 @@ Mynard")}));
        Systemic1.common_iliac_R216.l +
        Systemic1.external_iliac_R220.l +
        Systemic1.femoral_R222.l "Distance between carotid_L48 and femoral_R222";
+
+      output Physiolibrary.Types.Pressure brachial_pressure = Systemic1.brachial_L82.u_C;
+        annotation (experiment(
+            StopTime=60,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
       end base_fastBaro;
     end Baseline;
+
+    package Tilt
+      model base
+        extends CVS_7af_leveled(
+          Systemic1(Parameters_Systemic1(k_E=0.4),
+            baroreceptor_carotid(Ts(displayUnit="s") = 0.1),
+            baroreceptor_aortic(Ts(displayUnit="s") = 0.1)),
+          redeclare Components.Smith.HeartSmithOlufsenMynard heartComponent(
+            UseFrequencyInput=true,
+            UseThoracicPressureInput=true,
+            UsePhiInput=true),
+          redeclare Components.Smith.PulmonarySmith pulmonaryComponent,
+          redeclare Components.Baroreflex.HeartRate2 heartRate(HR_nom(displayUnit="1/min") = 1.16667, phi0=settings.phi0),
+          condHR(disconnected=false),
+          settings(
+          tissues_nominal_cardiac_output(displayUnit="l/min")=
+              0.00010666666666667,
+            heart_alphaE=0.2,
+            arteries_UseVasoconstrictionEffect=true,
+            exercise_factor_on_arterial_compliance=0.2,
+            R_vc=0.2,
+            Rv_factor=settings.Ra_factor,
+            UseNonLinear_TissuesCompliance=true,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissuesCompliance_PhiEffect=0.2,
+            exercise_factor_on_tissue_compliance=0.2,
+            UseNonLinear_VenousCompliance=true,
+            veins_activation_tau=0.1,
+            hideLevel0=false,
+            hideLevel1=false),
+          phi(
+            amplitude=0.31 - 0.25,
+            width=200,
+            nperiod=1,
+            offset=0.25,
+            startTime=40),
+          Tilt_ramp(
+            height=2*Modelica.Constants.pi/3,
+            duration=2,
+            startTime=40));
+
+        Modelica.Blocks.Logical.Switch switch1
+          annotation (Placement(transformation(extent={{10,52},{24,66}})));
+        Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi
+          annotation (Placement(transformation(extent={{-22,50},{-2,70}})));
+        Components.ConditionalConnection condHeartPhi(disconnectedValue=0.25,
+            disconnected=false) annotation (Placement(transformation(extent={{
+                  42,37.2592},{54,47.9259}})));
+      equation
+        connect(switch1.y, condHR.u) annotation (Line(points={{24.7,59},{32.35,
+                59},{32.35,60},{40.8,60}}, color={0,0,127}));
+        connect(useAutonomousPhi.y, switch1.u2) annotation (Line(points={{-1,60},
+                {4,60},{4,59},{8.6,59}}, color={255,0,255}));
+        connect(Systemic1.phi_baroreflex, switch1.u1) annotation (Line(points={{-27.4,
+                45.4},{-27.4,72},{4,72},{4,64.6},{8.6,64.6}},        color={0,0,
+                127}));
+        connect(condPhi.u, condHR.u) annotation (Line(points={{-27.2,4.00002},{
+                -27.2,36},{30,36},{30,59},{32.35,59},{32.35,60},{40.8,60}},
+              color={0,0,127}));
+        connect(heartComponent.phi, condHeartPhi.y) annotation (Line(points={{-16,-16},
+                {60,-16},{60,42},{54.6,42}},          color={0,0,127}));
+        connect(condHeartPhi.u, condHR.u) annotation (Line(points={{40.8,42},{
+                34,42},{34,60},{40.8,60}}, color={0,0,127}));
+        connect(phi.y, switch1.u3) annotation (Line(points={{-49,4},{-38,4},{
+                -38,53.4},{8.6,53.4}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=60,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end base;
+    end Tilt;
   annotation(preferredView="info",
   version="2.3.2-beta",
   versionBuild=1,
