@@ -1,5 +1,5 @@
 ﻿Advanced.SparseActivate=true;
-Advanced.NumberOfCores = 4;
+Advanced.NumberOfCores = 2;
 
 simulateModel("ADAN_main.AdanVenousRed_Safaei.Experiments.simple_base", stopTime=500, numberOfIntervals=0, outputInterval=0.06, method="Cvode", tolerance=1e-05, resultFile="simple_base");
 simulateModel("ADAN_main.AdanVenousRed_Safaei.Experiments.phi_HR", stopTime=500, numberOfIntervals=0, outputInterval=0.06, method="Cvode", tolerance=1e-05, resultFile="phi_HR");
