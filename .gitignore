@@ -1,3 +1,4 @@
+help/
 __pycache__/
 .vscode/
 ~FMUOutput/
@@ -22,5 +23,3 @@ dsmodel.c
 /request
 /status
 *.asv
-/Identification/status
-/Identification/success

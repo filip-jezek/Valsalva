@@ -1,0 +1,13 @@
+schedules/
+dsout.out
+status
+success
+failure
+debug.txt
+dsout.out
+*.mat
+*.log
+paramOut.txt
+GenOpt.log
+OutputListingAll.txt
+OutputListingMain.txt
