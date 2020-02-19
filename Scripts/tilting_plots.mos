@@ -1,0 +1,65 @@
+﻿Advanced.SparseActivate=true;
+Advanced.NumberOfCores = 4;
+
+removePlots();
+removeResults();
+translateModel("ADAN_main.AdanVenousRed_Safaei.Tilt.base");
+// Brachial no tilt 
+// TODO -- translate model first
+
+Tilt_ramp.startTime = 100;
+time_.startTime = 27.4285;
+simulateModel("ADAN_main.AdanVenousRed_Safaei.Tilt.base", stopTime=30, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-05, resultFile="base");
+// Brachial no tilt 
+createPlot(id=1, position={180, 50, 500, 350}, x="time_.y", y={"Systemic1.brachial_L82_HeartLevel.port_a.pressure", "Systemic1.brachial_L82_HeartLevel.u_C",
+ "Systemic1.brachial_L82_HeartLevel.port_b.pressure", "heartComponent.aorticValve.q_out.pressure"}, heading="Brachial artery - no tilt", range={0.0, 1.0, 60.0, 140.0}, autoscale=false, grid=true, filename="base.mat", legends={"port_a", "vessel", "port_b", "AV"}, leftTitleType=2, leftTitle="Pressure [mmHg]", bottomTitleType=2, bottomTitle="time [s]", colors={{28,108,200}, {238,46,47}, {0,140,72}, {217,67,180}}, thicknesses={0.25, 0.5, 0.25, 0.25}, range2={0.5000000000000001, 1.0}, displayUnits={"mmHg", "mmHg", "mmHg", "mmHg"});
+ 
+ // lets begin tilt 30
+translateModel("ADAN_main.AdanVenousRed_Safaei.Tilt.base"); 
+  Tilt_ramp.height = Modelica.Constants.pi/6;
+ Tilt_ramp.startTime = 0;
+ // adjust zero time
+time_.startTime = 27.4285; 
+// time_.startTime = 57.2884;
+simulateModel("ADAN_main.AdanVenousRed_Safaei.Tilt.base", stopTime=30, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-05, resultFile="Tilt30");
+ // Brachial tilt 
+createPlot(id=15, position={180, 50, 500, 350}, x="time_.y", y={"Systemic1.brachial_L82_HeartLevel.port_a.pressure", "Systemic1.brachial_L82_HeartLevel.u_C",
+ "Systemic1.brachial_L82_HeartLevel.port_b.pressure", "heartComponent.aorticValve.q_out.pressure"}, heading="Brachial artery - tilt 30", range={0.0, 1.0, 60.0, 140.0}, autoscale=false, grid=true, filename="Tilt30.mat", legends={"port_a", "vessel", "port_b", "AV"}, leftTitleType=2, leftTitle="Pressure [mmHg]", bottomTitleType=2, bottomTitle="time [s]", colors={{28,108,200}, {238,46,47}, {0,140,72}, {217,67,180}}, thicknesses={0.25, 0.5, 0.25, 0.25}, range2={0.5000000000000001, 1.0}, displayUnits={"mmHg", "mmHg", "mmHg", "mmHg"});
+ 
+ 
+ // lets begin tilt 60
+  Tilt_ramp.height = Modelica.Constants.pi/3;
+ Tilt_ramp.startTime = 0;
+ // adjust zero time
+time_.startTime = 27.4285; 
+// time_.startTime = 57.2884;
+simulateModel("ADAN_main.AdanVenousRed_Safaei.Tilt.base", stopTime=30, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-05, resultFile="Tilt60");
+ // Brachial tilt 
+createPlot(id=2, position={180, 50, 500, 350}, x="time_.y", y={"Systemic1.brachial_L82_HeartLevel.port_a.pressure", "Systemic1.brachial_L82_HeartLevel.u_C",
+ "Systemic1.brachial_L82_HeartLevel.port_b.pressure", "heartComponent.aorticValve.q_out.pressure"}, heading="Brachial artery - tilt 60", range={0.0, 1.0, 60.0, 140.0}, autoscale=false, grid=true, filename="Tilt60.mat", legends={"port_a", "vessel", "port_b", "AV"}, leftTitleType=2, leftTitle="Pressure [mmHg]", bottomTitleType=2, bottomTitle="time [s]", colors={{28,108,200}, {238,46,47}, {0,140,72}, {217,67,180}}, thicknesses={0.25, 0.5, 0.25, 0.25}, range2={0.5000000000000001, 1.0}, displayUnits={"mmHg", "mmHg", "mmHg", "mmHg"});
+ 
+  // Tilt 90
+  Tilt_ramp.height = Modelica.Constants.pi/2;
+ Tilt_ramp.startTime = 0;
+ // adjust zero time
+time_.startTime = 27.4285; 
+// time_.startTime = 57.2884;
+simulateModel("ADAN_main.AdanVenousRed_Safaei.Tilt.base", stopTime=30, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-05, resultFile="Tilt90");
+ 
+ // Brachial tilt 
+createPlot(id=3, position={180, 50, 500, 350}, x="time_.y", y={"Systemic1.brachial_L82_HeartLevel.port_a.pressure", "Systemic1.brachial_L82_HeartLevel.u_C",
+ "Systemic1.brachial_L82_HeartLevel.port_b.pressure", "heartComponent.aorticValve.q_out.pressure"}, heading="Brachial artery - tilt 90", range={0.0, 1.0, 60.0, 140.0}, autoscale=false, grid=true, filename="Tilt90.mat", legends={"port_a", "vessel", "port_b", "AV"}, leftTitleType=2, leftTitle="Pressure [mmHg]", bottomTitleType=2, bottomTitle="time [s]", colors={{28,108,200}, {238,46,47}, {0,140,72}, {217,67,180}}, thicknesses={0.25, 0.5, 0.25, 0.25}, range2={0.5000000000000001, 1.0}, displayUnits={"mmHg", "mmHg", "mmHg", "mmHg"});
+ 
+ // position of vessels of interest
+createPlot(id=33, position={14, 98, 809, 510}, y={"Systemic1.tibiofibular_trunk_R234.port_b.position", "Systemic1.internal_carotid_R8_B.port_b.position",
+ "Systemic1.femoral_R226.port_b.position", "Systemic1.thoracic_aorta_C108.port_b.position",
+ "Systemic1.brachial_L82_HeartLevel.port_b.position"}, range={0.0, 60.0, -100.0, 40.0}, grid=true, filename="tilt90.mat", legendLocation=2, legendHorizontal=false, legends={"tibiofibular_trunk_R234 B position", "internal_carotid_R8_B B position", 
+"femoral_R226 B position", "thoracic_aorta_C108 B position", "brachial_L82_HeartLevel B position"}, colors={{238,46,47}, {0,0,0}, {0,140,72}, {28,108,200}, {162,29,33}}, displayUnits={"cm", "cm", "cm", "cm", "cm"});
+
+
+// vessels of interest detail
+createPlot(id=41, position={180, 50, 500, 350}, x="time_.y", y={"Systemic1.tibiofibular_trunk_R234.u_C"}, heading="Tibiofibular_trunk_R234", range={0.0, 1.0, 60.0, 200.0}, autoscale=false, grid=true, filename="Tilt90.mat", leftTitleType=2, leftTitle="Pressure [mmHg]", bottomTitleType=2, bottomTitle="time [s]", colors={{28,108,200}}, thicknesses={0.25}, displayUnits={"mmHg"});
+createPlot(id=42, position={180, 50, 500, 350}, x="time_.y", y={"Systemic1.internal_carotid_R8_B.u_C"}, heading="internal_carotid_R8_B", range={0.0, 1.0, 60.0, 200.0}, autoscale=false, grid=true, filename="Tilt90.mat", leftTitleType=2, leftTitle="Pressure [mmHg]", bottomTitleType=2, bottomTitle="time [s]", colors={{28,108,200}}, thicknesses={0.25}, displayUnits={"mmHg"});
+createPlot(id=43, position={180, 50, 500, 350}, x="time_.y", y={"Systemic1.femoral_R226.u_C"}, heading="femoral_R226", range={0.0, 1.0, 60.0, 200.0}, autoscale=false, grid=true, filename="Tilt90.mat", leftTitleType=2, leftTitle="Pressure [mmHg]", bottomTitleType=2, bottomTitle="time [s]", colors={{28,108,200}}, thicknesses={0.25}, displayUnits={"mmHg"});
+createPlot(id=44, position={180, 50, 500, 350}, x="time_.y", y={"Systemic1.thoracic_aorta_C108.u_C"}, heading="thoracic_aorta_C108 (heart level)", range={0.0, 1.0, 70.0, 130.0}, autoscale=false, grid=true, filename="Tilt90.mat", leftTitleType=2, leftTitle="Pressure [mmHg]", bottomTitleType=2, bottomTitle="time [s]", colors={{28,108,200}}, thicknesses={0.25}, displayUnits={"mmHg"});
+createPlot(id=45, position={180, 50, 500, 350}, x="time_.y", y={"Systemic1.brachial_L82_HeartLevel.u_C"}, heading="brachial_L82 (Heart level)", range={0.0, 1.0, 70.0, 130.0}, autoscale=false, grid=true, filename="Tilt90.mat", leftTitleType=2, leftTitle="Pressure [mmHg]", bottomTitleType=2, bottomTitle="time [s]", colors={{28,108,200}}, thicknesses={0.25}, displayUnits={"mmHg"});

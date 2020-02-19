@@ -15681,6 +15681,7 @@ public
 
       partial model Systemic_base
         extends Systemic_interfaces;
+        parameter Physiolibrary.Types.Height brachial_division = 74e-3 "The height at which the left brachial artery is divided to have pressure measure at heart level";
 
         _7af7a4.Parameters86_cellml.Parameters_Systemic_tunable
           Parameters_Systemic1
@@ -16019,7 +16020,7 @@ public
             r = Parameters_Systemic1.r_axillary_L80)
         annotation (Placement(transformation(extent={{-39,109},{-19,114}})));
           Systemic_artery brachial_L82(
-            l=Parameters_Systemic1.l_brachial_L82,
+          l=Parameters_Systemic1.l_brachial_L82 - brachial_division,
             E=Parameters_Systemic1.E_brachial_L82,
             r=Parameters_Systemic1.r_brachial_L82)
             annotation (Placement(transformation(extent={{-16,109},{4,114}})));
@@ -16520,6 +16521,12 @@ public
           C(displayUnit="m3/Pa") = 7e-10,
           R(displayUnit="(Pa.s)/m3") = 2e8)
           annotation (Placement(transformation(extent={{60,74},{80,78}})));
+        Systemic_artery brachial_L82_HeartLevel(
+          sinAlpha=-1,
+          l=brachial_division,
+          E=Parameters_Systemic1.E_brachial_L82,
+          r=Parameters_Systemic1.r_brachial_L82)
+          annotation (Placement(transformation(extent={{-26,97},{-6,102}})));
       equation
 
         connect(internal_iliac_T1_R218.port_b,internal_iliac_vein_T1_R30.port_a) annotation (Line(points={{55,29.5},
@@ -16764,9 +16771,6 @@ public
             color={238,46,47}));
         connect(axillary_L80.port_a,subclavian_L78.port_b) annotation (Line(points={{-39,
                 111.5},{-42,111.5}},                                                                               thickness=1,
-            color={238,46,47}));
-        connect(brachial_L82.port_a,axillary_L80.port_b) annotation (Line(points={{-16,
-                111.5},{-19,111.5}},                                                                             thickness=1,
             color={238,46,47}));
         connect(common_carotid_R6_B.port_a,common_carotid_R6_A.port_b) annotation (Line(points={{-63,
                 189.5},{-68,189.5}},                                                                                           thickness=1,
@@ -17021,6 +17025,14 @@ public
             thickness=1));
         connect(coronary_veins.port_b, inferior_vena_cava_C8.port_b) annotation (Line(
             points={{80,76},{429,76},{429,-2.5}},
+            color={0,0,0},
+            thickness=1));
+        connect(axillary_L80.port_b, brachial_L82_HeartLevel.port_a) annotation (Line(
+            points={{-19,111.5},{-19,106.75},{-26,106.75},{-26,99.5}},
+            color={0,0,0},
+            thickness=1));
+        connect(brachial_L82.port_a, brachial_L82_HeartLevel.port_b) annotation (Line(
+            points={{-16,111.5},{-16,106},{-6,106},{-6,99.5}},
             color={0,0,0},
             thickness=1));
           annotation (Diagram(coordinateSystem(extent={{-320,-100},{440,200}})),
@@ -28380,6 +28392,7 @@ Mynard")}));
               ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic_leveled,
           redeclare model Systemic_artery =
               ADAN_main.Components.Vessel_modules.pv_type_leveled,
+          brachial_division=0.091,
           redeclare model Systemic_vein =
               ADAN_main.Components.Vessel_modules.vp_type_tension_based_leveled,
           redeclare model Systemic_tissue =
@@ -29223,15 +29236,15 @@ Mynard")}));
             hideLevel0=false,
             hideLevel1=false),
           phi(
-            amplitude=0.31 - 0.25,
+            amplitude=0.38 - 0.25,
             width=200,
-            nperiod=1,
+            nperiod=0,
             offset=0.25,
             startTime=40),
           Tilt_ramp(
-            height=2*Modelica.Constants.pi/3,
+            height=Modelica.Constants.pi/3,
             duration=2,
-            startTime=40));
+            startTime=100));
 
         Modelica.Blocks.Logical.Switch switch1
           annotation (Placement(transformation(extent={{10,52},{24,66}})));
@@ -29240,6 +29253,12 @@ Mynard")}));
         Components.ConditionalConnection condHeartPhi(disconnectedValue=0.25,
             disconnected=false) annotation (Placement(transformation(extent={{
                   42,37.2592},{54,47.9259}})));
+        Modelica.Blocks.Sources.Ramp time_(
+          height=100,
+          duration=100,
+          offset=-1,
+          startTime=26.5) annotation (Placement(transformation(extent={{-100,
+                  -100},{-80,-80}})));
       equation
         connect(switch1.y, condHR.u) annotation (Line(points={{24.7,59},{32.35,
                 59},{32.35,60},{40.8,60}}, color={0,0,127}));
@@ -29258,8 +29277,8 @@ Mynard")}));
         connect(phi.y, switch1.u3) annotation (Line(points={{-49,4},{-38,4},{
                 -38,53.4},{8.6,53.4}}, color={0,0,127}));
         annotation (experiment(
-            StopTime=60,
-            Interval=0.02,
+            StopTime=30,
+            Interval=0.01,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end base;
