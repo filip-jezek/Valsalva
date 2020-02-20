@@ -23,3 +23,7 @@ dsmodel.c
 /request
 /status
 *.asv
+/Scripts/failure
+/Scripts/status
+/Scripts/success
+/stop
