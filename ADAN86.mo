@@ -1348,10 +1348,10 @@ public
           "Backward state-off conductance (closed valve conductance)" annotation (Dialog(enable=LimitBackflow));
         parameter Physiolibrary.Types.Pressure Pknee(final min=0) = 0
           "Forward threshold pressure" annotation (Dialog(enable=LimitBackflow));
-        Boolean open(start = true) annotation(HideResult = settings.hideLevel1);
-        Physiolibrary.Types.Pressure dp = u_out - u_out_valved;
+        Boolean open(start = true) annotation(HideResult = settings.hideLevel1 or not LimitBackflow);
+        Physiolibrary.Types.Pressure dp_valve=u_out - u_out_valved annotation(HideResult = settings.hideLevel0 or not LimitBackflow);
         outer Settings settings
-          annotation (Placement(transformation(extent={{-80,0},{-60,20}})));
+          annotation (Placement(transformation(extent={{-100,20},{-90,30}})));
         protected
         constant Physiolibrary.Types.Pressure unitPressure=1;
         constant Physiolibrary.Types.VolumeFlowRate unitFlow=1;
@@ -1367,12 +1367,12 @@ public
 
         if LimitBackflow then
           open = passableVariable > Modelica.Constants.eps;
-          dp = (passableVariable*unitFlow)*(if open then R_on else 1) + Pknee;
+          dp_valve = (passableVariable*unitFlow)*(if open then R_on else 1) + Pknee;
           v_out = (passableVariable*unitPressure)*(if open then 1 else G_off) + G_off*Pknee;
         else
           // the valve is nonexistent, therefore permanently open
           open = true;
-          dp = 0;
+          dp_valve = 0;
           passableVariable = 0;
         end if;
 
@@ -1436,24 +1436,19 @@ public
         extends bg_base(final terminator=false);
         outer Modelica.SIunits.Angle Tilt;
         outer Physiolibrary.Types.Fraction Exercise;
-        Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure"  annotation(HideResult = settings.hideLevel1);
-        Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs "Output pressure including the hydrostatic pressure"  annotation(HideResult = settings.hideLevel1);
+        Physiolibrary.Types.Pressure P_hs = height*settings.blood_rho*Modelica.Constants.g_n "Hydrostatic pressure of whole vessel at actual orientation"  annotation(HideResult = settings.hideLevel1);
+        Physiolibrary.Types.Pressure u_in_hs = u_in - P_hs/2 "input pressure including the hydrostatic pressure"  annotation(HideResult = settings.hideLevel1);
+        Physiolibrary.Types.Pressure u_out_hs = u_out + P_hs/2 "Output pressure including the hydrostatic pressure"  annotation(HideResult = settings.hideLevel1);
 
         parameter Boolean UseDistentionOutput = false "Provides relative distention fraction output, otherwise hidden and not calculated" annotation(choices(checkBox=true));
-        parameter Boolean CalculateMeans = false "uses additional calculations" annotation(choices(checkBox=true));
+      //   parameter Boolean CalculateMeans = false "uses additional calculations" annotation(choices(checkBox=true));
       //  parameter Boolean UseNonLinearCompliance = false annotation(Dialog(group = "Parameters"));
         parameter Boolean UseSinAlphaInput = false "Vessel vertical angle, 0 is supine and 1 is facing upwards, -1 downwards respectively"  annotation(choices(checkBox=true),Dialog(group = "Parameters"));
         parameter Boolean UseVasoconstrictionEffect = false annotation(choices(checkBox=true),Dialog(group = "Parameters"));
 
-        parameter Real a(unit = "1") = 0.2802 annotation (Dialog(tab = "Defaults", group = "Vessel parameter computations"));
-        parameter Real b(unit = "m-1") = -505.3 annotation (Dialog(tab = "Defaults", group = "Vessel parameter computations"));
-        parameter Real c(unit = "1") = 0.1324 annotation (Dialog(tab = "Defaults", group = "Vessel parameter computations"));
-        parameter Real d(unit = "m-1") = -11.14 annotation (Dialog(tab = "Defaults", group = "Vessel parameter computations"));
-
-        constant Real mu(unit = "J.s.m-3") = 0.004;
-        constant Real rho(unit = "J.s2.m-5") = 1050;
         parameter Real sinAlpha = 0 "sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down."  annotation (Dialog(tab = "General", group = "Orientations", enabled = not UseSinAlphaInput));
-        Modelica.SIunits.Height height = _sinAlpha*l annotation (Dialog(tab = "General", group = "Orientations"));
+
+        Modelica.SIunits.Height height = sin(Tilt)*_sinAlpha*l annotation (Dialog(tab = "General", group = "Orientations"));
 
         //parameter Physiolibrary.Types.Pressure thoracic_pressure = 0;
 
@@ -1461,12 +1456,12 @@ public
        parameter Modelica.SIunits.Length l = 1e-2 "Segmant length" annotation (Dialog(tab = "General", group = "Vessel properties"));
        parameter Modelica.SIunits.Radius r = 1e-3 "Vessel radius" annotation (Dialog(tab = "General", group = "Vessel properties"));
 
-        parameter Modelica.SIunits.Thickness h = r*(a*exp(b*r)+c*exp(d*r)) "Thickness" annotation (Dialog(tab = "General", group = "Vessel properties"));
+        parameter Modelica.SIunits.Thickness h = r*(settings.vessel_a*exp(settings.vessel_b*r)+settings.vessel_c*exp(settings.vessel_d*r)) "Thickness" annotation (Dialog(tab = "General", group = "Vessel properties"));
 
 
-        parameter Physiolibrary.Types.HydraulicInertance I = rho*l/(Modelica.Constants.pi*(r)^2) annotation (Dialog(tab = "General", group = "Calculated parameters"));
+        parameter Physiolibrary.Types.HydraulicInertance I = settings.blood_rho*l/(Modelica.Constants.pi*(r)^2) annotation (Dialog(tab = "General", group = "Calculated parameters"));
         parameter Physiolibrary.Types.HydraulicCompliance C = 2*Modelica.Constants.pi*(r^3) *l/(E*h) annotation (Dialog(tab = "General", group = "Calculated parameters", enable = not UseNonLinearCompliance));
-        parameter Physiolibrary.Types.HydraulicResistance R = 8*mu*l/(Modelica.Constants.pi*(r^4)) annotation (Dialog(tab = "General", group = "Calculated parameters"));
+        parameter Physiolibrary.Types.HydraulicResistance R = 8*settings.blood_mu*l/(Modelica.Constants.pi*(r^4)) annotation (Dialog(tab = "General", group = "Calculated parameters"));
         parameter Physiolibrary.Types.HydraulicResistance R_v = 0.01/C "Viscoleasticity of the vessel" annotation (Dialog(tab = "General", group = "Calculated parameters"));
 
         parameter Physiolibrary.Types.Volume zpv = l*Modelica.Constants.pi*(r^2) "Zero-pressure volume" annotation (Dialog(tab = "General", group = "Calculated parameters"));
@@ -1515,7 +1510,38 @@ public
                 color={0,140,72},
                 thickness=1,
                 visible = DynamicSelect(false, sinAlpha > 0 or sinAlpha < 0),
-                arrow={Arrow.None,Arrow.Filled})}));
+                arrow={Arrow.None,Arrow.Filled})}), Diagram(graphics={
+                Ellipse(
+                  extent={{-82,2},{-78,-2}},
+                  fillColor={28,108,200},
+                  fillPattern=FillPattern.Solid,
+                  pattern=LinePattern.None),
+                Ellipse(
+                  extent={{78,2},{82,-2}},
+                  lineColor={28,108,200},
+                  lineThickness=0.5),
+                Line(
+                  points={{-100,-20},{100,-20}},
+                  color={28,108,200},
+                  thickness=0.5,
+                  arrow={Arrow.Open,Arrow.Open}),
+                Text(
+                  extent={{-30,-30},{32,-20}},
+                  lineColor={28,108,200},
+                  lineThickness=0.5,
+                  textString="P_hs ~ Tilt*sinAlpha*length"),
+                Text(
+                  extent={{-100,-10},{-80,2}},
+                  lineColor={28,108,200},
+                  lineThickness=0.5,
+                  textString="+
+P_hs/2"),
+                Text(
+                  extent={{80,-10},{100,2}},
+                  lineColor={28,108,200},
+                  lineThickness=0.5,
+                  textString="+
+P_hs/2")}));
       end bg_vessel;
 
       partial model bg_vessel_thoracic
@@ -1564,6 +1590,7 @@ public
 
         Physiolibrary.Types.Pressure u(nominal = 1000) annotation(HideResult = settings.hideLevel1);
 
+        Physiolibrary.Types.Pressure u_in_hs "Output pressure including the hydrostatic pressure" annotation(HideResult = settings.hideLevel1);
         Physiolibrary.Types.Pressure u_out_hs "Output pressure including the hydrostatic pressure" annotation(HideResult = settings.hideLevel1);
 
         // Physiolibrary.Types.HydraulicResistancse Ra_phi_inf = Ra*exp((phi-phi0)*settings.Ra_factor)/exp(exercise*settings.exercise_factor) "Arterioles resistance dependent on phi";
@@ -1609,10 +1636,10 @@ public
           der(Ra_phi)*settings.tissues_Ra_tau =  Ra_phi_inf - Ra_phi;
 
             if UseInertance then
-              der(v_in) =(u_in - u - Ra_phi*v_in)/I;
+              der(v_in) =(u_in_hs - u - Ra_phi*v_in)/I;
               der(v_out) =(u - u_out_hs - Rv_phi*(v_out - q_mc))/I_e;
             else
-              0 = u_in - u - Ra_phi *(v_in - q_mc);
+              0 = u_in_hs - u - Ra_phi *(v_in - q_mc);
               0 =(u - u_out_hs - Rv_phi *(v_out - q_mc));
               // (u - u_out_hs)/Rv + q_mc = v_out;
             end if;
@@ -1662,7 +1689,46 @@ public
 <p><br>Unlike the original Pstras publication, when the VMax is set as Vn + 500ml for veins, resp. Vn + 100 ml for Vena Cava, the Vmax difference here is delta-times the ZPV-Vn:</p>
 <p><img src=\"modelica://ADAN_main/Resources/Images/equations/equation-sfHOF1Pk.png\" alt=\"Vmax = Vn + delta*(Vn-ZPV)\"/> </p>
 <p>and thus shares the linear parametrization.</p>
-</html>"));
+</html>"),
+            Diagram(graphics={
+                Ellipse(
+                  extent={{-82,2},{-78,-2}},
+                  fillColor={28,108,200},
+                  fillPattern=FillPattern.Solid,
+                  pattern=LinePattern.None),
+                Ellipse(
+                  extent={{78,2},{82,-2}},
+                  lineColor={28,108,200},
+                  lineThickness=0.5),
+                Line(points={{-80,0},{80,0}}, color={28,108,200}),
+                Line(
+                  points={{14,-3.68679e-16},{46,4.04254e-15}},
+                  color={28,108,200},
+                  origin={0,-14},
+                  rotation=90),
+                Ellipse(extent={{-14,50},{14,22}}, lineColor={28,108,200}),
+                Text(
+                  extent={{-14,30},{14,42}},
+                  lineColor={28,108,200},
+                  textString="C"),
+                Rectangle(
+                  extent={{-64,6},{-36,-6}},
+                  lineColor={28,108,200},
+                  fillColor={255,255,255},
+                  fillPattern=FillPattern.Solid),
+                Text(
+                  extent={{-66,-6},{-38,6}},
+                  lineColor={28,108,200},
+                  textString="Ra"),
+                Rectangle(
+                  extent={{36,6},{64,-6}},
+                  lineColor={28,108,200},
+                  fillColor={255,255,255},
+                  fillPattern=FillPattern.Solid),
+                Text(
+                  extent={{34,-6},{62,6}},
+                  lineColor={28,108,200},
+                  textString="Rv")}));
       end systemic_tissue_base;
 
       partial model compliance_base
@@ -1946,9 +2012,9 @@ public
       volume = (u_C)  *compliance + zpv "Lim 2013";
 
       if UseInertance then
-        der(v_in) = (u_in-u_out_hs-R*v_in)/I;
+        der(v_in) = (u_in_hs-u_out_hs-R*v_in)/I;
       else
-        0 = u_in-u_out_hs-R*v_in;
+        0 = u_in_hs-u_out_hs-R*v_in;
       end if;
 
       der(volume) = (v_in-v_out);
@@ -1962,7 +2028,40 @@ public
                 points={{-80,0},{80,0}},
                 color={238,46,47},
                 arrow={Arrow.None,Arrow.Filled},
-                thickness=0.5)}));
+                thickness=0.5)}), Diagram(graphics={
+              Rectangle(extent={{-44,6},{-16,-6}}, lineColor={28,108,200}),
+              Ellipse(extent={{6,60},{34,32}}, lineColor={28,108,200}),
+              Line(points={{-80,0},{-44,0}}, color={28,108,200}),
+              Line(points={{-16,0},{80,0}}, color={28,108,200}),
+              Text(
+                extent={{-46,-6},{-18,6}},
+                lineColor={28,108,200},
+                textString="R&L"),
+              Text(
+                extent={{6,40},{34,52}},
+                lineColor={28,108,200},
+                textString="C"),
+              Rectangle(
+                extent={{-14,6},{14,-6}},
+                lineColor={28,108,200},
+                origin={20,16},
+                rotation=90),
+              Line(
+                points={{14,-3.68679e-16},{16,-1.34708e-15}},
+                color={28,108,200},
+                origin={20,16},
+                rotation=90),
+              Line(
+                points={{14,-3.68679e-16},{16,-1.34708e-15}},
+                color={28,108,200},
+                origin={20,-14},
+                rotation=90),
+              Text(
+                extent={{-14,-6},{14,6}},
+                lineColor={28,108,200},
+                origin={20,16},
+                rotation=90,
+                textString="R_v")}));
     end pv_type;
 
     model pv_type_thoracic
@@ -1986,8 +2085,8 @@ public
           UseOuter_thoracic_pressure=false,
       UseInertance = false,
       zpv = l*Modelica.Constants.pi*((r*settings.venous_diameter_correction)^2),
-      R = 8*mu*l/(Modelica.Constants.pi*((r*settings.venous_diameter_correction)^4)),
-      I = rho*l/(Modelica.Constants.pi*(r*settings.venous_diameter_correction)^2),
+      R = 8*settings.blood_mu*l/(Modelica.Constants.pi*((r*settings.venous_diameter_correction)^4)),
+      I = settings.blood_rho*l/(Modelica.Constants.pi*(r*settings.venous_diameter_correction)^2),
       V_min = compliant_vessel.V_min,
       volume(start = compliant_vessel.V0, fixed = true));
 
@@ -2015,14 +2114,14 @@ public
           l=l,
           p0=p0,
           V=volume, disableVenoconstriction = disableVenoconstriction)
-          annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
+          annotation (Placement(transformation(extent={{-50,32},{-30,52}})));
 
     equation
 
       if E == 0 or not UseInertance then
-          (u_in-u_out_hs)/R = v_out;
+          (u_in_hs -u_out_hs)/R = v_out;
       else
-        der(v_out) = (u_in-u_out_hs-R*v_out)/I;
+        der(v_out) = (u_in_hs -u_out_hs-R*v_out)/I;
       end if;
 
       der(volume) = netFlow;
@@ -2048,16 +2147,51 @@ public
 
 
       if not settings.veins_ignoreViscosityResistance then
-          u_in = p + R_v*(v_in - v_out) + external_pressure_inside;
+          u_in_hs = p + R_v*(v_in - v_out) + external_pressure_inside;
         else
-          u_in = p + external_pressure_inside;
+          u_in_hs = p + external_pressure_inside;
       end if;
 
         annotation (Icon(graphics={ Rectangle(
               extent={{-110,32},{112,-30}},
               lineColor={0,0,0},
               lineThickness=0.5,
-              visible=DynamicSelect(true, disableVenoconstriction))}));
+              visible=DynamicSelect(true, disableVenoconstriction))}), Diagram(
+            graphics={
+            Line(
+              points={{-14,-1.91119e-16},{18,-1.22462e-15}},
+              color={28,108,200},
+              origin={-40,14},
+              rotation=90),
+            Line(points={{-80,0},{80,0}}, color={28,108,200}),
+            Rectangle(
+              extent={{16,6},{44,-6}},
+              lineColor={28,108,200},
+              fillColor={255,255,255},
+              fillPattern=FillPattern.Solid),
+            Text(
+              extent={{14,-6},{42,6}},
+              lineColor={28,108,200},
+              textString="R&L"),
+            Text(
+              extent={{6,52},{34,64}},
+              lineColor={28,108,200},
+              textString="C"),
+            Rectangle(
+              extent={{-14,6},{14,-6}},
+              lineColor={28,108,200},
+              origin={-40,16},
+              rotation=90,
+              fillColor={255,255,255},
+              fillPattern=FillPattern.Solid,
+              visible = DynamicSelect(true, not settings.veins_ignoreViscosityResistance)),
+            Text(
+              extent={{-14,-6},{14,6}},
+              lineColor={28,108,200},
+              origin={-40,16},
+              rotation=90,
+              textString="?R_v",
+              visible = DynamicSelect(true, not settings.veins_ignoreViscosityResistance))}));
     end vp_type;
 
     model vp_type_tension_based "Extension of datafit"
@@ -2144,6 +2278,7 @@ public
     equation
 
         u_out_hs = u_out;
+        u_in_hs = u_in;
 
       annotation (Icon(graphics={
             Rectangle(
@@ -3668,6 +3803,9 @@ public
     model pv_type_leveled
       extends pv_type(  redeclare Interfaces.HydraulicPort_a_leveled port_a,
           redeclare Interfaces.HydraulicPort_b_leveled port_b);
+      Modelica.SIunits.Position hydrostatic_level = (port_a.position + height/2);
+    //   Physiolibrary.Types.Pressure hydrostatic_pressure = hydrostatic_level*settings.blood_rho*Modelica.Constants.g_n "Total hydrostatic pressure at given point (synthetic)";
+    //   Physiolibrary.Types.Pressure hydraulic_pressure = u_C + hydrostatic_pressure "Vessel pressure without the hydrostatic part (synthetic)";
     equation
       port_a.position + height = port_b.position;
     end pv_type_leveled;
@@ -3676,6 +3814,9 @@ public
       extends vp_type(
         redeclare Interfaces.HydraulicPort_a_leveled port_a,
         redeclare Interfaces.HydraulicPort_b_leveled port_b);
+      Modelica.SIunits.Position hydrostatic_level = (port_a.position + height/2);
+    //   Physiolibrary.Types.Pressure hydrostatic_pressure = hydrostatic_level*settings.blood_rho*Modelica.Constants.g_n "Total hydrostatic pressure at given point (synthetic)";
+    //   Physiolibrary.Types.Pressure hydraulic_pressure = p - hydrostatic_pressure "Vessel pressure without the hydrostatic part (synthetic)";
 
     equation
       port_a.position + height = port_b.position;
@@ -3688,6 +3829,7 @@ public
       extends vp_type_tension_based(
         redeclare Interfaces.HydraulicPort_a_leveled port_a,
         redeclare Interfaces.HydraulicPort_b_leveled port_b);
+      Modelica.SIunits.Position hydrostatic_level = (port_a.position + height/2);
 
     equation
       port_a.position + height = port_b.position;
@@ -3699,13 +3841,22 @@ public
           redeclare Interfaces.HydraulicPort_a_leveled port_a,
           redeclare Interfaces.HydraulicPort_a_leveled port_b);
 
-      constant Real rho(unit = "J.s2.m-5") = 1050;
       outer Modelica.SIunits.Angle Tilt(unit= "deg");
-      Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure";
+      Physiolibrary.Types.Pressure P_hs = height*settings.blood_rho*Modelica.Constants.g_n "Hydrostatic pressure of the whole tissue";
+      Physiolibrary.Types.Pressure P_hs_plus_dist=added_height/2*settings.blood_rho*
+          Modelica.Constants.g_n "Hydrostatic pressure of the half of additional distance (gravity center)";
+      parameter Modelica.SIunits.Height add_length=0
+        "Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size.";
 
-      Modelica.SIunits.Height height = port_b.position - port_a.position;
+      Modelica.SIunits.Height added_height = sin(Tilt)*add_length "Tilted additional height of the tissue mass center";
+      Modelica.SIunits.Height height=port_b.position - port_a.position "height difference between connectors";
+      Modelica.SIunits.Position hydrostatic_level = port_a.position + (height + added_height)/2;
+    //   Physiolibrary.Types.Pressure hydrostatic_pressure = hydrostatic_level*settings.blood_rho*Modelica.Constants.g_n "Total hydrostatic pressure at given point (synthetic)";
+    //   Physiolibrary.Types.Pressure hydraulic_pressure = u_C - hydrostatic_pressure "Vessel pressure without the hydrostatic part (synthetic)";
+
     equation
-      u_out_hs = u_out + P_hs;
+      u_out_hs = u_out + P_hs/2 - P_hs_plus_dist;
+      u_in_hs = u_in - P_hs/2 - P_hs_plus_dist;
 
       annotation (Icon(graphics={Text(
               extent={{-100,20},{-20,40}},
@@ -3717,7 +3868,45 @@ public
               lineColor={0,140,72},
               lineThickness=1,
               horizontalAlignment=TextAlignment.Right,
-              textString=DynamicSelect("level B", String(port_b.position*100, significantDigits=2) + " cm"))}));
+              textString=DynamicSelect("level B", String(port_b.position*100, significantDigits=2) + " cm"))}),
+            Diagram(graphics={
+              Text(
+                extent={{-100,-18},{-80,2}},
+                lineColor={28,108,200},
+                lineThickness=0.5,
+                textString="-
+P_hs/2
+-
+P_hs_plus_dist"),
+              Text(
+                extent={{-30,-32},{32,-20}},
+                lineColor={28,108,200},
+                lineThickness=0.5,
+                textString="P_hs ~ Tilt*|A B|
+P_hs_plus_dist ~ Tilt*(add_length /2)"),
+              Line(
+                points={{-100,-20},{100,-20}},
+                color={28,108,200},
+                thickness=0.5,
+                arrow={Arrow.Open,Arrow.Open}),
+              Text(
+                extent={{80,-16},{100,2}},
+                lineColor={28,108,200},
+                lineThickness=0.5,
+                textString="-
+P_hs/2
++
+P_hs_plus_dist"),
+              Line(
+                points={{-20,60},{-20,20}},
+                color={28,108,200},
+                arrow={Arrow.Open,Arrow.None}),
+              Text(
+                extent={{-14,-6},{14,6}},
+                lineColor={28,108,200},
+                origin={-28,38},
+                rotation=90,
+                textString="+ %add_length / 2")}));
     end systemic_tissue_leveled;
 
   end Vessel_modules;
@@ -15681,7 +15870,7 @@ public
 
       partial model Systemic_base
         extends Systemic_interfaces;
-        parameter Physiolibrary.Types.Height brachial_division = 74e-3 "The height at which the left brachial artery is divided to have pressure measure at heart level";
+        parameter Physiolibrary.Types.Height brachial_division=0.182   "The height at which the left brachial artery is divided to have pressure measure at heart level";
 
         _7af7a4.Parameters86_cellml.Parameters_Systemic_tunable
           Parameters_Systemic1
@@ -19529,6 +19718,16 @@ Mynard")}));
     //  parameter Boolean veins_UseViscoElasticDelay = false;
     //   parameter Fraction gamma =   0.5
 
+    // vessel constants
+      parameter Real vessel_a(unit = "1") = 0.2802 annotation (Dialog(tab = "Vessel parameter computations"));
+      parameter Real vessel_b(unit = "m-1") = -505.3 annotation (Dialog(tab = "Vessel parameter computations"));
+      parameter Real vessel_c(unit = "1") = 0.1324 annotation (Dialog(tab = "Vessel parameter computations"));
+      parameter Real vessel_d(unit = "m-1") = -11.14 annotation (Dialog(tab = "Vessel parameter computations"));
+
+      parameter Real blood_mu(unit = "J.s.m-3") = 0.004 annotation (Dialog(tab = "Vessel parameter computations"));
+      parameter Real blood_rho(unit = "J.s2.m-5") = 1050 annotation (Dialog(tab = "Vessel parameter computations"));
+
+
     // Limit result set
       parameter Boolean hideSystemic = false "Suppress writing output from systemic circulation, unless allowed by low level variables"
         annotation(choices(checkBox=true), Dialog(tab = "Hide results from dataset", group = "Systems"));
@@ -20779,132 +20978,142 @@ Mynard")}));
             coordinateSystem(preserveAspectRatio=false)));
     end testNonlinearVeins;
 
-    model height_test
-      import ADAN_main;
-      import ADAN_main;
-      import ADAN_main;
-      import ADAN_main;
-      import ADAN_main;
-      import ADAN_main;
-      import ADAN_main;
-      inner parameter Physiolibrary.Types.Fraction venous_diameter_correction = 1;
-      inner parameter Physiolibrary.Types.Fraction C_fact = 1;
+    model tilt_test
+      model height_module
+      extends ADAN_main.Components.AdanVenousRed.Systemic_interfaces;
+        //   inner parameter Physiolibrary.Types.Fraction venous_diameter_correction = 1;
+        //   inner parameter Physiolibrary.Types.Fraction C_fact = 1;
 
-      ADAN_main.Components.Vessel_modules.pv_type_leveled pv_type_leveled(
-        UseInertance=false,
-        sinAlpha=1,
-        l=0.5,
-        r=0.01)
-        annotation (Placement(transformation(extent={{-72,4},{-14,16}})));
+      ADAN_main.Components.Vessel_modules.pv_type_leveled pv_test1_1(
+          UseInertance=false,
+          sinAlpha=1,
+          l=0.5,
+          r=0.01)
+          annotation (Placement(transformation(extent={{-72,4},{-14,16}})));
       parameter Physiolibrary.Types.VolumeFlowRate m_flow(displayUnit="l/min")=3.3333333333333e-5;
       parameter Physiolibrary.Types.Pressure p = 0;
-      Components.Auxiliary.AcausalConnector.Pq_terminator_q_leveled
-        pq_terminator_q_leveled(level=1, v=-m_flow)
-        annotation (Placement(transformation(extent={{-120,0},{-100,20}})));
-      Components.Auxiliary.AcausalConnector.Pq_terminator_p pq_terminator_p(
-          redeclare
-          ADAN_main.Components.Vessel_modules.Interfaces.HydraulicPort_a_leveled
-          port_a,                                                             u = p)
-        annotation (Placement(transformation(extent={{100,0},{80,20}})));
+      Components.Auxiliary.AcausalConnector.Pq_terminator_q_leveled pq_terminator_q_test1(level=1,
+            v=-m_flow)
+          annotation (Placement(transformation(extent={{-120,0},{-100,20}})));
+      Components.Auxiliary.AcausalConnector.Pq_terminator_p pq_terminator_p_test1(
+            redeclare
+            ADAN_main.Components.Vessel_modules.Interfaces.HydraulicPort_a_leveled
+            port_a, u=p)
+          annotation (Placement(transformation(extent={{100,0},{80,20}})));
 
-    inner parameter Modelica.SIunits.Angle Tilt = 0;
-    inner parameter Physiolibrary.Types.Pressure thoracic_pressure = 0;
-      ADAN_main.Components.Vessel_modules.pv_type_leveled pv_type_leveled1(
+        // inner parameter Modelica.SIunits.Angle Tilt = 0;
+        // inner parameter Physiolibrary.Types.Pressure thoracic_pressure = 0;
+      ADAN_main.Components.Vessel_modules.pv_type_leveled pv_test1_2(
+          UseInertance=false,
+          sinAlpha=1,
+          l=0.25,
+          r=0.01) annotation (Placement(transformation(extent={{0,4},{58,16}})));
+      Components.Auxiliary.AcausalConnector.Pq_terminator_q_leveled pq_terminator_q_test2(level=1,
+            v=-m_flow) annotation (Placement(transformation(extent={{-120,-40},
+                  {-100,-20}})));
+      Components.Auxiliary.AcausalConnector.Pq_terminator_p_leveled pq_terminator_p_test2(level=
+              1.75, u=p)
+          annotation (Placement(transformation(extent={{100,-40},{80,-20}})));
+      ADAN_main.Components.Vessel_modules.systemic_tissue_leveled tissue_test2(
+          UseInertance=false,
+          I=0,
+          C=3.33e-08,
+          Ra=958000000,
+          Rv=180000000,
+          zpv=2.57e-10) "Aka renal tissue"
+          annotation (Placement(transformation(extent={{-60,-40},{40,-20}})));
+      Components.Auxiliary.AcausalConnector.Pq_terminator_q_leveled pq_terminator_q_test3(level=0,
+            v=-m_flow) annotation (Placement(transformation(extent={{-120,-80},
+                  {-100,-60}})));
+      Components.Auxiliary.AcausalConnector.Pq_terminator_p_leveled pq_terminator_p_test3(level=0,
+            u=p)
+          annotation (Placement(transformation(extent={{100,-80},{80,-60}})));
+      ADAN_main.Components.Vessel_modules.pv_type_leveled pv_type_test3_1(
+          UseInertance=false,
+          sinAlpha=-1,
+          l=0.5,
+          r=0.01)
+          annotation (Placement(transformation(extent={{-92,-74},{-56,-66}})));
+      ADAN_main.Components.Vessel_modules.systemic_tissue_leveled systemic_tissue_test3(
+          UseInertance=false,
+          I=0,
+          C=3.33e-08,
+          Ra=958000000,
+          Rv=180000000,
+          zpv(displayUnit="ml") = 0.000257) "Aka renal tissue"
+          annotation (Placement(transformation(extent={{-40,-74},{0,-66}})));
+      ADAN_main.Components.Vessel_modules.vp_type_leveled vp_type_test3_2(
         UseInertance=false,
-        sinAlpha=1,
-        l=0.25,
-        r=0.01) annotation (Placement(transformation(extent={{0,4},{58,16}})));
-      Components.Auxiliary.AcausalConnector.Pq_terminator_q_leveled
-        pq_terminator_q_leveled1(level=1, v=-m_flow)
-        annotation (Placement(transformation(extent={{-120,-40},{-100,-20}})));
-      Components.Auxiliary.AcausalConnector.Pq_terminator_p_leveled
-        pq_terminator_p_leveled(level=1.75, u = p)
-        annotation (Placement(transformation(extent={{100,-40},{80,-20}})));
-      ADAN_main.Components.Vessel_modules.systemic_tissue_leveled
-        systemic_tissue_leveled(
-        UseInertance=false,
-        I=0,
-        C=3.33E-08,
-        Ra=9.58E+08,
-        Rv=1.80E+08,
-        zpv=2.57e-10) "Aka renal tissue"
-        annotation (Placement(transformation(extent={{-60,-40},{40,-20}})));
-      Components.Auxiliary.AcausalConnector.Pq_terminator_q_leveled
-        pq_terminator_q_leveled2(level=0, v=-m_flow)
-        annotation (Placement(transformation(extent={{-120,-80},{-100,-60}})));
-      Components.Auxiliary.AcausalConnector.Pq_terminator_p_leveled
-        pq_terminator_p_leveled1(level=0, u=p)
-        annotation (Placement(transformation(extent={{100,-80},{80,-60}})));
-      ADAN_main.Components.Vessel_modules.pv_type_leveled pv_type_leveled2(
-        UseInertance=false,
-        sinAlpha=-1,
-        l=0.5,
-        r=0.01)
-        annotation (Placement(transformation(extent={{-92,-74},{-56,-66}})));
-      ADAN_main.Components.Vessel_modules.systemic_tissue_leveled
-        systemic_tissue_leveled1(
-        UseInertance=false,
-        I=0,
-        C=3.33E-08,
-        Ra=9.58E+08,
-        Rv=1.80E+08,
-        zpv(displayUnit="ml") = 0.000257) "Aka renal tissue"
-        annotation (Placement(transformation(extent={{-40,-74},{0,-66}})));
-      ADAN_main.Components.Vessel_modules.vp_type_leveled vp_type_leveled(
-        phi_norm=1,
-        UseInertance=false,
-        UseNonLinearCompliance=false,
         sinAlpha=1,
         l=0.5,
         r(displayUnit="mm") = 0.015)
         annotation (Placement(transformation(extent={{20,-74},{56,-66}})));
-    equation
-      connect(pq_terminator_q_leveled.port_a, pv_type_leveled.port_a) annotation (
-          Line(
-          points={{-100,10},{-72,10}},
-          color={0,0,0},
-          thickness=1));
-      connect(pv_type_leveled.port_b, pv_type_leveled1.port_a) annotation (Line(
-          points={{-14,10},{-1.77636e-15,10}},
-          color={0,0,0},
-          thickness=1));
-      connect(pv_type_leveled1.port_b, pq_terminator_p.port_a) annotation (Line(
-          points={{58,10},{80,10}},
-          color={0,0,0},
-          thickness=1));
-      connect(pq_terminator_q_leveled1.port_a, systemic_tissue_leveled.port_a)
-        annotation (Line(
-          points={{-100,-30},{-60,-30}},
-          color={0,0,0},
-          thickness=1));
-      connect(pq_terminator_p_leveled.port_a, systemic_tissue_leveled.port_b)
-        annotation (Line(
-          points={{80,-30},{40,-30}},
-          color={0,0,0},
-          thickness=1));
-      connect(pq_terminator_q_leveled2.port_a, pv_type_leveled2.port_a) annotation (
-         Line(
-          points={{-100,-70},{-92,-70}},
-          color={0,0,0},
-          thickness=1));
-      connect(pv_type_leveled2.port_b, systemic_tissue_leveled1.port_a) annotation (
-         Line(
-          points={{-56,-70},{-40,-70}},
-          color={0,0,0},
-          thickness=1));
-      connect(systemic_tissue_leveled1.port_b, vp_type_leveled.port_a) annotation (
-          Line(
-          points={{0,-70},{20,-70}},
-          color={0,0,0},
-          thickness=1));
-      connect(pq_terminator_p_leveled1.port_a, vp_type_leveled.port_b) annotation (
-          Line(
-          points={{80,-70},{56,-70}},
-          color={0,0,0},
-          thickness=1));
+      inner Components.Settings settings1
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+      equation
+        connect(pq_terminator_q_test1.port_a, pv_test1_1.port_a) annotation (
+            Line(
+            points={{-100,10},{-72,10}},
+            color={0,0,0},
+            thickness=1));
+        connect(pv_test1_1.port_b, pv_test1_2.port_a) annotation (Line(
+            points={{-14,10},{-1.77636e-15,10}},
+            color={0,0,0},
+            thickness=1));
+        connect(pv_test1_2.port_b, pq_terminator_p_test1.port_a) annotation (
+            Line(
+            points={{58,10},{80,10}},
+            color={0,0,0},
+            thickness=1));
+        connect(pq_terminator_q_test2.port_a, tissue_test2.port_a) annotation (
+            Line(
+            points={{-100,-30},{-60,-30}},
+            color={0,0,0},
+            thickness=1));
+        connect(pq_terminator_p_test2.port_a, tissue_test2.port_b) annotation (
+            Line(
+            points={{80,-30},{40,-30}},
+            color={0,0,0},
+            thickness=1));
+        connect(pq_terminator_q_test3.port_a, pv_type_test3_1.port_a)
+          annotation (Line(
+            points={{-100,-70},{-92,-70}},
+            color={0,0,0},
+            thickness=1));
+        connect(pv_type_test3_1.port_b, systemic_tissue_test3.port_a)
+          annotation (Line(
+            points={{-56,-70},{-40,-70}},
+            color={0,0,0},
+            thickness=1));
+        connect(systemic_tissue_test3.port_b, vp_type_test3_2.port_a)
+          annotation (Line(
+            points={{0,-70},{20,-70}},
+            color={0,0,0},
+            thickness=1));
+        connect(pq_terminator_p_test3.port_a, vp_type_test3_2.port_b)
+          annotation (Line(
+            points={{80,-70},{56,-70}},
+            color={0,0,0},
+            thickness=1));
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
             coordinateSystem(preserveAspectRatio=false)));
-    end height_test;
+      end height_module;
+      height_module height_module1(
+        systemic_tissue_test3(Ra(displayUnit="(mmHg.min)/l") = 7999343.2449, Rv(
+              displayUnit="(mmHg.min)/l") = 7999343.2449),
+        pv_type_test3_1(l=1),
+        tissue_test2(
+          Ra(displayUnit="(mmHg.min)/l") = 7999343.2449,
+          Rv(displayUnit="(mmHg.min)/l") = 7999343.2449,
+          add_length=0.33),
+        UseTiltInput=true)
+        annotation (Placement(transformation(extent={{-16,0},{4,20}})));
+      Modelica.Blocks.Sources.Constant const(k=Modelica.Constants.pi/2)
+        annotation (Placement(transformation(extent={{-54,-8},{-34,12}})));
+    equation
+      connect(const.y, height_module1.tilt_input)
+        annotation (Line(points={{-33,2},{-2,2}}, color={0,0,127}));
+    end tilt_test;
 
     model imp_comparison
       AdanVenousRed_Safaei.CardiovascularSystem_7af cardiovascularSystem_7af
@@ -28392,7 +28601,6 @@ Mynard")}));
               ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic_leveled,
           redeclare model Systemic_artery =
               ADAN_main.Components.Vessel_modules.pv_type_leveled,
-          brachial_division=0.091,
           redeclare model Systemic_vein =
               ADAN_main.Components.Vessel_modules.vp_type_tension_based_leveled,
           redeclare model Systemic_tissue =
@@ -29199,8 +29407,8 @@ Mynard")}));
 
       output Physiolibrary.Types.Pressure brachial_pressure = Systemic1.brachial_L82.u_C;
         annotation (experiment(
-            StopTime=60,
-            Interval=0.02,
+            StopTime=30,
+            Interval=0.01,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end base_fastBaro;
@@ -29233,6 +29441,7 @@ Mynard")}));
             exercise_factor_on_tissue_compliance=0.2,
             UseNonLinear_VenousCompliance=true,
             veins_activation_tau=0.1,
+            veins_ignoreViscosityResistance=true,
             hideLevel0=false,
             hideLevel1=false),
           phi(
@@ -29244,7 +29453,7 @@ Mynard")}));
           Tilt_ramp(
             height=Modelica.Constants.pi/3,
             duration=2,
-            startTime=100));
+            startTime=0));
 
         Modelica.Blocks.Logical.Switch switch1
           annotation (Placement(transformation(extent={{10,52},{24,66}})));
