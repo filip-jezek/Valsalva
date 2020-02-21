@@ -8,7 +8,7 @@ This file has been grabbed from https://github.com/ORNL-Modelica/ModelicaPy/blob
 import os
 
 
-def create_dsinORfinal(dicSim, dicVars, dsFileIn='dsfinal.txt', dsFileOut='dsin.txt', simulator='dymola'):
+def create_dsinORfinal(dicSim, dicVars, dsFileIn='dsfinal.txt', dsFileOut='dsin.txt', simulator='dymola', autoRewrite = True):
     '''
     Generate a new dsin.txt file with modified values from discSim and dicVars
     from a dsin.txt or dsfinal.txt file with a name specified by dsFileOut.
@@ -33,7 +33,7 @@ def create_dsinORfinal(dicSim, dicVars, dsFileIn='dsfinal.txt', dsFileOut='dsin.
     if not os.path.isfile(dsFileIn):
         raise IOError("File {} does not exist".format(dsFileIn))
 
-    if dsFileIn == dsFileOut:
+    if dsFileIn == dsFileOut and autoRewrite == False:
         answer = input('''Input and ouput file names match.
     The input file will be overwritten. Continue [y/n]? ''')
         if answer.lower() in ['y', 'yes']:

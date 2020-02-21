@@ -2064,11 +2064,6 @@ P_hs/2")}));
                 textString="R_v")}));
     end pv_type;
 
-    model pv_type_thoracic
-      extends ADAN_main.Components.Vessel_modules.pv_type(final
-            UseOuter_thoracic_pressure=true);
-    end pv_type_thoracic;
-
     model AdjustableConductanceRtam
       outer Physiolibrary.Types.Fraction rtam = 1 "modifier for Resistance of arterioles RTA_%name";
       parameter Physiolibrary.Types.HydraulicResistance RTA "Resistance of arterioles RTA_%name";
@@ -2383,7 +2378,7 @@ P_hs/2")}));
       end pv_jII_type;
 
       model pv_jII_type_thoracic
-        extends ADAN_main.Components.Vessel_modules.pv_type_thoracic;
+        extends ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic;
       //   input Real t(unit = "s");
       //   parameter Real mu(unit = "J.s.m-3") = 0.004;
       //   parameter Real rho(unit = "J.s2.m-5") = 1050;
@@ -2958,7 +2953,9 @@ P_hs/2")}));
       end vp_jII_type;
 
       model pv_type_thoracic_leveled
-          extends pv_type_thoracic(redeclare Interfaces.HydraulicPort_a_leveled
+          import ADAN_main;
+          extends ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic(
+                                   redeclare Interfaces.HydraulicPort_a_leveled
             port_a, redeclare Interfaces.HydraulicPort_b_leveled port_b);
       equation
         port_a.position + height = port_b.position;
@@ -3318,6 +3315,11 @@ P_hs/2")}));
         end if;
 
       end vp_type_backup;
+
+      model pv_type_thoracic
+        extends ADAN_main.Components.Vessel_modules.pv_type(final
+              UseOuter_thoracic_pressure=true);
+      end pv_type_thoracic;
     end Obsolete;
 
     package arterialTree
@@ -3928,19 +3930,22 @@ P_hs_plus_dist"),
           E=Parameters_Systemic1.E_ascending_aorta_A,
           r=Parameters_Systemic1.r_ascending_aorta_A)
           annotation (Placement(transformation(extent={{-241,47},{-221,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_B(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          ascending_aorta_B(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_ascending_aorta_B,
           E=Parameters_Systemic1.E_ascending_aorta_B,
           r=Parameters_Systemic1.r_ascending_aorta_B)
           annotation (Placement(transformation(extent={{-216,47},{-196,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_C(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          ascending_aorta_C(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_ascending_aorta_C,
           E=Parameters_Systemic1.E_ascending_aorta_C,
           r=Parameters_Systemic1.r_ascending_aorta_C)
           annotation (Placement(transformation(extent={{-191,47},{-171,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_D(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          ascending_aorta_D(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_ascending_aorta_D,
           E=Parameters_Systemic1.E_ascending_aorta_D,
@@ -3975,7 +3980,8 @@ P_hs_plus_dist"),
           E=Parameters_Systemic1.E_aortic_arch_C64,
           r=Parameters_Systemic1.r_aortic_arch_C64)
           annotation (Placement(transformation(extent={{-78,47},{-58,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic aortic_arch_C94(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          aortic_arch_C94(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_aortic_arch_C94,
           E=Parameters_Systemic1.E_aortic_arch_C94,
@@ -4009,7 +4015,7 @@ P_hs_plus_dist"),
           E=Parameters_Systemic1.E_thoracic_aorta_C108,
           r=Parameters_Systemic1.r_thoracic_aorta_C108)
           annotation (Placement(transformation(extent={{53,47},{73,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
           thoracic_aorta_C112(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_thoracic_aorta_C112,
@@ -5231,19 +5237,22 @@ P_hs_plus_dist"),
           E=Parameters_Systemic1.E_ascending_aorta_A,
           r=Parameters_Systemic1.r_ascending_aorta_A)
           annotation (Placement(transformation(extent={{-241,47},{-221,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_B(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          ascending_aorta_B(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_ascending_aorta_B,
           E=Parameters_Systemic1.E_ascending_aorta_B,
           r=Parameters_Systemic1.r_ascending_aorta_B)
           annotation (Placement(transformation(extent={{-216,47},{-196,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_C(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          ascending_aorta_C(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_ascending_aorta_C,
           E=Parameters_Systemic1.E_ascending_aorta_C,
           r=Parameters_Systemic1.r_ascending_aorta_C)
           annotation (Placement(transformation(extent={{-191,47},{-171,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_D(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          ascending_aorta_D(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_ascending_aorta_D,
           E=Parameters_Systemic1.E_ascending_aorta_D,
@@ -5278,7 +5287,8 @@ P_hs_plus_dist"),
           E=Parameters_Systemic1.E_aortic_arch_C64,
           r=Parameters_Systemic1.r_aortic_arch_C64)
           annotation (Placement(transformation(extent={{-78,47},{-58,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic aortic_arch_C94(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          aortic_arch_C94(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_aortic_arch_C94,
           E=Parameters_Systemic1.E_aortic_arch_C94,
@@ -5312,7 +5322,7 @@ P_hs_plus_dist"),
           E=Parameters_Systemic1.E_thoracic_aorta_C108,
           r=Parameters_Systemic1.r_thoracic_aorta_C108)
           annotation (Placement(transformation(extent={{53,47},{73,52}})));
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
           thoracic_aorta_C112(
           thoracic_pressure=thoracic_pressure,
           l=Parameters_Systemic1.l_thoracic_aorta_C112,
@@ -6647,84 +6657,92 @@ P_hs_plus_dist"),
           r=Parameters_Systemic1.r_ascending_aorta_A)
           annotation (Placement(transformation(extent={{-241,47},{-221,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_B(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          ascending_aorta_B(
           l=Parameters_Systemic1.l_ascending_aorta_B,
           E=Parameters_Systemic1.E_ascending_aorta_B,
           r=Parameters_Systemic1.r_ascending_aorta_B)
           annotation (Placement(transformation(extent={{-216,47},{-196,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_C(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          ascending_aorta_C(
           l=Parameters_Systemic1.l_ascending_aorta_C,
           E=Parameters_Systemic1.E_ascending_aorta_C,
           r=Parameters_Systemic1.r_ascending_aorta_C)
           annotation (Placement(transformation(extent={{-191,47},{-171,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_D(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          ascending_aorta_D(
           l=Parameters_Systemic1.l_ascending_aorta_D,
           E=Parameters_Systemic1.E_ascending_aorta_D,
           r=Parameters_Systemic1.r_ascending_aorta_D)
           annotation (Placement(transformation(extent={{-166,47},{-146,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic aortic_arch_C2(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          aortic_arch_C2(
           l=Parameters_Systemic1.l_aortic_arch_C2,
           E=Parameters_Systemic1.E_aortic_arch_C2,
           r=Parameters_Systemic1.r_aortic_arch_C2)
           annotation (Placement(transformation(extent={{-141,47},{-121,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
           brachiocephalic_trunk_C4(
           l=Parameters_Systemic1.l_brachiocephalic_trunk_C4,
           E=Parameters_Systemic1.E_brachiocephalic_trunk_C4,
           r=Parameters_Systemic1.r_brachiocephalic_trunk_C4)
           annotation (Placement(transformation(extent={{-98,127},{-78,132}})));
 
-        replaceable ADAN_main.Components.Vessel_modules.pv_type_thoracic
+        replaceable
+          ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
           aortic_arch_C46(
           l=Parameters_Systemic1.l_aortic_arch_C46,
           E=Parameters_Systemic1.E_aortic_arch_C46,
           r=Parameters_Systemic1.r_aortic_arch_C46)
           annotation (Placement(transformation(extent={{-105,47},{-85,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic aortic_arch_C64(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          aortic_arch_C64(
           l=Parameters_Systemic1.l_aortic_arch_C64,
           E=Parameters_Systemic1.E_aortic_arch_C64,
           r=Parameters_Systemic1.r_aortic_arch_C64)
           annotation (Placement(transformation(extent={{-78,47},{-58,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic aortic_arch_C94(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          aortic_arch_C94(
           l=Parameters_Systemic1.l_aortic_arch_C94,
           E=Parameters_Systemic1.E_aortic_arch_C94,
           r=Parameters_Systemic1.r_aortic_arch_C94)
           annotation (Placement(transformation(extent={{-49,47},{-29,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic thoracic_aorta_C96(
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+          thoracic_aorta_C96(
           l=Parameters_Systemic1.l_thoracic_aorta_C96,
           E=Parameters_Systemic1.E_thoracic_aorta_C96,
           r=Parameters_Systemic1.r_thoracic_aorta_C96)
           annotation (Placement(transformation(extent={{-26,47},{-6,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
           thoracic_aorta_C100(
           l=Parameters_Systemic1.l_thoracic_aorta_C100,
           E=Parameters_Systemic1.E_thoracic_aorta_C100,
           r=Parameters_Systemic1.r_thoracic_aorta_C100)
           annotation (Placement(transformation(extent={{3,47},{23,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
           thoracic_aorta_C104(
           l=Parameters_Systemic1.l_thoracic_aorta_C104,
           E=Parameters_Systemic1.E_thoracic_aorta_C104,
           r=Parameters_Systemic1.r_thoracic_aorta_C104)
           annotation (Placement(transformation(extent={{28,47},{48,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
           thoracic_aorta_C108(
           l=Parameters_Systemic1.l_thoracic_aorta_C108,
           E=Parameters_Systemic1.E_thoracic_aorta_C108,
           r=Parameters_Systemic1.r_thoracic_aorta_C108)
           annotation (Placement(transformation(extent={{53,47},{73,52}})));
 
-        ADAN_main.Components.Vessel_modules.pv_type_thoracic
+        ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
           thoracic_aorta_C112(
           l=Parameters_Systemic1.l_thoracic_aorta_C112,
           E=Parameters_Systemic1.E_thoracic_aorta_C112,
@@ -15784,9 +15802,9 @@ P_hs_plus_dist"),
 
 
         replaceable model Systemic_artery_thoracic =
-            ADAN_main.Components.Vessel_modules.pv_type_thoracic
+            ADAN_main.Components.Vessel_modules.pv_type(UseOuter_thoracic_pressure = true)
                                                       constrainedby
-          ADAN_main.Components.Vessel_modules.Interfaces.bg_vessel
+          ADAN_main.Components.Vessel_modules.Interfaces.bg_vessel(UseOuter_thoracic_pressure = true)
                                                             annotation (choices(
          choice=ADAN_main.Components.Vessel_modules.pv_type_thoracic
           "No position calculations",
@@ -20097,7 +20115,8 @@ Mynard")}));
         E=Parameters_Systemic1.E_ascending_aorta_A,
         r=Parameters_Systemic1.r_ascending_aorta_A)
         annotation (Placement(transformation(extent={{-61,37},{-41,42}})));
-      ADAN_main.Components.Vessel_modules.pv_type_thoracic ascending_aorta_B(
+      ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
+        ascending_aorta_B(
         thoracic_pressure=thoracic_pressure,
         l=Parameters_Systemic1.l_ascending_aorta_B,
         E=Parameters_Systemic1.E_ascending_aorta_B,
@@ -21661,7 +21680,8 @@ Mynard")}));
         duration=1)   constrainedby Modelica.Blocks.Sources.Ramp
         annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
       Components.Baroreflex.HeartRate2 HR_BC(phi0(displayUnit="%") = 0.25,
-          HR_nom=1.1666666666667)
+        HR_max=3.25,
+        HR_nom=1.1666666666667)
         annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
       Modelica.Blocks.Math.InverseBlockConstraints inverseBlockConstraints
         annotation (Placement(transformation(extent={{-22,-46},{-76,-14}})));
@@ -22034,7 +22054,7 @@ Mynard")}));
       Physiolibrary.Types.Constants.FractionConst  HR1(k(displayUnit="1")=
           0.25)
         annotation (Placement(transformation(extent={{-40,16},{-24,30}})));
-      ADAN_main.Components.Vessel_modules.pv_type_thoracic
+      ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
         aortic_arch_C46(
         UseDistentionOutput=true,
         l=Parameters_Systemic1.l_aortic_arch_C46,
@@ -22198,7 +22218,7 @@ Mynard")}));
         r=Parameters_Systemic1.r_ascending_aorta_A,
         v_in=v_sas,
         t=t) annotation (Placement(transformation(extent={{-75,95},{-55,100}})));
-      ADAN_main.Components.Vessel_modules.pv_type_thoracic
+      ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
         ascending_aorta_B_module(
         thoracic_pressure=thoracic_pressure,
         u_in=ascending_aorta_A_module.u,
@@ -22207,7 +22227,7 @@ Mynard")}));
         E=Parameters_Systemic1.E_ascending_aorta_B,
         r=Parameters_Systemic1.r_ascending_aorta_B,
         t=t) annotation (Placement(transformation(extent={{-50,95},{-30,100}})));
-      ADAN_main.Components.Vessel_modules.pv_type_thoracic
+      ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
         ascending_aorta_C_module(
         thoracic_pressure=thoracic_pressure,
         u_in=ascending_aorta_B_module.u,
@@ -22216,7 +22236,7 @@ Mynard")}));
         E=Parameters_Systemic1.E_ascending_aorta_C,
         r=Parameters_Systemic1.r_ascending_aorta_C,
         t=t) annotation (Placement(transformation(extent={{-25,95},{-5,100}})));
-      ADAN_main.Components.Vessel_modules.pv_type_thoracic
+      ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
         ascending_aorta_D_module(
         thoracic_pressure=thoracic_pressure,
         u_in=ascending_aorta_C_module.u,
@@ -22266,7 +22286,7 @@ Mynard")}));
         E=Parameters_Systemic1.E_aortic_arch_C64,
         r=Parameters_Systemic1.r_aortic_arch_C64,
         t=t) annotation (Placement(transformation(extent={{-100,85},{-80,90}})));
-      ADAN_main.Components.Vessel_modules.pv_type_thoracic
+      ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
         aortic_arch_C94_module(
         thoracic_pressure=thoracic_pressure,
         u_in=aortic_arch_C64_module.u,
@@ -22315,7 +22335,7 @@ Mynard")}));
         E=Parameters_Systemic1.E_thoracic_aorta_C108,
         r=Parameters_Systemic1.r_thoracic_aorta_C108,
         t=t) annotation (Placement(transformation(extent={{25,85},{45,90}})));
-      ADAN_main.Components.Vessel_modules.pv_type_thoracic
+      ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic
         thoracic_aorta_C112_module(
         thoracic_pressure=thoracic_pressure,
         u_in=thoracic_aorta_C108_module.u,
@@ -28598,7 +28618,7 @@ Mynard")}));
     model CVS_7af_leveled
       extends CVS_7af(Systemic1(
           redeclare model Systemic_artery_thoracic =
-              ADAN_main.Components.Vessel_modules.Obsolete.pv_type_thoracic_leveled,
+              ADAN_main.Components.Vessel_modules.pv_type_leveled,
           redeclare model Systemic_artery =
               ADAN_main.Components.Vessel_modules.pv_type_leveled,
           redeclare model Systemic_vein =
@@ -28615,7 +28635,7 @@ Mynard")}));
             ADAN_main.Components.Auxiliary.AcausalConnector.Pq_terminator_p_leveled
             pq_terminator_inf_vc,
           redeclare
-            ADAN_main.Components.Vessel_modules.Obsolete.vv_type_thoracic_leveled
+            ADAN_main.Components.Vessel_modules.vv_type_thoracic_leveled
             ascending_aorta_A(sinAlpha=1),
           ascending_aorta_B(sinAlpha=1),
           ascending_aorta_C(sinAlpha=1),
@@ -29468,6 +29488,23 @@ Mynard")}));
           offset=-1,
           startTime=26.5) annotation (Placement(transformation(extent={{-100,
                   -100},{-80,-80}})));
+        output Physiolibrary.Types.Pressure brachial_pressure = Systemic1.brachial_L82_HeartLevel.u_C;
+
+      // output Modelica.SIunits.Position Systemic1_brachial_L82_HeartLevel_port_a_position = Systemic1.brachial_L82_HeartLevel.port_a.position;
+      // output Physiolibrary.Types.Pressure Systemic1_brachial_L82_HeartLevel_port_a_pressure = Systemic1.brachial_L82_HeartLevel.port_a.pressure;
+      // output Modelica.SIunits.Position Systemic1_brachial_L82_HeartLevel_port_b_position = Systemic1.brachial_L82_HeartLevel.port_b.position;
+      // output Physiolibrary.Types.Pressure Systemic1_brachial_L82_HeartLevel_port_b_pressure = Systemic1.brachial_L82_HeartLevel.port_b.pressure;
+      // output Physiolibrary.Types.Pressure Systemic1_brachial_L82_HeartLevel_u_C = Systemic1.brachial_L82_HeartLevel.u_C;
+      // output Modelica.SIunits.Position Systemic1_femoral_R226_hydrostatic_level = Systemic1.femoral_R226.hydrostatic_level;
+      // output Physiolibrary.Types.Pressure Systemic1_femoral_R226_u_C = Systemic1.femoral_R226.u_C;
+      // output Modelica.SIunits.Position Systemic1_internal_carotid_R8_B_hydrostatic_level = Systemic1.internal_carotid_R8_B.hydrostatic_level;
+      // output Physiolibrary.Types.Pressure Systemic1_internal_carotid_R8_B_u_C = Systemic1.internal_carotid_R8_B.u_C;
+      // output Physiolibrary.Types.Pressure Systemic1_brachial_L82_HeartLevel_hydrostatic_level = Systemic1.brachial_L82_HeartLevel.hydrostatic_level;
+      // output Modelica.SIunits.Position Systemic1_thoracic_aorta_C108_hydrostatic_level = Systemic1.thoracic_aorta_C108.hydrostatic_level;
+      // output Physiolibrary.Types.Pressure Systemic1_thoracic_aorta_C108_u_C = Systemic1.thoracic_aorta_C108.u_C;
+      // output Modelica.SIunits.Position Systemic1_tibiofibular_trunk_R234_hydrostatic_level = Systemic1.tibiofibular_trunk_R234.hydrostatic_level;
+      // output Physiolibrary.Types.Pressure Systemic1_tibiofibular_trunk_R234_u_C = Systemic1.tibiofibular_trunk_R234.u_C;
+      // output Physiolibrary.Types.Pressure heartComponent_aorticValve_q_out_pressure = heartComponent.aorticValve.q_out.pressure;
       equation
         connect(switch1.y, condHR.u) annotation (Line(points={{24.7,59},{32.35,
                 59},{32.35,60},{40.8,60}}, color={0,0,127}));
