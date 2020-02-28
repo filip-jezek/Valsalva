@@ -56,6 +56,8 @@ if len(sys.argv) > 1:
 	filename = sys.argv[1]
 
 d = DyMat.DyMatFile(filename)
+toc = time.time()
+print("Opening result in ", toc - tic, " s")
 
 var_set = extractVars(d)
 
@@ -65,7 +67,7 @@ print("Loading result in ", toc - tic, " s")
 cf = importCostFunction()
 costs = cf.calculateCosts(var_set)
 
-print("Calculating costs in ", time.time() - toc, " s")
+print("Calculating costs in ", time.time() - tic, " s")
 
 writeCost(costs)
 logOutput(costs)

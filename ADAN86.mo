@@ -1748,6 +1748,7 @@ P_hs/2")}));
         parameter Volume V_min "minimal collapsing pressure";
         parameter Pressure p0 "Nominal pressure for initialization";
         Pressure p "Fluid pressure";
+        Modelica.SIunits.Radius r = sqrt(V/(l*Modelica.Constants.pi)) "Actual vessel radius";
 
 
         outer Settings settings
@@ -1854,7 +1855,8 @@ P_hs/2")}));
         "Fit of venous PV data from Moreno 1970 by Ben (ebrandal@umich.edu)"
         extends compliance_base(
           V0 = Modelica.Constants.pi*r_n^2*l,
-          V_min = Modelica.Constants.pi*r_0^2*l);
+          V_min = Modelica.Constants.pi*r_0^2*l,
+          r(start = r_n, fixed = false));
         type Tension =   Real (final quantity = "Tension", final unit = "N/m");
         type Radius =   Modelica.SIunits.Radius(final nominal =   1e-6);
         type CircumferentialLength =   Modelica.SIunits.Length(final nominal =   1e-3);
@@ -1883,7 +1885,7 @@ P_hs/2")}));
         parameter Real e = 1.5;
 
         // DIAMETERS AND LENGTHS
-        Radius r(start = r_n, fixed = false) "Actual vessel radius";
+      //  Radius r(start = r_n, fixed = false);
         parameter Radius r_n "nominal vessel radius";
         parameter Radius r_0 = sqrt(V_0/(l*Modelica.Constants.pi)) "Zero-pressure vessel radius";
         CircumferentialLength L = r*(2*Modelica.Constants.pi)
@@ -1956,8 +1958,8 @@ P_hs/2")}));
 
         der(A)*tau  =  phi_ - A;
 
-        // VOLUME equation
-        Modelica.Constants.pi*r^2*l  =  V;
+        // VOLUME equation - already contained in base class
+        // Modelica.Constants.pi*r^2*l  =  V;
 
         // pressure-tension equation
         p*r  =  T;
@@ -2085,6 +2087,8 @@ P_hs/2")}));
       V_min = compliant_vessel.V_min,
       volume(start = compliant_vessel.V0, fixed = true));
 
+      final parameter Boolean dynamicResistance = false;
+
       parameter Boolean disableVenoconstriction=false   "Disable the phi effect on compliance on this particular element" annotation(choices(checkBox=true),Dialog(group = "Parameters"));
 
       parameter Physiolibrary.Types.Pressure p0= settings.tissues_nominal_venules_pressure "nominal venous pressure";
@@ -2102,6 +2106,9 @@ P_hs/2")}));
 
       Physiolibrary.Types.Pressure p = compliant_vessel.p;
 
+      Physiolibrary.Types.HydraulicResistance R_dynamic = if not dynamicResistance then R
+        else 8*settings.blood_mu*l/(Modelica.Constants.pi*(( compliant_vessel.r^2/r*settings.venous_diameter_correction)^4));
+
 
         replaceable Interfaces.compliance_tensionBased compliant_vessel(
           l=l,
@@ -2114,9 +2121,9 @@ P_hs/2")}));
     equation
 
       if E == 0 or not UseInertance then
-          (u_in_hs -u_out_hs)/R = v_out;
+          (u_in_hs -u_out_hs)/R_dynamic = v_out;
       else
-        der(v_out) = (u_in_hs -u_out_hs-R*v_out)/I;
+        der(v_out) = (u_in_hs -u_out_hs-R_dynamic *v_out)/I;
       end if;
 
       der(volume) = netFlow;
@@ -3850,9 +3857,9 @@ P_hs/2")}));
       parameter Modelica.SIunits.Height add_length=0
         "Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size.";
 
-      Modelica.SIunits.Height added_height = sin(Tilt)*add_length "Tilted additional height of the tissue mass center";
-      Modelica.SIunits.Height height=port_b.position - port_a.position "height difference between connectors";
-      Modelica.SIunits.Position hydrostatic_level = port_a.position + (height + added_height)/2;
+      Modelica.SIunits.Height added_height = (port_a.position + height/2)*(settings.hydrostaticLevel_correction -1) + sin(Tilt)*add_length "Tilted additional height of the tissue mass center";
+      Modelica.SIunits.Height height=port_b.position - port_a.position "height difference between connectors. Already includes Tilt information, as the distances in ports are tilted";
+      Modelica.SIunits.Position hydrostatic_level = port_a.position + (height + sin(Tilt)*added_height)/2;
     //   Physiolibrary.Types.Pressure hydrostatic_pressure = hydrostatic_level*settings.blood_rho*Modelica.Constants.g_n "Total hydrostatic pressure at given point (synthetic)";
     //   Physiolibrary.Types.Pressure hydraulic_pressure = u_C - hydrostatic_pressure "Vessel pressure without the hydrostatic part (synthetic)";
 
@@ -3871,44 +3878,44 @@ P_hs/2")}));
               lineThickness=1,
               horizontalAlignment=TextAlignment.Right,
               textString=DynamicSelect("level B", String(port_b.position*100, significantDigits=2) + " cm"))}),
-            Diagram(graphics={
-              Text(
-                extent={{-100,-18},{-80,2}},
-                lineColor={28,108,200},
-                lineThickness=0.5,
-                textString="-
+          Diagram(graphics={
+            Text(
+              extent={{-100,-18},{-80,2}},
+              lineColor={28,108,200},
+              lineThickness=0.5,
+              textString="-
 P_hs/2
 -
 P_hs_plus_dist"),
-              Text(
-                extent={{-30,-32},{32,-20}},
-                lineColor={28,108,200},
-                lineThickness=0.5,
-                textString="P_hs ~ Tilt*|A B|
+            Text(
+              extent={{-30,-32},{32,-20}},
+              lineColor={28,108,200},
+              lineThickness=0.5,
+              textString="P_hs ~ Tilt*|A B|
 P_hs_plus_dist ~ Tilt*(add_length /2)"),
-              Line(
-                points={{-100,-20},{100,-20}},
-                color={28,108,200},
-                thickness=0.5,
-                arrow={Arrow.Open,Arrow.Open}),
-              Text(
-                extent={{80,-16},{100,2}},
-                lineColor={28,108,200},
-                lineThickness=0.5,
-                textString="-
+            Line(
+              points={{-100,-20},{100,-20}},
+              color={28,108,200},
+              thickness=0.5,
+              arrow={Arrow.Open,Arrow.Open}),
+            Text(
+              extent={{80,-16},{100,2}},
+              lineColor={28,108,200},
+              lineThickness=0.5,
+              textString="-
 P_hs/2
 +
 P_hs_plus_dist"),
-              Line(
-                points={{-20,60},{-20,20}},
-                color={28,108,200},
-                arrow={Arrow.Open,Arrow.None}),
-              Text(
-                extent={{-14,-6},{14,6}},
-                lineColor={28,108,200},
-                origin={-28,38},
-                rotation=90,
-                textString="+ %add_length / 2")}));
+            Line(
+              points={{-20,60},{-20,20}},
+              color={28,108,200},
+              arrow={Arrow.Open,Arrow.None}),
+            Text(
+              extent={{-14,-6},{14,6}},
+              lineColor={28,108,200},
+              origin={-28,38},
+              rotation=90,
+              textString="+ %add_length / 2")}));
     end systemic_tissue_leveled;
 
   end Vessel_modules;
@@ -19761,8 +19768,11 @@ Mynard")}));
       parameter Boolean EvaluateFunctionalParams = true "Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation."
         annotation(choices(checkBox=true), Dialog(tab = "Hide results from dataset", group = "Other"));
 
+    //experimental
+      parameter Fraction hydrostaticLevel_correction = 1 "Lenghten the body to observe some reaction to tilt";
 
-      annotation (defaultComponentName =     "settings",
+        annotation(Dialog(tab = "Experimental", group = "Other"),
+                  defaultComponentName =     "settings",
                  defaultComponentPrefixes = "inner",
                  missingInnerMessage =      "The Settings object is missing. Add a Settings to the top level and make it 'outer'",
       Icon(coordinateSystem(preserveAspectRatio=false), graphics={
@@ -21685,7 +21695,7 @@ Mynard")}));
         annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
       Modelica.Blocks.Math.InverseBlockConstraints inverseBlockConstraints
         annotation (Placement(transformation(extent={{-22,-46},{-76,-14}})));
-      Physiolibrary.Types.Constants.FrequencyConst frequency(k=1.4833333333333)
+      Physiolibrary.Types.Constants.FrequencyConst frequency(k=1.4)
         annotation (Placement(transformation(extent={{0,-34},{-8,-26}})));
     equation
       connect(heartRate2_1.phi, Tilt_ramp.y) annotation (Line(points={{-60,50},
@@ -29373,36 +29383,6 @@ Mynard")}));
         Components.ConditionalConnection condHeartPhi(disconnectedValue=0.25,
             disconnected=false) annotation (Placement(transformation(extent={{
                   42,37.2592},{54,47.9259}})));
-      equation
-        connect(switch1.y, condHR.u) annotation (Line(points={{24.7,59},{32.35,
-                59},{32.35,60},{40.8,60}}, color={0,0,127}));
-        connect(useAutonomousPhi.y, switch1.u2) annotation (Line(points={{-1,60},
-                {4,60},{4,59},{8.6,59}}, color={255,0,255}));
-        connect(Systemic1.phi_baroreflex, switch1.u1) annotation (Line(points={{-27.4,
-                45.4},{-27.4,72},{4,72},{4,64.6},{8.6,64.6}},        color={0,0,
-                127}));
-        connect(condPhi.u, condHR.u) annotation (Line(points={{-27.2,4.00002},{
-                -27.2,36},{30,36},{30,59},{32.35,59},{32.35,60},{40.8,60}},
-              color={0,0,127}));
-        connect(heartComponent.phi, condHeartPhi.y) annotation (Line(points={{-16,-16},
-                {60,-16},{60,42},{54.6,42}},          color={0,0,127}));
-        connect(condHeartPhi.u, condHR.u) annotation (Line(points={{40.8,42},{
-                34,42},{34,60},{40.8,60}}, color={0,0,127}));
-        connect(phi.y, switch1.u3) annotation (Line(points={{-49,4},{-38,4},{
-                -38,53.4},{8.6,53.4}}, color={0,0,127}));
-        annotation (experiment(
-            StopTime=60,
-            Interval=0.02,
-            Tolerance=1e-05,
-            __Dymola_Algorithm="Cvode"));
-      end base;
-
-      model base_fastBaro "Faster baroreflex allows to observe its steadystate even in short simulations"
-        extends base(
-          Systemic1(
-            baroreceptor_carotid(Ts(displayUnit="s") = 3),
-            baroreceptor_aortic(Ts(displayUnit="s") = 3)));
-
         parameter Modelica.SIunits.Length speedSegmentLength=
        Systemic1.common_carotid_L48_A.l +
        Systemic1.common_carotid_L48_B.l +
@@ -29425,13 +29405,98 @@ Mynard")}));
        Systemic1.external_iliac_R220.l +
        Systemic1.femoral_R222.l "Distance between carotid_L48 and femoral_R222";
 
-      output Physiolibrary.Types.Pressure brachial_pressure = Systemic1.brachial_L82.u_C;
+        parameter Modelica.SIunits.Length aortic_length=
+          Systemic1.ascending_aorta_A.l +
+          Systemic1.ascending_aorta_B.l +
+          Systemic1.ascending_aorta_C.l +
+          Systemic1.ascending_aorta_D.l +
+          Systemic1.aortic_arch_C2.l +
+          Systemic1.aortic_arch_C46.l +
+          Systemic1.aortic_arch_C64.l +
+          Systemic1.aortic_arch_C94.l +
+          Systemic1.thoracic_aorta_C96.l +
+          Systemic1.thoracic_aorta_C100.l +
+          Systemic1.thoracic_aorta_C104.l +
+          Systemic1.thoracic_aorta_C108.l +
+          Systemic1.thoracic_aorta_C112.l +
+          Systemic1.abdominal_aorta_C114.l +
+          Systemic1.abdominal_aorta_C136.l +
+          Systemic1.abdominal_aorta_C164.l +
+          Systemic1.abdominal_aorta_C176.l +
+          Systemic1.abdominal_aorta_C188.l +
+          Systemic1.abdominal_aorta_C192.l "Length of the whole aorta for comparison to body size";
+
+          parameter Real age = 35 "patient age";
+          Modelica.SIunits.Mass weight;
+          Modelica.SIunits.Height height(start = 1.7);
+          parameter Real BMI = 25;
+          Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*age+0.5409*(height*100)+0.3476*BMI) "Zemtsovskaja, HT 2019 for male subjects";
+          Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*age+2.5*height*100) "Rezai, Blood Press Monit 2013, for male subjects";
+
+      output Physiolibrary.Types.Pressure brachial_pressure = Systemic1.brachial_L82_HeartLevel.u_C;
+
+      output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
+      Real brachial_pressure_int "integration of pressure to find the true mean";
+      output Physiolibrary.Types.Pressure renal_capillary = Systemic1.renal_L166.u_C;
+      equation
+        BMI = weight/(height^2);
+        aortic_length = aortic_length_calc;
+
+        der(brachial_pressure_int) = brachial_pressure;
+
+        when heartComponent.smithOttesen_VentricularInteraction_flat_.systolicContraction then
+          brachial_pressure_mean = pre(brachial_pressure_int)/pre(heartComponent.smithOttesen_VentricularInteraction_flat_.tm);
+          reinit(brachial_pressure_int, 0);
+        end when;
+
+        connect(switch1.y, condHR.u) annotation (Line(points={{24.7,59},{32.35,
+                59},{32.35,60},{40.8,60}}, color={0,0,127}));
+        connect(useAutonomousPhi.y, switch1.u2) annotation (Line(points={{-1,60},
+                {4,60},{4,59},{8.6,59}}, color={255,0,255}));
+        connect(Systemic1.phi_baroreflex, switch1.u1) annotation (Line(points={{-27.4,
+                45.4},{-27.4,72},{4,72},{4,64.6},{8.6,64.6}},        color={0,0,
+                127}));
+        connect(condPhi.u, condHR.u) annotation (Line(points={{-27.2,4.00002},{
+                -27.2,36},{30,36},{30,59},{32.35,59},{32.35,60},{40.8,60}},
+              color={0,0,127}));
+        connect(heartComponent.phi, condHeartPhi.y) annotation (Line(points={{-16,-16},
+                {60,-16},{60,42},{54.6,42}},          color={0,0,127}));
+        connect(condHeartPhi.u, condHR.u) annotation (Line(points={{40.8,42},{
+                34,42},{34,60},{40.8,60}}, color={0,0,127}));
+        connect(phi.y, switch1.u3) annotation (Line(points={{-49,4},{-38,4},{
+                -38,53.4},{8.6,53.4}}, color={0,0,127}));
         annotation (experiment(
             StopTime=30,
             Interval=0.01,
             Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"),
+                    experiment(
+            StopTime=60,
+            Interval=0.02,
+            Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
+      end base;
+
+      model base_fastBaro "Faster baroreflex allows to observe its steadystate even in short simulations"
+        extends base(
+          Systemic1(
+            baroreceptor_carotid(Ts(displayUnit="s") = 3),
+            baroreceptor_aortic(Ts(displayUnit="s") = 3)));
+
+
+
       end base_fastBaro;
+
+      model base_denervatedBaseline
+        extends base_fastBaro(settings(tissues_nominal_arterioles_pressure(
+                displayUnit="Pa") = 16766, tissues_nominal_venules_pressure(
+                displayUnit="Pa") = 588), Systemic1(Parameters_Systemic1(k_E=
+                  0.558)));
+        annotation (experiment(
+            StopTime=30,
+            Interval=0.01,
+            __Dymola_Algorithm="Cvode"));
+      end base_denervatedBaseline;
     end Baseline;
 
     package Tilt
@@ -29488,7 +29553,7 @@ Mynard")}));
           offset=-1,
           startTime=26.5) annotation (Placement(transformation(extent={{-100,
                   -100},{-80,-80}})));
-        output Physiolibrary.Types.Pressure brachial_pressure = Systemic1.brachial_L82_HeartLevel.u_C;
+      //   output Physiolibrary.Types.Pressure brachial_pressure = Systemic1.brachial_L82_HeartLevel.u_C;
 
       // output Modelica.SIunits.Position Systemic1_brachial_L82_HeartLevel_port_a_position = Systemic1.brachial_L82_HeartLevel.port_a.position;
       // output Physiolibrary.Types.Pressure Systemic1_brachial_L82_HeartLevel_port_a_pressure = Systemic1.brachial_L82_HeartLevel.port_a.pressure;
@@ -29505,7 +29570,19 @@ Mynard")}));
       // output Modelica.SIunits.Position Systemic1_tibiofibular_trunk_R234_hydrostatic_level = Systemic1.tibiofibular_trunk_R234.hydrostatic_level;
       // output Physiolibrary.Types.Pressure Systemic1_tibiofibular_trunk_R234_u_C = Systemic1.tibiofibular_trunk_R234.u_C;
       // output Physiolibrary.Types.Pressure heartComponent_aorticValve_q_out_pressure = heartComponent.aorticValve.q_out.pressure;
+      output Physiolibrary.Types.Pressure brachial_pressure = Systemic1.brachial_L82_HeartLevel.u_C;
+
+      output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
+      Real brachial_pressure_int "integration of pressure to find the true mean";
+      output Physiolibrary.Types.Pressure renal_capillary = Systemic1.renal_L166.u_C;
       equation
+        der(brachial_pressure_int) = brachial_pressure;
+
+        when heartComponent.smithOttesen_VentricularInteraction_flat_.systolicContraction then
+          brachial_pressure_mean = pre(brachial_pressure_int)/pre(heartComponent.smithOttesen_VentricularInteraction_flat_.tm);
+          reinit(brachial_pressure_int, 0);
+        end when;
+
         connect(switch1.y, condHR.u) annotation (Line(points={{24.7,59},{32.35,
                 59},{32.35,60},{40.8,60}}, color={0,0,127}));
         connect(useAutonomousPhi.y, switch1.u2) annotation (Line(points={{-1,60},
@@ -29528,6 +29605,30 @@ Mynard")}));
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end base;
+
+      model base_denervated
+        extends base(settings(tissues_nominal_arterioles_pressure(
+                displayUnit="Pa") = 16766, tissues_nominal_venules_pressure(
+                displayUnit="Pa") = 588), Systemic1(
+            baroreceptor_carotid(Ts(displayUnit="s") = 3),
+            baroreceptor_aortic(Ts(displayUnit="s") = 3),
+            Parameters_Systemic1(k_E=0.558)),
+          Tilt_ramp(
+            height=70*Modelica.Constants.pi/180,
+            duration=3,
+            startTime=10),
+          condHeartPhi(disconnected=true),
+          condPhi(disconnected=true),
+          heartRate(HR_max=3.25),
+          phi(
+            amplitude=0.33 - 0.25,
+            nperiod=1,
+            startTime=10));
+        annotation (experiment(
+            StopTime=30,
+            Interval=0.02,
+            __Dymola_Algorithm="Cvode"));
+      end base_denervated;
     end Tilt;
   annotation(preferredView="info",
   version="2.3.2-beta",
