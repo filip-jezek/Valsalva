@@ -26879,7 +26879,8 @@ Mynard")}));
             smooth=Smooth.None));
         connect(conditionalConnection.y,
                           ventricularInteraction_flat. HR) annotation (Line(
-              points={{-17,8},{-14.2,8}},                     color={0,0,127}));
+              points={{-21.4,6.66667},{-18,6.66667},{-18,8},{-14.2,8}},
+                                                              color={0,0,127}));
         connect(ventricularInteraction_flat.beat,pressure_envelope. beat)
           annotation (Line(points={{-14.2,-4},{-150,-4}}, color={255,0,255}));
         connect(pressure_envelope_data.p,IntraThoracicPressure. aortic_pressure)
@@ -26918,7 +26919,8 @@ Mynard")}));
           annotation (Line(points={{-116.4,-10},{-116,-10},{-116,24},{-113,24}},
               color={0,0,127}));
         connect(conditionalConnection1.y, ventricularInteraction_flat.phi)
-          annotation (Line(points={{-97,24},{-14.2,24}},  color={0,0,127}));
+          annotation (Line(points={{-101.4,22.6667},{-58,22.6667},{-58,24},{
+                -14.2,24}},                               color={0,0,127}));
         connect(systemic_baroreflex.phi_baroreflex, conditionalConnection2.u1)
           annotation (Line(points={{-116.4,-10},{-116,-10},{-116,2},{-113,2}},
               color={0,0,127}));
@@ -27953,11 +27955,8 @@ Mynard")}));
       end heartRig_base;
 
       model heartRig_smith
-        extends heartRig_base(
-          redeclare Components.Smith.HeartSmith heartComponent(
-              UseFrequencyInput=true, UseThoracicPressureInput=true),
-          redeclare Components.Smith.PulmonarySmith pulmonaryComponent,
-          venousPressure(
+        extends heartRig_base(redeclare Components.Smith.PulmonarySmith
+            pulmonaryComponent, venousPressure(
             rising=50,
             width=49,
             falling=1,
@@ -28006,9 +28005,6 @@ Mynard")}));
 
       model heartRig_smith_phi
         extends heartRig_base(
-          redeclare Components.Smith.HeartSmith heartComponent(
-              UseFrequencyInput=true, UseThoracicPressureInput=true,
-            UsePhiInput=true),
           redeclare Components.Smith.PulmonarySmith pulmonaryComponent,
           venousPressure(
             rising=50,
@@ -28036,6 +28032,325 @@ Mynard")}));
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end heartRig_smith_phi;
+
+      model heartRig_base2
+        parameter Boolean VenousToneEffect = false;
+
+        Components.ConditionalConnection condHR(disconnectedValue=0.25,
+            disconnected=true) annotation (Placement(transformation(extent={{34,
+                  55.2592},{46,65.9259}})));
+      Modelica.Blocks.Sources.Trapezoid           thoracic_pressure(
+          amplitude=40*133,
+          rising=2,
+          width=20,
+          falling=2,
+          period=200,
+          nperiod=1,
+          offset=0,
+          startTime=40)
+          annotation (Placement(transformation(extent={{-110,-50},{-90,-30}})));
+        Components.ConditionalConnection condTP(disconnectedValue=0, disconnected=
+             true) annotation (Placement(transformation(extent={{-77,-45.3333},{
+                  -63,-33.3333}})));
+        Components.Baroreflex.HeartRate heartRate
+          annotation (Placement(transformation(extent={{8,-28},{-4,-16}})));
+        replaceable
+        Components.Smith.HeartSmithOlufsen              heartComponent(
+          HR=1,
+          UseFrequencyInput=true,
+          UseThoracicPressureInput=true) constrainedby
+          Components.Auxiliary.HeartBase(UseFrequencyInput=true,
+            UseThoracicPressureInput=true)
+          annotation (Placement(transformation(extent={{-12,-32},{-32,-12}})));
+        replaceable
+        Components.Smith.PulmonarySmith             pulmonaryComponent(
+            UseThoracic_PressureInput=true) constrainedby
+          Components.Auxiliary.PulmonaryBase
+          annotation (Placement(transformation(extent={{-30,-62},{-10,-42}})));
+      Modelica.Blocks.Sources.Trapezoid phi(
+          amplitude=0.74,
+          rising=200,
+          width=50,
+          period=1000,
+          startTime=50,
+          falling=2,
+          nperiod=1,
+          offset=0.25)
+          annotation (Placement(transformation(extent={{-100,50},{-80,70}})));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume SystemicVeins(
+            usePressureInput=true, P=533.28954966)
+          annotation (Placement(transformation(extent={{20,0},{0,20}})));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume SystemicTissues(P=
+              13332.2387415)
+          annotation (Placement(transformation(extent={{-120,-20},{-100,0}})));
+      Modelica.Blocks.Sources.Trapezoid venousPressure(
+          amplitude=133*30,
+          rising=200,
+          width=50,
+          period=1000,
+          startTime=50,
+          falling=2,
+          nperiod=1,
+          offset=-15*133)
+          annotation (Placement(transformation(extent={{-60,20},{-40,40}})));
+        Components.ConditionalConnection condHR1(disconnectedValue=4*133,
+            disconnected=false)
+                               annotation (Placement(transformation(extent={{-18,
+                  25.2592},{-6,35.9259}})));
+      Physiolibrary.Hydraulic.Components.ElasticVesselElastance
+                             aorta(
+          ZeroPressureVolume=0,
+          volume_start=0.0001241,
+          Elastance=92165766.41999) annotation (Placement(transformation(extent={{-52,-20},
+                  {-32,0}})));
+        Physiolibrary.Hydraulic.Components.Resistor
+                 Rsys(Resistance(displayUnit="(mmHg.min)/l") = 7.9993432449)
+          annotation (Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=180,
+              origin={-70,-10})));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume pulmonaryVeins(
+            usePressureInput=true, P=533.28954966)
+          annotation (Placement(transformation(extent={{84,-42},{64,-22}})));
+        Physiolibrary.Hydraulic.Components.Resistor
+                 Rsys1(Resistance(displayUnit="(mmHg.min)/l") = 7999343.2449)
+          annotation (Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=180,
+              origin={28,-52})));
+      equation
+        connect(thoracic_pressure.y, condTP.u) annotation (Line(points={{-89,-40},
+                {-84,-40},{-84,-40},{-78.4,-40}}, color={0,0,127}));
+        connect(condTP.y, heartComponent.thoracic_pressure_input) annotation (
+            Line(points={{-62.3,-40},{-22,-40},{-22,-32}}, color={0,0,127}));
+        connect(condTP.y, pulmonaryComponent.thoracic_pressure) annotation (Line(
+              points={{-62.3,-40},{-54,-40},{-54,-62},{-20,-62}}, color={0,0,127}));
+        connect(heartRate.HR, heartComponent.frequency_input)
+          annotation (Line(points={{-4.12,-22},{-12,-22}}, color={0,0,127}));
+        connect(condHR.y, heartRate.phi) annotation (Line(points={{46.6,60},{60,
+                60},{60,-22},{8,-22}}, color={0,0,127}));
+        connect(pulmonaryComponent.port_a,heartComponent. pa) annotation (Line(
+            points={{-30,-52},{-48,-52},{-48,-32},{-32,-32}},
+            color={0,0,0},
+            thickness=1));
+        connect(condHR.u, phi.y) annotation (Line(points={{32.8,60},{-24,60},{
+                -24,60},{-79,60}}, color={0,0,127}));
+        connect(heartComponent.sv, SystemicVeins.y) annotation (Line(
+            points={{-12,-12},{-6,-12},{-6,10},{0,10}},
+            color={0,0,0},
+            thickness=1));
+        connect(venousPressure.y, condHR1.u) annotation (Line(points={{-39,30},
+                {-30,30},{-30,30},{-19.2,30}}, color={0,0,127}));
+        connect(condHR1.y, SystemicVeins.pressure) annotation (Line(points={{-5.4,30},
+                {30,30},{30,10},{20,10}},          color={0,0,127}));
+        connect(SystemicTissues.y, Rsys.q_out) annotation (Line(
+            points={{-100,-10},{-80,-10}},
+            color={0,0,0},
+            thickness=1));
+        connect(Rsys.q_in, aorta.q_in) annotation (Line(
+            points={{-60,-10},{-42,-10}},
+            color={0,0,0},
+            thickness=1));
+        connect(aorta.q_in, heartComponent.sa) annotation (Line(
+            points={{-42,-10},{-38,-10},{-38,-12},{-32,-12}},
+            color={0,0,0},
+            thickness=1));
+        connect(pulmonaryVeins.y, heartComponent.pv) annotation (Line(
+            points={{64,-32},{-12,-32}},
+            color={0,0,0},
+            thickness=1));
+        connect(pulmonaryVeins.pressure, SystemicVeins.pressure) annotation (
+            Line(points={{84,-32},{84,10},{20,10}}, color={0,0,127}));
+        connect(pulmonaryComponent.port_b, Rsys1.q_out) annotation (Line(
+            points={{-10,-52},{18,-52}},
+            color={0,0,0},
+            thickness=1));
+        connect(Rsys1.q_in, pulmonaryVeins.y) annotation (Line(
+            points={{38,-52},{52,-52},{52,-32},{64,-32}},
+            color={0,0,0},
+            thickness=1));
+        annotation (experiment(
+            StopTime=300,
+            Interval=0.02,
+            Tolerance=1e-07,
+            __Dymola_Algorithm="Dassl"));
+      end heartRig_base2;
+
+      model heartRig_base2_mynards
+        extends heartRig_base2(redeclare
+            Components.Smith.HeartSmithOlufsenMynard heartComponent);
+      end heartRig_base2_mynards;
+
+      model heartRig_base2TriSeg
+        parameter Boolean VenousToneEffect = false;
+
+        Components.ConditionalConnection condHR(disconnectedValue=0.25,
+            disconnected=true) annotation (Placement(transformation(extent={{34,
+                  55.2592},{46,65.9259}})));
+      Modelica.Blocks.Sources.Trapezoid           thoracic_pressure(
+          amplitude=40*133,
+          rising=2,
+          width=20,
+          falling=2,
+          period=200,
+          nperiod=1,
+          offset=0,
+          startTime=40)
+          annotation (Placement(transformation(extent={{-110,-50},{-90,-30}})));
+        Components.ConditionalConnection condTP(disconnectedValue=0, disconnected=
+             true) annotation (Placement(transformation(extent={{-77,-45.3333},{
+                  -63,-33.3333}})));
+        Components.Baroreflex.HeartRate heartRate
+          annotation (Placement(transformation(extent={{8,-28},{-4,-16}})));
+        replaceable
+        Components.Smith.PulmonarySmith             pulmonaryComponent(
+            UseThoracic_PressureInput=true) constrainedby
+          Components.Auxiliary.PulmonaryBase
+          annotation (Placement(transformation(extent={{-30,-62},{-10,-42}})));
+      Modelica.Blocks.Sources.Trapezoid phi(
+          amplitude=0.74,
+          rising=200,
+          width=50,
+          period=1000,
+          startTime=50,
+          falling=2,
+          nperiod=1,
+          offset=0.25)
+          annotation (Placement(transformation(extent={{-100,50},{-80,70}})));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume SystemicVeins(
+            usePressureInput=true, P=533.28954966)
+          annotation (Placement(transformation(extent={{20,0},{0,20}})));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume SystemicTissues(P=13332.2387415)
+          annotation (Placement(transformation(extent={{-120,-20},{-100,0}})));
+      Modelica.Blocks.Sources.Trapezoid venousPressure(
+          amplitude=133*30,
+          rising=200,
+          width=50,
+          period=1000,
+          startTime=50,
+          falling=2,
+          nperiod=1,
+          offset=-15*133)
+          annotation (Placement(transformation(extent={{-60,20},{-40,40}})));
+        Components.ConditionalConnection condHR1(disconnectedValue=4*133,
+            disconnected=false)
+                               annotation (Placement(transformation(extent={{-18,
+                  25.2592},{-6,35.9259}})));
+      Physiolibrary.Hydraulic.Components.ElasticVesselElastance
+                             aorta(
+          ZeroPressureVolume=0,
+          volume_start=0.0001241,
+          Elastance=92165766.41999) annotation (Placement(transformation(extent={{-52,-20},
+                  {-32,0}})));
+        Physiolibrary.Hydraulic.Components.Resistor
+                 Rsys(Resistance(displayUnit="(mmHg.min)/l") = 7.9993432449)
+          annotation (Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=180,
+              origin={-70,-10})));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume pulmonaryVeins(
+            usePressureInput=true, P=533.28954966)
+          annotation (Placement(transformation(extent={{84,-42},{64,-22}})));
+        Physiolibrary.Hydraulic.Components.Resistor
+                 Rsys1(Resistance(displayUnit="(mmHg.min)/l") = 7999343.2449)
+          annotation (Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=180,
+              origin={28,-52})));
+        Cardiovascular.Model.Complex.Components.Heart heart
+          annotation (Placement(transformation(extent={{-10,-12},{-30,-32}})));
+        inner Cardiovascular.Model.Complex.Environment.ComplexEnvironment settings(
+            condition(heartBeat(displayUnit="1/min") = 1.25))
+          annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+
+                     Physiolibrary.Types.Volume SV_LV;
+          Physiolibrary.Types.VolumeFlowRate CO_LV=SV_LV/
+              settings.HeartRate "CO using SV x HR";
+          Physiolibrary.Types.Volume CO_beat;
+         //     Physiolibrary.Types.VolumeFlowRate CO_LV2 "CO using integration-reset";
+        Physiolibrary.Types.Volume ESV_LV_m;
+           Physiolibrary.Types.Volume ESV_LV;
+        Physiolibrary.Types.Volume EDV_LV_m;
+           Physiolibrary.Types.Volume EDV_LV;
+           parameter Physiolibrary.Types.Time tau = 1e-3 "integration time for claculation ESV and EDV";
+      equation
+        der(CO_beat) = - heart.leftHeartOutflow.q;
+         if heart.heart.ventricles.VLV > EDV_LV_m then
+           der(EDV_LV_m)*tau = heart.heart.ventricles.VLV - EDV_LV_m;
+         else
+           der(EDV_LV_m) = 0;
+         end if;
+
+         if heart.heart.ventricles.VLV < ESV_LV_m then
+           der(ESV_LV_m)*tau = heart.heart.ventricles.VLV - ESV_LV_m;
+         else
+           der(ESV_LV_m) = 0;
+         end if;
+
+        when heart.heart.ventricles.LW.beat then
+           EDV_LV = EDV_LV_m;
+          ESV_LV = ESV_LV_m;
+           reinit(EDV_LV_m, 0);
+           reinit(ESV_LV_m, 1e-3);
+
+           reinit(CO_beat, 0);
+
+          SV_LV = EDV_LV - ESV_LV;
+        end when;
+
+
+        connect(thoracic_pressure.y, condTP.u) annotation (Line(points={{-89,-40},
+                {-84,-40},{-84,-40},{-78.4,-40}}, color={0,0,127}));
+        connect(condTP.y, pulmonaryComponent.thoracic_pressure) annotation (Line(
+              points={{-62.3,-40},{-54,-40},{-54,-62},{-20,-62}}, color={0,0,127}));
+        connect(condHR.y, heartRate.phi) annotation (Line(points={{46.6,60},{60,
+                60},{60,-22},{8,-22}}, color={0,0,127}));
+        connect(condHR.u, phi.y) annotation (Line(points={{32.8,60},{-24,60},{
+                -24,60},{-79,60}}, color={0,0,127}));
+        connect(venousPressure.y, condHR1.u) annotation (Line(points={{-39,30},
+                {-30,30},{-30,30},{-19.2,30}}, color={0,0,127}));
+        connect(condHR1.y, SystemicVeins.pressure) annotation (Line(points={{-5.4,30},
+                {30,30},{30,10},{20,10}},          color={0,0,127}));
+        connect(SystemicTissues.y, Rsys.q_out) annotation (Line(
+            points={{-100,-10},{-80,-10}},
+            color={0,0,0},
+            thickness=1));
+        connect(Rsys.q_in, aorta.q_in) annotation (Line(
+            points={{-60,-10},{-42,-10}},
+            color={0,0,0},
+            thickness=1));
+        connect(pulmonaryVeins.pressure, SystemicVeins.pressure)
+          annotation (Line(points={{84,-32},{84,10},{20,10}}, color={0,0,127}));
+        connect(pulmonaryComponent.port_b, Rsys1.q_out) annotation (Line(
+            points={{-10,-52},{18,-52}},
+            color={0,0,0},
+            thickness=1));
+        connect(Rsys1.q_in, pulmonaryVeins.y) annotation (Line(
+            points={{38,-52},{52,-52},{52,-32},{64,-32}},
+            color={0,0,0},
+            thickness=1));
+        connect(heart.rightHeartInflow, SystemicVeins.y) annotation (Line(
+            points={{-10.2,-20},{-6,-20},{-6,10},{0,10}},
+            color={0,0,0},
+            thickness=1));
+        connect(heart.rightHeartOutflow, pulmonaryComponent.port_a) annotation (Line(
+            points={{-10,-24},{-10,-40},{-30,-40},{-30,-52}},
+            color={0,0,0},
+            thickness=1));
+        connect(heart.leftHeartInflow, pulmonaryVeins.y) annotation (Line(
+            points={{-30,-24},{-30,-32},{64,-32}},
+            color={0,0,0},
+            thickness=1));
+        connect(heart.leftHeartOutflow, aorta.q_in) annotation (Line(
+            points={{-30,-20.2},{-30,-10},{-42,-10}},
+            color={0,0,0},
+            thickness=1));
+        annotation (experiment(
+            StopTime=300,
+            Interval=0.02,
+            Tolerance=1e-07,
+            __Dymola_Algorithm="Sdirk34hw"));
+      end heartRig_base2TriSeg;
 
       model tree_tilt_base
         extends CVS_7af_leveled(redeclare replaceable Components.Smith.PulmonarySmith pulmonaryComponent(
@@ -29532,20 +29847,21 @@ Mynard")}));
           phi(
             amplitude=0.38 - 0.25,
             width=200,
-            nperiod=0,
+            nperiod=1,
             offset=0.25,
-            startTime=40),
+            startTime=30),
           Tilt_ramp(
             height=Modelica.Constants.pi/3,
             duration=2,
-            startTime=0));
+            startTime=30),
+          condPhi(disconnected=true));
 
         Modelica.Blocks.Logical.Switch switch1
           annotation (Placement(transformation(extent={{10,52},{24,66}})));
         Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi
           annotation (Placement(transformation(extent={{-22,50},{-2,70}})));
         Components.ConditionalConnection condHeartPhi(disconnectedValue=0.25,
-            disconnected=false) annotation (Placement(transformation(extent={{
+            disconnected=true)  annotation (Placement(transformation(extent={{
                   42,37.2592},{54,47.9259}})));
         Modelica.Blocks.Sources.Ramp time_(
           height=100,
