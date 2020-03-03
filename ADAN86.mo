@@ -4810,7 +4810,8 @@ P_hs/2")}));
 
             model compliance_linear
               extends Compliances.partialCompliance(
-                                      V_min = zpv/2);
+                                      V_min = zpv/2,
+                                      V0 = p0*C + zpv);
               parameter Physiolibrary.Types.HydraulicCompliance C "compliance";
               parameter Physiolibrary.Types.Volume zpv "Zero pressure volume";
             initial equation
@@ -9114,7 +9115,7 @@ P_hs_plus_dist"),
                 coordinateSystem(preserveAspectRatio=false)));
         end partialSystemicAV_interfaces;
 
-        partial model SystemicAV_base
+        model SystemicAV_base
           extends Subsystems.Systemic.partialSystemicAV_interfaces(UseBaroreflexOutput = true);
           parameter Physiolibrary.Types.Height brachial_division=0.182   "The height at which the left brachial artery is divided to have pressure measure at heart level";
 
@@ -10522,7 +10523,7 @@ P_hs_plus_dist"),
                 color={0,0,127}));
         end SystemicAV_base;
 
-        partial model SystemicAV_volumes
+        model SystemicAV_volumes
           extends ADAN_main.Components.Subsystems.Systemic.SystemicAV_base;
         Physiolibrary.Types.Volume total_volume = volume_arterial + volume_peripheral + volume_venous;
           Physiolibrary.Types.Volume volume_arterial = ascending_aorta_A.volume +
@@ -10950,6 +10951,7 @@ P_hs_plus_dist"),
 
         model Systemic_simplest
           extends Subsystems.Systemic.partialSystemicAV_interfaces(
+            UseBaroreflexOutput=true,
             redeclare model Systemic_vein =
                 ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vp_vein_tDF,
 
@@ -11024,19 +11026,6 @@ P_hs_plus_dist"),
               Placement(transformation(extent={{450,70},{470,90}}), iconTransformation(
                   extent={{430,-10},{450,10}})));
 
-          Subsystems.Baroreflex.Baroreflex baroreflex
-            annotation (Placement(transformation(extent={{-150,152},{-130,132}})));
-          Subsystems.Baroreflex.Baroreceptor baroreceptor_aortic(epsilon_start=0.76,
-              s_start=0.91)
-            annotation (Placement(transformation(extent={{-180,120},{-160,140}})));
-          Subsystems.Baroreflex.Baroreceptor baroreceptor_carotid(epsilon_start=0.4,
-              s_start=0.95)
-            annotation (Placement(transformation(extent={{-180,148},{-160,168}})));
-          Physiolibrary.Types.RealIO.FractionOutput  phi_baroreflex
-                                                        annotation (Placement(
-                transformation(extent={{-120,130},{-100,150}}),
-                                                            iconTransformation(extent={{-24,164},
-                    {-4,184}})));
         equation
           port_a.pressure = pq_terminator_v.u;
           port_b.q = -pq_terminator_inf_vc.v - pq_terminator_sup_vc.v;
@@ -11064,19 +11053,12 @@ P_hs_plus_dist"),
               points={{55,-2.5},{232.5,-2.5},{232.5,-2.5},{409,-2.5}},
               color={0,0,0},
               thickness=1));
-          connect(baroreflex.phi,phi_baroreflex)  annotation (Line(points={{-129.8,142},
-                  {-118,142},{-118,140},{-110,140}},
-                                      color={0,0,127}));
-          connect(baroreceptor_carotid.fbr,baroreflex. carotid_BR) annotation (
-              Line(points={{-160,158},{-156,158},{-156,152},{-150,152}}, color={0,
-                  0,127}));
-          connect(baroreceptor_aortic.fbr,baroreflex. aortic_BR) annotation (Line(
-                points={{-160,130},{-156,130},{-156,132},{-150,132}}, color={0,0,
-                  127}));
-          connect(baroreceptor_aortic.d, ascending_aorta_B.distentionFraction)
-            annotation (Line(points={{-180,130},{-228,130},{-228,92.5}}, color={0,0,127}));
-          connect(baroreceptor_carotid.d, ascending_aorta_B.distentionFraction)
-            annotation (Line(points={{-180,158},{-228,158},{-228,92.5}}, color={0,0,127}));
+          connect(baroreflex_system.aortic_distention, ascending_aorta_B.distentionFraction)
+            annotation (Line(points={{-238.667,145.333},{-252,145.333},{-252,
+                  104},{-228,104},{-228,92.5}}, color={0,0,127}));
+          connect(baroreflex_system.carotid_distention, ascending_aorta_B.distentionFraction)
+            annotation (Line(points={{-238.667,158.667},{-252,158.667},{-252,
+                  104},{-228,104},{-228,92.5}}, color={0,0,127}));
             annotation (Diagram(coordinateSystem(extent={{-320,-100},{440,200}})),
                 Icon(coordinateSystem(extent={{-320,-100},{440,200}}), graphics={
                           Bitmap(extent={{-320,-100},{440,200}}, fileName=
@@ -29867,14 +29849,15 @@ P_hs_plus_dist"),
           redeclare Components.Subsystems.Heart.Heart_Smith heartComponent(
               UseFrequencyInput=true, UseThoracicPressureInput=true),
           redeclare Components.Subsystems.Systemic.Systemic_simplest Systemic1(
+            UseBaroreflexOutput=true,
             UseThoracic_PressureInput=true,
             UsePhi_Input=true,
-            baroreflex(
+            baroreflex_system(baroreflex(
               resetAt=-1,
               fsn=0.025,
               g=1.0),
             baroreceptor_aortic(epsilon_start=1.19, delta0=0.3),
-            baroreceptor_carotid(epsilon_start=1.06, s_start=0.96),
+            baroreceptor_carotid(epsilon_start=1.06, s_start=0.96)),
             inferior_vena_cava_C8(
               l=2.5,
               r(displayUnit="mm") = 0.008,
@@ -30048,8 +30031,8 @@ P_hs_plus_dist"),
       model base_fastBaro "Faster baroreflex allows to observe its steadystate even in short simulations"
         extends base(
           Systemic1(
-            baroreceptor_carotid(Ts(displayUnit="s") = 3),
-            baroreceptor_aortic(Ts(displayUnit="s") = 3)));
+            baroreflex_system(baroreceptor_carotid(Ts(displayUnit="s") = 3),
+            baroreceptor_aortic(Ts(displayUnit="s") = 3))));
 
 
 
@@ -30073,8 +30056,8 @@ P_hs_plus_dist"),
           Systemic1(
             UseBaroreflexOutput=true,
             Parameters_Systemic1(k_E=0.4),
-            baroreceptor_carotid(Ts(displayUnit="s") = 0.1),
-            baroreceptor_aortic(Ts(displayUnit="s") = 0.1)),
+            baroreflex_system(baroreceptor_carotid(Ts(displayUnit="s") = 0.1),
+            baroreceptor_aortic(Ts(displayUnit="s") = 0.1))),
           redeclare Components.Subsystems.Heart.HeartSmithOlufsenMynard
             heartComponent(
             UseFrequencyInput=true,
@@ -30082,12 +30065,11 @@ P_hs_plus_dist"),
             UsePhiInput=true),
           redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
             pulmonaryComponent,
-          redeclare Components.Subsystems.Baroreflex.HeartRate2 heartRate(
-              HR_nom(displayUnit="1/min") = 1.16667, phi0=settings.phi0),
+          redeclare Components.Subsystems.Baroreflex.HeartRate2 heartRate(HR_nom(
+                displayUnit="1/min") = 1.16667, phi0=settings.phi0),
           condHR(disconnected=false),
           settings(
-            tissues_nominal_cardiac_output(displayUnit="l/min") =
-              0.00010666666666667,
+            tissues_nominal_cardiac_output(displayUnit="l/min") = 0.00010666666666667,
             heart_alphaE=0.2,
             arteries_UseVasoconstrictionEffect=true,
             exercise_factor_on_arterial_compliance=0.2,
@@ -30118,9 +30100,9 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{10,52},{24,66}})));
         Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi
           annotation (Placement(transformation(extent={{-22,50},{-2,70}})));
-        Components.Signals.ConditionalConnection condHeartPhi(disconnectedValue
-            =0.25, disconnected=true) annotation (Placement(transformation(
-                extent={{42,37.2592},{54,47.9259}})));
+        Components.Signals.ConditionalConnection condHeartPhi(disconnectedValue=0.25,
+            disconnected=true)
+          annotation (Placement(transformation(extent={{42,37.2592},{54,47.9259}})));
         Modelica.Blocks.Sources.Ramp time_(
           height=100,
           duration=100,
@@ -30184,9 +30166,9 @@ P_hs_plus_dist"),
         extends base(settings(tissues_nominal_arterioles_pressure(
                 displayUnit="Pa") = 16766, tissues_nominal_venules_pressure(
                 displayUnit="Pa") = 588), Systemic1(
-            baroreceptor_carotid(Ts(displayUnit="s") = 3),
+            baroreflex_system(baroreceptor_carotid(Ts(displayUnit="s") = 3),
             baroreceptor_aortic(Ts(displayUnit="s") = 3),
-            Parameters_Systemic1(k_E=0.558)),
+            Parameters_Systemic1(k_E=0.558))),
           Tilt_ramp(
             height=70*Modelica.Constants.pi/180,
             duration=3,
@@ -30198,6 +30180,7 @@ P_hs_plus_dist"),
             amplitude=0.33 - 0.25,
             nperiod=1,
             startTime=10));
+
         annotation (experiment(
             StopTime=30,
             Interval=0.02,
