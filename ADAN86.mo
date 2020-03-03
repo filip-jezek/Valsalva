@@ -3221,7 +3221,7 @@ type"),       Text(
             Components.Signals.ConditionalConnection condTP(disconnectedValue=0,
                 disconnected=true) annotation (Placement(transformation(extent=
                       {{-77,-45.3333},{-63,-33.3333}})));
-            Components.Subsystems.Baroreflex.HeartRate heartRate
+            Baroreflex.HeartRate2 heartRate2_1(phi0=0.25)
               annotation (Placement(transformation(extent={{8,-28},{-4,-16}})));
             replaceable Components.Subsystems.Heart.HeartSmithOlufsen
               heartComponent(
@@ -3293,11 +3293,10 @@ type"),       Text(
                 Line(points={{-62.3,-40},{-22,-40},{-22,-32}}, color={0,0,127}));
             connect(condTP.y, pulmonaryComponent.thoracic_pressure) annotation (Line(
                   points={{-62.3,-40},{-54,-40},{-54,-62},{-20,-62}}, color={0,0,127}));
-            connect(heartRate.HR, heartComponent.frequency_input)
+            connect(heartRate2_1.HR, heartComponent.frequency_input)
               annotation (Line(points={{-4.12,-22},{-12,-22}}, color={0,0,127}));
-            connect(condHR.y, heartRate.phi) annotation (Line(points={{46.6,60},
-                    {60,60},{60,-22},{8,-22}},
-                                           color={0,0,127}));
+            connect(condHR.y, heartRate2_1.phi) annotation (Line(points={{46.6,
+                    60},{60,60},{60,-22},{8,-22}}, color={0,0,127}));
             connect(pulmonaryComponent.port_a,heartComponent. pa) annotation (Line(
                 points={{-30,-52},{-48,-52},{-48,-32},{-32,-32}},
                 color={0,0,0},
@@ -3347,7 +3346,8 @@ type"),       Text(
           end heartRig_base;
 
           model heartRig_TriSeg
-            extends heartRig_base(redeclare Heart_TriSeg heartComponent);
+            extends heartRig_base(redeclare Heart_TriSeg heartComponent,
+                heartRate2_1(HR_nom=1.25));
           end heartRig_TriSeg;
         end Testers;
 
@@ -9115,13 +9115,12 @@ P_hs_plus_dist"),
         end partialSystemicAV_interfaces;
 
         partial model SystemicAV_base
-          extends Subsystems.Systemic.partialSystemicAV_interfaces;
+          extends Subsystems.Systemic.partialSystemicAV_interfaces(UseBaroreflexOutput = true);
           parameter Physiolibrary.Types.Height brachial_division=0.182   "The height at which the left brachial artery is divided to have pressure measure at heart level";
 
           Parametrization.Parameters_Systemic_tunable Parameters_Systemic1
             annotation (Placement(transformation(extent={{-96,-87},{-76,-82}})));
-          replaceable
-            ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vv_artery
+          replaceable ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vv_artery
             ascending_aorta_A constrainedby
             ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Interfaces.bg_vessel(
             l=Parameters_Systemic1.l_ascending_aorta_A,
@@ -9964,13 +9963,13 @@ P_hs_plus_dist"),
             r=Parameters_Systemic1.r_brachial_L82)
             annotation (Placement(transformation(extent={{-26,97},{-6,102}})));
 
-          replaceable ADAN_main.Components.Interfaces.Pq_terminator_v
-            pq_terminator_v(v=-v_aov) annotation (Placement(transformation(
-                  extent={{-298,78},{-278,98}})));
+          replaceable ADAN_main.Components.Interfaces.Pq_terminator_v pq_terminator_v(v=
+               -v_aov)
+            annotation (Placement(transformation(extent={{-298,78},{-278,98}})));
 
           replaceable ADAN_main.Components.Interfaces.Pq_terminator_p
-            pq_terminator_sup_vc(u=u_ra) annotation (Placement(transformation(
-                  extent={{380,160},{360,180}})));
+            pq_terminator_sup_vc(u=u_ra)
+            annotation (Placement(transformation(extent={{380,160},{360,180}})));
 
           replaceable ADAN_main.Components.Interfaces.Pq_terminator_p
             pq_terminator_inf_vc(u=u_ra)
@@ -28732,6 +28731,7 @@ P_hs_plus_dist"),
 
     partial model CVS_7af
       replaceable Components.Subsystems.Systemic.SystemicAV_volumes Systemic1(
+        baroreflex_system(
         baroreceptor_aortic(
           delta0=0.6,
           epsilon_start=1.23,
@@ -28740,12 +28740,11 @@ P_hs_plus_dist"),
           delta0=0.3,
           epsilon_start=1.07,
           s_start=0.945),
-        baroreflex(fsn=0.021),
+        baroreflex(                  fsn=0.021)),
         UseThoracic_PressureInput=true,
         UsePhi_Input=true,
         redeclare model Systemic_vein =
             ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vp_vein_tDF,
-
         femoral_vein_R34(LimitBackflow=true),
         femoral_vein_L64(LimitBackflow=true),
         superior_vena_cava_C88(UseOuter_thoracic_pressure=true),
@@ -28753,16 +28752,13 @@ P_hs_plus_dist"),
         inferior_vena_cava_C8(UseOuter_thoracic_pressure=true),
         hepatic_vein_T1_C10(UseOuter_thoracic_pressure=true,
             thoracic_pressure_ratio=0.8),
-        splachnic_vein(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio
-            =0.8),
-        renal_vein_T1_R18(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
+        splachnic_vein(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=0.8),
+        renal_vein_T1_R18(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=0.8),
         internal_iliac_vein_T1_R30(UseOuter_thoracic_pressure=true,
             thoracic_pressure_ratio=0.8),
         internal_iliac_vein_T1_L60(UseOuter_thoracic_pressure=true,
             thoracic_pressure_ratio=0.8),
-        renal_vein_T1_L22(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
+        renal_vein_T1_L22(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=0.8),
         inferior_vena_cava_C20(UseOuter_thoracic_pressure=true,
             thoracic_pressure_ratio=0.8),
         inferior_vena_cava_C16(UseOuter_thoracic_pressure=true,
@@ -28781,15 +28777,14 @@ P_hs_plus_dist"),
             thoracic_pressure_ratio=0.8),
         abdominal_aorta_C192(UseOuter_thoracic_pressure=true,
             thoracic_pressure_ratio=0.8),
-        mesenteric_artery(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        common_iliac_R216(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        common_iliac_L194(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8)) constrainedby
-        Components.Subsystems.Systemic.partialSystemicAV_interfaces annotation
-        (Placement(transformation(extent={{-58,18},{18,48}})),
+        mesenteric_artery(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=0.8),
+        common_iliac_R216(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=0.8),
+        common_iliac_L194(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=0.8))
+        constrainedby
+        Components.Subsystems.Systemic.partialSystemicAV_interfaces
+        annotation (Placement(transformation(extent={{-58,18},{18,48}})),
           __Dymola_choicesAllMatching=true);
+
     public
       replaceable Components.Subsystems.Heart.Heart_ADAN_VR heartComponent(
         UseFrequencyInput=true,
@@ -28805,8 +28800,8 @@ P_hs_plus_dist"),
           u_pvn(start=1266.1965),
           v_pas(start=1.0003076e-06),
           v_pat(start=2.2090626e-05))) constrainedby
-        Components.Subsystems.Pulmonary.partialPulmonary annotation (HideResult
-          =true, Placement(transformation(extent={{-34,-62},{-14,-42}})));
+        Components.Subsystems.Pulmonary.partialPulmonary annotation (HideResult=true,
+          Placement(transformation(extent={{-34,-62},{-14,-42}})));
     Modelica.Blocks.Sources.Trapezoid phi(
         amplitude=0.75,
         rising=2,
@@ -28820,8 +28815,8 @@ P_hs_plus_dist"),
       inner Components.Settings settings
         annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
       Components.Signals.ConditionalConnection condHR(disconnectedValue=0.25,
-          disconnected=true) annotation (Placement(transformation(extent={{42,
-                55.2592},{54,65.9259}})));
+          disconnected=true)
+        annotation (Placement(transformation(extent={{42,55.2592},{54,65.9259}})));
       replaceable Components.Subsystems.Baroreflex.HeartRate heartRate
         constrainedby Components.Subsystems.Baroreflex.HeartRate
         annotation (Placement(transformation(extent={{16,-28},{4,-16}})));
@@ -28836,11 +28831,11 @@ P_hs_plus_dist"),
         startTime=40)
         annotation (Placement(transformation(extent={{-102,-50},{-82,-30}})));
       Components.Signals.ConditionalConnection condTP(disconnectedValue=0,
-          disconnected=true) annotation (Placement(transformation(extent={{-69,
-                -45.3333},{-55,-33.3333}})));
+          disconnected=true) annotation (Placement(transformation(extent={{-69,-45.3333},
+                {-55,-33.3333}})));
       Components.Signals.ConditionalConnection condPhi(disconnectedValue=0.25,
-          disconnected=false) annotation (Placement(transformation(extent={{-26,
-                -0.44444},{-14,9.5556}})));
+          disconnected=false) annotation (Placement(transformation(extent={{-26,-0.44444},
+                {-14,9.5556}})));
     equation
       connect(Systemic1.port_b, heartComponent.sv) annotation (Line(
           points={{18,28},{38,28},{38,-12},{-16,-12}},
@@ -29088,13 +29083,13 @@ P_hs_plus_dist"),
     equation
       connect(condHR.u, Systemic1.HR) annotation (Line(points={{-6,54},{-19.6,
               54},{-19.6,45.6}}, color={0,0,127}));
-      connect(condHR.y, heartComponent.frequency_input) annotation (Line(points={{46.6,60},
+      connect(condHR.y, heartComponent.frequency_input) annotation (Line(points={{54.6,60},
               {52,60},{52,-22},{-16,-22}},         color={0,0,127}));
-      connect(Systemic1.phi_input, condPhi.y) annotation (Line(points={{-14,20},
-              {-10,20},{-10,4},{-1.4,4}},
+      connect(Systemic1.phi_input, condPhi.y) annotation (Line(points={{-16,20},
+              {-10,20},{-10,4.00002},{-13.4,4.00002}},
                                         color={0,0,127}));
       connect(Systemic1.phi_baroreflex, condPhi.u) annotation (Line(points={{-27.4,
-              45.4},{-27.4,28},{-15.2,28},{-15.2,4}},
+              45.4},{-27.4,28},{-27.2,28},{-27.2,4.00002}},
                                                 color={0,0,127}));
       annotation (experiment(
           StopTime=0.1,
@@ -30076,6 +30071,7 @@ P_hs_plus_dist"),
       model base
         extends CVS_7af_leveled(
           Systemic1(
+            UseBaroreflexOutput=true,
             Parameters_Systemic1(k_E=0.4),
             baroreceptor_carotid(Ts(displayUnit="s") = 0.1),
             baroreceptor_aortic(Ts(displayUnit="s") = 0.1)),
