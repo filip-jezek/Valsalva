@@ -3539,8 +3539,7 @@ type"),       Text(
               extends Modelica.Blocks.Interfaces.SO;
 
                 // Calcium mechanics
-              Real Ca_phi; //= mod(t+0.001,stim_period)/stim_period;
-              Real Ca_i = (a/(Ca_phi+eps))*exp(-b*(log(Ca_phi+eps)+c)^2) + Ca0;
+              Real Ca_i=(a/(t_cycle + eps))*exp(-b*(log(t_cycle + eps) + c)^2) + Ca0;
             // Ca_i = 2*(a/phi)*exp(-b*(log(phi)+c)^2) + 0.1*Ca0; // EXERCISE
 
             parameter Real a =    0.3099/2.13 " rat parameter ";
@@ -3554,20 +3553,61 @@ type"),       Text(
 
             // Physiolibrary.Types.Time stim_period = 1/frequency;
             parameter Real eps = 0.001 "Minimal Ca_i to prevent division by zero";
+              Physiolibrary.Types.RealIO.TimeOutput t_cycle "Time from start of the cycle"
+                annotation (Placement(transformation(extent={{92,90},{112,110}})));
             equation
               y = Ca_i;
 
-                der(Ca_phi) = frequency;
+              der(t_cycle) = frequency;
 
 
-                when Ca_phi > 1 then
-                  reinit(Ca_phi, 0);
-                end when;
+              when t_cycle > 1 then
+                reinit(t_cycle, 0);
+              end when;
 
 
               annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end CalciumMechanics;
+
+            model Atrium
+              Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_a
+                annotation (Placement(transformation(extent={{-10,-90},{10,-70}})));
+              Physiolibrary.Types.RealIO.TimeInput  t_cycle "Time from start of the cycle"
+                annotation (Placement(transformation(extent={{-114,-10},{-94,10}}),
+                    iconTransformation(extent={{-108,-10},{-88,10}})));
+
+            parameter Physiolibrary.Types.Time Tact = 0.10;
+            //
+              Real atriaCycle "Time from start of the atrial cycle";
+
+             parameter Real Emin = 0.05 + 0.20;
+             parameter Real Emax = 0.15 + 0.20;
+            //  % Emin = 0.05 ;
+            //  % Emax = 0.15 ;
+             parameter Real sigma_a = 0.125;
+              Real act=exp(-(atriaCycle/sigma_a)^2);
+              Real _E = (Emin + Emax*act);
+              Physiolibrary.Types.HydraulicElastance E=_E/Constants.ml_per_mmhg2SI;
+
+             Physiolibrary.Types.Volume V_LA( start = 100e-6);// = _VLA*Constants.ml2SI;
+            equation
+
+              der(V_LA) = port_a.q;
+              port_a.pressure = E*V_LA;
+
+              if t_cycle - Tact > 0.5 then
+                atriaCycle = t_cycle - Tact - 1;
+              elseif t_cycle - Tact < -0.5 then
+                atriaCycle = t_cycle - Tact + 1;
+              else
+                // its between
+                atriaCycle = t_cycle - Tact;
+              end if;
+
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                    coordinateSystem(preserveAspectRatio=false)));
+            end Atrium;
           end TriSegMechanics_components;
         end Auxiliary;
 
@@ -3785,38 +3825,6 @@ type"),       Text(
                 Tolerance=1e-07,
                 __Dymola_Algorithm="Cvode"));
           end TestTriSegMechVentricles;
-
-          model TestTriSegMech_all
-            Heart_TriSegMechanics heart_TriSegMechanics annotation (Placement(
-                  transformation(extent={{10,-10},{-10,10}})));
-            Pulmonary.PulmonaryTriSeg pulmonaryTriSeg annotation (Placement(
-                  transformation(extent={{-8,-54},{12,-34}})));
-            Systemic.Systemic_TriSeg systemic_TriSeg
-              annotation (Placement(transformation(extent={{-38,30},{38,60}})));
-          equation
-            connect(heart_TriSegMechanics.pa, pulmonaryTriSeg.port_a)
-              annotation (Line(
-                points={{-10,-10},{-20,-10},{-20,-44},{-8,-44}},
-                color={0,0,0},
-                thickness=1));
-            connect(heart_TriSegMechanics.pv, pulmonaryTriSeg.port_b)
-              annotation (Line(
-                points={{10,-10},{20,-10},{20,-44},{12,-44}},
-                color={0,0,0},
-                thickness=1));
-            connect(heart_TriSegMechanics.sa, systemic_TriSeg.port_a)
-              annotation (Line(
-                points={{-10,10},{-54,10},{-54,40},{-38,40}},
-                color={0,0,0},
-                thickness=1));
-            connect(systemic_TriSeg.port_b, heart_TriSegMechanics.sv)
-              annotation (Line(
-                points={{38,40},{60,40},{60,10},{10,10}},
-                color={0,0,0},
-                thickness=1));
-            annotation (Icon(coordinateSystem(preserveAspectRatio=false)),
-                Diagram(coordinateSystem(preserveAspectRatio=false)));
-          end TestTriSegMech_all;
         end Testers;
 
         partial model partialHeart
@@ -4828,6 +4836,13 @@ Mynard")}));
             annotation (Placement(transformation(extent={{80,-30},{60,-10}})));
           Auxiliary.TriSegMechanics_components.Ventricles ventricles
             annotation (Placement(transformation(extent={{-12,-6},{8,14}})));
+          Auxiliary.TriSegMechanics_components.Atrium ra
+            annotation (Placement(transformation(extent={{-40,50},{-60,70}})));
+          Auxiliary.TriSegMechanics_components.Atrium la
+            annotation (Placement(transformation(extent={{40,-10},{60,10}})));
+          Auxiliary.TriSegMechanics_components.CalciumMechanics
+            calciumMechanics
+            annotation (Placement(transformation(extent={{-68,6},{-48,26}})));
         equation
           connect(pulmonaryValve.q_out, pa) annotation (Line(
               points={{84,40},{92,40},{92,-100},{100,-100}},
@@ -4873,6 +4888,22 @@ Mynard")}));
                   0},{-60,0},{-60,4},{-12,4}}, color={0,0,127}));
           connect(HR0.y, ventricles.frequency) annotation (Line(points={{-75,0},{-44,0},
                   {-44,4},{-12,4}}, color={0,0,127}));
+          connect(ra.port_a, r_ra.q_out) annotation (Line(
+              points={{-50,52},{-50,40},{-60,40}},
+              color={0,0,0},
+              thickness=1));
+          connect(la.port_a, r_la.q_out) annotation (Line(
+              points={{50,-8},{50,-20},{60,-20}},
+              color={0,0,0},
+              thickness=1));
+          connect(calciumMechanics.frequency, HR0.y) annotation (Line(points={{
+                  -67,16},{-70,16},{-70,0},{-75,0}}, color={0,0,127}));
+          connect(calciumMechanics.frequency, frequency_input) annotation (Line(
+                points={{-67,16},{-80,16},{-80,0},{-106,0}}, color={0,0,127}));
+          connect(calciumMechanics.t_cycle, ra.t_cycle) annotation (Line(points
+                ={{-47.8,26},{-44,26},{-44,60},{-40.2,60}}, color={0,0,127}));
+          connect(calciumMechanics.t_cycle, la.t_cycle) annotation (Line(points
+                ={{-47.8,26},{22,26},{22,0},{40.2,0}}, color={0,0,127}));
         end Heart_TriSegMechanics;
       end Heart;
 
@@ -24339,6 +24370,43 @@ P_hs_plus_dist"),
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
             coordinateSystem(preserveAspectRatio=false)));
     end TestBasicCircuit;
+
+    model TestTriSegMech_all
+      Components.Subsystems.Heart.Heart_TriSegMechanics heart_TriSegMechanics
+        annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
+      Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg
+        annotation (Placement(transformation(extent={{-8,-54},{12,-34}})));
+      Components.Subsystems.Systemic.Systemic_TriSeg systemic_TriSeg
+        annotation (Placement(transformation(extent={{-38,30},{38,60}})));
+    equation
+      connect(heart_TriSegMechanics.pa, pulmonaryTriSeg.port_a) annotation (
+          Line(
+          points={{-10,-10},{-20,-10},{-20,-44},{-8,-44}},
+          color={0,0,0},
+          thickness=1));
+      connect(heart_TriSegMechanics.pv, pulmonaryTriSeg.port_b) annotation (
+          Line(
+          points={{10,-10},{20,-10},{20,-44},{12,-44}},
+          color={0,0,0},
+          thickness=1));
+      connect(heart_TriSegMechanics.sa, systemic_TriSeg.port_a) annotation (
+          Line(
+          points={{-10,10},{-54,10},{-54,40},{-38,40}},
+          color={0,0,0},
+          thickness=1));
+      connect(systemic_TriSeg.port_b, heart_TriSegMechanics.sv) annotation (
+          Line(
+          points={{38,40},{60,40},{60,10},{10,10}},
+          color={0,0,0},
+          thickness=1));
+      annotation (
+        Icon(coordinateSystem(preserveAspectRatio=false)),
+        Diagram(coordinateSystem(preserveAspectRatio=false)),
+        experiment(
+          StopTime=20,
+          Tolerance=1e-07,
+          __Dymola_Algorithm="Cvode"));
+    end TestTriSegMech_all;
   end tests;
 
   package Experiments
