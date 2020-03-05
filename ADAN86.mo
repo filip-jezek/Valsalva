@@ -3336,7 +3336,7 @@ type"),       Text(
             Real Cm =  2*xm/(xm^2 + ym^2);
             Real z =   3*Cm*Vw/(2*Am);
             Real epsf = (1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4;
-            Real SLo = Lsref*exp(epsf);
+            Real SLo(nominal = 1e-6) = Lsref*exp(epsf);
             // Sarcomere geometry
             Real sovr_ze = min(L_thick*0.5, SL*0.5);
             Real sovr_cle = max(SL*0.5 - (SL-L_thin),L_hbare*0.5);
@@ -3376,6 +3376,19 @@ type"),       Text(
             Real Jon = k_on*Ca_i*N*(1 + K_coop*(1 - N));
             Real Joff = k_off*P0*(1 + K_coop*N);
 
+
+            // Real dP1_0 = ka*P0*U_NR*N_overlap - kd*P1_0 - k1*f_alpha1o + km1*f_alpha0o;
+            // Real dP1_1 = dSL*P1_0 - kd*P1_1 - k1*f_alpha1i + km1*f_alpha0i;
+            // Real dP1_2 = 2*dSL*P1_1 - kd*P1_2 - k1*P1_2 + km1*P2_2;
+            // Real dP2_0 = -km1*f_alpha0o - k2*f_alpha2o + km2*P3_0 + k1*f_alpha1o;
+            // Real dP2_1 = dSL*P2_0 - k1*f_alpha0i - k2*f_alpha2i + km2*P3_1 + k1*f_alpha1i;
+            // Real dP2_2 = 2*dSL*P2_1 - km1*P2_2 - k2*P2_2 + km2*P3_2 + k1*P1_2;
+            // Real dP3_0 = +k2*f_alpha2o - km2*P3_0 - k3*f_alpha3o;
+            // Real dP3_1 = dSL*P3_0 + k2*f_alpha2i - km2*P3_1 - k3*f_alpha3i;
+            // Real dP3_2 = 2*dSL*P3_1 + k2*P2_2 - km2*P3_2 - k3*P3_2;
+            // Real dN =    - Jon + Joff;
+            // Real dU_NR = k1sr*(1 + kforce*(sigmapas + sigmaact))*U_SR - k2sr*U_NR;
+
             Real P1_0 "0th moment state A1,";
             Real P1_1 "1st moment state A1,";
             Real P1_2 "2nd moment state A1,";
@@ -3385,27 +3398,42 @@ type"),       Text(
             Real P3_0 "0th moment state A3,";
             Real P3_1 "1st moment state A3,";
             Real P3_2 "2nd moment state A3,";
-            Real N    "nonpermissive fraction";
+            Real N(start = 1)    "nonpermissive fraction";
             Real U_NR "U_NR represents the Non relaxed state";
-            Real SL "sarcomere length, um";
+            Real SL(nominal = 1e-6, start = 2.3) "sarcomere length, um";
               Modelica.Blocks.Interfaces.RealInput
                          Ca_i "Connector of Calcium input signal" annotation (Placement(
                     transformation(extent={{-120,-20},{-80,20}}), iconTransformation(extent=
                        {{-120,-20},{-80,20}})));
             equation
 
-            der(P1_0) = ka*P0*U_NR*N_overlap - kd*P1_0 - k1*f_alpha1o + km1*f_alpha0o;
-            der(P1_1) = dSL*P1_0 - kd*P1_1 - k1*f_alpha1i + km1*f_alpha0i;
-            der(P1_2) = 2*dSL*P1_1 - kd*P1_2 - k1*P1_2 + km1*P2_2;
-            der(P2_0) = -km1*f_alpha0o - k2*f_alpha2o + km2*P3_0 + k1*f_alpha1o;
-            der(P2_1) = dSL*P2_0 - k1*f_alpha0i - k2*f_alpha2i + km2*P3_1 + k1*f_alpha1i;
-            der(P2_2) = 2*dSL*P2_1 - km1*P2_2 - k2*P2_2 + km2*P3_2 + k1*P1_2;
-            der(P3_0) = +k2*f_alpha2o - km2*P3_0 - k3*f_alpha3o;
-            der(P3_1) = dSL*P3_0 + k2*f_alpha2i - km2*P3_1 - k3*f_alpha3i;
-            der(P3_2) = 2*dSL*P3_1 + k2*P2_2 - km2*P3_2 - k3*P3_2;
-            der(N)    = - Jon + Joff;
-            der(U_NR) = k1sr*(1 + kforce*(sigmapas + sigmaact))*U_SR - k2sr*U_NR;
-            der(SL) = dSL;
+             der(P1_0) = ka*P0*U_NR*N_overlap - kd*P1_0 - k1*f_alpha1o + km1*f_alpha0o;
+             der(P1_1) = dSL*P1_0 - kd*P1_1 - k1*f_alpha1i + km1*f_alpha0i;
+             der(P1_2) = 2*dSL*P1_1 - kd*P1_2 - k1*P1_2 + km1*P2_2;
+             der(P2_0) = -km1*f_alpha0o - k2*f_alpha2o + km2*P3_0 + k1*f_alpha1o;
+             der(P2_1) = dSL*P2_0 - k1*f_alpha0i - k2*f_alpha2i + km2*P3_1 + k1*f_alpha1i;
+             der(P2_2) = 2*dSL*P2_1 - km1*P2_2 - k2*P2_2 + km2*P3_2 + k1*P1_2;
+             der(P3_0) = +k2*f_alpha2o - km2*P3_0 - k3*f_alpha3o;
+             der(P3_1) = dSL*P3_0 + k2*f_alpha2i - km2*P3_1 - k3*f_alpha3i;
+             der(P3_2) = 2*dSL*P3_1 + k2*P2_2 - km2*P3_2 - k3*P3_2;
+             der(N)    = - Jon + Joff;
+             der(U_NR) = k1sr*(1 + kforce*(sigmapas + sigmaact))*U_SR - k2sr*U_NR;
+             der(SL) = dSL;
+
+
+            // der(P1_0) = 0;
+            // der(P1_1) = 0;
+            // der(P1_2) = 0;
+            // der(P2_0) = 0;
+            // der(P2_1) = 0;
+            // der(P2_2) = 0;
+            // der(P3_0) = 0;
+            // der(P3_1) = 0;
+            // der(P3_2) = 0;
+            // der(N)    = 0;
+            // der(U_NR) = 0;
+            // der(SL)   = 0;
+
 
               annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
@@ -3417,55 +3445,19 @@ type"),       Text(
                 Vw=89,
                 Amref=0.95*86,
                 xm=xm_LV,
-                ym=ym,
-                SL(start=2.31),
-                P1_0(start=0.0027),
-                P1_1(start=1.91e-05),
-                P1_2(start=2.68e-07),
-                P2_0(start=0.000542),
-                P2_1(start=5.03e-06),
-                P2_2(start=9.1e-08),
-                P3_0(start=0.00248),
-                P3_1(start=7.43e-05),
-                P3_2(start=4.13e-06),
-                N(start=0.941),
-                U_NR(start=0.0249))
+                ym=ym)
                 annotation (Placement(transformation(extent={{-32,30},{-12,50}})));
               VentricleWall SEP_wall(
                 Vw=34,
                 Amref=0.95*39,
                 xm=xm_SEP,
-                ym=ym,
-                SL(start=2.33),
-                P1_0(start=0.0028),
-                P1_1(start=8.95e-06),
-                P1_2(start=7.63e-08),
-                P2_0(start=0.000564),
-                P2_1(start=2.44e-06),
-                P2_2(start=2.79e-08),
-                P3_0(start=0.00273),
-                P3_1(start=5.31e-05),
-                P3_2(start=2.76e-06),
-                N(start=0.94),
-                U_NR(start=0.0261))
+                ym=ym)
                 annotation (Placement(transformation(extent={{-32,-10},{-12,10}})));
               VentricleWall RV_wall(
                 Vw=27,
                 Amref=0.95*110,
                 xm=xm_RV,
-                ym=ym,
-                SL(start=2.26),
-                P1_0(start=0.00228),
-                P1_1(start=6e-06),
-                P1_2(start=3.34e-08),
-                P2_0(start=0.000457),
-                P2_1(start=1.59e-06),
-                P2_2(start=1.15e-08),
-                P3_0(start=0.00244),
-                P3_1(start=3.07e-05),
-                P3_2(start=7.28e-07),
-                N(start=0.941),
-                U_NR(start=0.022))
+                ym=ym)
                 annotation (Placement(transformation(extent={{-32,-50},{-12,-30}})));
 
               Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
@@ -3474,11 +3466,12 @@ type"),       Text(
               CalciumMechanics calciumMechanics
                 annotation (Placement(transformation(extent={{-72,-10},{-52,10}})));
 
-              Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_lv annotation (
-                  Placement(transformation(extent={{70,50},{90,70}}), iconTransformation(
-                      extent={{70,50},{90,70}})));
               Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_rv annotation (
                   Placement(transformation(extent={{70,50},{90,70}}), iconTransformation(
+                      extent={{70,50},{90,70}})));
+              Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_lv annotation (
+                  Placement(transformation(extent={{70,-50},{90,-30}}),
+                                                                      iconTransformation(
                       extent={{70,-70},{90,-50}})));
 
               Real ptrans_LV=2*LV_wall.Tx/ym;
@@ -3490,15 +3483,15 @@ type"),       Text(
               Real _V_RV;
 
               // conversion to SI units
-              Physiolibrary.Types.Volume V_LV(start=163*Constants.ml2SI)=_V_LV*Constants.ml2SI;
-              Physiolibrary.Types.Volume V_RV(start=143*Constants.ml2SI)=_V_RV*Constants.ml2SI;
+              Physiolibrary.Types.Volume V_LV(start=200*Constants.ml2SI)=_V_LV*Constants.ml2SI;
+              Physiolibrary.Types.Volume V_RV(start=200*Constants.ml2SI)=_V_RV*Constants.ml2SI;
               Physiolibrary.Types.Pressure P_LV=_P_LV*Constants.mmHg2SI;
               Physiolibrary.Types.Pressure P_RV=_P_RV*Constants.mmHg2SI;
 
-              Real xm_LV(start=-5.09) "LV heart geometry variable, cm";
-              Real xm_SEP(start=2.17) "septum heart geometry variable, cm";
-              Real xm_RV(start=5.82) "RV heart geometry variable, cm";
-              Real ym(start=3.63) "Heart geometry variable, cm";
+              Real xm_LV(start=-4.8379205) "LV heart geometry variable, cm";
+              Real xm_SEP(start=2.889861) "septum heart geometry variable, cm";
+              Real xm_RV(start=6.617057) "RV heart geometry variable, cm";
+              Real ym(start=3.9518702) "Heart geometry variable, cm";
 
               // Init of the rest of the circulatory
               // V_SV start( 1423.2186 ),
@@ -3517,14 +3510,17 @@ type"),       Text(
               port_lv.pressure = P_LV;
               port_rv.pressure = P_RV;
 
-              // TriSeg
-              xm_LV = (-_V_LV - 0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm - LV_wall.Vm)
-                /_V_LV;
-              xm_SEP = (LV_wall.Tx + SEP_wall.Tx + RV_wall.Tx);
-              xm_RV = (+_V_RV + 0.5*RV_wall.Vw + 0.5*SEP_wall.Vw + SEP_wall.Vm - RV_wall.Vm)
-                /_V_LV;
-              ym = (LV_wall.Ty + SEP_wall.Ty + RV_wall.Ty);
-
+            //   // TriSeg
+               0 = (-_V_LV - 0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm - LV_wall.Vm)
+                 /_V_LV;
+               0 = (LV_wall.Tx + SEP_wall.Tx + RV_wall.Tx);
+               0 = (+_V_RV + 0.5*RV_wall.Vw + 0.5*SEP_wall.Vw + SEP_wall.Vm - RV_wall.Vm)
+                 /_V_LV;
+               0 = (LV_wall.Ty + SEP_wall.Ty + RV_wall.Ty);
+            //   der(xm_LV) = 0;
+            //   der(xm_SEP) = 0;
+            //   der(xm_RV) = 0;
+            //   der(ym) = 0;
 
 
               connect(frequency, calciumMechanics.frequency)
@@ -3556,7 +3552,7 @@ type"),       Text(
                     transformation(extent={{-174,-38},{-134,2}}), iconTransformation(extent=
                        {{-110,-20},{-70,20}})));
 
-            Physiolibrary.Types.Time stim_period = 1/frequency;
+            // Physiolibrary.Types.Time stim_period = 1/frequency;
             parameter Real eps = 0.001 "Minimal Ca_i to prevent division by zero";
             equation
               y = Ca_i;
@@ -3752,44 +3748,75 @@ type"),       Text(
             Auxiliary.TriSegMechanics_components.Ventricles ventricles
               annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
             Modelica.Blocks.Sources.Ramp ramp(
+              height=2,
               duration=10,
-              offset=1,
+              offset=0,
               startTime=5) annotation (Placement(transformation(extent={{-74,
                       -16},{-54,4}})));
             Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
                   displayUnit="(mmHg.min)/l") = 159986864.898)
-              annotation (Placement(transformation(extent={{20,10},{40,30}})));
+              annotation (Placement(transformation(extent={{40,10},{60,30}})));
             Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P=
                   2666.4477483)
               annotation (Placement(transformation(extent={{90,10},{70,30}})));
             Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
                   displayUnit="(mmHg.min)/l") = 159986864.898) annotation (
-                Placement(transformation(extent={{20,-30},{40,-10}})));
+                Placement(transformation(extent={{40,-30},{60,-10}})));
             Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P=
                   2666.4477483) annotation (Placement(transformation(extent={{
                       90,-30},{70,-10}})));
           equation
             connect(ramp.y, ventricles.frequency) annotation (Line(points={{-53,
                     -6},{-32,-6},{-32,0},{-10,0}}, color={0,0,127}));
-            connect(resistor.q_in, ventricles.port_lv) annotation (Line(
-                points={{20,20},{14,20},{14,6},{8,6}},
-                color={0,0,0},
-                thickness=1));
             connect(resistor.q_out, unlimitedVolume.y) annotation (Line(
-                points={{40,20},{70,20}},
+                points={{60,20},{70,20}},
                 color={0,0,0},
                 thickness=1));
             connect(resistor1.q_out, unlimitedVolume1.y) annotation (Line(
-                points={{40,-20},{70,-20}},
+                points={{60,-20},{70,-20}},
                 color={0,0,0},
                 thickness=1));
-            connect(ventricles.port_rv, resistor1.q_in) annotation (Line(
-                points={{8,-6},{14,-6},{14,-20},{20,-20}},
+            annotation (
+              Icon(coordinateSystem(preserveAspectRatio=false)),
+              Diagram(coordinateSystem(preserveAspectRatio=false)),
+              experiment(
+                StopTime=20,
+                __Dymola_NumberOfIntervals=15000,
+                Tolerance=1e-07,
+                __Dymola_Algorithm="Cvode"));
+          end TestTriSegMechVentricles;
+
+          model TestTriSegMech_all
+            Heart_TriSegMechanics heart_TriSegMechanics annotation (Placement(
+                  transformation(extent={{10,-10},{-10,10}})));
+            Pulmonary.PulmonaryTriSeg pulmonaryTriSeg annotation (Placement(
+                  transformation(extent={{-8,-54},{12,-34}})));
+            Systemic.Systemic_TriSeg systemic_TriSeg
+              annotation (Placement(transformation(extent={{-38,30},{38,60}})));
+          equation
+            connect(heart_TriSegMechanics.pa, pulmonaryTriSeg.port_a)
+              annotation (Line(
+                points={{-10,-10},{-20,-10},{-20,-44},{-8,-44}},
+                color={0,0,0},
+                thickness=1));
+            connect(heart_TriSegMechanics.pv, pulmonaryTriSeg.port_b)
+              annotation (Line(
+                points={{10,-10},{20,-10},{20,-44},{12,-44}},
+                color={0,0,0},
+                thickness=1));
+            connect(heart_TriSegMechanics.sa, systemic_TriSeg.port_a)
+              annotation (Line(
+                points={{-10,10},{-54,10},{-54,40},{-38,40}},
+                color={0,0,0},
+                thickness=1));
+            connect(systemic_TriSeg.port_b, heart_TriSegMechanics.sv)
+              annotation (Line(
+                points={{38,40},{60,40},{60,10},{10,10}},
                 color={0,0,0},
                 thickness=1));
             annotation (Icon(coordinateSystem(preserveAspectRatio=false)),
                 Diagram(coordinateSystem(preserveAspectRatio=false)));
-          end TestTriSegMechVentricles;
+          end TestTriSegMech_all;
         end Testers;
 
         partial model partialHeart
@@ -4789,14 +4816,18 @@ Mynard")}));
 
           parameter Real _R_LA =   0.025;
           parameter Real _R_RA =   0.025;
+          parameter Real _R_vlv = 0.001 " valve resistance, mmHg*sec/mL";
 
-          parameter Physiolibrary.Types.HydraulicResistance R_RA = _R_RA*mmHgSec_per_ml2SI;
-          parameter Physiolibrary.Types.HydraulicResistance R_LA = _R_LA*mmHgSec_per_ml2SI;
+          parameter Physiolibrary.Types.HydraulicResistance R_RA = _R_RA*Constants.mmHgSec_per_ml2SI;
+          parameter Physiolibrary.Types.HydraulicResistance R_LA = _R_LA*Constants.mmHgSec_per_ml2SI;
+          parameter Physiolibrary.Types.HydraulicResistance R_vlv = _R_vlv*Constants.mmHgSec_per_ml2SI;
 
           Physiolibrary.Hydraulic.Components.Resistor r_ra(Resistance=R_RA)
             annotation (Placement(transformation(extent={{-80,30},{-60,50}})));
           Physiolibrary.Hydraulic.Components.Resistor r_la(Resistance=R_LA)
             annotation (Placement(transformation(extent={{80,-30},{60,-10}})));
+          Auxiliary.TriSegMechanics_components.Ventricles ventricles
+            annotation (Placement(transformation(extent={{-12,-6},{8,14}})));
         equation
           connect(pulmonaryValve.q_out, pa) annotation (Line(
               points={{84,40},{92,40},{92,-100},{100,-100}},
@@ -4822,6 +4853,26 @@ Mynard")}));
               points={{80,-20},{86,-20},{86,-92},{-100,-92},{-100,-100}},
               color={0,0,0},
               thickness=1));
+          connect(tricuspidValve.q_out, pulmonaryValve.q_in) annotation (Line(
+              points={{-20,40},{64,40}},
+              color={0,0,0},
+              thickness=1));
+          connect(ventricles.port_rv, pulmonaryValve.q_in) annotation (Line(
+              points={{6,10},{6,40},{64,40}},
+              color={0,0,0},
+              thickness=1));
+          connect(mitralValve.q_out, aorticValve.q_in) annotation (Line(
+              points={{20,-20},{-60,-20}},
+              color={0,0,0},
+              thickness=1));
+          connect(ventricles.port_lv, aorticValve.q_in) annotation (Line(
+              points={{6,-2},{6,-20},{-60,-20}},
+              color={0,0,0},
+              thickness=1));
+          connect(frequency_input, ventricles.frequency) annotation (Line(points={{-106,
+                  0},{-60,0},{-60,4},{-12,4}}, color={0,0,127}));
+          connect(HR0.y, ventricles.frequency) annotation (Line(points={{-75,0},{-44,0},
+                  {-44,4},{-12,4}}, color={0,0,127}));
         end Heart_TriSegMechanics;
       end Heart;
 
@@ -18166,7 +18217,7 @@ P_hs_plus_dist"),
       extends Modelica.Icons.Package;
 
       final constant Real ml2SI = 1e-6;
-      final constant Real mmHg2SI = 1/133.32;
+      final constant Real mmHg2SI = 133.32;
       final constant Real ml_per_mmhg2SI = 1e-6/133.32;
       final constant Real mmHgSec_per_ml2SI = 133.32*1e6;
 
