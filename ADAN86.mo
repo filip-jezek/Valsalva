@@ -3501,7 +3501,8 @@ type"),       Text(
               // V_Ao start( 83.768949 ),
               // V_RA start( 8.414623 ),
               // V_LA start( 39.666051 ),
-
+              Real e;
+              parameter Real eps = 1e-6;
             equation
               // ports are already in SI units
               der(V_LV) = port_lv.q;
@@ -3515,11 +3516,11 @@ type"),       Text(
                _V_RV = - 0.5*RV_wall.Vw - 0.5*SEP_wall.Vw - SEP_wall.Vm + RV_wall.Vm;
 
                0 = (LV_wall.Tx + SEP_wall.Tx + RV_wall.Tx);
-               0 = (LV_wall.Ty + SEP_wall.Ty + RV_wall.Ty);
-            //   der(xm_LV) = 0;
-            //   der(xm_SEP) = 0;
-            //   der(xm_RV) = 0;
-            //   der(ym) = 0;
+
+              // This workaround needed because direct enforcement of equality of radial tensions led to numerical crashes in some cases
+              e = (LV_wall.Ty + SEP_wall.Ty + RV_wall.Ty);
+              der(LV_wall.ym)*eps = -e;
+
 
 
               connect(frequency, calciumMechanics.frequency)
@@ -24383,23 +24384,19 @@ P_hs_plus_dist"),
         c_sv(volume_start=0.00134))
         annotation (Placement(transformation(extent={{-38,30},{38,60}})));
     equation
-      connect(heart_TriSegMechanics.pa, pulmonaryTriSeg.port_a) annotation (
-          Line(
+      connect(heart_TriSegMechanics.pa, pulmonaryTriSeg.port_a) annotation (Line(
           points={{-10,-10},{-20,-10},{-20,-44},{-8,-44}},
           color={0,0,0},
           thickness=1));
-      connect(heart_TriSegMechanics.pv, pulmonaryTriSeg.port_b) annotation (
-          Line(
+      connect(heart_TriSegMechanics.pv, pulmonaryTriSeg.port_b) annotation (Line(
           points={{10,-10},{20,-10},{20,-44},{12,-44}},
           color={0,0,0},
           thickness=1));
-      connect(heart_TriSegMechanics.sa, systemic_TriSeg.port_a) annotation (
-          Line(
+      connect(heart_TriSegMechanics.sa, systemic_TriSeg.port_a) annotation (Line(
           points={{-10,10},{-54,10},{-54,40},{-38,40}},
           color={0,0,0},
           thickness=1));
-      connect(systemic_TriSeg.port_b, heart_TriSegMechanics.sv) annotation (
-          Line(
+      connect(systemic_TriSeg.port_b, heart_TriSegMechanics.sv) annotation (Line(
           points={{38,40},{60,40},{60,10},{10,10}},
           color={0,0,0},
           thickness=1));
@@ -24408,7 +24405,7 @@ P_hs_plus_dist"),
         Diagram(coordinateSystem(preserveAspectRatio=false)),
         experiment(
           StopTime=20,
-          Tolerance=1e-07,
+          Tolerance=1e-06,
           __Dymola_Algorithm="Cvode"));
     end TestTriSegMech_all;
   end tests;
