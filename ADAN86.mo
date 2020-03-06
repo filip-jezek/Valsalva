@@ -3285,9 +3285,9 @@ type"),       Text(
             parameter Real Kse =       50000 " series element elastance, mmHg/micron (Changed to match the value in Tewaris code) (9/5 BM)";
 
             // Metabolite levels (use the values from Tewari's paper) (9/5 BM)
-            parameter Real MgATP =  9.3458 " cytosolic Mg-ATP concentration, mM ";
-            parameter Real MgADP =  18.906e-3 " cytosolic Mg-ADP concentration, mM ";
-            parameter Real Pi =     0.47444 " cytosolic Pi concentration, mM ";
+            parameter Real MgATP =  9.0675 " cytosolic Mg-ATP concentration, mM ";
+            parameter Real MgADP =  55.848e-3 " cytosolic Mg-ADP concentration, mM ";
+            parameter Real Pi =     0.37033 " cytosolic Pi concentration, mM ";
 
             // Sarcomere geometry parameters
             parameter Real L_thick = 1.67 " Length of thick filament, um ";
@@ -3483,15 +3483,15 @@ type"),       Text(
               Real _V_RV;
 
               // conversion to SI units
-              Physiolibrary.Types.Volume V_LV(start=200*Constants.ml2SI)=_V_LV*Constants.ml2SI;
-              Physiolibrary.Types.Volume V_RV(start=200*Constants.ml2SI)=_V_RV*Constants.ml2SI;
+              Physiolibrary.Types.Volume V_LV(start=200e-6, fixed = true)=_V_LV*Constants.ml2SI;
+              Physiolibrary.Types.Volume V_RV(start=200e-6, fixed = true)=_V_RV*Constants.ml2SI;
               Physiolibrary.Types.Pressure P_LV=_P_LV*Constants.mmHg2SI;
               Physiolibrary.Types.Pressure P_RV=_P_RV*Constants.mmHg2SI;
 
-              Real xm_LV(start=-4.8379205) "LV heart geometry variable, cm";
-              Real xm_SEP(start=2.889861) "septum heart geometry variable, cm";
-              Real xm_RV(start=6.617057) "RV heart geometry variable, cm";
-              Real ym(start=3.9518702) "Heart geometry variable, cm";
+              Real xm_LV(start=-4.6627) "LV heart geometry variable, cm";
+              Real xm_SEP(start=2.90348) "septum heart geometry variable, cm";
+              Real xm_RV(start=6.26344) "RV heart geometry variable, cm";
+              Real ym(start=3.50013) "Heart geometry variable, cm";
 
               // Init of the rest of the circulatory
               // V_SV start( 1423.2186 ),
@@ -3511,11 +3511,10 @@ type"),       Text(
               port_rv.pressure = P_RV;
 
             //   // TriSeg
-               0 = (-_V_LV - 0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm - LV_wall.Vm)
-                 /_V_LV;
+               _V_LV = - 0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm - LV_wall.Vm;
+               _V_RV = - 0.5*RV_wall.Vw - 0.5*SEP_wall.Vw - SEP_wall.Vm + RV_wall.Vm;
+
                0 = (LV_wall.Tx + SEP_wall.Tx + RV_wall.Tx);
-               0 = (+_V_RV + 0.5*RV_wall.Vw + 0.5*SEP_wall.Vw + SEP_wall.Vm - RV_wall.Vm)
-                 /_V_LV;
                0 = (LV_wall.Ty + SEP_wall.Ty + RV_wall.Ty);
             //   der(xm_LV) = 0;
             //   der(xm_SEP) = 0;
@@ -3542,7 +3541,7 @@ type"),       Text(
               Real Ca_i=(a/(t_cycle + eps))*exp(-b*(log(t_cycle + eps) + c)^2) + Ca0;
             // Ca_i = 2*(a/phi)*exp(-b*(log(phi)+c)^2) + 0.1*Ca0; // EXERCISE
 
-            parameter Real a =    0.3099/2.13 " rat parameter ";
+            parameter Real a =    0.3099/2.98 " rat parameter ";
             parameter Real b =    1.6107 " rat parameter ";
             parameter Real c =    1.6932 " rat parameter ";
             parameter Real Ca0 =  0.150 " rat parameter ";
@@ -4834,7 +4833,8 @@ Mynard")}));
             annotation (Placement(transformation(extent={{-80,30},{-60,50}})));
           Physiolibrary.Hydraulic.Components.Resistor r_la(Resistance=R_LA)
             annotation (Placement(transformation(extent={{80,-30},{60,-10}})));
-          Auxiliary.TriSegMechanics_components.Ventricles ventricles
+          Auxiliary.TriSegMechanics_components.Ventricles ventricles(V_LV(start
+                =0.00015), V_RV(start=0.00015))
             annotation (Placement(transformation(extent={{-12,-6},{8,14}})));
           Auxiliary.TriSegMechanics_components.Atrium ra
             annotation (Placement(transformation(extent={{-40,50},{-60,70}})));
@@ -24374,9 +24374,13 @@ P_hs_plus_dist"),
     model TestTriSegMech_all
       Components.Subsystems.Heart.Heart_TriSegMechanics heart_TriSegMechanics
         annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
-      Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg
+      Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg(c_pa(
+            volume_start=3.5e-05), c_pv(volume_start=6.5e-05))
         annotation (Placement(transformation(extent={{-8,-54},{12,-34}})));
-      Components.Subsystems.Systemic.Systemic_TriSeg systemic_TriSeg
+      Components.Subsystems.Systemic.Systemic_TriSeg systemic_TriSeg(
+        c_ao(volume_start=6e-05),
+        c_sa(volume_start=0.0003),
+        c_sv(volume_start=0.00134))
         annotation (Placement(transformation(extent={{-38,30},{38,60}})));
     equation
       connect(heart_TriSegMechanics.pa, pulmonaryTriSeg.port_a) annotation (
