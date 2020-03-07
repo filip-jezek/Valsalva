@@ -1,11 +1,11 @@
 ﻿import Modelica.Utilities.Streams.print;
-signal = "base_TriSeg_phiHR[end].Systemic1.brachial_L82_HeartLevel.u_C";
+signal = "base_TriSegLumens[end-1].Systemic1.brachial_L82_HeartLevel.u_C";
 pp_supine = 
   signalOperatorValue(signal, SignalOperator.Max, 20, 30) - 
   signalOperatorValue(signal, SignalOperator.Min, 20, 30);
 pp_t = 
-  signalOperatorValue(signal, SignalOperator.Max, 110, 120) - 
-  signalOperatorValue(signal, SignalOperator.Min, 110, 120);
+  signalOperatorValue(signal, SignalOperator.Max, 50, 60) - 
+  signalOperatorValue(signal, SignalOperator.Min, 50, 60);
   
 Pa2mmHg = 1/133.32;
 print("pp_supine:" + String(pp_supine*Pa2mmHg));
