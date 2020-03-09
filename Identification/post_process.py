@@ -17,7 +17,7 @@ def writeCost(costs):
         file.write("banik pico\n")
         file.write('f(x) =' + repr(total_cost))
 
-def logOutput(costs):
+def logOutput(vals):
     # log the output, if the log directory exists. exit otherwise
 
 	log_dirname = '..\\Schedules'
@@ -25,9 +25,10 @@ def logOutput(costs):
 
 	if os.path.isdir(log_dirname):
 		cur_dirname = os.path.basename(os.getcwd())
-		log_filename = log_dirname + '\\' + cur_dirname + '_costs.txt'
-		with open(log_filename, 'w') as file:
-			file.write(str(costs))
+		log_filename = log_dirname + '\\'  + 'current_vals.txt'
+		# log_filename = log_dirname + '\\' + cur_dirname + '_costs.txt'
+		with open(log_filename, 'w+') as file:
+			file.write(', '.join(map(str, vals)))
 	
 def extractVars(d):
 	# use just a subset or use all
@@ -70,4 +71,6 @@ costs = cf.calculateCosts(var_set)
 print("Calculating costs in ", time.time() - tic, " s")
 
 writeCost(costs)
-logOutput(costs)
+
+if hasattr(cf, "getCurrentValues") and callable(cf.getCurrentValues):
+	logOutput(cf.getCurrentValues(var_set))

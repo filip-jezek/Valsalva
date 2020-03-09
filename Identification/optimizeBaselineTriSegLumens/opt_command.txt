@@ -1,0 +1,25 @@
+/* GenOpt command file
+   MWetter@lbl.gov 2008-11-11
+*/
+
+Vary{
+  // Parameter{ Name = Moje01; Min = 20; Ini = 190; Max = 300; Step = 1; }
+  Parameter{ Name = Pv_nom; Min = 0; Ini = 6.6E+02; Max = 1e3; Step = 133; }
+  Parameter{ Name = Pa_nom; Min = 5e+3; Ini = 1.3E+04; Max = 2e5; Step = 133; }
+  Parameter{ Name = CO_nom; Min = 5E-05; Ini = 1.0666666666667000E-04; Max = 2E-04; Step = 5e-6; }
+  Parameter{ Name = k_E; Min = 0.1; Ini = 0.4; Max = 0.8; Step = 0.01; }
+}
+
+OptimizationSettings{
+  MaxIte = 100;
+  MaxEqualResults = 10;
+  WriteStepNumber = false;
+}
+
+Algorithm{
+ Main = GPSHookeJeeves;
+ MeshSizeDivider = 2;
+ InitialMeshSizeExponent = 0;
+ MeshSizeExponentIncrement = 1;
+ NumberOfStepReduction = 4;
+}
