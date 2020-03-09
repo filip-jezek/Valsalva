@@ -8,6 +8,11 @@ package ADAN_main
 
       // general
       parameter Fraction phi0=0.25   "Baseline resting phi";
+      parameter Physiolibrary.Types.Height height = 1.7 "Subject's height for scaling vessel lengths";
+      parameter Modelica.SIunits.Mass weight = 70 "Subject's weight";
+      parameter Real age = 35;
+      parameter Real BMI = weight/(height^2);
+      parameter Real BSA = 0.007184*weight^0.425*height^0.725 "Du Bois formula for body surface area";
 
       // HEART
       parameter Physiolibrary.Types.Fraction heart_alphaE(min = 0, max = 1.33) = 0 "linear dependency of active elastance on phi" annotation(Dialog(group = "Heart"));
@@ -930,12 +935,14 @@ type"),       Text(
                   extent={{-114,48},{-74,88}}), iconTransformation(extent={{-120,80},{-80,
                     120}})));
 
-        Real fiSN(start = fiSN_start);
-        parameter Real fsn( unit = "s-1") = 0.041;
-        parameter Real f1 = 0.0046;
-        parameter Real g = 0.66;
-        Real aorticWeight = 2*g*aortic_BR;
-        Real carotidWeight = 2*(1-g)*carotid_BR;
+        Real fiSN(start = fiSN_start) "Generalized activation coefficient 0.25 for baseline supine resting.";
+        parameter Real fsn( unit = "s-1") = 0.041 "rising factor of the phi";
+        parameter Real f1 = 0.0046 "decrease factor of the phi";
+        parameter Real g = 0.66 "Aortic / carotid ratio";
+          Real fbr_ao_contrib=2*g*aortic_BR
+            "Weighted contribution of aortic firing rate";
+          Real fbr_car_contrib=2*(1 - g)*carotid_BR
+            "Weighted contribution of carotid firing rate";
         parameter Modelica.SIunits.Time resetAt = -1;
         parameter Real fiSN_start = 0.25;
           Physiolibrary.Types.RealIO.FractionOutput phi = fiSN
@@ -947,7 +954,7 @@ type"),       Text(
             reinit(fiSN, fiSN_start);
           end when;
 
-          der(fiSN) = fsn*(1-fiSN) - fiSN*f1*(aorticWeight + carotidWeight);
+          der(fiSN) =fsn*(1 - fiSN) - fiSN*f1*(fbr_ao_contrib + fbr_car_contrib);
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end Baroreflex;
@@ -1383,7 +1390,10 @@ type"),       Text(
 <p><br>The parameters are UPPERCASE, similarly to the Matlab source code.</p>
 <p>The objects have LOWERCASE,  to distinguish them from parameters.</p>
 <p>The parameters with original, non-SI unit start with underscore and are listed as Reals. Each used parameter have its SI counterpart.</p>
-</html>"));
+</html>"), Icon(graphics={                                  Text(
+                  extent={{-100,20},{100,100}},
+                  lineColor={0,0,0},
+                  textString="TriSeg")}));
         end PulmonaryTriSeg;
       end Pulmonary;
 
@@ -4438,17 +4448,17 @@ type"),       Text(
           connect(smith_VentricularInteraction_flat.HR, frequency_input) annotation (
               Line(points={{-11,9},{-55.5,9},{-55.5,0},{-106,0}}, color={0,0,127}));
           connect(smith_VentricularInteraction_flat.Pth, thoracic_pressure_input)
-            annotation (Line(points={{13.3,9},{13.3,-44.5},{-8,-44.5},{-8,-100}}, color=
+            annotation (Line(points={{13.3,9},{13.3,-44.5},{0,-44.5},{0,-100}},   color=
                  {0,0,127}));
           connect(phi, smith_VentricularInteraction_flat.phi) annotation (Line(points={{
                   -100,70},{-56,70},{-56,24.2},{-11,24.2}}, color={0,0,127}));
           connect(phi0.y, smith_VentricularInteraction_flat.phi) annotation (Line(
-                points={{-79,50},{-20,50},{-20,24.2},{-11,24.2}}, color={0,0,127}));
+                points={{-81,70},{-20,70},{-20,24.2},{-11,24.2}}, color={0,0,127}));
           connect(smith_VentricularInteraction_flat.Pth, P0.y) annotation (Line(
                 points={{13.3,9},{13.3,-44.5},{-8,-44.5},{-8,-74},{-4,-74},{-4,
-                  -75},{9.4369e-16,-75}}, color={0,0,127}));
+                  -81},{9.4369e-16,-81}}, color={0,0,127}));
           connect(smith_VentricularInteraction_flat.HR, HR0.y) annotation (Line(
-                points={{-11,9},{-55.5,9},{-55.5,0},{-75,0}}, color={0,0,127}));
+                points={{-11,9},{-55.5,9},{-55.5,0},{-87,0}}, color={0,0,127}));
           annotation (Diagram(graphics={  Rectangle(extent={{-84,54},{92,-46}},
                   lineColor={28,108,200})}), Icon(graphics={Text(
                   extent={{-100,60},{100,100}},
@@ -4620,19 +4630,21 @@ type"),       Text(
             annotation (Line(points={{-11,9},{-55.5,9},{-55.5,0},{-106,0}}, color=
                  {0,0,127}));
           connect(smithOttesen_VentricularInteraction_flat_.Pth,
-            thoracic_pressure_input) annotation (Line(points={{13.3,9},{13.3,-44.5},
-                  {-8,-44.5},{-8,-100}}, color={0,0,127}));
+            thoracic_pressure_input) annotation (Line(points={{13.3,9},{13.3,
+                  -44.5},{0,-44.5},{0,-100}},
+                                         color={0,0,127}));
           connect(phi, smithOttesen_VentricularInteraction_flat_.phi) annotation (
              Line(points={{-100,70},{-56,70},{-56,24.2},{-11,24.2}}, color={0,0,
                   127}));
           connect(phi0.y, smithOttesen_VentricularInteraction_flat_.phi)
-            annotation (Line(points={{-79,50},{-20,50},{-20,24.2},{-11,24.2}},
+            annotation (Line(points={{-81,70},{-20,70},{-20,24.2},{-11,24.2}},
                 color={0,0,127}));
           connect(smithOttesen_VentricularInteraction_flat_.Pth, P0.y)
-            annotation (Line(points={{13.3,9},{13.3,-44.5},{-8,-44.5},{-8,-74},{-4,
-                  -74},{-4,-75},{9.4369e-16,-75}}, color={0,0,127}));
+            annotation (Line(points={{13.3,9},{13.3,-44.5},{-8,-44.5},{-8,-74},
+                  {-4,-74},{-4,-81},{9.4369e-16,-81}},
+                                                   color={0,0,127}));
           connect(smithOttesen_VentricularInteraction_flat_.HR, HR0.y)
-            annotation (Line(points={{-11,9},{-55.5,9},{-55.5,0},{-75,0}}, color=
+            annotation (Line(points={{-11,9},{-55.5,9},{-55.5,0},{-87,0}}, color=
                   {0,0,127}));
           annotation (Diagram(graphics={  Rectangle(extent={{-84,54},{92,-46}},
                   lineColor={28,108,200})}), Icon(graphics={Text(
@@ -4886,17 +4898,19 @@ type"),       Text(
           connect(smithOttesen_VentricularInteraction_flat_.HR, frequency_input)
             annotation (Line(points={{-11,9},{-55.5,9},{-55.5,0},{-106,0}}, color={0,0,127}));
           connect(smithOttesen_VentricularInteraction_flat_.Pth,
-            thoracic_pressure_input) annotation (Line(points={{13.3,9},{13.3,-44.5},{-8,
-                  -44.5},{-8,-100}}, color={0,0,127}));
+            thoracic_pressure_input) annotation (Line(points={{13.3,9},{13.3,
+                  -44.5},{0,-44.5},{0,-100}},
+                                     color={0,0,127}));
           connect(phi, smithOttesen_VentricularInteraction_flat_.phi) annotation (Line(
                 points={{-100,70},{-56,70},{-56,24.2},{-11,24.2}}, color={0,0,127}));
           connect(phi0.y, smithOttesen_VentricularInteraction_flat_.phi) annotation (
-              Line(points={{-79,50},{-20,50},{-20,24.2},{-11,24.2}}, color={0,0,127}));
+              Line(points={{-81,70},{-20,70},{-20,24.2},{-11,24.2}}, color={0,0,127}));
           connect(smithOttesen_VentricularInteraction_flat_.Pth, P0.y) annotation (Line(
-                points={{13.3,9},{13.3,-44.5},{-8,-44.5},{-8,-74},{-4,-74},{-4,-75},{9.4369e-16,
-                  -75}}, color={0,0,127}));
+                points={{13.3,9},{13.3,-44.5},{-8,-44.5},{-8,-74},{-4,-74},{-4,
+                  -81},{9.4369e-16,-81}},
+                         color={0,0,127}));
           connect(smithOttesen_VentricularInteraction_flat_.HR, HR0.y) annotation (Line(
-                points={{-11,9},{-55.5,9},{-55.5,0},{-75,0}}, color={0,0,127}));
+                points={{-11,9},{-55.5,9},{-55.5,0},{-87,0}}, color={0,0,127}));
           annotation (Diagram(graphics={  Rectangle(extent={{-84,54},{92,-46}},
                   lineColor={28,108,200})}), Icon(graphics={Text(
                   extent={{-100,0},{100,100}},
@@ -5092,7 +5106,7 @@ Mynard")}));
               color={0,0,0},
               thickness=1));
           connect(HR0.y, timing.heart_rate) annotation (Line(
-              points={{-75,0},{-66,0},{-66,-50},{-60,-50}},
+              points={{-87,0},{-66,0},{-66,-50},{-60,-50}},
               color={0,0,127},
               pattern=LinePattern.Dash));
           connect(frequency_input, timing.heart_rate) annotation (Line(
@@ -5100,13 +5114,19 @@ Mynard")}));
               color={0,0,127},
               pattern=LinePattern.Dash));
           annotation (Icon(graphics={                       Text(
-                  extent={{-100,60},{100,100}},
+                  extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
-                  textString="TriSeg")}));
+                  textString="TriSeg
+Kalecky")}), experiment(
+              StopTime=30,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
         end Heart_TriSeg;
 
         model Heart_TriSegMechanics
           extends partialHeart;
+          parameter String class_name = "Ca mech";
           Physiolibrary.Hydraulic.Components.IdealValveResistance
                                tricuspidValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
@@ -5215,11 +5235,16 @@ Mynard")}));
           connect(aorticValve.cardiac_cycle, ventricles.cardiac_cycle)
             annotation (Line(points={{-70,-20},{16,-20},{16,0},{8,0}}, color={0,
                   0,127}));
+          annotation (Icon(graphics={                       Text(
+                  extent={{-100,20},{100,100}},
+                  lineColor={0,0,0},
+                  textString="TriSeg
+%class_name")}));
         end Heart_TriSegMechanics;
 
         model Heart_TriSegMechanicsLumens
           extends Heart_TriSegMechanics(redeclare
-              Auxiliary.TriSegMechanics_components.VentriclesLumens ventricles);
+              Auxiliary.TriSegMechanics_components.VentriclesLumens ventricles, class_name = "Lumens orig");
         end Heart_TriSegMechanicsLumens;
       end Heart;
 
@@ -8255,6 +8280,9 @@ P_hs_plus_dist"),
 
           model Parameters_Systemic_tunable "AdanVenousRed _7af7a4"
             parameter Physiolibrary.Types.Fraction k_E = 1 "Elasticity adjustment to fit normal arterial pressures";
+            final parameter Physiolibrary.Types.Height height_nominal = 1.7 "nominal height of the subject";
+            parameter Physiolibrary.Types.Height height_actual = 1.7 "actual height of the subject";
+
             parameter Real C_svl(unit = "m6.J-1") = 0.0037509e-6;
             parameter Real C_svn(unit = "m6.J-1") = 0.1125281e-6;
             parameter Real C_svc(unit = "m6.J-1") = 0.0375094e-6;
@@ -8520,253 +8548,122 @@ P_hs_plus_dist"),
             parameter Real r_medial_occipital_R268(unit = "m") = 0.0795007e-2;
             parameter Real r_medial_occipital_calcarine_branch_T51_L202(unit = "m") = 0.0349979e-2;
             parameter Real r_medial_occipital_calcarine_branch_T79_R270(unit = "m") = 0.0349979e-2;
-            parameter Real l_ascending_aorta_A(unit = "m") = 15.3234e-03;
-            parameter Real l_ascending_aorta_B(unit = "m") = 14.796e-03;
-            parameter Real l_ascending_aorta_C(unit = "m") = 14.796e-03;
-            parameter Real l_ascending_aorta_D(unit = "m") = 14.796e-03;
-            parameter Real l_aortic_arch_C2(unit = "m") = 14.796e-03;
-            parameter Real l_brachiocephalic_trunk_C4(unit = "m") = 47.3822e-03;
-            parameter Real l_aortic_arch_C46(unit = "m") = 9.60849e-03;
-            parameter Real l_aortic_arch_C64(unit = "m") = 6.97955e-03;
-            parameter Real l_aortic_arch_C94(unit = "m") = 43.2111e-03;
-            parameter Real l_thoracic_aorta_C96(unit = "m") = 9.89803e-03;
-            parameter Real l_thoracic_aorta_C100(unit = "m") = 7.88038e-03;
-            parameter Real l_thoracic_aorta_C104(unit = "m") = 15.5561e-03;
-            parameter Real l_thoracic_aorta_C108(unit = "m") = 5.32705e-03;
-            parameter Real l_thoracic_aorta_C112(unit = "m") = 121.566e-03;
-            parameter Real l_abdominal_aorta_C114(unit = "m") = 3.24767e-03;
-            parameter Real l_abdominal_aorta_C136(unit = "m") = 13.9886e-03;
-            parameter Real l_abdominal_aorta_C164(unit = "m") = 4.31913e-03;
-            parameter Real l_abdominal_aorta_C176(unit = "m") = 11.9773e-03;
-            parameter Real l_abdominal_aorta_C188(unit = "m") = 54.0907e-03;
-            parameter Real l_abdominal_aorta_C192(unit = "m") = 42.231e-03;
-            parameter Real l_posterior_intercostal_T1_R98(unit = "m") = 197.232e-03;
-            parameter Real l_posterior_intercostal_T1_L102(unit = "m") = 178.519e-03;
-            parameter Real l_posterior_intercostal_T2_R106(unit = "m") = 201.883e-03;
-            parameter Real l_posterior_intercostal_T2_L110(unit = "m") = 185.547e-03;
-            parameter Real l_celiac_trunk_C116(unit = "m") = 16.9374e-03;
-            parameter Real l_splenic_T2_C118(unit = "m") = 3.9576e-03;
-            parameter Real l_left_gastric_T3_C120(unit = "m") = 94.8344e-03;
-            parameter Real l_splenic_T2_C122(unit = "m") = 2.79812e-03;
-            parameter Real l_dorsal_pancreatic_T1_C124(unit = "m") = 33.4687e-03;
-            parameter Real l_splenic_T2_C126(unit = "m") = 63.2749e-03;
-            parameter Real l_common_hepatic_C128(unit = "m") = 69.3076e-03;
-            parameter Real l_hepatic_artery_proper_C130(unit = "m") = 16.8059e-03;
-            parameter Real l_hepatic_artery_proper_left_branch_C132(unit = "m") = 164.224e-03;
-            parameter Real l_hepatic_artery_proper_right_branch_C134(unit = "m") = 80.0632e-03;
-            parameter Real l_superior_mesenteric_T4_C138(unit = "m") = 49.5492e-03;
-            parameter Real l_middle_colic_T8_C140(unit = "m") = 116.298e-03;
-            parameter Real l_superior_mesenteric_T4_C142(unit = "m") = 35.1664e-03;
-            parameter Real l_jejunal_3_T10_C144(unit = "m") = 47.6944e-03;
-            parameter Real l_superior_mesenteric_T4_C146(unit = "m") = 32.2488e-03;
-            parameter Real l_jejunal_6_T11_C148(unit = "m") = 63.8535e-03;
-            parameter Real l_superior_mesenteric_T4_C150(unit = "m") = 16.7458e-03;
-            parameter Real l_ileocolic_T9_C152(unit = "m") = 46.8332e-03;
-            parameter Real l_superior_mesenteric_T4_C154(unit = "m") = 23.0546e-03;
-            parameter Real l_ileal_4_T12_C156(unit = "m") = 45.6984e-03;
-            parameter Real l_superior_mesenteric_T4_C158(unit = "m") = 20.5397e-03;
-            parameter Real l_ileal_6_T13_C160(unit = "m") = 29.1584e-03;
-            parameter Real l_superior_mesenteric_T4_C162(unit = "m") = 39.4879e-03;
-            parameter Real l_renal_L166(unit = "m") = 22.0037e-03;
-            parameter Real l_renal_anterior_branch_L168(unit = "m") = 10.8789e-03;
-            parameter Real l_inferior_segmental_T5_L170(unit = "m") = 40.8761e-03;
-            parameter Real l_superior_segmental_T4_L172(unit = "m") = 29.7265e-03;
-            parameter Real l_renal_posterior_branch_T3_L174(unit = "m") = 22.3608e-03;
-            parameter Real l_renal_R178(unit = "m") = 37.7403e-03;
-            parameter Real l_renal_anterior_branch_R180(unit = "m") = 10.8792e-03;
-            parameter Real l_superior_segmental_T4_R182(unit = "m") = 29.7263e-03;
-            parameter Real l_inferior_segmental_T5_R184(unit = "m") = 40.8756e-03;
-            parameter Real l_renal_posterior_branch_T3_R186(unit = "m") = 22.36e-03;
-            parameter Real l_inferior_mesenteric_T5_C190(unit = "m") = 90.3282e-03;
-            parameter Real l_common_iliac_R216(unit = "m") = 76.4393e-03;
-            parameter Real l_internal_iliac_T1_R218(unit = "m") = 72.5302e-03;
-            parameter Real l_external_iliac_R220(unit = "m") = 102.358e-03;
-            parameter Real l_femoral_R222(unit = "m") = 31.5982e-03;
-            parameter Real l_profundus_T2_R224(unit = "m") = 238.438e-03;
-            parameter Real l_femoral_R226(unit = "m") = 319.297e-03;
-            parameter Real l_popliteal_R228(unit = "m") = 132.06e-03;
-            parameter Real l_anterior_tibial_T3_R230(unit = "m") = 386.388e-03;
-            parameter Real l_popliteal_R232(unit = "m") = 8.80051e-03;
-            parameter Real l_tibiofibular_trunk_R234(unit = "m") = 36.1667e-03;
-            parameter Real l_posterior_tibial_T4_R236(unit = "m") = 382.987e-03;
-            parameter Real l_common_iliac_L194(unit = "m") = 74.0524e-03;
-            parameter Real l_internal_iliac_T1_L196(unit = "m") = 72.5301e-03;
-            parameter Real l_external_iliac_L198(unit = "m") = 102.358e-03;
-            parameter Real l_femoral_L200(unit = "m") = 31.5982e-03;
-            parameter Real l_profundus_T2_L202(unit = "m") = 238.438e-03;
-            parameter Real l_femoral_L204(unit = "m") = 319.297e-03;
-            parameter Real l_popliteal_L206(unit = "m") = 132.059e-03;
-            parameter Real l_anterior_tibial_T3_L208(unit = "m") = 386.389e-03;
-            parameter Real l_popliteal_L210(unit = "m") = 8.80046e-03;
-            parameter Real l_tibiofibular_trunk_L212(unit = "m") = 36.1676e-03;
-            parameter Real l_posterior_tibial_T4_L214(unit = "m") = 382.987e-03;
-            parameter Real l_subclavian_R28(unit = "m") = 15.7469e-03;
-            parameter Real l_subclavian_R30(unit = "m") = 41.1419e-03;
-            parameter Real l_axillary_R32(unit = "m") = 120.021e-03;
-            parameter Real l_brachial_R34(unit = "m") = 223.119e-03;
-            parameter Real l_ulnar_T2_R36(unit = "m") = 29.7599e-03;
-            parameter Real l_common_interosseous_R38(unit = "m") = 16.2682e-03;
-            parameter Real l_posterior_interosseous_T3_R40(unit = "m") = 231.694e-03;
-            parameter Real l_ulnar_T2_R42(unit = "m") = 239.276e-03;
-            parameter Real l_radial_T1_R44(unit = "m") = 302.156e-03;
-            parameter Real l_subclavian_L66(unit = "m") = 49.4669e-03;
-            parameter Real l_subclavian_L78(unit = "m") = 41.1396e-03;
-            parameter Real l_axillary_L80(unit = "m") = 120.021e-03;
-            parameter Real l_brachial_L82(unit = "m") = 223.119e-03;
-            parameter Real l_ulnar_T2_L84(unit = "m") = 29.7594e-03;
-            parameter Real l_common_interosseous_L86(unit = "m") = 16.2681e-03;
-            parameter Real l_posterior_interosseous_T3_L88(unit = "m") = 231.695e-03;
-            parameter Real l_ulnar_T2_L90(unit = "m") = 239.277e-03;
-            parameter Real l_radial_T1_L92(unit = "m") = 302.155e-03;
-            parameter Real l_common_carotid_R6_A(unit = "m") = 27.0844e-03;
-            parameter Real l_common_carotid_R6_B(unit = "m") = 27.0844e-03;
-            parameter Real l_common_carotid_R6_C(unit = "m") = 27.0844e-03;
-            parameter Real l_internal_carotid_R8_A(unit = "m") = 45.036e-03;
-            parameter Real l_internal_carotid_R8_B(unit = "m") = 45.036e-03;
-            parameter Real l_internal_carotid_R8_C(unit = "m") = 45.036e-03;
-            parameter Real l_external_carotid_T2_R26(unit = "m") = 61.0125e-03;
-            parameter Real l_common_carotid_L48_A(unit = "m") = 30.339e-03;
-            parameter Real l_common_carotid_L48_B(unit = "m") = 30.339e-03;
-            parameter Real l_common_carotid_L48_C(unit = "m") = 30.339e-03;
-            parameter Real l_common_carotid_L48_D(unit = "m") = 30.339e-03;
-            parameter Real l_internal_carotid_L50_A(unit = "m") = 45.036e-03;
-            parameter Real l_internal_carotid_L50_B(unit = "m") = 45.036e-03;
-            parameter Real l_internal_carotid_L50_C(unit = "m") = 45.036e-03;
-            parameter Real l_external_carotid_T2_L62(unit = "m") = 61.0127e-03;
-            parameter Real l_vertebral_L2(unit = "m") = 20.9765e-2;
-            parameter Real l_vertebral_R272(unit = "m") = 21.0146e-2;
-            parameter Real l_basilar_C4(unit = "m") = 2.26443e-2;
-            parameter Real l_posterior_cerebral_precommunicating_part_L6(unit = "m") = 0.697753e-2;
-            parameter Real l_posterior_cerebral_precommunicating_part_R204(unit = "m") = 0.77827e-2;
-            parameter Real l_posterior_communicating_L8(unit = "m") = 1.65974e-2;
-            parameter Real l_posterior_communicating_R206(unit = "m") = 1.6597e-2;
-            parameter Real l_posterior_cerebral_postcommunicating_part_L12(unit = "m") = 1.28091e-2;
-            parameter Real l_posterior_cerebral_postcommunicating_part_R208(unit = "m") = 1.28083e-2;
-            parameter Real l_occipital_lateral_L14(unit = "m") = 0.472985e-2;
-            parameter Real l_occipital_lateral_R210(unit = "m") = 0.472973e-2;
-            parameter Real l_lateral_occipital_anterior_temporal_branch_T111_R212(unit = "m") = 2.61986e-2;
-            parameter Real l_lateral_occipital_anterior_temporal_branch_T46_L16(unit = "m") = 2.61979e-2;
-            parameter Real l_occipital_lateral_L18(unit = "m") = 1.11052e-2;
-            parameter Real l_occipital_lateral_R214(unit = "m") = 1.11056e-2;
-            parameter Real l_lateral_occipital_intermediate_temporal_branch_T47_L20(unit = "m") = 2.1112e-2;
-            parameter Real l_lateral_occipital_intermediate_temporal_branch_T76_R216(unit = "m") = 2.1112e-2;
-            parameter Real l_occipital_lateral_L22(unit = "m") = 1.2455e-2;
-            parameter Real l_occipital_lateral_R218(unit = "m") = 1.2455e-2;
-            parameter Real l_lateral_occipital_posterior_temporal_branch_T48_L24(unit = "m") = 2.05518e-2;
-            parameter Real l_lateral_occipital_posterior_temporal_branch_T112_R220(unit = "m") = 2.05518e-2;
-            parameter Real l_medial_occipital_L26(unit = "m") = 3.21752e-2;
-            parameter Real l_medial_occipital_R222(unit = "m") = 3.21754e-2;
-            parameter Real l_medial_occipital_dorsal_branch_to_corpus_callosum_L28(unit = "m") = 2.51851e-2;
-            parameter Real l_medial_occipital_dorsal_branch_to_corpus_callosum_R224(unit = "m") = 2.51847e-2;
-            parameter Real l_pericallosal_parieto_occipital_branch_T60_L30(unit = "m") = 4.1888e-2;
-            parameter Real l_pericallosal_parieto_occipital_branch_T124_R226(unit = "m") = 4.18881e-2;
-            parameter Real l_pericallosal_L32(unit = "m") = 1.5668e-2;
-            parameter Real l_pericallosal_R228(unit = "m") = 1.5668e-2;
-            parameter Real l_pericallosal_precuneal_branch_T61_L34(unit = "m") = 5.42988e-2;
-            parameter Real l_pericallosal_precuneal_branch_T125_R230(unit = "m") = 5.42989e-2;
-            parameter Real l_pericallosal_L36(unit = "m") = 5.57509e-2;
-            parameter Real l_pericallosal_R232(unit = "m") = 5.57509e-2;
-            parameter Real l_anterior_cerebral_L38(unit = "m") = 2.809e-2;
-            parameter Real l_anterior_cerebral_R234(unit = "m") = 2.80898e-2;
-            parameter Real l_distal_medial_striate_T44_L40(unit = "m") = 1.24626e-2;
-            parameter Real l_distal_medial_striate_T109_R236(unit = "m") = 1.24626e-2;
-            parameter Real l_anterior_cerebral_L42(unit = "m") = 0.114668e-2;
-            parameter Real l_anterior_cerebral_R238(unit = "m") = 0.114733e-2;
-            parameter Real l_anterior_communicating_C44(unit = "m") = 0.565531e-2;
-            parameter Real l_anterior_cerebral_L110(unit = "m") = 1.05951e-2;
-            parameter Real l_anterior_cerebral_R46(unit = "m") = 1.05945e-2;
-            parameter Real l_internal_carotid_L112(unit = "m") = 0.196966e-2;
-            parameter Real l_internal_carotid_R48(unit = "m") = 0.196955e-2;
-            parameter Real l_middle_cerebral_L114(unit = "m") = 0.182233e-2;
-            parameter Real l_middle_cerebral_R52(unit = "m") = 0.182229e-2;
-            parameter Real l_anterior_choroidal_T34_L116(unit = "m") = 2.5869e-2;
-            parameter Real l_anterior_choroidal_T98_R54(unit = "m") = 2.5869e-2;
-            parameter Real l_middle_cerebral_L118(unit = "m") = 2.83007e-2;
-            parameter Real l_middle_cerebral_R56(unit = "m") = 2.8301e-2;
-            parameter Real l_middle_cerebral_superior_terminal_branch_L120(unit = "m") = 0.251165e-2;
-            parameter Real l_middle_cerebral_superior_terminal_branch_R58(unit = "m") = 0.251165e-2;
-            parameter Real l_lateral_frontobasal_T45_L122(unit = "m") = 4.32804e-2;
-            parameter Real l_lateral_frontobasal_T110_R60(unit = "m") = 4.32805e-2;
-            parameter Real l_middle_cerebral_superior_terminal_branch_L124(unit = "m") = 1.33091e-2;
-            parameter Real l_middle_cerebral_superior_terminal_branch_R62(unit = "m") = 1.3309e-2;
-            parameter Real l_prefrontal_T65_L126(unit = "m") = 10.0723e-2;
-            parameter Real l_prefrontal_T130_R64(unit = "m") = 10.0723e-2;
-            parameter Real l_middle_cerebral_superior_terminal_branch_L128(unit = "m") = 1.2255e-2;
-            parameter Real l_middle_cerebral_superior_terminal_branch_R66(unit = "m") = 1.2255e-2;
-            parameter Real l_artery_of_precentral_sulcus_T38_L130(unit = "m") = 0.935653e-2;
-            parameter Real l_artery_of_precentral_sulcus_T103_R68(unit = "m") = 0.935654e-2;
-            parameter Real l_artery_of_central_sulcus_T36_L132(unit = "m") = 10.6498e-2;
-            parameter Real l_artery_of_central_sulcus_T101_R70(unit = "m") = 10.6498e-2;
-            parameter Real l_artery_of_precentral_sulcus_T38_L134(unit = "m") = 8.81918e-2;
-            parameter Real l_artery_of_precentral_sulcus_T103_R72(unit = "m") = 8.81919e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_L136(unit = "m") = 0.142512e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_R74(unit = "m") = 0.142516e-2;
-            parameter Real l_polar_temporal_T63_L138(unit = "m") = 2.17951e-2;
-            parameter Real l_polar_temporal_T127_R76(unit = "m") = 2.17953e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_L140(unit = "m") = 0.0932844e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_R78(unit = "m") = 0.0932844e-2;
-            parameter Real l_middle_cerebral_anterior_temporal_branch_T55_L142(unit = "m") = 2.67934e-2;
-            parameter Real l_middle_cerebral_anterior_temporal_branch_T119_R80(unit = "m") = 2.67942e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_L144(unit = "m") = 2.83599e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_R82(unit = "m") = 2.83601e-2;
-            parameter Real l_middle_cerebral_middle_temporal_branch_T57_L146(unit = "m") = 3.00383e-2;
-            parameter Real l_middle_cerebral_middle_temporal_branch_T121_R84(unit = "m") = 3.00379e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_L148(unit = "m") = 1.82043e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_R86(unit = "m") = 1.82041e-2;
-            parameter Real l_artery_of_postcentral_sulcus_T37_L150(unit = "m") = 7.36477e-2;
-            parameter Real l_artery_of_postcentral_sulcus_T102_R88(unit = "m") = 7.36471e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_L152(unit = "m") = 0.708809e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_R90(unit = "m") = 0.708809e-2;
-            parameter Real l_middle_cerebral_posterior_temporal_branch_T58_L154(unit = "m") = 0.692097e-2;
-            parameter Real l_middle_cerebral_posterior_temporal_branch_T122_R92(unit = "m") = 0.692096e-2;
-            parameter Real l_middle_cerebral_posterior_temporo_occipital_branch_T59_L156(unit = "m") = 5.73679e-2;
-            parameter Real l_middle_cerebral_posterior_temporo_occipital_branch_T123_R94(unit = "m") = 5.7368e-2;
-            parameter Real l_middle_cerebral_posterior_temporal_branch_T58_L158(unit = "m") = 2.26651e-2;
-            parameter Real l_middle_cerebral_posterior_temporal_branch_T122_R96(unit = "m") = 2.26651e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_L160(unit = "m") = 0.549683e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_R98(unit = "m") = 0.549683e-2;
-            parameter Real l_anterior_parietal_T35_L162(unit = "m") = 6.219e-2;
-            parameter Real l_anterior_parietal_T100_R100(unit = "m") = 6.21893e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_L164(unit = "m") = 1.05444e-2;
-            parameter Real l_middle_cerebral_inferior_terminal_branch_R102(unit = "m") = 1.05443e-2;
-            parameter Real l_middle_cerebral_branch_to_angular_gyrus_T56_L166(unit = "m") = 1.01852e-2;
-            parameter Real l_middle_cerebral_branch_to_angular_gyrus_T120_R104(unit = "m") = 1.01852e-2;
-            parameter Real l_posterior_parietal_T64_L168(unit = "m") = 4.2951e-2;
-            parameter Real l_posterior_parietal_T129_R106(unit = "m") = 4.2951e-2;
-            parameter Real l_middle_cerebral_branch_to_angular_gyrus_T56_L170(unit = "m") = 4.19474e-2;
-            parameter Real l_middle_cerebral_branch_to_angular_gyrus_T120_R108(unit = "m") = 4.19475e-2;
-            parameter Real l_callosomarginal_L172(unit = "m") = 1.13312e-2;
-            parameter Real l_callosomarginal_R240(unit = "m") = 1.13311e-2;
-            parameter Real l_callosomarginal_intermediomedial_frontal_branch_T41_L174(unit = "m") = 3.43749e-2;
-            parameter Real l_callosomarginal_intermediomedial_frontal_branch_T106_R242(unit = "m") = 3.43749e-2;
-            parameter Real l_callosomarginal_L176(unit = "m") = 1.72952e-2;
-            parameter Real l_callosomarginal_R244(unit = "m") = 1.72952e-2;
-            parameter Real l_callosomarginal_posteromedial_frontal_branch_T43_L178(unit = "m") = 4.19271e-2;
-            parameter Real l_callosomarginal_posteromedial_frontal_branch_T108_R246(unit = "m") = 4.1927e-2;
-            parameter Real l_callosomarginal_L180(unit = "m") = 1.39198e-2;
-            parameter Real l_callosomarginal_R248(unit = "m") = 1.39198e-2;
-            parameter Real l_callosomarginal_cingular_branch_T40_L182(unit = "m") = 1.75028e-2;
-            parameter Real l_callosomarginal_cingular_branch_T105_R250(unit = "m") = 1.75028e-2;
-            parameter Real l_callosomarginal_L184(unit = "m") = 0.496294e-2;
-            parameter Real l_callosomarginal_R252(unit = "m") = 0.496295e-2;
-            parameter Real l_callosomarginal_paracentral_branch_T42_L186(unit = "m") = 4.22964e-2;
-            parameter Real l_callosomarginal_paracentral_branch_T107_R254(unit = "m") = 4.22964e-2;
-            parameter Real l_medial_occipital_L188(unit = "m") = 0.490507e-2;
-            parameter Real l_medial_occipital_R256(unit = "m") = 0.490474e-2;
-            parameter Real l_medial_occipital_occipitotemporal_branch_T52_L190(unit = "m") = 2.98359e-2;
-            parameter Real l_medial_occipital_occipitotemporal_branch_T80_R258(unit = "m") = 2.98366e-2;
-            parameter Real l_medial_occipital_L192(unit = "m") = 0.892062e-2;
-            parameter Real l_medial_occipital_R260(unit = "m") = 0.892067e-2;
-            parameter Real l_medial_occipital_parieto_occipital_branch_T54_L194(unit = "m") = 1.88987e-2;
-            parameter Real l_medial_occipital_parieto_occipital_branch_T118_R262(unit = "m") = 1.88989e-2;
-            parameter Real l_medial_occipital_parietal_branch_T53_L196(unit = "m") = 2.80168e-2;
-            parameter Real l_medial_occipital_parietal_branch_T81_R264(unit = "m") = 2.80169e-2;
-            parameter Real l_medial_occipital_parieto_occipital_branch_T54_L198(unit = "m") = 2.33801e-2;
-            parameter Real l_medial_occipital_parieto_occipital_branch_T118_R266(unit = "m") = 2.33801e-2;
-            parameter Real l_medial_occipital_L200(unit = "m") = 1.26049e-2;
-            parameter Real l_medial_occipital_R268(unit = "m") = 1.26049e-2;
-            parameter Real l_medial_occipital_calcarine_branch_T51_L202(unit = "m") = 1.47666e-2;
-            parameter Real l_medial_occipital_calcarine_branch_T79_R270(unit = "m") = 1.47667e-2;
+            parameter Physiolibrary.Types.Length l_ascending_aorta_A = 15.3234e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ascending_aorta_B = 14.796e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ascending_aorta_C = 14.796e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ascending_aorta_D = 14.796e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_aortic_arch_C2 = 14.796e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachiocephalic_trunk_C4 = 47.3822e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_aortic_arch_C46 = 9.60849e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_aortic_arch_C64 = 6.97955e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_aortic_arch_C94 = 43.2111e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_thoracic_aorta_C96 = 9.89803e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_thoracic_aorta_C100 = 7.88038e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_thoracic_aorta_C104 = 15.5561e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_thoracic_aorta_C108 = 5.32705e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_thoracic_aorta_C112 = 121.566e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_abdominal_aorta_C114 = 3.24767e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_abdominal_aorta_C136 = 13.9886e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_abdominal_aorta_C164 = 4.31913e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_abdominal_aorta_C176 = 11.9773e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_abdominal_aorta_C188 = 54.0907e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_abdominal_aorta_C192 = 42.231e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_intercostal_T1_R98 = 197.232e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_intercostal_T1_L102 = 178.519e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_intercostal_T2_R106 = 201.883e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_intercostal_T2_L110 = 185.547e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_celiac_trunk_C116 = 16.9374e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_splenic_T2_C118 = 3.9576e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_left_gastric_T3_C120 = 94.8344e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_splenic_T2_C122 = 2.79812e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_dorsal_pancreatic_T1_C124 = 33.4687e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_splenic_T2_C126 = 63.2749e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_hepatic_C128 = 69.3076e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_hepatic_artery_proper_C130 = 16.8059e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_hepatic_artery_proper_left_branch_C132 = 164.224e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_hepatic_artery_proper_right_branch_C134 = 80.0632e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_mesenteric_T4_C138 = 49.5492e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_middle_colic_T8_C140 = 116.298e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_mesenteric_T4_C142 = 35.1664e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_jejunal_3_T10_C144 = 47.6944e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_mesenteric_T4_C146 = 32.2488e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_jejunal_6_T11_C148 = 63.8535e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_mesenteric_T4_C150 = 16.7458e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ileocolic_T9_C152 = 46.8332e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_mesenteric_T4_C154 = 23.0546e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ileal_4_T12_C156 = 45.6984e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_mesenteric_T4_C158 = 20.5397e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ileal_6_T13_C160 = 29.1584e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_mesenteric_T4_C162 = 39.4879e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_renal_L166 = 22.0037e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_renal_anterior_branch_L168 = 10.8789e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_inferior_segmental_T5_L170 = 40.8761e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_segmental_T4_L172 = 29.7265e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_renal_posterior_branch_T3_L174 = 22.3608e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_renal_R178 = 37.7403e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_renal_anterior_branch_R180 = 10.8792e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_segmental_T4_R182 = 29.7263e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_inferior_segmental_T5_R184 = 40.8756e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_renal_posterior_branch_T3_R186 = 22.36e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_inferior_mesenteric_T5_C190 = 90.3282e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_iliac_R216 = 76.4393e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_iliac_T1_R218 = 72.5302e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_iliac_R220 = 102.358e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_R222 = 31.5982e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_profundus_T2_R224 = 238.438e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_R226 = 319.297e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_popliteal_R228 = 132.06e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_anterior_tibial_T3_R230 = 386.388e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_popliteal_R232 = 8.80051e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_tibiofibular_trunk_R234 = 36.1667e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_tibial_T4_R236 = 382.987e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_iliac_L194 = 74.0524e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_iliac_T1_L196 = 72.5301e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_iliac_L198 = 102.358e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_L200 = 31.5982e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_profundus_T2_L202 = 238.438e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_L204 = 319.297e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_popliteal_L206 = 132.059e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_anterior_tibial_T3_L208 = 386.389e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_popliteal_L210 = 8.80046e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_tibiofibular_trunk_L212 = 36.1676e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_tibial_T4_L214 = 382.987e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_subclavian_R28 = 15.7469e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_subclavian_R30 = 41.1419e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_axillary_R32 = 120.021e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_R34 = 223.119e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ulnar_T2_R36 = 29.7599e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_interosseous_R38 = 16.2682e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_interosseous_T3_R40 = 231.694e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ulnar_T2_R42 = 239.276e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_radial_T1_R44 = 302.156e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_subclavian_L66 = 49.4669e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_subclavian_L78 = 41.1396e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_axillary_L80 = 120.021e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_L82 = 223.119e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ulnar_T2_L84 = 29.7594e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_interosseous_L86 = 16.2681e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_interosseous_T3_L88 = 231.695e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ulnar_T2_L90 = 239.277e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_radial_T1_L92 = 302.155e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_carotid_R6_A = 27.0844e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_carotid_R6_B = 27.0844e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_carotid_R6_C = 27.0844e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_carotid_R8_A = 45.036e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_carotid_R8_B = 45.036e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_carotid_R8_C = 45.036e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_carotid_T2_R26 = 61.0125e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_carotid_L48_A = 30.339e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_carotid_L48_B = 30.339e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_carotid_L48_C = 30.339e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_carotid_L48_D = 30.339e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_carotid_L50_A = 45.036e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_carotid_L50_B = 45.036e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_carotid_L50_C = 45.036e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_carotid_T2_L62 = 61.0127e-03*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_vertebral_L2 = 20.9765e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_vertebral_R272 = 21.0146e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_basilar_C4 = 2.26443e-2*height_actual/height_nominal;
             parameter Real C_ascending_aorta_A(unit = "m6.J-1") = 1.631e-10;
             parameter Real C_ascending_aorta_B(unit = "m6.J-1") = 1.631e-10;
             parameter Real C_ascending_aorta_C(unit = "m6.J-1") = 1.631e-10;
@@ -9474,6 +9371,9 @@ P_hs_plus_dist"),
           end Parameters_Systemic_tunable;
 
           model Parameters_Venous "AdanVenousRed _7af7a4"
+            final parameter Physiolibrary.Types.Height height_nominal = 1.7 "nominal height of the subject";
+            parameter Physiolibrary.Types.Height height_actual = 1.7 "actual height of the subject";
+
             parameter Real r_superior_vena_cava_C2(unit = "m") = 0.975e-2;
             parameter Real r_azygos_vein_T1_C4(unit = "m") = 0.38e-2;
             parameter Real r_superior_vena_cava_C88(unit = "m") = 0.975e-2;
@@ -9628,83 +9528,84 @@ P_hs_plus_dist"),
             parameter Real h_venous_perforator_T1_L150(unit = "m") = 0.04226e-2;
             parameter Real h_brachial_vein_L152(unit = "m") = 0.04226e-2;
             parameter Real h_radial_vein_T3_L154(unit = "m") = 0.02206e-2;
-            parameter Real l_superior_vena_cava_C2(unit = "m") = 1.19864e-2;
-            parameter Real l_azygos_vein_T1_C4(unit = "m") = 24.1235e-2;
-            parameter Real l_superior_vena_cava_C88(unit = "m") = 2.06549e-2;
-            parameter Real l_azygos_vein_T1_C86(unit = "m") = 4.16471e-2;
-            parameter Real l_inferior_vena_cava_C8(unit = "m") = 1.72606e-2;
-            parameter Real l_hepatic_vein_T1_C10(unit = "m") = 1.38104e-2;
-            parameter Real l_inferior_vena_cava_C12(unit = "m") = 4.75594e-2;
-            parameter Real l_venous_perforator_T2_C14(unit = "m") = 1.61605e-2;
-            parameter Real l_inferior_vena_cava_C16(unit = "m") = 4.05694e-2;
-            parameter Real l_renal_vein_T1_R18(unit = "m") = 2.98282e-2;
-            parameter Real l_inferior_vena_cava_C20(unit = "m") = 0.283038e-2;
-            parameter Real l_renal_vein_T1_L22(unit = "m") = 3.13626e-2;
-            parameter Real l_inferior_vena_cava_C24(unit = "m") = 11.3168e-2;
-            parameter Real l_common_iliac_vein_L56(unit = "m") = 6.24014e-2;
-            parameter Real l_common_iliac_vein_R26(unit = "m") = 5.73581e-2;
-            parameter Real l_external_iliac_vein_R28(unit = "m") = 0.840236e-2;
-            parameter Real l_internal_iliac_vein_T1_R30(unit = "m") = 5.91456e-2;
-            parameter Real l_external_iliac_vein_R32(unit = "m") = 9.74495e-2;
-            parameter Real l_femoral_vein_R34(unit = "m") = 0.521142e-2;
-            parameter Real l_great_saphenous_vein_T7_R36(unit = "m") = 92.6589e-2;
-            parameter Real l_femoral_vein_R38(unit = "m") = 4.13055e-2;
-            parameter Real l_profunda_femoris_vein_T2_R40(unit = "m") = 22.9655e-2;
-            parameter Real l_femoral_vein_R42(unit = "m") = 29.2094e-2;
-            parameter Real l_venous_perforator_T3_R44(unit = "m") = 1.01988e-2;
-            parameter Real l_femoral_vein_R46(unit = "m") = 1.60864e-2;
-            parameter Real l_popliteal_vein_R48(unit = "m") = 14.5387e-2;
-            parameter Real l_anterior_tibial_vein_T4_R50(unit = "m") = 38.09e-2;
-            parameter Real l_popliteal_vein_R52(unit = "m") = 3.2338e-2;
-            parameter Real l_posterior_tibial_vein_T6_R54(unit = "m") = 30.5697e-2;
-            parameter Real l_external_iliac_vein_L58(unit = "m") = 0.841264e-2;
-            parameter Real l_internal_iliac_vein_T1_L60(unit = "m") = 6.08336e-2;
-            parameter Real l_external_iliac_vein_L62(unit = "m") = 9.56715e-2;
-            parameter Real l_femoral_vein_L64(unit = "m") = 0.609248e-2;
-            parameter Real l_great_saphenous_vein_T7_L66(unit = "m") = 92.6588e-2;
-            parameter Real l_femoral_vein_L68(unit = "m") = 4.13055e-2;
-            parameter Real l_profunda_femoris_vein_T2_L70(unit = "m") = 22.9654e-2;
-            parameter Real l_femoral_vein_L72(unit = "m") = 29.2094e-2;
-            parameter Real l_venous_perforator_T3_L74(unit = "m") = 1.01987e-2;
-            parameter Real l_femoral_vein_L76(unit = "m") = 1.60863e-2;
-            parameter Real l_popliteal_vein_L78(unit = "m") = 14.5387e-2;
-            parameter Real l_anterior_tibial_vein_T4_L80(unit = "m") = 38.09e-2;
-            parameter Real l_popliteal_vein_L82(unit = "m") = 3.23382e-2;
-            parameter Real l_posterior_tibial_vein_T6_L84(unit = "m") = 30.5698e-2;
-            parameter Real l_brachiocephalic_vein_R90(unit = "m") = 3.60711e-2;
-            parameter Real l_brachiocephalic_vein_L124(unit = "m") = 7.69083e-2;
-            parameter Real l_vertebral_vein_R92(unit = "m") = 19.7909e-2;
-            parameter Real l_brachiocephalic_vein_R94(unit = "m") = 0.817729e-2;
-            parameter Real l_subclavian_vein_R96(unit = "m") = 0.811432e-2;
-            parameter Real l_internal_jugular_vein_R122(unit = "m") = 17.8797e-2;
-            parameter Real l_external_jugular_vein_R98(unit = "m") = 13.807e-2;
-            parameter Real l_subclavian_vein_R100(unit = "m") = 3.31851e-2;
-            parameter Real l_axillary_vein_R102(unit = "m") = 11.6597e-2;
-            parameter Real l_brachial_vein_R104(unit = "m") = 20.4344e-2;
-            parameter Real l_brachial_vein_R114(unit = "m") = 21.6418e-2;
-            parameter Real l_venous_perforator_T2_R106(unit = "m") = 1.64071e-2;
-            parameter Real l_brachial_vein_R108(unit = "m") = 2.81322e-2;
-            parameter Real l_ulnar_vein_T7_R110(unit = "m") = 26.5376e-2;
-            parameter Real l_brachial_vein_R112(unit = "m") = 1.06711e-2;
-            parameter Real l_venous_perforator_T1_R116(unit = "m") = 1.56083e-2;
-            parameter Real l_brachial_vein_R118(unit = "m") = 2.085e-2;
-            parameter Real l_radial_vein_T3_R120(unit = "m") = 25.8545e-2;
-            parameter Real l_vertebral_vein_L126(unit = "m") = 18.5123e-2;
-            parameter Real l_brachiocephalic_vein_L128(unit = "m") = 0.470158e-2;
-            parameter Real l_subclavian_vein_L130(unit = "m") = 0.721557e-2;
-            parameter Real l_internal_jugular_vein_L156(unit = "m") = 16.9554e-2;
-            parameter Real l_external_jugular_vein_L132(unit = "m") = 13.5402e-2;
-            parameter Real l_subclavian_vein_L134(unit = "m") = 3.23403e-2;
-            parameter Real l_axillary_vein_L136(unit = "m") = 11.7916e-2;
-            parameter Real l_brachial_vein_L138(unit = "m") = 20.4344e-2;
-            parameter Real l_brachial_vein_L148(unit = "m") = 21.6418e-2;
-            parameter Real l_venous_perforator_T2_L140(unit = "m") = 1.64073e-2;
-            parameter Real l_brachial_vein_L142(unit = "m") = 2.81325e-2;
-            parameter Real l_ulnar_vein_T7_L144(unit = "m") = 26.5376e-2;
-            parameter Real l_brachial_vein_L146(unit = "m") = 1.06711e-2;
-            parameter Real l_venous_perforator_T1_L150(unit = "m") = 1.56083e-2;
-            parameter Real l_brachial_vein_L152(unit = "m") = 2.085e-2;
-            parameter Real l_radial_vein_T3_L154(unit = "m") = 25.8545e-2;
+
+            parameter Physiolibrary.Types.Length l_superior_vena_cava_C2 = 1.19864e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_azygos_vein_T1_C4 = 24.1235e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_superior_vena_cava_C88 = 2.06549e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_azygos_vein_T1_C86 = 4.16471e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_inferior_vena_cava_C8 = 1.72606e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_hepatic_vein_T1_C10 = 1.38104e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_inferior_vena_cava_C12 = 4.75594e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_venous_perforator_T2_C14 = 1.61605e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_inferior_vena_cava_C16 = 4.05694e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_renal_vein_T1_R18 = 2.98282e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_inferior_vena_cava_C20 = 0.283038e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_renal_vein_T1_L22 = 3.13626e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_inferior_vena_cava_C24 = 11.3168e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_iliac_vein_L56 = 6.24014e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_common_iliac_vein_R26 = 5.73581e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_iliac_vein_R28 = 0.840236e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_iliac_vein_T1_R30 = 5.91456e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_iliac_vein_R32 = 9.74495e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_vein_R34 = 0.521142e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_great_saphenous_vein_T7_R36 = 92.6589e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_vein_R38 = 4.13055e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_profunda_femoris_vein_T2_R40 = 22.9655e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_vein_R42 = 29.2094e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_venous_perforator_T3_R44 = 1.01988e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_vein_R46 = 1.60864e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_popliteal_vein_R48 = 14.5387e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_anterior_tibial_vein_T4_R50 = 38.09e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_popliteal_vein_R52 = 3.2338e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_tibial_vein_T6_R54 = 30.5697e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_iliac_vein_L58 = 0.841264e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_iliac_vein_T1_L60 = 6.08336e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_iliac_vein_L62 = 9.56715e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_vein_L64 = 0.609248e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_great_saphenous_vein_T7_L66 = 92.6588e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_vein_L68 = 4.13055e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_profunda_femoris_vein_T2_L70 = 22.9654e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_vein_L72 = 29.2094e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_venous_perforator_T3_L74 = 1.01987e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_femoral_vein_L76 = 1.60863e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_popliteal_vein_L78 = 14.5387e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_anterior_tibial_vein_T4_L80 = 38.09e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_popliteal_vein_L82 = 3.23382e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_posterior_tibial_vein_T6_L84 = 30.5698e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachiocephalic_vein_R90 = 3.60711e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachiocephalic_vein_L124 = 7.69083e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_vertebral_vein_R92 = 19.7909e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachiocephalic_vein_R94 = 0.817729e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_subclavian_vein_R96 = 0.811432e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_jugular_vein_R122 = 17.8797e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_jugular_vein_R98 = 13.807e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_subclavian_vein_R100 = 3.31851e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_axillary_vein_R102 = 11.6597e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_R104 = 20.4344e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_R114 = 21.6418e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_venous_perforator_T2_R106 = 1.64071e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_R108 = 2.81322e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ulnar_vein_T7_R110 = 26.5376e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_R112 = 1.06711e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_venous_perforator_T1_R116 = 1.56083e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_R118 = 2.085e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_radial_vein_T3_R120 = 25.8545e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_vertebral_vein_L126 = 18.5123e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachiocephalic_vein_L128 = 0.470158e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_subclavian_vein_L130 = 0.721557e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_internal_jugular_vein_L156 = 16.9554e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_external_jugular_vein_L132 = 13.5402e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_subclavian_vein_L134 = 3.23403e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_axillary_vein_L136 = 11.7916e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_L138 = 20.4344e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_L148 = 21.6418e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_venous_perforator_T2_L140 = 1.64073e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_L142 = 2.81325e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_ulnar_vein_T7_L144 = 26.5376e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_L146 = 1.06711e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_venous_perforator_T1_L150 = 1.56083e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_brachial_vein_L152 = 2.085e-2*height_actual/height_nominal;
+            parameter Physiolibrary.Types.Length l_radial_vein_T3_L154 = 25.8545e-2*height_actual/height_nominal;
             parameter Real C_superior_vena_cava_C2(unit = "m6.J-1") = 0.555603e-10;
             parameter Real C_azygos_vein_T1_C4(unit = "m6.J-1") = 1.22148e-10;
             parameter Real C_superior_vena_cava_C88(unit = "m6.J-1") = 0.957416e-10;
@@ -11836,6 +11737,58 @@ P_hs_plus_dist"),
             coronary_veins.l +
             splachnic_vein.l;
 
+              parameter Modelica.SIunits.Length speedSegmentLength=
+         common_carotid_L48_A.l +
+         common_carotid_L48_B.l +
+         common_carotid_L48_C.l +
+         common_carotid_L48_D.l +
+         aortic_arch_C64.l +
+         aortic_arch_C94.l +
+         thoracic_aorta_C96.l +
+         thoracic_aorta_C100.l +
+         thoracic_aorta_C104.l +
+         thoracic_aorta_C108.l +
+         thoracic_aorta_C112.l +
+         abdominal_aorta_C114.l +
+         abdominal_aorta_C136.l +
+         abdominal_aorta_C164.l +
+         abdominal_aorta_C176.l +
+         abdominal_aorta_C188.l +
+         abdominal_aorta_C192.l +
+         common_iliac_R216.l +
+         external_iliac_R220.l +
+         femoral_R222.l "Distance between carotid_L48 and femoral_R222";
+
+          parameter Modelica.SIunits.Length aortic_length=
+            ascending_aorta_A.l +
+            ascending_aorta_B.l +
+            ascending_aorta_C.l +
+            ascending_aorta_D.l +
+            aortic_arch_C2.l +
+            aortic_arch_C46.l +
+            aortic_arch_C64.l +
+            aortic_arch_C94.l +
+            thoracic_aorta_C96.l +
+            thoracic_aorta_C100.l +
+            thoracic_aorta_C104.l +
+            thoracic_aorta_C108.l +
+            thoracic_aorta_C112.l +
+            abdominal_aorta_C114.l +
+            abdominal_aorta_C136.l +
+            abdominal_aorta_C164.l +
+            abdominal_aorta_C176.l +
+            abdominal_aorta_C188.l +
+            abdominal_aorta_C192.l "Length of the whole aorta for comparison to body size";
+
+            parameter Real age = settings.age "patient age";
+            parameter Modelica.SIunits.Mass weight = settings.weight;
+            parameter Modelica.SIunits.Height height(start = 1.7) = settings.height;
+            parameter Real BMI =  settings.BMI;
+            parameter Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*age+0.5409*(height*100)+0.3476*BMI) "Zemtsovskaja, HT 2019 for male subjects";
+            parameter Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*age+2.5*height*100) "Rezai, Blood Press Monit 2013, for male subjects";
+        equation
+          //BMI = weight/(height^2);
+          // aortic_length = aortic_length_calc;
         end SystemicAV;
 
         model Systemic_simplest
@@ -24735,14 +24688,14 @@ P_hs_plus_dist"),
           ventricles(V_LV(start=0.00015), V_RV(start=0.00015)))
         annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
       Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg(
-        _HR=60,                                                    c_pa(
+        _HR=if adjust then HR*60 else 60,                                                    c_pa(
             volume_start=3.5e-05), c_pv(volume_start=6.5e-05))
         annotation (Placement(transformation(extent={{-8,-54},{12,-34}})));
       Components.Subsystems.Systemic.Systemic_TriSeg systemic_TriSeg(
         c_ao(volume_start=6e-05),
         c_sa(volume_start=0.0003),
         c_sv(volume_start=0.00134),
-        _HR=60)
+        _HR=if adjust then HR*60 else 60)
         annotation (Placement(transformation(extent={{-38,30},{38,60}})));
     Physiolibrary.Types.Volume volume = systemic_TriSeg.volume + pulmonaryTriSeg.volume + heart.volume;
       parameter Physiolibrary.Types.Frequency HR=_HR/60 "Default freq";
@@ -24751,6 +24704,7 @@ P_hs_plus_dist"),
       output Real _BPs = heart.aorticValve.BPs/133.32;
       output Real _BPd = heart.aorticValve.BPd/133.32;
       output Real _BPp = heart.aorticValve.BPp/133.32;
+      parameter Boolean adjust = true;
     equation
       connect(heart.sa, systemic_TriSeg.port_a) annotation (Line(
           points={{-10,10},{-38,10},{-38,40}},
@@ -30810,7 +30764,7 @@ P_hs_plus_dist"),
       connect(heartComponent.frequency_input, step.y) annotation (Line(points={
               {-16,-22},{10,-22},{10,-26},{37,-26}}, color={0,0,127}));
       connect(step1.y, Systemic1.phi_input) annotation (Line(points={{11,8},{-2,
-              8},{-2,20},{-14,20}}, color={0,0,127}));
+              8},{-2,20},{-16,20}}, color={0,0,127}));
     end CVS_7af_normal_step_hr;
 
     model CVS_7af_baro_simple
@@ -31150,17 +31104,21 @@ P_hs_plus_dist"),
 
       model base_TriSeg
         extends CVS_7af(
-          Systemic1(Parameters_Systemic1(k_E=0.4)),
-          redeclare Components.Subsystems.Heart.Heart_TriSeg heartComponent(
+          Systemic1(Parameters_Systemic1(k_E=0.4), baroreflex_system(
+                baroreceptor_carotid(Ts(displayUnit="s") = 3), baroreceptor_aortic(Ts(
+                    displayUnit="s") = 3),
+              baroreflex(f1=0.0041))),
+          redeclare Components.Subsystems.Heart.Heart_TriSegMechanicsLumens
+                                                             heartComponent(
               UseFrequencyInput=true, UseThoracicPressureInput=true),
-          redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
+          redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg
             pulmonaryComponent,
           redeclare Components.Subsystems.Baroreflex.HeartRate2 heartRate(
-              HR_nom(displayUnit="1/min") = 1.16667, phi0=settings.phi0),
+              HR_nom(displayUnit="1/min")=1.0,       phi0=settings.phi0),
           condHR(disconnected=false),
           settings(
-            tissues_nominal_cardiac_output(displayUnit="l/min")=
-              0.00010666666666667,
+            tissues_nominal_arterioles_pressure(displayUnit="mmHg") = 9679.205326329,
+            tissues_nominal_cardiac_output(displayUnit="ml/min") = 8.1666666666667e-05,
             heart_alphaE=0.2,
             arteries_UseVasoconstrictionEffect=true,
             exercise_factor_on_arterial_compliance=0.2,
@@ -31170,6 +31128,7 @@ P_hs_plus_dist"),
             tissues_UseStraighteningReaction2Phi=true,
             tissuesCompliance_PhiEffect=0.2,
             exercise_factor_on_tissue_compliance=0.2,
+            tissues_nominal_venules_pressure(displayUnit="mmHg") = 227.98128247965,
             UseNonLinear_VenousCompliance=true,
             veins_activation_tau=0.1,
             hideLevel0=true,
@@ -31183,69 +31142,20 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condHeartPhi(disconnectedValue=
              0.25, disconnected=false) annotation (Placement(transformation(
                 extent={{42,37.2592},{54,47.9259}})));
-        parameter Modelica.SIunits.Length speedSegmentLength=
-       Systemic1.common_carotid_L48_A.l +
-       Systemic1.common_carotid_L48_B.l +
-       Systemic1.common_carotid_L48_C.l +
-       Systemic1.common_carotid_L48_D.l +
-       Systemic1.aortic_arch_C64.l +
-       Systemic1.aortic_arch_C94.l +
-       Systemic1.thoracic_aorta_C96.l +
-       Systemic1.thoracic_aorta_C100.l +
-       Systemic1.thoracic_aorta_C104.l +
-       Systemic1.thoracic_aorta_C108.l +
-       Systemic1.thoracic_aorta_C112.l +
-       Systemic1.abdominal_aorta_C114.l +
-       Systemic1.abdominal_aorta_C136.l +
-       Systemic1.abdominal_aorta_C164.l +
-       Systemic1.abdominal_aorta_C176.l +
-       Systemic1.abdominal_aorta_C188.l +
-       Systemic1.abdominal_aorta_C192.l +
-       Systemic1.common_iliac_R216.l +
-       Systemic1.external_iliac_R220.l +
-       Systemic1.femoral_R222.l "Distance between carotid_L48 and femoral_R222";
-
-        parameter Modelica.SIunits.Length aortic_length=
-          Systemic1.ascending_aorta_A.l +
-          Systemic1.ascending_aorta_B.l +
-          Systemic1.ascending_aorta_C.l +
-          Systemic1.ascending_aorta_D.l +
-          Systemic1.aortic_arch_C2.l +
-          Systemic1.aortic_arch_C46.l +
-          Systemic1.aortic_arch_C64.l +
-          Systemic1.aortic_arch_C94.l +
-          Systemic1.thoracic_aorta_C96.l +
-          Systemic1.thoracic_aorta_C100.l +
-          Systemic1.thoracic_aorta_C104.l +
-          Systemic1.thoracic_aorta_C108.l +
-          Systemic1.thoracic_aorta_C112.l +
-          Systemic1.abdominal_aorta_C114.l +
-          Systemic1.abdominal_aorta_C136.l +
-          Systemic1.abdominal_aorta_C164.l +
-          Systemic1.abdominal_aorta_C176.l +
-          Systemic1.abdominal_aorta_C188.l +
-          Systemic1.abdominal_aorta_C192.l "Length of the whole aorta for comparison to body size";
-
-          parameter Real age = 35 "patient age";
-          Modelica.SIunits.Mass weight;
-          Modelica.SIunits.Height height(start = 1.7);
-          parameter Real BMI = 25;
-          Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*age+0.5409*(height*100)+0.3476*BMI) "Zemtsovskaja, HT 2019 for male subjects";
-          Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*age+2.5*height*100) "Rezai, Blood Press Monit 2013, for male subjects";
 
       output Physiolibrary.Types.Pressure brachial_pressure = Systemic1.brachial_L82_HeartLevel.u_C;
 
       output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
       Real brachial_pressure_int "integration of pressure to find the true mean";
       output Physiolibrary.Types.Pressure renal_capillary = Systemic1.renal_L166.u_C;
+      output Physiolibrary.Types.VolumeFlowRate CO = heartComponent.aorticValve.CO;
       equation
-        BMI = weight/(height^2);
-        aortic_length = aortic_length_calc;
+
 
         der(brachial_pressure_int) = brachial_pressure;
 
-        when heartComponent.smithOttesen_VentricularInteraction_flat_.systolicContraction then
-          brachial_pressure_mean = pre(brachial_pressure_int)/pre(heartComponent.smithOttesen_VentricularInteraction_flat_.tm);
+        when heartComponent.ventricles.cardiac_cycle < 0.1 then
+          brachial_pressure_mean = brachial_pressure_int/pre(heartComponent.ventricles.calciumMechanics.period);
           reinit(brachial_pressure_int, 0);
         end when;
 
@@ -31266,7 +31176,7 @@ P_hs_plus_dist"),
         annotation (experiment(
             StopTime=30,
             Interval=0.01,
-            Tolerance=1e-05,
+            Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"),
                     experiment(
             StopTime=60,
@@ -31290,8 +31200,10 @@ P_hs_plus_dist"),
             UseFrequencyInput=true,
             UseThoracicPressureInput=true,
             UsePhiInput=true),
-          redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
-            pulmonaryComponent,
+          redeclare replaceable
+                    Components.Subsystems.Pulmonary.Pulmonary_Smith
+            pulmonaryComponent constrainedby
+            Components.Subsystems.Pulmonary.partialPulmonary,
           redeclare Components.Subsystems.Baroreflex.HeartRate2 heartRate(HR_nom(
                 displayUnit="1/min") = 1.16667, phi0=settings.phi0),
           condHR(disconnected=false),
@@ -31468,8 +31380,12 @@ P_hs_plus_dist"),
                                                              heartComponent(
               UsePhiInput=false),
           condHR(disconnected=true),
-          Tilt_ramp(startTime=30),
-          phi(startTime=30));
+          Tilt_ramp(startTime=0),
+          phi(startTime=30),
+          redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg
+            pulmonaryComponent,
+          Systemic1(baroreflex_system(baroreceptor_carotid(delta0=0.4),
+                baroreflex(fsn=0.0135)), Parameters_Systemic1(k_E=0.36)));
         annotation (experiment(
             StopTime=60,
             Interval=0.02,
