@@ -883,6 +883,231 @@ type"),       Text(
 <p><br><img src=\"modelica://Physiolibrary/Resources/Images/UserGuide/ElasticVessel_PV.png\"/></p>
 </html>"));
       end ElasticVessel_nonLinear;
+
+      model IdealValve_deactivable "A valve that can be deactivatd"
+        extends Physiolibrary.Hydraulic.Interfaces.OnePort;
+         Boolean open(start=true) "Switching state";
+         Real passableVariable(start=0, final unit="1")
+          "Auxiliary variable for actual position on the ideal diode characteristic";
+        /*  = 0: knee point
+      < 0: below knee point, diode locking
+      > 0: above knee point, diode conducting */
+        parameter Physiolibrary.Types.HydraulicConductance _Gon(
+          final min=0,
+          displayUnit="l/(mmHg.min)")=1.2501026264094e-02
+          "Forward state-on conductance (open valve conductance)"
+          annotation (Dialog(enable=not useLimitationInputs)); //= the same as resistance 1e-5 mmHg/(l/min)
+        parameter Physiolibrary.Types.HydraulicConductance _Goff(
+          final min=0,
+          displayUnit="l/(mmHg.min)")=1.2501026264094e-12
+          "Backward state-off conductance (closed valve conductance)"
+          annotation (Dialog(enable=not useLimitationInputs)); //= 1e-5 (l/min)/mmHg
+        parameter Physiolibrary.Types.Pressure Pknee(final min=0)=0
+          "Forward threshold pressure";
+        parameter Boolean useLimitationInputs = false
+          "=true, if Gon and Goff are from inputs"
+          annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
+        Modelica.Blocks.Interfaces.BooleanInput On(start=true)
+          annotation (Placement(transformation(
+              extent={{-20,-20},{20,20}},
+              rotation=270,
+              origin={-60,100})));
+
+      protected
+        constant Physiolibrary.Types.Pressure unitPressure=1;
+        constant Physiolibrary.Types.VolumeFlowRate unitFlow=1;
+      equation
+
+        open = On or passableVariable > Modelica.Constants.eps;
+        dp = (passableVariable*unitFlow)*(if open then 1/_Gon else 1) + Pknee;
+        volumeFlowRate = (passableVariable*unitPressure)*(if open then 1 else _Goff)  + _Goff *Pknee;
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,
+                  -100},{100,100}}),
+                               graphics={Polygon(
+                points={{-76,66},{-76,-82},{34,-10},{34,12},{-66,68},{-76,74},{
+                    -76,66}},
+                lineColor={0,0,127},
+                fillColor={0,0,255},
+                fillPattern=FillPattern.Solid), Rectangle(
+                extent={{40,96},{68,-94}},
+                lineColor={0,0,127},
+                fillColor={0,0,255},
+                fillPattern=FillPattern.Solid),
+              Text(
+                extent={{-188,-96},{192,-118}},
+                lineColor={255,0,0},
+                fillPattern=FillPattern.Sphere,
+                fillColor={255,85,85},
+                textString="%name")}),
+          Documentation(info="<html>
+<p>Ideal Valve allows a volumetric flow in one direction in case of pressure gradient is greater. </p>
+</html>",   revisions="<html>
+<p><i>2014</i></p>
+<p>Tomas Kulhanek, Charles University, Prague, Czech Republic </p>
+</html>"));
+      end IdealValve_deactivable;
+
+      model IdealValveResistanceWithMeasurements
+        "Adds additional output calculations"
+        extends Physiolibrary.Hydraulic.Components.IdealValveResistance;
+        parameter Boolean useCardiacCycleInput = false "Use any signal of cardiac cycle which resets to zero for precise calculations of CO"
+        annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
+
+        Physiolibrary.Types.Pressure BPp;
+        Physiolibrary.Types.Pressure BPs;
+        Physiolibrary.Types.Pressure BPd;
+
+        Physiolibrary.Types.Pressure BP_max(start = 0);
+        Physiolibrary.Types.Pressure BP_min(start = 200*133);
+
+        Physiolibrary.Types.Pressure BPao = q_out.pressure;
+
+        parameter Physiolibrary.Types.Time tau = 1e-3;
+        Physiolibrary.Types.Time Ts(start = 1) "True time of cardiologic systole (duration of open valve)";
+        Physiolibrary.Types.Time Td "True time of cardiologic diastole (duration of closed valve)";
+        Physiolibrary.Types.Time T0 "Time since opening (begin of cardiologic systole)";
+        Physiolibrary.Types.Time T0_cycle "Time of beggining of current cardiac cycle. May be same as T0, when the cardiacCycleOutput is not specified.";
+
+        Physiolibrary.Types.Volume CO_acc "Accumulated volume since valve closing";
+        Physiolibrary.Types.VolumeFlowRate CO;
+        Modelica.Blocks.Interfaces.RealInput cardiac_cycle=cc if
+          useCardiacCycleInput
+          "Any signal that resets to zero e.g. fraction of cardiac cycle, time of cardiac cycle e.g."
+          annotation (Placement(transformation(
+              extent={{-20,-20},{20,20}},
+              rotation=270,
+              origin={0,100})));
+              Real cc "signal for reseting cardiac cycle";
+      equation
+        if not useCardiacCycleInput then
+          // when not given proper guidance, we would have to guess from opening and closing the valves
+          cc = time - T0;
+        end if;
+
+      //   if open then
+      //     BP_max = max(BPao, BP_max);
+      //   else
+      //     BP_max = 0;
+      //   end if;
+        der(CO_acc) = q_in.q;
+
+        if open and BP_max < BPao then
+          der(BP_max)*tau = BPao - BP_max;
+        else
+          der(BP_max) = 0;
+        end if;
+
+        if not open and BP_min > BPao then
+          der(BP_min)*tau = BPao - BP_min;
+        else
+          der(BP_min) = 0;
+        end if;
+
+        when open then
+          T0 = time;
+          Td = time - pre(T0) - Ts;
+        end when;
+
+        when not open then
+          Ts = time - T0;
+        end when;
+
+        when cc < 1e-3 then
+          // this launches when the signal resets. We better not use 0 for possible numerical issues. 1ms distance from beggining of cardiac cycle must be satisfactory.
+          // The T0 signal is not precise, as the valves might be chattering
+          T0_cycle = time;
+          reinit(CO_acc, 0);
+          CO = CO_acc/(time - pre(T0_cycle));
+          BPd = pre(BP_min);
+          reinit(BP_min, 200*133);
+          BPp = BPs - BPd;
+          BPs = pre(BP_max);
+          reinit(BP_max, 0);
+        end when;
+
+      end IdealValveResistanceWithMeasurements;
+
+      model ValveMynard "Valve by Mynard et al 2012, doi 10.1002/cnm.1466"
+        extends Physiolibrary.Hydraulic.Interfaces.OnePort;
+        type Area = Modelica.SIunits.Area(nominal = 1e-4);
+
+        Area ARef=ARef_init;
+
+        parameter Area ARef_init
+          "Starting value of reference cross-sectional area";
+        parameter Modelica.SIunits.Length l "Length of valve segment";
+        parameter Physiolibrary.Types.Pressure dpO=0 "Opening pressure";
+        parameter Physiolibrary.Types.Pressure dpC=0 "Closing pressure";
+        parameter Real Ko(unit="m2/(N.s)") "Opening rate coefficient";
+        parameter Real Kc(unit="m2/(N.s)") "Closing rate coefficient";
+        parameter Physiolibrary.Types.Fraction Mrg=0 "Ratio of valve regurgitation";
+        parameter Physiolibrary.Types.Fraction Mst=0 "Valve stenosis ratio";
+        parameter Physiolibrary.Types.Density rho = 1060;
+        parameter Area AMin_eps = 1e-6 "Anular area left open during maximally closed valve to prevent numerical issues.";
+
+        Area A=(AMax - AMin)*s + AMin
+          "Current cross-sectional area";
+        Area AMin=Mrg*ARef + AMin_eps
+          "Cross-sectional area when closed, with miniature hole to prevent zero division";
+        Area AMax=(1 - Mst)*ARef
+          "Cross-sectional area when open";
+
+        Physiolibrary.Types.Fraction s(start=1, fixed=true)
+          "Opening state (1 = open .. 0 = closed)";
+        Boolean open(start = true);
+        Real R(unit="kg/m7", nominal = 1e12) = rho/2/A^2 "Bernoulli resistance";
+        Physiolibrary.Types.HydraulicInertance L = rho*l/A "Inertance";
+      equation
+        assert(A > 0, "C'mon, the valve openin area could not be negative..", AssertionLevel.warning);
+
+      //   if noEvent(A > 0) then
+          dp = R*volumeFlowRate *abs(volumeFlowRate) + L*der(volumeFlowRate);
+
+      //   else
+      //     volumeFlowRate = 0;
+      //     R = Modelica.Constants.inf;
+      //     L = Modelica.Constants.inf;
+      //   end if;
+
+        if dp > dpO then
+          open = true;
+          der(s) = (1 - s)*Ko*(dp - dpO);
+        elseif dp < dpC then
+          open = false;
+          der(s) = s*Kc*(dp - dpC);
+        else
+          open = pre(open);
+          der(s) = 0;
+        end if;
+
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,
+                  -100},{100,100}}),
+                               graphics={Polygon(
+                points={{-76,66},{-76,-82},{34,-10},{34,12},{-66,68},{-76,74},{
+                    -76,66}},
+                lineColor={0,0,127},
+                fillColor={0,0,255},
+                fillPattern=FillPattern.Solid),
+              Text(
+                extent={{-188,-96},{192,-118}},
+                lineColor={255,0,0},
+                fillPattern=FillPattern.Sphere,
+                fillColor={255,85,85},
+                textString="%name"),
+              Polygon(
+                points={{40,100},{20,40},{40,-40},{20,-100},{42,-100},{60,-40},{40,40},
+                    {60,100},{40,100}},
+                lineColor={0,0,127},
+                fillColor={0,0,255},
+                fillPattern=FillPattern.Solid,
+                smooth=Smooth.Bezier)}),
+          Documentation(info="<html>
+<p>Ideal Valve allows a volumetric flow in one direction in case of pressure gradient is greater. </p>
+</html>",   revisions="<html>
+<p><i>2014</i></p>
+<p>Tomas Kulhanek, Charles University, Prague, Czech Republic </p>
+</html>"));
+      end ValveMynard;
     end Basic;
 
     package Subsystems
@@ -1542,87 +1767,6 @@ type"),       Text(
                     textString="phi")}));
           end Smith_VentricularInteraction_flat;
 
-          model IdealValveResistanceWithMeasurements
-            "Adds additional output calculations"
-            extends Physiolibrary.Hydraulic.Components.IdealValveResistance;
-            parameter Boolean useCardiacCycleInput = false "Use any signal of cardiac cycle which resets to zero for precise calculations of CO"
-            annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
-
-            Physiolibrary.Types.Pressure BPp;
-            Physiolibrary.Types.Pressure BPs;
-            Physiolibrary.Types.Pressure BPd;
-
-            Physiolibrary.Types.Pressure BP_max(start = 0);
-            Physiolibrary.Types.Pressure BP_min(start = 200*133);
-
-            Physiolibrary.Types.Pressure BPao = q_out.pressure;
-
-            parameter Physiolibrary.Types.Time tau = 1e-3;
-            Physiolibrary.Types.Time Ts(start = 1) "True time of cardiologic systole (duration of open valve)";
-            Physiolibrary.Types.Time Td "True time of cardiologic diastole (duration of closed valve)";
-            Physiolibrary.Types.Time T0 "Time since opening (begin of cardiologic systole)";
-            Physiolibrary.Types.Time T0_cycle "Time of beggining of current cardiac cycle. May be same as T0, when the cardiacCycleOutput is not specified.";
-
-            Physiolibrary.Types.Volume CO_acc "Accumulated volume since valve closing";
-            Physiolibrary.Types.VolumeFlowRate CO;
-            Modelica.Blocks.Interfaces.RealInput cardiac_cycle=cc if
-              useCardiacCycleInput
-              "Any signal that resets to zero e.g. fraction of cardiac cycle, time of cardiac cycle e.g."
-              annotation (Placement(transformation(
-                  extent={{-20,-20},{20,20}},
-                  rotation=270,
-                  origin={0,100})));
-                  Real cc "signal for reseting cardiac cycle";
-          equation
-            if not useCardiacCycleInput then
-              // when not given proper guidance, we would have to guess from opening and closing the valves
-              cc = time - T0;
-            end if;
-
-
-          //   if open then
-          //     BP_max = max(BPao, BP_max);
-          //   else
-          //     BP_max = 0;
-          //   end if;
-            der(CO_acc) = q_in.q;
-
-            if open and BP_max < BPao then
-              der(BP_max)*tau = BPao - BP_max;
-            else
-              der(BP_max) = 0;
-            end if;
-
-            if not open and BP_min > BPao then
-              der(BP_min)*tau = BPao - BP_min;
-            else
-              der(BP_min) = 0;
-            end if;
-
-            when open then
-              T0 = time;
-              Td = time - pre(T0) - Ts;
-            end when;
-
-            when not open then
-              Ts = time - T0;
-            end when;
-
-            when cc < 1e-3 then
-              // this launches when the signal resets. We better not use 0 for possible numerical issues. 1ms distance from beggining of cardiac cycle must be satisfactory.
-              // The T0 signal is not precise, as the valves might be chattering
-              T0_cycle = time;
-              reinit(CO_acc, 0);
-              CO = CO_acc/(time - pre(T0_cycle));
-              BPd = pre(BP_min);
-              reinit(BP_min, 200*133);
-              BPp = BPs - BPd;
-              BPs = pre(BP_max);
-              reinit(BP_max, 0);
-            end when;
-
-          end IdealValveResistanceWithMeasurements;
-
           model SmithOlufson_VentricularInteraction_flat_
               import Physiolibrary.Types.*;
             Volume Vsept(start=V0sept), Vperi;
@@ -1790,88 +1934,6 @@ type"),       Text(
                     lineColor={0,0,255},
                     textString="phi")}));
           end SmithOlufson_VentricularInteraction_flat_;
-
-          model ValveMynard "Valve by Mynard et al 2012, doi 10.1002/cnm.1466"
-            extends Physiolibrary.Hydraulic.Interfaces.OnePort;
-            type Area = Modelica.SIunits.Area(nominal = 1e-4);
-
-            Area ARef=ARef_init;
-
-            parameter Area ARef_init
-              "Starting value of reference cross-sectional area";
-            parameter Modelica.SIunits.Length l "Length of valve segment";
-            parameter Physiolibrary.Types.Pressure dpO=0 "Opening pressure";
-            parameter Physiolibrary.Types.Pressure dpC=0 "Closing pressure";
-            parameter Real Ko(unit="m2/(N.s)") "Opening rate coefficient";
-            parameter Real Kc(unit="m2/(N.s)") "Closing rate coefficient";
-            parameter Physiolibrary.Types.Fraction Mrg=0 "Ratio of valve regurgitation";
-            parameter Physiolibrary.Types.Fraction Mst=0 "Valve stenosis ratio";
-            parameter Physiolibrary.Types.Density rho = 1060;
-            parameter Area AMin_eps = 1e-6 "Anular area left open during maximally closed valve to prevent numerical issues.";
-
-            Area A=(AMax - AMin)*s + AMin
-              "Current cross-sectional area";
-            Area AMin=Mrg*ARef + AMin_eps
-              "Cross-sectional area when closed, with miniature hole to prevent zero division";
-            Area AMax=(1 - Mst)*ARef
-              "Cross-sectional area when open";
-
-            Physiolibrary.Types.Fraction s(start=1, fixed=true)
-              "Opening state (1 = open .. 0 = closed)";
-            Boolean open(start = true);
-            Real R(unit="kg/m7", nominal = 1e12) = rho/2/A^2 "Bernoulli resistance";
-            Physiolibrary.Types.HydraulicInertance L = rho*l/A "Inertance";
-          equation
-            assert(A > 0, "C'mon, the valve openin area could not be negative..", AssertionLevel.warning);
-
-          //   if noEvent(A > 0) then
-              dp = R*volumeFlowRate *abs(volumeFlowRate) + L*der(volumeFlowRate);
-
-          //   else
-          //     volumeFlowRate = 0;
-          //     R = Modelica.Constants.inf;
-          //     L = Modelica.Constants.inf;
-          //   end if;
-
-            if dp > dpO then
-              open = true;
-              der(s) = (1 - s)*Ko*(dp - dpO);
-            elseif dp < dpC then
-              open = false;
-              der(s) = s*Kc*(dp - dpC);
-            else
-              open = pre(open);
-              der(s) = 0;
-            end if;
-
-            annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{-100,
-                      -100},{100,100}}),
-                                   graphics={Polygon(
-                    points={{-76,66},{-76,-82},{34,-10},{34,12},{-66,68},{-76,74},{
-                        -76,66}},
-                    lineColor={0,0,127},
-                    fillColor={0,0,255},
-                    fillPattern=FillPattern.Solid),
-                  Text(
-                    extent={{-188,-96},{192,-118}},
-                    lineColor={255,0,0},
-                    fillPattern=FillPattern.Sphere,
-                    fillColor={255,85,85},
-                    textString="%name"),
-                  Polygon(
-                    points={{40,100},{20,40},{40,-40},{20,-100},{42,-100},{60,-40},{40,40},
-                        {60,100},{40,100}},
-                    lineColor={0,0,127},
-                    fillColor={0,0,255},
-                    fillPattern=FillPattern.Solid,
-                    smooth=Smooth.Bezier)}),
-              Documentation(info="<html>
-<p>Ideal Valve allows a volumetric flow in one direction in case of pressure gradient is greater. </p>
-</html>",       revisions="<html>
-<p><i>2014</i></p>
-<p>Tomas Kulhanek, Charles University, Prague, Czech Republic </p>
-</html>"));
-          end ValveMynard;
 
           model HeartInputs "Heart model from adan venous red commit _7af7a4"
             ADAN_main.Components.Subsystems.Heart.Auxiliary.Parameters_Heart
@@ -3689,6 +3751,11 @@ type"),       Text(
                 "Time from start of the cycle" annotation (Placement(
                     transformation(extent={{-56,14},{-36,34}}),
                     iconTransformation(extent={{90,-10},{110,10}})));
+              Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input  annotation (Placement(
+                    transformation(extent={{-20,-20},{20,20}},
+                    rotation=90,
+                    origin={0,-100}),                             iconTransformation(extent={{-20,
+                        -120},{20,-80}})));
             equation
               connect(frequency, calciumMechanics.frequency)
                 annotation (Line(points={{-100,0},{-80,0},{-80,-20},{-59,-20}},
@@ -3725,8 +3792,8 @@ type"),       Text(
                 redeclare VentricleWallCalcium RV_wall(xm=xm_RV, ym=ym, Vw=27, Amref=0.95*110),
                 redeclare DrivingFunctionCalcium calciumMechanics);
 
-              Real ptrans_LV=2*LV_wall.Tx/ym;
-              Real ptrans_RV=2*RV_wall.Tx/ym;
+              Real ptrans_LV=2*LV_wall.Tx/ym + thoracic_pressure_input;
+              Real ptrans_RV=2*RV_wall.Tx/ym + thoracic_pressure_input;
 
               Real _P_LV=-ptrans_LV;
               Real _P_RV=+ptrans_RV;
@@ -3814,13 +3881,33 @@ type"),       Text(
               // V_LA start( 39.666051 ),
               Real e;
               parameter Real eps = 1e-6;
+              parameter Physiolibrary.Types.Volume V_min = 5e-6;
+              Physiolibrary.Types.Pressure intraRV_external_pressure;
+              Real vrv_tp_fraction = (V_RV - V_min)/ V_min;
+              Modelica.Blocks.Interfaces.BooleanOutput OnRV(start=true)
+                annotation (Placement(transformation(
+                    extent={{-20,-20},{20,20}},
+                    rotation=90,
+                    origin={40,80})));
+              Modelica.Blocks.Interfaces.BooleanOutput OnLV(start=true)
+                annotation (Placement(transformation(
+                    extent={{-20,-20},{20,20}},
+                    rotation=270,
+                    origin={60,-80})));
             equation
               // ports are already in SI units
               der(V_LV) = port_lv.q;
               der(V_RV) = port_rv.q;
 
+              intraRV_external_pressure =
+                  thoracic_pressure_input
+                  *max(min(vrv_tp_fraction, 1), 0);
+
+              OnRV = V_RV > V_min;
+              OnLV = V_LV > V_min;
+
               port_lv.pressure = P_LV;
-              port_rv.pressure = P_RV;
+              port_rv.pressure = P_RV  + intraRV_external_pressure;
 
             //   // TriSeg
                _V_LV = - 0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm - LV_wall.Vm;
@@ -4060,7 +4147,8 @@ type"),       Text(
           end TestCalciumMechanics;
 
           model TestTriSegMechVentricles
-            Auxiliary.TriSegMechanics_components.VentriclesLumens ventricles
+            Auxiliary.TriSegMechanics_components.VentriclesLumens ventricles(V_LV(
+                  start=l), V_RV(start=r))
               annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
             Modelica.Blocks.Sources.Ramp ramp(
               height=1,
@@ -4080,6 +4168,13 @@ type"),       Text(
             Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P=
                   2666.4477483) annotation (Placement(transformation(extent={{
                       90,-30},{70,-10}})));
+            Modelica.Blocks.Sources.Ramp ramp1(
+              height=0,
+              duration=10,
+              offset=0,
+              startTime=5) annotation (Placement(transformation(extent={{-36,-52},{-16,-32}})));
+              parameter Physiolibrary.Types.Volume r=0.0001;
+              parameter Physiolibrary.Types.Volume l=0.0001;
           equation
             connect(ramp.y, ventricles.frequency) annotation (Line(points={{-53,
                     -6},{-32,-6},{-32,0},{-10,0}}, color={0,0,127}));
@@ -4091,40 +4186,54 @@ type"),       Text(
                 points={{60,-20},{70,-20}},
                 color={0,0,0},
                 thickness=1));
+            connect(ramp1.y, ventricles.thoracic_pressure_input) annotation (Line(points={
+                    {-15,-42},{-8,-42},{-8,-40},{0,-40},{0,-10}}, color={0,0,127}));
             annotation (
               Icon(coordinateSystem(preserveAspectRatio=false)),
               Diagram(coordinateSystem(preserveAspectRatio=false)),
-              experiment(
-                StopTime=20,
-                __Dymola_NumberOfIntervals=15000,
-                __Dymola_Algorithm="Cvode"));
+              experiment(__Dymola_NumberOfIntervals=1500, __Dymola_Algorithm="Cvode"));
           end TestTriSegMechVentricles;
 
           model TestTriSegMechVentriclesOld
-            Auxiliary.TriSegMechanics_components.VentriclesCalciumEverything
-              ventricles annotation (Placement(transformation(extent={{-10,-10},
-                      {10,10}})));
+            Auxiliary.TriSegMechanics_components.VentriclesLumens
+              ventricles annotation (Placement(transformation(extent={{-64,-10},
+                      {-44,10}})));
             Modelica.Blocks.Sources.Ramp ramp(
-              height=2,
+              height=0,
               duration=10,
-              offset=0,
-              startTime=5) annotation (Placement(transformation(extent={{-74,
-                      -16},{-54,4}})));
+              offset=1,
+              startTime=5) annotation (Placement(transformation(extent={{-128,
+                      -16},{-108,4}})));
             Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
-                  displayUnit="(mmHg.min)/l") = 159986864.898)
+                  displayUnit="(mmHg.min)/l") = 7999343.2449)
               annotation (Placement(transformation(extent={{40,10},{60,30}})));
-            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P=
-                  2666.4477483)
+            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(
+                usePressureInput=true, P=2666.4477483)
               annotation (Placement(transformation(extent={{90,10},{70,30}})));
             Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
-                  displayUnit="(mmHg.min)/l") = 159986864.898) annotation (
+                  displayUnit="(mmHg.min)/l") = 7999343.2449)  annotation (
                 Placement(transformation(extent={{40,-30},{60,-10}})));
-            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P=
-                  2666.4477483) annotation (Placement(transformation(extent={{
-                      90,-30},{70,-10}})));
+            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(
+                usePressureInput=true, P=2666.4477483)
+                                annotation (Placement(transformation(extent={{90,-30},
+                      {70,-10}})));
+            Modelica.Blocks.Sources.Ramp thoracicPressure(
+              height=0,
+              duration=10,
+              offset=0,
+              startTime=5) annotation (Placement(transformation(extent={{-92,
+                      -76},{-72,-56}})));
+            Modelica.Blocks.Sources.Ramp thoracicPressure1(
+              height=-1200,
+              duration=600,
+              offset=666,
+              startTime=5)
+              annotation (Placement(transformation(extent={{-12,60},{8,80}})));
+            Basic.IdealValve_deactivable idealValve_deactivable annotation (
+                Placement(transformation(extent={{-16,-4},{-36,16}})));
+            Basic.IdealValve_deactivable idealValve_deactivable1
+              annotation (Placement(transformation(extent={{16,4},{-4,-16}})));
           equation
-            connect(ramp.y, ventricles.frequency) annotation (Line(points={{-53,
-                    -6},{-32,-6},{-32,0},{-10,0}}, color={0,0,127}));
             connect(resistor.q_out, unlimitedVolume.y) annotation (Line(
                 points={{60,20},{70,20}},
                 color={0,0,0},
@@ -4133,14 +4242,50 @@ type"),       Text(
                 points={{60,-20},{70,-20}},
                 color={0,0,0},
                 thickness=1));
+            connect(ramp.y, ventricles.frequency) annotation (Line(points={{
+                    -107,-6},{-86,-6},{-86,0},{-64,0}}, color={0,0,127}));
+            connect(thoracicPressure.y, ventricles.thoracic_pressure_input)
+              annotation (Line(points={{-71,-66},{-54,-66},{-54,-10}}, color={0,
+                    0,127}));
+            connect(thoracicPressure1.y, unlimitedVolume.pressure) annotation (
+                Line(points={{9,70},{112,70},{112,20},{90,20}}, color={0,0,127}));
+            connect(unlimitedVolume1.pressure, unlimitedVolume.pressure)
+              annotation (Line(points={{90,-20},{112,-20},{112,20},{90,20}},
+                  color={0,0,127}));
+            connect(resistor.q_in, idealValve_deactivable.q_in) annotation (
+                Line(
+                points={{40,20},{24,20},{24,6},{-16,6}},
+                color={0,0,0},
+                thickness=1));
+            connect(idealValve_deactivable.q_out, ventricles.port_rv)
+              annotation (Line(
+                points={{-36,6},{-46,6}},
+                color={0,0,0},
+                thickness=1));
+            connect(ventricles.OnRV, idealValve_deactivable.On) annotation (
+                Line(points={{-50,8},{-50,24},{-20,24},{-20,16}}, color={255,0,
+                    255}));
+            connect(idealValve_deactivable1.q_in, resistor1.q_in) annotation (
+                Line(
+                points={{16,-6},{28,-6},{28,-20},{40,-20}},
+                color={0,0,0},
+                thickness=1));
+            connect(idealValve_deactivable1.q_out, ventricles.port_lv)
+              annotation (Line(
+                points={{-4,-6},{-46,-6}},
+                color={0,0,0},
+                thickness=1));
+            connect(ventricles.OnLV, idealValve_deactivable1.On) annotation (
+                Line(points={{-48,-8},{-48,-30},{12,-30},{12,-16}}, color={255,
+                    0,255}));
             annotation (
               Icon(coordinateSystem(preserveAspectRatio=false)),
               Diagram(coordinateSystem(preserveAspectRatio=false)),
               experiment(
-                StopTime=20,
+                StopTime=605,
                 __Dymola_NumberOfIntervals=1500,
                 Tolerance=1e-05,
-                __Dymola_Algorithm="Cvode"));
+                __Dymola_Algorithm="Sdirk34hw"));
           end TestTriSegMechVentriclesOld;
         end Testers;
 
@@ -4293,9 +4438,9 @@ type"),       Text(
         model Heart_Smith
           extends Subsystems.Heart.partialHeart;
 
-          Auxiliary.IdealValveResistanceWithMeasurements aorticValve(Pknee=0, _Ron(
-                displayUnit="(mmHg.s)/ml") = 2399802.97347)
-            annotation (Placement(transformation(extent={{-68,-30},{-88,-10}})));
+          Basic.IdealValveResistanceWithMeasurements aorticValve(Pknee=0, _Ron(
+                displayUnit="(mmHg.s)/ml") = 2399802.97347) annotation (
+              Placement(transformation(extent={{-68,-30},{-88,-10}})));
           Physiolibrary.Hydraulic.Components.IdealValveResistance
                                tricuspidValve(Pknee=0, _Ron(displayUnit=
                   "(mmHg.s)/ml") = 3159740.5817355)
@@ -4469,9 +4614,9 @@ type"),       Text(
         model HeartSmithOlufsen
           extends Subsystems.Heart.partialHeart;
 
-          Subsystems.Heart.Auxiliary.IdealValveResistanceWithMeasurements aorticValve(
-              Pknee=0, _Ron(displayUnit="(mmHg.s)/ml") = 2399802.97347)
-            annotation (Placement(transformation(extent={{-68,-30},{-88,-10}})));
+          Basic.IdealValveResistanceWithMeasurements aorticValve(Pknee=0, _Ron(
+                displayUnit="(mmHg.s)/ml") = 2399802.97347) annotation (
+              Placement(transformation(extent={{-68,-30},{-88,-10}})));
           Physiolibrary.Hydraulic.Components.IdealValveResistance
                                tricuspidValve(Pknee=0, _Ron(displayUnit=
                   "(mmHg.s)/ml") = 3159740.5817355)
@@ -4656,13 +4801,13 @@ type"),       Text(
         model HeartSmithOlufsenMynard
           extends Subsystems.Heart.partialHeart;
 
-          replaceable Subsystems.Heart.Auxiliary.ValveMynard aorticValve(
+          replaceable Basic.ValveMynard aorticValve(
             ARef_init(displayUnit="cm2") = 0.00049827,
             l(displayUnit="cm") = 0.0201,
             Ko=0.12,
             Kc=0.12) constrainedby Physiolibrary.Hydraulic.Interfaces.OnePort
             annotation (Placement(transformation(extent={{-68,-30},{-88,-10}})));
-          replaceable Subsystems.Heart.Auxiliary.ValveMynard tricuspidValve(
+          replaceable Basic.ValveMynard tricuspidValve(
             ARef_init(displayUnit="cm2") = 0.00074785,
             l(displayUnit="cm") = 0.0246,
             Ko=0.3,
@@ -4681,13 +4826,13 @@ type"),       Text(
                   Lpv(I(displayUnit="mmHg.s2/ml") = 19822.372560862,
               volumeFlow_start(displayUnit="m3/s") = -1.9e-9)
             annotation (Placement(transformation(extent={{32,24},{52,44}})));
-          replaceable Subsystems.Heart.Auxiliary.ValveMynard pulmonaryValve(
+          replaceable Basic.ValveMynard pulmonaryValve(
             ARef_init(displayUnit="cm2") = 0.00049857,
             l(displayUnit="cm") = 0.0201,
             Ko=0.2,
             Kc=0.2) constrainedby Physiolibrary.Hydraulic.Interfaces.OnePort
             annotation (Placement(transformation(extent={{62,24},{82,44}})));
-          replaceable Subsystems.Heart.Auxiliary.ValveMynard mitralValve(
+          replaceable Basic.ValveMynard mitralValve(
             ARef_init=0.0007474,
             l(displayUnit="cm") = 0.0246,
             Ko=0.3,
@@ -5145,12 +5290,12 @@ Kalecky")}), experiment(
             Pknee=0,
             _Ron=R_vlv)
             annotation (Placement(transformation(extent={{40,-40},{20,-20}})));
-          Auxiliary.IdealValveResistanceWithMeasurements aorticValve(
+          Basic.IdealValveResistanceWithMeasurements aorticValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
             _Ron=R_vlv,
-            useCardiacCycleInput=true)
-            annotation (Placement(transformation(extent={{-60,-40},{-80,-20}})));
+            useCardiacCycleInput=true) annotation (Placement(transformation(
+                  extent={{-60,-40},{-80,-20}})));
 
           parameter Real _R_LA =   0.025;
           parameter Real _R_RA =   0.025;
@@ -5167,7 +5312,7 @@ Kalecky")}), experiment(
           replaceable Auxiliary.TriSegMechanics_components.VentriclesCalcium ventricles(
               V_LV(start=0.00015), V_RV(start=0.00015)) constrainedby
             Auxiliary.TriSegMechanics_components.partialVentricles
-            annotation (Placement(transformation(extent={{-12,-10},{8,10}})));
+            annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
           Auxiliary.TriSegMechanics_components.Atrium ra
             annotation (Placement(transformation(extent={{-40,26},{-60,6}})));
           Auxiliary.TriSegMechanics_components.Atrium la
@@ -5205,7 +5350,7 @@ Kalecky")}), experiment(
               color={0,0,0},
               thickness=1));
           connect(ventricles.port_rv, pulmonaryValve.q_in) annotation (Line(
-              points={{6,6},{6,40},{64,40}},
+              points={{8,6},{8,40},{64,40}},
               color={0,0,0},
               thickness=1));
           connect(mitralValve.q_out, aorticValve.q_in) annotation (Line(
@@ -5213,13 +5358,13 @@ Kalecky")}), experiment(
               color={0,0,0},
               thickness=1));
           connect(ventricles.port_lv, aorticValve.q_in) annotation (Line(
-              points={{6,-6},{6,-30},{-60,-30}},
+              points={{8,-6},{8,-30},{-60,-30}},
               color={0,0,0},
               thickness=1));
           connect(frequency_input, ventricles.frequency) annotation (Line(points={{-106,0},
-                  {-12,0}},                    color={0,0,127}));
+                  {-10,0}},                    color={0,0,127}));
           connect(HR0.y, ventricles.frequency) annotation (Line(points={{-87,0},
-                  {-12,0}},         color={0,0,127}));
+                  {-10,0}},         color={0,0,127}));
           connect(ra.port_a, r_ra.q_out) annotation (Line(
               points={{-50,24},{-50,40},{-60,40}},
               color={0,0,0},
@@ -5229,12 +5374,16 @@ Kalecky")}), experiment(
               color={0,0,0},
               thickness=1));
           connect(ra.cardiac_cycle, ventricles.cardiac_cycle) annotation (Line(points={{-40.2,
-                  16},{16,16},{16,0},{8,0}},       color={0,0,127}));
+                  16},{16,16},{16,0},{10,0}},      color={0,0,127}));
           connect(la.cardiac_cycle, ventricles.cardiac_cycle)
-            annotation (Line(points={{40.2,0},{8,0}},               color={0,0,127}));
+            annotation (Line(points={{40.2,0},{10,0}},              color={0,0,127}));
           connect(aorticValve.cardiac_cycle, ventricles.cardiac_cycle)
-            annotation (Line(points={{-70,-20},{16,-20},{16,0},{8,0}}, color={0,
+            annotation (Line(points={{-70,-20},{16,-20},{16,0},{10,0}},color={0,
                   0,127}));
+          connect(ventricles.thoracic_pressure_input, P0.y) annotation (Line(
+                points={{0,-10},{0,-81},{1.77636e-15,-81}}, color={0,0,127}));
+          connect(ventricles.thoracic_pressure_input, thoracic_pressure_input)
+            annotation (Line(points={{0,-10},{0,-100}}, color={0,0,127}));
           annotation (Icon(graphics={                       Text(
                   extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
@@ -11742,7 +11891,6 @@ P_hs_plus_dist"),
          common_carotid_L48_B.l +
          common_carotid_L48_C.l +
          common_carotid_L48_D.l +
-         aortic_arch_C64.l +
          aortic_arch_C94.l +
          thoracic_aorta_C96.l +
          thoracic_aorta_C100.l +
@@ -11757,7 +11905,7 @@ P_hs_plus_dist"),
          abdominal_aorta_C192.l +
          common_iliac_R216.l +
          external_iliac_R220.l +
-         femoral_R222.l "Distance between carotid_L48 and femoral_R222";
+         femoral_R222.l "Distance between carotid_L48_D and femoral_R222";
 
           parameter Modelica.SIunits.Length aortic_length=
             ascending_aorta_A.l +
@@ -24684,10 +24832,12 @@ P_hs_plus_dist"),
     end TestTriSegMech_all;
 
     model TestTriSegMech_Lumens
-      Components.Subsystems.Heart.Heart_TriSegMechanicsLumens heart(HR=HR,
+      Components.Subsystems.Heart.Heart_TriSegMechanicsLumens heart(
+        UseThoracicPressureInput=true,                              HR=HR,
           ventricles(V_LV(start=0.00015), V_RV(start=0.00015)))
         annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
       Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg(
+        UseThoracic_PressureInput=true,
         _HR=if adjust then HR*60 else 60,                                                    c_pa(
             volume_start=3.5e-05), c_pv(volume_start=6.5e-05))
         annotation (Placement(transformation(extent={{-8,-54},{12,-34}})));
@@ -24705,6 +24855,20 @@ P_hs_plus_dist"),
       output Real _BPd = heart.aorticValve.BPd/133.32;
       output Real _BPp = heart.aorticValve.BPp/133.32;
       parameter Boolean adjust = true;
+    Modelica.Blocks.Sources.Trapezoid           thoracic_pressure(
+        amplitude=40*133,
+        rising=2,
+        width=20,
+        falling=2,
+        period=200,
+        nperiod=1,
+        offset=0,
+        startTime=40)
+        annotation (Placement(transformation(extent={{-100,-10},{-80,10}})));
+      Components.Signals.ConditionalConnection condTP(disconnectedValue=0,
+          disconnected=false)
+                             annotation (Placement(transformation(extent={{-67,
+                -5.3333},{-53,6.6667}})));
     equation
       connect(heart.sa, systemic_TriSeg.port_a) annotation (Line(
           points={{-10,10},{-38,10},{-38,40}},
@@ -24722,15 +24886,60 @@ P_hs_plus_dist"),
           points={{12,-44},{24,-44},{24,-10},{10,-10}},
           color={0,0,0},
           thickness=1));
+      connect(thoracic_pressure.y,condTP. u) annotation (Line(points={{-79,0},{
+              -74,0},{-74,3e-05},{-68.4,3e-05}},color={0,0,127}));
+      connect(condTP.y, heart.thoracic_pressure_input) annotation (Line(points=
+              {{-52.3,3.33333e-05},{-18,3.33333e-05},{-18,-22},{0,-22},{0,-10}},
+            color={0,0,127}));
+      connect(condTP.y, pulmonaryTriSeg.thoracic_pressure) annotation (Line(
+            points={{-52.3,3.33333e-05},{-40,3.33333e-05},{-40,-60},{2,-60},{2,
+              -54}}, color={0,0,127}));
       annotation (
         Icon(coordinateSystem(preserveAspectRatio=false)),
         Diagram(coordinateSystem(preserveAspectRatio=false)),
         experiment(
-          StopTime=20,
-          __Dymola_NumberOfIntervals=1500,
-          Tolerance=1e-06,
+          StopTime=90,
+          Interval=0.01,
+          Tolerance=1e-05,
           __Dymola_Algorithm="Cvode"));
     end TestTriSegMech_Lumens;
+
+    model demo
+      Components.Subsystems.Heart.Heart_ADAN86 heart_ADAN86_1
+        annotation (Placement(transformation(extent={{-40,70},{-20,90}})));
+      Components.Subsystems.Heart.Heart_ADAN_VR heart_ADAN_VR
+        annotation (Placement(transformation(extent={{-40,40},{-20,60}})));
+      Components.Subsystems.Heart.Heart_Smith heart_Smith
+        annotation (Placement(transformation(extent={{-40,10},{-20,30}})));
+      Components.Subsystems.Heart.HeartSmithOlufsenMynard
+        heartSmithOlufsenMynard
+        annotation (Placement(transformation(extent={{-40,-18},{-20,2}})));
+      Components.Subsystems.Heart.Heart_TriSegMechanics heart_TriSegMechanics
+        annotation (Placement(transformation(extent={{-40,-48},{-20,-28}})));
+      Components.Subsystems.Heart.Heart_TriSegMechanicsLumens
+        heart_TriSegMechanicsLumens
+        annotation (Placement(transformation(extent={{-40,-78},{-20,-58}})));
+      Components.Subsystems.Pulmonary.Pulmonary_ADAN86 pulmonary_ADAN86_1
+        annotation (Placement(transformation(extent={{-88,60},{-68,80}})));
+      Components.Subsystems.Pulmonary.Pulmonary_ADAN_VR pulmonary_ADAN_VR
+        annotation (Placement(transformation(extent={{-88,20},{-68,40}})));
+      Components.Subsystems.Pulmonary.Pulmonary_Smith pulmonary_Smith
+        annotation (Placement(transformation(extent={{-88,-20},{-68,0}})));
+      Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg
+        annotation (Placement(transformation(extent={{-88,-60},{-68,-40}})));
+      Components.Subsystems.Systemic.SystemicAV systemicAV
+        annotation (Placement(transformation(extent={{0,22},{76,52}})));
+      Components.Subsystems.Systemic.Systemic_TriSeg systemic_TriSeg
+        annotation (Placement(transformation(extent={{0,-20},{76,10}})));
+      Components.Subsystems.Systemic.Postures.SystemicAV_Sit_Stand
+        systemicAV_Sit_Stand
+        annotation (Placement(transformation(extent={{0,-66},{76,-36}})));
+      Components.Subsystems.Systemic.ADAN86ArterialTree.arteries_ADAN86
+        arteries_ADAN86_1
+        annotation (Placement(transformation(extent={{30,70},{50,90}})));
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)));
+    end demo;
   end tests;
 
   package Experiments
@@ -31112,7 +31321,7 @@ P_hs_plus_dist"),
                                                              heartComponent(
               UseFrequencyInput=true, UseThoracicPressureInput=true),
           redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg
-            pulmonaryComponent,
+            pulmonaryComponent(UseThoracic_PressureInput=true),
           redeclare Components.Subsystems.Baroreflex.HeartRate2 heartRate(
               HR_nom(displayUnit="1/min")=1.0,       phi0=settings.phi0),
           condHR(disconnected=false),
@@ -31131,13 +31340,13 @@ P_hs_plus_dist"),
             tissues_nominal_venules_pressure(displayUnit="mmHg") = 227.98128247965,
             UseNonLinear_VenousCompliance=true,
             veins_activation_tau=0.1,
-            hideLevel0=true,
-            hideLevel1=true),
+            hideLevel0=false,
+            hideLevel1=false),
           phi(nperiod=0));
 
         Modelica.Blocks.Logical.Switch switch1
           annotation (Placement(transformation(extent={{10,52},{24,66}})));
-        Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi
+        Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi(y=false)
           annotation (Placement(transformation(extent={{-22,50},{-2,70}})));
         Components.Signals.ConditionalConnection condHeartPhi(disconnectedValue=
              0.25, disconnected=false) annotation (Placement(transformation(
@@ -31149,6 +31358,9 @@ P_hs_plus_dist"),
       Real brachial_pressure_int "integration of pressure to find the true mean";
       output Physiolibrary.Types.Pressure renal_capillary = Systemic1.renal_L166.u_C;
       output Physiolibrary.Types.VolumeFlowRate CO = heartComponent.aorticValve.CO;
+      output Physiolibrary.Types.Pressure carotid_pressure = Systemic1.common_carotid_L48_D.u_C;
+      output Physiolibrary.Types.Pressure femoral_pressure = Systemic1.femoral_L200.u_C;
+
       equation
 
 
@@ -31379,13 +31591,14 @@ P_hs_plus_dist"),
           redeclare Components.Subsystems.Heart.Heart_TriSegMechanicsLumens
                                                              heartComponent(
               UsePhiInput=false),
-          condHR(disconnected=true),
-          Tilt_ramp(startTime=0),
+          condHR(disconnected=false),
+          Tilt_ramp(startTime=30),
           phi(startTime=30),
           redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg
             pulmonaryComponent,
           Systemic1(baroreflex_system(baroreceptor_carotid(delta0=0.4),
-                baroreflex(fsn=0.0135)), Parameters_Systemic1(k_E=0.36)));
+                baroreflex(fsn=0.0135)), Parameters_Systemic1(k_E=0.36)),
+          condPhi(disconnected=false));
         annotation (experiment(
             StopTime=60,
             Interval=0.02,
