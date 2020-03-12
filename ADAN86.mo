@@ -3638,6 +3638,9 @@ type"),       Text(
             model VentricleWallLumens
               "As close to original Lumens model as possible, with exception of passive force."
               extends partialVentricleWall;
+              Real sinalpha = Tx/Tm;
+              Modelica.SIunits.Angle alpha = asin(sinalpha);
+
 
               // Inlcuded in the base class:
               //   input Real xm;
@@ -3697,8 +3700,8 @@ type"),       Text(
               // Passive forces (Lumens) do not really work here atm so we are using DAB variant
               // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
               Real sigmapas=k_passive*(SLo/2 - L0) + sigma_collagen;
-              // Active forces
-              Real sigmaact=sigma_act*C*(SL - SLrest)*(SLo - SL)/LSEiso;
+              // Active forces could not go negative
+              Real sigmaact=max(0, sigma_act*C*(SL - SLrest)*(SLo - SL)/LSEiso);
               // Total forces
               Real sigmaM=sigmaact + sigmapas;
               // equilibrium of forces at junction circle already in base class
@@ -3756,6 +3759,15 @@ type"),       Text(
                     rotation=90,
                     origin={0,-100}),                             iconTransformation(extent={{-20,
                         -120},{20,-80}})));
+              Modelica.Mechanics.MultiBody.Visualizers.Advanced.Arrow arrowLV(
+                  r_head={LV_wall.Tx,LV_wall.Ty,0}/100) annotation (Placement(
+                    transformation(extent={{20,32},{40,52}})));
+              Modelica.Mechanics.MultiBody.Visualizers.Advanced.Arrow arrowSEP(
+                  r_head={SEP_wall.Tx,SEP_wall.Ty,0}/100) annotation (Placement(
+                    transformation(extent={{20,-8},{40,12}})));
+              Modelica.Mechanics.MultiBody.Visualizers.Advanced.Arrow arrowRV(
+                  r_head={RV_wall.Tx,RV_wall.Ty,0}/100) annotation (Placement(
+                    transformation(extent={{20,-50},{40,-30}})));
             equation
               connect(frequency, calciumMechanics.frequency)
                 annotation (Line(points={{-100,0},{-80,0},{-80,-20},{-59,-20}},
@@ -3848,7 +3860,10 @@ type"),       Text(
                 redeclare DrivingLumens calciumMechanics,
                 redeclare VentricleWallLumens LV_wall(xm=xm_LV, ym=ym, Vw=89, Amref=0.95*86),
                 redeclare VentricleWallLumens SEP_wall(xm=xm_SEP, ym=ym, Vw=34, Amref=0.95*39),
-                redeclare VentricleWallLumens RV_wall(xm=xm_RV, ym=ym, Vw=27, Amref=0.95*110));
+                redeclare VentricleWallLumens RV_wall(xm=xm_RV, ym=ym, Vw=27, Amref=0.95*110),
+                arrowLV(r_tail={0,ym,0}),
+                arrowSEP(r_tail={0,ym,0}),
+                arrowRV(r_tail={0,ym,0}));
 
 
 
@@ -3894,6 +3909,9 @@ type"),       Text(
                     extent={{-20,-20},{20,20}},
                     rotation=270,
                     origin={60,-80})));
+              Physiolibrary.Types.Pressure P_suc_sep = p_suc_fact*exp(10*(SEP_wall.Cm-0.5))*Constants.mmHg2SI;
+              parameter Real p_suc_fact = 0;
+              Real Tysq = - 1 / ym;
             equation
               // ports are already in SI units
               der(V_LV) = port_lv.q;
@@ -3906,17 +3924,23 @@ type"),       Text(
               OnRV = V_RV > V_min;
               OnLV = V_LV > V_min;
 
-              port_lv.pressure = P_LV;
-              port_rv.pressure = P_RV  + intraRV_external_pressure;
+              port_lv.pressure = P_LV + P_suc_sep + thoracic_pressure_input;
+              port_rv.pressure = P_RV + thoracic_pressure_input;
 
             //   // TriSeg
-               _V_LV = - 0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm - LV_wall.Vm;
-               _V_RV = - 0.5*RV_wall.Vw - 0.5*SEP_wall.Vw - SEP_wall.Vm + RV_wall.Vm;
+               // _V_LV = - 0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm - LV_wall.Vm;
+               LV_wall.Vm = - 0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm  - _V_LV;
+               // _V_RV = - 0.5*RV_wall.Vw - 0.5*SEP_wall.Vw - SEP_wall.Vm + RV_wall.Vm;
+               RV_wall.Vm = _V_RV + 0.5*RV_wall.Vw + 0.5*SEP_wall.Vw + SEP_wall.Vm;
+
+               // not as in paper though, but same as in CircAdapt Matlab routine
+               // Lv.Vm= Sv.Vm-Lv.V-0.5*(Lv.VWall+Sv.VWall);
+            // Rv.Vm= Sv.Vm+Rv.V+0.5*(Sv.VWall+Rv.VWall);
 
                0 = (LV_wall.Tx + SEP_wall.Tx + RV_wall.Tx);
 
               // This workaround needed because direct enforcement of equality of radial tensions led to numerical crashes in some cases
-              e = (LV_wall.Ty + SEP_wall.Ty + RV_wall.Ty);
+              e = (LV_wall.Ty + SEP_wall.Ty + RV_wall.Ty + Tysq);
               der(LV_wall.ym)*eps = -e;
 
               connect(calciumMechanics.cardiac_cycle, RV_wall.cardiac_cycle)
@@ -3937,7 +3961,8 @@ type"),       Text(
                 annotation (Placement(transformation(extent={{-10,-90},{10,-70}})));
               Physiolibrary.Types.RealIO.FractionInput cardiac_cycle
                 "Time from start of the cycle" annotation (Placement(transformation(extent={
-                        {-114,-10},{-94,10}}), iconTransformation(extent={{-108,-10},{-88,10}})));
+                        {-114,-10},{-94,10}}), iconTransformation(extent={{-120,
+                        -20},{-80,20}})));
 
             parameter Physiolibrary.Types.Time Tact = 0.10;
             //
@@ -3953,10 +3978,15 @@ type"),       Text(
               Physiolibrary.Types.HydraulicElastance E=_E/Constants.ml_per_mmhg2SI;
 
              Physiolibrary.Types.Volume V_LA( start = 100e-6);// = _VLA*Constants.ml2SI;
+              Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input  annotation (Placement(
+                    transformation(extent={{-20,-20},{20,20}},
+                    rotation=180,
+                    origin={100,0}),                              iconTransformation(extent={{120,-20},
+                        {80,20}})));
             equation
 
               der(V_LA) = port_a.q;
-              port_a.pressure = E*V_LA;
+              port_a.pressure = E*V_LA + thoracic_pressure_input;
 
               if cardiac_cycle - Tact > 0.5 then
                 atriaCycle =cardiac_cycle - Tact - 1;
@@ -4151,7 +4181,7 @@ type"),       Text(
                   start=l), V_RV(start=r))
               annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
             Modelica.Blocks.Sources.Ramp ramp(
-              height=1,
+              height=0,
               duration=10,
               offset=1,
               startTime=5) annotation (Placement(transformation(extent={{-74,
@@ -4169,7 +4199,7 @@ type"),       Text(
                   2666.4477483) annotation (Placement(transformation(extent={{
                       90,-30},{70,-10}})));
             Modelica.Blocks.Sources.Ramp ramp1(
-              height=0,
+              height=40*133,
               duration=10,
               offset=0,
               startTime=5) annotation (Placement(transformation(extent={{-36,-52},{-16,-32}})));
@@ -4188,6 +4218,14 @@ type"),       Text(
                 thickness=1));
             connect(ramp1.y, ventricles.thoracic_pressure_input) annotation (Line(points={
                     {-15,-42},{-8,-42},{-8,-40},{0,-40},{0,-10}}, color={0,0,127}));
+            connect(ventricles.port_rv, resistor.q_in) annotation (Line(
+                points={{8,6},{24,6},{24,20},{40,20}},
+                color={0,0,0},
+                thickness=1));
+            connect(resistor1.q_in, ventricles.port_lv) annotation (Line(
+                points={{40,-20},{26,-20},{26,-6},{8,-6}},
+                color={0,0,0},
+                thickness=1));
             annotation (
               Icon(coordinateSystem(preserveAspectRatio=false)),
               Diagram(coordinateSystem(preserveAspectRatio=false)),
@@ -4421,12 +4459,14 @@ type"),       Text(
           pv.pressure = Heart1.u_la;
           pa.q = -Heart1.v_puv;
 
-          connect(TP.u, P0.y) annotation (Line(points={{-8.88178e-16,-62},{0,-62},{0,-75}},
+          connect(TP.u, P0.y) annotation (Line(points={{-8.88178e-16,-62},{0,
+                  -62},{0,-81}},
                 color={0,0,127}));
-          connect(TP.u, thoracic_pressure_input) annotation (Line(points={{0,-62},{0,-82},
-                  {0,-100},{-8,-100}}, color={0,0,127}));
+          connect(TP.u, thoracic_pressure_input) annotation (Line(points={{0,-62},
+                  {0,-82},{0,-100},{0,-100}},
+                                       color={0,0,127}));
           connect(HR0.y, HR_.u)
-            annotation (Line(points={{-75,0},{-62,0}}, color={0,0,127}));
+            annotation (Line(points={{-87,0},{-62,0}}, color={0,0,127}));
           connect(frequency_input, HR_.u)
             annotation (Line(points={{-106,0},{-62,0}}, color={0,0,127}));
           annotation (Icon(graphics={Text(
@@ -5319,6 +5359,16 @@ Kalecky")}), experiment(
             annotation (Placement(transformation(extent={{40,-10},{60,10}})));
 
         Physiolibrary.Types.Volume volume;
+          Basic.IdealValve_deactivable idealValve_deactivable annotation (
+              Placement(transformation(
+                extent={{-10,10},{10,-10}},
+                rotation=270,
+                origin={8,24})));
+          Basic.IdealValve_deactivable idealValve_deactivable1 annotation (
+              Placement(transformation(
+                extent={{-4,-4},{4,4}},
+                rotation=90,
+                origin={8,-22})));
         equation
           volume = ra.V_LA + la.V_LA + ventricles.V_LV + ventricles.V_RV;
           connect(pulmonaryValve.q_out, pa) annotation (Line(
@@ -5349,16 +5399,8 @@ Kalecky")}), experiment(
               points={{-20,40},{64,40}},
               color={0,0,0},
               thickness=1));
-          connect(ventricles.port_rv, pulmonaryValve.q_in) annotation (Line(
-              points={{8,6},{8,40},{64,40}},
-              color={0,0,0},
-              thickness=1));
           connect(mitralValve.q_out, aorticValve.q_in) annotation (Line(
               points={{20,-30},{-60,-30}},
-              color={0,0,0},
-              thickness=1));
-          connect(ventricles.port_lv, aorticValve.q_in) annotation (Line(
-              points={{8,-6},{8,-30},{-60,-30}},
               color={0,0,0},
               thickness=1));
           connect(frequency_input, ventricles.frequency) annotation (Line(points={{-106,0},
@@ -5373,10 +5415,10 @@ Kalecky")}), experiment(
               points={{50,-8},{50,-30},{60,-30}},
               color={0,0,0},
               thickness=1));
-          connect(ra.cardiac_cycle, ventricles.cardiac_cycle) annotation (Line(points={{-40.2,
-                  16},{16,16},{16,0},{10,0}},      color={0,0,127}));
+          connect(ra.cardiac_cycle, ventricles.cardiac_cycle) annotation (Line(points={{-40,16},
+                  {16,16},{16,0},{10,0}},          color={0,0,127}));
           connect(la.cardiac_cycle, ventricles.cardiac_cycle)
-            annotation (Line(points={{40.2,0},{10,0}},              color={0,0,127}));
+            annotation (Line(points={{40,0},{10,0}},                color={0,0,127}));
           connect(aorticValve.cardiac_cycle, ventricles.cardiac_cycle)
             annotation (Line(points={{-70,-20},{16,-20},{16,0},{10,0}},color={0,
                   0,127}));
@@ -5384,6 +5426,37 @@ Kalecky")}), experiment(
                 points={{0,-10},{0,-81},{1.77636e-15,-81}}, color={0,0,127}));
           connect(ventricles.thoracic_pressure_input, thoracic_pressure_input)
             annotation (Line(points={{0,-10},{0,-100}}, color={0,0,127}));
+          connect(ra.thoracic_pressure_input, thoracic_pressure_input)
+            annotation (Line(points={{-60,16},{-68,16},{-68,-10},{-20,-10},{-20,
+                  -100},{0,-100}}, color={0,0,127}));
+          connect(la.thoracic_pressure_input, thoracic_pressure_input)
+            annotation (Line(points={{60,0},{70,0},{70,-100},{0,-100}}, color={
+                  0,0,127}));
+          connect(ra.thoracic_pressure_input, P0.y) annotation (Line(points={{
+                  -60,16},{-68,16},{-68,-10},{-20,-10},{-20,-81},{8.88178e-16,
+                  -81}}, color={0,0,127}));
+          connect(la.thoracic_pressure_input, P0.y) annotation (Line(points={{
+                  60,0},{70,0},{70,-81},{0,-81}}, color={0,0,127}));
+          connect(ventricles.port_rv, idealValve_deactivable.q_out) annotation
+            (Line(
+              points={{8,6},{8,14}},
+              color={0,0,0},
+              thickness=1));
+          connect(idealValve_deactivable.q_in, pulmonaryValve.q_in) annotation
+            (Line(
+              points={{8,34},{8,40},{64,40}},
+              color={0,0,0},
+              thickness=1));
+          connect(ventricles.port_lv, idealValve_deactivable1.q_out)
+            annotation (Line(
+              points={{8,-6},{8,-18}},
+              color={0,0,0},
+              thickness=1));
+          connect(idealValve_deactivable1.q_in, aorticValve.q_in) annotation (
+              Line(
+              points={{8,-26},{8,-30},{-60,-30}},
+              color={0,0,0},
+              thickness=1));
           annotation (Icon(graphics={                       Text(
                   extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
@@ -5394,6 +5467,11 @@ Kalecky")}), experiment(
         model Heart_TriSegMechanicsLumens
           extends Heart_TriSegMechanics(redeclare
               Auxiliary.TriSegMechanics_components.VentriclesLumens ventricles, class_name = "Lumens orig");
+        equation
+          connect(ventricles.OnLV, idealValve_deactivable1.On) annotation (Line(
+                points={{6,-8},{6,-24.4},{4,-24.4}}, color={255,0,255}));
+          connect(ventricles.OnRV, idealValve_deactivable.On) annotation (Line(
+                points={{4,8},{12,8},{12,30},{-2,30}}, color={255,0,255}));
         end Heart_TriSegMechanicsLumens;
       end Heart;
 
@@ -24834,7 +24912,10 @@ P_hs_plus_dist"),
     model TestTriSegMech_Lumens
       Components.Subsystems.Heart.Heart_TriSegMechanicsLumens heart(
         UseThoracicPressureInput=true,                              HR=HR,
-          ventricles(V_LV(start=0.00015), V_RV(start=0.00015)))
+          ventricles(V_LV(start=0.00015), V_RV(start=0.00015),
+          arrowLV(color={255,0,0}),
+          arrowRV(color={0,0,255}),
+          arrowSEP(color={0,0,0})))
         annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
       Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg(
         UseThoracic_PressureInput=true,
@@ -24858,17 +24939,22 @@ P_hs_plus_dist"),
     Modelica.Blocks.Sources.Trapezoid           thoracic_pressure(
         amplitude=40*133,
         rising=2,
-        width=20,
+        width=15,
         falling=2,
         period=200,
         nperiod=1,
         offset=0,
-        startTime=40)
+        startTime=10)
         annotation (Placement(transformation(extent={{-100,-10},{-80,10}})));
       Components.Signals.ConditionalConnection condTP(disconnectedValue=0,
           disconnected=false)
                              annotation (Placement(transformation(extent={{-67,
                 -5.3333},{-53,6.6667}})));
+      inner Modelica.Mechanics.MultiBody.World world
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+
+    Modelica.SIunits.Radius rs = 1/heart.ventricles.SEP_wall.Cm;
+    Modelica.SIunits.Position cs = heart.ventricles.SEP_wall.xm - rs;
     equation
       connect(heart.sa, systemic_TriSeg.port_a) annotation (Line(
           points={{-10,10},{-38,10},{-38,40}},
@@ -24898,9 +24984,9 @@ P_hs_plus_dist"),
         Icon(coordinateSystem(preserveAspectRatio=false)),
         Diagram(coordinateSystem(preserveAspectRatio=false)),
         experiment(
-          StopTime=90,
+          StopTime=50,
           Interval=0.01,
-          Tolerance=1e-05,
+          Tolerance=1e-06,
           __Dymola_Algorithm="Cvode"));
     end TestTriSegMech_Lumens;
 
@@ -24940,6 +25026,77 @@ P_hs_plus_dist"),
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
             coordinateSystem(preserveAspectRatio=false)));
     end demo;
+
+    model TestTriSeg
+      Components.Subsystems.Heart.Heart_TriSeg                heart
+        annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
+      Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg(
+        UseThoracic_PressureInput=true,
+        _HR=if adjust then HR*60 else 60,                                                    c_pa(
+            volume_start=3.5e-05), c_pv(volume_start=6.5e-05))
+        annotation (Placement(transformation(extent={{-8,-54},{12,-34}})));
+      Components.Subsystems.Systemic.Systemic_TriSeg systemic_TriSeg(
+        c_ao(volume_start=6e-05),
+        c_sa(volume_start=0.0003),
+        c_sv(volume_start=0.00134),
+        _HR=if adjust then HR*60 else 60)
+        annotation (Placement(transformation(extent={{-38,30},{38,60}})));
+    // Physiolibrary.Types.Volume volume = systemic_TriSeg.volume + pulmonaryTriSeg.volume + heart.volume;
+      parameter Physiolibrary.Types.Frequency HR=_HR/60 "Default freq";
+      parameter Real _HR = 60 "Freq in BPM";
+    //   output Real _CO = heart.aorticValve.CO*60*1e6;
+    //   output Real _BPs = heart.aorticValve.BPs/133.32;
+    //   output Real _BPd = heart.aorticValve.BPd/133.32;
+    //   output Real _BPp = heart.aorticValve.BPp/133.32;
+      parameter Boolean adjust = true;
+    Modelica.Blocks.Sources.Trapezoid           thoracic_pressure(
+        amplitude=40*133,
+        rising=20,
+        width=20,
+        falling=2,
+        period=200,
+        nperiod=1,
+        offset=0,
+        startTime=10)
+        annotation (Placement(transformation(extent={{-100,-10},{-80,10}})));
+      Components.Signals.ConditionalConnection condTP(disconnectedValue=0,
+          disconnected=false)
+                             annotation (Placement(transformation(extent={{-67,
+                -5.3333},{-53,6.6667}})));
+    equation
+      connect(heart.sa, systemic_TriSeg.port_a) annotation (Line(
+          points={{-10,10},{-38,10},{-38,40}},
+          color={0,0,0},
+          thickness=1));
+      connect(heart.sv, systemic_TriSeg.port_b) annotation (Line(
+          points={{10,10},{38,10},{38,40}},
+          color={0,0,0},
+          thickness=1));
+      connect(heart.pa, pulmonaryTriSeg.port_a) annotation (Line(
+          points={{-10,-10},{-22,-10},{-22,-44},{-8,-44}},
+          color={0,0,0},
+          thickness=1));
+      connect(pulmonaryTriSeg.port_b, heart.pv) annotation (Line(
+          points={{12,-44},{24,-44},{24,-10},{10,-10}},
+          color={0,0,0},
+          thickness=1));
+      connect(thoracic_pressure.y,condTP. u) annotation (Line(points={{-79,0},{
+              -74,0},{-74,3e-05},{-68.4,3e-05}},color={0,0,127}));
+      connect(condTP.y, heart.thoracic_pressure_input) annotation (Line(points=
+              {{-52.3,3.33333e-05},{-18,3.33333e-05},{-18,-22},{0,-22},{0,-10}},
+            color={0,0,127}));
+      connect(condTP.y, pulmonaryTriSeg.thoracic_pressure) annotation (Line(
+            points={{-52.3,3.33333e-05},{-40,3.33333e-05},{-40,-60},{2,-60},{2,
+              -54}}, color={0,0,127}));
+      annotation (
+        Icon(coordinateSystem(preserveAspectRatio=false)),
+        Diagram(coordinateSystem(preserveAspectRatio=false)),
+        experiment(
+          StopTime=20,
+          Interval=0.01,
+          Tolerance=1e-05,
+          __Dymola_Algorithm="Cvode"));
+    end TestTriSeg;
   end tests;
 
   package Experiments
@@ -31342,11 +31499,13 @@ P_hs_plus_dist"),
             veins_activation_tau=0.1,
             hideLevel0=false,
             hideLevel1=false),
-          phi(nperiod=0));
+          phi(nperiod=0),
+          thoracic_pressure(rising=10, startTime=20),
+          condTP(disconnected=false));
 
         Modelica.Blocks.Logical.Switch switch1
           annotation (Placement(transformation(extent={{10,52},{24,66}})));
-        Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi(y=false)
+        Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi(y=true)
           annotation (Placement(transformation(extent={{-22,50},{-2,70}})));
         Components.Signals.ConditionalConnection condHeartPhi(disconnectedValue=
              0.25, disconnected=false) annotation (Placement(transformation(
@@ -31386,7 +31545,7 @@ P_hs_plus_dist"),
         connect(phi.y, switch1.u3) annotation (Line(points={{-49,4},{-38,4},{
                 -38,53.4},{8.6,53.4}}, color={0,0,127}));
         annotation (experiment(
-            StopTime=30,
+            StopTime=60,
             Interval=0.01,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"),
