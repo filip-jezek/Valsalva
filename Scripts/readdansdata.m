@@ -2,10 +2,13 @@
 % dataset = import_txt_data('data/Filip sitting.txt');
 % dataset = import_txt_data('data/Noah sitting.txt');
 % dataset = import_txt_data('data/Filip with ECHO.txt');
-
+clear
 i = 3
+% filename = 'data/VEc_0' + string(i) + '_sup';
+filename = 'data/V_0' + string(i) + '_sit';
+filename_open = filename + '.txt'
 % dataset = import_txt_data('data/V_0' + string(i) + '_sit.txt');
-dataset = import_txt_data('data/VEc_0' + string(i) + '_sup.txt');
+dataset = import_txt_data(filename_open);
 
 
 %% decimate the dataset
@@ -16,8 +19,7 @@ s = 100;
 
 % fs = 2khz
 t = (dataset.Time)*60;
-bp = dataset.BP;
-bps = smooth(bp, 100);
+bps = smooth( dataset.BP, 100);
 tps = smooth(dataset.TP, 100);
 
 % blood pressure smooth decimated
@@ -47,8 +49,8 @@ clf; hold on;
 plot(td, bpsd, 'linewidth', 1);
 
 % % debug peak detection for HR
-% plot(td, bpdst, 'linewidth', 2);
-% plot(td, bpds, 'linewidth', 2);
+plot(td, bpdst, 'linewidth', 2);
+plot(td, bpds, 'linewidth', 2);
 
 plot(td(maxs), bpsd(maxs), 'rx');
 plot(td(maxs), HR, 'linewidth', 2);
@@ -56,8 +58,17 @@ plot(td, tpsd , 'linewidth', 2);
 
 legend('Blood pressure', 'detected peaks', 'HR [bpm]', 'Thoracic pressure');
 
-%%     
-
+%% save
+time_start = 0;
+time_end = td(end);
+incl = td > time_start & td < time_end;
+time = td(incl);
+bp = bpsd(incl);
+hr_all = interp1(td(maxs), HR, td);
+hr = hr_all(incl);
+tp = tpsd(incl);
+save(filename + '.mat', 'time', 'bp', 'hr', 'tp')
+disp('Saved')
 
 % %%
 % figure(2);
