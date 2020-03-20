@@ -9,7 +9,17 @@ def findLowestIndex(time, timeArr):
     return next((i for i, x in enumerate(lst) if x >= time))
 
 def cost(measured, target):
+    # calculate costs. Could go negative or NaN for negative or zero measured values!
     return (measured - target)**2/(measured*target)
+
+def penalty(measured, min_val, max_val, k_p = 1e3):
+    # apply steep linear penalty for outside of the bounds values
+    if measured < min_val:
+        return cost(measured, min_val)*k_p
+    elif measured > max_val:
+        return cost(measured, max_val)*k_p
+    else:
+        return 0
 
 def calculatePWV(timeArr, signal, delayedSignal, distance):
     # find last three seconds - should do for as low as 30 bpm
@@ -34,4 +44,8 @@ def calculatePWV(timeArr, signal, delayedSignal, distance):
     velocity = distance/timediff
     return velocity
 
-    
+def calculateEF(volumes):
+    esv = min(volumes)
+    edv = max(volumes)
+    return (edv - esv)/edv
+

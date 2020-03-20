@@ -3718,7 +3718,8 @@ type"),       Text(
               parameter Real vmax=7 "micron/sec";
               parameter Real LSEiso=0.04 "micron";
               parameter Real sigma_act=7.5*120 "mmHg ";
-              parameter Real sigma_pas=7.5*7 "mmHg";
+              // not used in the current version. Using k_passive instead
+            //  parameter Real sigma_pas=7.5*7 "mmHg";
               parameter Real SLrest=1.51 "microns";
 
               // same parameters as in driving function. Change with care.
@@ -3929,9 +3930,15 @@ type"),       Text(
             model VentriclesLumens
               extends partialVentricles(
                 redeclare DrivingLumens calciumMechanics,
-                redeclare VentricleWallLumens LV_wall(xm=xm_LV, ym=ym, Vw=89, Amref=0.95*86),
-                redeclare VentricleWallLumens SEP_wall(xm=xm_SEP, ym=ym, Vw=34, Amref=0.95*39),
-                redeclare VentricleWallLumens RV_wall(xm=xm_RV, ym=ym, Vw=27, Amref=0.95*110),
+                redeclare VentricleWallLumens LV_wall(xm=xm_LV, ym=ym, Vw=89, Amref=0.95*86,
+                  sigma_act=sigma_act_factor*7.5*120,
+                  k_passive=k_passive_factor*50),
+                redeclare VentricleWallLumens SEP_wall(xm=xm_SEP, ym=ym, Vw=34, Amref=0.95*39,
+                  sigma_act=sigma_act_factor*7.5*120,
+                  k_passive=k_passive_factor*50),
+                redeclare VentricleWallLumens RV_wall(xm=xm_RV, ym=ym, Vw=27, Amref=0.95*110,
+                  sigma_act=sigma_act_factor*7.5*120,
+                  k_passive=k_passive_factor*50),
                 arrowLV(r_tail={0,ym,0}),
                 arrowSEP(r_tail={0,ym,0}),
                 arrowRV(r_tail={0,ym,0}));
@@ -3962,6 +3969,10 @@ type"),       Text(
               Physiolibrary.Types.Pressure P_suc_sep = p_suc_fact*exp(10*(SEP_wall.Cm-0.5))*Constants.mmHg2SI;
               parameter Real p_suc_fact = 0;
               Real Tysq = - 1 / ym;
+              parameter Physiolibrary.Types.Fraction sigma_act_factor=1
+                "Factor affecting systolic strength";
+              parameter Physiolibrary.Types.Fraction k_passive_factor=1
+                "Factor affecting diastolic compliance";
             equation
               // ports are already in SI units
               der(V_LV) = port_lv.q;
@@ -31858,11 +31869,11 @@ P_hs_plus_dist"),
             hideLevel1=false),
           phi(nperiod=0),
           thoracic_pressure(rising=10, startTime=20),
-          condTP(disconnected=false));
+          condTP(disconnected=true));
 
         Modelica.Blocks.Logical.Switch switch1
           annotation (Placement(transformation(extent={{10,52},{24,66}})));
-        Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi(y=true)
+        Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi(y=false)
           annotation (Placement(transformation(extent={{-22,50},{-2,70}})));
         Components.Signals.ConditionalConnection condHeartPhi(disconnectedValue=
              0.25, disconnected=false) annotation (Placement(transformation(
@@ -31876,7 +31887,7 @@ P_hs_plus_dist"),
       output Physiolibrary.Types.VolumeFlowRate CO = heartComponent.aorticValve.CO;
       output Physiolibrary.Types.Pressure carotid_pressure = Systemic1.common_carotid_L48_D.u_C;
       output Physiolibrary.Types.Pressure femoral_pressure = Systemic1.femoral_L200.u_C;
-
+      output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
       equation
 
 

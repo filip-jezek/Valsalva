@@ -10,6 +10,8 @@ import importlib.util
 # import re
 # import TerminalDS
 
+VALUE_LOG_DIRNAME = '..\\Schedules\\'
+VALUE_LOG_FILENAME =  '_current_costs.txt'
 # // write the outputfiles
 def writeCost(costs):
     total_cost = sum(costs)
@@ -17,18 +19,26 @@ def writeCost(costs):
         file.write("banik pico\n")
         file.write('f(x) =' + repr(total_cost))
 
-def logOutput(vals):
+def logLine(val, cost, sum):
+	# return ','.join(["%"val), str(cost), str(round(cost/sum*100))])
+	return '%.3e,%.3e,%02d' % (val, cost, round(cost/sum*100))
+
+
+def logOutput(vals, costs):
     # log the output, if the log directory exists. exit otherwise
 
-	log_dirname = '..\\Schedules'
+	log_dirname = VALUE_LOG_DIRNAME
 	# log_dirname = 'Schedules'
 
-	if os.path.isdir(log_dirname):
-		cur_dirname = os.path.basename(os.getcwd())
-		log_filename = log_dirname + '\\'  + 'current_vals.txt'
+	if not os.path.isdir(log_dirname):
+		log_dirname = '..\\'
+		# cur_dirname = os.path.basename(os.getcwd())
 		# log_filename = log_dirname + '\\' + cur_dirname + '_costs.txt'
-		with open(log_filename, 'w+') as file:
-			file.write(', '.join(map(str, vals)))
+	log_filename = log_dirname + VALUE_LOG_FILENAME
+	with open(log_filename, 'a') as file:
+		# prepare the line with value, cost value for this and percentage of total costs
+		string_seq = map(lambda val, cost: logLine(val, cost, sum(costs)), vals, costs)
+		file.write(', '.join(string_seq) + '\n')
 	
 def extractVars(d):
 	# use just a subset or use all
@@ -72,5 +82,17 @@ print("Calculating costs in ", time.time() - tic, " s")
 
 writeCost(costs)
 
+vals = cf.getCurrentValues(var_set)
+
+# check if file exists and build header otherwise
+# no point in building header when we do not know the value names tho
+if hasattr(cf, "getValueNames") and callable(cf.getValueNames):
+	if not os.path.isfile(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME):
+		with open(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME, 'w') as file:
+			header_vals = cf.getValueNames()
+			header = map(lambda s: s.rjust(9) + ',' + s.rjust(4) + '_cost, %', header_vals)
+			file.write(', '.join(header) + '\n')
+		# logOutput(cf.getCurrentValues(var_set), costs)
+
 if hasattr(cf, "getCurrentValues") and callable(cf.getCurrentValues):
-	logOutput(cf.getCurrentValues(var_set))
+	logOutput(vals, costs)
