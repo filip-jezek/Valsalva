@@ -31844,7 +31844,11 @@ P_hs_plus_dist"),
               baroreflex(f1=0.0041))),
           redeclare Components.Subsystems.Heart.Heart_TriSegMechanicsLumens
                                                              heartComponent(
-              UseFrequencyInput=true, UseThoracicPressureInput=true),
+              UseFrequencyInput=true, UseThoracicPressureInput=true,
+            ventricles(
+              LV_wall(Vw=Vw_factor*89, Amref=Amref_factor*86),
+              SEP_wall(Vw=Vw_factor*34, Amref=Amref_factor*39),
+              RV_wall(Vw=Amref_factor*27, Amref=Amref_factor*110))),
           redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg
             pulmonaryComponent(UseThoracic_PressureInput=true),
           redeclare Components.Subsystems.Baroreflex.HeartRate2 heartRate(
@@ -31888,6 +31892,9 @@ P_hs_plus_dist"),
       output Physiolibrary.Types.Pressure carotid_pressure = Systemic1.common_carotid_L48_D.u_C;
       output Physiolibrary.Types.Pressure femoral_pressure = Systemic1.femoral_L200.u_C;
       output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
+        parameter Real Vw_factor=1;
+        parameter Real Amref_factor=0.95;
+        Real SV = CO/heartRate.HR*1e6 "SV in ml";
       equation
 
 
@@ -31913,7 +31920,7 @@ P_hs_plus_dist"),
         connect(phi.y, switch1.u3) annotation (Line(points={{-49,4},{-38,4},{
                 -38,53.4},{8.6,53.4}}, color={0,0,127}));
         annotation (experiment(
-            StopTime=60,
+            StopTime=30,
             Interval=0.01,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"),
@@ -31923,6 +31930,41 @@ P_hs_plus_dist"),
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end base_TriSeg;
+
+      model base_TriSeg_SA "for sensitivity analysis"
+        extends base_TriSeg(heartComponent(ventricles(LV_wall(
+                Lsref=Lsref,
+                vmax=vmax,
+                LSEiso=LSEiso,
+                SLrest=SLrest,
+                SLcollagen=SLcollagen,
+                PConcollagen=PConcollagen,
+                PExpcollagen=PExpcollagen,
+                L0=L0))));
+        parameter Real Lsref = Lsref_frac*1.9 " Resting SL, micron ";
+        parameter Real vmax = vmax_frac*7 "micron/sec";
+        parameter Real LSEiso = LSEiso_frac*0.04 "micron";
+        parameter Real SLrest = SLrest_frac*1.51 "microns";
+        parameter Real SLcollagen = SLcollagen_frac*2.25;
+        parameter Real PConcollagen = PConcollagen_frac*0.01;
+        parameter Real PExpcollagen = PExpcollagen_frac*70;
+        parameter Real L0 = L0_frac*0.907 "micron";
+
+      parameter Physiolibrary.Types.Fraction Lsref_frac = 1;
+      parameter Physiolibrary.Types.Fraction vmax_frac = 1;
+      parameter Physiolibrary.Types.Fraction LSEiso_frac = 1;
+      parameter Physiolibrary.Types.Fraction SLrest_frac = 1;
+      parameter Physiolibrary.Types.Fraction SLcollagen_frac = 1;
+      parameter Physiolibrary.Types.Fraction PConcollagen_frac = 1;
+      parameter Physiolibrary.Types.Fraction PExpcollagen_frac = 1;
+      parameter Physiolibrary.Types.Fraction L0_frac = 1;
+
+        annotation (experiment(
+            StopTime=30,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end base_TriSeg_SA;
     end Baseline;
 
     package Tilt

@@ -1,0 +1,29 @@
+/* GenOpt command file
+   MWetter@lbl.gov 2008-11-11
+*/
+
+Vary{
+  Parameter{ Name = Vw_factor; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = Amref_factor; Min = 0.8; Ini = 0.95; Max = 1.2; Step = 1; }
+  Parameter{ Name = Lsref_frac; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = vmax_frac; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = LSEiso_frac; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = SLrest_frac; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = SLcollagen_frac; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = PConcollagen_frac; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = PExpcollagen_frac; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = L0_frac; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = k_passive_factor; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+  Parameter{ Name = sigma_act_factor; Min = 0.8; Ini = 1; Max = 1.2; Step = 1; }
+}
+
+OptimizationSettings{
+  MaxIte = 100;
+  MaxEqualResults = 10;
+  WriteStepNumber = false;
+}
+
+Algorithm {
+Main = Parametric;
+StopAtError = false;
+}
