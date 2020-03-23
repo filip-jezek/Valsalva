@@ -8,10 +8,13 @@ Vary{
   Parameter{ Name = Pa_nom; Min = 5e+3; Ini = 1.3E+04; Max = 2e5; Step = 133; }
   Parameter{ Name = CO_nom; Min = 5E-05; Ini = 1.0666666666667000E-04; Max = 2E-04; Step = 5e-6; }
   Parameter{ Name = k_E; Min = 0.1; Ini = 0.4; Max = 0.8; Step = 0.01; }
+  Parameter{ Name = Vw_factor; Min = 0.8; Ini = 1; Max = 1.2; Step = 0.01; }
+  Parameter{ Name = Amref_factor; Min = 0.8; Ini = 0.95; Max = 1.2; Step = 0.01; }
+  
 }
 
 OptimizationSettings{
-  MaxIte = 100;
+  MaxIte = 500;
   MaxEqualResults = 10;
   WriteStepNumber = false;
 }

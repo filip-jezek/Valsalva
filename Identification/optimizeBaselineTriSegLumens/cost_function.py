@@ -30,7 +30,7 @@ def getCurrentValues(vars_set):
     # distance = vars_set['Systemic1.speedSegmentLength'][1]*0.8
     distance = 0.672*0.8
 
-    pwv = fun_lib.calculatePWV(
+    pwv = fun_lib.calculatePWV2(
         vars_set['time'], 
         vars_set['carotid_pressure'], 
         vars_set['femoral_pressure'], 
