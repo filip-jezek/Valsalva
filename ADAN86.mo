@@ -3810,15 +3810,6 @@ type"),       Text(
                     rotation=90,
                     origin={0,-100}),                             iconTransformation(extent={{-20,
                         -120},{20,-80}})));
-              Modelica.Mechanics.MultiBody.Visualizers.Advanced.Arrow arrowLV(r_head={
-                    LV_wall.Tx,LV_wall.Ty,0}/100)
-                annotation (Placement(transformation(extent={{20,32},{40,52}})));
-              Modelica.Mechanics.MultiBody.Visualizers.Advanced.Arrow arrowSEP(r_head={
-                    SEP_wall.Tx,SEP_wall.Ty,0}/100)
-                annotation (Placement(transformation(extent={{20,-8},{40,12}})));
-              Modelica.Mechanics.MultiBody.Visualizers.Advanced.Arrow arrowRV(r_head={
-                    RV_wall.Tx,RV_wall.Ty,0}/100)
-                annotation (Placement(transformation(extent={{20,-50},{40,-30}})));
               Modelica.Blocks.Interfaces.BooleanOutput OnLV(start=true)
                 annotation (Placement(transformation(
                     extent={{-20,-20},{20,20}},
@@ -3930,18 +3921,27 @@ type"),       Text(
             model VentriclesLumens
               extends partialVentricles(
                 redeclare DrivingLumens calciumMechanics,
-                redeclare VentricleWallLumens LV_wall(xm=xm_LV, ym=ym, Vw=89, Amref=0.95*86,
+                redeclare VentricleWallLumens LV_wall(
+                  xm=xm_LV,
+                  ym=ym,
+                  Vw=89,
+                  Amref=0.95*86,
                   sigma_act=sigma_act_factor*7.5*120,
                   k_passive=k_passive_factor*50),
-                redeclare VentricleWallLumens SEP_wall(xm=xm_SEP, ym=ym, Vw=34, Amref=0.95*39,
+                redeclare VentricleWallLumens SEP_wall(
+                  xm=xm_SEP,
+                  ym=ym,
+                  Vw=34,
+                  Amref=0.95*39,
                   sigma_act=sigma_act_factor*7.5*120,
                   k_passive=k_passive_factor*50),
-                redeclare VentricleWallLumens RV_wall(xm=xm_RV, ym=ym, Vw=27, Amref=0.95*110,
+                redeclare VentricleWallLumens RV_wall(
+                  xm=xm_RV,
+                  ym=ym,
+                  Vw=27,
+                  Amref=0.95*110,
                   sigma_act=sigma_act_factor*7.5*120,
-                  k_passive=k_passive_factor*50),
-                arrowLV(r_tail={0,ym,0}),
-                arrowSEP(r_tail={0,ym,0}),
-                arrowRV(r_tail={0,ym,0}));
+                  k_passive=k_passive_factor*50));
 
 
 
@@ -25239,11 +25239,9 @@ P_hs_plus_dist"),
 
     model TestTriSegMech_Lumens
       Components.Subsystems.Heart.Heart_TriSegMechanicsLumens heart(
-        UseThoracicPressureInput=true,                              HR=HR,
-          ventricles(V_LV(start=0.00015), V_RV(start=0.00015),
-          arrowLV(color={255,0,0}),
-          arrowRV(color={0,0,255}),
-          arrowSEP(color={0,0,0})))
+        UseThoracicPressureInput=true,
+        HR=HR,
+        ventricles(V_LV(start=0.00015), V_RV(start=0.00015)))
         annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
       Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg(
         UseThoracic_PressureInput=true,
