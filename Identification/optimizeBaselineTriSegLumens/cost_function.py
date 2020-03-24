@@ -57,7 +57,7 @@ def calculateCosts(vars_set):
     BPk_target = 20*mmHg2SI
     CO_target = 6.3*lpm2SI
     EF_target = 0.6
-    pwv_bounds = [2, 10]
+    pwv_bounds = [3.3, 10]
 
 
     curvals = getCurrentValues(vars_set)

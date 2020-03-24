@@ -1,4 +1,5 @@
 import numpy
+
 # Provides functions for calculating cost functions
 
 def findInterval(t_from, t_to, timeArr):
@@ -22,6 +23,12 @@ def penalty(measured, min_val, max_val, k_p = 1e3):
         return 0
 
 def calculatePWV(timeArr, signal, delayedSignal, distance):
+    """
+    Calculates pulse wave propagation velocity based on bottom base shift of pressure signals.
+    In other words, it compares  position of signals minimum
+
+    This is the simpler approach, however it does not work in all cases.
+    """    
     # find last three seconds - should do for as low as 30 bpm
     # we better leave some time to find min of the other signal
     i_from = findLowestIndex(timeArr[-1] - 3, timeArr)
@@ -43,6 +50,20 @@ def calculatePWV(timeArr, signal, delayedSignal, distance):
     timediff = t_second_min - t_first_min
     velocity = distance/timediff
     return velocity
+
+def calculatePWV2(timeArr, signal, delayedSignal, distance):
+    """
+    More robust way to calculate PWV takes position of maximal signal rising steepness.
+    In other words, takes maxs of difference
+
+    """
+
+    diff_signal = numpy.diff(signal)
+    diff_delayedSignal = numpy.diff(delayedSignal)
+    
+    # call with signal derivatives - maxing the steepness
+    # we have to use negative though, as calculatePWV is taking mins instead of max
+    return calculatePWV(timeArr, numpy.negative(diff_signal), numpy.negative(diff_delayedSignal), distance)
 
 def calculateEF(volumes):
     esv = min(volumes)
