@@ -18716,6 +18716,8 @@ P_hs_plus_dist"),
 
 
             parameter Physiolibrary.Types.Fraction vfactor = 0.732;
+
+
         //
         // % Lumped circulatory parameters
         // C_Ao = 0.0022045;  % Proximal aortic compliance, mL/mmHg
@@ -18729,7 +18731,91 @@ P_hs_plus_dist"),
         // R_tSA  = 4;
         //
 
+          Physiolibrary.Hydraulic.Components.Resistor r_vc(Resistance=R_VC)
+            annotation (Placement(transformation(extent={{-156,70},{-136,90}})));
         end Systemic_TriSeg_Rat;
+
+        model Systemic_TriSeg_Rat_Ben "Rat parametrization"
+          extends Systemic_TriSeg(
+            _R_tSA=4,
+            _R_tAo=0.5,
+            _R_SA=88/_CO_target*60,
+            _R_Ao=2.5,
+            _C_SV=2.5,
+            _C_SA=0.0077157,
+            _C_Ao=0.0022045,
+            _HR=0,
+            _CO_target=95,
+            c_sv(volume_start=vfactor*4e-06),
+            c_sa(volume_start=vfactor*3e-06),
+            c_ao(volume_start=vfactor*1e-06));
+        import ADAN_main.Components.Constants.*;
+
+            parameter Physiolibrary.Types.Fraction vfactor=0.732;
+            parameter Real _R_SV=0.01;
+            parameter Physiolibrary.Types.HydraulicResistance R_SV=_R_SV*mmHgSec_per_ml2SI;
+            parameter Real _R_TH=10;
+            parameter Physiolibrary.Types.HydraulicResistance R_TH=_R_TH*mmHgSec_per_ml2SI;
+            parameter Real _R_tVC=0.1;
+            parameter Physiolibrary.Types.HydraulicResistance R_tVC=_R_tVC*mmHgSec_per_ml2SI;
+            parameter Real _C_VC=1.5;
+            parameter Physiolibrary.Types.HydraulicCompliance C_VC=_C_VC*ml_per_mmhg2SI;
+
+        //
+        // % Lumped circulatory parameters
+        // C_Ao = 0.0022045;  % Proximal aortic compliance, mL/mmHg
+        // C_SA = 0.0077157; % Systemic arterial compliance, mL/mmHg
+        //
+        // C_SV = 2.5; % Systemic venous compliance, mL/mmHg  DAB 10/7/2018
+        // R_Ao   = 2.5; % resistance of aorta , mmHg*sec/mL
+        // R_SA   = adjvar(7)*88/CO_target*60;% mmHg*sec/mL; % Systemic vasculature resistance, mmHg*sec/mL
+        // R_SV   = 0.25;
+        // R_tAo  = 0.5;
+        // R_tSA  = 4;
+        //
+
+          Physiolibrary.Hydraulic.Components.Resistor r_sv(Resistance=R_SV)
+            annotation (Placement(transformation(extent={{-158,70},{-138,90}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel c_vc(
+            volume_start=vfactor*0.8e-06,
+            Compliance=C_VC,
+            ExternalPressure(displayUnit="Pa"))
+            annotation (Placement(transformation(extent={{-130,10},{-110,30}})));
+          Physiolibrary.Hydraulic.Components.Resistor r_th(Resistance=R_TH)
+            annotation (Placement(transformation(extent={{-220,-12},{-200,8}})));
+          Physiolibrary.Hydraulic.Components.Resistor r_tvc(Resistance=R_tVC)
+            annotation (Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=270,
+                origin={-120,48})));
+        equation
+
+          connect(r_sv.q_in, r_sa.q_out) annotation (Line(
+              points={{-158,80},{-200,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(r_sv.q_out, port_b) annotation (Line(
+              points={{-138,80},{460,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(r_th.q_in, c_ao.q_in) annotation (Line(
+              points={{-220,-2},{-300,-2},{-300,20}},
+              color={0,0,0},
+              thickness=1));
+          connect(r_th.q_out, c_vc.q_in) annotation (Line(
+              points={{-200,-2},{-120,-2},{-120,20}},
+              color={0,0,0},
+              thickness=1));
+          connect(r_sv.q_out, r_tvc.q_in) annotation (Line(
+              points={{-138,80},{-120,80},{-120,58}},
+              color={0,0,0},
+              thickness=1));
+          connect(c_vc.q_in, r_tvc.q_out) annotation (Line(
+              points={{-120,20},{-120,38}},
+              color={0,0,0},
+              thickness=1));
+          annotation (experiment(StopTime=20));
+        end Systemic_TriSeg_Rat_Ben;
       end Systemic;
     end Subsystems;
 
@@ -25465,6 +25551,48 @@ P_hs_plus_dist"),
           Tolerance=1e-09,
           __Dymola_Algorithm="Cvode"));
     end TestRat;
+
+    model TestRat_Ben
+      Components.Subsystems.Heart.Heart_TriSegMechanics_Rat
+        heart_TriSegMechanics_Rat(idealValve_deactivable1(_Gon(displayUnit="m3/(Pa.s)")=
+               1), idealValve_deactivable(_Gon(displayUnit="m3/(Pa.s)") = 1))
+                                     annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
+      Components.Subsystems.Pulmonary.PulmonaryTriSeg_Rat pulmonaryTriSeg_Rat
+        annotation (Placement(transformation(extent={{-10,-60},{10,-40}})));
+      Components.Subsystems.Systemic.Systemic_TriSeg_Rat_Ben
+                                                         systemic_TriSeg_Rat_Ben
+        annotation (Placement(transformation(extent={{-42,30},{34,60}})));
+      Physiolibrary.Types.Volume V_T=heart_TriSegMechanics_Rat.volume +
+          pulmonaryTriSeg_Rat.volume + systemic_TriSeg_Rat_Ben.volume;
+    equation
+      connect(systemic_TriSeg_Rat_Ben.port_a, heart_TriSegMechanics_Rat.sa)
+        annotation (Line(
+          points={{-42,40},{-46,40},{-46,10},{-10,10}},
+          color={0,0,0},
+          thickness=1));
+      connect(systemic_TriSeg_Rat_Ben.port_b, heart_TriSegMechanics_Rat.sv)
+        annotation (Line(
+          points={{34,40},{46,40},{46,10},{10,10}},
+          color={0,0,0},
+          thickness=1));
+      connect(heart_TriSegMechanics_Rat.pv, pulmonaryTriSeg_Rat.port_b)
+        annotation (Line(
+          points={{10,-10},{30,-10},{30,-50},{10,-50}},
+          color={0,0,0},
+          thickness=1));
+      connect(pulmonaryTriSeg_Rat.port_a, heart_TriSegMechanics_Rat.pa)
+        annotation (Line(
+          points={{-10,-50},{-32,-50},{-32,-10},{-10,-10}},
+          color={0,0,0},
+          thickness=1));
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)),
+        experiment(
+          StopTime=5,
+          __Dymola_NumberOfIntervals=1500,
+          Tolerance=1e-09,
+          __Dymola_Algorithm="Cvode"));
+    end TestRat_Ben;
   end tests;
 
   package Experiments
