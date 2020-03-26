@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11310,94)
+char initialName(11317,94)
 settings.phi0
 settings.height
 settings.weight
@@ -9970,6 +9970,7 @@ Systemic1.radial_vein_T3_L154.compliant_vessel.h_L_n
 Systemic1.radial_vein_T3_L154.compliant_vessel.p_n
 Systemic1.Parameters_Venous1.height_nominal
 Systemic1.Parameters_Venous1.height_actual
+Systemic1.Parameters_Venous1.smallVeins_D_multiplier
 Systemic1.Parameters_Venous1.r_superior_vena_cava_C2
 Systemic1.Parameters_Venous1.r_azygos_vein_T1_C4
 Systemic1.Parameters_Venous1.r_superior_vena_cava_C88
@@ -11411,10 +11412,16 @@ V_LV
 Vw_factor
 Amref_factor
 SV
+TPR
+TR_frac
+Pt
+CO_nom
+Pa
+Pv
 CPUtime
 EventCounter
 
-double initialValue(11310,6)
+double initialValue(11317,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
@@ -11431,22 +11438,22 @@ double initialValue(11310,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1  %Pa_nom%       0                       0                
-  1   280   # settings.tissues_nominal_arterioles_pressure
+  0       0                       0                       0                
+  6   256   # settings.tissues_nominal_arterioles_pressure
   0       1                       0                       0                
   6   257   # settings.arteries_UseVasoconstrictionEffect
  -1  2.0000000000000001E-01       0                       0                
   1   280   # settings.exercise_factor_on_arterial_compliance
  -1  2.0000000000000001E-01       0                       0                
   1   280   # settings.R_vc
- -1  2.6664477483000001E+03       0                       0                
-  1   280   # settings.tissues_nominal_pressure
+  0       0                       0                       0                
+  6   256   # settings.tissues_nominal_pressure
  -1  2.3040000000000001E-03       0                 1.0000000000000000E+100
   1   280   # settings.tissues_nominal_zpv
  -1  7.9500000000000003E-04       0                 1.0000000000000000E+100
   1   280   # settings.tissues_nominal_stressed_volume
- -1  %CO_nom%       0                       0                
-  1   280   # settings.tissues_nominal_cardiac_output
+  0       0                       0                       0                
+  6   256   # settings.tissues_nominal_cardiac_output
  -1       1                       0                       0                
   1   280   # settings.Ra_factor
  -1  1.2000000000000000E-05       0                       0                
@@ -11467,8 +11474,8 @@ double initialValue(11310,6)
   1   280   # settings.exercise_factor
  -1       0                       0                       0                
   1   280   # settings.exercise_venous_pumping_factor
- -1  %Pv_nom%       0                       0                
-  1   280   # settings.tissues_nominal_venules_pressure
+  0       0                       0                       0                
+  6   256   # settings.tissues_nominal_venules_pressure
  -1       1                       0                       0                
   1   281   # settings.UseNonLinear_VenousCompliance
  -1       1                       0                       0                
@@ -31149,6 +31156,8 @@ double initialValue(11310,6)
   6   256   # Systemic1.Parameters_Venous1.height_nominal
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
   1   280   # Systemic1.Parameters_Venous1.height_actual
+ -1       2                       0                       0                
+  1   280   # Systemic1.Parameters_Venous1.smallVeins_D_multiplier
  -1  9.7500000000000000E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_superior_vena_cava_C2
  -1  3.8000000000000000E-03       0                       0                
@@ -31261,16 +31270,16 @@ double initialValue(11310,6)
   1   280   # Systemic1.Parameters_Venous1.r_venous_perforator_T2_R106
  -1  1.8500000000000001E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_brachial_vein_R108
- -1  8.4999999999999995E-04       0                       0                
-  1   280   # Systemic1.Parameters_Venous1.r_ulnar_vein_T7_R110
+  0       0                       0                       0                
+  6   256   # Systemic1.Parameters_Venous1.r_ulnar_vein_T7_R110
  -1  1.8500000000000001E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_brachial_vein_R112
  -1  1.8500000000000001E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_venous_perforator_T1_R116
  -1  1.6999999999999999E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_brachial_vein_R118
- -1  6.6500000000000001E-04       0                       0                
-  1   280   # Systemic1.Parameters_Venous1.r_radial_vein_T3_R120
+  0       0                       0                       0                
+  6   256   # Systemic1.Parameters_Venous1.r_radial_vein_T3_R120
  -1  2.7000000000000001E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_vertebral_vein_L126
  -1  7.4999999999999997E-03       0                       0                
@@ -31293,16 +31302,16 @@ double initialValue(11310,6)
   1   280   # Systemic1.Parameters_Venous1.r_venous_perforator_T2_L140
  -1  1.8500000000000001E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_brachial_vein_L142
- -1  8.4999999999999995E-04       0                       0                
-  1   280   # Systemic1.Parameters_Venous1.r_ulnar_vein_T7_L144
+  0       0                       0                       0                
+  6   256   # Systemic1.Parameters_Venous1.r_ulnar_vein_T7_L144
  -1  1.8500000000000001E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_brachial_vein_L146
  -1  1.6999999999999999E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_venous_perforator_T1_L150
  -1  1.6999999999999999E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.r_brachial_vein_L152
- -1  6.6500000000000001E-04       0                       0                
-  1   280   # Systemic1.Parameters_Venous1.r_radial_vein_T3_L154
+  0       0                       0                       0                
+  6   256   # Systemic1.Parameters_Venous1.r_radial_vein_T3_L154
  -1  1.1777999999999999E-03       0                       0                
   1   280   # Systemic1.Parameters_Venous1.h_superior_vena_cava_C2
  -1  6.3840000000000001E-04       0                       0                
@@ -34031,6 +34040,18 @@ double initialValue(11310,6)
   1   280   # Amref_factor
   0       0                       0                       0                
   6   256   # SV
+ -1  %TPR%       0                 1.0000000000000000E+100
+  1   280   # TPR
+ -1  %TR_frac%       0                       0                
+  1   280   # TR_frac
+ -1  2.6664477483000001E+03       0                       0                
+  1   280   # Pt
+ -1  1.0500000000000000E-04       0                       0                
+  1   280   # CO_nom
+  0       0                       0                       0                
+  6   256   # Pa
+  0       0                       0                       0                
+  6   256   # Pv
   0       0                       0                       0                
   4   256   # CPUtime
   0       0                       0                       0                
@@ -34085,7 +34106,7 @@ double initialValue(11310,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11310,152)
+char initialDescription(11317,152)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -43953,6 +43974,7 @@ Tension function on circumferential wall length [1]
 [Pa|mmHg]
 nominal height of the subject [m|cm]
 actual height of the subject [m|cm]
+multiplier for small veins to have more or less same tissue post-tissue pressure [1|%]
 [m]
 [m]
 [m]
@@ -45394,6 +45416,12 @@ der(integration of pressure to find the true mean) [Pa]
 
 
 SV in ml
+[(Pa.s)/m3|(mmHg.min)/ml]
+Ra to Rv ratio [1|%]
+[Pa|mmHg]
+[m3/s|ml/min]
+[Pa|mmHg]
+[Pa|mmHg]
 [s]
 
 
