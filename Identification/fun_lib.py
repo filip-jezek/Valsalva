@@ -1,6 +1,47 @@
 import numpy
+import math
 
-# Provides functions for calculating cost functions
+class ObjectiveVar:
+
+    def __init__(self, name, value = None, targetValue = None, limit = None):
+        self.name = name
+        self.targetValue = targetValue
+        self.value = value
+        self.limit = limit if limit is not None else [-math.inf, math.inf]
+
+    def __cost_function(self, measured, target):
+        # calculate costs. Could go negative or NaN for negative or zero measured values!
+        return (measured - target)**2/(measured*target)
+
+    def cost(self, k_p = 1e3):
+        """
+        Calculates costs per variable as difference from target value and applies steep linear penalty for outside of the bounds values, if defined.
+        """
+        measured = self.value
+        if self.targetValue is None:
+            c = 0
+        else:
+            c = self.__cost_function(measured, self.targetValue)
+
+        min_val = self.limit[0]
+        max_val = self.limit[1]
+
+        if measured < min_val:
+            return c + self.__cost_function(measured, min_val)*k_p
+        elif measured > max_val:
+            return c + self.__cost_function(measured, max_val)*k_p
+        else:
+            return c
+    
+    def inLimit(self):
+        if self.value < self.limit[0] or self.value > self.limit[1]:
+            return False
+        else:
+            return True
+
+
+    
+# Provides objects and functions for calculating cost functions
 
 def findInterval(t_from, t_to, timeArr):
     return range(findLowestIndex(t_from, timeArr), findLowestIndex(t_to, timeArr))
@@ -9,18 +50,7 @@ def findLowestIndex(time, timeArr):
     lst = timeArr.tolist()
     return next((i for i, x in enumerate(lst) if x >= time))
 
-def cost(measured, target):
-    # calculate costs. Could go negative or NaN for negative or zero measured values!
-    return (measured - target)**2/(measured*target)
 
-def penalty(measured, min_val, max_val, k_p = 1e3):
-    # apply steep linear penalty for outside of the bounds values
-    if measured < min_val:
-        return cost(measured, min_val)*k_p
-    elif measured > max_val:
-        return cost(measured, max_val)*k_p
-    else:
-        return 0
 
 def calculatePWV(timeArr, signal, delayedSignal, distance):
     """
