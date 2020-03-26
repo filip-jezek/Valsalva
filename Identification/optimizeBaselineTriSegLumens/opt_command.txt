@@ -3,10 +3,8 @@
 */
 
 Vary{
-  // Parameter{ Name = Moje01; Min = 20; Ini = 190; Max = 300; Step = 1; }
-  Parameter{ Name = Pv_nom; Min = 0; Ini = 510.375; Max = 1e3; Step = 133; }
-  Parameter{ Name = Pa_nom; Min = 5e+3; Ini = 12833.75; Max = 2e5; Step = 133; }
-  Parameter{ Name = CO_nom; Min = 5E-05; Ini = 1.1166667E-4; Max = 2E-04; Step = 5e-6; }
+  Parameter{ Name = TPR; Min = 1e7; Ini = 1.1999014867350000E+08; Max = 1e9; Step = 1e6; }
+  Parameter{ Name = TR_frac; Min = 2; Ini = 5.3333300000000001E+00; Max = 10; Step = 0.01; }
   Parameter{ Name = k_E; Min = 0.1; Ini = 0.17375; Max = 0.8; Step = 0.01; }
   Parameter{ Name = Vw_factor; Min = 0.8; Ini = 1.13875; Max = 1.4; Step = 0.01; }
   Parameter{ Name = Amref_factor; Min = 0.8; Ini = 1.2; Max = 1.4; Step = 0.01; }

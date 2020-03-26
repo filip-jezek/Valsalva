@@ -9713,6 +9713,8 @@ P_hs_plus_dist"),
             final parameter Physiolibrary.Types.Height height_nominal = 1.7 "nominal height of the subject";
             parameter Physiolibrary.Types.Height height_actual = 1.7 "actual height of the subject";
 
+            parameter Physiolibrary.Types.Fraction smallVeins_D_multiplier = 2 "multiplier for small veins to have more or less same tissue post-tissue pressure";
+
             parameter Real r_superior_vena_cava_C2(unit = "m") = 0.975e-2;
             parameter Real r_azygos_vein_T1_C4(unit = "m") = 0.38e-2;
             parameter Real r_superior_vena_cava_C88(unit = "m") = 0.975e-2;
@@ -9769,11 +9771,11 @@ P_hs_plus_dist"),
             parameter Real r_brachial_vein_R114(unit = "m") = 0.17e-2;
             parameter Real r_venous_perforator_T2_R106(unit = "m") = 0.17e-2;
             parameter Real r_brachial_vein_R108(unit = "m") = 0.185e-2;
-            parameter Real r_ulnar_vein_T7_R110(unit = "m") = 0.085e-2;
+            parameter Real r_ulnar_vein_T7_R110(unit = "m") = 0.085e-2*smallVeins_D_multiplier;
             parameter Real r_brachial_vein_R112(unit = "m") = 0.185e-2;
             parameter Real r_venous_perforator_T1_R116(unit = "m") = 0.185e-2;
             parameter Real r_brachial_vein_R118(unit = "m") = 0.17e-2;
-            parameter Real r_radial_vein_T3_R120(unit = "m") = 0.0665e-2;
+            parameter Real r_radial_vein_T3_R120(unit = "m") = 0.0665e-2*smallVeins_D_multiplier;
             parameter Real r_vertebral_vein_L126(unit = "m") = 0.27e-2;
             parameter Real r_brachiocephalic_vein_L128(unit = "m") = 0.75e-2;
             parameter Real r_subclavian_vein_L130(unit = "m") = 0.56e-2;
@@ -9785,11 +9787,11 @@ P_hs_plus_dist"),
             parameter Real r_brachial_vein_L148(unit = "m") = 0.17e-2;
             parameter Real r_venous_perforator_T2_L140(unit = "m") = 0.185e-2;
             parameter Real r_brachial_vein_L142(unit = "m") = 0.185e-2;
-            parameter Real r_ulnar_vein_T7_L144(unit = "m") = 0.085e-2;
+            parameter Real r_ulnar_vein_T7_L144(unit = "m") = 0.085e-2*smallVeins_D_multiplier;
             parameter Real r_brachial_vein_L146(unit = "m") = 0.185e-2;
             parameter Real r_venous_perforator_T1_L150(unit = "m") = 0.17e-2;
             parameter Real r_brachial_vein_L152(unit = "m") = 0.17e-2;
-            parameter Real r_radial_vein_T3_L154(unit = "m") = 0.0665e-2;
+            parameter Real r_radial_vein_T3_L154(unit = "m") = 0.0665e-2*smallVeins_D_multiplier;
             parameter Real h_superior_vena_cava_C2(unit = "m") = 0.11778e-2;
             parameter Real h_azygos_vein_T1_C4(unit = "m") = 0.06384e-2;
             parameter Real h_superior_vena_cava_C88(unit = "m") = 0.11778e-2;
@@ -31853,8 +31855,9 @@ P_hs_plus_dist"),
               HR_nom(displayUnit="1/min")=1.0,       phi0=settings.phi0),
           condHR(disconnected=false),
           settings(
-            tissues_nominal_arterioles_pressure(displayUnit="mmHg") = 9679.205326329,
-            tissues_nominal_cardiac_output(displayUnit="ml/min") = 8.1666666666667e-05,
+            tissues_nominal_arterioles_pressure(displayUnit="mmHg") = Pa,
+            tissues_nominal_pressure=Pt,
+            tissues_nominal_cardiac_output(displayUnit="ml/min") = CO_nom,
             heart_alphaE=0.2,
             arteries_UseVasoconstrictionEffect=true,
             exercise_factor_on_arterial_compliance=0.2,
@@ -31864,7 +31867,7 @@ P_hs_plus_dist"),
             tissues_UseStraighteningReaction2Phi=true,
             tissuesCompliance_PhiEffect=0.2,
             exercise_factor_on_tissue_compliance=0.2,
-            tissues_nominal_venules_pressure(displayUnit="mmHg") = 227.98128247965,
+            tissues_nominal_venules_pressure(displayUnit="mmHg") = Pv,
             UseNonLinear_VenousCompliance=true,
             veins_activation_tau=0.1,
             hideLevel0=false,
@@ -31893,6 +31896,13 @@ P_hs_plus_dist"),
         parameter Real Vw_factor=1;
         parameter Real Amref_factor=0.95;
         Real SV = CO/heartRate.HR*1e6 "SV in ml";
+        parameter Physiolibrary.Types.HydraulicResistance TPR=119990148.6735;
+        parameter Physiolibrary.Types.Fraction TR_frac=5.33333 "Ra to Rv ratio";
+        parameter Physiolibrary.Types.Pressure Pt=2666.4477483;
+        parameter Physiolibrary.Types.VolumeFlowRate CO_nom=0.000105;
+        parameter Physiolibrary.Types.Pressure Pa=TR_frac*(Pt - Pv) + Pt;
+        parameter Physiolibrary.Types.Pressure Pv = (Pt * (1+ TR_frac) - TPR*CO_nom)/(1+TR_frac);
+
       equation
 
 
@@ -31963,6 +31973,18 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end base_TriSeg_SA;
+
+      model nominals
+        parameter Physiolibrary.Types.HydraulicResistance TPR=119990148.6735;
+        parameter Physiolibrary.Types.Fraction TR_frac=5.33333 "Ra to Rv ratio";
+        parameter Physiolibrary.Types.Pressure Pt=2666.4477483;
+        parameter Physiolibrary.Types.VolumeFlowRate CO=0.000105;
+        parameter Physiolibrary.Types.Pressure Pa=TR_frac*(Pt - Pv) + Pt;
+        parameter Physiolibrary.Types.Pressure Pv = (Pt * (1+ TR_frac) - TPR*CO)/(1+TR_frac);
+
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+              coordinateSystem(preserveAspectRatio=false)));
+      end nominals;
     end Baseline;
 
     package Tilt
