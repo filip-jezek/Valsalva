@@ -5,9 +5,10 @@
 Vary{
   Parameter{ Name = TPR; Min = 1e7; Ini = 1.1999014867350000E+08; Max = 1e9; Step = 1e6; }
   Parameter{ Name = TR_frac; Min = 2; Ini = 5.3333300000000001E+00; Max = 10; Step = 0.01; }
-  Parameter{ Name = k_E; Min = 0.1; Ini = 0.17375; Max = 0.8; Step = 0.01; }
-  Parameter{ Name = Vw_factor; Min = 0.8; Ini = 1.13875; Max = 1.4; Step = 0.01; }
-  Parameter{ Name = Amref_factor; Min = 0.8; Ini = 1.2; Max = 1.4; Step = 0.01; }
+  Parameter{ Name = V_PV_init; Min = 1e-3; Ini = 2.1397999999999999E-03; Max = 3e-3; Step = 10e-6; }
+  Parameter{ Name = k_E; Min = 0.1; Ini = 0.4; Max = 0.8; Step = 0.01; }
+  Parameter{ Name = Vw_factor; Min = 0.8; Ini = 1; Max = 1.4; Step = 0.01; }
+  Parameter{ Name = Amref_factor; Min = 0.8; Ini = 0.95; Max = 1.4; Step = 0.01; }
   
 }
 
@@ -18,19 +19,9 @@ OptimizationSettings{
 }
 
 Algorithm{
-  Main = GPSPSOCCHJ;
-  NeighborhoodTopology = vonNeumann;
-  NeighborhoodSize = 5;
-  NumberOfParticle = 8;
-  NumberOfGeneration = 8;
-  Seed = 1;
-  CognitiveAcceleration = 2.8;
-  SocialAcceleration = 1.3;
-  MaxVelocityGainContinuous = 0.5;
-  MaxVelocityDiscrete = 4;
-  ConstrictionGain = 0.5;
-  MeshSizeDivider = 2;
-  InitialMeshSizeExponent = 0;
-  MeshSizeExponentIncrement = 1;
-  NumberOfStepReduction = 4;
+ Main = GPSHookeJeeves;
+ MeshSizeDivider = 2;
+ InitialMeshSizeExponent = 0;
+ MeshSizeExponentIncrement = 1;
+ NumberOfStepReduction = 4;
 }

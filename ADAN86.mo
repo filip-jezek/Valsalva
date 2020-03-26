@@ -31850,7 +31850,8 @@ P_hs_plus_dist"),
               SEP_wall(Vw=Vw_factor*34, Amref=Amref_factor*39),
               RV_wall(Vw=Amref_factor*27, Amref=Amref_factor*110))),
           redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg
-            pulmonaryComponent(UseThoracic_PressureInput=true),
+            pulmonaryComponent(UseThoracic_PressureInput=true, c_pv(
+                volume_start=V_PV_init, ZeroPressureVolume=0.002)),
           redeclare Components.Subsystems.Baroreflex.HeartRate2 heartRate(
               HR_nom(displayUnit="1/min")=1.0,       phi0=settings.phi0),
           condHR(disconnected=false),
@@ -31903,6 +31904,7 @@ P_hs_plus_dist"),
         parameter Physiolibrary.Types.Pressure Pa=TR_frac*(Pt - Pv) + Pt;
         parameter Physiolibrary.Types.Pressure Pv = (Pt * (1+ TR_frac) - TPR*CO_nom)/(1+TR_frac);
 
+        parameter Physiolibrary.Types.Volume V_PV_init=0.0021398;
       equation
 
 
@@ -31985,6 +31987,21 @@ P_hs_plus_dist"),
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)));
       end nominals;
+
+      model base_TriSeg_OptimizedBaseline
+        extends base_TriSeg(
+          V_PV_init(displayUnit="ml") = 0.00185605,
+          TR_frac(displayUnit="%") = 5.118955,
+          TPR(displayUnit="(mmHg.min)/l") = 119490152,
+          Amref_factor=1.06,
+          Vw_factor=0.90375,
+          Systemic1(Parameters_Systemic1(k_E(displayUnit="1") = 0.358125)));
+        annotation (experiment(
+            StopTime=30,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end base_TriSeg_OptimizedBaseline;
     end Baseline;
 
     package Tilt

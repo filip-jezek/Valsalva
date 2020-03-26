@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11317,94)
+char initialName(11318,94)
 settings.phi0
 settings.height
 settings.weight
@@ -11418,10 +11418,11 @@ Pt
 CO_nom
 Pa
 Pv
+V_PV_init
 CPUtime
 EventCounter
 
-double initialValue(11317,6)
+double initialValue(11318,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
@@ -33796,13 +33797,13 @@ double initialValue(11317,6)
   2   784   # pulmonaryComponent.c_pv.state
   0       0                       0                       0                
   3   768   # pulmonaryComponent.c_pv.der(state)
- -1  1.3980000000000001E-04       0                 1.0000000000000000E+100
-  1   792   # pulmonaryComponent.c_pv.volume_start
+  0       0                       0                 1.0000000000000000E+100
+  6   768   # pulmonaryComponent.c_pv.volume_start
   0       0                       0                 1.0000000000000000E+100
   6   768   # pulmonaryComponent.c_pv.excessVolume
   0       0                       0                       0                
   6   769   # pulmonaryComponent.c_pv.useV0Input
- -1  9.9999999999999994E-12       0                 1.0000000000000000E+100
+ -1  2.0000000000000000E-03       0                 1.0000000000000000E+100
   1   792   # pulmonaryComponent.c_pv.ZeroPressureVolume
  -1  9.9999999999999998E-13       0                 1.0000000000000000E+100
   1   792   # pulmonaryComponent.c_pv.CollapsingPressureVolume
@@ -34052,6 +34053,8 @@ double initialValue(11317,6)
   6   256   # Pa
   0       0                       0                       0                
   6   256   # Pv
+ -1  %V_PV_init%       0                 1.0000000000000000E+100
+  1   280   # V_PV_init
   0       0                       0                       0                
   4   256   # CPUtime
   0       0                       0                       0                
@@ -34106,7 +34109,7 @@ double initialValue(11317,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11317,152)
+char initialDescription(11318,152)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -45422,6 +45425,7 @@ Ra to Rv ratio [1|%]
 [m3/s|ml/min]
 [Pa|mmHg]
 [Pa|mmHg]
+[m3|ml]
 [s]
 
 
