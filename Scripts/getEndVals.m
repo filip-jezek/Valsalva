@@ -1,7 +1,8 @@
 % TODO variable end time
 % TODO ignored variables
 
-mat_file = 'base_TriSeg_OptimizedBaseline.mat';
+% run after simulation with "state" outputs only!!
+mat_file = 'base_TriSeg_OptimizedBaseline_init.mat';
 state_file = 'states.csv'
 time = -1; %-1 is the end
 

@@ -16,9 +16,9 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'ADAN_main.AdanVenousRed_Safaei.Baseline.base_TriSeg_OptimizedBaseline'
+base_model_full_path = 'ADAN_main.AdanVenousRed_Safaei.Baseline.base_TriSeg_OptimizedBaseline_init'
 relative_folder = ''
-steadyStateAt = 29
+steadyStateAt = 300
 
 # get the main and path
 if '.' in base_model_full_path:
@@ -29,8 +29,11 @@ else:
 
 
 input_text = open('states.csv', 'r').read()
-m = re.findall(r'([\w.]+(volume|V_LV|V_RV|vol1|vol2);.+;)', input_text)
-lines = (l[0] for l in m)
+# incl_vars = 'volume|V_LV|V_RV|vol1|vol2|s|epsilon|fiSN|v_in'
+incl_vars = '.+'
+match = r'([\w.]+\.(?:' + incl_vars + r');.+;)'
+m = re.findall(match, input_text)
+lines = (l for l in m)
 
 # Build modelica Object Tree
 mc_tree = mc.ModelicaClass.BuildObjectTree(lines, root=base_model)
@@ -54,8 +57,8 @@ for name in nmsList:
     n = mc_tree.findNode(name)
     if n is None:
         continue
-    if 'radial_vein_T3_R120' in name:
-        print(d.data(name))
+    # if 'radial_vein_T3_R120' in name:
+    #     print(d.data(name))
     n.start_val = d.data(name)[steadyStateInd]
 
 
