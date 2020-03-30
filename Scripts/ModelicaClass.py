@@ -33,9 +33,9 @@ class ModelicaClass:
         else: 
             return mc.findNode(rest)
 
-    def buildChildTree(self, inp, ignore_lines = 0):
+    def buildChildTree(self, inps):
         # ill = inp.split('\n')
-        for line in inp[ignore_lines:]:
+        for line in inps:
             l = line.split(';', 1)
             self.__attach(l[0], self)
 
@@ -70,10 +70,15 @@ class ModelicaClass:
             ModelicaClass.__attach(others, trunk.children[node])
 
     @staticmethod
-    def BuildObjectTreeFromFile(filename, root = 'Root'):
-        lines = open(filename, 'r').read().splitlines()
+    def BuildObjectTree(lines, root = 'Root'):
         root_mc = ModelicaClass(root)
-        root_mc.buildChildTree(lines, 1)
+        root_mc.buildChildTree(lines)
         return root_mc
+
+
+    @staticmethod
+    def BuildObjectTreeFromFile(filename, root = 'Root', ignoreLines = 0):
+        lines = open(filename, 'r').read().splitlines()
+        return ModelicaClass.BuildObjectTree(lines[ignoreLines:], root)
 
 

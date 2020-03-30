@@ -1,7 +1,7 @@
 % TODO variable end time
 % TODO ignored variables
 
-mat_file = '..\CVS_7af.mat';
+mat_file = 'base_TriSeg_OptimizedBaseline.mat';
 state_file = 'states.csv'
 time = -1; %-1 is the end
 
