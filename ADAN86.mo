@@ -18816,6 +18816,89 @@ P_hs_plus_dist"),
               thickness=1));
           annotation (experiment(StopTime=20));
         end Systemic_TriSeg_Rat_Ben;
+
+        model SystemicRat_Ben
+          extends partialSystemic(
+            final UseTiltInput=false,
+            final UsePhi_Input=false,
+            final UseOuter_PressureInput=false,
+            final UseBaroreflexOutput=false);
+          import ADAN_main.Components.Constants.*;
+
+          Physiolibrary.Hydraulic.Components.ElasticVessel C_ao(volume_start=5.4e-7,
+              Compliance=1.2000985213531e-11)
+            annotation (Placement(transformation(extent={{-160,20},{-140,40}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel C_sa(volume_start=1.8e-6,
+              Compliance=3.975326351982e-11)
+            annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel C_sv(volume_start=9.9e-6,
+              Compliance=7.425609600872e-10)
+            annotation (Placement(transformation(extent={{80,20},{100,40}})));
+          Physiolibrary.Hydraulic.Components.Resistor R_ao(Resistance=(96 - 95)/(0.8*95/
+                60)) annotation (Placement(transformation(extent={{-100,70},{-80,90}})));
+          Physiolibrary.Hydraulic.Components.Resistor R_sa(Resistance=(95 - 8)/(0.8*95/60))
+            annotation (Placement(transformation(extent={{20,70},{40,90}})));
+          Physiolibrary.Hydraulic.Components.Resistor R_sv(Resistance=(8 - 4)/(0.8*95/60))
+            annotation (Placement(transformation(extent={{140,70},{160,90}})));
+          Physiolibrary.Hydraulic.Components.Resistor R_tv(Resistance=799934.32449)
+            annotation (Placement(transformation(extent={{262,70},{282,90}})));
+          Physiolibrary.Hydraulic.Components.Resistor R_mv(Resistance=799934.32449)
+            annotation (Placement(transformation(extent={{-220,70},{-200,90}})));
+          Physiolibrary.Hydraulic.Components.Resistor R_th(Resistance=(96 - 4)/(0.2*95/60))
+            annotation (Placement(transformation(extent={{20,108},{40,128}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel C_vc(volume_start=2.7e-6,
+              Compliance=5.4004433460887e-10)
+            annotation (Placement(transformation(extent={{200,18},{220,38}})));
+        equation
+          connect(R_ao.q_out, R_sa.q_in) annotation (Line(
+              points={{-80,80},{20,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_sa.q_out, R_sv.q_in) annotation (Line(
+              points={{40,80},{140,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(C_sa.q_in, R_sa.q_in) annotation (Line(
+              points={{-30,30},{-32,30},{-32,80},{20,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(C_sv.q_in, R_sv.q_in) annotation (Line(
+              points={{90,30},{90,80},{140,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_sv.q_out, R_tv.q_in) annotation (Line(
+              points={{160,80},{262,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_tv.q_out, port_b) annotation (Line(
+              points={{282,80},{460,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(port_a, R_mv.q_in) annotation (Line(
+              points={{-320,80},{-220,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_mv.q_out, R_ao.q_in) annotation (Line(
+              points={{-200,80},{-100,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(C_ao.q_in, R_ao.q_in) annotation (Line(
+              points={{-150,30},{-150,80},{-100,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_mv.q_out, R_th.q_in) annotation (Line(
+              points={{-200,80},{-150,80},{-150,118},{20,118}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_th.q_out, R_tv.q_in) annotation (Line(
+              points={{40,118},{210,118},{210,80},{262,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(C_vc.q_in, R_tv.q_in) annotation (Line(
+              points={{210,28},{210,80},{262,80}},
+              color={0,0,0},
+              thickness=1));
+        end SystemicRat_Ben;
       end Systemic;
     end Subsystems;
 
@@ -25516,7 +25599,8 @@ P_hs_plus_dist"),
       Components.Subsystems.Heart.Heart_TriSegMechanics_Rat
         heart_TriSegMechanics_Rat(idealValve_deactivable1(_Gon(displayUnit="m3/(Pa.s)")=
                1), idealValve_deactivable(_Gon(displayUnit="m3/(Pa.s)") = 1))
-                                     annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
+                                     annotation (Placement(transformation(extent={{10,-12},
+                {-10,8}})));
       Components.Subsystems.Pulmonary.PulmonaryTriSeg_Rat pulmonaryTriSeg_Rat
         annotation (Placement(transformation(extent={{-10,-60},{10,-40}})));
       Components.Subsystems.Systemic.Systemic_TriSeg_Rat systemic_TriSeg_Rat
@@ -25525,22 +25609,22 @@ P_hs_plus_dist"),
     equation
       connect(systemic_TriSeg_Rat.port_a, heart_TriSegMechanics_Rat.sa)
         annotation (Line(
-          points={{-44,40},{-46,40},{-46,10},{-10,10}},
+          points={{-44,40},{-46,40},{-46,8},{-10,8}},
           color={0,0,0},
           thickness=1));
       connect(systemic_TriSeg_Rat.port_b, heart_TriSegMechanics_Rat.sv)
         annotation (Line(
-          points={{32,40},{46,40},{46,10},{10,10}},
+          points={{32,40},{46,40},{46,8},{10,8}},
           color={0,0,0},
           thickness=1));
       connect(heart_TriSegMechanics_Rat.pv, pulmonaryTriSeg_Rat.port_b)
         annotation (Line(
-          points={{10,-10},{30,-10},{30,-50},{10,-50}},
+          points={{10,-12},{30,-12},{30,-50},{10,-50}},
           color={0,0,0},
           thickness=1));
       connect(pulmonaryTriSeg_Rat.port_a, heart_TriSegMechanics_Rat.pa)
         annotation (Line(
-          points={{-10,-50},{-32,-50},{-32,-10},{-10,-10}},
+          points={{-10,-50},{-32,-50},{-32,-12},{-10,-12}},
           color={0,0,0},
           thickness=1));
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
@@ -25593,6 +25677,41 @@ P_hs_plus_dist"),
           Tolerance=1e-09,
           __Dymola_Algorithm="Cvode"));
     end TestRat_Ben;
+
+    model TestRat_Ben_full
+      Components.Subsystems.Pulmonary.PulmonaryTriSeg_Rat pulmonaryTriSeg_Rat
+        annotation (Placement(transformation(extent={{-10,-60},{10,-40}})));
+      Components.Subsystems.Heart.Heart_TriSegMechanics_Rat
+        heart_TriSegMechanics_Rat(idealValve_deactivable1(_Gon(displayUnit=
+                "m3/(Pa.s)") = 1), idealValve_deactivable(_Gon(displayUnit=
+                "m3/(Pa.s)") = 1))   annotation (Placement(transformation(extent={{10,-12},
+                {-10,8}})));
+      Components.Subsystems.Systemic.SystemicRat_Ben systemicRat_Ben
+        annotation (Placement(transformation(extent={{-36,30},{40,60}})));
+    equation
+      connect(heart_TriSegMechanics_Rat.pv, pulmonaryTriSeg_Rat.port_b)
+        annotation (Line(
+          points={{10,-12},{42,-12},{42,-50},{10,-50}},
+          color={0,0,0},
+          thickness=1));
+      connect(pulmonaryTriSeg_Rat.port_a, heart_TriSegMechanics_Rat.pa)
+        annotation (Line(
+          points={{-10,-50},{-40,-50},{-40,-12},{-10,-12}},
+          color={0,0,0},
+          thickness=1));
+      connect(heart_TriSegMechanics_Rat.sv, systemicRat_Ben.port_b) annotation
+        (Line(
+          points={{10,8},{60,8},{60,40},{40,40}},
+          color={0,0,0},
+          thickness=1));
+      connect(systemicRat_Ben.port_a, heart_TriSegMechanics_Rat.sa) annotation
+        (Line(
+          points={{-36,40},{-60,40},{-60,8},{-10,8}},
+          color={0,0,0},
+          thickness=1));
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)));
+    end TestRat_Ben_full;
   end tests;
 
   package Experiments
