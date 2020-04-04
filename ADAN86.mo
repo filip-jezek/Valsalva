@@ -3443,8 +3443,13 @@ type"),       Text(
             Modelica.SIunits.Period period = 1/frequency;
               Real x=min(8, max(0, cardiac_cycle*period/tauR));
             Real Fr = 0.02*(x^3)*((8-x)^2)*exp(-x);
+            outer Physiolibrary.Types.Fraction phi;
+            parameter Physiolibrary.Types.Fraction phi_effect_Ca = 0;
+            parameter Physiolibrary.Types.Fraction phi0 = 0.25;
+            Physiolibrary.Types.Fraction phi_effect = (1 + phi_effect_Ca*(phi - phi0));
+
             equation
-              drivingFunction = Fr;
+              drivingFunction = Fr*phi_effect;
 
             end DrivingLumens;
 
@@ -3813,8 +3818,10 @@ type"),       Text(
               Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input  annotation (Placement(
                     transformation(extent={{-20,-20},{20,20}},
                     rotation=90,
-                    origin={0,-100}),                             iconTransformation(extent={{-20,
-                        -120},{20,-80}})));
+                    origin={0,-100}),                             iconTransformation(extent={{-20,-20},
+                        {20,20}},
+                    rotation=90,
+                    origin={0,-100})));
               Modelica.Blocks.Interfaces.BooleanOutput OnLV(start=true)
                 annotation (Placement(transformation(
                     extent={{-20,-20},{20,20}},
@@ -3836,6 +3843,14 @@ type"),       Text(
               Physiolibrary.Types.Volume V_RV(start=200e-6, fixed = true)=_V_RV*Constants.ml2SI;
               Physiolibrary.Types.Pressure P_LV=_P_LV*Constants.mmHg2SI;
               Physiolibrary.Types.Pressure P_RV=_P_RV*Constants.mmHg2SI;
+              Physiolibrary.Types.RealIO.FractionInput phi_input
+                annotation (Placement(transformation(extent={{-20,-20},{20,20}},
+                    rotation=270,
+                    origin={0,100}),
+                    iconTransformation(extent={{-20,-20},{20,20}},
+                    rotation=270,
+                    origin={0,100})));
+              inner Physiolibrary.Types.Fraction phi = phi_input "Global provider of phi for any components interested";
             equation
               OnRV = V_RV > V_min;
               OnLV = V_LV > V_min;
@@ -4442,8 +4457,8 @@ type"),       Text(
             annotation (Placement(transformation(extent={{-90,66},{-82,74}})));
 
 
-          inner Settings settings
-            annotation (Placement(transformation(extent={{-80,78},{-60,98}})));
+          outer Settings settings
+            annotation (Placement(transformation(extent={{-80,80},{-60,100}})));
         end partialHeart;
 
         model Heart_ADAN86
@@ -5490,27 +5505,37 @@ Kalecky")}), experiment(
               color={0,0,0},
               thickness=1));
           connect(ra.cardiac_cycle, ventricles.cardiac_cycle) annotation (Line(points={{-40,16},
-                  {16,16},{16,0},{10,0}},          color={0,0,127}));
+                  {16,16},{16,0},{10,0}},          color={244,125,35}));
           connect(la.cardiac_cycle, ventricles.cardiac_cycle)
-            annotation (Line(points={{40,0},{10,0}},                color={0,0,127}));
+            annotation (Line(points={{40,0},{10,0}},                color={244,125,
+                  35}));
           connect(aorticValve.cardiac_cycle, ventricles.cardiac_cycle)
-            annotation (Line(points={{-70,-20},{16,-20},{16,0},{10,0}},color={0,
-                  0,127}));
+            annotation (Line(points={{-70,-20},{16,-20},{16,0},{10,0}},color={244,125,
+                  35}));
           connect(ventricles.thoracic_pressure_input, P0.y) annotation (Line(
-                points={{0,-10},{0,-81},{1.77636e-15,-81}}, color={0,0,127}));
+                points={{0,-10},{0,-81},{1.77636e-15,-81}}, color={162,29,33},
+              thickness=0.5));
           connect(ventricles.thoracic_pressure_input, thoracic_pressure_input)
-            annotation (Line(points={{0,-10},{0,-100}}, color={0,0,127}));
+            annotation (Line(points={{0,-10},{0,-100}}, color={162,29,33},
+              thickness=0.5));
           connect(ra.thoracic_pressure_input, thoracic_pressure_input)
-            annotation (Line(points={{-60,16},{-68,16},{-68,-10},{-20,-10},{-20,
-                  -100},{0,-100}}, color={0,0,127}));
+            annotation (Line(points={{-60,16},{-68,16},{-68,-10},{-24,-10},{-24,
+                  -52},{0,-52},{0,-100}},
+                                   color={162,29,33},
+              thickness=0.5));
           connect(la.thoracic_pressure_input, thoracic_pressure_input)
-            annotation (Line(points={{60,0},{70,0},{70,-100},{0,-100}}, color={
-                  0,0,127}));
-          connect(ra.thoracic_pressure_input, P0.y) annotation (Line(points={{
-                  -60,16},{-68,16},{-68,-10},{-20,-10},{-20,-81},{8.88178e-16,
-                  -81}}, color={0,0,127}));
-          connect(la.thoracic_pressure_input, P0.y) annotation (Line(points={{
-                  60,0},{70,0},{70,-81},{0,-81}}, color={0,0,127}));
+            annotation (Line(points={{60,0},{70,0},{70,-52},{0,-52},{0,-100}},
+                                                                        color={162,29,
+                  33},
+              thickness=0.5));
+          connect(ra.thoracic_pressure_input, P0.y) annotation (Line(points={{-60,16},
+                  {-68,16},{-68,-10},{-24,-10},{-24,-52},{0,-52},{0,-81},{
+                  8.88178e-16,-81}},
+                         color={162,29,33},
+              thickness=0.5));
+          connect(la.thoracic_pressure_input, P0.y) annotation (Line(points={{60,0},{
+                  70,0},{70,-52},{0,-52},{0,-81}},color={162,29,33},
+              thickness=0.5));
           connect(ventricles.port_rv, idealValve_deactivable.q_out) annotation (
              Line(
               points={{8,6},{8,18}},
@@ -5535,6 +5560,10 @@ Kalecky")}), experiment(
             annotation (Line(points={{4,8},{4,24.4}}, color={255,0,255}));
           connect(ventricles.OnLV, idealValve_deactivable1.On)
             annotation (Line(points={{4,-8},{4,-16.4}}, color={255,0,255}));
+          connect(ventricles.phi_input, phi0.y) annotation (Line(points={{0,10},
+                  {0,70},{-81,70}}, color={0,0,127}));
+          connect(ventricles.phi_input, phi) annotation (Line(points={{0,10},{0,
+                  70},{-100,70}}, color={0,0,127}));
           annotation (Icon(graphics={                       Text(
                   extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
@@ -5907,12 +5936,12 @@ P_hs/2")}));
                 *(1 + (phi - settings.phi0) * settings.Rv_factor)
                 /(1 + exercise*settings.exercise_factor) "Venules resistance dependent on phi and exercise" annotation(HideResult = settings.hideLevel1);
 
-            parameter Real k = C / (V_max - V_n) "For Pstras non-linear PV characteristics";
+            parameter Real k = C / (V_max - V_n) "For Pstras non-linear PV characteristics. For gamma = 0.0003750308";
             parameter Physiolibrary.Types.Volume V_max = V_n + (V_n - zpv)*settings.tissues_gamma
               " V_n is between zpv and V_max, parameterized by gamma. 1 means its in the center. For Pstras non-linear PV characteristics";
             parameter Physiolibrary.Types.Volume V_n = nominal_pressure*C + zpv
               "nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization";
-            parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * C / (V_max - V_n))
+            parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * k)
               "nonlinear Un-Stressed volume";
 
             Real k_phi = C / (V_max - V_n_phi) "For Pstras non-linear PV characteristics" annotation(HideResult = settings.hideLevel1);
@@ -25121,18 +25150,21 @@ P_hs_plus_dist"),
 
       Physiolibrary.Types.Pressure u_C(start = nominal_pressure, nominal = 1000, fixed = false);
 
-      parameter Real k = C / (V_max - V_n) "For Pstras non-linear PV characteristics";
+      parameter Real k = 0.0003750308;
+     //C / (V_max - V_n) "For Pstras non-linear PV characteristics";
       parameter Physiolibrary.Types.Volume V_max = V_n + (V_n - zpv)*settings.tissues_gamma
         " V_n is between zpv and V_max, parameterized by gamma. 1 means its in the center. For Pstras non-linear PV characteristics";
       parameter Physiolibrary.Types.Volume V_n = nominal_pressure*C + zpv
         "nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization";
-      parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * C / (V_max - V_n))
-        "nonlinear Un-Stressed volume";
+    //   parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * C / (V_max - V_n))
+    //     "nonlinear Un-Stressed volume";
+      parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * k);
+
       Physiolibrary.Types.Volume V_us_phi = V_us * (1 + settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi";
       Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras";
     //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
     //       *(phi - phi0)) "Nonlinear compliance unstressed volume affected by phi";
-    parameter Physiolibrary.Types.Volume volume=0.000285;
+    Physiolibrary.Types.Volume volume( start = 0);
 
       // parametrization from celiac trunk
       parameter Physiolibrary.Types.HydraulicCompliance C = 3.69E-08 annotation(Dialog(tab="Tissue parametrization", group="Compliances"));
@@ -25144,6 +25176,7 @@ P_hs_plus_dist"),
     initial equation
     //  volume = nominal_pressure*C + zpv;
     equation
+      der(volume) = 1e-6;
             u_C = 1/k*log((V_max_phi - V_us_phi)/max(1e-9, V_max_phi - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
 
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
@@ -25164,24 +25197,29 @@ P_hs_plus_dist"),
         annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
       Components.Subsystems.Baroreflex.HeartRate2 HR_BC(
         phi0(displayUnit="%") = 0.25,
-        HR_max=3.25,
-        HR_nom=1.1666666666667)
-        annotation (Placement(transformation(extent={{-60,-40},{-40,-20}})));
+        HR_max=3.1666666666667,
+        HR_nom=1.15)
+        annotation (Placement(transformation(extent={{12,-38},{32,-18}})));
       Modelica.Blocks.Math.InverseBlockConstraints inverseBlockConstraints
-        annotation (Placement(transformation(extent={{-22,-46},{-76,-14}})));
-      Physiolibrary.Types.Constants.FrequencyConst frequency(k=1.4)
-        annotation (Placement(transformation(extent={{0,-34},{-8,-26}})));
+        annotation (Placement(transformation(extent={{50,-44},{-4,-12}})));
+      Physiolibrary.Types.Constants.FrequencyConst frequency(k=1.4833333333333)
+        annotation (Placement(transformation(extent={{72,-32},{64,-24}})));
+      Components.Subsystems.Baroreflex.HeartRate2 HR_MyBase(phi0=0.25, HR_max=
+            3.1666666666667)
+        annotation (Placement(transformation(extent={{-40,-40},{-60,-20}})));
     equation
       connect(heartRate2_1.phi, Tilt_ramp.y) annotation (Line(points={{-60,50},
               {-70,50},{-70,30},{-79,30}}, color={0,0,127}));
       connect(heartRate.phi, Tilt_ramp.y) annotation (Line(points={{-60,10},{
               -70,10},{-70,30},{-79,30}}, color={0,0,127}));
       connect(inverseBlockConstraints.y2, HR_BC.phi)
-        annotation (Line(points={{-71.95,-30},{-60,-30}}, color={0,0,127}));
+        annotation (Line(points={{0.05,-28},{12,-28}},    color={0,0,127}));
       connect(HR_BC.HR, inverseBlockConstraints.u2)
-        annotation (Line(points={{-39.8,-30},{-27.4,-30}}, color={0,0,127}));
+        annotation (Line(points={{32.2,-28},{44.6,-28}},   color={0,0,127}));
       connect(inverseBlockConstraints.u1, frequency.y)
-        annotation (Line(points={{-19.3,-30},{-9,-30}}, color={0,0,127}));
+        annotation (Line(points={{52.7,-28},{63,-28}},  color={0,0,127}));
+      connect(HR_MyBase.phi, inverseBlockConstraints.y1) annotation (Line(
+            points={{-40,-30},{-22,-30},{-22,-28},{-5.35,-28}}, color={0,0,127}));
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
             coordinateSystem(preserveAspectRatio=false)));
     end HR2Phi;
@@ -25479,6 +25517,21 @@ P_hs_plus_dist"),
           Tolerance=1e-09,
           __Dymola_Algorithm="Cvode"));
     end TestRat;
+
+    model LumensPhiSensitivity
+      extends AdanVenousRed_Safaei.Baseline.base_TriSeg_OptimizedBaseline(
+        heartComponent(UsePhiInput=true),
+        condHeartPhi(disconnected=false),
+        condHR(disconnected=true));
+    equation
+      connect(heartComponent.phi, condHeartPhi.y) annotation (Line(points={{-16,
+              -16},{60,-16},{60,42},{54.6,42}}, color={0,0,127}));
+      annotation (experiment(
+          StopTime=30,
+          Interval=0.02,
+          Tolerance=1e-05,
+          __Dymola_Algorithm="Cvode"));
+    end LumensPhiSensitivity;
   end tests;
 
   package Experiments
@@ -30511,6 +30564,27 @@ P_hs_plus_dist"),
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end tree_exercise_mynardValves;
+
+      model LumensCardiacSensitivity
+        extends Baseline.base_TriSeg_OptimizedBaseline_init(
+          heartComponent(UsePhiInput=true, ventricles(calciumMechanics(
+                  phi_effect_Ca=1))),
+          condHR(disconnected=true),
+          condPhi(disconnected=true),
+          phi(
+            amplitude=0.25,
+            width=40,
+            nperiod=1,
+            startTime=2));
+      equation
+        connect(condHeartPhi.y, heartComponent.phi) annotation (Line(points={{
+                54.6,42},{60,42},{60,-16},{-16,-16}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=60,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end LumensCardiacSensitivity;
     end Experiments;
 
     partial model CVS_7af
@@ -31870,6 +31944,24 @@ P_hs_plus_dist"),
       model OptimizeBaseline
         extends Baseline.base_fastBaro;
       end OptimizeBaseline;
+
+      model passive_tilt "optiize passive tilt"
+        extends Tilt.OptimizedBaseline_tiltable(
+          Tilt_ramp(startTime=0),
+          phi(
+            amplitude=0.3739 - 0.25,
+            rising=1,
+            width=360,
+            period=360,
+            startTime=0),
+          settings(tissues_gamma=0.5),
+          heartRate(HR_max=3.1666666666667));
+        annotation (experiment(
+            StopTime=180,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end passive_tilt;
     end Identification;
 
     package Baseline
@@ -32035,6 +32127,7 @@ P_hs_plus_dist"),
           redeclare Components.Subsystems.Heart.Heart_TriSegMechanicsLumens
                                                              heartComponent(
               UseFrequencyInput=true, UseThoracicPressureInput=true,
+            UsePhiInput=true,
             ventricles(
               LV_wall(Vw=Vw_factor*89, Amref=Amref_factor*86),
               SEP_wall(Vw=Vw_factor*34, Amref=Amref_factor*39),
@@ -32084,9 +32177,11 @@ P_hs_plus_dist"),
       output Physiolibrary.Types.Pressure carotid_pressure = Systemic1.common_carotid_L48_D.u_C;
       output Physiolibrary.Types.Pressure femoral_pressure = Systemic1.femoral_L200.u_C;
       output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
+      output Physiolibrary.Types.Fraction phi_baro = Systemic1.phi_baroreflex;
+      output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
+
         parameter Real Vw_factor=1;
         parameter Real Amref_factor=0.95;
-        Real SV = CO/heartRate.HR*1e6 "SV in ml";
         parameter Physiolibrary.Types.HydraulicResistance TPR=119990148.6735;
         parameter Physiolibrary.Types.Fraction TR_frac=5.33333 "Ra to Rv ratio";
         parameter Physiolibrary.Types.Pressure Pt=2666.4477483;
@@ -32119,6 +32214,8 @@ P_hs_plus_dist"),
                 34,42},{34,60},{40.8,60}}, color={0,0,127}));
         connect(phi.y, switch1.u3) annotation (Line(points={{-49,4},{-38,4},{
                 -38,53.4},{8.6,53.4}}, color={0,0,127}));
+        connect(condHeartPhi.y, heartComponent.phi) annotation (Line(points={{54.6,42},
+                {60,42},{60,-16},{-16,-16}},          color={0,0,127}));
         annotation (experiment(
             StopTime=30,
             Interval=0.01,
@@ -32423,7 +32520,6 @@ P_hs_plus_dist"),
                 compliant_vessel(A(start = 0.25, fixed = true))),
               brachial_L82_HeartLevel(v_in(start = 2.8019003e-06, fixed = true), volume(start = 3.7550526e-06, fixed = true))),
             heartComponent(
-              aorticValve(BP_max(start = 15295.77, fixed = true), BP_min(start = 11269.348, fixed = true), CO_acc(start = 0.00010498476, fixed = true)),
               ventricles(
                 LV_wall(ym(start = 3.721515, fixed = true), SL(start = 2.1559181, fixed = true), C(start = 0.020000003, fixed = true)),
                 SEP_wall(SL(start = 2.161576, fixed = true), C(start = 0.020000003, fixed = true)),
@@ -32674,6 +32770,153 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end base_TriSeg_OptimizedBaseline;
+
+      model OptimizedBaseline_tiltable
+        extends Baseline.base_TriSeg_OptimizedBaseline_init(Systemic1(
+            redeclare model Systemic_artery_thoracic =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
+            redeclare model Systemic_artery =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
+            redeclare model Systemic_vein =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vp_vein_tDF_leveled,
+            redeclare model Systemic_tissue =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.systemic_tissue_leveled,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_q_leveled
+              pq_terminator_v,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_p_leveled
+              pq_terminator_sup_vc,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_p_leveled
+              pq_terminator_inf_vc,
+            redeclare
+              ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vv_artery_thoracic_leveled
+              ascending_aorta_A(sinAlpha=1),
+            ascending_aorta_B(sinAlpha=1),
+            ascending_aorta_C(sinAlpha=1),
+            ascending_aorta_D(sinAlpha=1),
+            aortic_arch_C2(sinAlpha=1),
+            aortic_arch_C46(sinAlpha=1),
+            aortic_arch_C64(sinAlpha=1),
+            common_carotid_R6_A(sinAlpha=1),
+            common_carotid_R6_B(sinAlpha=1),
+            common_carotid_R6_C(sinAlpha=1),
+            internal_carotid_R8_A(sinAlpha=1),
+            internal_carotid_R8_B(sinAlpha=1),
+            common_carotid_L48_A(sinAlpha=1),
+            common_carotid_L48_B(sinAlpha=1),
+            common_carotid_L48_C(sinAlpha=1),
+            common_carotid_L48_D(sinAlpha=1),
+            internal_carotid_L50_A(sinAlpha=1),
+            internal_carotid_L50_B(sinAlpha=1),
+            brachial_L82(sinAlpha=-1),
+            ulnar_T2_L84(sinAlpha=-1),
+            brachial_R34(sinAlpha=-1),
+            ulnar_T2_R36(sinAlpha=-1),
+            vertebral_vein_L126(sinAlpha=-1),
+            brachial_vein_L138(sinAlpha=1),
+            brachial_vein_L142(sinAlpha=1),
+            ulnar_vein_T7_L144(sinAlpha=1),
+            brachial_vein_L152(sinAlpha=1),
+            radial_vein_T3_L154(sinAlpha=1),
+            brachial_vein_R104(sinAlpha=1),
+            brachial_vein_R114(sinAlpha=1),
+            brachial_vein_R108(sinAlpha=1),
+            ulnar_vein_T7_R110(sinAlpha=1),
+            brachial_vein_R118(sinAlpha=1),
+            radial_vein_T3_R120(sinAlpha=1),
+            brachial_vein_L148(sinAlpha=1),
+            superior_vena_cava_C2(sinAlpha=-1),
+            superior_vena_cava_C88(sinAlpha=-1),
+            brachiocephalic_vein_R90(sinAlpha=-1),
+            brachiocephalic_vein_R94(sinAlpha=-1),
+            brachiocephalic_vein_L128(sinAlpha=-1),
+            brachiocephalic_vein_L124(sinAlpha=-1),
+            internal_jugular_vein_R122(sinAlpha=-1),
+            external_jugular_vein_R98(sinAlpha=-1),
+            thoracic_aorta_C96(sinAlpha=-1),
+            thoracic_aorta_C100(sinAlpha=-1),
+            thoracic_aorta_C104(sinAlpha=-1),
+            thoracic_aorta_C108(sinAlpha=-1),
+            thoracic_aorta_C112(sinAlpha=-1),
+            aortic_arch_C94(sinAlpha=-1),
+            vertebral_vein_R92(sinAlpha=-1),
+            internal_jugular_vein_L156(sinAlpha=-1),
+            external_jugular_vein_L132(sinAlpha=-1),
+            abdominal_aorta_C114(sinAlpha=-1),
+            abdominal_aorta_C136(sinAlpha=-1),
+            abdominal_aorta_C164(sinAlpha=-1),
+            abdominal_aorta_C176(sinAlpha=-1),
+            abdominal_aorta_C188(sinAlpha=-1),
+            abdominal_aorta_C192(sinAlpha=-1),
+            common_iliac_R216(sinAlpha=-1),
+            external_iliac_R220(sinAlpha=-1),
+            femoral_R222(sinAlpha=-1),
+            common_iliac_L194(sinAlpha=-1),
+            external_iliac_L198(sinAlpha=-1),
+            femoral_L200(sinAlpha=-1),
+            femoral_R226(sinAlpha=-1),
+            popliteal_R228(sinAlpha=-1),
+            popliteal_R232(sinAlpha=-1),
+            tibiofibular_trunk_R234(sinAlpha=-1),
+            femoral_L204(sinAlpha=-1),
+            popliteal_L206(sinAlpha=-1),
+            popliteal_L210(sinAlpha=-1),
+            tibiofibular_trunk_L212(sinAlpha=-1),
+            renal_vein_T1_L22(sinAlpha=1),
+            internal_iliac_vein_T1_R30(sinAlpha=1),
+            profunda_femoris_vein_T2_R40(sinAlpha=1),
+            anterior_tibial_vein_T4_R50(sinAlpha=1),
+            posterior_tibial_vein_T6_R54(sinAlpha=1),
+            internal_iliac_vein_T1_L60(sinAlpha=1),
+            profunda_femoris_vein_T2_L70(sinAlpha=1),
+            anterior_tibial_vein_T4_L80(sinAlpha=1),
+            posterior_tibial_vein_T6_L84(sinAlpha=1),
+            external_iliac_vein_R32(sinAlpha=1),
+            femoral_vein_R34(sinAlpha=1),
+            femoral_vein_R38(sinAlpha=1),
+            femoral_vein_R42(sinAlpha=1),
+            femoral_vein_R46(sinAlpha=1),
+            popliteal_vein_R48(sinAlpha=1),
+            popliteal_vein_R52(sinAlpha=1),
+            external_iliac_vein_L62(sinAlpha=1),
+            femoral_vein_L64(sinAlpha=1),
+            femoral_vein_L68(sinAlpha=1),
+            femoral_vein_L72(sinAlpha=1),
+            femoral_vein_L76(sinAlpha=1),
+            popliteal_vein_L78(sinAlpha=1),
+            popliteal_vein_L82(sinAlpha=1),
+            inferior_vena_cava_C20(sinAlpha=1),
+            inferior_vena_cava_C24(sinAlpha=1),
+            common_iliac_vein_L56(sinAlpha=1),
+            common_iliac_vein_R26(sinAlpha=1),
+            external_iliac_vein_R28(sinAlpha=1),
+            external_iliac_vein_L58(sinAlpha=1),
+            inferior_vena_cava_C16(sinAlpha=1),
+            inferior_vena_cava_C12(sinAlpha=1),
+            inferior_vena_cava_C8(sinAlpha=1),
+            UseTiltInput=true), heartComponent(UseFrequencyInput=true, UsePhiInput=true),
+          phi(
+            amplitude=0.05,
+            width=200,
+            nperiod=1,
+            startTime=10),
+          settings(
+            R_vc=0,
+            Ra_factor=0,
+            tissuesCompliance_PhiEffect=0));
+
+        replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
+          height=Modelica.Constants.pi/3,
+          startTime=10,
+          duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
+          annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
+      equation
+        connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-79,32},
+                {-22,32},{-22,20}},    color={0,0,127}));
+        annotation (experiment(
+            Interval=0.02,
+            Tolerance=1e-09,
+            __Dymola_Algorithm="Cvode"));
+      end OptimizedBaseline_tiltable;
     end Tilt;
   annotation(preferredView="info",
   version="2.3.2-beta",

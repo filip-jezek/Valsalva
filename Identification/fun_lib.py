@@ -3,17 +3,20 @@ import math
 
 class ObjectiveVar:
 
-    def __init__(self, name, value = None, targetValue = None, limit = None):
+    def __init__(self, name, value = None, targetValue = None, limit = None, weight = 1, k_p = 1e3):
         self.name = name
         self.targetValue = targetValue
         self.value = value
         self.limit = limit if limit is not None else [-math.inf, math.inf]
+        self.weight = weight
+        # self.costLimit = -1 # unlimited costs
+        self.k_p = k_p # multiplier for out ouf limit values
 
     def __cost_function(self, measured, target):
         # calculate costs. Could go negative or NaN for negative or zero measured values!
-        return (measured - target)**2/(measured*target)
+        return self.weight*(measured - target)**2/(measured*target)
 
-    def cost(self, k_p = 1e3):
+    def cost(self):
         """
         Calculates costs per variable as difference from target value and applies steep linear penalty for outside of the bounds values, if defined.
         """
@@ -27,9 +30,9 @@ class ObjectiveVar:
         max_val = self.limit[1]
 
         if measured < min_val:
-            return c + self.__cost_function(measured, min_val)*k_p
+            return c + self.__cost_function(measured, min_val)*self.k_p
         elif measured > max_val:
-            return c + self.__cost_function(measured, max_val)*k_p
+            return c + self.__cost_function(measured, max_val)*self.k_p
         else:
             return c
     
@@ -51,6 +54,8 @@ def findLowestIndex(time, timeArr):
     return next((i for i, x in enumerate(lst) if x >= time))
 
 
+def avg(var_set, interval):
+    return sum(var_set[interval]) /len(interval)
 
 def calculatePWV(timeArr, signal, delayedSignal, distance):
     """
