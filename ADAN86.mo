@@ -31945,7 +31945,7 @@ P_hs_plus_dist"),
         extends Baseline.base_fastBaro;
       end OptimizeBaseline;
 
-      model passive_tilt "optiize passive tilt"
+      model passive_tilt "optimized passive tilt"
         extends Tilt.OptimizedBaseline_tiltable(
           Tilt_ramp(startTime=0),
           phi(
@@ -31954,8 +31954,13 @@ P_hs_plus_dist"),
             width=360,
             period=360,
             startTime=0),
-          settings(tissues_gamma=0.5),
-          heartRate(HR_max=3.1666666666667));
+          settings(
+            R_vc=0.525,
+            Ra_factor=2.44375,
+            tissuesCompliance_PhiEffect=0.4,
+            tissues_gamma=0.5),
+          heartRate(HR_max=3.1666666666667),
+          heartComponent(ventricles(calciumMechanics(phi_effect_Ca=-0.0265))));
         annotation (experiment(
             StopTime=180,
             Interval=0.02,
