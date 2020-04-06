@@ -6,6 +6,8 @@ import sys
 import os
 import time
 import importlib.util
+import re
+from datetime import datetime
 # from matplotlib import pyplot as plt
 # import re
 # import TerminalDS
@@ -23,6 +25,15 @@ def writeCost(objectives):
         file.write("banik pico\n")
         file.write('f(x) =' + repr(total_cost))
 
+def writeLogHeader(objectives):
+    """check if file exists and build header otherwise
+    """
+
+    if not os.path.isfile(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME):
+        with open(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME, 'w') as file:
+            header = map(lambda o: o.name.rjust(5) + '_val,' + o.name.rjust(5) + '_trg, %', objectives)
+            line = ',  '.join(header) + ",run, datetime"
+            file.write(line + '\n')
 
 def logLine(objective, total_cost):
     # return ','.join(["%"val), str(cost), str(round(cost/sum*100))])
@@ -37,19 +48,34 @@ def logOutput(objectives):
     # log the output, if the log directory exists. exit otherwise
 
     log_dirname = VALUE_LOG_DIRNAME
+    run = 0
     # log_dirname = 'Schedules'
 
     if not os.path.isdir(log_dirname):
         log_dirname = '..\\'
-        # cur_dirname = os.path.basename(os.getcwd())
+    else:
+        log_dirname = VALUE_LOG_DIRNAME
+
+    
+    cur_dirname = os.path.basename(os.getcwd())
+    run_match = re.match(r'[\w-]*-(\d+)$', cur_dirname)
+
+    if run_match is not None:
+        run = int(run_match[1])
+    else:
+        run = 0
+
         # log_filename = log_dirname + '\\' + cur_dirname + '_costs.txt'
     log_filename = log_dirname + VALUE_LOG_FILENAME
     with open(log_filename, 'a') as file:
         # prepare the line with value, cost value for this and percentage of total costs
         total_cost = sum(o.cost() for o in objectives)
+        t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        tail = ",%03d,%s" % (run, t)
+        
         string_seq = map(lambda o: logLine(o, total_cost), objectives)
 
-        file.write(',  '.join(string_seq) + '\n')
+        file.write(',  '.join(string_seq) + tail + '\n')
 
 
 def extractVars(d):
@@ -97,12 +123,5 @@ print("Calculating costs in ", time.time() - tic, " s")
 
 writeCost(objectives)
 
-# check if file exists and build header otherwise
-# no point in building header when we do not know the value names tho
-if not os.path.isfile(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME):
-    with open(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME, 'w') as file:
-        header = map(lambda o: o.name.rjust(5) + '_val,' + o.name.rjust(5) + '_trg, %', objectives)
-        file.write(',  '.join(header) + '\n')
-    # logOutput(cf.getCurrentValues(var_set), costs)
-
+writeLogHeader(objectives)
 logOutput(objectives)

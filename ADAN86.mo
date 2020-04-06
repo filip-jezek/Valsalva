@@ -31955,12 +31955,12 @@ P_hs_plus_dist"),
             period=360,
             startTime=0),
           settings(
-            R_vc=0.525,
-            Ra_factor=2.44375,
-            tissuesCompliance_PhiEffect=0.4,
+            R_vc=0,
+            Ra_factor=1.3,
+            tissuesCompliance_PhiEffect=0.3,
             tissues_gamma=0.5),
           heartRate(HR_max=3.1666666666667),
-          heartComponent(ventricles(calciumMechanics(phi_effect_Ca=-0.0265))));
+          heartComponent(ventricles(calciumMechanics(phi_effect_Ca=4))));
         annotation (experiment(
             StopTime=180,
             Interval=0.02,
