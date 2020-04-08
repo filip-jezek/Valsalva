@@ -3,10 +3,10 @@
 */
 
 Vary{
-  Parameter{ Name = R_vc; Min = 0; Ini = 0.2; Max = 4; Step = 0.1; }
-  Parameter{ Name = Ra_factor; Min = 0; Ini = 1; Max = 4; Step = 0.1; }
-  Parameter{ Name = tissuesCompliance_PhiEffect; Min = 0; Ini = 2; Max = 4; Step = 0.1; }
-  Parameter{ Name = phi_effect_Ca; Min = -4; Ini = 1; Max = 4; Step = 0.1; }  
+  Parameter{ Name = R_vc; Min = 0; Ini = 0.2; Max = 4; Step = 0.05; }
+  Parameter{ Name = Ra_factor; Min = 0; Ini = 1; Max = 4; Step = 0.05; }
+  Parameter{ Name = tissuesCompliance_PhiEffect; Min = 0; Ini = 2; Max = 4; Step = 0.05; }
+  Parameter{ Name = inotropic_effect; Min = 0; Ini = 1; Max = 4; Step = 0.02; }  
 }
 
 OptimizationSettings{
@@ -19,8 +19,8 @@ Algorithm{
   Main = GPSPSOCCHJ;
   NeighborhoodTopology = vonNeumann;
   NeighborhoodSize = 5;
-  NumberOfParticle = 8;
-  NumberOfGeneration = 8;
+  NumberOfParticle = 12;
+  NumberOfGeneration = 16;
   Seed = 1;
   CognitiveAcceleration = 2.8;
   SocialAcceleration = 1.3;

@@ -3456,10 +3456,10 @@ type"),       Text(
               outer Physiolibrary.Types.Fraction phi;
               parameter Physiolibrary.Types.Fraction phi0 = 0.25;
               parameter Real k_TS = 0.1 "systolic contraction, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
-              parameter Real k_TR = 0.2 "Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
+              parameter Real k_TR = 0.3 "Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
               Real k_TR_phi = k_TR*(1-k_RS*(phi - phi0));
               Real k_RS( fixed = false) "Lusitropic relaxation slope dependent on phi linearly. Given by k_tr_min";
-              parameter Physiolibrary.Types.Time k_TR_min = 0.2
+              parameter Physiolibrary.Types.Time k_TR_min = 0.15
                 "minimal time for muscle relaxation at maximal activation. Guessed value";
               parameter Real nominal_drive=0.8
                 "0.8 is the maximum of Ca driving function in Lumens heart";
@@ -25601,7 +25601,10 @@ P_hs_plus_dist"),
             ={{-39.8,0},{-26,0},{-26,62},{-11,62}}, color={0,0,127}));
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
             coordinateSystem(preserveAspectRatio=false)),
-        experiment(StopTime=5, __Dymola_Algorithm="Dassl"));
+        experiment(
+          StopTime=15,
+          __Dymola_NumberOfIntervals=5500,
+          __Dymola_Algorithm="Dassl"));
     end testDrivingOttesen;
 
     model TestTriSegMechLumens_OttesenFriving
@@ -32055,8 +32058,12 @@ P_hs_plus_dist"),
             tissuesCompliance_PhiEffect=0.3,
             tissues_gamma=0.5),
           heartRate(HR_max=3.1666666666667),
-          heartComponent(ventricles(calciumMechanics(phi_effect_Ca=4))),
-          useAutonomousPhi(y=true));
+          heartComponent(ventricles(redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOttesen
+                calciumMechanics(k_TR_min(displayUnit="s")))),
+          useAutonomousPhi(y=false),
+          Systemic1(baroreflex_system(baroreceptor_aortic(Ts=6.0),
+                baroreceptor_carotid(Ts=6.0))));
         annotation (experiment(
             StopTime=180,
             Interval=0.02,
@@ -32297,7 +32304,7 @@ P_hs_plus_dist"),
         der(brachial_pressure_int) = brachial_pressure;
 
         when heartComponent.ventricles.cardiac_cycle < 0.1 then
-          brachial_pressure_mean = brachial_pressure_int/pre(heartComponent.ventricles.calciumMechanics.period);
+          brachial_pressure_mean = brachial_pressure_int*pre(heartComponent.ventricles.calciumMechanics.frequency);
           reinit(brachial_pressure_int, 0);
         end when;
 

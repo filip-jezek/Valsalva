@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11953,94)
+char initialName(11957,94)
 settings.phi0
 settings.height
 settings.weight
@@ -11816,18 +11816,22 @@ heartComponent.ventricles.RV_wall.SL
 heartComponent.ventricles.RV_wall.der(SL)
 heartComponent.ventricles.RV_wall.C
 heartComponent.ventricles.RV_wall.der(C)
+heartComponent.ventricles.calciumMechanics.frequency
 heartComponent.ventricles.calciumMechanics.cardiac_cycle
 heartComponent.ventricles.calciumMechanics.der(cardiac_cycle)
-heartComponent.ventricles.calciumMechanics.tauD
-heartComponent.ventricles.calciumMechanics.tauR
-heartComponent.ventricles.calciumMechanics.tauSC
-heartComponent.ventricles.calciumMechanics.Crest
-heartComponent.ventricles.calciumMechanics.period
-heartComponent.ventricles.calciumMechanics.x
-heartComponent.ventricles.calciumMechanics.Fr
-heartComponent.ventricles.calciumMechanics.phi_effect_Ca
 heartComponent.ventricles.calciumMechanics.phi0
-heartComponent.ventricles.calciumMechanics.phi_effect
+heartComponent.ventricles.calciumMechanics.k_TS
+heartComponent.ventricles.calciumMechanics.k_TR
+heartComponent.ventricles.calciumMechanics.k_TR_phi
+heartComponent.ventricles.calciumMechanics.k_RS
+heartComponent.ventricles.calciumMechanics.k_TR_min
+heartComponent.ventricles.calciumMechanics.nominal_drive
+heartComponent.ventricles.calciumMechanics.inotropic_effect
+heartComponent.ventricles.calciumMechanics.driving
+heartComponent.ventricles.calciumMechanics.drive_factor
+heartComponent.ventricles.calciumMechanics.tm
+heartComponent.ventricles.calciumMechanics.systolicContraction
+heartComponent.ventricles.calciumMechanics.systolicRelaxation
 heartComponent.ventricles.OnLV
 heartComponent.ventricles.OnRV
 heartComponent.ventricles.V_min
@@ -12057,7 +12061,7 @@ Tilt_ramp.duration
 Tilt_ramp.offset
 Tilt_ramp.startTime
 
-double initialValue(11953,6)
+double initialValue(11957,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
@@ -12216,7 +12220,7 @@ double initialValue(11953,6)
   2   280   # Systemic1.baroreflex_system.baroreceptor_aortic.epsilon
   0       0                       0                       0                
   3   256   # Systemic1.baroreflex_system.baroreceptor_aortic.der(epsilon)
- -1       3                       0                       0                
+ -1       6                       0                       0                
   1   280   # Systemic1.baroreflex_system.baroreceptor_aortic.Ts
   0       0                       0                       0                
   6   256   # Systemic1.baroreflex_system.baroreceptor_aortic.delta
@@ -12242,7 +12246,7 @@ double initialValue(11953,6)
   2   280   # Systemic1.baroreflex_system.baroreceptor_carotid.epsilon
   0       0                       0                       0                
   3   256   # Systemic1.baroreflex_system.baroreceptor_carotid.der(epsilon)
- -1       3                       0                       0                
+ -1       6                       0                       0                
   1   280   # Systemic1.baroreflex_system.baroreceptor_carotid.Ts
   0       0                       0                       0                
   6   256   # Systemic1.baroreflex_system.baroreceptor_carotid.delta
@@ -35484,30 +35488,38 @@ double initialValue(11953,6)
   2   280   # heartComponent.ventricles.RV_wall.C
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.RV_wall.der(C)
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.frequency
  -1       1                       0                       0                
   2   280   # heartComponent.ventricles.calciumMechanics.cardiac_cycle
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.calciumMechanics.der(cardiac_cycle)
- -1  3.2000000000000001E-02       0                       0                
-  1   280   # heartComponent.ventricles.calciumMechanics.tauD
- -1  4.8000000000000001E-02       0                       0                
-  1   280   # heartComponent.ventricles.calciumMechanics.tauR
- -1  4.2499999999999999E-01       0                       0                
-  1   280   # heartComponent.ventricles.calciumMechanics.tauSC
- -1  2.0000000000000000E-02       0                       0                
-  1   280   # heartComponent.ventricles.calciumMechanics.Crest
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.period
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.x
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.Fr
- -1       %phi_effect_Ca%                       0                       0                
-  1   280   # heartComponent.ventricles.calciumMechanics.phi_effect_Ca
  -1  2.5000000000000000E-01       0                       0                
   1   280   # heartComponent.ventricles.calciumMechanics.phi0
+ -1  1.0000000000000001E-01       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.k_TS
+ -1  2.9999999999999999E-01       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.k_TR
   0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.phi_effect
+  6   256   # heartComponent.ventricles.calciumMechanics.k_TR_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.k_RS
+ -1  1.4999999999999999E-01       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.k_TR_min
+ -1  8.0000000000000004E-01       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.nominal_drive
+ -1       %inotropic_effect%                       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.inotropic_effect
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.driving
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.drive_factor
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.tm
+  0       0                       0                       0                
+  6   321   # heartComponent.ventricles.calciumMechanics.systolicContraction
+  0       0                       0                       0                
+  6   321   # heartComponent.ventricles.calciumMechanics.systolicRelaxation
   0       1                       0                       0                
   6   321   # heartComponent.ventricles.OnLV
   0       1                       0                       0                
@@ -36014,7 +36026,7 @@ double initialValue(11953,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11953,152)
+char initialDescription(11957,152)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -47728,18 +47740,22 @@ sarcomere length, um
 der(sarcomere length, um)
 activation function
 der(activation function)
+[Hz|1/min]
 Fraction of the cycle length [1|%]
 der(Fraction of the cycle length) [s-1]
+[1|%]
+systolic contraction, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication [s]
+Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication
 [s]
-[s]
-[s]
+Lusitropic relaxation slope dependent on phi linearly. Given by k_tr_min
+minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
+0.8 is the maximum of Ca driving function in Lumens heart
+Phi effect on muscle contraction strength. [1|%]
+[1|%]
 
-[s]
-[1]
-
-[1|%]
-[1|%]
-[1|%]
+time since start of cardiac cycle [s|min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
 [m3|ml]
