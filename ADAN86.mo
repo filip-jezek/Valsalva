@@ -3436,22 +3436,58 @@ type"),       Text(
             model DrivingLumens
               extends partialDrivingFunction;
 
-            parameter Modelica.SIunits.Time tauD =  0.032;
-            parameter Modelica.SIunits.Time tauR =  0.048;
-            parameter Modelica.SIunits.Time tauSC = 0.425;
-            parameter Real Crest = 0.02;
-            Modelica.SIunits.Period period = 1/frequency;
+              parameter Modelica.SIunits.Time tauR =  0.048;
+              Modelica.SIunits.Period period = 1/frequency;
               Real x=min(8, max(0, cardiac_cycle*period/tauR));
-            Real Fr = 0.02*(x^3)*((8-x)^2)*exp(-x);
-            outer Physiolibrary.Types.Fraction phi;
-            parameter Physiolibrary.Types.Fraction phi_effect_Ca = 0;
-            parameter Physiolibrary.Types.Fraction phi0 = 0.25;
-            Physiolibrary.Types.Fraction phi_effect = (1 + phi_effect_Ca*(phi - phi0));
+              Real Fr = 0.02*(x^3)*((8-x)^2)*exp(-x);
+              outer Physiolibrary.Types.Fraction phi;
+              parameter Physiolibrary.Types.Fraction phi_effect_Ca = 0;
+              parameter Physiolibrary.Types.Fraction phi0 = 0.25;
+              Physiolibrary.Types.Fraction phi_effect = (1 + phi_effect_Ca*(phi - phi0));
 
             equation
               drivingFunction = Fr*phi_effect;
 
             end DrivingLumens;
+
+            model DrivingOttesen
+              extends partialDrivingFunction;
+
+              outer Physiolibrary.Types.Fraction phi;
+              parameter Physiolibrary.Types.Fraction phi0 = 0.25;
+              parameter Real k_TS = 0.1 "systolic contraction, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
+              parameter Real k_TR = 0.2 "Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
+              Real k_TR_phi = k_TR*(1-k_RS*(phi - phi0));
+              Real k_RS( fixed = false) "Lusitropic relaxation slope dependent on phi linearly. Given by k_tr_min";
+              parameter Physiolibrary.Types.Time k_TR_min = 0.2
+                "minimal time for muscle relaxation at maximal activation. Guessed value";
+              parameter Real nominal_drive=0.8
+                "0.8 is the maximum of Ca driving function in Lumens heart";
+              parameter Physiolibrary.Types.Fraction inotropic_effect=0
+                "Phi effect on muscle contraction strength.";
+              Physiolibrary.Types.Fraction driving;
+              Real drive_factor = nominal_drive*(1 + inotropic_effect *(phi - phi0));
+              Physiolibrary.Types.Time TS, TR;
+              Physiolibrary.Types.Time tm = cardiac_cycle / frequency "time since start of cardiac cycle";
+              Boolean systolicContraction = tm >= 0 and tm < TS;
+              Boolean systolicRelaxation = tm >= TS and tm < TR + TS;
+            equation
+              k_TR_min = k_TR*(1-k_RS*(1 - phi0));
+
+            TS = k_TS;
+            TR = k_TR_phi;
+
+            if systolicContraction then
+                driving = 0.5*(1 - cos(Modelica.Constants.pi*tm/TS));
+            elseif systolicRelaxation then
+                driving = 0.5*(1 + cos(Modelica.Constants.pi*(tm - TS)/TR));
+            else
+                driving = 0;
+            end if;
+
+             drivingFunction =drive_factor*driving;
+
+            end DrivingOttesen;
 
             partial model partialVentricleWall "base class to be plug-in usable"
               input Real xm;
@@ -3940,7 +3976,8 @@ type"),       Text(
 
             model VentriclesLumens
               extends partialVentricles(
-                redeclare DrivingLumens calciumMechanics,
+                redeclare replaceable
+                          DrivingLumens calciumMechanics,
                 redeclare VentricleWallLumens LV_wall(
                   xm=xm_LV,
                   ym=ym,
@@ -25315,7 +25352,7 @@ P_hs_plus_dist"),
       output Real _BPs = heart.aorticValve.BPs/133.32;
       output Real _BPd = heart.aorticValve.BPd/133.32;
       output Real _BPp = heart.aorticValve.BPp/133.32;
-      parameter Boolean adjust = true;
+      parameter Boolean adjust = false;
     Modelica.Blocks.Sources.Trapezoid           thoracic_pressure(
         amplitude=40*133,
         rising=2,
@@ -25524,14 +25561,72 @@ P_hs_plus_dist"),
         condHeartPhi(disconnected=false),
         condHR(disconnected=true));
     equation
-      connect(heartComponent.phi, condHeartPhi.y) annotation (Line(points={{-16,
-              -16},{60,-16},{60,42},{54.6,42}}, color={0,0,127}));
+      connect(heartComponent.phi, condHeartPhi.y) annotation (Line(points={{-16,-16},
+              {60,-16},{60,42},{54.6,42}},      color={0,0,127}));
       annotation (experiment(
           StopTime=30,
           Interval=0.02,
           Tolerance=1e-05,
           __Dymola_Algorithm="Cvode"));
     end LumensPhiSensitivity;
+
+    model testDrivingOttesen
+      Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOttesen
+        drivingOttesen(k_TR=0.2, k_TR_min=0.1)
+        annotation (Placement(transformation(extent={{-12,-10},{8,10}})));
+      Modelica.Blocks.Sources.Ramp phi_ramp(
+        height=0.75,
+        duration=5.0,
+        offset=0.25,
+        startTime=5.0)
+        annotation (Placement(transformation(extent={{-100,-10},{-80,10}})));
+        inner Physiolibrary.Types.Fraction phi = phi_ramp.y;
+      Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingLumens
+        drivingLumens
+        annotation (Placement(transformation(extent={{-12,52},{8,72}})));
+      Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingFunctionCalcium
+        drivingFunctionCalcium
+        annotation (Placement(transformation(extent={{-12,74},{8,94}})));
+      Components.Subsystems.Baroreflex.HeartRate2 heartRate2_1(phi0=0.0025)
+        annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
+    equation
+      connect(drivingFunctionCalcium.frequency, drivingLumens.frequency)
+        annotation (Line(points={{-11,84},{-26,84},{-26,62},{-11,62}}, color={0,
+              0,127}));
+      connect(phi_ramp.y, heartRate2_1.phi)
+        annotation (Line(points={{-79,0},{-60,0}}, color={0,0,127}));
+      connect(heartRate2_1.HR, drivingOttesen.frequency)
+        annotation (Line(points={{-39.8,0},{-11,0}}, color={0,0,127}));
+      connect(heartRate2_1.HR, drivingLumens.frequency) annotation (Line(points
+            ={{-39.8,0},{-26,0},{-26,62},{-11,62}}, color={0,0,127}));
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)),
+        experiment(StopTime=5, __Dymola_Algorithm="Dassl"));
+    end testDrivingOttesen;
+
+    model TestTriSegMechLumens_OttesenFriving
+      extends TestTriSegMech_Lumens(heart(
+          UseFrequencyInput=true,
+          UsePhiInput=true,
+          ventricles(redeclare
+              Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOttesen
+              calciumMechanics)), thoracic_pressure(nperiod=0));
+      Modelica.Blocks.Sources.Ramp phi_ramp(
+        height=0.25,
+        duration=0,
+        offset=0.25,
+        startTime=10.0)
+        annotation (Placement(transformation(extent={{-60,60},{-40,80}})));
+      Components.Subsystems.Baroreflex.HeartRate2 heartRate2_1(phi0=0.0025)
+        annotation (Placement(transformation(extent={{66,-10},{46,10}})));
+    equation
+      connect(phi_ramp.y, heartRate2_1.phi) annotation (Line(points={{-39,70},{
+              78,70},{78,0},{66,0}}, color={0,0,127}));
+      connect(heart.frequency_input, heartRate2_1.HR)
+        annotation (Line(points={{10,0},{45.8,0}}, color={0,0,127}));
+      connect(heart.phi, heartRate2_1.phi) annotation (Line(points={{10,6},{44,
+              6},{44,70},{78,70},{78,0},{66,0}}, color={0,0,127}));
+    end TestTriSegMechLumens_OttesenFriving;
   end tests;
 
   package Experiments
@@ -31960,7 +32055,8 @@ P_hs_plus_dist"),
             tissuesCompliance_PhiEffect=0.3,
             tissues_gamma=0.5),
           heartRate(HR_max=3.1666666666667),
-          heartComponent(ventricles(calciumMechanics(phi_effect_Ca=4))));
+          heartComponent(ventricles(calciumMechanics(phi_effect_Ca=4))),
+          useAutonomousPhi(y=true));
         annotation (experiment(
             StopTime=180,
             Interval=0.02,
