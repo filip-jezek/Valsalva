@@ -3403,6 +3403,12 @@ type"),       Text(
                 reinit(cardiac_cycle, 0);
               end when;
 
+              annotation (Icon(graphics={Line(
+                      points={{-66,-36},{-46,-36},{-46,4},{-26,44},{-6,44},{4,4},
+                          {14,-16},{34,-26},{54,-36},{74,-36},{94,-36}},
+                      color={0,0,0},
+                      smooth=Smooth.Bezier), Rectangle(extent={{-72,64},{94,-40}},
+                        lineColor={0,0,0})}));
             end partialDrivingFunction;
 
             model DrivingFunctionCalcium "HeartBeat origins in Calcium mechanics"
@@ -3429,7 +3435,14 @@ type"),       Text(
             //     reinit(t_cycle, 0);
             //   end when;
 
-              annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={Text(
+                      extent={{-60,-100},{80,-40}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="Calcium")}),                               Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end DrivingFunctionCalcium;
 
@@ -3448,9 +3461,16 @@ type"),       Text(
             equation
               drivingFunction = Fr*phi_effect;
 
+              annotation (Icon(graphics={Text(
+                      extent={{-60,-100},{80,-40}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="Lumens")}));
             end DrivingLumens;
 
-            model DrivingOttesen
+            model DrivingOlufsen
               extends partialDrivingFunction;
 
               outer Physiolibrary.Types.Fraction phi;
@@ -3487,7 +3507,14 @@ type"),       Text(
 
              drivingFunction =drive_factor*driving;
 
-            end DrivingOttesen;
+              annotation (Icon(graphics={Text(
+                      extent={{-60,-100},{80,-40}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="Olufsen")}));
+            end DrivingOlufsen;
 
             partial model partialVentricleWall "base class to be plug-in usable"
               input Real xm;
@@ -3500,23 +3527,41 @@ type"),       Text(
               parameter Real Amref "midwall reference surface area, cm^2";
               parameter Real Lsref=1.9 " Resting SL, micron ";
 
-              Real Tm;
-              Real Tx=Tm*2*xm*ym/(xm^2 + ym^2);
-              Real Ty=Tm*(-xm^2 + ym^2)/(xm^2 + ym^2);
+              Real Tm "Represenattive midwall tension";
+              Real Tx=Tm*2*xm*ym/(xm^2 + ym^2) "Axial midwall component";
+              Real Ty=Tm*(-xm^2 + ym^2)/(xm^2 + ym^2) "Radial midwall component";
               // ventricular mechanics
-              Real Vm=(Modelica.Constants.pi/6)*xm*(xm^2 + 3*ym^2);
-              Real Am=Modelica.Constants.pi*(xm^2 + ym^2);
-              Real Cm=2*xm/(xm^2 + ym^2);
+              Real Vm=(Modelica.Constants.pi/6)*xm*(xm^2 + 3*ym^2) "Volume of spherical cap, formed by midwall surface of wall segment";
+              Real Am=Modelica.Constants.pi*(xm^2 + ym^2) "Midwall surface area of curved wall segment";
+              Real Cm=2*xm/(xm^2 + ym^2) "Curvature of midwall surface (reciprocal of radius) ";
 
-              Real z=3*Cm*Vw/(2*Am);
-              Real epsf=(1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4;
-              Real SLo(nominal=1e-6) = Lsref*exp(epsf);
+              Real z=3*Cm*Vw/(2*Am) "Ratio of wall thickness to midwall radius of curvature of curved wall segment";
+              Real epsf=(1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4 "Natural myofiber strain";
+              Real SLo(nominal=1e-6) = Lsref*exp(epsf) "Sarcomere length";
 
               Modelica.Blocks.Interfaces.RealInput frequency "Stimulation frequency"
                 annotation (Placement(transformation(extent={{-120,80},{-80,120}})));
               Physiolibrary.Types.RealIO.FractionInput cardiac_cycle
                 annotation (Placement(transformation(extent={{-120,-120},{-80,-80}})));
-              annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={
+                    Ellipse(
+                      extent={{-72,80},{80,-72}},
+                      fillColor={162,29,33},
+                      fillPattern=FillPattern.Solid,
+                      pattern=LinePattern.None),
+                    Ellipse(
+                      extent={{-46,54},{54,-46}},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      pattern=LinePattern.None),
+                    Polygon(
+                      points={{2,-2},{-20,80},{100,80},{100,-82},{20,-80},{2,-2}},
+
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      lineColor={0,0,0})}),                                  Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end partialVentricleWall;
 
@@ -3700,7 +3745,14 @@ type"),       Text(
               // Real Tx =  Tm*2*xm*ym/(xm^2 + ym^2);
               // Real Ty =  Tm*(-xm^2 + ym^2)/(xm^2 + ym^2);
 
-              annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={Text(
+                      extent={{-40,-38},{98,20}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="Calcium")}),                               Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end VentricleWallCalcium;
 
@@ -3761,23 +3813,27 @@ type"),       Text(
 
               // Triseg parameters
               parameter Real Lsref=1.9 "Resting SL, micron";
-              parameter Real vmax=7 "micron/sec";
-              parameter Real LSEiso=0.04 "micron";
+              parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
+              parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
               parameter Real sigma_act=7.5*120 "mmHg ";
               // not used in the current version. Using k_passive instead
             //  parameter Real sigma_pas=7.5*7 "mmHg";
               parameter Real SLrest=1.51 "microns";
 
               // same parameters as in driving function. Change with care.
-              parameter Modelica.SIunits.Time tauD=0.032;
-              parameter Modelica.SIunits.Time tauR=0.048;
-              parameter Modelica.SIunits.Time tauSC=0.425;
-              parameter Real Crest=0.02;
+              parameter Modelica.SIunits.Time tauD=0.032 "Factor scaling contraction decay time";
+              parameter Modelica.SIunits.Time tauR=0.048 "Factor scaling contraction rise time";
+              parameter Modelica.SIunits.Time tauSC=0.425 "Factor scaling duration of contraction";
+              parameter Real Crest=0.02 "Diastolic resting level of activation";
 
-              Real CL=tanh(4*(SL - SLrest)^2);
-              Real T=tauSC*(0.29 + 0.3*SL);
+              Real CL=tanh(4*(SL - SLrest)^2) "increase of activation with sarcomere length";
+              Real T=tauSC*(0.29 + 0.3*SL) "decrease of activation duration with decrease of sarcomere length";
+              Real C(fixed = false) "activation function, related to intracellular calcium conncentration";
               Real dC=CL*drivingInput/tauR + (Crest - C)/(1 + exp((T - cardiac_cycle/
                   frequency)/tauD))/tauD;
+              Real SL(nominal=1e-6, start=2.3) "sarcomere length, um";
+              // Sliding velocities -- Eq. (B2) Lumens et al.
+              Real dSL=((SLo - SL)/LSEiso - 1)*vmax;
 
               // Collagen force
               parameter Real SLcollagen=2.25;
@@ -3803,12 +3859,6 @@ type"),       Text(
               Real sigmaM=sigmaact + sigmapas;
               // equilibrium of forces at junction circle already in base class
 
-              Real SL(nominal=1e-6, start=2.3) "sarcomere length, um";
-              Real C "activation function";
-
-              // Sliding velocities -- Eq. (B2) Lumens et al.
-              Real dSL=((SLo - SL)/LSEiso - 1)*vmax;
-
             equation
 
 
@@ -3820,9 +3870,111 @@ type"),       Text(
               // Real Tx =  Tm*2*xm*ym/(xm^2 + ym^2);
               // Real Ty =  Tm*(-xm^2 + ym^2)/(xm^2 + ym^2);
 
-              annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={Text(
+                      extent={{-38,-18},{100,40}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="Lum")}),                                   Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end VentricleWallLumens;
+
+            model VentricleWallLumensSimple
+              "Lumens model, but with driving directly the mechanical activation"
+              extends partialVentricleWall;
+              Real sinalpha = Tx/Tm;
+              Modelica.SIunits.Angle alpha = asin(sinalpha);
+
+              // Inlcuded in the base class:
+              //   input Real xm;
+              //   input Real ym;
+              //   Modelica.Blocks.Interfaces.RealInput Ca_i "Connector of Calcium input signal"
+              //     annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+              //         iconTransformation(extent={{-120,-20},{-80,20}})));
+              //
+              //   parameter Real Vw "Heart wall volumes (mL)";
+              //   parameter Real Amref "midwall reference surface area, cm^2";
+              //   Real Tm;
+              //   Real Tx=Tm*2*xm*ym/(xm^2 + ym^2);
+              //   Real Ty=Tm*(-xm^2 + ym^2)/(xm^2 + ym^2);
+              // // ventricular mechanics
+              // Real Vm=(Modelica.Constants.pi/6)*xm*(xm^2 + 3*ym^2);
+              // Real Am=Modelica.Constants.pi*(xm^2 + ym^2);
+              // Real Cm=2*xm/(xm^2 + ym^2);
+              //
+              // Real z=3*Cm*Vw/(2*Am);
+              // Real epsf=(1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4;
+              // Real SLo(nominal=1e-6) = Lsref*exp(epsf);
+
+              // Triseg parameters
+              parameter Real Lsref=1.9 "Resting SL, micron";
+              parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
+              parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
+              parameter Real sigma_act=7.5*120 "mmHg ";
+              // not used in the current version. Using k_passive instead
+            //  parameter Real sigma_pas=7.5*7 "mmHg";
+              parameter Real SLrest=1.51 "microns";
+
+              // same parameters as in driving function. Change with care.
+              parameter Modelica.SIunits.Time tauD=0.032 "Factor scaling contraction decay time";
+              parameter Modelica.SIunits.Time tauR=0.048 "Factor scaling contraction rise time";
+              parameter Modelica.SIunits.Time tauSC=0.425 "Factor scaling duration of contraction";
+              parameter Real Crest=0.02 "Diastolic resting level of activation";
+
+              Real CL=tanh(4*(SL - SLrest)^2) "increase of activation with sarcomere length";
+              Real T=tauSC*(0.29 + 0.3*SL) "decrease of activation duration with decrease of sarcomere length";
+              Real C(fixed = false) "activation function, related to intracellular calcium conncentration";
+              Real SL(nominal=1e-6, start=2.3) "sarcomere length, um";
+              // Sliding velocities -- Eq. (B2) Lumens et al.
+              Real dSL=((SLo - SL)/LSEiso - 1)*vmax;
+
+              // Collagen force
+              parameter Real SLcollagen=2.25;
+              // threshold for collagen activation, microns
+              parameter Real PConcollagen=0.01;
+              // contriubtion of collagen (??)
+              parameter Real PExpcollagen=70;
+              // expresion of collagen (??), unitless
+
+              parameter Real k_passive=50 "mN / mm^2 / micro";
+              parameter Real L0=0.907 "micron";
+
+              // Collagen force
+              Real sigma_collagen=if (SLo > SLcollagen) then PConcollagen*(exp(PExpcollagen*
+                  (SLo - SLcollagen)) - 1) else 0;
+
+              // Passive forces (Lumens) do not really work here atm so we are using DAB variant
+              // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
+              Real sigmapas=k_passive*(SLo/2 - L0) + sigma_collagen;
+              // Active forces could not go negative
+              Real sigmaact=max(0, sigma_act*C*(SL - SLrest)*(SLo - SL)/LSEiso);
+              // Total forces
+              Real sigmaM=sigmaact + sigmapas;
+              // equilibrium of forces at junction circle already in base class
+
+            equation
+
+              C = drivingInput;
+              der(SL) = dSL;
+
+              Tm = (Vw*sigmaM/(2*Am))*(1 + (z^2)/3 + (z^4)/5);
+              // Tx and Ty are defined in the parent base class
+              // Real Tx =  Tm*2*xm*ym/(xm^2 + ym^2);
+              // Real Ty =  Tm*(-xm^2 + ym^2)/(xm^2 + ym^2);
+
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={Text(
+                      extent={{-38,-38},{100,20}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="Lum
+Simple")}),                                                                  Diagram(
+                    coordinateSystem(preserveAspectRatio=false)));
+            end VentricleWallLumensSimple;
 
             partial model partialVentricles
               Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
@@ -25557,21 +25709,44 @@ P_hs_plus_dist"),
 
     model LumensPhiSensitivity
       extends AdanVenousRed_Safaei.Baseline.base_TriSeg_OptimizedBaseline(
-        heartComponent(UsePhiInput=true),
+        heartComponent(UsePhiInput=true, ventricles(
+            LV_wall(
+              tauD=tauD,
+              tauR=tauR,
+              tauSC=tauSC),
+            SEP_wall(
+              tauD=tauD,
+              tauR=tauR,
+              tauSC=tauSC),
+            RV_wall(
+              tauD=tauD,
+              tauR=tauR,
+              tauSC=tauSC),
+            calciumMechanics(tauR=tauR))),
         condHeartPhi(disconnected=false),
-        condHR(disconnected=true));
+        condHR(disconnected=false),
+        phi(rising=0,
+          nperiod=1,
+          startTime=5),
+        condPhi(disconnected=true));
+      parameter Modelica.SIunits.Time tauD=0.032
+        "Factor scaling contraction decay time";
+      parameter Modelica.SIunits.Time tauR=0.048/2
+        "Factor scaling contraction rise time";
+      parameter Modelica.SIunits.Time tauSC=0.425/2
+        "Factor scaling duration of contraction";
     equation
       connect(heartComponent.phi, condHeartPhi.y) annotation (Line(points={{-16,-16},
               {60,-16},{60,42},{54.6,42}},      color={0,0,127}));
       annotation (experiment(
-          StopTime=30,
+          StopTime=15,
           Interval=0.02,
           Tolerance=1e-05,
           __Dymola_Algorithm="Cvode"));
     end LumensPhiSensitivity;
 
     model testDrivingOttesen
-      Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOttesen
+      Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
         drivingOttesen(k_TR=0.2, k_TR_min=0.1)
         annotation (Placement(transformation(extent={{-12,-10},{8,10}})));
       Modelica.Blocks.Sources.Ramp phi_ramp(
@@ -25597,13 +25772,14 @@ P_hs_plus_dist"),
         annotation (Line(points={{-79,0},{-60,0}}, color={0,0,127}));
       connect(heartRate2_1.HR, drivingOttesen.frequency)
         annotation (Line(points={{-39.8,0},{-11,0}}, color={0,0,127}));
-      connect(heartRate2_1.HR, drivingLumens.frequency) annotation (Line(points
-            ={{-39.8,0},{-26,0},{-26,62},{-11,62}}, color={0,0,127}));
+      connect(heartRate2_1.HR, drivingLumens.frequency) annotation (Line(points=
+             {{-39.8,0},{-26,0},{-26,62},{-11,62}}, color={0,0,127}));
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
             coordinateSystem(preserveAspectRatio=false)),
         experiment(
           StopTime=15,
-          __Dymola_NumberOfIntervals=5500,
+          Interval=0.001,
+          Tolerance=1e-05,
           __Dymola_Algorithm="Dassl"));
     end testDrivingOttesen;
 
@@ -25612,7 +25788,7 @@ P_hs_plus_dist"),
           UseFrequencyInput=true,
           UsePhiInput=true,
           ventricles(redeclare
-              Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOttesen
+              Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
               calciumMechanics)), thoracic_pressure(nperiod=0));
       Modelica.Blocks.Sources.Ramp phi_ramp(
         height=0.25,
@@ -32059,7 +32235,7 @@ P_hs_plus_dist"),
             tissues_gamma=0.5),
           heartRate(HR_max=3.1666666666667),
           heartComponent(ventricles(redeclare
-                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOttesen
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
                 calciumMechanics(k_TR_min(displayUnit="s"), inotropic_effect=1.515625))),
           useAutonomousPhi(y=true),
           Systemic1(baroreflex_system(baroreceptor_aortic(Ts=6.0),
@@ -32070,6 +32246,81 @@ P_hs_plus_dist"),
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end passive_tilt;
+
+      model base_Exercise "Aimed to ahve max CO"
+        extends Baseline.base_TriSeg_OptimizedBaseline_init(
+          Systemic1(
+            UseExerciseInput=true,
+            ulnar_T2_R42(UseExercise=true),
+            radial_T1_R44(UseExercise=true),
+            vertebral_R272(UseExercise=true),
+            ulnar_T2_L90(UseExercise=true),
+            radial_T1_L92(UseExercise=true),
+            vertebral_L2(UseExercise=true),
+            cardiac_tissue(UseExercise=true),
+            internal_iliac_T1_R218(UseExercise=true),
+            profundus_T2_R224(UseExercise=true),
+            anterior_tibial_T3_R230(UseExercise=true),
+            posterior_tibial_T4_R236(UseExercise=true),
+            posterior_tibial_T4_L214(UseExercise=true),
+            anterior_tibial_T3_L208(UseExercise=true),
+            profundus_T2_L202(UseExercise=true),
+            internal_iliac_T1_L196(UseExercise=true)),
+          phi(offset=1),
+          settings(exercise_factor_on_arterial_compliance=0, exercise_factor=4),
+          useAutonomousPhi(y=false),
+          condHeartPhi(disconnected=false),
+          condHR(disconnected=false),
+          heartComponent(ventricles(
+              LV_wall(
+                vmax=vmax,
+                SLrest=SLrest,
+                tauD=tauD,
+                tauR=tauR,
+                      tauSC=tauSC,
+                C(fixed=false)),
+              SEP_wall(
+                vmax=vmax,
+                SLrest=SLrest,
+                tauD=tauD,
+                tauR=tauR,
+                       tauSC=tauSC,
+                C(fixed=false)),
+              RV_wall(
+                vmax=vmax,
+                SLrest=SLrest,
+                tauD=tauD,
+                tauR=tauR,
+                      tauSC=tauSC,
+                C(fixed=false)),
+              sigma_act_factor=sigma_act_factor,
+              redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
+                calciumMechanics)));
+
+        replaceable Modelica.Blocks.Sources.Ramp Exercise(
+          startTime=5,
+          height=1,
+          duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+          annotation (Placement(transformation(extent={{-76,52},{-56,72}})));
+        parameter Modelica.SIunits.Time tauSC=0.225;
+        parameter Modelica.SIunits.Time tauR=0.024;
+        parameter Modelica.SIunits.Time tauD=0.032
+          "Factor scaling contraction decay time";
+        parameter Real SLrest=1.51 "microns";
+        parameter Real vmax=7
+          "Sarcomere shortening velocity with zero load micron/sec";
+        parameter Physiolibrary.Types.Fraction sigma_act_factor=3
+          "Factor affecting systolic strength";
+      equation
+        connect(Exercise.y, Systemic1.exercise_input) annotation (Line(points={
+                {-55,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=180,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end base_Exercise;
     end Identification;
 
     package Baseline
@@ -33049,14 +33300,15 @@ P_hs_plus_dist"),
             internal_iliac_T1_L196(UseExercise=true)),
           phi(amplitude=0.75),
           settings(exercise_factor_on_arterial_compliance=0, exercise_factor=4),
-
           useAutonomousPhi(y=false),
           condHeartPhi(disconnected=false),
           condHR(disconnected=false),
           heartComponent(ventricles(
               LV_wall(tauSC=tauSC),
               SEP_wall(tauSC=tauSC),
-              RV_wall(tauSC=tauSC))));
+              RV_wall(tauSC=tauSC))),
+          Tilt_ramp(startTime=200));
+
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           startTime=10,
           height=1,
