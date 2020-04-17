@@ -27,7 +27,8 @@ def getObjectives(vars_set):
 
     # build costs
     ov = [  ('EDV', max(vars_set['V_LV'][interval]), EDV_target, None, 1),
-            ('ESV', min(vars_set['V_LV'][interval]), ESV_target, None, 1)]
+            ('ESV', min(vars_set['V_LV'][interval]), ESV_target, None, 1),
+            ('Ts', max(vars_set['TS'][interval]), 0.15, None, 1)]
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight = o[4]), ov))
 

@@ -3,11 +3,9 @@
 */
 
 Vary{
-  Parameter{ Name = tauSC; Min = 0.1; Ini = 0.425; Max = 1; Step = 0.005; }
-  Parameter{ Name = tauR; Min = 0.005; Ini = 0.024; Max = 0.1; Step = 0.005; }
-  Parameter{ Name = tauD; Min = 0.005; Ini = 0.032; Max = 0.1; Step = 0.05; }
-  Parameter{ Name = vmax; Min = 5; Ini = 7; Max = 14; Step = 1; }
-  Parameter{ Name = sigma_act_factor; Min = 0.1; Ini = 1; Max = 10; Step = 0.1; }
+  Parameter{ Name = k_TS; Min = 0.01; Ini = 0.17375; Max = 0.5; Step = 0.01; }
+  Parameter{ Name = k_TR; Min = 0.01; Ini = 0.1; Max = 0.5; Step = 0.01; }
+  Parameter{ Name = sigma_factor; Min = 1; Ini = 13; Max = 20; Step = 0.1; }
 }
 
 OptimizationSettings{
@@ -17,20 +15,10 @@ OptimizationSettings{
 }
 
 Algorithm{
-  Main = GPSPSOCCHJ;
-  NeighborhoodTopology = vonNeumann;
-  NeighborhoodSize = 5;
-  NumberOfParticle = 12;
-  NumberOfGeneration = 16;
-  Seed = 1;
-  CognitiveAcceleration = 2.8;
-  SocialAcceleration = 1.3;
-  MaxVelocityGainContinuous = 0.5;
-  MaxVelocityDiscrete = 4;
-  ConstrictionGain = 0.5;
-  MeshSizeDivider = 2;
-  InitialMeshSizeExponent = 0;
-  MeshSizeExponentIncrement = 1;
-  NumberOfStepReduction = 4;
+ Main = GPSHookeJeeves;
+ MeshSizeDivider = 2;
+ InitialMeshSizeExponent = 0;
+ MeshSizeExponentIncrement = 1;
+ NumberOfStepReduction = 4;
 }
 

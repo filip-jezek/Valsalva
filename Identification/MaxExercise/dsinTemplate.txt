@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11277,94)
+char initialName(11280,94)
 settings.phi0
 settings.height
 settings.weight
@@ -11047,8 +11047,6 @@ heartComponent.ventricles.LV_wall.tauSC
 heartComponent.ventricles.LV_wall.Crest
 heartComponent.ventricles.LV_wall.CL
 heartComponent.ventricles.LV_wall.T
-heartComponent.ventricles.LV_wall.C
-heartComponent.ventricles.LV_wall.der(C)
 heartComponent.ventricles.LV_wall.SL
 heartComponent.ventricles.LV_wall.der(SL)
 heartComponent.ventricles.LV_wall.SLcollagen
@@ -11084,8 +11082,6 @@ heartComponent.ventricles.SEP_wall.tauSC
 heartComponent.ventricles.SEP_wall.Crest
 heartComponent.ventricles.SEP_wall.CL
 heartComponent.ventricles.SEP_wall.T
-heartComponent.ventricles.SEP_wall.C
-heartComponent.ventricles.SEP_wall.der(C)
 heartComponent.ventricles.SEP_wall.SL
 heartComponent.ventricles.SEP_wall.der(SL)
 heartComponent.ventricles.SEP_wall.SLcollagen
@@ -11121,8 +11117,6 @@ heartComponent.ventricles.RV_wall.tauSC
 heartComponent.ventricles.RV_wall.Crest
 heartComponent.ventricles.RV_wall.CL
 heartComponent.ventricles.RV_wall.T
-heartComponent.ventricles.RV_wall.C
-heartComponent.ventricles.RV_wall.der(C)
 heartComponent.ventricles.RV_wall.SL
 heartComponent.ventricles.RV_wall.der(SL)
 heartComponent.ventricles.RV_wall.SLcollagen
@@ -11137,13 +11131,19 @@ heartComponent.ventricles.RV_wall.sigmaM
 heartComponent.ventricles.calciumMechanics.frequency
 heartComponent.ventricles.calciumMechanics.cardiac_cycle
 heartComponent.ventricles.calciumMechanics.der(cardiac_cycle)
-heartComponent.ventricles.calciumMechanics.tauR
-heartComponent.ventricles.calciumMechanics.period
-heartComponent.ventricles.calciumMechanics.x
-heartComponent.ventricles.calciumMechanics.Fr
-heartComponent.ventricles.calciumMechanics.phi_effect_Ca
 heartComponent.ventricles.calciumMechanics.phi0
-heartComponent.ventricles.calciumMechanics.phi_effect
+heartComponent.ventricles.calciumMechanics.k_TS
+heartComponent.ventricles.calciumMechanics.k_TR
+heartComponent.ventricles.calciumMechanics.k_TR_phi
+heartComponent.ventricles.calciumMechanics.k_RS
+heartComponent.ventricles.calciumMechanics.k_TR_min
+heartComponent.ventricles.calciumMechanics.nominal_drive
+heartComponent.ventricles.calciumMechanics.inotropic_effect
+heartComponent.ventricles.calciumMechanics.driving
+heartComponent.ventricles.calciumMechanics.drive_factor
+heartComponent.ventricles.calciumMechanics.tm
+heartComponent.ventricles.calciumMechanics.systolicContraction
+heartComponent.ventricles.calciumMechanics.systolicRelaxation
 heartComponent.ventricles.OnLV
 heartComponent.ventricles.OnRV
 heartComponent.ventricles.V_min
@@ -11378,10 +11378,13 @@ tauD
 SLrest
 vmax
 sigma_act_factor
+TS
+sigma_act
+sigma_factor
 CPUtime
 EventCounter
 
-double initialValue(11277,6)
+double initialValue(11280,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
@@ -33220,7 +33223,7 @@ double initialValue(11277,6)
   2   280   # heartComponent.ventricles.LV_wall.ym
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.LV_wall.der(ym)
-  0       0                       0                       0                
+  0  2.0000002999999999E-02       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.drivingInput
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.Vw
@@ -33270,10 +33273,6 @@ double initialValue(11277,6)
   6   256   # heartComponent.ventricles.LV_wall.CL
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.T
- -1  2.0000002999999999E-02       0                       0                
-  2   280   # heartComponent.ventricles.LV_wall.C
-  0       0                       0                       0                
-  3   256   # heartComponent.ventricles.LV_wall.der(C)
  -1  2.1559181000000001E+00       0                       0                
   2   280   # heartComponent.ventricles.LV_wall.SL
   0       0                       0                       0                
@@ -33284,8 +33283,8 @@ double initialValue(11277,6)
   1   280   # heartComponent.ventricles.LV_wall.PConcollagen
  -1      70                       0                       0                
   1   280   # heartComponent.ventricles.LV_wall.PExpcollagen
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.LV_wall.k_passive
+ -1      50                       0                       0                
+  1   280   # heartComponent.ventricles.LV_wall.k_passive
  -1  9.0700000000000003E-01       0                       0                
   1   280   # heartComponent.ventricles.LV_wall.L0
   0       0                       0                       0                
@@ -33344,10 +33343,6 @@ double initialValue(11277,6)
   6   256   # heartComponent.ventricles.SEP_wall.CL
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.T
- -1  2.0000002999999999E-02       0                       0                
-  2   280   # heartComponent.ventricles.SEP_wall.C
-  0       0                       0                       0                
-  3   256   # heartComponent.ventricles.SEP_wall.der(C)
  -1  2.1615760000000002E+00       0                       0                
   2   280   # heartComponent.ventricles.SEP_wall.SL
   0       0                       0                       0                
@@ -33358,8 +33353,8 @@ double initialValue(11277,6)
   1   280   # heartComponent.ventricles.SEP_wall.PConcollagen
  -1      70                       0                       0                
   1   280   # heartComponent.ventricles.SEP_wall.PExpcollagen
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.SEP_wall.k_passive
+ -1      50                       0                       0                
+  1   280   # heartComponent.ventricles.SEP_wall.k_passive
  -1  9.0700000000000003E-01       0                       0                
   1   280   # heartComponent.ventricles.SEP_wall.L0
   0       0                       0                       0                
@@ -33418,10 +33413,6 @@ double initialValue(11277,6)
   6   256   # heartComponent.ventricles.RV_wall.CL
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.T
- -1  2.0000002999999999E-02       0                       0                
-  2   280   # heartComponent.ventricles.RV_wall.C
-  0       0                       0                       0                
-  3   256   # heartComponent.ventricles.RV_wall.der(C)
  -1  2.2086703999999999E+00       0                       0                
   2   280   # heartComponent.ventricles.RV_wall.SL
   0       0                       0                       0                
@@ -33432,8 +33423,8 @@ double initialValue(11277,6)
   1   280   # heartComponent.ventricles.RV_wall.PConcollagen
  -1      70                       0                       0                
   1   280   # heartComponent.ventricles.RV_wall.PExpcollagen
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.RV_wall.k_passive
+ -1      50                       0                       0                
+  1   280   # heartComponent.ventricles.RV_wall.k_passive
  -1  9.0700000000000003E-01       0                       0                
   1   280   # heartComponent.ventricles.RV_wall.L0
   0       0                       0                       0                
@@ -33450,20 +33441,32 @@ double initialValue(11277,6)
   2   280   # heartComponent.ventricles.calciumMechanics.cardiac_cycle
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.calciumMechanics.der(cardiac_cycle)
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.tauR
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.period
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.x
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.Fr
- -1       0                       0                       0                
-  1   280   # heartComponent.ventricles.calciumMechanics.phi_effect_Ca
  -1  2.5000000000000000E-01       0                       0                
   1   280   # heartComponent.ventricles.calciumMechanics.phi0
+ -1  %k_TS%       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.k_TS
+ -1  %k_TR%       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.k_TR
   0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.phi_effect
+  6   256   # heartComponent.ventricles.calciumMechanics.k_TR_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.k_RS
+ -1  %k_TR%       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.k_TR_min
+ -1  8.0000000000000004E-01       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.nominal_drive
+ -1       0                       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.inotropic_effect
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.driving
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.drive_factor
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.tm
+  0       0                       0                       0                
+  6   321   # heartComponent.ventricles.calciumMechanics.systolicContraction
+  0       0                       0                       0                
+  6   321   # heartComponent.ventricles.calciumMechanics.systolicRelaxation
   0       1                       0                       0                
   6   321   # heartComponent.ventricles.OnLV
   0       1                       0                       0                
@@ -33920,18 +33923,24 @@ double initialValue(11277,6)
   1   280   # Exercise.offset
  -1       5                       0                       0                
   1   280   # Exercise.startTime
- -1  %tauSC%       0                       0                
+ -1  2.2500000000000001E-01       0                       0                
   1   280   # tauSC
- -1  %tauR%       0                       0                
+ -1  2.4000000000000000E-02       0                       0                
   1   280   # tauR
- -1  %tauD%       0                       0                
+ -1  3.2000000000000001E-02       0                       0                
   1   280   # tauD
  -1  1.5100000000000000E+00       0                       0                
   1   280   # SLrest
- -1       %vmax%                       0                       0                
+ -1       7                       0                       0                
   1   280   # vmax
- -1       %sigma_act_factor%                       0                       0                
+ -1       3                       0                       0                
   1   280   # sigma_act_factor
+  0       1                       0                       0                
+  4   320   # TS
+  0       0                       0                       0                
+  6   256   # sigma_act
+ -1       %sigma_factor%                       0                       0                
+  1   280   # sigma_factor
   0       0                       0                       0                
   4   256   # CPUtime
   0       0                       0                       0                
@@ -33986,7 +33995,7 @@ double initialValue(11277,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11277,152)
+char initialDescription(11280,152)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -44930,9 +44939,7 @@ Factor scaling contraction rise time [s]
 Factor scaling duration of contraction [s]
 Diastolic resting level of activation
 increase of activation with sarcomere length
-decrease of activation duration with decrease of sarcomere length [s]
-activation function, related to intracellular calcium conncentration
-der(activation function, related to intracellular calcium conncentration)
+decrease of activation duration with decrease of sarcomere length
 sarcomere length, um
 der(sarcomere length, um)
 
@@ -44967,9 +44974,7 @@ Factor scaling contraction rise time [s]
 Factor scaling duration of contraction [s]
 Diastolic resting level of activation
 increase of activation with sarcomere length
-decrease of activation duration with decrease of sarcomere length [s]
-activation function, related to intracellular calcium conncentration
-der(activation function, related to intracellular calcium conncentration)
+decrease of activation duration with decrease of sarcomere length
 sarcomere length, um
 der(sarcomere length, um)
 
@@ -45004,9 +45009,7 @@ Factor scaling contraction rise time [s]
 Factor scaling duration of contraction [s]
 Diastolic resting level of activation
 increase of activation with sarcomere length
-decrease of activation duration with decrease of sarcomere length [s]
-activation function, related to intracellular calcium conncentration
-der(activation function, related to intracellular calcium conncentration)
+decrease of activation duration with decrease of sarcomere length
 sarcomere length, um
 der(sarcomere length, um)
 
@@ -45021,13 +45024,19 @@ micron
 [Hz|1/min]
 Fraction of the cycle length [1|%]
 der(Fraction of the cycle length) [s-1]
+[1|%]
+systolic contraction, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication [s]
+Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication
 [s]
-[s]
-[1]
+Lusitropic relaxation slope dependent on phi linearly. Given by k_tr_min
+minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
+0.8 is the maximum of Ca driving function in Lumens heart
+Phi effect on muscle contraction strength. [1|%]
+[1|%]
 
-[1|%]
-[1|%]
-[1|%]
+time since start of cardiac cycle [s|min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
 [m3|ml]
@@ -45262,6 +45271,9 @@ Factor scaling contraction decay time [s]
 microns
 Sarcomere shortening velocity with zero load micron/sec
 Factor affecting systolic strength [1|%]
+[s]
+mmHg 
+[1|%]
 [s]
 
 
