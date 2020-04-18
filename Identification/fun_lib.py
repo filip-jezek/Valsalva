@@ -1,9 +1,14 @@
 import numpy
 import math
+import enum
+
+class CostFunctionType(enum.Enum):
+    Quadratic = 1
+    Linear = 2
 
 class ObjectiveVar:
 
-    def __init__(self, name, value = None, targetValue = None, limit = None, weight = 1, k_p = 1e3):
+    def __init__(self, name, value=None, targetValue=None, limit=None, weight=1, k_p=1e3, costFunctionType=CostFunctionType.Quadratic):
         self.name = name
         self.targetValue = targetValue
         self.value = value
@@ -11,10 +16,15 @@ class ObjectiveVar:
         self.weight = weight
         # self.costLimit = -1 # unlimited costs
         self.k_p = k_p # multiplier for out ouf limit values
+        self.costFunctionType = costFunctionType
 
     def __cost_function(self, measured, target):
         # calculate costs. Could go negative or NaN for negative or zero measured values!
-        return self.weight*(measured - target)**2/(measured*target)
+        if self.costFunctionType is CostFunctionType.Quadratic:
+            return self.weight*(measured - target)**2/(target**2)
+        elif self.costFunctionType is CostFunctionType.Linear:
+            return self.weight*abs(measured - target)/target
+
 
     def cost(self):
         """

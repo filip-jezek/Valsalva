@@ -19,6 +19,7 @@ def getObjectives(vars_set):
     ml2SI = 1e-6
     lpm2SI = 1e-3/60
 
+    BPs_target = 160*mmHg2SI
     EDV_target = 133*ml2SI
     ESV_target = 27*ml2SI
 
@@ -26,10 +27,16 @@ def getObjectives(vars_set):
     interval = fun_lib.findInterval(t-5, t, vars_set['time'])
 
     # build costs
-    ov = [  ('EDV', max(vars_set['V_LV'][interval]), EDV_target, None, 1),
+    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), BPs_target, None, 1),
+            ('EDV', max(vars_set['V_LV'][interval]), EDV_target, None, 1),
             ('ESV', min(vars_set['V_LV'][interval]), ESV_target, None, 1),
-            ('Ts', max(vars_set['TS'][interval]), 0.15, None, 1)]
-
+            ('Ts', max(vars_set['TEjection'][interval]), 0.166, [0.1, 0.2], 1e-4),
+            ('Ts', max(vars_set['TFilling'][interval]), 0.138, [0.1, 0.2], 1e-4),
+        ]
+    
+    # make it a dict?
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight = o[4]), ov))
 
+    objectives[-1].costFunctionType = fun_lib.CostFunctionType.Linear
+    objectives[-2].costFunctionType = fun_lib.CostFunctionType.Linear
     return objectives

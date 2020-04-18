@@ -3,9 +3,11 @@
 */
 
 Vary{
-  Parameter{ Name = k_TS; Min = 0.01; Ini = 0.17375; Max = 0.5; Step = 0.01; }
-  Parameter{ Name = k_TR; Min = 0.01; Ini = 0.1; Max = 0.5; Step = 0.01; }
-  Parameter{ Name = sigma_factor; Min = 1; Ini = 13; Max = 20; Step = 0.1; }
+  Parameter{ Name = k_TS; Min = 0.01; Ini = 0.18; Max = 0.3; Step = 0.01; }
+  Parameter{ Name = k_TR; Min = 0.01; Ini = 0.1; Max = 0.3; Step = 0.01; }
+  Parameter{ Name = sigma_factor; Min = 1; Ini = 13; Max = 50; Step = 1; }
+  Parameter{ Name = exercise_factor; Min = 1; Ini = 10; Max = 50; Step = 1; }
+ // Parameter{ Name = driving_offset; Min = 0.001; Ini = 0.05; Max = 0.1; Step = 0.001; }
 }
 
 OptimizationSettings{

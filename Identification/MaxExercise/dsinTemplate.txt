@@ -9,10 +9,10 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-     20                   # StopTime     Time at which integration stops
+      15                   # StopTime     Time at which integration stops
   2.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
-  1.0000000000000001E-05   # Tolerance    Relative precision of signals for
+  1.0000000000000001E-07   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
        0                   # MaxFixedStep Maximum step size of fixed step size
                            #              integrators, if > 0.0
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11280,94)
+char initialName(11313,94)
 settings.phi0
 settings.height
 settings.weight
@@ -10946,6 +10946,9 @@ heartComponent.tricuspidValve.q_in.pressure
 heartComponent.tricuspidValve.q_in.q
 heartComponent.tricuspidValve.q_out.pressure
 heartComponent.tricuspidValve.dp
+heartComponent.tricuspidValve.useChatteringProtection
+heartComponent.tricuspidValve.chatteringProtectionTime
+heartComponent.tricuspidValve.lastChange
 heartComponent.tricuspidValve.open
 heartComponent.tricuspidValve.passableVariable
 heartComponent.tricuspidValve._Gon
@@ -10956,6 +10959,9 @@ heartComponent.tricuspidValve.unitPressure
 heartComponent.tricuspidValve.unitFlow
 heartComponent.tricuspidValve._Ron
 heartComponent.pulmonaryValve.dp
+heartComponent.pulmonaryValve.useChatteringProtection
+heartComponent.pulmonaryValve.chatteringProtectionTime
+heartComponent.pulmonaryValve.lastChange
 heartComponent.pulmonaryValve.open
 heartComponent.pulmonaryValve.passableVariable
 heartComponent.pulmonaryValve._Gon
@@ -10966,9 +10972,11 @@ heartComponent.pulmonaryValve.unitPressure
 heartComponent.pulmonaryValve.unitFlow
 heartComponent.pulmonaryValve._Ron
 heartComponent.mitralValve.q_in.pressure
-heartComponent.mitralValve.q_in.q
 heartComponent.mitralValve.q_out.pressure
 heartComponent.mitralValve.dp
+heartComponent.mitralValve.useChatteringProtection
+heartComponent.mitralValve.chatteringProtectionTime
+heartComponent.mitralValve.lastChange
 heartComponent.mitralValve.open
 heartComponent.mitralValve.passableVariable
 heartComponent.mitralValve._Gon
@@ -10978,7 +10986,28 @@ heartComponent.mitralValve.useLimitationInputs
 heartComponent.mitralValve.unitPressure
 heartComponent.mitralValve.unitFlow
 heartComponent.mitralValve._Ron
+heartComponent.mitralValve.useCycleInput
+heartComponent.mitralValve.Pout_pulse
+heartComponent.mitralValve.Pout_max
+heartComponent.mitralValve.Pout_min
+heartComponent.mitralValve.BP_max
+heartComponent.mitralValve.der(BP_max)
+heartComponent.mitralValve.BP_min
+heartComponent.mitralValve.der(BP_min)
+heartComponent.mitralValve.Pmax
+heartComponent.mitralValve.tau
+heartComponent.mitralValve.epsTime
+heartComponent.mitralValve.Ts
+heartComponent.mitralValve.Td
+heartComponent.mitralValve.T0
+heartComponent.mitralValve.T0_cycle
+heartComponent.mitralValve.CO_acc
+heartComponent.mitralValve.der(CO_acc)
+heartComponent.mitralValve.CO
 heartComponent.aorticValve.dp
+heartComponent.aorticValve.useChatteringProtection
+heartComponent.aorticValve.chatteringProtectionTime
+heartComponent.aorticValve.lastChange
 heartComponent.aorticValve.open
 heartComponent.aorticValve.passableVariable
 heartComponent.aorticValve._Gon
@@ -10988,15 +11017,17 @@ heartComponent.aorticValve.useLimitationInputs
 heartComponent.aorticValve.unitPressure
 heartComponent.aorticValve.unitFlow
 heartComponent.aorticValve._Ron
-heartComponent.aorticValve.useCardiacCycleInput
-heartComponent.aorticValve.BPp
-heartComponent.aorticValve.BPs
-heartComponent.aorticValve.BPd
+heartComponent.aorticValve.useCycleInput
+heartComponent.aorticValve.Pout_pulse
+heartComponent.aorticValve.Pout_max
+heartComponent.aorticValve.Pout_min
 heartComponent.aorticValve.BP_max
 heartComponent.aorticValve.der(BP_max)
 heartComponent.aorticValve.BP_min
 heartComponent.aorticValve.der(BP_min)
+heartComponent.aorticValve.Pmax
 heartComponent.aorticValve.tau
+heartComponent.aorticValve.epsTime
 heartComponent.aorticValve.Ts
 heartComponent.aorticValve.Td
 heartComponent.aorticValve.T0
@@ -11132,6 +11163,7 @@ heartComponent.ventricles.calciumMechanics.frequency
 heartComponent.ventricles.calciumMechanics.cardiac_cycle
 heartComponent.ventricles.calciumMechanics.der(cardiac_cycle)
 heartComponent.ventricles.calciumMechanics.phi0
+heartComponent.ventricles.calciumMechanics.offset
 heartComponent.ventricles.calciumMechanics.k_TS
 heartComponent.ventricles.calciumMechanics.k_TR
 heartComponent.ventricles.calciumMechanics.k_TR_phi
@@ -11378,13 +11410,14 @@ tauD
 SLrest
 vmax
 sigma_act_factor
-TS
+TEjection
+TFilling
 sigma_act
 sigma_factor
 CPUtime
 EventCounter
 
-double initialValue(11280,6)
+double initialValue(11313,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
@@ -11435,7 +11468,7 @@ double initialValue(11280,6)
   1   280   # settings.exercise_factor_on_tissue_compliance
  -1       1                       0                       0                
   1   280   # settings.tissues_gamma
- -1       4                       0                       0                
+ -1      %exercise_factor%                       0                       0                
   1   280   # settings.exercise_factor
  -1       0                       0                       0                
   1   280   # settings.exercise_venous_pumping_factor
@@ -18255,7 +18288,7 @@ double initialValue(11280,6)
   6   256   # Systemic1.ulnar_T2_R42.phi0
  -1       1                       0                       0                
   1   280   # Systemic1.ulnar_T2_R42.thoracic_pressure_ratio
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # Systemic1.ulnar_T2_R42.UseExercise
  -1       1                       0                       0                
   1   280   # Systemic1.ulnar_T2_R42.exercise_ratio
@@ -18353,7 +18386,7 @@ double initialValue(11280,6)
   6   256   # Systemic1.radial_T1_R44.phi0
  -1       1                       0                       0                
   1   280   # Systemic1.radial_T1_R44.thoracic_pressure_ratio
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # Systemic1.radial_T1_R44.UseExercise
  -1       1                       0                       0                
   1   280   # Systemic1.radial_T1_R44.exercise_ratio
@@ -18887,7 +18920,7 @@ double initialValue(11280,6)
   6   256   # Systemic1.ulnar_T2_L90.phi0
  -1       1                       0                       0                
   1   280   # Systemic1.ulnar_T2_L90.thoracic_pressure_ratio
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # Systemic1.ulnar_T2_L90.UseExercise
  -1       1                       0                       0                
   1   280   # Systemic1.ulnar_T2_L90.exercise_ratio
@@ -18985,7 +19018,7 @@ double initialValue(11280,6)
   6   256   # Systemic1.radial_T1_L92.phi0
  -1       1                       0                       0                
   1   280   # Systemic1.radial_T1_L92.thoracic_pressure_ratio
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # Systemic1.radial_T1_L92.UseExercise
  -1       1                       0                       0                
   1   280   # Systemic1.radial_T1_L92.exercise_ratio
@@ -20423,7 +20456,7 @@ double initialValue(11280,6)
   6   256   # Systemic1.vertebral_L2.phi0
  -1       1                       0                       0                
   1   280   # Systemic1.vertebral_L2.thoracic_pressure_ratio
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # Systemic1.vertebral_L2.UseExercise
  -1       1                       0                       0                
   1   280   # Systemic1.vertebral_L2.exercise_ratio
@@ -20521,7 +20554,7 @@ double initialValue(11280,6)
   6   256   # Systemic1.vertebral_R272.phi0
  -1       1                       0                       0                
   1   280   # Systemic1.vertebral_R272.thoracic_pressure_ratio
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # Systemic1.vertebral_R272.UseExercise
  -1       1                       0                       0                
   1   280   # Systemic1.vertebral_R272.exercise_ratio
@@ -32683,7 +32716,7 @@ double initialValue(11280,6)
   6   256   # Systemic1.cardiac_tissue.phi0
  -1       1                       0                       0                
   1   280   # Systemic1.cardiac_tissue.thoracic_pressure_ratio
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # Systemic1.cardiac_tissue.UseExercise
  -1       1                       0                       0                
   1   280   # Systemic1.cardiac_tissue.exercise_ratio
@@ -33072,7 +33105,13 @@ double initialValue(11280,6)
   0       0                       0                       0                
   6   256   # heartComponent.tricuspidValve.dp
   0       1                       0                       0                
-  6   353   # heartComponent.tricuspidValve.open
+  6   257   # heartComponent.tricuspidValve.useChatteringProtection
+  0  1.0000000000000000E-02       0                       0                
+  6   256   # heartComponent.tricuspidValve.chatteringProtectionTime
+  0       0                       0                       0                
+  6   328   # heartComponent.tricuspidValve.lastChange
+  0       1                       0                       0                
+  6   361   # heartComponent.tricuspidValve.open
   0       0                       0                       0                
   6   256   # heartComponent.tricuspidValve.passableVariable
   0       0                       0                 1.0000000000000000E+100
@@ -33092,7 +33131,13 @@ double initialValue(11280,6)
   0       0                       0                       0                
   6   256   # heartComponent.pulmonaryValve.dp
   0       1                       0                       0                
-  6   353   # heartComponent.pulmonaryValve.open
+  6   257   # heartComponent.pulmonaryValve.useChatteringProtection
+  0  1.0000000000000000E-02       0                       0                
+  6   256   # heartComponent.pulmonaryValve.chatteringProtectionTime
+  0       0                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.lastChange
+  0       1                       0                       0                
+  6   361   # heartComponent.pulmonaryValve.open
   0       0                       0                       0                
   6   256   # heartComponent.pulmonaryValve.passableVariable
   0       0                       0                 1.0000000000000000E+100
@@ -33112,13 +33157,17 @@ double initialValue(11280,6)
   0       0                       0                       0                
   6   260   # heartComponent.mitralValve.q_in.pressure
   0       0                       0                       0                
-  6   388   # heartComponent.mitralValve.q_in.q
-  0       0                       0                       0                
   6   260   # heartComponent.mitralValve.q_out.pressure
   0       0                       0                       0                
   6   256   # heartComponent.mitralValve.dp
   0       1                       0                       0                
-  6   353   # heartComponent.mitralValve.open
+  6   257   # heartComponent.mitralValve.useChatteringProtection
+  0  1.0000000000000000E-02       0                       0                
+  6   256   # heartComponent.mitralValve.chatteringProtectionTime
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.lastChange
+  0       1                       0                       0                
+  6   361   # heartComponent.mitralValve.open
   0       0                       0                       0                
   6   256   # heartComponent.mitralValve.passableVariable
   0       0                       0                 1.0000000000000000E+100
@@ -33135,10 +33184,52 @@ double initialValue(11280,6)
   6  1280   # heartComponent.mitralValve.unitFlow
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.mitralValve._Ron
+  0       1                       0                       0                
+  6   769   # heartComponent.mitralValve.useCycleInput
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.Pout_pulse
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.Pout_max
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.Pout_min
+ -1       0                       0                       0                
+  2   280   # heartComponent.mitralValve.BP_max
+  0       0                       0                       0                
+  3   256   # heartComponent.mitralValve.der(BP_max)
+ -1   26600                       0                       0                
+  2   280   # heartComponent.mitralValve.BP_min
+  0       0                       0                       0                
+  3   256   # heartComponent.mitralValve.der(BP_min)
+ -1   39996                       0                       0                
+  1   280   # heartComponent.mitralValve.Pmax
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # heartComponent.mitralValve.tau
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # heartComponent.mitralValve.epsTime
+  0       1                       0                       0                
+  6   328   # heartComponent.mitralValve.Ts
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.Td
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.T0
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.T0_cycle
+ -1       0                       0                 1.0000000000000000E+100
+  2   280   # heartComponent.mitralValve.CO_acc
+  0       0                       0                       0                
+  3   256   # heartComponent.mitralValve.der(CO_acc)
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.CO
   0       0                       0                       0                
   6   256   # heartComponent.aorticValve.dp
   0       1                       0                       0                
-  6   353   # heartComponent.aorticValve.open
+  6   257   # heartComponent.aorticValve.useChatteringProtection
+  0  1.0000000000000000E-02       0                       0                
+  6   256   # heartComponent.aorticValve.chatteringProtectionTime
+  0       0                       0                       0                
+  6   328   # heartComponent.aorticValve.lastChange
+  0       1                       0                       0                
+  6   361   # heartComponent.aorticValve.open
   0       0                       0                       0                
   6   256   # heartComponent.aorticValve.passableVariable
   0       0                       0                 1.0000000000000000E+100
@@ -33156,13 +33247,13 @@ double initialValue(11280,6)
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.aorticValve._Ron
   0       1                       0                       0                
-  6   769   # heartComponent.aorticValve.useCardiacCycleInput
+  6   769   # heartComponent.aorticValve.useCycleInput
   0       0                       0                       0                
-  6   328   # heartComponent.aorticValve.BPp
+  6   328   # heartComponent.aorticValve.Pout_pulse
   0       0                       0                       0                
-  6   328   # heartComponent.aorticValve.BPs
+  6   328   # heartComponent.aorticValve.Pout_max
   0       0                       0                       0                
-  6   328   # heartComponent.aorticValve.BPd
+  6   328   # heartComponent.aorticValve.Pout_min
  -1       0                       0                       0                
   2   280   # heartComponent.aorticValve.BP_max
   0       0                       0                       0                
@@ -33171,8 +33262,12 @@ double initialValue(11280,6)
   2   280   # heartComponent.aorticValve.BP_min
   0       0                       0                       0                
   3   256   # heartComponent.aorticValve.der(BP_min)
+ -1   39996                       0                       0                
+  1   280   # heartComponent.aorticValve.Pmax
  -1  1.0000000000000000E-03       0                       0                
   1   280   # heartComponent.aorticValve.tau
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # heartComponent.aorticValve.epsTime
   0       1                       0                       0                
   6   328   # heartComponent.aorticValve.Ts
   0       0                       0                       0                
@@ -33187,9 +33282,9 @@ double initialValue(11280,6)
   3   256   # heartComponent.aorticValve.der(CO_acc)
   0       0                       0                       0                
   6   328   # heartComponent.aorticValve.CO
- -1  2.5000000000000001E-02       0                       0                
+ -1  1.4999999999999999E-02       0                       0                
   1   280   # heartComponent._R_LA
- -1  2.5000000000000001E-02       0                       0                
+ -1  1.4999999999999999E-02       0                       0                
   1   280   # heartComponent._R_RA
  -1  1.0000000000000000E-03       0                       0                
   1   280   # heartComponent._R_vlv
@@ -33443,9 +33538,11 @@ double initialValue(11280,6)
   3   256   # heartComponent.ventricles.calciumMechanics.der(cardiac_cycle)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # heartComponent.ventricles.calciumMechanics.phi0
+ -1       0                       0                       0                
+  1   280   # heartComponent.ventricles.calciumMechanics.offset
  -1  %k_TS%       0                       0                
   1   280   # heartComponent.ventricles.calciumMechanics.k_TS
- -1  %k_TR%       0                       0                
+ -1  5.0000000000000003E-02       0                       0                
   1   280   # heartComponent.ventricles.calciumMechanics.k_TR
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.calciumMechanics.k_TR_phi
@@ -33453,7 +33550,7 @@ double initialValue(11280,6)
   6   256   # heartComponent.ventricles.calciumMechanics.k_RS
  -1  %k_TR%       0                       0                
   1   280   # heartComponent.ventricles.calciumMechanics.k_TR_min
- -1  8.0000000000000004E-01       0                       0                
+ -1       1                       0                       0                
   1   280   # heartComponent.ventricles.calciumMechanics.nominal_drive
  -1       0                       0                       0                
   1   280   # heartComponent.ventricles.calciumMechanics.inotropic_effect
@@ -33691,13 +33788,13 @@ double initialValue(11280,6)
   1   792   # phi.falling
  -1     200                  9.9999999999999997E-61 1.0000000000000000E+100
   1   792   # phi.period
- -1       0                       0                       0                
+ -1       1                       0                       0                
   1   794   # phi.nperiod
   0       0                       0                       0                
   6   768   # phi.y
- -1       1                       0                       0                
+ -1  2.5000000000000000E-01       0                       0                
   1   792   # phi.offset
- -1      20                       0                       0                
+ -1       2                       0                       0                
   1   792   # phi.startTime
   0       0                       0                       0                
   6   768   # phi.T_rising
@@ -33921,7 +34018,7 @@ double initialValue(11280,6)
   1   280   # Exercise.duration
  -1       0                       0                       0                
   1   280   # Exercise.offset
- -1       5                       0                       0                
+ -1       1                       0                       0                
   1   280   # Exercise.startTime
  -1  2.2500000000000001E-01       0                       0                
   1   280   # tauSC
@@ -33933,13 +34030,15 @@ double initialValue(11280,6)
   1   280   # SLrest
  -1       7                       0                       0                
   1   280   # vmax
- -1       3                       0                       0                
+ -1      30                       0                       0                
   1   280   # sigma_act_factor
   0       1                       0                       0                
-  4   320   # TS
+  4   320   # TEjection
+  0       1                       0                       0                
+  4   320   # TFilling
   0       0                       0                       0                
   6   256   # sigma_act
- -1       %sigma_factor%                       0                       0                
+ -1      %sigma_factor%                       0                       0                
   1   280   # sigma_factor
   0       0                       0                       0                
   4   256   # CPUtime
@@ -33995,7 +34094,7 @@ double initialValue(11280,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11280,152)
+char initialDescription(11313,152)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -44839,57 +44938,88 @@ Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
 Pressure [Pa|mmHg]
 Pressure gradient [Pa|mmHg]
-Switching state [:#(type=Boolean)]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-=true, if Gon and Goff are from inputs [:#(type=Boolean)]
-[Pa|mmHg]
-[m3/s|ml/min]
-forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Pressure gradient [Pa|mmHg]
-Switching state [:#(type=Boolean)]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-=true, if Gon and Goff are from inputs [:#(type=Boolean)]
-[Pa|mmHg]
-[m3/s|ml/min]
-forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Pressure [Pa|mmHg]
-Volume flow [m3/s|ml/min]
-Pressure [Pa|mmHg]
-Pressure gradient [Pa|mmHg]
-Switching state [:#(type=Boolean)]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-=true, if Gon and Goff are from inputs [:#(type=Boolean)]
-[Pa|mmHg]
-[m3/s|ml/min]
-forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Pressure gradient [Pa|mmHg]
-Switching state [:#(type=Boolean)]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-=true, if Gon and Goff are from inputs [:#(type=Boolean)]
-[Pa|mmHg]
-[m3/s|ml/min]
-forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Use any signal of cardiac cycle which resets to zero for precise calculations of CO [:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[Pa|mmHg]
-[Pa|mmHg]
-[Pa/s]
-[Pa|mmHg]
-[Pa/s]
+[:#(type=Boolean)]
+Minimal period of time, in which a closed valve stays closed [s|ms]
 [s|min]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Pressure gradient [Pa|mmHg]
+[:#(type=Boolean)]
+Minimal period of time, in which a closed valve stays closed [s|ms]
+[s|min]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Pressure [Pa|mmHg]
+Pressure [Pa|mmHg]
+Pressure gradient [Pa|mmHg]
+[:#(type=Boolean)]
+Minimal period of time, in which a closed valve stays closed [s|ms]
+[s|min]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Use any signal of beating cycle which resets to zero for precise calculations of throughput [:#(type=Boolean)]
+Difference between max and min output pressure (e.g. pulse pressure) [Pa|mmHg]
+Maximal pressure at outflow during open valve (e.g. Systolic pressure) [Pa|mmHg]
+Minimal pressure at outflow during closed valve (e.g. diastolic pressure) [Pa|mmHg]
+[Pa|mmHg]
+[Pa/s]
+[Pa|mmHg]
+[Pa/s]
+Maximal possible Pout_min pressure (start point for calculations) [Pa|mmHg]
+Integration costant for min-max calculations [s|min]
+Reset offset after cycle start. We better not use 0 for numerical issues. [s|min]
+True time of cardiologic systole (duration of open valve) [s|min]
+True time of cardiologic diastole (duration of closed valve) [s|min]
+Time since opening (begin of cardiologic systole) [s|min]
+Time of beggining of current cardiac cycle. May be same as T0, when the cardiacCycleOutput is not specified. [s|min]
+Accumulated volume since valve closing [m3|ml]
+der(Accumulated volume since valve closing) [m3/s]
+[m3/s|ml/min]
+Pressure gradient [Pa|mmHg]
+[:#(type=Boolean)]
+Minimal period of time, in which a closed valve stays closed [s|ms]
+[s|min]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Use any signal of beating cycle which resets to zero for precise calculations of throughput [:#(type=Boolean)]
+Difference between max and min output pressure (e.g. pulse pressure) [Pa|mmHg]
+Maximal pressure at outflow during open valve (e.g. Systolic pressure) [Pa|mmHg]
+Minimal pressure at outflow during closed valve (e.g. diastolic pressure) [Pa|mmHg]
+[Pa|mmHg]
+[Pa/s]
+[Pa|mmHg]
+[Pa/s]
+Maximal possible Pout_min pressure (start point for calculations) [Pa|mmHg]
+Integration costant for min-max calculations [s|min]
+Reset offset after cycle start. We better not use 0 for numerical issues. [s|min]
 True time of cardiologic systole (duration of open valve) [s|min]
 True time of cardiologic diastole (duration of closed valve) [s|min]
 Time since opening (begin of cardiologic systole) [s|min]
@@ -45025,6 +45155,7 @@ micron
 Fraction of the cycle length [1|%]
 der(Fraction of the cycle length) [s-1]
 [1|%]
+driving offset [1]
 systolic contraction, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication [s]
 Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication
 [s]
@@ -45145,10 +45276,10 @@ External pressure. Set zero if internal pressure is relative to external. Valid 
 [m3/s]
 [Pa|mmHg]
 Amplitude of trapezoid [1]
-Rising duration of trapezoid [s]
-Width duration of trapezoid [s]
-Falling duration of trapezoid [s]
-Time for one period [s]
+Rising duration of trapezoid [s|s]
+Width duration of trapezoid [s|s]
+Falling duration of trapezoid [s|s]
+Time for one period [s|s]
 Number of periods (< 0 means infinite number of periods) [:#(type=Integer)]
 Connector of Real output signal [1]
 Offset of output signal y [1]
@@ -45271,6 +45402,7 @@ Factor scaling contraction decay time [s]
 microns
 Sarcomere shortening velocity with zero load micron/sec
 Factor affecting systolic strength [1|%]
+[s]
 [s]
 mmHg 
 [1|%]

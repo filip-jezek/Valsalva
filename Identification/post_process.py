@@ -32,7 +32,7 @@ def writeLogHeader(objectives):
     if not os.path.isfile(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME):
         with open(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME, 'w') as file:
             header = map(lambda o: o.name.rjust(5) + '_val,' + o.name.rjust(5) + '_trg, %', objectives)
-            line = ',  '.join(header) + ",run, datetime"
+            line = ',  '.join(header) + "  ,run, datetime"
             file.write(line + '\n')
 
 def logLine(objective, total_cost):
@@ -71,7 +71,7 @@ def logOutput(objectives):
         # prepare the line with value, cost value for this and percentage of total costs
         total_cost = sum(o.cost() for o in objectives)
         t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        tail = ",%03d,%s" % (run, t)
+        tail = "  ,%03d,%s" % (run, t)
         
         string_seq = map(lambda o: logLine(o, total_cost), objectives)
 
