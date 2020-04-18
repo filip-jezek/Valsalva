@@ -952,19 +952,26 @@ type"),       Text(
       model IdealValveResistanceWithMeasurements
         "Adds additional output calculations"
         extends Physiolibrary.Hydraulic.Components.IdealValveResistance;
-        parameter Boolean useCardiacCycleInput = false "Use any signal of cardiac cycle which resets to zero for precise calculations of CO"
+        parameter Boolean useCycleInput=false
+          "Use any signal of beating cycle which resets to zero for precise calculations of throughput"
         annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
 
-        Physiolibrary.Types.Pressure BPp;
-        Physiolibrary.Types.Pressure BPs;
-        Physiolibrary.Types.Pressure BPd;
+        Physiolibrary.Types.Pressure Pout_pulse
+          "Difference between max and min output pressure (e.g. pulse pressure)";
+        Physiolibrary.Types.Pressure Pout_max
+          "Maximal pressure at outflow during open valve (e.g. Systolic pressure)";
+        Physiolibrary.Types.Pressure Pout_min
+          "Minimal pressure at outflow during closed valve (e.g. diastolic pressure)";
 
         Physiolibrary.Types.Pressure BP_max(start = 0);
         Physiolibrary.Types.Pressure BP_min(start = 200*133);
+        parameter Physiolibrary.Types.Pressure Pmax = 39996 "Maximal possible Pout_min pressure (start point for calculations)";
 
-        Physiolibrary.Types.Pressure BPao = q_out.pressure;
+        Physiolibrary.Types.Pressure Pout=q_out.pressure "Pressure at outflow";
 
-        parameter Physiolibrary.Types.Time tau = 1e-3;
+
+        parameter Physiolibrary.Types.Time tau = 1e-3 "Integration costant for min-max calculations";
+        parameter Physiolibrary.Types.Time epsTime = 1e-3 "Reset offset after cycle start. We better not use 0 for numerical issues.";
         Physiolibrary.Types.Time Ts(start = 1) "True time of cardiologic systole (duration of open valve)";
         Physiolibrary.Types.Time Td "True time of cardiologic diastole (duration of closed valve)";
         Physiolibrary.Types.Time T0 "Time since opening (begin of cardiologic systole)";
@@ -972,8 +979,7 @@ type"),       Text(
 
         Physiolibrary.Types.Volume CO_acc "Accumulated volume since valve closing";
         Physiolibrary.Types.VolumeFlowRate CO;
-        Modelica.Blocks.Interfaces.RealInput cardiac_cycle=cc if
-          useCardiacCycleInput
+        Modelica.Blocks.Interfaces.RealInput cardiac_cycle=cc if useCycleInput
           "Any signal that resets to zero e.g. fraction of cardiac cycle, time of cardiac cycle e.g."
           annotation (Placement(transformation(
               extent={{-20,-20},{20,20}},
@@ -981,7 +987,7 @@ type"),       Text(
               origin={0,100})));
               Real cc "signal for reseting cardiac cycle";
       equation
-        if not useCardiacCycleInput then
+        if not useCycleInput then
           // when not given proper guidance, we would have to guess from opening and closing the valves
           cc = time - T0;
         end if;
@@ -993,14 +999,14 @@ type"),       Text(
       //   end if;
         der(CO_acc) = q_in.q;
 
-        if open and BP_max < BPao then
-          der(BP_max)*tau = BPao - BP_max;
+        if open and BP_max <Pout then
+          der(BP_max)*tau =Pout  - BP_max;
         else
           der(BP_max) = 0;
         end if;
 
-        if not open and BP_min > BPao then
-          der(BP_min)*tau = BPao - BP_min;
+        if not open and BP_min >Pout then
+          der(BP_min)*tau =Pout  - BP_min;
         else
           der(BP_min) = 0;
         end if;
@@ -1014,16 +1020,16 @@ type"),       Text(
           Ts = time - T0;
         end when;
 
-        when cc < 1e-3 then
+        when cc < epsTime then
           // this launches when the signal resets. We better not use 0 for possible numerical issues. 1ms distance from beggining of cardiac cycle must be satisfactory.
           // The T0 signal is not precise, as the valves might be chattering
           T0_cycle = time;
           reinit(CO_acc, 0);
           CO = CO_acc/(time - pre(T0_cycle));
-          BPd = pre(BP_min);
-          reinit(BP_min, 200*133);
-          BPp = BPs - BPd;
-          BPs = pre(BP_max);
+          Pout_min = pre(BP_min);
+          reinit(BP_min, Pmax);
+          Pout_pulse = Pout_max - Pout_min;
+          Pout_max = pre(BP_max);
           reinit(BP_max, 0);
         end when;
 
@@ -3475,6 +3481,7 @@ type"),       Text(
 
               outer Physiolibrary.Types.Fraction phi;
               parameter Physiolibrary.Types.Fraction phi0 = 0.25;
+              parameter Real offset = 0.1 "driving offset";
               parameter Real k_TS = 0.1 "systolic contraction, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
               parameter Real k_TR = 0.3 "Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
               Real k_TR_phi = k_TR*(1-k_RS*(phi - phi0));
@@ -3498,11 +3505,11 @@ type"),       Text(
             TR = k_TR_phi;
 
             if systolicContraction then
-                driving = 0.5*(1 - cos(Modelica.Constants.pi*tm/TS));
+                driving = (1-offset)/2*(1 - cos(Modelica.Constants.pi*tm/TS)) + offset;
             elseif systolicRelaxation then
-                driving = 0.5*(1 + cos(Modelica.Constants.pi*(tm - TS)/TR));
+                driving = (1-offset)/2*(1 + cos(Modelica.Constants.pi*(tm - TS)/TR)) + offset;
             else
-                driving = 0;
+                driving = 0 + offset;
             end if;
 
              drivingFunction =drive_factor*driving;
@@ -5590,30 +5597,58 @@ Kalecky")}), experiment(
         model Heart_TriSegMechanics
           extends partialHeart;
           parameter String class_name = "Ca mech";
+          replaceable
           Physiolibrary.Hydraulic.Components.IdealValveResistance
                                tricuspidValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=R_vlv) constrainedby
+            Physiolibrary.Hydraulic.Components.IdealValveResistance(
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=R_vlv)
             annotation (Placement(transformation(extent={{-40,30},{-20,50}})));
+          replaceable
           Physiolibrary.Hydraulic.Components.IdealValveResistance
                                pulmonaryValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=R_vlv) constrainedby
+            Physiolibrary.Hydraulic.Components.IdealValveResistance(
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=R_vlv)
             annotation (Placement(transformation(extent={{64,30},{84,50}})));
-          Physiolibrary.Hydraulic.Components.IdealValveResistance
+          replaceable
+          Basic.IdealValveResistanceWithMeasurements
                                mitralValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=R_vlv,
+            useCycleInput=true) constrainedby
+            Physiolibrary.Hydraulic.Components.IdealValveResistance(
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=R_vlv)
             annotation (Placement(transformation(extent={{40,-40},{20,-20}})));
-          Basic.IdealValveResistanceWithMeasurements aorticValve(
+          replaceable Basic.IdealValveResistanceWithMeasurements aorticValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
-            _Ron=R_vlv,
-            useCardiacCycleInput=true) annotation (Placement(transformation(
-                  extent={{-60,-40},{-80,-20}})));
+            useCycleInput=true,
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=R_vlv) constrainedby
+            Physiolibrary.Hydraulic.Components.IdealValveResistance(
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=R_vlv) annotation (Placement(transformation(extent={{-60,-40},
+                    {-80,-20}})));
 
           parameter Real _R_LA =   0.025;
           parameter Real _R_RA =   0.025;
@@ -5753,6 +5788,8 @@ Kalecky")}), experiment(
                   {0,70},{-81,70}}, color={0,0,127}));
           connect(ventricles.phi_input, phi) annotation (Line(points={{0,10},{0,
                   70},{-100,70}}, color={0,0,127}));
+          connect(mitralValve.cardiac_cycle, ventricles.cardiac_cycle)
+            annotation (Line(points={{30,-20},{30,0},{10,0}}, color={244,125,35}));
           annotation (Icon(graphics={                       Text(
                   extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
@@ -25501,9 +25538,9 @@ P_hs_plus_dist"),
       parameter Physiolibrary.Types.Frequency HR=_HR/60 "Default freq";
       parameter Real _HR = 60 "Freq in BPM";
       output Real _CO = heart.aorticValve.CO*60*1e6;
-      output Real _BPs = heart.aorticValve.BPs/133.32;
-      output Real _BPd = heart.aorticValve.BPd/133.32;
-      output Real _BPp = heart.aorticValve.BPp/133.32;
+      output Real _BPs=heart.aorticValve.Pout_max/133.32;
+      output Real _BPd=heart.aorticValve.Pout_min/133.32;
+      output Real _BPp=heart.aorticValve.Pout_pulse/133.32;
       parameter Boolean adjust = false;
     Modelica.Blocks.Sources.Trapezoid           thoracic_pressure(
         amplitude=40*133,
@@ -32402,7 +32439,8 @@ P_hs_plus_dist"),
           "Sarcomere shortening velocity with zero load micron/sec";
         parameter Physiolibrary.Types.Fraction sigma_act_factor=3
           "Factor affecting systolic strength";
-        output Real TS = heartComponent.aorticValve.Ts;
+        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
+        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
         parameter Real sigma_act=sigma_factor*7.5*120 "mmHg ";
         parameter Physiolibrary.Types.Fraction sigma_factor = 13.625;
       equation
@@ -32421,20 +32459,42 @@ P_hs_plus_dist"),
                 k_TR_min=0.05,
                 k_TS=0.18,
                 nominal_drive=1.0,
-                k_TR=0.05))),
+                k_TR=0.05,
+                offset=0.0)),
+            tricuspidValve(useChatteringProtection=true,
+                chatteringProtectionTime(displayUnit="ms") = 0.01),
+            pulmonaryValve(useChatteringProtection=true,
+                chatteringProtectionTime(displayUnit="ms") = 0.01),
+            mitralValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            aorticValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            _R_LA=0.0125,
+            _R_RA=0.0125),
           settings(exercise_factor=10.0),
-          sigma_factor=5.0,
+          sigma_factor=30.0,
           vmax=7.0,
-          Exercise(startTime=15),
+          Exercise(startTime=1),
           phi(
             amplitude=0.75,
+            rising(displayUnit="s"),
+            width(displayUnit="s"),
+            falling(displayUnit="s"),
+            period(displayUnit="s"),
             nperiod=1,
             offset=0.25,
-            startTime=20),
+            startTime=2),
           Systemic1(
             ulnar_T2_L90(UseExercise=false),
             radial_T1_L92(UseExercise=false),
-            vertebral_L2(UseExercise=false)));
+            vertebral_L2(UseExercise=false),
+            ulnar_T2_R42(UseExercise=false),
+            radial_T1_R44(UseExercise=false),
+            internal_carotid_R8_C(UseExercise=false),
+            external_carotid_T2_R26(UseExercise=false),
+            vertebral_R272(UseExercise=false),
+            cardiac_tissue(UseExercise=false)),
+          sigma_act_factor=30.0);
         annotation (experiment(
             StopTime=30,
             Interval=0.02,
