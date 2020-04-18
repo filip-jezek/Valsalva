@@ -32418,14 +32418,25 @@ P_hs_plus_dist"),
       model base_Exercise_SimpleCa_maxSV
         extends base_Exercise_SimpleCa(
           heartComponent(ventricles(calciumMechanics(
-                k_TR_min=0.01,
-                k_TS=0.1,
-                nominal_drive=1.0))),
+                k_TR_min=0.05,
+                k_TS=0.18,
+                nominal_drive=1.0,
+                k_TR=0.05))),
           settings(exercise_factor=10.0),
-          sigma_factor=20.0,
-          vmax=14.0);
+          sigma_factor=5.0,
+          vmax=7.0,
+          Exercise(startTime=15),
+          phi(
+            amplitude=0.75,
+            nperiod=1,
+            offset=0.25,
+            startTime=20),
+          Systemic1(
+            ulnar_T2_L90(UseExercise=false),
+            radial_T1_L92(UseExercise=false),
+            vertebral_L2(UseExercise=false)));
         annotation (experiment(
-            StopTime=20,
+            StopTime=30,
             Interval=0.02,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
