@@ -32284,223 +32284,19 @@ P_hs_plus_dist"),
             __Dymola_Algorithm="Cvode"));
       end passive_tilt;
 
-      model base_Exercise "Aimed to ahve max CO"
-        extends Baseline.base_TriSeg_OptimizedBaseline_init(
-          Systemic1(
-            UseExerciseInput=true,
-            ulnar_T2_R42(UseExercise=true),
-            radial_T1_R44(UseExercise=true),
-            vertebral_R272(UseExercise=true),
-            ulnar_T2_L90(UseExercise=true),
-            radial_T1_L92(UseExercise=true),
-            vertebral_L2(UseExercise=true),
-            cardiac_tissue(UseExercise=true),
-            internal_iliac_T1_R218(UseExercise=true),
-            profundus_T2_R224(UseExercise=true),
-            anterior_tibial_T3_R230(UseExercise=true),
-            posterior_tibial_T4_R236(UseExercise=true),
-            posterior_tibial_T4_L214(UseExercise=true),
-            anterior_tibial_T3_L208(UseExercise=true),
-            profundus_T2_L202(UseExercise=true),
-            internal_iliac_T1_L196(UseExercise=true)),
-          phi(offset=1),
-          settings(exercise_factor_on_arterial_compliance=0, exercise_factor=4),
-          useAutonomousPhi(y=false),
-          condHeartPhi(disconnected=false),
-          condHR(disconnected=false),
-          heartComponent(ventricles(
-              LV_wall(
-                vmax=vmax,
-                SLrest=SLrest,
-                tauD=tauD,
-                tauR=tauR,
-                      tauSC=tauSC,
-                C(fixed=false)),
-              SEP_wall(
-                vmax=vmax,
-                SLrest=SLrest,
-                tauD=tauD,
-                tauR=tauR,
-                       tauSC=tauSC,
-                C(fixed=false)),
-              RV_wall(
-                vmax=vmax,
-                SLrest=SLrest,
-                tauD=tauD,
-                tauR=tauR,
-                      tauSC=tauSC,
-                C(fixed=false)),
-              sigma_act_factor=sigma_act_factor,
-              redeclare
-                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
-                calciumMechanics)));
-
-        replaceable Modelica.Blocks.Sources.Ramp Exercise(
-          startTime=5,
-          height=1,
-          duration=0) constrainedby Modelica.Blocks.Sources.Ramp
-          annotation (Placement(transformation(extent={{-76,52},{-56,72}})));
-        parameter Modelica.SIunits.Time tauSC=0.225;
-        parameter Modelica.SIunits.Time tauR=0.024;
-        parameter Modelica.SIunits.Time tauD=0.032
-          "Factor scaling contraction decay time";
-        parameter Real SLrest=1.51 "microns";
-        parameter Real vmax=7
-          "Sarcomere shortening velocity with zero load micron/sec";
-        parameter Physiolibrary.Types.Fraction sigma_act_factor=3
-          "Factor affecting systolic strength";
-        output Real TS = heartComponent.aorticValve.Ts;
-      equation
-        connect(Exercise.y, Systemic1.exercise_input) annotation (Line(points={
-                {-55,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
+      model maxExercise "Aimed to ahve max CO"
+        extends ADAN_main.AdanVenousRed_Safaei.Exercise.base_Exercise_SimpleCa_maxSV(
+          sigma_factor(displayUnit="1") = 38.625,
+          heartComponent(ventricles(calciumMechanics(k_TS=0.165, k_TR_min(
+                    displayUnit="s") = 0.08))),
+          settings(exercise_factor(displayUnit="1") = 13.625));
         annotation (experiment(
-            StopTime=180,
-            Interval=0.02,
-            Tolerance=1e-05,
+            StopTime=15,
+            Interval=0.01,
+            Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
-      end base_Exercise;
+      end maxExercise;
 
-      model base_Exercise_SimpleCa "Simplified heart model"
-        extends Baseline.base_TriSeg_OptimizedBaseline_init(
-          Systemic1(
-            UseExerciseInput=true,
-            ulnar_T2_R42(UseExercise=true),
-            radial_T1_R44(UseExercise=true),
-            vertebral_R272(UseExercise=true),
-            ulnar_T2_L90(UseExercise=true),
-            radial_T1_L92(UseExercise=true),
-            vertebral_L2(UseExercise=true),
-            cardiac_tissue(UseExercise=true),
-            internal_iliac_T1_R218(UseExercise=true),
-            profundus_T2_R224(UseExercise=true),
-            anterior_tibial_T3_R230(UseExercise=true),
-            posterior_tibial_T4_R236(UseExercise=true),
-            posterior_tibial_T4_L214(UseExercise=true),
-            anterior_tibial_T3_L208(UseExercise=true),
-            profundus_T2_L202(UseExercise=true),
-            internal_iliac_T1_L196(UseExercise=true)),
-          settings(exercise_factor_on_arterial_compliance=0, exercise_factor=4),
-          useAutonomousPhi(y=false),
-          condHeartPhi(disconnected=false),
-          condHR(disconnected=false),
-          heartComponent(ventricles(
-              sigma_act_factor=sigma_act_factor,
-              redeclare
-                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
-                calciumMechanics(k_TS=0.17375, k_TR=0.01),
-              redeclare
-                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
-                LV_wall(
-                vmax=vmax,
-                sigma_act=sigma_act,
-                SLrest=SLrest,
-                tauD=tauD,
-                tauR=tauR,
-                      tauSC=tauSC,
-                C(fixed=false)),
-              redeclare
-                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
-                RV_wall(
-                vmax=vmax,
-                sigma_act=sigma_act,
-                SLrest=SLrest,
-                tauD=tauD,
-                tauR=tauR,
-                      tauSC=tauSC,
-                C(fixed=false)),
-              redeclare
-                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
-                SEP_wall(
-                vmax=vmax,
-                sigma_act=sigma_act,
-                SLrest=SLrest,
-                tauD=tauD,
-                tauR=tauR,
-                       tauSC=tauSC,
-                C(fixed=false))),
-            ra(enabled=true),
-            la(enabled=true)),
-          phi(
-            amplitude=0,
-            offset=1,
-            startTime=0));
-
-        replaceable Modelica.Blocks.Sources.Ramp Exercise(
-          startTime=5,
-          height=1,
-          duration=0) constrainedby Modelica.Blocks.Sources.Ramp
-          annotation (Placement(transformation(extent={{-76,52},{-56,72}})));
-        parameter Modelica.SIunits.Time tauSC=0.225;
-        parameter Modelica.SIunits.Time tauR=0.024;
-        parameter Modelica.SIunits.Time tauD=0.032
-          "Factor scaling contraction decay time";
-        parameter Real SLrest=1.51 "microns";
-        parameter Real vmax=7
-          "Sarcomere shortening velocity with zero load micron/sec";
-        parameter Physiolibrary.Types.Fraction sigma_act_factor=3
-          "Factor affecting systolic strength";
-        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
-        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
-        parameter Real sigma_act=sigma_factor*7.5*120 "mmHg ";
-        parameter Physiolibrary.Types.Fraction sigma_factor = 13.625;
-      equation
-        connect(Exercise.y, Systemic1.exercise_input) annotation (Line(points={
-                {-55,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
-        annotation (experiment(
-            StopTime=180,
-            Interval=0.02,
-            Tolerance=1e-05,
-            __Dymola_Algorithm="Cvode"));
-      end base_Exercise_SimpleCa;
-
-      model base_Exercise_SimpleCa_maxSV
-        extends base_Exercise_SimpleCa(
-          heartComponent(ventricles(calciumMechanics(
-                k_TR_min=0.05,
-                k_TS=0.18,
-                nominal_drive=1.0,
-                k_TR=0.05,
-                offset=0.0)),
-            tricuspidValve(useChatteringProtection=true,
-                chatteringProtectionTime(displayUnit="ms") = 0.01),
-            pulmonaryValve(useChatteringProtection=true,
-                chatteringProtectionTime(displayUnit="ms") = 0.01),
-            mitralValve(useChatteringProtection=true, chatteringProtectionTime(
-                  displayUnit="ms") = 0.01),
-            aorticValve(useChatteringProtection=true, chatteringProtectionTime(
-                  displayUnit="ms") = 0.01),
-            _R_LA=0.0125,
-            _R_RA=0.0125),
-          settings(exercise_factor=10.0),
-          sigma_factor=30.0,
-          vmax=7.0,
-          Exercise(startTime=1),
-          phi(
-            amplitude=0.75,
-            rising(displayUnit="s"),
-            width(displayUnit="s"),
-            falling(displayUnit="s"),
-            period(displayUnit="s"),
-            nperiod=1,
-            offset=0.25,
-            startTime=2),
-          Systemic1(
-            ulnar_T2_L90(UseExercise=false),
-            radial_T1_L92(UseExercise=false),
-            vertebral_L2(UseExercise=false),
-            ulnar_T2_R42(UseExercise=false),
-            radial_T1_R44(UseExercise=false),
-            internal_carotid_R8_C(UseExercise=false),
-            external_carotid_T2_R26(UseExercise=false),
-            vertebral_R272(UseExercise=false),
-            cardiac_tissue(UseExercise=false)),
-          sigma_act_factor=30.0);
-        annotation (experiment(
-            StopTime=30,
-            Interval=0.02,
-            Tolerance=1e-05,
-            __Dymola_Algorithm="Cvode"));
-      end base_Exercise_SimpleCa_maxSV;
     end Identification;
 
     package Baseline
@@ -33324,6 +33120,61 @@ P_hs_plus_dist"),
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end base_TriSeg_OptimizedBaseline_init_CL;
+
+      model OlufsenTriSeg_base "Simplified heart model"
+        extends Baseline.base_TriSeg_OptimizedBaseline_init(
+          Systemic1(UseExerciseInput=false),
+          useAutonomousPhi(y=false),
+          condHeartPhi(disconnected=false),
+          condHR(disconnected=false),
+          heartComponent(
+            tricuspidValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            pulmonaryValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            mitralValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            aorticValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            _R_LA=0.015,
+            _R_RA=0.015,
+            ventricles(
+              redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
+                calciumMechanics(
+                offset=1e-4,     k_TS=0.3, k_TR=0.3),
+              redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
+                LV_wall(
+                sigma_act=sigma_act,
+                C(fixed=false)),
+              redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
+                RV_wall(
+                sigma_act=sigma_act,
+                C(fixed=false)),
+              redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
+                SEP_wall(
+                sigma_act=sigma_act,
+                C(fixed=false))),
+            ra(enabled=true),
+            la(enabled=true)),
+          phi(
+            amplitude=0,
+            offset=0.25,
+            startTime=0));
+
+        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
+        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        parameter Real sigma_act=sigma_factor*7.5*120 "mmHg ";
+        parameter Physiolibrary.Types.Fraction sigma_factor = 20;
+        annotation (experiment(
+            StopTime=30,
+            Interval=0.02,
+            Tolerance=1e-07,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_base;
     end Baseline;
 
     package Tilt
@@ -33695,6 +33546,153 @@ P_hs_plus_dist"),
             Tolerance=1e-09,
             __Dymola_Algorithm="Cvode"));
       end OptimizedBaseline_tiltable;
+
+      model OptimizedExercise_tiltable
+        extends Exercise.base_Exercise_SimpleCa_maxSV(Systemic1(
+            redeclare model Systemic_artery_thoracic =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
+            redeclare model Systemic_artery =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
+            redeclare model Systemic_vein =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vp_vein_tDF_leveled,
+            redeclare model Systemic_tissue =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.systemic_tissue_leveled,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_q_leveled
+              pq_terminator_v,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_p_leveled
+              pq_terminator_sup_vc,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_p_leveled
+              pq_terminator_inf_vc,
+            redeclare
+              ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vv_artery_thoracic_leveled
+              ascending_aorta_A(sinAlpha=1),
+            ascending_aorta_B(sinAlpha=1),
+            ascending_aorta_C(sinAlpha=1),
+            ascending_aorta_D(sinAlpha=1),
+            aortic_arch_C2(sinAlpha=1),
+            aortic_arch_C46(sinAlpha=1),
+            aortic_arch_C64(sinAlpha=1),
+            common_carotid_R6_A(sinAlpha=1),
+            common_carotid_R6_B(sinAlpha=1),
+            common_carotid_R6_C(sinAlpha=1),
+            internal_carotid_R8_A(sinAlpha=1),
+            internal_carotid_R8_B(sinAlpha=1),
+            common_carotid_L48_A(sinAlpha=1),
+            common_carotid_L48_B(sinAlpha=1),
+            common_carotid_L48_C(sinAlpha=1),
+            common_carotid_L48_D(sinAlpha=1),
+            internal_carotid_L50_A(sinAlpha=1),
+            internal_carotid_L50_B(sinAlpha=1),
+            brachial_L82(sinAlpha=-1),
+            ulnar_T2_L84(sinAlpha=-1),
+            brachial_R34(sinAlpha=-1),
+            ulnar_T2_R36(sinAlpha=-1),
+            vertebral_vein_L126(sinAlpha=-1),
+            brachial_vein_L138(sinAlpha=1),
+            brachial_vein_L142(sinAlpha=1),
+            ulnar_vein_T7_L144(sinAlpha=1),
+            brachial_vein_L152(sinAlpha=1),
+            radial_vein_T3_L154(sinAlpha=1),
+            brachial_vein_R104(sinAlpha=1),
+            brachial_vein_R114(sinAlpha=1),
+            brachial_vein_R108(sinAlpha=1),
+            ulnar_vein_T7_R110(sinAlpha=1),
+            brachial_vein_R118(sinAlpha=1),
+            radial_vein_T3_R120(sinAlpha=1),
+            brachial_vein_L148(sinAlpha=1),
+            superior_vena_cava_C2(sinAlpha=-1),
+            superior_vena_cava_C88(sinAlpha=-1),
+            brachiocephalic_vein_R90(sinAlpha=-1),
+            brachiocephalic_vein_R94(sinAlpha=-1),
+            brachiocephalic_vein_L128(sinAlpha=-1),
+            brachiocephalic_vein_L124(sinAlpha=-1),
+            internal_jugular_vein_R122(sinAlpha=-1),
+            external_jugular_vein_R98(sinAlpha=-1),
+            thoracic_aorta_C96(sinAlpha=-1),
+            thoracic_aorta_C100(sinAlpha=-1),
+            thoracic_aorta_C104(sinAlpha=-1),
+            thoracic_aorta_C108(sinAlpha=-1),
+            thoracic_aorta_C112(sinAlpha=-1),
+            aortic_arch_C94(sinAlpha=-1),
+            vertebral_vein_R92(sinAlpha=-1),
+            internal_jugular_vein_L156(sinAlpha=-1),
+            external_jugular_vein_L132(sinAlpha=-1),
+            abdominal_aorta_C114(sinAlpha=-1),
+            abdominal_aorta_C136(sinAlpha=-1),
+            abdominal_aorta_C164(sinAlpha=-1),
+            abdominal_aorta_C176(sinAlpha=-1),
+            abdominal_aorta_C188(sinAlpha=-1),
+            abdominal_aorta_C192(sinAlpha=-1),
+            common_iliac_R216(sinAlpha=-1),
+            external_iliac_R220(sinAlpha=-1),
+            femoral_R222(sinAlpha=-1),
+            common_iliac_L194(sinAlpha=-1),
+            external_iliac_L198(sinAlpha=-1),
+            femoral_L200(sinAlpha=-1),
+            femoral_R226(sinAlpha=-1),
+            popliteal_R228(sinAlpha=-1),
+            popliteal_R232(sinAlpha=-1),
+            tibiofibular_trunk_R234(sinAlpha=-1),
+            femoral_L204(sinAlpha=-1),
+            popliteal_L206(sinAlpha=-1),
+            popliteal_L210(sinAlpha=-1),
+            tibiofibular_trunk_L212(sinAlpha=-1),
+            renal_vein_T1_L22(sinAlpha=1),
+            internal_iliac_vein_T1_R30(sinAlpha=1),
+            profunda_femoris_vein_T2_R40(sinAlpha=1),
+            anterior_tibial_vein_T4_R50(sinAlpha=1),
+            posterior_tibial_vein_T6_R54(sinAlpha=1),
+            internal_iliac_vein_T1_L60(sinAlpha=1),
+            profunda_femoris_vein_T2_L70(sinAlpha=1),
+            anterior_tibial_vein_T4_L80(sinAlpha=1),
+            posterior_tibial_vein_T6_L84(sinAlpha=1),
+            external_iliac_vein_R32(sinAlpha=1),
+            femoral_vein_R34(sinAlpha=1),
+            femoral_vein_R38(sinAlpha=1),
+            femoral_vein_R42(sinAlpha=1),
+            femoral_vein_R46(sinAlpha=1),
+            popliteal_vein_R48(sinAlpha=1),
+            popliteal_vein_R52(sinAlpha=1),
+            external_iliac_vein_L62(sinAlpha=1),
+            femoral_vein_L64(sinAlpha=1),
+            femoral_vein_L68(sinAlpha=1),
+            femoral_vein_L72(sinAlpha=1),
+            femoral_vein_L76(sinAlpha=1),
+            popliteal_vein_L78(sinAlpha=1),
+            popliteal_vein_L82(sinAlpha=1),
+            inferior_vena_cava_C20(sinAlpha=1),
+            inferior_vena_cava_C24(sinAlpha=1),
+            common_iliac_vein_L56(sinAlpha=1),
+            common_iliac_vein_R26(sinAlpha=1),
+            external_iliac_vein_R28(sinAlpha=1),
+            external_iliac_vein_L58(sinAlpha=1),
+            inferior_vena_cava_C16(sinAlpha=1),
+            inferior_vena_cava_C12(sinAlpha=1),
+            inferior_vena_cava_C8(sinAlpha=1),
+            UseTiltInput=true), heartComponent(UseFrequencyInput=true, UsePhiInput=true),
+          phi(
+            amplitude=0.75,
+            rising=1,
+            width=200,
+            falling=1,
+            period=200,
+            nperiod=1,
+            startTime=0));
+
+        replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
+          height=Modelica.Constants.pi/3,
+          startTime=10,
+          duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
+          annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
+      equation
+        connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-79,32},
+                {-22,32},{-22,20}},    color={0,0,127}));
+        annotation (experiment(
+            StopTime=30,
+            Interval=0.02,
+            Tolerance=1e-07,
+            __Dymola_Algorithm="Cvode"));
+      end OptimizedExercise_tiltable;
     end Tilt;
 
     package Exercise
@@ -33753,6 +33751,148 @@ P_hs_plus_dist"),
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end TiltWithExercise;
+
+      model base_Exercise_SimpleCa "Simplified heart model"
+        extends Baseline.base_TriSeg_OptimizedBaseline_init(
+          Systemic1(
+            UseExerciseInput=true,
+            ulnar_T2_R42(UseExercise=true),
+            radial_T1_R44(UseExercise=true),
+            vertebral_R272(UseExercise=true),
+            ulnar_T2_L90(UseExercise=true),
+            radial_T1_L92(UseExercise=true),
+            vertebral_L2(UseExercise=true),
+            cardiac_tissue(UseExercise=true),
+            internal_iliac_T1_R218(UseExercise=true),
+            profundus_T2_R224(UseExercise=true),
+            anterior_tibial_T3_R230(UseExercise=true),
+            posterior_tibial_T4_R236(UseExercise=true),
+            posterior_tibial_T4_L214(UseExercise=true),
+            anterior_tibial_T3_L208(UseExercise=true),
+            profundus_T2_L202(UseExercise=true),
+            internal_iliac_T1_L196(UseExercise=true)),
+          settings(exercise_factor_on_arterial_compliance=0, exercise_factor=4),
+          useAutonomousPhi(y=false),
+          condHeartPhi(disconnected=false),
+          condHR(disconnected=false),
+          heartComponent(ventricles(
+              sigma_act_factor=sigma_act_factor,
+              redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
+                calciumMechanics(k_TS=0.17375, k_TR=0.01),
+              redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
+                LV_wall(
+                vmax=vmax,
+                sigma_act=sigma_act,
+                SLrest=SLrest,
+                tauD=tauD,
+                tauR=tauR,
+                      tauSC=tauSC,
+                C(fixed=false)),
+              redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
+                RV_wall(
+                vmax=vmax,
+                sigma_act=sigma_act,
+                SLrest=SLrest,
+                tauD=tauD,
+                tauR=tauR,
+                      tauSC=tauSC,
+                C(fixed=false)),
+              redeclare
+                Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
+                SEP_wall(
+                vmax=vmax,
+                sigma_act=sigma_act,
+                SLrest=SLrest,
+                tauD=tauD,
+                tauR=tauR,
+                       tauSC=tauSC,
+                C(fixed=false))),
+            ra(enabled=true),
+            la(enabled=true)),
+          phi(
+            amplitude=0,
+            offset=1,
+            startTime=0));
+
+        replaceable Modelica.Blocks.Sources.Ramp Exercise(
+          startTime=5,
+          height=1,
+          duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+          annotation (Placement(transformation(extent={{-76,52},{-56,72}})));
+        parameter Modelica.SIunits.Time tauSC=0.225;
+        parameter Modelica.SIunits.Time tauR=0.024;
+        parameter Modelica.SIunits.Time tauD=0.032
+          "Factor scaling contraction decay time";
+        parameter Real SLrest=1.51 "microns";
+        parameter Real vmax=7
+          "Sarcomere shortening velocity with zero load micron/sec";
+        parameter Physiolibrary.Types.Fraction sigma_act_factor=3
+          "Factor affecting systolic strength";
+        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
+        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        parameter Real sigma_act=sigma_factor*7.5*120 "mmHg ";
+        parameter Physiolibrary.Types.Fraction sigma_factor = 13.625;
+      equation
+        connect(Exercise.y, Systemic1.exercise_input) annotation (Line(points={
+                {-55,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=180,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end base_Exercise_SimpleCa;
+
+      model base_Exercise_SimpleCa_maxSV
+        extends ADAN_main.AdanVenousRed_Safaei.Exercise.base_Exercise_SimpleCa(
+          heartComponent(ventricles(calciumMechanics(
+                k_TR_min=0.08,
+                k_TS=0.165,
+                nominal_drive=1.0,
+                k_TR=0.05,
+                offset=0.0)),
+            tricuspidValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            pulmonaryValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            mitralValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            aorticValve(useChatteringProtection=true, chatteringProtectionTime(
+                  displayUnit="ms") = 0.01),
+            _R_LA=0.015,
+            _R_RA=0.015),
+          settings(exercise_factor(displayUnit="1") = 13.625),
+          sigma_factor=38.625,
+          vmax=7.0,
+          Exercise(startTime=1),
+          phi(
+            amplitude=0.75,
+            rising(displayUnit="s"),
+            width(displayUnit="s"),
+            falling(displayUnit="s"),
+            period(displayUnit="s"),
+            nperiod=1,
+            offset=0.25,
+            startTime=2),
+          Systemic1(
+            ulnar_T2_L90(UseExercise=false),
+            radial_T1_L92(UseExercise=false),
+            vertebral_L2(UseExercise=false),
+            ulnar_T2_R42(UseExercise=false),
+            radial_T1_R44(UseExercise=false),
+            internal_carotid_R8_C(UseExercise=false),
+            external_carotid_T2_R26(UseExercise=false),
+            vertebral_R272(UseExercise=false),
+            cardiac_tissue(UseExercise=false)),
+          sigma_act_factor=30.0);
+        annotation (experiment(
+            StopTime=15,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end base_Exercise_SimpleCa_maxSV;
     end Exercise;
   annotation(preferredView="info",
   version="2.3.2-beta",
