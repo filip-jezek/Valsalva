@@ -33436,7 +33436,7 @@ P_hs_plus_dist"),
       end base_TriSeg_OptimizedBaseline;
 
       model OptimizedBaseline_tiltable
-        extends Baseline.base_TriSeg_OptimizedBaseline_init(Systemic1(
+        extends Baseline.base_TriSeg_OptimizedBaseline_initNoHeart( Systemic1(
             redeclare model Systemic_artery_thoracic =
                 ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
             redeclare model Systemic_artery =
@@ -33856,7 +33856,8 @@ P_hs_plus_dist"),
             amplitude=0.38 - 0.25,
             width=200,
             nperiod=1,
-            startTime=10));
+            startTime=10),
+          useAutonomousPhi(y=true));
 
         replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
           height=Modelica.Constants.pi/3,
@@ -33872,6 +33873,32 @@ P_hs_plus_dist"),
             Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_tiltable;
+
+      model OlufsenTriseg_tiltable_reparam
+        extends OlufsenTriSeg_tiltable( settings(
+            R_vc=0.5,
+            Ra_factor=4.2625,
+            tissuesCompliance_PhiEffect=0.2,
+            tissues_gamma=0.5));
+      end OlufsenTriseg_tiltable_reparam;
+
+      model OlufsenTriseg_tiltable_reparam_valsalva
+        extends OlufsenTriseg_tiltable_reparam(
+          condTP(disconnected=false),
+          thoracic_pressure(
+            rising=1,
+            width=15,
+            falling=1,
+            period=40,
+            nperiod=2,
+            startTime=10),
+          Tilt_ramp(startTime=40));
+        annotation (experiment(
+            StopTime=80,
+            Interval=0.02,
+            Tolerance=1e-07,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriseg_tiltable_reparam_valsalva;
     end Tilt;
 
     package Exercise
@@ -34076,7 +34103,26 @@ P_hs_plus_dist"),
     end Exercise;
 
     package United
+
     end United;
+
+    package Valsalva
+
+      model OlufsenTriSeg_valsalva
+        extends Baseline.OlufsenTriSeg_base( settings(
+            R_vc=0.5,
+            Ra_factor=4.2625,
+            tissuesCompliance_PhiEffect=0.2,
+            tissues_gamma=0.5),
+          useAutonomousPhi(y=true),
+          thoracic_pressure(
+            rising=1,
+            width=15,
+            falling=1,
+            startTime=10),
+          condTP(disconnected=false));
+      end OlufsenTriSeg_valsalva;
+    end Valsalva;
   annotation(preferredView="info",
   version="2.3.2-beta",
   versionBuild=1,
