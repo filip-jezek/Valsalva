@@ -1020,12 +1020,12 @@ type"),       Text(
           Ts = time - T0;
         end when;
 
-        when cc < epsTime then
+        when not initial() and cc < epsTime then
           // this launches when the signal resets. We better not use 0 for possible numerical issues. 1ms distance from beggining of cardiac cycle must be satisfactory.
           // The T0 signal is not precise, as the valves might be chattering
           T0_cycle = time;
           reinit(CO_acc, 0);
-          CO = CO_acc/(time - pre(T0_cycle));
+          CO = max(0, CO_acc/(time - pre(T0_cycle)));
           Pout_min = pre(BP_min);
           reinit(BP_min, Pmax);
           Pout_pulse = Pout_max - Pout_min;
@@ -3409,12 +3409,16 @@ type"),       Text(
                 reinit(cardiac_cycle, 0);
               end when;
 
-              annotation (Icon(graphics={Line(
+              annotation (Icon(graphics={    Rectangle(extent={{-72,64},{94,-40}},
+                        lineColor={0,0,0},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid),
+                                         Line(
                       points={{-66,-36},{-46,-36},{-46,4},{-26,44},{-6,44},{4,4},
                           {14,-16},{34,-26},{54,-36},{74,-36},{94,-36}},
                       color={0,0,0},
-                      smooth=Smooth.Bezier), Rectangle(extent={{-72,64},{94,-40}},
-                        lineColor={0,0,0})}));
+                      smooth=Smooth.Bezier,
+                      thickness=0.5)}));
             end partialDrivingFunction;
 
             model DrivingFunctionCalcium "HeartBeat origins in Calcium mechanics"
@@ -3481,38 +3485,52 @@ type"),       Text(
 
               outer Physiolibrary.Types.Fraction phi;
               parameter Physiolibrary.Types.Fraction phi0 = 0.25;
-              parameter Real offset = 0.1 "driving offset";
-              parameter Real k_TS = 0.1 "systolic contraction, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
-              parameter Real k_TR = 0.3 "Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
-              Real k_TR_phi = k_TR*(1-k_RS*(phi - phi0));
-              Real k_RS( fixed = false) "Lusitropic relaxation slope dependent on phi linearly. Given by k_tr_min";
-              parameter Physiolibrary.Types.Time k_TR_min = 0.15
-                "minimal time for muscle relaxation at maximal activation. Guessed value";
-              parameter Real nominal_drive=0.8
-                "0.8 is the maximum of Ca driving function in Lumens heart";
-              parameter Physiolibrary.Types.Fraction inotropic_effect=0
-                "Phi effect on muscle contraction strength.";
-              Physiolibrary.Types.Fraction driving;
-              Real drive_factor = nominal_drive*(1 + inotropic_effect *(phi - phi0));
-              Physiolibrary.Types.Time TS, TR;
-              Physiolibrary.Types.Time tm = cardiac_cycle / frequency "time since start of cardiac cycle";
-              Boolean systolicContraction = tm >= 0 and tm < TS;
-              Boolean systolicRelaxation = tm >= TS and tm < TR + TS;
-            equation
-              k_TR_min = k_TR*(1-k_RS*(1 - phi0));
+              parameter Real offset = 1e-4 "nominal driving offset";
+              parameter Real offset_maxAct=offset
+                "Minimal driving offset at maximal activation";
+              Real offset_coeff "Inotropic effect on driving offset coefficient. Automatically calculated";
+              Real offset_phi = offset*(1+ offset_coeff*(phi-phi0));
 
-            TS = k_TS;
-            TR = k_TR_phi;
+              parameter Real k_TS = 0.1 "nominal systolic contraction timing";
+              parameter Real k_TS_maxAct = 0.1 "nominal systolic contraction at maximal activation";
+              Real k_TS_coeff;
+              Real k_TS_phi = k_TS*(1 - k_TS_coeff*(phi - phi0));
+
+              parameter Real k_TR = 0.3 "Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication";
+              Real k_TR_phi=k_TR*(1 - k_TR_coeff*(phi - phi0))
+                "systolic relaxation time at current phi";
+              Real k_TR_coeff(fixed=false)
+                "Lusitropic relaxation slope dependent on phi linearly. Given by k_tr_min";
+              parameter Physiolibrary.Types.Time k_TR_maxAct=0.15
+                "minimal time for muscle relaxation at maximal activation. Guessed value";
+
+              parameter Real drive=0.8
+                "0.8 is the maximum of Ca driving function in Lumens heart";
+              parameter Physiolibrary.Types.Fraction drive_maxAct=drive
+                "Phi effect on muscle contraction strength. Nominal drive means zeo effect";
+              Physiolibrary.Types.Fraction drive_coeff
+                "Phi effect on muscle contraction strength. Auto calculated from nominal and maximal drive";
+              Physiolibrary.Types.Fraction driving;
+              Real drive_phi=drive*(1 + drive_coeff*(phi - phi0));
+
+              Physiolibrary.Types.Time tm = cardiac_cycle / frequency "time since start of cardiac cycle";
+              Boolean systolicContraction = tm >= 0 and tm < k_TS_phi;
+              Boolean systolicRelaxation = tm >= k_TS_phi and tm < k_TR_phi + k_TS_phi;
+            equation
+              k_TS_maxAct =k_TS*(1 - k_TS_coeff*(1 - phi0));
+              k_TR_maxAct = k_TR*(1 - k_TR_coeff*(1 - phi0));
+              drive_maxAct = drive*(1 + drive_coeff*(1 - phi0));
+              offset_maxAct = offset*(1 + offset_coeff*(1 - phi0));
 
             if systolicContraction then
-                driving = (1-offset)/2*(1 - cos(Modelica.Constants.pi*tm/TS)) + offset;
+                driving = (1-offset_phi)/2*(1 - cos(Modelica.Constants.pi*tm/k_TS_phi)) + offset_phi;
             elseif systolicRelaxation then
-                driving = (1-offset)/2*(1 + cos(Modelica.Constants.pi*(tm - TS)/TR)) + offset;
+                driving = (1-offset_phi)/2*(1 + cos(Modelica.Constants.pi*(tm - k_TS_phi)/k_TR_phi)) + offset_phi;
             else
-                driving = 0 + offset;
+                driving = 0 + offset_phi;
             end if;
 
-             drivingFunction =drive_factor*driving;
+             drivingFunction =drive_phi*driving;
 
               annotation (Icon(graphics={Text(
                       extent={{-60,-100},{80,-40}},
@@ -3892,6 +3910,8 @@ type"),       Text(
             model VentricleWallLumensSimple
               "Lumens model, but with driving directly the mechanical activation"
               extends partialVentricleWall;
+              outer Physiolibrary.Types.Fraction phi;
+              parameter Physiolibrary.Types.Fraction phi0 = 0.25;
               Real sinalpha = Tx/Tm;
               Modelica.SIunits.Angle alpha = asin(sinalpha);
 
@@ -3917,10 +3937,15 @@ type"),       Text(
               // Real SLo(nominal=1e-6) = Lsref*exp(epsf);
 
               // Triseg parameters
+
               parameter Real Lsref=1.9 "Resting SL, micron";
               parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
               parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
               parameter Real sigma_act=7.5*120 "mmHg ";
+              parameter Real sigma_act_maxAct = sigma_act "Sigma at maximal activation";
+              Real sigma_act_coeff "Slope of sigma change for activation. Calculated from nominal and max active";
+              Real sigma_act_phi = sigma_act*(1 + sigma_act_coeff*(phi - phi0));
+
               // not used in the current version. Using k_passive instead
             //  parameter Real sigma_pas=7.5*7 "mmHg";
               parameter Real SLrest=1.51 "microns";
@@ -3965,6 +3990,7 @@ type"),       Text(
               // equilibrium of forces at junction circle already in base class
 
             equation
+              sigma_act_maxAct = sigma_act*(1 + sigma_act_coeff*(1 - phi0));
 
               // der(C) = dC;
               C = drivingInput;
@@ -25784,7 +25810,7 @@ P_hs_plus_dist"),
 
     model testDrivingOttesen
       Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
-        drivingOttesen(k_TR=0.2, k_TR_min=0.1)
+        drivingOttesen(k_TR=0.2, k_TR_maxAct=0.1)
         annotation (Placement(transformation(extent={{-12,-10},{8,10}})));
       Modelica.Blocks.Sources.Ramp phi_ramp(
         height=0.75,
@@ -32273,7 +32299,8 @@ P_hs_plus_dist"),
           heartRate(HR_max=3.1666666666667),
           heartComponent(ventricles(redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
-                calciumMechanics(k_TR_min(displayUnit="s"), inotropic_effect=1.515625))),
+                calciumMechanics(k_TR_maxAct(displayUnit="s"), drive_coeff=
+                    1.515625))),
           useAutonomousPhi(y=true),
           Systemic1(baroreflex_system(baroreceptor_aortic(Ts=6.0),
                 baroreceptor_carotid(Ts=6.0))));
@@ -33142,23 +33169,28 @@ P_hs_plus_dist"),
               redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
                 calciumMechanics(
-                offset=0.0162625,k_TS=0.14, k_TR=0.45,
-                nominal_drive=1.0),
+                offset=0.0162625,
+                offset_maxAct=7.6875E-4,
+                k_TS_maxAct=0.13,
+                k_TR_maxAct(displayUnit="s") = 0.08,
+                drive=1,
+                k_TS=0.14,
+                k_TR=0.45),
               redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
-                LV_wall(
-                sigma_act=sigma_act,
-                C(fixed=false)),
+                LV_wall(sigma_act=sigma_act,
+                sigma_act_maxAct=sigma_act_maxAct,
+                                             C(fixed=false)),
               redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
-                RV_wall(
-                sigma_act=sigma_act,
-                C(fixed=false)),
+                RV_wall(sigma_act=sigma_act,
+                sigma_act_maxAct=sigma_act_maxAct,
+                                             C(fixed=false)),
               redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
-                SEP_wall(
-                sigma_act=sigma_act,
-                C(fixed=false))),
+                SEP_wall(sigma_act=sigma_act,
+                sigma_act_maxAct=sigma_act_maxAct,
+                                              C(fixed=false))),
             ra(enabled=true),
             la(enabled=true)),
           phi(
@@ -33168,8 +33200,10 @@ P_hs_plus_dist"),
 
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
         output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
-        parameter Real sigma_act=sigma_factor*7.5*120 "mmHg ";
-        parameter Physiolibrary.Types.Fraction sigma_factor = 2;
+        parameter Real sigma_act=2*7.5*120 "mmHg ";
+      //  parameter Physiolibrary.Types.Fraction sigma_factor = 2;
+        parameter Real sigma_act_maxAct=30.25*7.5*120
+          "Sigma at maximal activation";
         annotation (experiment(
             StopTime=30,
             Interval=0.02,
@@ -33833,8 +33867,9 @@ P_hs_plus_dist"),
         connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-79,32},
                 {-22,32},{-22,20}},    color={0,0,127}));
         annotation (experiment(
+            StopTime=20,
             Interval=0.02,
-            Tolerance=1e-09,
+            Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_tiltable;
     end Tilt;
@@ -33992,11 +34027,12 @@ P_hs_plus_dist"),
       model base_Exercise_SimpleCa_maxSV
         extends ADAN_main.AdanVenousRed_Safaei.Exercise.base_Exercise_SimpleCa(
           heartComponent(ventricles(calciumMechanics(
-                k_TR_min=0.08,
+                offset_maxAct=7.6875E-4,
+                k_TS_maxAct=0.13,
+                k_TR_maxAct(displayUnit="s") = 0.08,
+                drive=1,
                 k_TS=0.165,
-                nominal_drive=1.0,
-                k_TR=0.05,
-                offset=0.0)),
+                k_TR=0.45)),
             tricuspidValve(useChatteringProtection=true, chatteringProtectionTime(
                   displayUnit="ms") = 0.01),
             pulmonaryValve(useChatteringProtection=true, chatteringProtectionTime(
@@ -34008,7 +34044,7 @@ P_hs_plus_dist"),
             _R_LA=0.015,
             _R_RA=0.015),
           settings(exercise_factor(displayUnit="1") = 13.625),
-          sigma_factor=38.625,
+          sigma_factor=30.25,
           vmax=7.0,
           Exercise(startTime=1),
           phi(
@@ -34038,6 +34074,9 @@ P_hs_plus_dist"),
             __Dymola_Algorithm="Cvode"));
       end base_Exercise_SimpleCa_maxSV;
     end Exercise;
+
+    package United
+    end United;
   annotation(preferredView="info",
   version="2.3.2-beta",
   versionBuild=1,
