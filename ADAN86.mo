@@ -4707,7 +4707,7 @@ Simple")}),                                                                  Dia
           connect(Heart1.frequency, frequency_input)
             annotation (Line(points={{-10,0},{-106,0}}, color={0,0,127}));
           connect(Heart1.thoracic_pressure, thoracic_pressure_input)
-            annotation (Line(points={{0,-10},{-8,-10},{-8,-100}}, color={0,0,127}));
+            annotation (Line(points={{0,-10},{0,-10},{0,-100}},   color={0,0,127}));
           annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
                   Text(
                   extent={{-100,60},{100,100}},
@@ -33142,7 +33142,8 @@ P_hs_plus_dist"),
               redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
                 calciumMechanics(
-                offset=1e-4,     k_TS=0.3, k_TR=0.3),
+                offset=0.0162625,k_TS=0.14, k_TR=0.45,
+                nominal_drive=1.0),
               redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
                 LV_wall(
@@ -33168,7 +33169,7 @@ P_hs_plus_dist"),
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
         output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
         parameter Real sigma_act=sigma_factor*7.5*120 "mmHg ";
-        parameter Physiolibrary.Types.Fraction sigma_factor = 20;
+        parameter Physiolibrary.Types.Fraction sigma_factor = 2;
         annotation (experiment(
             StopTime=30,
             Interval=0.02,
@@ -33693,6 +33694,149 @@ P_hs_plus_dist"),
             Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
       end OptimizedExercise_tiltable;
+
+      model OlufsenTriSeg_tiltable
+        extends Baseline.OlufsenTriSeg_base(Systemic1(
+            redeclare model Systemic_artery_thoracic =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
+            redeclare model Systemic_artery =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
+            redeclare model Systemic_vein =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vp_vein_tDF_leveled,
+            redeclare model Systemic_tissue =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.systemic_tissue_leveled,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_q_leveled
+              pq_terminator_v,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_p_leveled
+              pq_terminator_sup_vc,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_p_leveled
+              pq_terminator_inf_vc,
+            redeclare
+              ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vv_artery_thoracic_leveled
+              ascending_aorta_A(sinAlpha=1),
+            ascending_aorta_B(sinAlpha=1),
+            ascending_aorta_C(sinAlpha=1),
+            ascending_aorta_D(sinAlpha=1),
+            aortic_arch_C2(sinAlpha=1),
+            aortic_arch_C46(sinAlpha=1),
+            aortic_arch_C64(sinAlpha=1),
+            common_carotid_R6_A(sinAlpha=1),
+            common_carotid_R6_B(sinAlpha=1),
+            common_carotid_R6_C(sinAlpha=1),
+            internal_carotid_R8_A(sinAlpha=1),
+            internal_carotid_R8_B(sinAlpha=1),
+            common_carotid_L48_A(sinAlpha=1),
+            common_carotid_L48_B(sinAlpha=1),
+            common_carotid_L48_C(sinAlpha=1),
+            common_carotid_L48_D(sinAlpha=1),
+            internal_carotid_L50_A(sinAlpha=1),
+            internal_carotid_L50_B(sinAlpha=1),
+            brachial_L82(sinAlpha=-1),
+            ulnar_T2_L84(sinAlpha=-1),
+            brachial_R34(sinAlpha=-1),
+            ulnar_T2_R36(sinAlpha=-1),
+            vertebral_vein_L126(sinAlpha=-1),
+            brachial_vein_L138(sinAlpha=1),
+            brachial_vein_L142(sinAlpha=1),
+            ulnar_vein_T7_L144(sinAlpha=1),
+            brachial_vein_L152(sinAlpha=1),
+            radial_vein_T3_L154(sinAlpha=1),
+            brachial_vein_R104(sinAlpha=1),
+            brachial_vein_R114(sinAlpha=1),
+            brachial_vein_R108(sinAlpha=1),
+            ulnar_vein_T7_R110(sinAlpha=1),
+            brachial_vein_R118(sinAlpha=1),
+            radial_vein_T3_R120(sinAlpha=1),
+            brachial_vein_L148(sinAlpha=1),
+            superior_vena_cava_C2(sinAlpha=-1),
+            superior_vena_cava_C88(sinAlpha=-1),
+            brachiocephalic_vein_R90(sinAlpha=-1),
+            brachiocephalic_vein_R94(sinAlpha=-1),
+            brachiocephalic_vein_L128(sinAlpha=-1),
+            brachiocephalic_vein_L124(sinAlpha=-1),
+            internal_jugular_vein_R122(sinAlpha=-1),
+            external_jugular_vein_R98(sinAlpha=-1),
+            thoracic_aorta_C96(sinAlpha=-1),
+            thoracic_aorta_C100(sinAlpha=-1),
+            thoracic_aorta_C104(sinAlpha=-1),
+            thoracic_aorta_C108(sinAlpha=-1),
+            thoracic_aorta_C112(sinAlpha=-1),
+            aortic_arch_C94(sinAlpha=-1),
+            vertebral_vein_R92(sinAlpha=-1),
+            internal_jugular_vein_L156(sinAlpha=-1),
+            external_jugular_vein_L132(sinAlpha=-1),
+            abdominal_aorta_C114(sinAlpha=-1),
+            abdominal_aorta_C136(sinAlpha=-1),
+            abdominal_aorta_C164(sinAlpha=-1),
+            abdominal_aorta_C176(sinAlpha=-1),
+            abdominal_aorta_C188(sinAlpha=-1),
+            abdominal_aorta_C192(sinAlpha=-1),
+            common_iliac_R216(sinAlpha=-1),
+            external_iliac_R220(sinAlpha=-1),
+            femoral_R222(sinAlpha=-1),
+            common_iliac_L194(sinAlpha=-1),
+            external_iliac_L198(sinAlpha=-1),
+            femoral_L200(sinAlpha=-1),
+            femoral_R226(sinAlpha=-1),
+            popliteal_R228(sinAlpha=-1),
+            popliteal_R232(sinAlpha=-1),
+            tibiofibular_trunk_R234(sinAlpha=-1),
+            femoral_L204(sinAlpha=-1),
+            popliteal_L206(sinAlpha=-1),
+            popliteal_L210(sinAlpha=-1),
+            tibiofibular_trunk_L212(sinAlpha=-1),
+            renal_vein_T1_L22(sinAlpha=1),
+            internal_iliac_vein_T1_R30(sinAlpha=1),
+            profunda_femoris_vein_T2_R40(sinAlpha=1),
+            anterior_tibial_vein_T4_R50(sinAlpha=1),
+            posterior_tibial_vein_T6_R54(sinAlpha=1),
+            internal_iliac_vein_T1_L60(sinAlpha=1),
+            profunda_femoris_vein_T2_L70(sinAlpha=1),
+            anterior_tibial_vein_T4_L80(sinAlpha=1),
+            posterior_tibial_vein_T6_L84(sinAlpha=1),
+            external_iliac_vein_R32(sinAlpha=1),
+            femoral_vein_R34(sinAlpha=1),
+            femoral_vein_R38(sinAlpha=1),
+            femoral_vein_R42(sinAlpha=1),
+            femoral_vein_R46(sinAlpha=1),
+            popliteal_vein_R48(sinAlpha=1),
+            popliteal_vein_R52(sinAlpha=1),
+            external_iliac_vein_L62(sinAlpha=1),
+            femoral_vein_L64(sinAlpha=1),
+            femoral_vein_L68(sinAlpha=1),
+            femoral_vein_L72(sinAlpha=1),
+            femoral_vein_L76(sinAlpha=1),
+            popliteal_vein_L78(sinAlpha=1),
+            popliteal_vein_L82(sinAlpha=1),
+            inferior_vena_cava_C20(sinAlpha=1),
+            inferior_vena_cava_C24(sinAlpha=1),
+            common_iliac_vein_L56(sinAlpha=1),
+            common_iliac_vein_R26(sinAlpha=1),
+            external_iliac_vein_R28(sinAlpha=1),
+            external_iliac_vein_L58(sinAlpha=1),
+            inferior_vena_cava_C16(sinAlpha=1),
+            inferior_vena_cava_C12(sinAlpha=1),
+            inferior_vena_cava_C8(sinAlpha=1),
+            UseTiltInput=true), heartComponent(UseFrequencyInput=true, UsePhiInput=true),
+          phi(
+            amplitude=0.38 - 0.25,
+            width=200,
+            nperiod=1,
+            startTime=10));
+
+        replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
+          height=Modelica.Constants.pi/3,
+          startTime=5,
+          duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
+          annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
+      equation
+        connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-79,32},
+                {-22,32},{-22,20}},    color={0,0,127}));
+        annotation (experiment(
+            Interval=0.02,
+            Tolerance=1e-09,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_tiltable;
     end Tilt;
 
     package Exercise
