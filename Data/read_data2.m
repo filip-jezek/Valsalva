@@ -1,7 +1,7 @@
 %% read it from excel
-bpd = readallsheets('BP_data.xlsx');
-tpd = readallsheets('Valsalva_data');
-hrd = readallsheets('HR_data');
+bpd = readallsheets('data/BP_data.xlsx');
+tpd = readallsheets('data/Valsalva_data');
+hrd = readallsheets('data/HR_data');
 
 %%
 k = 2;
@@ -12,7 +12,7 @@ for k = 1:min([numel(tpd), numel(bpd), numel(hrd)])
     
 
     bpdsm = smooth(bpd{k}(:, 1), bpd{k}(:, 2), 0.01);
-    bpds = bpd{k}(:, 2) - bpdsm-15;
+    bpds = bpd{k}(:, 2) - bpdsm;
     bpds(bpds < 0 ) = 0;
     [~,maxs] = findpeaks(bpds,'MinPeakDistance',55);
     
