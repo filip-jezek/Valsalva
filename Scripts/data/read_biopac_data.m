@@ -1,12 +1,19 @@
-% dataset = import_txt_data('data/Dan_lyingdown.txt');
-% dataset = import_txt_data('data/Filip sitting.txt');
-% dataset = import_txt_data('data/Noah sitting.txt');
-% dataset = import_txt_data('data/Filip with ECHO.txt');
+
 clear
+close all;
 
 %% BIG CITY lOOP
 files  = {'V_00_sup', 'V_01_sit', 'V_02_sit', 'V_03_sit', 'VEc_01_sup', 'VEc_02_sup', 'VEc_03_sup'};
 folder = "Valsalva/";
+% files = {'V_00_sit_01', 'V_00_sit_02', 'V_00_sit_03', 'V_00_sit_04'}
+useSeqExt = true;
+% folder = "";
+% toSeconds = 1;
+toSeconds = 60;
+source_fs = 2000;
+% source_fs = 200;
+target_fs = 100;
+figure(100);clf;hold on;
 for i = 1:length(files)
     % filename = 'data/VEc_0' + string(i) + '_sup';
     % filename = 'Valsalva/V_0' + string(j) + '_sit';
@@ -15,18 +22,21 @@ for i = 1:length(files)
     filename_open = folder + filename + ".txt";
     % dataset = import_txt_data('data/V_0' + string(i) + '_sit.txt');
     dataset = import_txt_data(filename_open);
+    fs = 1/(dataset.Time(3)- dataset.Time(2))./toSeconds
     
     
     %% decimate the dataset
     % decimation factor
-    d = 20;
+%     d = 20;
+    d = source_fs / target_fs;
+
     % smoothing factor
-    s = 100;
+    s = 5*d;
     
     % fs = 2khz
-    t = (dataset.Time)*60;
-    bps = smooth( dataset.BP, 100);
-    tps = smooth(dataset.TP, 100);
+    t = (dataset.Time)*toSeconds;
+    bps = smooth( dataset.BP, s);
+    tps = smooth(dataset.TP, s);
     
     % blood pressure smooth decimated
     bpsd = bps(1:d:end);
@@ -40,16 +50,19 @@ for i = 1:length(files)
     %% find HR
     
     % peak cut-off
-    pc = 10;
+    pc = 5;
     %  get trend
-    bpdst = smooth(bpsd, s);
+    bpdst = smooth(bpsd, 100);
     % subtrack trend
     bpds = bpsd - bpdst-pc;
     bpds(bpds < 0 ) = 0;
     [~,maxs] = findpeaks(bpds,'MinPeakDistance',45);
-    HR = [60./diff(td(maxs));60];
+    HR = [60;60./diff(td(maxs))];
+    t_hr_beats = td(maxs);
+    hr_all = interp1(td(maxs), HR, td);
+    hr_all(isnan(hr_all)) = HR(1);
     %%
-    figure(10);
+    figure(10 + i);
     clf; hold on;
     % plot(t, bp, 'linewidth', 1);
     % plot(t, bp, 'linewidth', 1);
@@ -60,7 +73,7 @@ for i = 1:length(files)
     plot(td, bpds, 'linewidth', 2);
     
     plot(td(maxs), bpsd(maxs), 'rx');
-    plot(td(maxs), HR, 'linewidth', 2);
+    plot(t_hr_beats, HR, '-*', 'linewidth', 2);
     plot(td, tpsd , 'linewidth', 2);
     
     title(filename, 'Interpreter', 'none')
@@ -104,7 +117,6 @@ for i = 1:length(files)
     plot(td(valsalva_starts_positions) - time_before, tpsd(valsalva_starts_positions), 'g*', 'markersize', 5)
     plot(td(valsalva_starts_positions) + time_after, tpsd(valsalva_starts_positions), 'r*', 'markersize', 5)
     %% cut sin segmentys and save
-    figure(100);clf;hold on;
     for j = 1:length(valsalva_starts_positions)
         
         time_start = td(valsalva_starts_positions(j)) - time_before;
@@ -112,13 +124,18 @@ for i = 1:length(files)
         incl = td > time_start & td < time_end;
         
         time = td(incl) - time_start;
-        arterial_pressure = bpsd(incl);
-        hr_all = interp1(td(maxs), HR, td);
-        heart_rate = hr_all(incl);
-        thoracic_pressure = tpsd(incl);
-        segment = sprintf( '%02d', j ) ;
-        save(folder + filename + "_" + segment + ".mat", 'time', 'arterial_pressure', 'heart_rate', 'thoracic_pressure')
-        plot(time, arterial_pressure, time, heart_rate, time, thoracic_pressure)
+        arterial_pressure = [time, bpsd(incl)];
+        
+        heart_rate = [time, hr_all(incl)];
+        thoracic_pressure = [time, tpsd(incl)];
+        if useSeqExt 
+            segment = sprintf( '_%02d', j ) ;
+        else
+            segment = "";
+        end
+        save(folder + filename + segment + ".mat", 'arterial_pressure', 'heart_rate', 'thoracic_pressure')
+        figure(100);hold on;
+        plot(time, arterial_pressure(:, 2), time, heart_rate(:, 2), time, thoracic_pressure(:, 2))
         disp('Saved')
     end
 end
