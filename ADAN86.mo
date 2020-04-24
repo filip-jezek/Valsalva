@@ -333,11 +333,14 @@ type"),       Text(
             -10},{70,10}})));
 */
       parameter Boolean disconnected=false   "When true, the parameter value is used as fixed output" annotation(choices(checkBox=true));
+
       parameter Real disconnectedValue = 0 "output for disconnected = true. Use SI units!" annotation(Dialog(enable = disconnected));
-        MyDelay                              myDelay(   delayTime=delayTime)
+        MyDelay                              myDelay(   delayTime=delayTime,
+            delayEnabled=delayEnabled)
           annotation (Placement(transformation(extent={{26,-16},{46,4}})));
+        parameter Boolean delayEnabled=false annotation(choices(checkBox=true));
         parameter Modelica.SIunits.Time delayTime=0
-          "Delay time of output with respect to input signal";
+          "Delay time of output with respect to input signal" annotation(Dialog(enable=delayEnabled));
         Modelica.Blocks.Nonlinear.Limiter limiter(uMax=uMax, uMin=uMin)
           annotation (Placement(transformation(extent={{56,-16},{76,4}})));
         parameter Real uMax=Modelica.Constants.inf "Upper limits of input signals";
@@ -395,36 +398,48 @@ type"),       Text(
         extends Modelica.Blocks.Interfaces.SISO;
         parameter Modelica.SIunits.Time delayTime(start=1)
           "Delay time of output with respect to input signal";
+        parameter Boolean delayEnabled=false;
 
-      //  parameter Physiolibrary.Types.Time phiDelay = 0;
-      //  Physiolibrary.Types.RealIO.FractionInput phi_in annotation (Placement(
-      //       transformation(extent={{-100,-100},{-60,-60}}),
-      //                                                     iconTransformation(extent={{-100,60},
-      //               {-60,100}})));
+
+        //  parameter Physiolibrary.Types.Time phiDelay = 0;
+        //  Physiolibrary.Types.RealIO.FractionInput phi_in annotation (Placement(
+        //       transformation(extent={{-100,-100},{-60,-60}}),
+        //                                                     iconTransformation(extent={{-100,60},
+        //               {-60,100}})));
 
       equation
-          if delayTime > 0 then
-            y = delay(u, delayTime,  10);
-          else
-            y = u;
-          end if;
-        annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={Text(
-            extent={{8.0,-142.0},{8.0,-102.0}},
-            textString="delayTime=%delayTime"),
-                                      Rectangle(
-              extent={{-100,-100},{100,100}},
-              lineColor={0,0,127},
-              fillColor={255,255,255},
-              fillPattern=FillPattern.Solid),
-          Line(
-            points={{-92.0,0.0},{-80.7,34.2},{-73.5,53.1},{-67.1,66.4},{-61.4,74.6},{-55.8,79.1},{-50.2,79.8},{-44.6,76.6},{-38.9,69.7},{-33.3,59.4},{-26.9,44.1},{-18.83,21.2},{-1.9,-30.8},{5.3,-50.2},{11.7,-64.2},{17.3,-73.1},{23.0,-78.4},{28.6,-80.0},{34.2,-77.6},{39.9,-71.5},{45.5,-61.9},{51.9,-47.2},{60.0,-24.8},{68.0,0.0}},
-            color={0,0,127},
-            smooth=Smooth.Bezier),
-          Line(
-            points={{-62.0,0.0},{-50.7,34.2},{-43.5,53.1},{-37.1,66.4},{-31.4,74.6},{-25.8,79.1},{-20.2,79.8},{-14.6,76.6},{-8.9,69.7},{-3.3,59.4},{3.1,44.1},{11.17,21.2},{28.1,-30.8},{35.3,-50.2},{41.7,-64.2},{47.3,-73.1},{53.0,-78.4},{58.6,-80.0},{64.2,-77.6},{69.9,-71.5},{75.5,-61.9},{81.9,-47.2},{90.0,-24.8},{98.0,0.0}},
-            color={160,160,164},
-            smooth=Smooth.Bezier)}),                                   Diagram(
-              coordinateSystem(preserveAspectRatio=false)));
+        if delayEnabled then
+          y = delay(
+            u,
+            delayTime,
+            10);
+        else
+          y = u;
+        end if;
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
+              Text(extent={{8.0,-142.0},{8.0,-102.0}}, textString="delayTime=%delayTime"),
+              Rectangle(
+                extent={{-100,-100},{100,100}},
+                lineColor={0,0,127},
+                fillColor={255,255,255},
+                fillPattern=FillPattern.Solid),
+              Line(
+                points={{-92.0,0.0},{-80.7,34.2},{-73.5,53.1},{-67.1,66.4},{-61.4,74.6},
+                    {-55.8,79.1},{-50.2,79.8},{-44.6,76.6},{-38.9,69.7},{-33.3,59.4},{
+                    -26.9,44.1},{-18.83,21.2},{-1.9,-30.8},{5.3,-50.2},{11.7,-64.2},{17.3,
+                    -73.1},{23.0,-78.4},{28.6,-80.0},{34.2,-77.6},{39.9,-71.5},{45.5,-61.9},
+                    {51.9,-47.2},{60.0,-24.8},{68.0,0.0}},
+                color={0,0,127},
+                smooth=Smooth.Bezier),
+              Line(
+                points={{-62.0,0.0},{-50.7,34.2},{-43.5,53.1},{-37.1,66.4},{-31.4,74.6},
+                    {-25.8,79.1},{-20.2,79.8},{-14.6,76.6},{-8.9,69.7},{-3.3,59.4},{3.1,
+                    44.1},{11.17,21.2},{28.1,-30.8},{35.3,-50.2},{41.7,-64.2},{47.3,-73.1},
+                    {53.0,-78.4},{58.6,-80.0},{64.2,-77.6},{69.9,-71.5},{75.5,-61.9},{
+                    81.9,-47.2},{90.0,-24.8},{98.0,0.0}},
+                color={160,160,164},
+                smooth=Smooth.Bezier)}), Diagram(coordinateSystem(preserveAspectRatio=
+                 false)));
       end MyDelay;
 
       model Volume2Distention
@@ -487,7 +502,12 @@ type"),       Text(
       package DataFit
         model ReadData
           parameter Integer ExperimentNr = 1;
-          parameter String filename = "Data/valsalva_experiment" + String(ExperimentNr)  + ".mat";
+          parameter String filename_base = "VEc_01_sup_0";
+          // parameter Integer sequenceDigits = 2;
+          // parameter Integer paddingZerosLength = max(0, sequenceDigits - String(ExperimentNr));
+          // parameter String sequence = Strings.repeat(n, string="0") + String(ExperimentNr);
+          parameter String path = "Scripts\\data\\Valsalva\\";
+          parameter String filename = path + filename_base + String(ExperimentNr) + ".mat";
           constant Real const_mmHg2Pa = 133.32;
         Modelica.Blocks.Sources.CombiTimeTable tbl_thoracic_pressure(
             tableOnFile=true,
@@ -637,9 +657,120 @@ type"),       Text(
           ThoracicPressureFromData thoracicPressureFromData(readData(ExperimentNr=
                  2))
             annotation (Placement(transformation(extent={{-32,16},{-12,36}})));
+
+                String s = String(2.0, "02.0f");
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end testData;
+
+        model HrDataElement
+          ReadData readData(
+            ExperimentNr=2, filename_base="V_00_sit_0",
+            path="Scripts\\data\\Valsalva\\")
+            annotation (Placement(transformation(extent={{-100,-10},{-80,10}})));
+          inner Settings settings
+            annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(
+              usePressureInput=true)
+            annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
+            inner Physiolibrary.Types.Fraction phi = 0.25;
+            inner Physiolibrary.Types.Pressure thoracic_pressure = 0;
+            inner Physiolibrary.Types.Pressure outer_pressure = 0;
+            inner Physiolibrary.Types.Fraction Exercise = 0;
+
+          Subsystems.Systemic.SystemicMockPressure systemicMockPressure(
+            UseBaroreflexOutput=true,
+            UseThoracic_PressureInput=true,
+            baroreflex_system(baroreceptor_aortic(epsilon(start=1.255),
+                Ts(displayUnit="s") = Ts,                               s(start=0.87)),
+                baroreceptor_carotid(epsilon(start=1.08),
+                Ts(displayUnit="s") = Ts,                 s(start=0.95)),
+              baroreflex(
+                fsn=0.02725,
+                f1=0.00533437,
+                g(displayUnit="1") = 0.394375)))
+            annotation (Placement(transformation(extent={{-20,-10},{56,20}})));
+          Subsystems.Baroreflex.HeartRate2 heartRate2_1(phi0=0.25)
+            annotation (Placement(transformation(extent={{60,30},{80,50}})));
+
+        parameter Real scale=1.0;
+        Real cost = (heartRate2_1.HR - readData.heart_rate)^2*scale;
+        output Real sum_cost;
+          ConditionalConnection conditionalConnection(delayTime=0.1)
+            annotation (Placement(transformation(extent={{22,32},{42,50}})));
+          parameter Physiolibrary.Types.Time Ts=30
+            "Time constant for averaging";
+        equation
+          der(sum_cost) = cost;
+
+          connect(readData.arterial_pressure, unlimitedVolume.pressure) annotation (
+              Line(
+              points={{-79.8,0},{-60,0}},
+              color={0,0,127},
+              smooth=Smooth.Bezier));
+          connect(unlimitedVolume.y, systemicMockPressure.port_a) annotation (Line(
+              points={{-40,0},{-20,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(systemicMockPressure.port_b, systemicMockPressure.port_a) annotation (
+             Line(
+              points={{56,0},{60,0},{60,-20},{-30,-20},{-30,0},{-20,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(readData.thoracic_pressure, systemicMockPressure.thoracic_pressure_input)
+            annotation (Line(points={{-79.8,4},{-70,4},{-70,20},{-14,20},{-14,-8},{4,-8}},
+                color={0,0,127}));
+          connect(heartRate2_1.phi, conditionalConnection.y)
+            annotation (Line(points={{60,40},{43,40}}, color={0,0,127}));
+          connect(conditionalConnection.u, systemicMockPressure.phi_baroreflex)
+            annotation (Line(points={{20,40},{10.6,40},{10.6,17.4}}, color={0,0,
+                  127}));
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                coordinateSystem(preserveAspectRatio=false)),
+            experiment(
+              StartTime=3,
+              StopTime=60,
+              Interval=0.02,
+              Tolerance=1e-07,
+              __Dymola_Algorithm="Cvode"));
+        end HrDataElement;
+
+        model FitHRData
+          extends HrDataElement(readData(path="..\\"));
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                coordinateSystem(preserveAspectRatio=false)));
+        end FitHRData;
+
+        model HrDataMoreElements
+
+          replaceable HrDataElement hrDataElement[4](conditionalConnection(
+                delayEnabled=true, delayTime=delayTime))
+                                                     constrainedby
+            HrDataElement(
+              readData(ExperimentNr={1,2,3,4}), systemicMockPressure(baroreflex_system(
+                  baroreflex(
+                  each fsn=fsn,
+                  each f1=f1,
+                  each g=g)))) annotation (Placement(transformation(extent={{-60,-10},{-40,
+                    10}})), __Dymola_choicesAllMatching=true);
+          parameter Physiolibrary.Types.Frequency fsn=0.02725
+            "rising factor of the phi";
+          parameter Real f1=0.00533437 "decrease factor of the phi";
+          parameter Physiolibrary.Types.Fraction g=0.394375 "Aortic / carotid ratio";
+          parameter Modelica.SIunits.Time delayTime=0
+            "Delay time of output with respect to input signal";
+                Real cost = sum(hrDataElement.cost);
+                output Real sum_cost = sum(hrDataElement.sum_cost);
+        // initi
+
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                coordinateSystem(preserveAspectRatio=false)));
+        end HrDataMoreElements;
+
+        model FitHrDataMoreElements
+          "Prepared to fit using different relative data path"
+          extends HrDataMoreElements(hrDataElement(readData(path="..\\")));
+        end FitHrDataMoreElements;
       end DataFit;
     end Signals;
 
@@ -1132,25 +1263,25 @@ type"),       Text(
                   extent={{84,-10},{104,10}}),   iconTransformation(extent={{80,-20},
                     {120,20}})));
 
-          Real epsilon( start = epsilon_start) "Averaged distension ratio";
+          Real epsilon( start = 1) "Averaged distension ratio";
           parameter Physiolibrary.Types.Time Ts = 30 "Time constant for averaging";
           Real delta=max(d - epsilon, 0) "Positive peaks detected";
           parameter Real f0( unit = "Hz")= 300 "Base firing frequency";
           parameter Real delta0 = 0.4965 "Baseline delta";
 
-          Real s(start = s_start);
+          Real s(start = 0.85);
           parameter Real a(unit="s-1") = 0.0651;
           parameter Real b(unit="s-1") = 0.2004;
-          parameter Real epsilon_start = 1.075;
-          parameter Real s_start = 0.85;
-          parameter Modelica.SIunits.Time resetAt = -1 "resets initial conditions to counter transients";
+        //   parameter Real epsilon_start = 1.075;
+        //   parameter Real s_start = 0.85;
+        //   parameter Modelica.SIunits.Time resetAt = -1 "resets initial conditions to counter transients";
 
         equation
 
-          when time > resetAt then
-            reinit(epsilon, epsilon_start);
-            reinit(s, s_start);
-          end when;
+        //   when time > resetAt then
+        //     reinit(epsilon, epsilon_start);
+        //     reinit(s, s_start);
+        //   end when;
 
           der(epsilon) =(d - epsilon)/Ts;
           der(s) =a*(1 - s) - b*s*(delta/(delta + delta0));
@@ -1168,8 +1299,8 @@ type"),       Text(
                   extent={{-114,48},{-74,88}}), iconTransformation(extent={{-120,80},{-80,
                     120}})));
 
-        Physiolibrary.Types.Fraction fiSN(start = fiSN_start) "Generalized activation coefficient 0.25 for baseline supine resting.";
-        Physiolibrary.Types.Fraction fiSN_mean(start = fiSN_start);
+        Physiolibrary.Types.Fraction fiSN(start = 0.25) "Generalized activation coefficient 0.25 for baseline supine resting.";
+        Physiolibrary.Types.Fraction fiSN_mean(start = 0.25);
         parameter Physiolibrary.Types.Frequency fsn = 0.041 "rising factor of the phi";
         parameter Real f1 = 0.0046 "decrease factor of the phi";
         parameter Physiolibrary.Types.Fraction g = 0.66 "Aortic / carotid ratio";
@@ -1177,17 +1308,17 @@ type"),       Text(
             "Weighted contribution of aortic firing rate";
           Real fbr_car_contrib=2*(1 - g)*carotid_BR
             "Weighted contribution of carotid firing rate";
-            parameter Modelica.SIunits.Time resetAt = -1;
+        //     parameter Modelica.SIunits.Time resetAt = -1;
           parameter Modelica.SIunits.Time tau_mean = 10;
-        parameter Physiolibrary.Types.Fraction fiSN_start = 0.25;
+        // parameter Physiolibrary.Types.Fraction fiSN_start = 0.25;
           Physiolibrary.Types.RealIO.FractionOutput phi = fiSN
                                                         annotation (Placement(
                 transformation(extent={{96,70},{116,90}}),  iconTransformation(extent={{92,-10},
                     {112,10}})));
         equation
-          when time > resetAt then
-            reinit(fiSN, fiSN_start);
-          end when;
+        //   when time > resetAt then
+        //     reinit(fiSN, fiSN_start);
+        //   end when;
           der(fiSN_mean)*tau_mean = fiSN - fiSN_mean;
 
           der(fiSN) =fsn*(1 - fiSN) - fiSN*f1*(fbr_ao_contrib + fbr_car_contrib);
@@ -1224,32 +1355,32 @@ type"),       Text(
 
         model Baroreflex_system
           Baroreflex baroreflex
-            annotation (Placement(transformation(extent={{4,6},{24,-14}})));
-          Baroreceptor baroreceptor_aortic(epsilon_start=0.76, s_start=0.91)
-            annotation (Placement(transformation(extent={{-26,-26},{-6,-6}})));
-          Baroreceptor baroreceptor_carotid(epsilon_start=0.4, s_start=0.95)
-            annotation (Placement(transformation(extent={{-26,2},{-6,22}})));
+            annotation (Placement(transformation(extent={{4,10},{24,-10}})));
+          Baroreceptor baroreceptor_aortic
+            annotation (Placement(transformation(extent={{-24,-26},{-4,-6}})));
+          Baroreceptor baroreceptor_carotid
+            annotation (Placement(transformation(extent={{-24,2},{-4,22}})));
           Physiolibrary.Types.RealIO.FractionInput aortic_distention
-            annotation (Placement(transformation(rotation=0, extent={{-19,-19},
-                    {-13,-13}}), iconTransformation(extent={{-30,-30},{-10,-10}})));
+            annotation (Placement(transformation(rotation=0, extent={{-35,-19},
+                    {-29,-13}}), iconTransformation(extent={{-30,-30},{-10,-10}})));
           Physiolibrary.Types.RealIO.FractionInput carotid_distention
-            annotation (Placement(transformation(rotation=0, extent={{-31,9},{
-                    -25,15}}), iconTransformation(extent={{-30,10},{-10,30}})));
+            annotation (Placement(transformation(rotation=0, extent={{-35,9},{
+                    -29,15}}), iconTransformation(extent={{-30,10},{-10,30}})));
           Physiolibrary.Types.RealIO.FractionOutput phi annotation (Placement(
                 transformation(rotation=0, extent={{27,-3},{33,3}})));
         equation
           connect(baroreceptor_carotid.fbr,baroreflex. carotid_BR) annotation (
-              Line(points={{-6,12},{-2,12},{-2,6},{4,6}},                color={0,
+              Line(points={{-4,12},{-2,12},{-2,10},{4,10}},              color={0,
                   0,127}));
           connect(baroreceptor_aortic.fbr,baroreflex. aortic_BR) annotation (Line(
-                points={{-6,-16},{-2,-16},{-2,-14},{4,-14}},          color={0,0,
+                points={{-4,-16},{-2,-16},{-2,-10},{4,-10}},          color={0,0,
                   127}));
           connect(aortic_distention, baroreceptor_aortic.d) annotation (Line(
-                points={{-16,-16},{-16,-16},{-26,-16}}, color={0,0,127}));
+                points={{-32,-16},{-24,-16}},           color={0,0,127}));
           connect(carotid_distention, baroreceptor_carotid.d) annotation (Line(
-                points={{-28,12},{-28,12},{-28,12},{-26,12}}, color={0,0,127}));
-          connect(phi, baroreflex.phi) annotation (Line(points={{30,0},{28,0},{
-                  28,-4},{24.2,-4}}, color={0,0,127}));
+                points={{-32,12},{-24,12}},                   color={0,0,127}));
+          connect(phi, baroreflex.phi) annotation (Line(points={{30,0},{24.2,0}},
+                                     color={0,0,127}));
           annotation (Diagram(coordinateSystem(extent={{-30,-30},{30,30}})),
               Icon(coordinateSystem(extent={{-30,-30},{30,30}})));
         end Baroreflex_system;
@@ -11945,6 +12076,57 @@ P_hs_plus_dist"),
                   -238.667,158.667}},
                 color={0,0,127}));
         end SystemicAV_base;
+
+        model SystemicMockPressure
+          "Mock throughput just to provide distenstion data for baroreflex"
+          extends partialSystemicAV;
+          Vessel_modules.pv_artery
+                          internal_carotid_R8_A(
+            l=Parameters_Systemic1.l_internal_carotid_R8_A,
+            E=Parameters_Systemic1.E_internal_carotid_R8_A,
+            r=Parameters_Systemic1.r_internal_carotid_R8_A,
+            UseDistentionOutput=true)
+          annotation (Placement(transformation(extent={{-279,97},{-259,102}})));
+            Vessel_modules.pv_artery
+              aortic_arch_C46(
+            l=Parameters_Systemic1.l_aortic_arch_C46,
+            E=Parameters_Systemic1.E_aortic_arch_C46,
+            r=Parameters_Systemic1.r_aortic_arch_C46,
+            UseDistentionOutput=true,
+            UseOuter_thoracic_pressure=true)
+              annotation (Placement(transformation(extent={{-279,57},{-259,62}})));
+          Parametrization.Parameters_Systemic_tunable Parameters_Systemic1
+            annotation (Placement(transformation(extent={{-44,-29},{-24,-24}})));
+        equation
+          connect(port_a, aortic_arch_C46.port_a) annotation (Line(
+              points={{-320,80},{-300,80},{-300,59.5},{-279,59.5}},
+              color={0,0,0},
+              thickness=1));
+          connect(port_a, port_a) annotation (Line(
+              points={{-320,80},{-320,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(port_a, internal_carotid_R8_A.port_a) annotation (Line(
+              points={{-320,80},{-300,80},{-300,99.5},{-279,99.5}},
+              color={0,0,0},
+              thickness=1));
+          connect(internal_carotid_R8_A.port_b, aortic_arch_C46.port_b)
+            annotation (Line(
+              points={{-259,99.5},{-259,100},{-240,100},{-240,59.5},{-259,59.5}},
+
+              color={0,0,0},
+              thickness=1));
+          connect(internal_carotid_R8_A.port_b, port_b) annotation (Line(
+              points={{-259,99.5},{-240,99.5},{-240,80},{112,80},{460,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(baroreflex_system.aortic_distention, aortic_arch_C46.distentionFraction)
+            annotation (Line(points={{-238.667,145.333},{-250,145.333},{-250,
+                  64.5},{-269,64.5}}, color={0,0,127}));
+          connect(internal_carotid_R8_A.distentionFraction, baroreflex_system.carotid_distention)
+            annotation (Line(points={{-269,104.5},{-269,158.667},{-238.667,
+                  158.667}}, color={0,0,127}));
+        end SystemicMockPressure;
 
         model SystemicAV
           extends ADAN_main.Components.Subsystems.Systemic.SystemicAV_base;
@@ -33890,9 +34072,9 @@ P_hs_plus_dist"),
             width=15,
             falling=1,
             period=40,
-            nperiod=2,
+            nperiod=1,
             startTime=10),
-          Tilt_ramp(startTime=40));
+          Tilt_ramp(startTime=4000));
         annotation (experiment(
             StopTime=80,
             Interval=0.02,

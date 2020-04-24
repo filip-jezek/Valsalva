@@ -1,9 +1,13 @@
 % plots all the values at once to have avg reaction
 clear
+close all
 % sitting
-files = {"V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"}
+% files = {"V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"}
 % supine
+% all
 % files = {"V_00_sup", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"}
+% subj
+files = {"VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03"}
 
 folder = "Valsalva/";
 %% plot it
@@ -32,7 +36,8 @@ for file = files
 %         base2 = add
 %         add2 = base
 figure();hold on;
-    plot(time, arterial_pressure(:, 2), 'linewidth', 1);
+    plot(time, arterial_pressure(:, 2), 'linewidth', 0.5);
+    plot(time, bp_mean, 'linewidth', 2);
     plot(time, heart_rate(:, 2), 'linewidth', 2);
     plot(time, thoracic_pressure(:, 2) , 'linewidth', 3);
     title(file, 'Interpreter', 'none')
@@ -40,7 +45,7 @@ figure();hold on;
 
     figure(100);
     plot(time, bp_mean, 'linewidth', 1);
-%     plot(time, arterial_pressure, 'linewidth', 1);
+     plot(time, arterial_pressure(:, 2), 'linewidth', 1);
     plot(time, heart_rate(:, 2), 'linewidth', 1);
     plot(time, thoracic_pressure(:, 2) , 'linewidth', 1);
 end
