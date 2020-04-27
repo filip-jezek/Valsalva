@@ -24,10 +24,14 @@ def getObjectives(vars_set):
     ESV_target = 27*ml2SI
 
     t = vars_set['time'][-1]
-    interval = fun_lib.findInterval(t-5, t, vars_set['time'])
+    interval = fun_lib.findInterval(10, 15, vars_set['time'])
+    interval2 = fun_lib.findInterval(10, 15, vars_set['time'])
 
     # build costs
-    ov = [  ('costs', max(vars_set['sum_cost'][interval]), -1, None, 1)        ]
+    ov = [  ('costs', max(vars_set['sum_cost'][interval]), -1, None, 1),
+            ('fbr_aor', max(vars_set['systemicMockPressure.baroreflex_system.baroreceptor_aortic.fbr'][interval2]), 35, None, 10),
+            ('fbr_car', max(vars_set['systemicMockPressure.baroreflex_system.baroreceptor_carotid.fbr'][interval2]), 35, None, 10),
+            ]
     
     # make it a dict?
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight = o[4]), ov))

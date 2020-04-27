@@ -501,6 +501,11 @@ type"),       Text(
 
       package DataFit
         model ReadData
+          parameter Real stopTime=Modelica.Constants.inf
+            "Last point before repeat";
+          parameter Modelica.SIunits.Time startTime=0
+            "Start time of the repeat";
+
           parameter Integer ExperimentNr = 1;
           parameter String filename_base = "VEc_01_sup_0";
           // parameter Integer sequenceDigits = 2;
@@ -509,27 +514,27 @@ type"),       Text(
           parameter String path = "Scripts\\data\\Valsalva\\";
           parameter String filename = path + filename_base + String(ExperimentNr) + ".mat";
           constant Real const_mmHg2Pa = 133.32;
-        Modelica.Blocks.Sources.CombiTimeTable tbl_thoracic_pressure(
+        Modelica.Blocks.Tables.CombiTable1Ds   tbl_thoracic_pressure(
             tableOnFile=true,
             tableName="thoracic_pressure",
             fileName=filename,
             smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
             extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-            annotation (Placement(transformation(extent={{-80,40},{-60,60}})));
-        Modelica.Blocks.Sources.CombiTimeTable tbl_arterial_pressure(
+            annotation (Placement(transformation(extent={{-10,30},{10,50}})));
+        Modelica.Blocks.Tables.CombiTable1Ds   tbl_arterial_pressure(
             tableOnFile=true,
             tableName="arterial_pressure",
             fileName=filename,
             smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
             extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-            annotation (Placement(transformation(extent={{-80,0},{-60,20}})));
-        Modelica.Blocks.Sources.CombiTimeTable tbl_heart_rate(
+            annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
+        Modelica.Blocks.Tables.CombiTable1Ds   tbl_heart_rate(
             tableOnFile=true,
             tableName="heart_rate",
             fileName=filename,
             smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
             extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
-            annotation (Placement(transformation(extent={{-80,-40},{-60,-20}})));
+            annotation (Placement(transformation(extent={{-10,-50},{10,-30}})));
           Physiolibrary.Types.RealIO.PressureOutput
                                                 thoracic_pressure annotation (Placement(
                 transformation(extent={{92,30},{112,50}}), iconTransformation(extent={{92,
@@ -546,19 +551,30 @@ type"),       Text(
             annotation (Placement(transformation(extent={{40,-10},{60,10}})));
           Modelica.Blocks.Math.Gain BPM2Hz(k=1/60)
             annotation (Placement(transformation(extent={{40,-50},{60,-30}})));
+          Modelica.Blocks.Sources.SawTooth sawTooth(
+            amplitude=stopTime - startTime,
+            period=stopTime - startTime,
+            offset=startTime)
+            annotation (Placement(transformation(extent={{-80,-10},{-60,10}})));
         equation
-          connect(tbl_thoracic_pressure.y[1], mmHg2Pa1.u) annotation (Line(points={{-59,
-                  50},{-10,50},{-10,40},{38,40}}, color={0,0,127}));
+          connect(tbl_thoracic_pressure.y[1], mmHg2Pa1.u) annotation (Line(points={{11,40},
+                  {38,40}},                       color={0,0,127}));
           connect(thoracic_pressure, mmHg2Pa1.y)
             annotation (Line(points={{102,40},{61,40}}, color={0,0,127}));
-          connect(tbl_arterial_pressure.y[1], mmHg2Pa2.u) annotation (Line(points={{-59,
-                  10},{-10,10},{-10,0},{38,0}}, color={0,0,127}));
+          connect(tbl_arterial_pressure.y[1], mmHg2Pa2.u) annotation (Line(points={{11,0},{
+                  38,0}},                       color={0,0,127}));
           connect(arterial_pressure, mmHg2Pa2.y)
             annotation (Line(points={{102,0},{61,0}}, color={0,0,127}));
-          connect(tbl_heart_rate.y[1], BPM2Hz.u) annotation (Line(points={{-59,-30},{-10,
-                  -30},{-10,-40},{38,-40}}, color={0,0,127}));
+          connect(tbl_heart_rate.y[1], BPM2Hz.u) annotation (Line(points={{11,-40},{38,-40}},
+                                            color={0,0,127}));
           connect(heart_rate, BPM2Hz.y)
             annotation (Line(points={{102,-40},{61,-40}}, color={0,0,127}));
+          connect(sawTooth.y, tbl_thoracic_pressure.u) annotation (Line(points={{-59,0},
+                  {-36,0},{-36,40},{-12,40}}, color={0,0,127}));
+          connect(sawTooth.y, tbl_arterial_pressure.u)
+            annotation (Line(points={{-59,0},{-12,0}}, color={0,0,127}));
+          connect(sawTooth.y, tbl_heart_rate.u) annotation (Line(points={{-59,0},{-36,0},
+                  {-36,-40},{-12,-40}}, color={0,0,127}));
         annotation (uses(Modelica(version="3.2.3")), experiment(StopTime=100,
               __Dymola_NumberOfIntervals=50));
         end ReadData;
@@ -666,7 +682,10 @@ type"),       Text(
         model HrDataElement
           ReadData readData(
             ExperimentNr=2, filename_base="V_00_sit_0",
-            path="Scripts\\data\\Valsalva\\")
+            path="Scripts\\data\\Valsalva\\",
+            stopTime=18.9 + 100,
+            sawTooth(startTime=0),
+            startTime=0.35)
             annotation (Placement(transformation(extent={{-100,-10},{-80,10}})));
           inner Settings settings
             annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
@@ -682,9 +701,11 @@ type"),       Text(
             UseBaroreflexOutput=true,
             UseThoracic_PressureInput=true,
             baroreflex_system(baroreceptor_aortic(epsilon(start=1.255),
-                Ts(displayUnit="s") = Ts,                               s(start=0.87)),
+                Ts(displayUnit="s") = Ts,                               s(start=0.87),
+                delta0=0.61),
                 baroreceptor_carotid(epsilon(start=1.08),
-                Ts(displayUnit="s") = Ts,                 s(start=0.95)),
+                Ts(displayUnit="s") = Ts,                 s(start=0.95),
+                delta0=0.2),
               baroreflex(
                 fsn=0.02725,
                 f1=0.00533437,
@@ -728,9 +749,8 @@ type"),       Text(
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)),
             experiment(
-              StartTime=3,
-              StopTime=60,
-              Interval=0.02,
+              StopTime=160,
+              Interval=0.005,
               Tolerance=1e-07,
               __Dymola_Algorithm="Cvode"));
         end HrDataElement;
@@ -743,9 +763,8 @@ type"),       Text(
 
         model HrDataMoreElements
 
-          replaceable HrDataElement hrDataElement[4](conditionalConnection(
-                delayEnabled=true, delayTime=delayTime))
-                                                     constrainedby
+          replaceable HrDataElement hrDataElement[4](conditionalConnection(delayEnabled=
+                 true, delayTime=delayTime))         constrainedby
             HrDataElement(
               readData(ExperimentNr={1,2,3,4}), systemicMockPressure(baroreflex_system(
                   baroreflex(
@@ -753,24 +772,74 @@ type"),       Text(
                   each f1=f1,
                   each g=g)))) annotation (Placement(transformation(extent={{-60,-10},{-40,
                     10}})), __Dymola_choicesAllMatching=true);
-          parameter Physiolibrary.Types.Frequency fsn=0.02725
+          parameter Real f1=0.00385 "decrease factor of the phi";
+          parameter Physiolibrary.Types.Frequency fsn=0.01725
             "rising factor of the phi";
-          parameter Real f1=0.00533437 "decrease factor of the phi";
-          parameter Physiolibrary.Types.Fraction g=0.394375 "Aortic / carotid ratio";
-          parameter Modelica.SIunits.Time delayTime=0
+          parameter Physiolibrary.Types.Fraction g=0.70375 "Aortic / carotid ratio";
+          parameter Modelica.SIunits.Time delayTime=0.771875
             "Delay time of output with respect to input signal";
                 Real cost = sum(hrDataElement.cost);
-                output Real sum_cost = sum(hrDataElement.sum_cost);
+                output Real sum_costs = sum(hrDataElement.sum_cost);
+                output Real sum_cost[:] = hrDataElement[:].sum_cost;
         // initi
-
+        // 0.00385        0.01725        0.70375        0.771875
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end HrDataMoreElements;
+
+        model HrDataMoreElementsSeparatedCosts
+          "Using separate objectives instead of summed ones. 0.00281875\t0.01475\t0.8990625\t0.7078125"
+          extends HrDataMoreElements(
+            delayTime=0.7078125,
+            g(displayUnit="1") = 0.8990625,
+            fsn(displayUnit="Hz") = 0.01475,
+            f1=0.00281875);
+        end HrDataMoreElementsSeparatedCosts;
 
         model FitHrDataMoreElements
           "Prepared to fit using different relative data path"
           extends HrDataMoreElements(hrDataElement(readData(path="..\\")));
         end FitHrDataMoreElements;
+
+        model testRepeat
+          parameter Integer ExperimentNr = 1;
+          parameter String filename_base = "VEc_01_sup_0";
+          // parameter Integer sequenceDigits = 2;
+          // parameter Integer paddingZerosLength = max(0, sequenceDigits - String(ExperimentNr));
+          // parameter String sequence = Strings.repeat(n, string="0") + String(ExperimentNr);
+          parameter String path = "Scripts\\data\\Valsalva\\";
+          parameter String filename = path + filename_base + String(ExperimentNr) + ".mat";
+        Modelica.Blocks.Sources.CombiTimeTable tbl_arterial_pressure(
+            tableOnFile=true,
+            tableName="arterial_pressure",
+            fileName=filename,
+            smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
+            extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint)
+            annotation (Placement(transformation(extent={{-60,40},{-40,60}})));
+          Modelica.Blocks.Tables.CombiTable1Ds combiTable1Ds(
+            tableOnFile=true,
+            tableName="arterial_pressure",
+            fileName=filename,
+            extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint,
+            verboseExtrapolation=true)
+            annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+          Modelica.Blocks.Sources.SawTooth
+                                        sawTooth(
+            amplitude=stop_time - start_time,
+            period=stop_time - start_time,
+            startTime=start_time)
+            annotation (Placement(transformation(extent={{-100,0},{-80,20}})));
+        equation
+          connect(sawTooth.y, combiTable1Ds.u)
+            annotation (Line(points={{-79,10},{-62,10}}, color={0,0,127}));
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                coordinateSystem(preserveAspectRatio=false)),
+            experiment(
+              StopTime=60,
+              Interval=0.02,
+              Tolerance=1e-07,
+              __Dymola_Algorithm="Cvode"));
+        end testRepeat;
       end DataFit;
     end Signals;
 
