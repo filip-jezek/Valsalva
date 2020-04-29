@@ -9,8 +9,8 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-     160                   # StopTime     Time at which integration stops
-  5.0000000000000001E-03   # Increment    Communication step size, if > 0
+     55                    # StopTime     Time at which integration stops
+  2.0000000000000001E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
   9.9999999999999995E-08   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
@@ -87,8 +87,8 @@ double method(27,1)
 int settings(13,1)
  0                         # lprec    0/1 do not/store result data in double
  1                         # lx       0/1 do not/store x  (state variables)
- 1                         # lxd      0/1 do not/store xd (derivative of states)
- 1                         # lu       0/1 do not/store u  (input     signals)
+ 0                         # lxd      0/1 do not/store xd (derivative of states)
+ 0                         # lu       0/1 do not/store u  (input     signals)
  1                         # ly       0/1 do not/store y  (output    signals)
  1                         # lz       0/1 do not/store z  (indicator signals)
  1                         # lw       0/1 do not/store w  (auxiliary signals)
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(1354,105)
+char initialName(1355,105)
 settings.phi0
 settings.height
 settings.weight
@@ -1442,6 +1442,7 @@ conditionalConnection.switch1.u2
 conditionalConnection.switch1.y
 conditionalConnection.disconnected
 conditionalConnection.disconnectedValue
+conditionalConnection.myDelay.y
 conditionalConnection.myDelay.delayTime
 conditionalConnection.myDelay.delayEnabled
 conditionalConnection.delayEnabled
@@ -1458,7 +1459,7 @@ Ts
 CPUtime
 EventCounter
 
-double initialValue(1354,6)
+double initialValue(1355,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
@@ -1711,11 +1712,11 @@ double initialValue(1354,6)
   2   280   # systemicMockPressure.baroreflex_system.baroreflex.fiSN_mean
   0       0                       0                       0                
   3   256   # systemicMockPressure.baroreflex_system.baroreflex.der(fiSN_mean)
- -1  2.7250000000000000E-02       0                       0                
+ -1  %fsn%       0                       0                
   1   280   # systemicMockPressure.baroreflex_system.baroreflex.fsn
- -1  5.3343699999999997E-03       0                       0                
+ -1  %f1%       0                       0                
   1   280   # systemicMockPressure.baroreflex_system.baroreflex.f1
- -1  3.9437499999999998E-01       0                       0                
+ -1  %g%       0                       0                
   1   280   # systemicMockPressure.baroreflex_system.baroreflex.g
   0       0                       0                       0                
   6   256   # systemicMockPressure.baroreflex_system.baroreflex.fbr_ao_contrib
@@ -1733,7 +1734,7 @@ double initialValue(1354,6)
   6   256   # systemicMockPressure.baroreflex_system.baroreceptor_aortic.delta
  -1     300                       0                       0                
   1   280   # systemicMockPressure.baroreflex_system.baroreceptor_aortic.f0
- -1  6.0999999999999999E-01       0                       0                
+ -1  %delta0_aor%       0                       0                
   1   280   # systemicMockPressure.baroreflex_system.baroreceptor_aortic.delta0
  -1  8.7000000000000000E-01       0                       0                
   2   280   # systemicMockPressure.baroreflex_system.baroreceptor_aortic.s
@@ -1753,7 +1754,7 @@ double initialValue(1354,6)
   6   256   # systemicMockPressure.baroreflex_system.baroreceptor_carotid.delta
  -1     300                       0                       0                
   1   280   # systemicMockPressure.baroreflex_system.baroreceptor_carotid.f0
- -1  2.0000000000000001E-01       0                       0                
+ -1  %delta0_car%       0                       0                
   1   280   # systemicMockPressure.baroreflex_system.baroreceptor_carotid.delta0
  -1  9.4999999999999996E-01       0                       0                
   2   280   # systemicMockPressure.baroreflex_system.baroreceptor_carotid.s
@@ -4137,13 +4138,15 @@ double initialValue(1354,6)
   1   281   # conditionalConnection.disconnected
  -1       0                       0                       0                
   1   280   # conditionalConnection.disconnectedValue
+  0       0                       0                       0                
+  6   256   # conditionalConnection.myDelay.y
   0       1                       0                       0                
   6   256   # conditionalConnection.myDelay.delayTime
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # conditionalConnection.myDelay.delayEnabled
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # conditionalConnection.delayEnabled
- -1  1.0000000000000001E-01       0                       0                
+ -1  %delay%       0                       0                
   1   280   # conditionalConnection.delayTime
   0       1                       0                       0                
   6   256   # conditionalConnection.limiter.uMax
@@ -4217,7 +4220,7 @@ double initialValue(1354,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(1354,152)
+char initialDescription(1355,152)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -5557,6 +5560,7 @@ Connector of Boolean input signal [:#(type=Boolean)]
 Connector of Real output signal [1]
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units! [1]
+Connector of Real output signal [1]
 Delay time of output with respect to input signal [s]
 [:#(type=Boolean)]
 [:#(type=Boolean)]

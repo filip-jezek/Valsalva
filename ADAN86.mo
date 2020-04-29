@@ -756,7 +756,9 @@ type"),       Text(
         end HrDataElement;
 
         model FitHRData
-          extends HrDataElement(readData(path="..\\"));
+          extends HrDataElement(readData(ExperimentNr=1,
+                                         path="..\\"), conditionalConnection(
+                delayEnabled=true));
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end FitHRData;
@@ -840,6 +842,39 @@ type"),       Text(
               Tolerance=1e-07,
               __Dymola_Algorithm="Cvode"));
         end testRepeat;
+
+        package Experiments
+          model CaptureKosinski
+            extends Subsystems.Baroreflex.Baroreflex_system(
+              baroreflex(
+                fsn(displayUnit="Hz") = 0.036,
+                f1=0.0041,
+                g(displayUnit="1") = 0.54),
+              baroreceptor_carotid(
+                delta0=delta0_factor*0.2,
+                epsilon(start=1.08),
+                Ts(displayUnit="s") = Ts,
+                s(start=0.95)),
+              baroreceptor_aortic(
+                delta0=delta0_factor*0.61,
+                epsilon(start=1.255),
+                Ts(displayUnit="s") = Ts,
+                s(start=0.87)));
+          end CaptureKosinski;
+        end Experiments;
+
+        model HrDataElement_Kosinski
+          "Parametrizationa as in the paper from Kosinski 2018 using table 1 and male, except for afferent delta0 for both"
+          extends HrDataElement(heartRate2_1(HR_max=3.0666666666667, HR_nom=1.1166666666667),
+              systemicMockPressure(baroreflex_system(
+                baroreflex(
+                  fsn(displayUnit="Hz") = 0.036,
+                  f1=0.0041,
+                  g=0.54),
+                baroreceptor_carotid(delta0=delta0_factor*0.2),
+                baroreceptor_aortic(delta0=delta0_factor*0.61))));
+          parameter Real delta0_factor=1 "Baseline delta factor";
+        end HrDataElement_Kosinski;
       end DataFit;
     end Signals;
 
@@ -31179,13 +31214,9 @@ P_hs_plus_dist"),
       replaceable Components.Subsystems.Systemic.SystemicAV Systemic1(
         baroreflex_system(
           baroreceptor_aortic(
-            delta0=0.6,
-            epsilon_start=1.23,
-            s_start=0.922),
+            delta0=0.6),
           baroreceptor_carotid(
-            delta0=0.3,
-            epsilon_start=1.07,
-            s_start=0.945),
+            delta0=0.3),
           baroreflex(fsn=0.021)),
         UseThoracic_PressureInput=true,
         UsePhi_Input=true,
@@ -34373,6 +34404,49 @@ P_hs_plus_dist"),
             startTime=10),
           condTP(disconnected=false));
       end OlufsenTriSeg_valsalva;
+
+      model OlufsenTriSeg_valsalva_KosinskiBaro
+        extends OlufsenTriSeg_valsalva(Systemic1(baroreflex_system(
+              baroreflex(
+                fsn(displayUnit="Hz") = 0.036,
+                f1=0.0041,
+                g(displayUnit="1") = 0.54),
+              baroreceptor_carotid(
+                delta0=0.55*delta0_factor,
+                epsilon(start=1.25),
+                s(start=0.91),
+                Ts=30.0),
+              baroreceptor_aortic(
+                delta0=0.6*delta0_factor,
+                epsilon(start=1.6),
+                s(start=0.81),
+                Ts=30.0))),
+          condTP(disconnected=false),
+          useAutonomousPhi(y=true),
+          thoracic_pressure(startTime=60));
+                parameter Physiolibrary.Types.Fraction delta0_factor=0.4;
+
+        annotation (experiment(
+            StopTime=80,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_valsalva_KosinskiBaro;
+
+      model OlufsenTriSeg_valsalva_KosinskiBaro_lowp
+        extends OlufsenTriSeg_valsalva_KosinskiBaro(
+          thoracic_pressure(startTime=60.0),
+          Systemic1(baroreflex_system(
+              baroreceptor_aortic(Ts=6.0),
+              baroreceptor_carotid(Ts=6.0),
+              baroreflex(f1=0.0031))),
+          delta0_factor=0.25);
+        annotation (experiment(
+            StopTime=50,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_valsalva_KosinskiBaro_lowp;
     end Valsalva;
   annotation(preferredView="info",
   version="2.3.2-beta",

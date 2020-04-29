@@ -1,7 +1,7 @@
 *.txt
 *.mat
 *.xlsx
-!/*.*
+*.asv
 !/*.m
 !/*.mo
 !/*.py

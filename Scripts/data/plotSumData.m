@@ -2,12 +2,12 @@
 clear
 close all
 % sitting
-% files = {"V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"}
+files = {"V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"}
 % supine
 % all
 % files = {"V_00_sup", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"}
 % subj
-files = {"VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03"}
+% files = {"VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03"}
 
 folder = "Valsalva/";
 %% plot it
