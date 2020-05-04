@@ -319,11 +319,11 @@ type"),       Text(
       model ConditionalConnection
         extends Modelica.Blocks.Interfaces.SISO;
         Modelica.Blocks.Sources.Constant const1(k=disconnectedValue)
-          annotation (Placement(transformation(extent={{-60,-24},{-44,-10}})));
+          annotation (Placement(transformation(extent={{16,-52},{0,-38}})));
         Modelica.Blocks.Logical.Switch switch1
-          annotation (Placement(transformation(extent={{-2,-16},{18,4}})));
+          annotation (Placement(transformation(extent={{-2,-18},{18,2}})));
         Modelica.Blocks.Sources.BooleanExpression useClosedLoopHR(y=not disconnected)
-          annotation (Placement(transformation(extent={{-42,-20},{-22,0}})));
+          annotation (Placement(transformation(extent={{-40,-80},{-20,-60}})));
       /*  
   Modelica.Blocks.Interfaces.RealInput u1 annotation (Placement(transformation(
           rotation=0, extent={{-70,-8},{-50,12}}), iconTransformation(extent={{-60,-10},
@@ -337,32 +337,49 @@ type"),       Text(
       parameter Real disconnectedValue = 0 "output for disconnected = true. Use SI units!" annotation(Dialog(enable = disconnected));
         MyDelay                              myDelay(   delayTime=delayTime,
             delayEnabled=delayEnabled)
-          annotation (Placement(transformation(extent={{26,-16},{46,4}})));
+          annotation (Placement(transformation(extent={{26,-18},{46,2}})));
         parameter Boolean delayEnabled=false annotation(choices(checkBox=true));
         parameter Modelica.SIunits.Time delayTime=0
           "Delay time of output with respect to input signal" annotation(Dialog(enable=delayEnabled));
         Modelica.Blocks.Nonlinear.Limiter limiter(uMax=uMax, uMin=uMin)
-          annotation (Placement(transformation(extent={{56,-16},{76,4}})));
+          annotation (Placement(transformation(extent={{56,-18},{76,2}})));
         parameter Real uMax=Modelica.Constants.inf "Upper limits of input signals";
         parameter Real uMin=-uMax "Lower limits of input signals";
+        Modelica.Blocks.Math.Gain         gain(k=phi_gain)
+          annotation (Placement(transformation(extent={{-78,-10},{-58,10}})));
+        Modelica.Blocks.Sources.Constant const_shiftOffset(k=(phi_gain - 1)*
+              phi0)
+          annotation (Placement(transformation(extent={{-78,24},{-62,38}})));
+        parameter Real phi0=0.25 "Default phi0";
+        parameter Real phi_gain=1 "Phi Gain multiplier";
+        Modelica.Blocks.Math.Add         add(k1=-1)
+          annotation (Placement(transformation(extent={{-38,-3},{-22,11}})));
       protected
         Boolean showLimiterLine = not disconnected and (uMax <> Modelica.Constants.inf or uMax <> -uMin);
       equation
 
-        connect(switch1.u3, const1.y) annotation (Line(points={{-4,-14},{-20,-14},{-20,
-                -17},{-43.2,-17}}, color={0,0,127}));
-        connect(useClosedLoopHR.y,switch1. u2) annotation (Line(points={{-21,-10},{-12,
-                -10},{-12,-6},{-4,-6}},         color={255,0,255}));
+        connect(switch1.u3, const1.y) annotation (Line(points={{-4,-16},{-10,
+                -16},{-10,-45},{-0.8,-45}},
+                                   color={0,0,127}));
+        connect(useClosedLoopHR.y,switch1. u2) annotation (Line(points={{-19,-70},
+                {-12,-70},{-12,-8},{-4,-8}},    color={255,0,255}));
         connect(y, y) annotation (Line(points={{110,0},{110,0}},
                                                                color={0,0,127}));
         connect(switch1.y, myDelay.u)
-          annotation (Line(points={{19,-6},{24,-6}}, color={0,0,127}));
-        connect(u, switch1.u1) annotation (Line(points={{-120,0},{-62,0},{-62,2},
-                {-4,2}}, color={0,0,127}));
+          annotation (Line(points={{19,-8},{24,-8}}, color={0,0,127}));
         connect(myDelay.y, limiter.u)
-          annotation (Line(points={{47,-6},{54,-6}}, color={0,0,127}));
-        connect(limiter.y, y) annotation (Line(points={{77,-6},{90,-6},{90,0},{110,0}},
+          annotation (Line(points={{47,-8},{54,-8}}, color={0,0,127}));
+        connect(limiter.y, y) annotation (Line(points={{77,-8},{90,-8},{90,0},{
+                110,0}},
               color={0,0,127}));
+        connect(u, gain.u)
+          annotation (Line(points={{-120,0},{-80,0}}, color={0,0,127}));
+        connect(switch1.u1, add.y) annotation (Line(points={{-4,0},{-12,0},{-12,
+                4},{-21.2,4}}, color={0,0,127}));
+        connect(gain.y, add.u2) annotation (Line(points={{-57,0},{-48,0},{-48,
+                -0.2},{-39.6,-0.2}}, color={0,0,127}));
+        connect(const_shiftOffset.y, add.u1) annotation (Line(points={{-61.2,31},
+                {-46,31},{-46,8.2},{-39.6,8.2}}, color={0,0,127}));
         annotation (Diagram(coordinateSystem(extent={{-100,-100},{100,100}})),
                                                                            Icon(
               coordinateSystem(extent={{-100,-80},{100,100}}),
@@ -1359,17 +1376,21 @@ type"),       Text(
 
       package Baroreflex
         model Baroreceptor
+          parameter Boolean useAbsolutePressureTerm = true "Use absolute distention for delta. If not, only pulse pressure is effective";
           Physiolibrary.Types.RealIO.FractionInput d "The distension ratio r/r0. Should be around 1, but not necesarily exactly 1, as it is compensated by other paraemters"
           annotation (Placement(transformation(
                   extent={{-110,-8},{-90,12}}),  iconTransformation(extent={{-120,
                     -20},{-80,20}})));
-          Modelica.Blocks.Interfaces.RealOutput fbr( unit = "Hz") = f0*s*(delta/(delta + delta0)) "Baroreceptor firing frequency" annotation (Placement(transformation(
+          Modelica.Blocks.Interfaces.RealOutput fbr( unit = "Hz") "Baroreceptor firing frequency" annotation (Placement(transformation(
                   extent={{84,-10},{104,10}}),   iconTransformation(extent={{80,-20},
                     {120,20}})));
-
+          Real fbr_auc "Discrete area under the fbr curve, reset per each positive peak";
+          Real fbr_int "Integral of fbr (area under curve), reset per each positive peak";
           Real epsilon( start = 1) "Averaged distension ratio";
           parameter Physiolibrary.Types.Time Ts = 30 "Time constant for averaging";
-          Real delta=max(d - epsilon, 0) "Positive peaks detected";
+          Real delta "Positive peaks detected";
+          parameter Real d0 = 1.5;
+        //  Real delta2=delta*d "Positive peaks detected";
           parameter Real f0( unit = "Hz")= 300 "Base firing frequency";
           parameter Real delta0 = 0.4965 "Baseline delta";
 
@@ -1379,14 +1400,25 @@ type"),       Text(
         //   parameter Real epsilon_start = 1.075;
         //   parameter Real s_start = 0.85;
         //   parameter Modelica.SIunits.Time resetAt = -1 "resets initial conditions to counter transients";
-
+        parameter Real stimulation = 0 "additional baroreceptor stimulation";
         equation
+          if useAbsolutePressureTerm then
+            delta =max(d - epsilon, 0)*d/d0;
+          else
+                delta =max(d - epsilon, 0);
+          end if;
 
+          der(fbr_int) = fbr;
+          when fbr > 0 then
+            reinit(fbr_int, 0);
+            fbr_auc = fbr_int;
+          end when;
         //   when time > resetAt then
         //     reinit(epsilon, epsilon_start);
         //     reinit(s, s_start);
         //   end when;
 
+          fbr = f0*s*(delta/(delta + delta0)) + stimulation;
           der(epsilon) =(d - epsilon)/Ts;
           der(s) =a*(1 - s) - b*s*(delta/(delta + delta0));
 
@@ -3773,7 +3805,61 @@ type"),       Text(
                       pattern=LinePattern.None,
                       fillColor={255,255,255},
                       fillPattern=FillPattern.Solid,
-                      textString="Olufsen")}));
+                      textString="Olufsen")}), Diagram(graphics={
+                                             Rectangle(extent={{-74,60},{92,-44}},
+                        lineColor={0,0,0},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid),
+                    Line(
+                      points={{-74,-16},{-64,-16},{-50,62},{-4,0},{-4,-14},{24,
+                          -14},{86,-14}},
+                      color={0,0,0},
+                      thickness=1,
+                      smooth=Smooth.Bezier),
+                    Line(
+                      points={{74,-44},{74,-14}},
+                      color={28,108,200},
+                      arrow={Arrow.Open,Arrow.Open}),
+                    Line(points={{-46,44},{-46,-44}}, color={28,108,200}),
+                    Line(
+                      points={{-74,-34},{-46,-34}},
+                      color={28,108,200},
+                      arrow={Arrow.Open,Arrow.Open}),
+                    Line(
+                      points={{-48,-34},{-2,-34}},
+                      color={28,108,200},
+                      arrow={Arrow.Open,Arrow.Open}),
+                    Line(points={{-2,-10},{-2,-44}}, color={28,108,200}),
+                    Text(
+                      extent={{36,-38},{76,-22}},
+                      lineColor={28,108,200},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="offset"),
+                    Text(
+                      extent={{-72,-34},{-48,-18}},
+                      lineColor={28,108,200},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="k_TS"),
+                    Text(
+                      extent={{-36,-34},{-12,-18}},
+                      lineColor={28,108,200},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="k_TR"),
+                    Text(
+                      extent={{-18,22},{8,32}},
+                      lineColor={0,0,0},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="1 + cos"),
+                    Text(
+                      extent={{-74,42},{-46,60}},
+                      lineColor={0,0,0},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="1 - cos")}));
             end DrivingOlufsen;
 
             partial model partialVentricleWall "base class to be plug-in usable"
@@ -12233,7 +12319,45 @@ P_hs_plus_dist"),
         end SystemicMockPressure;
 
         model SystemicAV
-          extends ADAN_main.Components.Subsystems.Systemic.SystemicAV_base;
+          extends ADAN_main.Components.Subsystems.Systemic.SystemicAV_base(
+            superior_vena_cava_C2(UseOuter_thoracic_pressure=true),
+            superior_vena_cava_C88(UseOuter_thoracic_pressure=true),
+            inferior_vena_cava_C8(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            inferior_vena_cava_C12(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            inferior_vena_cava_C16(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            inferior_vena_cava_C20(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            inferior_vena_cava_C24(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            celiac_trunk_C116(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                  thoracic_pressure_ratio),
+            renal_R178(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                  thoracic_pressure_ratio),
+            hepatic_vein_T1_C10(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            renal_vein_T1_R18(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                  thoracic_pressure_ratio),
+            splachnic_tissue(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                  thoracic_pressure_ratio),
+            splachnic_vein(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                  thoracic_pressure_ratio),
+            mesenteric_artery(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                  thoracic_pressure_ratio),
+            abdominal_aorta_C114(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            abdominal_aorta_C136(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            abdominal_aorta_C176(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            abdominal_aorta_C164(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=thoracic_pressure_ratio),
+            renal_vein_T1_L22(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                  thoracic_pressure_ratio),
+            renal_L166(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                  thoracic_pressure_ratio));
         Physiolibrary.Types.Volume total_volume = volume_arterial + volume_peripheral + volume_venous;
           Physiolibrary.Types.Volume volume_arterial = ascending_aorta_A.volume +
             ascending_aorta_B.volume +
@@ -12707,6 +12831,7 @@ P_hs_plus_dist"),
             parameter Real BMI =  settings.BMI;
             parameter Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*age+0.5409*(height*100)+0.3476*BMI) "Zemtsovskaja, HT 2019 for male subjects";
             parameter Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*age+2.5*height*100) "Rezai, Blood Press Monit 2013, for male subjects";
+            parameter Physiolibrary.Types.Fraction thoracic_pressure_ratio = 0.8 "fraction of thoracic pressure in the abdominal cavity";
         equation
           //BMI = weight/(height^2);
           // aortic_length = aortic_length_calc;
@@ -32361,7 +32486,11 @@ P_hs_plus_dist"),
           internal_carotid_R8_A(distentionBase=1.5E-07),
           baroreflex(fsn=0.03),
           baroreceptor_aortic(epsilon_start=1.6, s_start=0.88),
-          baroreceptor_carotid(epsilon_start=2.65, s_start=0.9)));
+          baroreceptor_carotid(epsilon_start=2.65, s_start=0.9)),
+          thoracic_pressure(
+          rising=1,
+          width=15,
+          falling=1));
     end CVS_7af_normal;
 
     model CVS_7af_normal_step_hr
@@ -34181,6 +34310,29 @@ P_hs_plus_dist"),
             Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriseg_tiltable_reparam_valsalva;
+
+      model OlufsenTriSeg_tiltable_sit
+        "tilting to sitting position. Zero degree tilt while sitting does not elevate lower limbs."
+        extends OlufsenTriSeg_tiltable(
+          Systemic1(
+            femoral_R226(sinAlpha=0),
+            popliteal_R228(sinAlpha=0),
+            popliteal_L206(sinAlpha=0),
+            femoral_L204(sinAlpha=0),
+            femoral_vein_R42(sinAlpha=0),
+            femoral_vein_R46(sinAlpha=0),
+            popliteal_vein_R48(sinAlpha=0),
+            femoral_vein_L76(sinAlpha=0),
+            popliteal_vein_L78(sinAlpha=0),
+            femoral_vein_L72(sinAlpha=0)),
+          thoracic_pressure(
+            rising=1,
+            width=15,
+            falling=1,
+            startTime=60),
+          condTP(disconnected=false),
+          Tilt_ramp(startTime=1000));
+      end OlufsenTriSeg_tiltable_sit;
     end Tilt;
 
     package Exercise
@@ -34436,17 +34588,45 @@ P_hs_plus_dist"),
       model OlufsenTriSeg_valsalva_KosinskiBaro_lowp
         extends OlufsenTriSeg_valsalva_KosinskiBaro(
           thoracic_pressure(startTime=60.0),
-          Systemic1(baroreflex_system(
-              baroreceptor_aortic(Ts=6.0),
-              baroreceptor_carotid(Ts=6.0),
-              baroreflex(f1=0.0031))),
-          delta0_factor=0.25);
+          Systemic1(
+            baroreflex_system(
+              baroreceptor_aortic(Ts=60),
+              baroreceptor_carotid(Ts=60, stimulation=40),
+              baroreflex(f1=0.0031)),
+            splachnic_tissue(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=1),
+            mesenteric_artery(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=1),
+            hepatic_vein_T1_C10(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=1),
+            splachnic_vein(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=1),
+            renal_vein_T1_R18(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=1),
+            internal_iliac_vein_T1_R30(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=1),
+            renal_R178(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio
+                =1),
+            internal_iliac_T1_R218(UseOuter_thoracic_pressure=true,
+                thoracic_pressure_ratio=1)),
+          delta0_factor=0.25,
+          settings(arteries_UseVasoconstrictionEffect=false));
         annotation (experiment(
-            StopTime=50,
+            StopTime=120,
             Interval=0.02,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_valsalva_KosinskiBaro_lowp;
+
+      model OlufsenTriSeg_valsalva_KosinskiBaro_lowTs
+        extends OlufsenTriSeg_valsalva_KosinskiBaro_lowp(condPhi(phi_gain=2),
+            condHeartPhi(phi_gain=2));
+        annotation (experiment(
+            StopTime=90,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_valsalva_KosinskiBaro_lowTs;
     end Valsalva;
   annotation(preferredView="info",
   version="2.3.2-beta",
