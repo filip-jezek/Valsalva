@@ -1376,8 +1376,10 @@ type"),       Text(
 
       package Baroreflex
         model Baroreceptor
-          parameter Boolean useAbsolutePressureTerm = true "Use absolute distention for delta. If not, only pulse pressure is effective";
-          Physiolibrary.Types.RealIO.FractionInput d "The distension ratio r/r0. Should be around 1, but not necesarily exactly 1, as it is compensated by other paraemters"
+          parameter Boolean useAbsolutePressureTerm = true "Use absolute distention for delta. If not, only pulse pressure is effective"
+            annotation(choices(checkBox=true));
+          Physiolibrary.Types.RealIO.FractionInput d
+            "The distension ratio r/r0. Should be around 1, but not necesarily exactly 1, as it is compensated by other paraemters"
           annotation (Placement(transformation(
                   extent={{-110,-8},{-90,12}}),  iconTransformation(extent={{-120,
                     -20},{-80,20}})));
@@ -1400,8 +1402,17 @@ type"),       Text(
         //   parameter Real epsilon_start = 1.075;
         //   parameter Real s_start = 0.85;
         //   parameter Modelica.SIunits.Time resetAt = -1 "resets initial conditions to counter transients";
-        parameter Real stimulation = 0 "additional baroreceptor stimulation";
+          parameter Boolean useStimulationInput = false annotation(choices(checkBox=true));
+          Physiolibrary.Types.Frequency stimulation "additional baroreceptor stimulation";
+          Physiolibrary.Types.RealIO.FrequencyInput stimulationInput = stimulation if useStimulationInput
+            "Artificial stimulation of the baroreceptor"
+            annotation (Placement(transformation(extent={{-110,-106},{-90,-86}}),
+                iconTransformation(extent={{-120,-120},{-80,-80}})));
         equation
+          if not useStimulationInput then
+            stimulation = 0;
+          end if;
+
           if useAbsolutePressureTerm then
             delta =max(d - epsilon, 0)*d/d0;
           else
@@ -1494,7 +1505,7 @@ type"),       Text(
             annotation (Placement(transformation(extent={{4,10},{24,-10}})));
           Baroreceptor baroreceptor_aortic
             annotation (Placement(transformation(extent={{-24,-26},{-4,-6}})));
-          Baroreceptor baroreceptor_carotid
+          Baroreceptor baroreceptor_carotid(useStimulationInput=false)
             annotation (Placement(transformation(extent={{-24,2},{-4,22}})));
           Physiolibrary.Types.RealIO.FractionInput aortic_distention
             annotation (Placement(transformation(rotation=0, extent={{-35,-19},
@@ -1504,6 +1515,8 @@ type"),       Text(
                     -29,15}}), iconTransformation(extent={{-30,10},{-10,30}})));
           Physiolibrary.Types.RealIO.FractionOutput phi annotation (Placement(
                 transformation(rotation=0, extent={{27,-3},{33,3}})));
+          Modelica.Blocks.Sources.Step step(height=20, startTime=60)
+            annotation (Placement(transformation(extent={{-10,-4},{-14,0}})));
         equation
           connect(baroreceptor_carotid.fbr,baroreflex. carotid_BR) annotation (
               Line(points={{-4,12},{-2,12},{-2,10},{4,10}},              color={0,
@@ -1517,6 +1530,8 @@ type"),       Text(
                 points={{-32,12},{-24,12}},                   color={0,0,127}));
           connect(phi, baroreflex.phi) annotation (Line(points={{30,0},{24.2,0}},
                                      color={0,0,127}));
+          connect(step.y, baroreceptor_carotid.stimulationInput) annotation (
+              Line(points={{-14.2,-2},{-28,-2},{-28,2},{-24,2}}, color={0,0,127}));
           annotation (Diagram(coordinateSystem(extent={{-30,-30},{30,30}})),
               Icon(coordinateSystem(extent={{-30,-30},{30,30}})));
         end Baroreflex_system;
@@ -34585,30 +34600,14 @@ P_hs_plus_dist"),
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_valsalva_KosinskiBaro;
 
-      model OlufsenTriSeg_valsalva_KosinskiBaro_lowp
+      model OlufsenTriSeg_valsalva_KosinskiBaro_longTs
         extends OlufsenTriSeg_valsalva_KosinskiBaro(
           thoracic_pressure(startTime=60.0),
           Systemic1(
             baroreflex_system(
               baroreceptor_aortic(Ts=60),
-              baroreceptor_carotid(Ts=60, stimulation=40),
-              baroreflex(f1=0.0031)),
-            splachnic_tissue(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=1),
-            mesenteric_artery(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=1),
-            hepatic_vein_T1_C10(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=1),
-            splachnic_vein(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=1),
-            renal_vein_T1_R18(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=1),
-            internal_iliac_vein_T1_R30(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=1),
-            renal_R178(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio
-                =1),
-            internal_iliac_T1_R218(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=1)),
+              baroreceptor_carotid(Ts=60),
+              baroreflex(f1=0.0031))),
           delta0_factor=0.25,
           settings(arteries_UseVasoconstrictionEffect=false));
         annotation (experiment(
@@ -34616,18 +34615,32 @@ P_hs_plus_dist"),
             Interval=0.02,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
-      end OlufsenTriSeg_valsalva_KosinskiBaro_lowp;
+      end OlufsenTriSeg_valsalva_KosinskiBaro_longTs;
 
-      model OlufsenTriSeg_valsalva_KosinskiBaro_lowTs
-        extends OlufsenTriSeg_valsalva_KosinskiBaro_lowp(condPhi(phi_gain=2),
+      model OlufsenTriSeg_valsalva_KosinskiBaro_lowp_phigain
+        extends OlufsenTriSeg_valsalva_KosinskiBaro_longTs(condPhi(phi_gain=2),
             condHeartPhi(phi_gain=2));
         annotation (experiment(
             StopTime=90,
             Interval=0.02,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
-      end OlufsenTriSeg_valsalva_KosinskiBaro_lowTs;
+      end OlufsenTriSeg_valsalva_KosinskiBaro_lowp_phigain;
     end Valsalva;
+
+    package BaroreceptorStimulation
+      model OlufsenTriSeg_valsalva_KosinskiBaro_longTs_Stimulation
+        extends Valsalva.OlufsenTriSeg_valsalva_KosinskiBaro_longTs(condTP(
+              disconnected=true), Systemic1(baroreflex_system(
+                baroreceptor_carotid(useStimulationInput=true), step(height=10,
+                  startTime=300))));
+        annotation (experiment(
+            StopTime=1800,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_valsalva_KosinskiBaro_longTs_Stimulation;
+    end BaroreceptorStimulation;
   annotation(preferredView="info",
   version="2.3.2-beta",
   versionBuild=1,

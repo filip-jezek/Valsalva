@@ -1,56 +1,12 @@
-import scipy.io as skipy
+# import scipy.io as skipy
+
 import fun_lib
-from statistics import mean
-from scipy.signal import savgol_filter
+# from statistics import mean
 from matplotlib import pyplot as plt
-import scipy.signal as ss
+
 import math
 # import DyMat
 # from matplotlib import pyplot as plt
-
-def getOddWindow(time, dt):
-    win = round(time/dt)
-    return int(win) if win%2 == 1 else int(win) + 1
-
-
-def getMeanSavGol(sig, dt):
-    # smooth the data first to have the mean
-    # we assume equidistant grid
-    # dt = vars_set['time'][2] - vars_set['time'][1]
-    # dt = time[2] - time[1]
-    sig_mean = savgol_filter(sig, getOddWindow(3, dt), 3) # window size of 3 following avg heartbeats = 3s and polynomial order of 3
-
-    return sig_mean
-
-def detrend(sig, window, cutoff = -math.inf):
-    sigf = savgol_filter(sig, window, 3)
-    return [max(s - sf, cutoff) for s, sf in zip(sig, sigf)]
-
-def getPeaks(sig, dt):
-    # get mean and detrend
-    win = getOddWindow(2, dt)
-    sigDet = detrend(sig, win, 0)
-    # and again
-    sigDet2 = detrend(sigDet, win, 0)
-    # plt.plot(sigDet)
-    # plt.plot(sigDet2)
-    # plt.show()
-
-    # find peaks - its minimal distance is 0.3 s (is about 200 BPM) and is above the mean of the signal
-    peaks, _ = ss.find_peaks(sigDet2, distance= int(0.4/dt))
-    return peaks
-
-def getMeanRR(sig, dt):
-    
-    peaks = getPeaks(sig, dt)
-    means = [0]*len(peaks)
-    for i in range(2, len(peaks)):
-        # loop from 2nd
-        # take range inbetween the means
-        rng = slice(peaks[i-1], peaks[i], 1)
-        # take mean from two peaks
-        means[rng] = [sig[rng].mean()]*(rng.stop-rng.start)
-    return means
 
 def getObjectives(vars_set):
 
@@ -67,11 +23,12 @@ def getObjectives(vars_set):
     BP = vars_set['brachial_pressure']
     dt = vars_set['time'][2] - vars_set['time'][1]
     assert dt > 0, "The simulation must not store values at events."
-    bp_mean = getMeanRR(BP, dt)
+
+    bp_mean = fun_lib.getMeanRR(BP, dt)
     time = vars_set['time']
 
-    bp_mean1 = getMeanSavGol(BP, dt)
-    bp_mean2 = getMeanRR(BP, dt)
+    # bp_mean1 = getMeanSavGol(BP, dt)
+    # bp_mean2 = getMeanRR(BP, dt)
     # plt.plot(time, BP)
     # plt.plot(time, bp_mean1)
     # plt.plot(time[0:len(bp_mean2)], bp_mean2)
@@ -84,37 +41,46 @@ def getObjectives(vars_set):
 
 
     # find valsalva start and end
-    valsalva_start = 20
-    # TODO find automatically
-    valsalva_end = 35
-
-    # baseline is 5s before Valsalva
-    baseline = bp_mean[fun_lib.findInterval(valsalva_start-5, valsalva_start)].mean()
-
-    t = vars_set['time'][-1]
-    interval = fun_lib.findInterval(valsalva_start, valsalva_end, vars_set['time'])
-    interval2 = fun_lib.findInterval(10, 15, vars_set['time'])
-
-
+    valsalva_start = fun_lib.getValsalvaStart(time, vars_set['thoracic_pressure'])
+    valsalva_end = fun_lib.getValsalvaEnd(valsalva_start + 5, time, vars_set['thoracic_pressure'])
+    # baseline is start to just before Valsalva
+    baseline = bp_mean[fun_lib.findInterval(0, valsalva_start, time)].mean()
+    
     # systolic peak at start of valsalva
-    interval_phase1 = fun_lib.findInterval(valsalva_start, valsalva_start + 5, vars_set['time'])
-    ph1_peak = max(BP[interval])
-    
+    ph1_peak = max(BP[fun_lib.findInterval(valsalva_start, valsalva_start + 5, time)])
     # min mean pressure during valsalva
-
-    interval_valsalva = fun_lib.findInterval(valsalva_start, valsalva_end, vars_set['time'])
-    valsalva_mean_min = min(bp_mean1[interval_valsalva])
+    ph2_mean_min = min(bp_mean[fun_lib.findInterval(valsalva_start, valsalva_end-2, time)])
     # peak minimal after valsalva release
+    ph3_mean_min = min(bp_mean[fun_lib.findInterval(valsalva_end, valsalva_end + 10, time)])
     # peak maximal after valsalva
+    ph4_mean_max = max(BP[fun_lib.findInterval(valsalva_end, valsalva_end + 15, time)])
     # mean recovery
+    ph5_recovery_mean = bp_mean[fun_lib.findInterval(valsalva_end+15, valsalva_end + 20, time)].mean()
 
 
-    # build costs
-    ov = [  ('costs', max(vars_set['sum_cost'][interval]), -1, None, 1),
-            ('fbr_aor', max(vars_set['systemicMockPressure.baroreflex_system.baroreceptor_aortic.fbr'][interval2]), 35, None, 10),
-            ('fbr_car', max(vars_set['systemicMockPressure.baroreflex_system.baroreceptor_carotid.fbr'][interval2]), 35, None, 10),
+    # construct objectives
+    objectives = list()
+    objectives.append(fun_lib.ObjectiveVar('baseline', baseline, costFunctionType=fun_lib.CostFunctionType.Ignore))
+
+    # build costs, relative to baseline
+    ov = [  ('ph1', ph1_peak/baseline, None),
+            ('ph2', ph2_mean_min/baseline, None),
+            ('ph3', ph3_mean_min/baseline, None),
+            ('ph4', ph4_mean_max/baseline, None),
+            ('ph5', ph5_recovery_mean/baseline, None),
             ]
-    
-    # make it a dict?
-    objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight = o[4]), ov))
+    # map the inputs to ObjectiveVar
+    objectives.extend(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2]), ov))
+  
+    if '__draw_plots' in vars_set:
+        plt.plot(time, BP, 'b')
+        plt.plot(time, bp_mean, 'r')
+        plt.plot((valsalva_start - 10, valsalva_start), [baseline]*2, 'k')
+        plt.plot((valsalva_start, valsalva_start + 5), [ph1_peak]*2, 'k')
+        plt.plot((valsalva_start, valsalva_end - 2), [ph2_mean_min]*2, 'k')
+        plt.plot((valsalva_end, valsalva_end+10), [ph3_mean_min]*2, 'k')
+        plt.plot((valsalva_end, valsalva_end+15), [ph4_mean_max]*2, 'k')
+        plt.plot((valsalva_end+15, valsalva_end+20), [ph5_recovery_mean]*2, 'k')
+        plt.draw()
+
     return objectives

@@ -1,14 +1,28 @@
 import numpy
 import math
 import enum
+from scipy.signal import savgol_filter
+import numpy
+import scipy.signal as ss
 
 class CostFunctionType(enum.Enum):
     Quadratic = 1
     Linear = 2
+    Ignore = 3
 
 class ObjectiveVar:
+    """
+    Provides objects and functions for calculating cost functions
 
-    def __init__(self, name, value=None, targetValue=None, limit=None, weight=1, k_p=1e3, costFunctionType=CostFunctionType.Quadratic):
+    """
+
+    def __init__(self, name, 
+                value=None, 
+                targetValue=None, 
+                limit=None, 
+                weight=1, 
+                k_p=1e3, 
+                costFunctionType=CostFunctionType.Quadratic):
         self.name = name
         self.targetValue = targetValue
         self.value = value
@@ -24,6 +38,11 @@ class ObjectiveVar:
             return self.weight*(measured - target)**2/(target**2)
         elif self.costFunctionType is CostFunctionType.Linear:
             return self.weight*abs(measured - target)/target
+        elif self.costFunctionType is CostFunctionType.Ignore:
+            return 0
+        else:
+            raise NotImplementedError()
+
 
 
     def cost(self):
@@ -53,8 +72,6 @@ class ObjectiveVar:
             return True
 
 
-    
-# Provides objects and functions for calculating cost functions
 
 def findInterval(t_from, t_to, timeArr):
     return range(findLowestIndex(t_from, timeArr), findLowestIndex(t_to, timeArr))
@@ -114,4 +131,60 @@ def calculateEF(volumes):
     esv = min(volumes)
     edv = max(volumes)
     return (edv - esv)/edv
+
+def getOddWindow(time, dt):
+    win = round(time/dt)
+    return int(win) if win%2 == 1 else int(win) + 1
+
+def detrend(sig, window, cutoff = -math.inf):
+    sigf = savgol_filter(sig, window, 3)
+    return [max(s - sf, cutoff) for s, sf in zip(sig, sigf)]
+
+def getPeaks(sig, dt):
+    # get mean and detrend
+    win = getOddWindow(2, dt)
+    sigDet = detrend(sig, win, 0)
+    # and again
+    sigDet2 = detrend(sigDet, win, 0)
+    # plt.plot(sigDet)
+    # plt.plot(sigDet2)
+    # plt.show()
+
+    # find peaks - its minimal distance is 0.3 s (is about 200 BPM) and is above the mean of the signal
+    peaks, _ = ss.find_peaks(sigDet2, distance= int(0.4/dt))
+    return peaks
+
+def getMeanRR(sig, dt):
+    
+    peaks = getPeaks(sig, dt)
+    means = [0]*len(sig)
+    for i in range(1, len(peaks)):
+        # loop from 2nd
+        # take range inbetween the means
+        rng = slice(peaks[i-1], peaks[i], 1)
+        # take mean from two peaks
+        means[rng] = [sig[rng].mean()]*(rng.stop-rng.start)
+    
+    # fill in the begining - value of first peak, long up to first peak indice
+    means[0: peaks[0]] = [means[peaks[0]]]*peaks[0]
+
+    # fill in the last
+    l = len(means[peaks[-1]:] )
+    means[peaks[-1]:] = [means[peaks[-1]-1]]*l
+
+    return numpy.array(means)
+
+def getValsalvaStart(time, thoracic_pressure):
+    # threshold of 10 mmHg is good enough also for synthetic 10 Pa
+    return time[findLowestIndex(10, thoracic_pressure)]
+
+def getValsalvaEnd(valsalva_start, time, thoracic_pressure):
+    # minimal valsalva length is 5
+    i_from = findLowestIndex(valsalva_start + 5, time)
+    # get rid of noise for thresholding
+    tpf = ss.medfilt(thoracic_pressure, 7)
+    
+    # threshold of 10 mmHg is good enough also for synthetic 10 Pa
+    i = next((i for i, x in numpy.ndenumerate(tpf[i_from:]) if x <= 10))
+    return time[i] + valsalva_start
 
