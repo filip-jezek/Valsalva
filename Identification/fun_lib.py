@@ -72,6 +72,11 @@ class ObjectiveVar:
             return True
 
 
+def getObjectiveByName(objective_iterable, name):
+    """
+    Returns objective of given name from the list
+    """
+    return next((i for i in objective_iterable if i.name == name))
 
 def findInterval(t_from, t_to, timeArr):
     return range(findLowestIndex(t_from, timeArr), findLowestIndex(t_to, timeArr))
@@ -178,13 +183,25 @@ def getValsalvaStart(time, thoracic_pressure):
     # threshold of 10 mmHg is good enough also for synthetic 10 Pa
     return time[findLowestIndex(10, thoracic_pressure)]
 
-def getValsalvaEnd(valsalva_start, time, thoracic_pressure):
+def getValsalvaEnd(valsalva_start, time, thoracic_pressure, min_length = 5, threshold = 20):
     # minimal valsalva length is 5
-    i_from = findLowestIndex(valsalva_start + 5, time)
+    i_from = findLowestIndex(valsalva_start + min_length, time)
     # get rid of noise for thresholding
     tpf = ss.medfilt(thoracic_pressure, 7)
     
     # threshold of 10 mmHg is good enough also for synthetic 10 Pa
-    i = next((i for i, x in numpy.ndenumerate(tpf[i_from:]) if x <= 10))
-    return time[i] + valsalva_start
+    i = next((i for i, x in numpy.ndenumerate(tpf[i_from:]) if x <= threshold))
+    return time[i] + valsalva_start + min_length
+
+def UpdateObjectivesByValuesFromFile(filename, objectives):
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+        for line in lines[1:]:
+            vals = line.split(',')
+            # first col is name
+            objective = next((o for o in objectives if o.name == vals[0]), None)
+            if objective is not None:
+                objective.targetValue = float(vals[1])
+
 

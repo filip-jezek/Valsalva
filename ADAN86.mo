@@ -12318,9 +12318,9 @@ P_hs_plus_dist"),
           connect(internal_carotid_R8_A.port_b, aortic_arch_C46.port_b)
             annotation (Line(
               points={{-259,99.5},{-259,100},{-240,100},{-240,59.5},{-259,59.5}},
-
               color={0,0,0},
               thickness=1));
+
           connect(internal_carotid_R8_A.port_b, port_b) annotation (Line(
               points={{-259,99.5},{-240,99.5},{-240,80},{112,80},{460,80}},
               color={0,0,0},
@@ -33626,6 +33626,7 @@ P_hs_plus_dist"),
 
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
         output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        output Physiolibrary.Types.Pressure thoracic_pressure = Systemic1.thoracic_pressure;
         parameter Real sigma_act=2*7.5*120 "mmHg ";
       //  parameter Physiolibrary.Types.Fraction sigma_factor = 2;
         parameter Real sigma_act_maxAct=30.25*7.5*120
@@ -34602,7 +34603,7 @@ P_hs_plus_dist"),
 
       model OlufsenTriSeg_valsalva_KosinskiBaro_longTs
         extends OlufsenTriSeg_valsalva_KosinskiBaro(
-          thoracic_pressure(startTime=60.0),
+          thoracic_pressure(startTime=20.0),
           Systemic1(
             baroreflex_system(
               baroreceptor_aortic(Ts=60),
@@ -34626,6 +34627,29 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_valsalva_KosinskiBaro_lowp_phigain;
+
+      model OlufsenTriSeg_valsalva_KosinskiBaro_tiltable_sit
+        "tilting to sitting position. Zero degree tilt while sitting does not elevate lower limbs."
+        extends Tilt.OlufsenTriSeg_tiltable(
+          Systemic1(
+            femoral_R226(sinAlpha=0),
+            popliteal_R228(sinAlpha=0),
+            popliteal_L206(sinAlpha=0),
+            femoral_L204(sinAlpha=0),
+            femoral_vein_R42(sinAlpha=0),
+            femoral_vein_R46(sinAlpha=0),
+            popliteal_vein_R48(sinAlpha=0),
+            femoral_vein_L76(sinAlpha=0),
+            popliteal_vein_L78(sinAlpha=0),
+            femoral_vein_L72(sinAlpha=0)),
+          thoracic_pressure(
+            rising=1,
+            width=15,
+            falling=1,
+            startTime=60),
+          condTP(disconnected=false),
+          Tilt_ramp(startTime=1000));
+      end OlufsenTriSeg_valsalva_KosinskiBaro_tiltable_sit;
     end Valsalva;
 
     package BaroreceptorStimulation
