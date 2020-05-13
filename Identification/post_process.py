@@ -24,6 +24,7 @@ def writeCost(objectives):
     with open('dsout.out', 'w') as file:
         file.write("banik pico\n")
         file.write('f(x) =' + repr(total_cost))
+    print('Total costs: %s' % (total_cost))
 
 def writeLogHeader(objectives):
     """check if file exists and build header otherwise
@@ -112,7 +113,6 @@ toc = time.time()
 print("Opening result in ", toc - tic, " s")
 
 var_set = extractVars(d)
-
 toc = time.time()
 print("Loading result in ", toc - tic, " s")
 

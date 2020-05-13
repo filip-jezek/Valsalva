@@ -7,21 +7,22 @@ package ADAN_main
       import Physiolibrary.Types.*;
 
       // general
-      parameter Fraction phi0=0.25   "Baseline resting phi";
-      parameter Physiolibrary.Types.Height height = 1.7 "Subject's height for scaling vessel lengths";
-      parameter Modelica.SIunits.Mass weight = 70 "Subject's weight";
-      parameter Real age = 35;
-      parameter Real BMI = weight/(height^2);
-      parameter Real BSA = 0.007184*weight^0.425*height^0.725 "Du Bois formula for body surface area";
+      parameter Fraction phi0=0.25   "Baseline resting phi" annotation(Dialog(group = "General"));
+      parameter Physiolibrary.Types.Height height = 1.7 "Subject's height for scaling vessel lengths" annotation(Dialog(group = "General"));
+      parameter Modelica.SIunits.Mass weight = 70 "Subject's weight" annotation(Dialog(group = "General"));
+      parameter Real age = 35 annotation(Dialog(group = "General"));
+      parameter Real BMI = weight/(height^2) annotation(Dialog(group = "General"));
+      parameter Real BSA = 0.007184*weight^0.425*height^0.725 "Du Bois formula for body surface area" annotation(Dialog(group = "General"));
+      parameter Physiolibrary.Types.Fraction thoracic_pressure_ratio = 0.8 "fraction of thoracic pressure in the abdominal cavity" annotation(Dialog(group = "General"));
 
       //INIT
-      parameter Boolean initByPressure = true "Use nominal pressure to initialize vessel volume. False to use volume directly";
+      parameter Boolean initByPressure = true "Use nominal pressure to initialize vessel volume. False to use volume directly" annotation(Dialog(group = "General"));
       // HEART
-      parameter Physiolibrary.Types.Fraction heart_alphaE(min = 0, max = 1.33) = 0 "linear dependency of active elastance on phi" annotation(Dialog(group = "Heart"));
+      parameter Physiolibrary.Types.Fraction heart_alphaE(min = 0, max = 1.33) = 0 "For Smith heart - linear dependency of active elastance on phi" annotation(Dialog(group = "Heart"));
       parameter Physiolibrary.Types.Fraction heart_gammaE(
         min=0,
         max=1.33) = 0
-        "linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi"                                                                      annotation(Dialog(group="Heart"));
+        "For Smith heart - linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi"                                                                      annotation(Dialog(group="Heart"));
 
       // arteries
       parameter Pressure tissues_nominal_arterioles_pressure=13332.2387415
@@ -4274,7 +4275,6 @@ type"),       Text(
 
               // Triseg parameters
 
-              parameter Real Lsref=1.9 "Resting SL, micron";
               parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
               parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
               parameter Real sigma_act=7.5*120 "mmHg ";
@@ -4287,13 +4287,13 @@ type"),       Text(
               parameter Real SLrest=1.51 "microns";
 
               // same parameters as in driving function. Change with care.
-              parameter Modelica.SIunits.Time tauD=0.032 "Factor scaling contraction decay time";
-              parameter Modelica.SIunits.Time tauR=0.048 "Factor scaling contraction rise time";
-              parameter Modelica.SIunits.Time tauSC=0.425 "Factor scaling duration of contraction";
-              parameter Real Crest=0.02 "Diastolic resting level of activation";
+            //   parameter Modelica.SIunits.Time tauD=0.032 "Factor scaling contraction decay time";
+            //   parameter Modelica.SIunits.Time tauR=0.048 "Factor scaling contraction rise time";
+            //   parameter Modelica.SIunits.Time tauSC=0.425 "Factor scaling duration of contraction";
+            //   parameter Real Crest=0.02 "Diastolic resting level of activation";
 
-              Real CL=tanh(4*(SL - SLrest)^2) "increase of activation with sarcomere length";
-              Real T=tauSC*(0.29 + 0.3*SL) "decrease of activation duration with decrease of sarcomere length";
+            //   Real CL=tanh(4*(SL - SLrest)^2) "increase of activation with sarcomere length";
+            //   Real T=tauSC*(0.29 + 0.3*SL) "decrease of activation duration with decrease of sarcomere length";
               Real C(fixed = false) "activation function, related to intracellular calcium conncentration";
             //   Real dC=CL*drivingInput/tauR + (Crest - C)/(1 + exp((T - cardiac_cycle/
             //       frequency)/tauD))/tauD;
@@ -12338,41 +12338,41 @@ P_hs_plus_dist"),
             superior_vena_cava_C2(UseOuter_thoracic_pressure=true),
             superior_vena_cava_C88(UseOuter_thoracic_pressure=true),
             inferior_vena_cava_C8(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             inferior_vena_cava_C12(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             inferior_vena_cava_C16(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             inferior_vena_cava_C20(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             inferior_vena_cava_C24(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             celiac_trunk_C116(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
-                  thoracic_pressure_ratio),
+                  settings.thoracic_pressure_ratio),
             renal_R178(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
-                  thoracic_pressure_ratio),
+                  settings.thoracic_pressure_ratio),
             hepatic_vein_T1_C10(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             renal_vein_T1_R18(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
-                  thoracic_pressure_ratio),
+                  settings.thoracic_pressure_ratio),
             splachnic_tissue(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
-                  thoracic_pressure_ratio),
+                  settings.thoracic_pressure_ratio),
             splachnic_vein(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
-                  thoracic_pressure_ratio),
+                  settings.thoracic_pressure_ratio),
             mesenteric_artery(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
-                  thoracic_pressure_ratio),
+                  settings.thoracic_pressure_ratio),
             abdominal_aorta_C114(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             abdominal_aorta_C136(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             abdominal_aorta_C176(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             abdominal_aorta_C164(UseOuter_thoracic_pressure=true,
-                thoracic_pressure_ratio=thoracic_pressure_ratio),
+                thoracic_pressure_ratio=settings.thoracic_pressure_ratio),
             renal_vein_T1_L22(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
-                  thoracic_pressure_ratio),
+                  settings.thoracic_pressure_ratio),
             renal_L166(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
-                  thoracic_pressure_ratio));
+                  settings.thoracic_pressure_ratio));
         Physiolibrary.Types.Volume total_volume = volume_arterial + volume_peripheral + volume_venous;
           Physiolibrary.Types.Volume volume_arterial = ascending_aorta_A.volume +
             ascending_aorta_B.volume +
@@ -12846,7 +12846,7 @@ P_hs_plus_dist"),
             parameter Real BMI =  settings.BMI;
             parameter Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*age+0.5409*(height*100)+0.3476*BMI) "Zemtsovskaja, HT 2019 for male subjects";
             parameter Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*age+2.5*height*100) "Rezai, Blood Press Monit 2013, for male subjects";
-            parameter Physiolibrary.Types.Fraction thoracic_pressure_ratio = 0.8 "fraction of thoracic pressure in the abdominal cavity";
+        //    parameter Physiolibrary.Types.Fraction thoracic_pressure_ratio = 0.8 "fraction of thoracic pressure in the abdominal cavity";
         equation
           //BMI = weight/(height^2);
           // aortic_length = aortic_length_calc;

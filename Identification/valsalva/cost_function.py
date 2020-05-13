@@ -9,12 +9,69 @@ import math
 # import DyMat
 # from matplotlib import pyplot as plt
 
-def buildObjectives(o, baseline, time):
-    # (BP,      phase1, numpy.max   , 'ph1_peak'    ,  1/baseline, count),
-    return None
+def plotTargetValues(objectives, valsalva_start, valsalva_end, signal_end):
+    # plot merged timecourse
+    # valsalva_start = 20
+    # valsalva_end = 35
+    # signal_end = 55
+    
+    # All targets are relative to baseline, so we have to have that set first
+    baseline_bp = fun_lib.getObjectiveByName(objectives, 'baseline_bp').value
+    baseline_hr = fun_lib.getObjectiveByName(objectives, 'baseline_hr').value
+
+    # just a shortcut
+    def getTrgtVal(name):
+        return fun_lib.getObjectiveByName(objectives, name).targetValue
+    
+    def getTrgtVar(name):
+        return fun_lib.getObjectiveByName(objectives, name).variance
+
+    # color for BP and HR
+    c_BP = 'g'
+    c_HR = 'c'
+
+    # baselines
+    plt.errorbar((valsalva_start/2), getTrgtVal('baseline_bp'), yerr=getTrgtVar('baseline_bp'), fmt = c_BP, barsabove = True, zorder=3)
+    plt.errorbar((valsalva_start/2), getTrgtVal('baseline_hr'), yerr=getTrgtVar('baseline_hr'), fmt = c_HR, barsabove = True, zorder=3)
+    
+    # recoveries
+    plt.errorbar((signal_end - 2.5), getTrgtVal('ph5_recovery')*baseline_bp, yerr=getTrgtVar('ph5_recovery')*baseline_bp, fmt = c_BP, barsabove = True, zorder=3)
+    plt.errorbar((signal_end - 2.5), getTrgtVal('ph5_hr_recovery')*baseline_hr, yerr=getTrgtVar('ph5_hr_recovery')*baseline_hr, fmt = c_HR, barsabove = True, zorder=3)
+
+    def plotMetric(t_val, t_offset, val, baseline, color):
+        val_mean = getTrgtVal(val)*baseline
+        val_std = getTrgtVar(val)*baseline
+        t_mean = getTrgtVal(t_val) + t_offset
+        t_std = getTrgtVar(t_val) 
+        # zorder 3 is a workaround to show errorbars above the plots
+        plt.errorbar(t_mean, val_mean, yerr= val_std, xerr=t_std, fmt = color, barsabove = True, zorder=3, linewidth = 2)
+
+    def plotBPMetric(t_val, t_offset, val, color = c_BP):
+        plotMetric(t_val, t_offset, val, baseline_bp, color)
+
+    def plotHRMetric(t_val, t_offset, val, color = c_HR):
+        plotMetric(t_val, t_offset, val, baseline_hr, color)    
+
+    plotBPMetric('t_ph1_peak', valsalva_start, 'ph1_peak')
+    plotBPMetric('t_ph2_mean_min', valsalva_start, 'ph2_mean_min')
+    plotBPMetric('t_ph2_max', valsalva_end, 'ph2_max')
+    plotBPMetric('t_ph4_drop', valsalva_end, 'ph4_drop')
+    plotBPMetric('t_ph4_ovrshoot', valsalva_end, 'ph4_ovrshoot')
+
+    plotHRMetric('t_ph1_hr_min', valsalva_start, 'ph1_hr_min')
+    plotHRMetric('t_ph4_hr_max', valsalva_end, 'ph4_hr_max')
+    plotHRMetric('t_ph4_hr_drop', valsalva_end, 'ph4_hr_drop')
+    pass
 
 
 def getObjectives(vars_set):
+
+    if '__targetValuesFilename' not in vars_set:
+        vars_set['__file_name'] = 'All_supine'
+        vars_set['__targetValuesFilename'] = r'../targetValues_' + vars_set['__file_name'] + '.txt'
+
+    if '__draw_plots' not in vars_set:
+        vars_set['__draw_plots'] = True
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
     # Pa = vars_set['Pa']
@@ -23,11 +80,20 @@ def getObjectives(vars_set):
 
     # HR is system input (change in phi) from 70 to 89
     mmHg2SI = 133.32
-    ml2SI = 1e-6
-    lpm2SI = 1e-3/60
+    # ml2SI = 1e-6
+    # lpm2SI = 1e-3/60
+    BPM2SI = 1/60
 
     BP = vars_set['brachial_pressure']
-    HR = vars_set['heart_rate']
+    HR = vars_set['heartRate.HR']
+    TP = vars_set['Systemic1.thoracic_pressure']
+
+    # make sure its in non-SI units
+    if numpy.mean(BP) > 200:
+        # convert to SI units
+        BP = BP/mmHg2SI
+        HR = HR/BPM2SI
+        TP = TP/mmHg2SI
 
     dt = vars_set['time'][2] - vars_set['time'][1]
     assert dt > 0, "The simulation must not store values at events."
@@ -49,8 +115,9 @@ def getObjectives(vars_set):
 
 
     # find valsalva start and end
-    valsalva_start = fun_lib.getValsalvaStart(time, vars_set['thoracic_pressure'])
-    valsalva_end = fun_lib.getValsalvaEnd(valsalva_start, time, vars_set['thoracic_pressure'])
+    valsalva_start = fun_lib.getValsalvaStart(time, TP, threshold=10)
+    valsalva_end = fun_lib.getValsalvaEnd(valsalva_start, time, TP, threshold=10)
+    valsalva = (valsalva_start, valsalva_end)
     
     # divide valsalva phases    
     # pre-valsalva
@@ -79,8 +146,8 @@ def getObjectives(vars_set):
 
     phase_values = [(BP     , phase1, (-1, 0), numpy.max  , baseline_bp, 'ph1_peak'    , COUNT),
                     (bp_mean, phase2, (0, -2), numpy.min  , baseline_bp, 'ph2_mean_min', COUNT),
-                    (bp_mean, phase4,(-5, -5), numpy.max  , baseline_bp, 'ph2_max'     , COUNT),
-                    (bp_mean, phase4, (0, -2), numpy.min  , baseline_bp, 'ph4_drop'    , COUNT),
+                    (bp_mean, phase4,(-7, -7), numpy.max  , baseline_bp, 'ph2_max'     , COUNT),
+                    (bp_mean, phase4, (-2, -2), numpy.min  , baseline_bp, 'ph4_drop'    , COUNT),
                     (bp_mean, phase4, (2, 5) , numpy.max  , baseline_bp, 'ph4_ovrshoot', COUNT),
                     (bp_mean, phase5, 0      , numpy.mean , baseline_bp, 'ph5_recovery', COUNT),
                     (HR     , phase1, 0      , numpy.min  , baseline_hr, 'ph1_hr_min' , COUNT),
@@ -90,8 +157,8 @@ def getObjectives(vars_set):
 
     time_values = [ (BP,      phase1, (-1, 0), numpy.argmax, 't_ph1_peak'    , COUNT),
                     (bp_mean, phase2, (0, -2), numpy.argmin, 't_ph2_mean_min', COUNT),
-                    (bp_mean, phase4,(-5, -5), numpy.argmax, 't_ph2_max'     , COUNT),
-                    (bp_mean, phase4, (0, -2), numpy.argmin, 't_ph4_drop'    , COUNT),
+                    (bp_mean, phase4,(-7, -7), numpy.argmax, 't_ph2_max'     , COUNT),
+                    (bp_mean, phase4, (-2, -2), numpy.argmin, 't_ph4_drop'    , COUNT),
                     (bp_mean, phase4, (2, 5) , numpy.argmax, 't_ph4_ovrshoot', COUNT),
                     (HR     , phase1, 0      , numpy.argmin, 't_ph1_hr_min'  , COUNT),
                     (HR     , phase4, (0, 0) , numpy.argmax, 't_ph4_hr_max'  , COUNT),
@@ -123,12 +190,17 @@ def getObjectives(vars_set):
     objectives.extend(map(buildValueObjective, phase_values))
     objectives.extend(map(buildTimeObjective, time_values))
 
+    if '__targetValuesFilename' in vars_set:
+        fun_lib.updateObjectivesByValuesFromFile(vars_set['__targetValuesFilename'], objectives)
       
     if '__draw_plots' in vars_set:
+        plt.figure()
+        plt.title(vars_set['__file_name'])
+
         plt.plot(time, BP, 'b')
         plt.plot(time, bp_mean, 'm')
-        plt.plot(time, vars_set['thoracic_pressure'], 'g')
-        plt.plot(time, vars_set['heart_rate'])
+        plt.plot(time, TP, 'g')
+        plt.plot(time, HR)
 
         # get objective by name shortcuts
         getObj = lambda name: fun_lib.getObjectiveByName(objectives, name).value
@@ -152,7 +224,9 @@ def getObjectives(vars_set):
         plt.plot(getObj('t_ph4_hr_drop') + phase4[0], getObj('ph4_hr_drop')*baseline_hr, '*m')
         plt.plot(phase5, [getObj('ph5_hr_recovery')*baseline_hr]*2, 'c')
 
-
-    fun_lib.UpdateObjectivesByValuesFromFile('targetValues.txt', objectives)
+        plotTargetValues(objectives, valsalva_start, valsalva_end, time[-1])
+        # plt.show(block = False)
+        plt.savefig('plot.png', dpi = 200)
+        
 
     return objectives

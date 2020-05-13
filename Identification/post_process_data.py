@@ -15,14 +15,26 @@ import matplotlib.pyplot as plt
 # import re
 # import TerminalDS
 
+
+# CONTROL ROOM
 DATA_FOLDER = R"..\data\Valsalva"
 COST_FUNCTION_FOLDER = R"..\Identification\valsalva"
 VALUE_LOG_DIRNAME = R'..\Schedules\\'
 VALUE_LOG_FILENAME = '_current_costs.txt'
-DRAW_PLOTS = False
-WRITE_FILE = True
-# // write the outputfiles
+DRAW_PLOTS = True
+# write the outputfiles
+WRITE_FILE = False
 
+# file_set = 'Sitting V_OO'
+# files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04"]
+# file_set = 'All sitting'
+# files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"]
+# file_set = 'All supine'
+# files = ["V_00_sup_01", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"]
+file_set = 'mODEL'
+files = 
+
+# </ COTRNOL ROM
 
 def writeCost(objectives):
 
@@ -109,12 +121,13 @@ def importCostFunction():
     spec.loader.exec_module(cf)
     return cf
 
-def printTargetValues(targetValues, fileTag = ''):
+def writeTargetValues(targetValues, fileTag = ''):
     if not WRITE_FILE:
         return
     # print means and stds to file
     
     filename = 'targetValues' + fileTag + '.txt'
+    
     with open(DATA_FOLDER + '\\' + filename, 'w') as file:
         file.write('Name, value, std\n')
         for name, targetValue in targetValues.items():
@@ -122,6 +135,8 @@ def printTargetValues(targetValues, fileTag = ''):
             std = numpy.std(targetValue)
             print("%s : %.4f +/- %.3f" % (name,value, std ))
             file.write('%s, %.4f, %.3f\n' % (name,value, std))
+
+    print('--- Written to file %s ' % (DATA_FOLDER + '\\' + filename) )
 
 
 
@@ -180,13 +195,6 @@ def plotTargetValues(targetValues):
 targetValues = dict()
 cf = importCostFunction()
 
-# file_set = 'Sitting V_OO'
-# files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04"]
-file_set = 'All sitting'
-files = {"V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"}
-# file_set = 'All supine'
-# files = {"V_00_sup_01", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"}
-
 for file in files:
     # filename = 'V_00_sit_01.mat'
     filename = file + '.mat'
@@ -195,16 +203,16 @@ for file in files:
     matdata = skipy.loadmat(file_path)
 
     keyMapping = [ ['arterial_pressure', 'brachial_pressure'],
-                ['heart_rate','heart_rate'],
+                ['heart_rate','heartRate.HR'],
                 ['thoracic_pressure', 'thoracic_pressure']
             ]
     var_set = extractVars(matdata, keyMapping)
 
     if DRAW_PLOTS:
         var_set['__draw_plots'] = True
-        plt.figure()
-        plt.title(file)
-        plt.show(block = False)
+        var_set['__file_name'] = file
+    
+    var_set['__targetValuesFilename'] = 'targetValues_All_sitting.txt'
 
     objectives = cf.getObjectives(var_set)
 
@@ -221,14 +229,9 @@ for file in files:
 
     # writeCost(objectives)
 
+fileTag = '_' + file_set.replace(' ', '_')
+writeTargetValues(targetValues, fileTag=fileTag)
+
 plotTargetValues(targetValues)
 
-fileTag = '_' + file_set.replace(' ', '_')
-
-printTargetValues(targetValues, fileTag=fileTag)
-# for targetValue in targetValues:
-#     targetValue = targetValue
-
 pass
-# writeLogHeader(objectives)
-# logOutput(objectives)

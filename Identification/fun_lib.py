@@ -6,9 +6,11 @@ import numpy
 import scipy.signal as ss
 
 class CostFunctionType(enum.Enum):
+    Ignore = 0
     Quadratic = 1
     Linear = 2
-    Ignore = 3
+    QuadraticVariance = 3
+    
 
 class ObjectiveVar:
     """
@@ -22,6 +24,7 @@ class ObjectiveVar:
                 limit=None, 
                 weight=1, 
                 k_p=1e3, 
+                variance = None,
                 costFunctionType=CostFunctionType.Quadratic):
         self.name = name
         self.targetValue = targetValue
@@ -31,6 +34,7 @@ class ObjectiveVar:
         # self.costLimit = -1 # unlimited costs
         self.k_p = k_p # multiplier for out ouf limit values
         self.costFunctionType = costFunctionType
+        self.variance = variance
 
     def __cost_function(self, measured, target):
         # calculate costs. Could go negative or NaN for negative or zero measured values!
@@ -38,6 +42,8 @@ class ObjectiveVar:
             return self.weight*(measured - target)**2/(target**2)
         elif self.costFunctionType is CostFunctionType.Linear:
             return self.weight*abs(measured - target)/target
+        elif self.costFunctionType is CostFunctionType.QuadraticVariance:
+            return self.weight*(measured - target)**2/(self.variance**2)
         elif self.costFunctionType is CostFunctionType.Ignore:
             return 0
         else:
@@ -179,21 +185,20 @@ def getMeanRR(sig, dt):
 
     return numpy.array(means)
 
-def getValsalvaStart(time, thoracic_pressure):
-    # threshold of 10 mmHg is good enough also for synthetic 10 Pa
-    return time[findLowestIndex(10, thoracic_pressure)]
+def getValsalvaStart(time, thoracic_pressure, threshold = 1330):
+    
+    return time[findLowestIndex(threshold, thoracic_pressure)]
 
-def getValsalvaEnd(valsalva_start, time, thoracic_pressure, min_length = 5, threshold = 20):
+def getValsalvaEnd(valsalva_start, time, thoracic_pressure, min_length = 5, threshold = 1330):
     # minimal valsalva length is 5
     i_from = findLowestIndex(valsalva_start + min_length, time)
     # get rid of noise for thresholding
     tpf = ss.medfilt(thoracic_pressure, 7)
     
-    # threshold of 10 mmHg is good enough also for synthetic 10 Pa
     i = next((i for i, x in numpy.ndenumerate(tpf[i_from:]) if x <= threshold))
     return time[i] + valsalva_start + min_length
 
-def UpdateObjectivesByValuesFromFile(filename, objectives):
+def updateObjectivesByValuesFromFile(filename, objectives):
     with open(filename, 'r') as file:
         lines = file.readlines()
 
@@ -203,5 +208,6 @@ def UpdateObjectivesByValuesFromFile(filename, objectives):
             objective = next((o for o in objectives if o.name == vals[0]), None)
             if objective is not None:
                 objective.targetValue = float(vals[1])
+                objective.variance = float(vals[2])
 
 
