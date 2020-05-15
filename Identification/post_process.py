@@ -48,25 +48,8 @@ def logLine(objective, total_cost):
 def logOutput(objectives):
     # log the output, if the log directory exists. exit otherwise
 
-    log_dirname = VALUE_LOG_DIRNAME
-    run = 0
-    # log_dirname = 'Schedules'
-
-    if not os.path.isdir(log_dirname):
-        log_dirname = '..\\'
-    else:
-        log_dirname = VALUE_LOG_DIRNAME
-
-    
-    cur_dirname = os.path.basename(os.getcwd())
-    run_match = re.match(r'[\w-]*-(\d+)$', cur_dirname)
-
-    if run_match is not None:
-        run = int(run_match[1])
-    else:
-        run = 0
-
-        # log_filename = log_dirname + '\\' + cur_dirname + '_costs.txt'
+    log_dirname = fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME)
+    run = fun_lib.getRunNumber()
     log_filename = log_dirname + VALUE_LOG_FILENAME
     with open(log_filename, 'a') as file:
         # prepare the line with value, cost value for this and percentage of total costs
@@ -113,6 +96,8 @@ toc = time.time()
 print("Opening result in ", toc - tic, " s")
 
 var_set = extractVars(d)
+vars_set['__saveFig_path'] = fun_lib.getSafeLogDir + 'FitFig_' + fun_lib.getRunNumber() + '.png'
+
 toc = time.time()
 print("Loading result in ", toc - tic, " s")
 

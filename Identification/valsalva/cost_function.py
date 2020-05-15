@@ -147,7 +147,7 @@ def getObjectives(vars_set):
     phase_values = [(BP     , phase1, (-1, 0), numpy.max  , baseline_bp, 'ph1_peak'    , COUNT),
                     (bp_mean, phase2, (0, -2), numpy.min  , baseline_bp, 'ph2_mean_min', COUNT),
                     (bp_mean, phase4,(-7, -7), numpy.max  , baseline_bp, 'ph2_max'     , COUNT),
-                    (bp_mean, phase4, (-2, -2), numpy.min  , baseline_bp, 'ph4_drop'    , COUNT),
+                    (bp_mean, phase4,(-2, -2), numpy.min  , baseline_bp, 'ph4_drop'    , COUNT),
                     (bp_mean, phase4, (2, 5) , numpy.max  , baseline_bp, 'ph4_ovrshoot', COUNT),
                     (bp_mean, phase5, 0      , numpy.mean , baseline_bp, 'ph5_recovery', COUNT),
                     (HR     , phase1, 0      , numpy.min  , baseline_hr, 'ph1_hr_min' , COUNT),
@@ -226,7 +226,9 @@ def getObjectives(vars_set):
 
         plotTargetValues(objectives, valsalva_start, valsalva_end, time[-1])
         # plt.show(block = False)
-        plt.savefig('plot.png', dpi = 200)
+
+        if '__saveFig_path' in vars_set:
+            plt.savefig(vars_set['__saveFig_path'], dpi = 150)
         
 
     return objectives

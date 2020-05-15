@@ -6159,10 +6159,50 @@ Kalecky")}), experiment(
 %class_name")}));
         end Heart_TriSegMechanics;
 
-        model Heart_TriSegMechanicsLumens
+        model Heart_TriSegMechanics_Lumens
           extends Heart_TriSegMechanics(redeclare
               Auxiliary.TriSegMechanics_components.VentriclesLumens ventricles, class_name = "Lumens orig");
-        end Heart_TriSegMechanicsLumens;
+        end Heart_TriSegMechanics_Lumens;
+
+        model Heart_TriSegMechanics_Simple
+          "Simplified Ca driving function"
+          extends Heart_TriSegMechanics(
+              _R_LA=0.015,
+              _R_RA=0.015,
+              class_name = "Lumens orig",
+              redeclare
+              Auxiliary.TriSegMechanics_components.VentriclesLumens ventricles(
+                redeclare
+                  Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.DrivingOlufsen
+                  calciumMechanics(
+                  offset=0.0162625,
+                  offset_maxAct=7.6875E-4,
+                  k_TS_maxAct=0.13,
+                  k_TR_maxAct(displayUnit="s") = 0.08,
+                  drive=1,
+                  k_TS=0.14,
+                  k_TR=0.45),
+                redeclare
+                  Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
+                  LV_wall(sigma_act=sigma_act,
+                  sigma_act_maxAct=sigma_act_maxAct,
+                                               C(fixed=false)),
+                redeclare
+                  Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
+                  RV_wall(sigma_act=sigma_act,
+                  sigma_act_maxAct=sigma_act_maxAct,
+                                               C(fixed=false)),
+                redeclare
+                  Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
+                  SEP_wall(sigma_act=sigma_act,
+                  sigma_act_maxAct=sigma_act_maxAct,
+                                                C(fixed=false))));
+
+          parameter Real sigma_act=2*7.5*120 "mmHg ";
+        //  parameter Physiolibrary.Types.Fraction sigma_factor = 2;
+          parameter Real sigma_act_maxAct=30.25*7.5*120
+            "Sigma at maximal activation";
+        end Heart_TriSegMechanics_Simple;
 
         model Heart_TriSegMechanics_Rat
           extends Heart_TriSegMechanics(
@@ -25970,7 +26010,7 @@ P_hs_plus_dist"),
     end TestTriSegMech_all;
 
     model TestTriSegMech_Lumens
-      Components.Subsystems.Heart.Heart_TriSegMechanicsLumens heart(
+      Components.Subsystems.Heart.Heart_TriSegMechanics_Lumens heart(
         UseThoracicPressureInput=true,
         HR=HR,
         ventricles(V_LV(start=0.00015), V_RV(start=0.00015)))
@@ -26060,7 +26100,7 @@ P_hs_plus_dist"),
         annotation (Placement(transformation(extent={{-40,-18},{-20,2}})));
       Components.Subsystems.Heart.Heart_TriSegMechanics heart_TriSegMechanics
         annotation (Placement(transformation(extent={{-40,-48},{-20,-28}})));
-      Components.Subsystems.Heart.Heart_TriSegMechanicsLumens
+      Components.Subsystems.Heart.Heart_TriSegMechanics_Lumens
         heart_TriSegMechanicsLumens
         annotation (Placement(transformation(extent={{-40,-78},{-20,-58}})));
       Components.Subsystems.Pulmonary.Pulmonary_ADAN86 pulmonary_ADAN86_1
@@ -30258,7 +30298,7 @@ P_hs_plus_dist"),
       end tree_phi_tissuesComplianceAlternative;
 
       model tree_phi_tissuesComplianceAlternative_Valsalva
-        extends tree_phi_tissuesComplianceAlternative(thoracic_pressure(
+        extends tree_phi_tissuesComplianceAlternative(thoracic_pressure_ramp(
             rising=1,
             width=18,
             falling=1,
@@ -30268,18 +30308,20 @@ P_hs_plus_dist"),
       end tree_phi_tissuesComplianceAlternative_Valsalva;
 
       model tree_phi_tissuesComplianceAlternative_veins_Valsalva
-        extends tree_phi_tissuesComplianceAlternative(thoracic_pressure(
+        extends tree_phi_tissuesComplianceAlternative(
+          thoracic_pressure_ramp(
             rising=1,
             width=18,
             falling=1,
             period=80,
             nperiod=2,
-            startTime=260), condTP(disconnected=false),
+            startTime=260),
+          condTP(disconnected=false),
           settings(veins_UsePhiEffect=true));
       end tree_phi_tissuesComplianceAlternative_veins_Valsalva;
 
       model tree_phi_tissuesCompliance_Valsalva
-        extends tree_phi_tissuesCompliance(thoracic_pressure(
+        extends tree_phi_tissuesCompliance(thoracic_pressure_ramp(
             rising=1,
             width=18,
             falling=1,
@@ -30980,16 +31022,16 @@ P_hs_plus_dist"),
 
       model tree_tilt_all_valsalva
         extends tree_tilt_base(
-          condPhi(disconnected=false),
-          condHR(disconnected=false),
-          condTP(disconnected=false),
-          thoracic_pressure(
+          thoracic_pressure_ramp(
             rising=1,
             width=18,
             falling=1,
             period=300,
             nperiod=-1,
-            startTime=150));
+            startTime=150),
+          condPhi(disconnected=false),
+          condHR(disconnected=false),
+          condTP(disconnected=false));
         annotation (experiment(
             StopTime=400,
             Interval=0.06,
@@ -31442,7 +31484,7 @@ P_hs_plus_dist"),
       replaceable Components.Subsystems.Baroreflex.HeartRate heartRate
         constrainedby Components.Subsystems.Baroreflex.HeartRate
         annotation (Placement(transformation(extent={{16,-28},{4,-16}})));
-    Modelica.Blocks.Sources.Trapezoid           thoracic_pressure(
+    Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
         amplitude=40*133,
         rising=2,
         width=20,
@@ -31479,8 +31521,8 @@ P_hs_plus_dist"),
               60},{68,-22},{16,-22}},color={0,0,127}));
       connect(heartRate.HR, heartComponent.frequency_input)
         annotation (Line(points={{3.88,-22},{-16,-22}},  color={0,0,127}));
-      connect(thoracic_pressure.y,condTP. u) annotation (Line(points={{-81,-40},
-              {-76,-40},{-76,-40},{-70.4,-40}}, color={0,0,127}));
+      connect(thoracic_pressure_ramp.y, condTP.u) annotation (Line(points={{-81,
+              -40},{-76,-40},{-76,-40},{-70.4,-40}}, color={0,0,127}));
       connect(condTP.y, Systemic1.thoracic_pressure_input) annotation (Line(
             points={{-54.3,-40},{-46,-40},{-46,20},{-34,20}}, color={0,0,127}));
       connect(condTP.y, heartComponent.thoracic_pressure_input) annotation (
@@ -32496,16 +32538,15 @@ P_hs_plus_dist"),
 
     model CVS_7af_normal
       extends ADAN_main.AdanVenousRed_Safaei.ss_init.CVS_7af_normal_init(
-          Systemic1(
+          thoracic_pressure_ramp(
+          rising=1,
+          width=15,
+          falling=1), Systemic1(
           aortic_arch_C46(distentionBase=3e-6),
           internal_carotid_R8_A(distentionBase=1.5E-07),
           baroreflex(fsn=0.03),
           baroreceptor_aortic(epsilon_start=1.6, s_start=0.88),
-          baroreceptor_carotid(epsilon_start=2.65, s_start=0.9)),
-          thoracic_pressure(
-          rising=1,
-          width=15,
-          falling=1));
+          baroreceptor_carotid(epsilon_start=2.65, s_start=0.9)));
     end CVS_7af_normal;
 
     model CVS_7af_normal_step_hr
@@ -32908,13 +32949,15 @@ P_hs_plus_dist"),
 
       model base_TriSeg
         extends CVS_7af(
+          thoracic_pressure_ramp(rising=10, startTime=20),
           Systemic1(Parameters_Systemic1(k_E=0.4), baroreflex_system(
-                baroreceptor_carotid(Ts(displayUnit="s") = 3), baroreceptor_aortic(Ts(
-                    displayUnit="s") = 3),
+              baroreceptor_carotid(Ts(displayUnit="s") = 3),
+              baroreceptor_aortic(Ts(displayUnit="s") = 3),
               baroreflex(f1=0.0041))),
-          redeclare Components.Subsystems.Heart.Heart_TriSegMechanicsLumens
-                                                             heartComponent(
-              UseFrequencyInput=true, UseThoracicPressureInput=true,
+          redeclare Components.Subsystems.Heart.Heart_TriSegMechanics_Lumens
+            heartComponent(
+            UseFrequencyInput=true,
+            UseThoracicPressureInput=true,
             UsePhiInput=true,
             ventricles(
               LV_wall(Vw=Vw_factor*89, Amref=Amref_factor*86),
@@ -32924,7 +32967,7 @@ P_hs_plus_dist"),
             pulmonaryComponent(UseThoracic_PressureInput=true, c_pv(
                 volume_start=V_PV_init, ZeroPressureVolume=0.002)),
           redeclare Components.Subsystems.Baroreflex.HeartRate2 heartRate(
-              HR_nom(displayUnit="1/min")=1.0,       phi0=settings.phi0),
+              HR_nom(displayUnit="1/min") = 1.0, phi0=settings.phi0),
           condHR(disconnected=false),
           settings(
             tissues_nominal_arterioles_pressure(displayUnit="mmHg") = Pa,
@@ -32945,7 +32988,6 @@ P_hs_plus_dist"),
             hideLevel0=false,
             hideLevel1=false),
           phi(nperiod=0),
-          thoracic_pressure(rising=10, startTime=20),
           condTP(disconnected=true));
 
         Modelica.Blocks.Logical.Switch switch1
@@ -33829,9 +33871,8 @@ P_hs_plus_dist"),
 
       model base_TriSegLumens
         extends base(
-          redeclare Components.Subsystems.Heart.Heart_TriSegMechanicsLumens
-                                                             heartComponent(
-              UsePhiInput=false),
+          redeclare Components.Subsystems.Heart.Heart_TriSegMechanics_Lumens
+            heartComponent(UsePhiInput=false),
           condHR(disconnected=false),
           Tilt_ramp(startTime=30),
           phi(startTime=30),
@@ -34311,14 +34352,14 @@ P_hs_plus_dist"),
 
       model OlufsenTriseg_tiltable_reparam_valsalva
         extends OlufsenTriseg_tiltable_reparam(
-          condTP(disconnected=false),
-          thoracic_pressure(
+          thoracic_pressure_ramp(
             rising=1,
             width=15,
             falling=1,
             period=40,
             nperiod=1,
             startTime=10),
+          condTP(disconnected=false),
           Tilt_ramp(startTime=4000));
         annotation (experiment(
             StopTime=80,
@@ -34330,6 +34371,11 @@ P_hs_plus_dist"),
       model OlufsenTriSeg_tiltable_sit
         "tilting to sitting position. Zero degree tilt while sitting does not elevate lower limbs."
         extends OlufsenTriSeg_tiltable(
+          thoracic_pressure_ramp(
+            rising=1,
+            width=15,
+            falling=1,
+            startTime=60),
           Systemic1(
             femoral_R226(sinAlpha=0),
             popliteal_R228(sinAlpha=0),
@@ -34341,14 +34387,76 @@ P_hs_plus_dist"),
             femoral_vein_L76(sinAlpha=0),
             popliteal_vein_L78(sinAlpha=0),
             femoral_vein_L72(sinAlpha=0)),
-          thoracic_pressure(
-            rising=1,
-            width=15,
-            falling=1,
-            startTime=60),
           condTP(disconnected=false),
           Tilt_ramp(startTime=1000));
       end OlufsenTriSeg_tiltable_sit;
+
+      model OlufsenTriSeg_LegRaise
+        extends Baseline.OlufsenTriSeg_base(Systemic1(
+            redeclare model Systemic_artery_thoracic =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
+            redeclare model Systemic_artery =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
+            redeclare model Systemic_vein =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vp_vein_tDF_leveled,
+            redeclare model Systemic_tissue =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.systemic_tissue_leveled,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_q_leveled
+              pq_terminator_v,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_p_leveled
+              pq_terminator_sup_vc,
+            redeclare ADAN_main.Components.Interfaces.Pq_terminator_p_leveled
+              pq_terminator_inf_vc,
+            redeclare
+              ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vv_artery_thoracic_leveled
+              ascending_aorta_A,
+            UseTiltInput=true,
+            femoral_R226(sinAlpha=1),
+            femoral_L204(sinAlpha=1),
+            femoral_R222(sinAlpha=1),
+            femoral_L200(sinAlpha=1),
+            femoral_vein_R38(sinAlpha=-1),
+            femoral_vein_R42(sinAlpha=-1),
+            femoral_vein_R46(sinAlpha=-1),
+            femoral_vein_L68(sinAlpha=-1),
+            femoral_vein_L76(sinAlpha=-1),
+            femoral_vein_L72(sinAlpha=-1),
+            baroreflex_system(
+              baroreceptor_aortic(Ts=60),
+              baroreceptor_carotid(Ts=60),
+              baroreflex(f1=0.0031))),
+                                heartComponent(UseFrequencyInput=true, UsePhiInput=true),
+                                settings(
+            R_vc=0.5,
+            Ra_factor=4.2625,
+            tissuesCompliance_PhiEffect=0.2,
+            tissues_gamma=0.5),
+          phi(
+            amplitude=0.38 - 0.25,
+            width=200,
+            nperiod=1,
+            startTime=10),
+          useAutonomousPhi(y=true));
+
+        replaceable Modelica.Blocks.Sources.Trapezoid
+                                                 Tilt_ramp(
+          amplitude=Modelica.Constants.pi/2,
+          rising=1,
+          width=30,
+          falling=1,
+          period=60,
+          nperiod=1,
+          startTime=30) constrainedby Modelica.Blocks.Interfaces.SO
+          annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
+      equation
+        connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-79,32},
+                {-22,32},{-22,20}},    color={0,0,127}));
+        annotation (experiment(
+            StopTime=90,
+            Interval=0.02,
+            Tolerance=1e-07,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_LegRaise;
     end Tilt;
 
     package Exercise
@@ -34439,35 +34547,18 @@ P_hs_plus_dist"),
               redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
                 LV_wall(
-                vmax=vmax,
                 sigma_act=sigma_act,
-                SLrest=SLrest,
-                tauD=tauD,
-                tauR=tauR,
-                      tauSC=tauSC,
                 C(fixed=false)),
               redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
                 RV_wall(
-                vmax=vmax,
                 sigma_act=sigma_act,
-                SLrest=SLrest,
-                tauD=tauD,
-                tauR=tauR,
-                      tauSC=tauSC,
                 C(fixed=false)),
               redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWallLumensSimple
                 SEP_wall(
-                vmax=vmax,
                 sigma_act=sigma_act,
-                SLrest=SLrest,
-                tauD=tauD,
-                tauR=tauR,
-                       tauSC=tauSC,
-                C(fixed=false))),
-            ra(enabled=true),
-            la(enabled=true)),
+                C(fixed=false)))),
           phi(
             amplitude=0,
             offset=1,
@@ -34476,15 +34567,8 @@ P_hs_plus_dist"),
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           startTime=5,
           height=1,
-          duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+          duration=0) constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-76,52},{-56,72}})));
-        parameter Modelica.SIunits.Time tauSC=0.225;
-        parameter Modelica.SIunits.Time tauR=0.024;
-        parameter Modelica.SIunits.Time tauD=0.032
-          "Factor scaling contraction decay time";
-        parameter Real SLrest=1.51 "microns";
-        parameter Real vmax=7
-          "Sarcomere shortening velocity with zero load micron/sec";
         parameter Physiolibrary.Types.Fraction sigma_act_factor=3
           "Factor affecting systolic strength";
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
@@ -34503,36 +34587,21 @@ P_hs_plus_dist"),
 
       model base_Exercise_SimpleCa_maxSV
         extends ADAN_main.AdanVenousRed_Safaei.Exercise.base_Exercise_SimpleCa(
-          heartComponent(ventricles(calciumMechanics(
-                offset_maxAct=7.6875E-4,
-                k_TS_maxAct=0.13,
-                k_TR_maxAct(displayUnit="s") = 0.08,
-                drive=1,
-                k_TS=0.165,
-                k_TR=0.45)),
-            tricuspidValve(useChatteringProtection=true, chatteringProtectionTime(
-                  displayUnit="ms") = 0.01),
-            pulmonaryValve(useChatteringProtection=true, chatteringProtectionTime(
-                  displayUnit="ms") = 0.01),
-            mitralValve(useChatteringProtection=true, chatteringProtectionTime(
-                  displayUnit="ms") = 0.01),
-            aorticValve(useChatteringProtection=true, chatteringProtectionTime(
-                  displayUnit="ms") = 0.01),
+          heartComponent(
             _R_LA=0.015,
             _R_RA=0.015),
           settings(exercise_factor(displayUnit="1") = 13.625),
           sigma_factor=30.25,
-          vmax=7.0,
-          Exercise(startTime=1),
+          Exercise(startTime=10),
           phi(
             amplitude=0.75,
-            rising(displayUnit="s"),
-            width(displayUnit="s"),
-            falling(displayUnit="s"),
+            rising(displayUnit="s") = 0,
+            width(displayUnit="s") = 200,
+            falling(displayUnit="s") = 0,
             period(displayUnit="s"),
             nperiod=1,
             offset=0.25,
-            startTime=2),
+            startTime=10),
           Systemic1(
             ulnar_T2_L90(UseExercise=false),
             radial_T1_L92(UseExercise=false),
@@ -34545,7 +34614,7 @@ P_hs_plus_dist"),
             cardiac_tissue(UseExercise=false)),
           sigma_act_factor=30.0);
         annotation (experiment(
-            StopTime=15,
+            StopTime=20,
             Interval=0.02,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
@@ -34559,22 +34628,25 @@ P_hs_plus_dist"),
     package Valsalva
 
       model OlufsenTriSeg_valsalva
-        extends Baseline.OlufsenTriSeg_base( settings(
+        extends Baseline.OlufsenTriSeg_base(
+          thoracic_pressure_ramp(
+            rising=1,
+            width=15,
+            falling=1,
+            startTime=10),
+          settings(
             R_vc=0.5,
             Ra_factor=4.2625,
             tissuesCompliance_PhiEffect=0.2,
             tissues_gamma=0.5),
           useAutonomousPhi(y=true),
-          thoracic_pressure(
-            rising=1,
-            width=15,
-            falling=1,
-            startTime=10),
           condTP(disconnected=false));
       end OlufsenTriSeg_valsalva;
 
       model OlufsenTriSeg_valsalva_KosinskiBaro
-        extends OlufsenTriSeg_valsalva(Systemic1(baroreflex_system(
+        extends OlufsenTriSeg_valsalva(
+          thoracic_pressure_ramp(startTime=60),
+          Systemic1(baroreflex_system(
               baroreflex(
                 fsn(displayUnit="Hz") = 0.036,
                 f1=0.0041,
@@ -34590,8 +34662,7 @@ P_hs_plus_dist"),
                 s(start=0.81),
                 Ts=30.0))),
           condTP(disconnected=false),
-          useAutonomousPhi(y=true),
-          thoracic_pressure(startTime=60));
+          useAutonomousPhi(y=true));
                 parameter Physiolibrary.Types.Fraction delta0_factor=0.4;
 
         annotation (experiment(
@@ -34603,9 +34674,8 @@ P_hs_plus_dist"),
 
       model OlufsenTriSeg_valsalva_KosinskiBaro_longTs
         extends OlufsenTriSeg_valsalva_KosinskiBaro(
-          thoracic_pressure(startTime=20.0),
-          Systemic1(
-            baroreflex_system(
+          thoracic_pressure_ramp(startTime=20.0),
+          Systemic1(baroreflex_system(
               baroreceptor_aortic(Ts=60),
               baroreceptor_carotid(Ts=60),
               baroreflex(f1=0.0031))),
@@ -34631,6 +34701,11 @@ P_hs_plus_dist"),
       model OlufsenTriSeg_valsalva_KosinskiBaro_tiltable_sit
         "tilting to sitting position. Zero degree tilt while sitting does not elevate lower limbs."
         extends Tilt.OlufsenTriSeg_tiltable(
+          thoracic_pressure_ramp(
+            rising=1,
+            width=15,
+            falling=1,
+            startTime=60),
           Systemic1(
             femoral_R226(sinAlpha=0),
             popliteal_R228(sinAlpha=0),
@@ -34642,11 +34717,6 @@ P_hs_plus_dist"),
             femoral_vein_L76(sinAlpha=0),
             popliteal_vein_L78(sinAlpha=0),
             femoral_vein_L72(sinAlpha=0)),
-          thoracic_pressure(
-            rising=1,
-            width=15,
-            falling=1,
-            startTime=60),
           condTP(disconnected=false),
           Tilt_ramp(startTime=1000));
       end OlufsenTriSeg_valsalva_KosinskiBaro_tiltable_sit;

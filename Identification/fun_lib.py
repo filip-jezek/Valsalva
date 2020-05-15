@@ -210,4 +210,23 @@ def updateObjectivesByValuesFromFile(filename, objectives):
                 objective.targetValue = float(vals[1])
                 objective.variance = float(vals[2])
 
+def getRunNumber():
+    """ Gets GenOpt run number using the name of the current working directory
+    """
+    cur_dirname = os.path.basename(os.getcwd())
+    run_match = re.match(r'[\w-]*-(\d+)$', cur_dirname)
+
+    if run_match is not None:
+        run = int(run_match[1])
+    else:
+        run = 0
+
+def getSafeLogDir(unsafeDir):
+    """ Try provided unsafeDir and falls back to current dir otherwise
+    """
+
+    if not os.path.isdir(unsafeDir):
+        log_dirname = ''
+    else:
+        log_dirname = unsafeDir
 
