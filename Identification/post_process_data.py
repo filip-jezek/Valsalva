@@ -1,7 +1,9 @@
+# reads the measured data and passes them to cost_function to calculate proper metrics. Metrics are averaged and saved to file for further use
+
 import scipy.io as skipy
 import numpy
 import DyMat
-# its imported dynamically based on current dir
+# its imported dynamically based on selected dir
 # import cost_function as cf
 import sys
 import os
@@ -19,22 +21,39 @@ import matplotlib.pyplot as plt
 # CONTROL ROOM
 DATA_FOLDER = R"..\data\Valsalva"
 COST_FUNCTION_FOLDER = R"..\Identification\valsalva"
-VALUE_LOG_DIRNAME = R'..\Schedules\\'
+VALUE_LOG_DIRNAME = R'..\Schedules'
 VALUE_LOG_FILENAME = '_current_costs.txt'
 DRAW_PLOTS = True
 # write the outputfiles
-WRITE_FILE = False
+WRITE_FILE = True
+READ_OBJECTIVES = True
+USE_WEIGHING = True
 
-# file_set = 'Sitting V_OO'
-# files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04"]
+file_set = 'Sitting V_OO'
+files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04"]
 # file_set = 'All sitting'
 # files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"]
 # file_set = 'All supine'
 # files = ["V_00_sup_01", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"]
-file_set = 'mODEL'
-files = 
 
 # </ COTRNOL ROM
+
+def getTargetFileName(file_set):
+    fileTag = '_' + file_set.replace(' ', '_')
+    return DATA_FOLDER + '\\' + 'targetValues' + fileTag + '.txt'
+
+def getWeights(files):
+    """ Finds occurences for the same filename root "AA_XX_bbb_" from AA_XX_bbb_YY to weight participants with multiple measurements
+    """
+    if not USE_WEIGHING:
+        return [1]*len(files)
+
+    weights = list()
+    for file in files:
+        count = sum(1 for x in files if file[0:-3] == x[0:-3])
+        weights.append(1/count)
+    return weights
+
 
 def writeCost(objectives):
 
@@ -121,14 +140,13 @@ def importCostFunction():
     spec.loader.exec_module(cf)
     return cf
 
-def writeTargetValues(targetValues, fileTag = ''):
+def writeTargetValues(targetValues, file_set):
     if not WRITE_FILE:
         return
     # print means and stds to file
     
-    filename = 'targetValues' + fileTag + '.txt'
-    
-    with open(DATA_FOLDER + '\\' + filename, 'w') as file:
+    filename = getTargetFileName(file_set)
+    with open(filename, 'w') as file:
         file.write('Name, value, std\n')
         for name, targetValue in targetValues.items():
             value = numpy.mean(targetValue)
@@ -136,7 +154,7 @@ def writeTargetValues(targetValues, fileTag = ''):
             print("%s : %.4f +/- %.3f" % (name,value, std ))
             file.write('%s, %.4f, %.3f\n' % (name,value, std))
 
-    print('--- Written to file %s ' % (DATA_FOLDER + '\\' + filename) )
+    print('--- Written to file %s ' % (filename) )
 
 
 
@@ -190,12 +208,15 @@ def plotTargetValues(targetValues):
 
     plt.title('Avg metrics of \'%s\' with %d elements' % (file_set, len(files)))
 
-    plt.show(block = True)
+
+    plt.savefig(getTargetFileName(file_set).replace('.txt', '.png') , dpi = 150)
 
 targetValues = dict()
 cf = importCostFunction()
+weights = getWeights(files)
 
-for file in files:
+
+for file, measurement_weight in zip(files, weights):
     # filename = 'V_00_sit_01.mat'
     filename = file + '.mat'
 
@@ -204,21 +225,27 @@ for file in files:
 
     keyMapping = [ ['arterial_pressure', 'brachial_pressure'],
                 ['heart_rate','heartRate.HR'],
-                ['thoracic_pressure', 'thoracic_pressure']
+                ['thoracic_pressure', 'Systemic1.thoracic_pressure']
             ]
     var_set = extractVars(matdata, keyMapping)
 
     if DRAW_PLOTS:
         var_set['__draw_plots'] = True
-        var_set['__file_name'] = file
+
+        var_set['__plot_title'] = file
+        var_set['__saveFig_path'] = fun_lib.getSafeLogDir(COST_FUNCTION_FOLDER)  + file + '.png'
     
-    var_set['__targetValuesFilename'] = 'targetValues_All_sitting.txt'
+    if READ_OBJECTIVES:
+       var_set['__targetValuesFilename'] = getTargetFileName(file_set)
+    else:
+        var_set['__targetValuesFilename'] = None
+    
 
     objectives = cf.getObjectives(var_set)
 
     #print cost
-    cost = sum(o.cost() for o in objectives)
-    print("Cost of %s is %.4f" % (file, round(cost, 4)))
+    cost = sum(o.cost() for o in objectives)*measurement_weight
+    print("Cost of %s is %.4f, weighted by %.2f" % (file, round(cost, 4), measurement_weight))
 
 
     for objective in objectives:
@@ -229,8 +256,7 @@ for file in files:
 
     # writeCost(objectives)
 
-fileTag = '_' + file_set.replace(' ', '_')
-writeTargetValues(targetValues, fileTag=fileTag)
+writeTargetValues(targetValues, file_set)
 
 plotTargetValues(targetValues)
 

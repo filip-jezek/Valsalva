@@ -7,13 +7,16 @@ import os
 import time
 import importlib.util
 import re
+import fun_lib
 from datetime import datetime
 # from matplotlib import pyplot as plt
 # import re
 # import TerminalDS
 
-VALUE_LOG_DIRNAME = '..\\Schedules\\'
+VALUE_LOG_DIRNAME = '..\\Schedules'
 VALUE_LOG_FILENAME = '_current_costs.txt'
+DRAW_PLOTS = True
+READ_OBJECTIVES = True
 # // write the outputfiles
 
 
@@ -96,12 +99,17 @@ toc = time.time()
 print("Opening result in ", toc - tic, " s")
 
 var_set = extractVars(d)
-vars_set['__saveFig_path'] = fun_lib.getSafeLogDir + 'FitFig_' + fun_lib.getRunNumber() + '.png'
 
 toc = time.time()
 print("Loading result in ", toc - tic, " s")
 
 cf = importCostFunction()
+
+if DRAW_PLOTS:
+    var_set['__draw_plots'] = True
+    var_set['__plot_title'] = "Run %i" % (fun_lib.getRunNumber())
+    var_set['__saveFig_path'] = "%sFitFig_%i.png" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
+    
 objectives = cf.getObjectives(var_set)
 
 print("Calculating costs in ", time.time() - tic, " s")

@@ -9,6 +9,9 @@ import math
 # import DyMat
 # from matplotlib import pyplot as plt
 
+DEFAULT_TARGETVARS_TAG = 'All_supine'
+
+
 def plotTargetValues(objectives, valsalva_start, valsalva_end, signal_end):
     # plot merged timecourse
     # valsalva_start = 20
@@ -24,7 +27,7 @@ def plotTargetValues(objectives, valsalva_start, valsalva_end, signal_end):
         return fun_lib.getObjectiveByName(objectives, name).targetValue
     
     def getTrgtVar(name):
-        return fun_lib.getObjectiveByName(objectives, name).variance
+        return fun_lib.getObjectiveByName(objectives, name).std
 
     # color for BP and HR
     c_BP = 'g'
@@ -64,14 +67,19 @@ def plotTargetValues(objectives, valsalva_start, valsalva_end, signal_end):
     pass
 
 
-def getObjectives(vars_set):
+def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARGETVARS_TAG + '.txt'):
 
-    if '__targetValuesFilename' not in vars_set:
-        vars_set['__file_name'] = 'All_supine'
-        vars_set['__targetValuesFilename'] = r'../targetValues_' + vars_set['__file_name'] + '.txt'
+    # some control variables are not present in case of identification
+    if '__targetValuesFilename' not in vars_set or vars_set['__targetValuesFilename'] is None:
+        vars_set['__targetValuesFilename'] = targetsFileName
 
-    if '__draw_plots' not in vars_set:
-        vars_set['__draw_plots'] = True
+    # if '__file_name' not in vars_set:
+    #     vars_set['__file_name'] = 'All_supine'
+
+    # if '__draw_plots' not in vars_set:
+    #     vars_set['__draw_plots'] = True
+
+    
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
     # Pa = vars_set['Pa']
@@ -190,12 +198,14 @@ def getObjectives(vars_set):
     objectives.extend(map(buildValueObjective, phase_values))
     objectives.extend(map(buildTimeObjective, time_values))
 
-    if '__targetValuesFilename' in vars_set:
+    if '__targetValuesFilename' in vars_set and vars_set['__targetValuesFilename'] is not None:
         fun_lib.updateObjectivesByValuesFromFile(vars_set['__targetValuesFilename'], objectives)
       
-    if '__draw_plots' in vars_set:
+    if '__draw_plots' in vars_set and vars_set['__draw_plots']:
         plt.figure()
-        plt.title(vars_set['__file_name'])
+
+        if '__plot_title' in vars_set:
+            plt.title(vars_set['__plot_title'])
 
         plt.plot(time, BP, 'b')
         plt.plot(time, bp_mean, 'm')

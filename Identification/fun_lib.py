@@ -4,6 +4,8 @@ import enum
 from scipy.signal import savgol_filter
 import numpy
 import scipy.signal as ss
+import os
+import re
 
 class CostFunctionType(enum.Enum):
     Ignore = 0
@@ -24,7 +26,7 @@ class ObjectiveVar:
                 limit=None, 
                 weight=1, 
                 k_p=1e3, 
-                variance = None,
+                std = None,
                 costFunctionType=CostFunctionType.Quadratic):
         self.name = name
         self.targetValue = targetValue
@@ -34,7 +36,8 @@ class ObjectiveVar:
         # self.costLimit = -1 # unlimited costs
         self.k_p = k_p # multiplier for out ouf limit values
         self.costFunctionType = costFunctionType
-        self.variance = variance
+        # standard deviation
+        self.std = std
 
     def __cost_function(self, measured, target):
         # calculate costs. Could go negative or NaN for negative or zero measured values!
@@ -43,7 +46,8 @@ class ObjectiveVar:
         elif self.costFunctionType is CostFunctionType.Linear:
             return self.weight*abs(measured - target)/target
         elif self.costFunctionType is CostFunctionType.QuadraticVariance:
-            return self.weight*(measured - target)**2/(self.variance**2)
+            # variance is squared standard deviation
+            return self.weight*(measured - target)**2/(self.std**2)**2
         elif self.costFunctionType is CostFunctionType.Ignore:
             return 0
         else:
@@ -208,7 +212,7 @@ def updateObjectivesByValuesFromFile(filename, objectives):
             objective = next((o for o in objectives if o.name == vals[0]), None)
             if objective is not None:
                 objective.targetValue = float(vals[1])
-                objective.variance = float(vals[2])
+                objective.std = float(vals[2])
 
 def getRunNumber():
     """ Gets GenOpt run number using the name of the current working directory
@@ -217,16 +221,16 @@ def getRunNumber():
     run_match = re.match(r'[\w-]*-(\d+)$', cur_dirname)
 
     if run_match is not None:
-        run = int(run_match[1])
+        return int(run_match[1])
     else:
-        run = 0
+        return 0
 
 def getSafeLogDir(unsafeDir):
     """ Try provided unsafeDir and falls back to current dir otherwise
     """
 
     if not os.path.isdir(unsafeDir):
-        log_dirname = ''
+        return ''
     else:
-        log_dirname = unsafeDir
+        return unsafeDir + '\\'
 
