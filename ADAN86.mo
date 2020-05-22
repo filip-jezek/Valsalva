@@ -1,6 +1,87 @@
 ﻿within ;
 package ADAN_main
 
+  package UsersGuide "User's Guide"
+    package Test_parameter "Inheritance and redeclaration examples"
+      model sub_A
+        replaceable parameter Integer param = 1;
+        annotation (preferredView = "text");
+      end sub_A;
+
+      model sub_B
+              extends sub_A(
+                        param = 2);
+                        parameter Integer param2 = 5;
+                        annotation (preferredView = "text");
+      end sub_B;
+
+      model base_unconstrained
+        replaceable sub_A a(param=3);
+        parameter Integer expected_param_val = 3;
+        annotation (preferredView = "text");
+      end base_unconstrained;
+
+      model A "Rewrites the param"
+              extends base_unconstrained(
+                        a(param = 4), expected_param_val = 4);
+                        annotation (preferredView = "text");
+      end A;
+
+      model B "Redeclares, should keep the param val"
+        extends A(redeclare sub_B a, expected_param_val=4);
+        annotation (preferredView = "text");
+      end B;
+
+    model C "Directly redeclares, should keep the unconstrained as well"
+      extends base_unconstrained(redeclare sub_B a, expected_param_val = 3);
+      annotation (preferredView = "text");
+    end C;
+
+      model base_constrained
+          replaceable sub_A a(param=3) constrainedby sub_A;
+          parameter Integer expected_param_val = 3;
+          annotation (preferredView = "text");
+      end base_constrained;
+
+      model A_con "Rewrites the param"
+              extends base_constrained(
+                        a(param = 4), expected_param_val = 4);
+                        annotation (preferredView = "text");
+      end A_con;
+
+      model B_con "Redeclares, should keep the param val"
+        extends A(redeclare sub_B a, expected_param_val=4);
+        annotation (preferredView = "text");
+      end B_con;
+
+    model C_con "redeclares constrained, should keep sub_B val"
+      extends base_constrained(redeclare sub_B a, expected_param_val = 2);
+      annotation (preferredView = "text");
+    end C_con;
+
+      model all
+        "Demonstrates difference between constrained and unconstrained during multiple level redeclaration. "
+        extends Modelica.Icons.Example;
+        base_unconstrained base_unconstrained1
+          annotation (Placement(transformation(extent={{-86,30},{-66,50}})));
+        base_constrained base_constrained1
+          annotation (Placement(transformation(extent={{-90,-32},{-70,-12}})));
+        A a "Only rewrites the param" annotation (Placement(transformation(extent={{-42,30},{-22,50}})));
+        A_con a_con "Only rewrites the param"
+          annotation (Placement(transformation(extent={{-40,-28},{-20,-8}})));
+        B b "B keeps the param even after redeclaration!" annotation (Placement(transformation(extent={{6,32},{26,52}})));
+        B_con b_con
+                   "B keeps the param even after redeclaration!" annotation (Placement(transformation(extent={{10,-30},{30,-10}})));
+        C c  annotation (Placement(transformation(extent={{64,24},{84,44}})));
+        C_con c_con "param is different for constrained class!" annotation (Placement(transformation(extent={{66,-28},{86,-8}})));
+
+      annotation (preferredView = "text");
+      end all;
+      annotation (DocumentationClass=false);
+    end Test_parameter;
+  annotation(DocumentationClass = true);
+  end UsersGuide;
+
   package Components
     extends Modelica.Icons.VariantsPackage;
     model Settings
@@ -195,7 +276,7 @@ package ADAN_main
           annotation(Dialog(tab = "Baroreflex", group = "Afferent baroreceptors"));
       parameter Real baro_delta0_aor =  0.6*baro_delta0_factor "delta0 threshold for aortic sensor"
         annotation(Dialog(tab = "Baroreflex", group = "Afferent baroreceptors"));
-      parameter Real baro_delta0_car =  0.55*baro_delta0_factor "delta0 threshold for carotid sensor"
+      parameter Real baro_delta0_car =  0.55*baro_delta0_factor "delta0 threshold for carotid sensor - 0.55 (Kosinski)"
         annotation(Dialog(tab = "Baroreflex", group = "Afferent baroreceptors"));
       // Boolean baro_useStimulationInput = false
       //     annotation(Dialog(tab = "Baroreflex", group = "Afferent baroreceptors"));
@@ -29732,55 +29813,8 @@ P_hs_plus_dist"),
     partial model CVS_7af "Base class for circulatory model"
       extends Physiolibrary.Icons.CardioVascular;
       replaceable Components.Subsystems.Systemic.SystemicAV Systemic1(
-        baroreflex_system(
-          baroreceptor_aortic(
-            delta0=0.6),
-          baroreceptor_carotid(
-            delta0=0.3),
-          baroreflex(fsn=0.021)),
         UseThoracic_PressureInput=true,
-        UsePhi_Input=true,
-        femoral_vein_R34(LimitBackflow=true),
-        femoral_vein_L64(LimitBackflow=true),
-        superior_vena_cava_C88(UseOuter_thoracic_pressure=true),
-        superior_vena_cava_C2(UseOuter_thoracic_pressure=true),
-        inferior_vena_cava_C8(UseOuter_thoracic_pressure=true),
-        hepatic_vein_T1_C10(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        splachnic_vein(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
-             0.8),
-        renal_vein_T1_R18(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        internal_iliac_vein_T1_R30(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        internal_iliac_vein_T1_L60(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        renal_vein_T1_L22(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        inferior_vena_cava_C20(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        inferior_vena_cava_C16(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        inferior_vena_cava_C12(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        abdominal_aorta_C114(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        abdominal_aorta_C136(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        abdominal_aorta_C164(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        abdominal_aorta_C176(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        abdominal_aorta_C188(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        abdominal_aorta_C192(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        mesenteric_artery(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        common_iliac_R216(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8),
-        common_iliac_L194(UseOuter_thoracic_pressure=true,
-            thoracic_pressure_ratio=0.8)) constrainedby
+        UsePhi_Input=true) constrainedby
         Components.Subsystems.Systemic.partialSystemic annotation (Placement(
             transformation(extent={{-58,18},{18,48}})),
           __Dymola_choicesAllMatching=true);
@@ -29811,9 +29845,12 @@ P_hs_plus_dist"),
         nperiod=1,
         offset=0.25,
         startTime=20)
-        annotation (HideResult = true, Placement(transformation(extent={{-70,70},
-                {-50,90}})));
-      inner Components.Settings settings
+        annotation (HideResult = true, Placement(transformation(extent={{-70,70},{-50,
+                90}})));
+      inner Components.Settings settings(
+        baro_delta0_factor=1,
+        baro_delta0_car=0.3*settings.baro_delta0_factor,
+        baro_fsn(displayUnit="Hz") = 0.021)
         annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
       Components.Signals.ConditionalConnection condHR(disconnectedValue=0.25,
           disconnected=true)
@@ -29837,8 +29874,8 @@ P_hs_plus_dist"),
           disconnected=true) annotation (Placement(transformation(extent={{-69,-45.3333},
                 {-55,-33.3333}})));
       Components.Signals.ConditionalConnection condPhi(disconnectedValue=0.25,
-          disconnected=false) annotation (Placement(transformation(extent={{6,
-                5.55556},{-6,15.5556}})));
+          disconnected=false) annotation (Placement(transformation(extent={{6,5.55556},
+                {-6,15.5556}})));
     equation
       connect(Systemic1.port_b, heartComponent.sv) annotation (Line(
           points={{18,28},{24,28},{24,-12},{-16,-12}},
@@ -33482,7 +33519,8 @@ P_hs_plus_dist"),
             TR_frac(displayUnit="%") = 5.118955,
             TPR(displayUnit="(mmHg.min)/l") = 119490152,
             V_PV_init(displayUnit="ml") = -164.55e-6,
-            k_E(displayUnit="1") = 0.358125));
+            k_E(displayUnit="1") = 0.358125,
+            baro_f1=0.00418));
         annotation (experiment(
             StopTime=30,
             Interval=0.02,
@@ -33497,8 +33535,7 @@ P_hs_plus_dist"),
             baroreflex_system(
               baroreflex(
                 fiSN(start=0.25242782, fixed=true),
-                fiSN_mean(start=0.24990731, fixed=true),
-                f1=0.00418),
+                fiSN_mean(start=0.24990731, fixed=true)),
               baroreceptor_aortic(epsilon(start=1.6187029, fixed=true), s(start=
                      0.92078173, fixed=true)),
               baroreceptor_carotid(epsilon(start=1.2045674, fixed=true), s(
@@ -34257,6 +34294,11 @@ P_hs_plus_dist"),
               Tolerance=1e-07,
               __Dymola_Algorithm="Cvode"));
         end OlufsenTriSeg_LegRaise;
+
+        model OlufsenTriSeg_SemiRecumberent
+          extends ADAN_main.SystemicTree.Tilt.OlufsenTriSeg_SemiRecumberent(
+              settings(baro_Ts(displayUnit="s") = 9));
+        end OlufsenTriSeg_SemiRecumberent;
       end Experiments;
 
       model base
@@ -34466,18 +34508,23 @@ P_hs_plus_dist"),
         replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
           height=Modelica.Constants.pi/6,
           duration=0,
-          startTime=15) constrainedby Modelica.Blocks.Sources.Ramp
+          startTime=20) constrainedby Modelica.Blocks.Sources.Ramp
           annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
         replaceable Modelica.Blocks.Sources.Ramp Tilt_LegRaise(
           height=Modelica.Constants.pi/2,
           duration=0,
-          startTime=30) constrainedby Modelica.Blocks.Sources.Ramp
+          startTime=80) constrainedby Modelica.Blocks.Sources.Ramp
           annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
       equation
         connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-79,32},
                 {-22,32},{-22,20}},    color={0,0,127}));
         connect(Systemic1.legsUp_input, Tilt_LegRaise.y) annotation (Line(
               points={{-40.2,20},{-42,20},{-42,62},{-79,62}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=130,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_SemiRecumberent;
     end Tilt;
 
