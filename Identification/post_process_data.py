@@ -29,14 +29,65 @@ WRITE_FILE = True
 READ_OBJECTIVES = True
 USE_WEIGHING = True
 
-file_set = 'Sitting V_OO'
-files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04"]
+# file_set = 'Sitting V_OO'
+# files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04"]
 # file_set = 'All sitting'
 # files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"]
-# file_set = 'All supine'
-# files = ["V_00_sup_01", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"]
+file_set = 'All supine'
+files = ["V_00_sup_01", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"]
 
 # </ COTRNOL ROM
+
+def processObjectiveMetrics(objectiveMetrics):
+    """ Expects objectiveMetrics[subject][objective] = value and returns mean and std dicts
+    """
+    # get mean of the measurements for each subject
+    subjectMeanMetrics = dict()
+    for subject, subjectMetric in objectiveMetrics.items():
+        for objective, objList in subjectMetric.items():
+            # get mean of all the measurements per one subject
+            if objective not in subjectMeanMetrics:
+                subjectMeanMetrics[objective] = list()
+            subjectMeanMetrics[objective].append(numpy.mean(objList))
+    
+    # get mean of all subject's measurements
+    objectiveMeans = dict()
+    for objective, objList in subjectMeanMetrics.items():
+        objectiveMeans[objective] = numpy.mean(objList)
+
+    # get variance per each subject
+    subjectVariances = dict()
+    for subject, subjectMetric in objectiveMetrics.items():
+        for objective, objList in subjectMetric.items():
+            objMean = objectiveMeans[objective]
+            n_measurement = len(objList)
+            if objective not in subjectVariances:
+                subjectVariances[objective] = dict()    
+            subjectVariances[objective][subject] = sum(1/n_measurement*(abs(x) - abs(objMean))**2 for x in objList)
+    
+    # sum the variances from all subjects
+    objectiveStds = dict()
+    for objective, subjectVariance in subjectVariances.items():
+        n_subjects = len(subjectVariance)
+        objectiveStds[objective] = numpy.sqrt(sum(x for x in subjectVariance.values())/n_subjects)
+    
+    # # prepare ttuples for the output
+    # # std = sqrt(var)
+    # targetValues = dict()
+    # for key, objectiveMean in objectiveMeans.items():
+    #     std = sqrt(objectiveVariance[key])
+    #     targetValues[key] = (objectiveMean, std)
+
+    return (objectiveMeans, objectiveStds)
+
+        
+
+
+
+def getSubjectNum(s):
+    # expecting the input as e.g. 'V_00_sup_01' it gets the second group, supposedly a participant number
+    parts = s.split('_')
+    return int(parts[1])
 
 def getTargetFileName(file_set):
     fileTag = '_' + file_set.replace(' ', '_')
@@ -140,7 +191,7 @@ def importCostFunction():
     spec.loader.exec_module(cf)
     return cf
 
-def writeTargetValues(targetValues, file_set):
+def writeTargetValues(targetValues, targetStds, file_set):
     if not WRITE_FILE:
         return
     # print means and stds to file
@@ -148,9 +199,9 @@ def writeTargetValues(targetValues, file_set):
     filename = getTargetFileName(file_set)
     with open(filename, 'w') as file:
         file.write('Name, value, std\n')
-        for name, targetValue in targetValues.items():
-            value = numpy.mean(targetValue)
-            std = numpy.std(targetValue)
+        for name in targetValues.keys():
+            value = targetValues[name]
+            std = targetStds[name]
             print("%s : %.4f +/- %.3f" % (name,value, std ))
             file.write('%s, %.4f, %.3f\n' % (name,value, std))
 
@@ -159,33 +210,33 @@ def writeTargetValues(targetValues, file_set):
 
 
 
-def plotTargetValues(targetValues):
+def plotTargetValues(targetValues, targetStds):
     # plot merged timecourse
     valsalva_start = 20
     valsalva_end = 35
     signal_end = 55
-    baseline_bp = numpy.mean(targetValues['baseline_bp'])
-    recovery_bp = numpy.mean(targetValues['ph5_recovery'])*baseline_bp
-    baseline_hr = numpy.mean(targetValues['baseline_hr'])
-    recovery_hr = numpy.mean(targetValues['ph5_hr_recovery'])*baseline_hr
+    baseline_bp = targetValues['baseline_bp']
+    recovery_bp = targetValues['ph5_recovery']*baseline_bp
+    baseline_hr = targetValues['baseline_hr']
+    recovery_hr = targetValues['ph5_hr_recovery']*baseline_hr
 
     plt.figure()
 
     plt.plot((0, valsalva_start), [baseline_bp]*2, 'k')
-    plt.errorbar((valsalva_start/2), baseline_bp, yerr=numpy.std(targetValues['baseline_bp']), fmt = 'b')
+    plt.errorbar((valsalva_start/2), baseline_bp, yerr=targetStds['baseline_bp'], fmt = 'b')
     plt.plot((signal_end - 5, signal_end), [recovery_bp]*2, 'k')
-    plt.errorbar((signal_end - 2.5), recovery_bp, yerr=numpy.std(targetValues['ph5_hr_recovery'])*baseline_bp, fmt = 'b')
+    plt.errorbar((signal_end - 2.5), recovery_bp, yerr=targetStds['ph5_hr_recovery']*baseline_bp, fmt = 'b')
 
     plt.plot((0, valsalva_start), [baseline_hr]*2, 'g')
-    plt.errorbar((valsalva_start/2), baseline_hr, yerr=numpy.std(targetValues['baseline_hr']), fmt = 'c')
+    plt.errorbar((valsalva_start/2), baseline_hr, yerr=targetStds['baseline_hr'], fmt = 'c')
     plt.plot((signal_end - 5, signal_end), [recovery_hr]*2, 'g')
-    plt.errorbar((signal_end - 2.5), recovery_hr, yerr=numpy.std(targetValues['ph5_hr_recovery'])*baseline_bp, fmt = 'c')
+    plt.errorbar((signal_end - 2.5), recovery_hr, yerr=targetStds['ph5_hr_recovery']*baseline_bp, fmt = 'c')
 
     def plotMetric(t_val, t_offset, val, baseline, color):
-        val_mean = numpy.mean(val)*baseline
-        val_std = numpy.std(val)*baseline
-        t_mean = numpy.mean(t_val) + t_offset
-        t_std = numpy.std(t_val) 
+        val_mean = targetVals[val]*baseline
+        val_std = targetStds[val]*baseline
+        t_mean = targetVals[t_val] + t_offset
+        t_std = targetStds[t_val]
         plt.errorbar(t_mean, val_mean, yerr= val_std, xerr=t_std, fmt = color)
         plt.plot(t_mean, val_mean, '*' + color)
 
@@ -195,23 +246,25 @@ def plotTargetValues(targetValues):
     def plotHRMetric(t_val, t_offset, val, color = 'c'):
         plotMetric(t_val, t_offset, val, baseline_hr, color)    
 
-    plotBPMetric(targetValues['t_ph1_peak'], valsalva_start, targetValues['ph1_peak'])
-    plotBPMetric(targetValues['t_ph2_mean_min'], valsalva_start, targetValues['ph2_mean_min'])
-    plotBPMetric(targetValues['t_ph2_max'], valsalva_end, targetValues['ph2_max'])
-    plotBPMetric(targetValues['t_ph4_drop'], valsalva_end, targetValues['ph4_drop'])
-    plotBPMetric(targetValues['t_ph4_ovrshoot'], valsalva_end, targetValues['ph4_ovrshoot'])
+    plotBPMetric('t_ph1_peak', valsalva_start, 'ph1_peak')
+    plotBPMetric('t_ph2_mean_min', valsalva_start, 'ph2_mean_min')
+    plotBPMetric('t_ph2_max', valsalva_end, 'ph2_max')
+    plotBPMetric('t_ph4_drop', valsalva_end, 'ph4_drop')
+    plotBPMetric('t_ph4_ovrshoot', valsalva_end, 'ph4_ovrshoot')
 
-    plotHRMetric(targetValues['t_ph1_hr_min'], valsalva_start, targetValues['ph1_hr_min'])
-    plotHRMetric(targetValues['t_ph4_hr_max'], valsalva_end, targetValues['ph4_hr_max'])
-    plotHRMetric(targetValues['t_ph4_hr_drop'], valsalva_end, targetValues['ph4_hr_drop'])
-    plotHRMetric(targetValues['t_ph4_ovrshoot'], valsalva_end, targetValues['ph5_hr_recovery'])
+    plotHRMetric('t_ph1_hr_min', valsalva_start, 'ph1_hr_min')
+    plotHRMetric('t_ph4_hr_max', valsalva_end, 'ph4_hr_max')
+    plotHRMetric('t_ph4_hr_drop', valsalva_end, 'ph4_hr_drop')
+    plotHRMetric('t_ph4_ovrshoot', valsalva_end, 'ph5_hr_recovery')
 
     plt.title('Avg metrics of \'%s\' with %d elements' % (file_set, len(files)))
+    plt.ylim(-10, 180)
+    plt.xlim(0, 60)
 
 
     plt.savefig(getTargetFileName(file_set).replace('.txt', '.png') , dpi = 150)
 
-targetValues = dict()
+objectiveMetrics = dict()
 cf = importCostFunction()
 weights = getWeights(files)
 
@@ -219,6 +272,7 @@ weights = getWeights(files)
 for file, measurement_weight in zip(files, weights):
     # filename = 'V_00_sit_01.mat'
     filename = file + '.mat'
+    subject = getSubjectNum(file)
 
     file_path = DATA_FOLDER + '\\' + filename
     matdata = skipy.loadmat(file_path)
@@ -249,15 +303,17 @@ for file, measurement_weight in zip(files, weights):
 
 
     for objective in objectives:
-        if objective.name not in targetValues:
-            targetValues[objective.name] = list()
+        if subject not in objectiveMetrics:
+            objectiveMetrics[subject] = dict()
+        if objective.name not in objectiveMetrics[subject]:
+            objectiveMetrics[subject][objective.name] = list()
 
-        targetValues[objective.name].append(objective.value)
+        objectiveMetrics[subject][objective.name].append(objective.value)
 
     # writeCost(objectives)
+(targetVals, targetStds) = processObjectiveMetrics(objectiveMetrics)
+writeTargetValues(targetVals, targetStds, file_set)
 
-writeTargetValues(targetValues, file_set)
-
-plotTargetValues(targetValues)
+plotTargetValues(targetVals, targetStds)
 
 pass

@@ -7,6 +7,10 @@ import scipy.signal as ss
 import os
 import re
 
+# For variance based cost function we need a guess of variance of any target variables
+# does not really work for timed variables though
+DEFAULT_STD_PERCENT = 10
+
 class CostFunctionType(enum.Enum):
     Ignore = 0
     Quadratic = 1
@@ -47,7 +51,7 @@ class ObjectiveVar:
             return self.weight*abs(measured - target)/target
         elif self.costFunctionType is CostFunctionType.QuadraticVariance:
             # variance is squared standard deviation
-            return self.weight*(measured - target)**2/(self.std**2)**2
+            return self.weight*(measured - target)**2/(target*self.std)
         elif self.costFunctionType is CostFunctionType.Ignore:
             return 0
         else:
@@ -63,6 +67,9 @@ class ObjectiveVar:
         if self.targetValue is None:
             c = 0
         else:
+            if self.std is None:
+                self.std = self.targetValue*DEFAULT_STD_PERCENT/100
+
             c = self.__cost_function(measured, self.targetValue)
 
         min_val = self.limit[0]
