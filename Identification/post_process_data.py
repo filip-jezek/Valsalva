@@ -31,10 +31,10 @@ USE_WEIGHING = True
 
 # file_set = 'Sitting V_OO'
 # files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04"]
-# file_set = 'All sitting'
-# files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"]
-file_set = 'All supine'
-files = ["V_00_sup_01", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"]
+file_set = 'All sitting'
+files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"]
+# file_set = 'All supine'
+# files = ["V_00_sup_01", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"]
 
 # </ COTRNOL ROM
 
