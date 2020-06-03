@@ -23,9 +23,11 @@ DATA_FOLDER = R"..\data\Valsalva"
 COST_FUNCTION_FOLDER = R"..\Identification\valsalva"
 VALUE_LOG_DIRNAME = R'..\Schedules'
 VALUE_LOG_FILENAME = '_current_costs.txt'
-DRAW_PLOTS = True
-# write the outputfiles
-WRITE_FILE = True
+
+# draws plots for each individual file
+DRAW_PLOTS = False
+# write the outputfiles with targetValues
+WRITE_FILE = False
 READ_OBJECTIVES = True
 USE_WEIGHING = True
 
@@ -210,7 +212,13 @@ def writeTargetValues(targetValues, targetStds, file_set):
 
 
 
-def plotTargetValues(targetValues, targetStds):
+def plotTargetValues(targetValues, targetStds, styles = ('k', 'b', 'g', 'c')):
+    """    PLots in the curent plot.
+    styles = (bp_base_s, bp_s, hr_base_s, hr_s)
+    """
+
+    (bp_base_s, bp_s, hr_base_s, hr_s) = styles
+
     # plot merged timecourse
     valsalva_start = 20
     valsalva_end = 35
@@ -220,30 +228,28 @@ def plotTargetValues(targetValues, targetStds):
     baseline_hr = targetValues['baseline_hr']
     recovery_hr = targetValues['ph5_hr_recovery']*baseline_hr
 
-    plt.figure()
+    plt.plot((0, valsalva_start), [baseline_bp]*2, bp_base_s)
+    plt.errorbar((valsalva_start/2), baseline_bp, yerr=targetStds['baseline_bp'], fmt = bp_s)
+    plt.plot((signal_end - 5, signal_end), [recovery_bp]*2, bp_base_s)
+    plt.errorbar((signal_end - 2.5), recovery_bp, yerr=targetStds['ph5_hr_recovery']*baseline_bp, fmt = bp_s)
 
-    plt.plot((0, valsalva_start), [baseline_bp]*2, 'k')
-    plt.errorbar((valsalva_start/2), baseline_bp, yerr=targetStds['baseline_bp'], fmt = 'b')
-    plt.plot((signal_end - 5, signal_end), [recovery_bp]*2, 'k')
-    plt.errorbar((signal_end - 2.5), recovery_bp, yerr=targetStds['ph5_hr_recovery']*baseline_bp, fmt = 'b')
-
-    plt.plot((0, valsalva_start), [baseline_hr]*2, 'g')
-    plt.errorbar((valsalva_start/2), baseline_hr, yerr=targetStds['baseline_hr'], fmt = 'c')
-    plt.plot((signal_end - 5, signal_end), [recovery_hr]*2, 'g')
-    plt.errorbar((signal_end - 2.5), recovery_hr, yerr=targetStds['ph5_hr_recovery']*baseline_bp, fmt = 'c')
+    plt.plot((0, valsalva_start), [baseline_hr]*2, hr_base_s)
+    plt.errorbar((valsalva_start/2), baseline_hr, yerr=targetStds['baseline_hr'], fmt = hr_s)
+    plt.plot((signal_end - 5, signal_end), [recovery_hr]*2, hr_base_s)
+    plt.errorbar((signal_end - 2.5), recovery_hr, yerr=targetStds['ph5_hr_recovery']*baseline_bp, fmt = hr_s)
 
     def plotMetric(t_val, t_offset, val, baseline, color):
-        val_mean = targetVals[val]*baseline
+        val_mean = targetValues[val]*baseline
         val_std = targetStds[val]*baseline
-        t_mean = targetVals[t_val] + t_offset
+        t_mean = targetValues[t_val] + t_offset
         t_std = targetStds[t_val]
         plt.errorbar(t_mean, val_mean, yerr= val_std, xerr=t_std, fmt = color)
         plt.plot(t_mean, val_mean, '*' + color)
 
-    def plotBPMetric(t_val, t_offset, val, color = 'b'):
+    def plotBPMetric(t_val, t_offset, val, color = bp_s):
         plotMetric(t_val, t_offset, val, baseline_bp, color)
 
-    def plotHRMetric(t_val, t_offset, val, color = 'c'):
+    def plotHRMetric(t_val, t_offset, val, color = hr_s):
         plotMetric(t_val, t_offset, val, baseline_hr, color)    
 
     plotBPMetric('t_ph1_peak', valsalva_start, 'ph1_peak')
@@ -261,8 +267,6 @@ def plotTargetValues(targetValues, targetStds):
     plt.ylim(-10, 180)
     plt.xlim(0, 60)
 
-
-    plt.savefig(getTargetFileName(file_set).replace('.txt', '.png') , dpi = 150)
 
 objectiveMetrics = dict()
 cf = importCostFunction()
@@ -314,6 +318,28 @@ for file, measurement_weight in zip(files, weights):
 (targetVals, targetStds) = processObjectiveMetrics(objectiveMetrics)
 writeTargetValues(targetVals, targetStds, file_set)
 
+plt.figure()
 plotTargetValues(targetVals, targetStds)
+plt.savefig(getTargetFileName(file_set).replace('.txt', '.png') , dpi = 150)
+
 
 pass
+
+# compare sitting and supine targetvalues
+def getAndPlotTargetVals(file_set, style):
+    filename = getTargetFileName(file_set)
+    objectives = fun_lib.updateObjectivesByValuesFromFile(filename)
+
+    targetVals = dict()
+    targetStds = dict()
+    for o in objectives:
+        targetVals[o.name] = o.targetValue
+        targetStds[o.name] = o.std
+
+    plotTargetValues(targetVals, targetStds, style)
+
+plt.figure()
+getAndPlotTargetVals('All sitting', ('k', 'b', 'g', 'c'))
+getAndPlotTargetVals('All supine', ('k--', 'r', 'g--', 'm'))
+plt.title('Sit (full, blue, cyan) vs. supine (dashed, red, magenta) comparisson')
+plt.savefig(getTargetFileName('sit vs supine').replace('.txt', '.png') , dpi = 300)

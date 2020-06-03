@@ -1,0 +1,27 @@
+/* GenOpt command file
+   MWetter@lbl.gov 2008-11-11
+*/
+
+Vary{
+  Parameter{ Name = f1; Min = 0.0001; Ini = .0046; Max = 0.05; Step = 0.001; }
+  Parameter{ Name = fsn; Min = 0.01; Ini = 0.041; Max = 0.1; Step = 0.01; }
+  Parameter{ Name = g; Min = 0.01; Ini = 0.66; Max = 0.99; Step = 0.1; }
+  Parameter{ Name = delay; Min = 0; Ini = 0; Max = 3; Step = 0.1; }
+  Parameter{ Name = delta0_car; Min = 0.01; Ini = 0.4; Max = 1; Step = 0.1; }
+  Parameter{ Name = delta0_aor; Min = 0.01; Ini = 0.4; Max = 1; Step = 0.1; }
+}
+
+OptimizationSettings{
+  MaxIte = 800;
+  MaxEqualResults = 4;
+  WriteStepNumber = false;
+}
+
+Algorithm{
+ Main = GPSHookeJeeves;
+ MeshSizeDivider = 2;
+ InitialMeshSizeExponent = 0;
+ MeshSizeExponentIncrement = 1;
+ NumberOfStepReduction = 6;
+}
+

@@ -202,7 +202,7 @@ package ADAN_main
         annotation(Dialog(tab = "Systemic", group = "Tissues"));
       parameter Volume tissues_nominal_stressed_volume=0.000795 "Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance"
         annotation(Dialog(tab = "Systemic", group = "Tissues"));
-      parameter VolumeFlowRate tissues_nominal_cardiac_output=9.98e-05 "Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances."
+      parameter VolumeFlowRate tissues_nominal_cardiac_output=0.000105 "Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances."
         annotation(Dialog(tab = "Systemic", group = "Tissues"));
       parameter Fraction Ra_factor=4.2625   "Exponential factor affecting arterioles resistance"
         annotation(Dialog(tab = "Systemic", group = "Tissues"));
@@ -217,11 +217,11 @@ package ADAN_main
     //  parameter Boolean UseNonLinear_TissuesCompliance_PhiEffect = false
     //     annotation(choices(checkBox=true), Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
       parameter Fraction tissuesCompliance_PhiEffect=0.2   "Effect on tissue's compliance"
-        annotation(Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
+        annotation(Dialog(enable = UseNonLinear_TissuesCompliance, tab = "Systemic", group = "Tissues"));
       parameter Fraction exercise_factor_on_tissue_compliance = 0 "Effect of venoconstriction"
         annotation(Dialog(tab = "Systemic", group = "Tissues", enable = UseNonLinear_TissuesCompliance));
-      parameter Fraction tissues_gamma=0.5   "Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv)"
-        annotation (Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
+      parameter Fraction tissues_gamma=1   "Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv)"
+        annotation (Dialog(enable = UseNonLinear_TissuesCompliance, tab = "Systemic", group = "Tissues"));
       parameter Fraction exercise_factor=13.625   "Effect factor on tissue resistance"
         annotation (Dialog(tab = "Systemic", group = "Tissues"));
       parameter Fraction exercise_venous_pumping_factor = 0 "Contraction of large veins"
@@ -6841,7 +6841,7 @@ P_hs/2")}));
 
                 der(volume) = (v_in-v_out);
                 if UseOuter_thoracic_pressure then
-                  u =u_C + Rvis*(v_in - v_out) + thoracic_pressure;
+                  u =u_C + Rvis*(v_in - v_out) + thoracic_pressure*thoracic_pressure_ratio;
                 else
                   u =u_C + Rvis*(v_in - v_out);
                 end if;
@@ -29871,9 +29871,7 @@ P_hs_plus_dist"),
         annotation (HideResult = true, Placement(transformation(extent={{-70,70},{-50,
                 90}})));
       inner Components.Settings settings(
-        baro_delta0_factor=1,
-        baro_delta0_car=0.3*settings.baro_delta0_factor,
-        baro_fsn(displayUnit="Hz") = 0.021)
+        tissues_nominal_cardiac_output=0.000105)
         annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
       Components.Signals.ConditionalConnection condHR(disconnectedValue=0.25,
           disconnected=true)
@@ -34481,15 +34479,24 @@ P_hs_plus_dist"),
             heartComponent(
             UseFrequencyInput=true,
             UseThoracicPressureInput=true,
-            UsePhiInput=true));
+            UsePhiInput=true),
+          settings(
+            V_PV_init=7.4e-05,
+            arteries_UseVasoconstrictionEffect=false,
+            tissues_gamma=0.5,
+            baro_useAbsolutePressureTerm=false,
+            baro_Ts=300,
+            baro_f1=0.0031),
+          pulmonaryComponent(deadVolume=0.002, c_pv(CollapsingPressureVolume=
+                  pulmonaryComponent.deadVolume, MinimalCollapsingPressure=-13332.2387415)));
 
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
         output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
         output Physiolibrary.Types.Pressure thoracic_pressure = Systemic1.thoracic_pressure;
         annotation (experiment(
-            StopTime=90,
+            StopTime=1800,
             Interval=0.04,
-            Tolerance=1e-05,
+            Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_base;
     end Baseline;
@@ -35316,9 +35323,16 @@ P_hs_plus_dist"),
             rising=1,
             width=15,
             falling=1,
-            startTime=10),
-          useAutonomousPhi(y=false),
-          condTP(disconnected=false));
+            startTime=20),
+          useAutonomousPhi(y=true),
+          condTP(disconnected=false),
+          phi(
+            amplitude=-0.0025,
+            rising=0,
+            width=60,
+            falling=0,
+            nperiod=1,
+            startTime=30));
       end OlufsenTriSeg_valsalva;
 
     end Valsalva;

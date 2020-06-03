@@ -6,6 +6,7 @@ import numpy
 import scipy.signal as ss
 import os
 import re
+from typing import Iterable
 
 # For variance based cost function we need a guess of variance of any target variables
 # does not really work for timed variables though
@@ -16,6 +17,7 @@ class CostFunctionType(enum.Enum):
     Quadratic = 1
     Linear = 2
     QuadraticVariance = 3
+    DistanceFromZero = 4
     
 
 class ObjectiveVar:
@@ -52,6 +54,8 @@ class ObjectiveVar:
         elif self.costFunctionType is CostFunctionType.QuadraticVariance:
             # variance is squared standard deviation
             return self.weight*(measured - target)**2/(target*self.std)
+        elif self.costFunctionType is CostFunctionType.DistanceFromZero:
+            return self.weight*self.targetValue
         elif self.costFunctionType is CostFunctionType.Ignore:
             return 0
         else:
@@ -176,9 +180,29 @@ def getPeaks(sig, dt):
     peaks, _ = ss.find_peaks(sigDet2, distance= int(0.4/dt))
     return peaks
 
-def getMeanRR(sig, dt):
+def getHR(sig, peaks, dt):
     
-    peaks = getPeaks(sig, dt)
+    heart_rate = [0]*len(sig)
+    for i in range(1, len(peaks)):
+        # loop from 2nd
+        # take range inbetween the means
+        rng = slice(peaks[i-1], peaks[i], 1)
+        # time between the peaks
+        beat_time = (peaks[i] - peaks[i-1])*dt
+        heart_rate[rng] = [1/beat_time]*(rng.stop-rng.start)
+     
+    # before the first peak, lets fill with the first value
+    heart_rate[0: peaks[0]] = [heart_rate[peaks[0]]]*peaks[0]
+
+    # fill in the last
+    l = len(heart_rate[peaks[-1]:] )
+    heart_rate[peaks[-1]:] = [heart_rate[peaks[-1]-1]]*l
+
+    return numpy.array(heart_rate)
+    
+
+def getMeanRR(sig, peaks):
+
     means = [0]*len(sig)
     for i in range(1, len(peaks)):
         # loop from 2nd
@@ -209,17 +233,33 @@ def getValsalvaEnd(valsalva_start, time, thoracic_pressure, min_length = 5, thre
     i = next((i for i, x in numpy.ndenumerate(tpf[i_from:]) if x <= threshold))
     return time[i] + valsalva_start + min_length
 
-def updateObjectivesByValuesFromFile(filename, objectives):
+def updateObjectivesByValuesFromFile(filename, objectives = None) -> Iterable[ObjectiveVar]:
+    """
+    If no objectives are provided, get a list of all objectives listed in the file instead
+    """
+    if objectives is None:
+        create = True
+        objectives = list()
+    else:
+        create = False
+
     with open(filename, 'r') as file:
         lines = file.readlines()
 
         for line in lines[1:]:
-            vals = line.split(',')
             # first col is name
-            objective = next((o for o in objectives if o.name == vals[0]), None)
+            vals = line.split(',')
+            if create:
+                objective = ObjectiveVar(vals[0], costFunctionType=CostFunctionType.Ignore)
+                objectives.append(objective)
+            else:
+                objective = next((o for o in objectives if o.name == vals[0]), None)
+
             if objective is not None:
                 objective.targetValue = float(vals[1])
                 objective.std = float(vals[2])
+    
+    return objectives
 
 def getRunNumber():
     """ Gets GenOpt run number using the name of the current working directory

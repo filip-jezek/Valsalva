@@ -68,17 +68,18 @@ def plotTargetValues(objectives, valsalva_start, valsalva_end, signal_end):
 
 
 def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARGETVARS_TAG + '.txt'):
-
+    """ Returns dict of objectives
+    control variables:
+    __targetValuesFilename
+    __plot_title
+    __saveFig_path
+    __draw_plots"""
     # some control variables are not present in case of identification
     if '__targetValuesFilename' not in vars_set or vars_set['__targetValuesFilename'] is None:
         vars_set['__targetValuesFilename'] = targetsFileName
 
-    # if '__file_name' not in vars_set:
-    #     vars_set['__file_name'] = 'All_supine'
-
     # if '__draw_plots' not in vars_set:
     #     vars_set['__draw_plots'] = True
-
     
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
@@ -93,34 +94,24 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     BPM2SI = 1/60
 
     BP = vars_set['brachial_pressure']
-    HR = vars_set['heartRate.HR']
+    # HR = vars_set['heartRate.HR']
     TP = vars_set['Systemic1.thoracic_pressure']
+    time = vars_set['time']
 
     # make sure its in non-SI units
     if numpy.mean(BP) > 200:
         # convert to SI units
         BP = BP/mmHg2SI
-        HR = HR/BPM2SI
+        # HR = HR/BPM2SI
         TP = TP/mmHg2SI
 
     dt = vars_set['time'][2] - vars_set['time'][1]
     assert dt > 0, "The simulation must not store values at events."
 
-    bp_mean = fun_lib.getMeanRR(BP, dt)
-    time = vars_set['time']
-
-    # bp_mean1 = getMeanSavGol(BP, dt)
-    # bp_mean2 = getMeanRR(BP, dt)
-    # plt.plot(time, BP)
-    # plt.plot(time, bp_mean1)
-    # plt.plot(time[0:len(bp_mean2)], bp_mean2)
-    # sigf = ss.medfilt(BP, int(1/dt)+1)
-    # plt.plot(time[0:len(sigf)], sigf)
-
-    # plt.legend(['bp', 'mean1', 'mean2', 'medfilt'])
     
-    # plt.show()
-
+    peaks  = fun_lib.getPeaks(BP, dt)
+    HR = fun_lib.getHR(BP, peaks, dt)/BPM2SI
+    bp_mean = fun_lib.getMeanRR(BP, peaks)
 
     # find valsalva start and end
     valsalva_start = fun_lib.getValsalvaStart(time, TP, threshold=10)
@@ -211,6 +202,8 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         plt.plot(time, bp_mean, 'm')
         plt.plot(time, TP, 'g')
         plt.plot(time, HR)
+        plt.plot(time, vars_set['heartRate.HR'], '--')
+
 
         # get objective by name shortcuts
         getObj = lambda name: fun_lib.getObjectiveByName(objectives, name).value
@@ -237,8 +230,8 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         plotTargetValues(objectives, valsalva_start, valsalva_end, time[-1])
         # plt.show(block = False)
 
-        if '__saveFig_path' in vars_set:
-            plt.savefig(vars_set['__saveFig_path'], dpi = 150)
+        if '__saveFig_path' in vars_set and vars_set['__saveFig_path'] is not None:
+            plt.savefig(vars_set['__saveFig_path'], dpi = 300)
         
 
     return objectives
