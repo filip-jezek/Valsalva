@@ -95,7 +95,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
 
     BP = vars_set['brachial_pressure']
     # HR = vars_set['heartRate.HR']
-    TP = vars_set['Systemic1.thoracic_pressure']
+    TP = vars_set['thoracic_pressure']
     time = vars_set['time']
 
     # make sure its in non-SI units
@@ -202,7 +202,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         plt.plot(time, bp_mean, 'm')
         plt.plot(time, TP, 'g')
         plt.plot(time, HR)
-        plt.plot(time, vars_set['heartRate.HR'], '--')
+        # plt.plot(time, vars_set['heartRate.HR'], '--')
 
 
         # get objective by name shortcuts

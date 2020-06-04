@@ -27,7 +27,7 @@ def mapVarSet(vars_set, mapping):
     """ Creates new varset with mapped input vars_set from simulation to that used in cost function (aka original model)
     All other (non-mapped) stay the same
     """
-
+    new_vars_set = {}
     for key in vars_set.keys():
         if key in mapping:
             new_vars_set[key] = vars_set[mapping[key]]
@@ -35,6 +35,15 @@ def mapVarSet(vars_set, mapping):
             new_vars_set[key] = vars_set[key]
 
     return new_vars_set
+
+def filterVarSet(vars_set, filter_string):
+    
+    filtered_vars = {k[len(filter_string):]:v for (k,v) in vars_set.items() if k.startswith(filter_string)}
+    # keep the control vars, just in case
+    control_vars = {k:v for (k,v) in vars_set.items() if k.startswith("__") or k is "time"}
+    filtered_vars.update(control_vars)
+    
+    return filtered_vars
 
 def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARGETVARS_TAG + '.txt'):
     """ Gets all objectives for our combined CF.
@@ -51,17 +60,26 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
 
     objectives = list()
 
-    def buildCostObjective(name, cost_func_folder, mapping):
-        cf = importCostFunction('valsalva')
-        mapped_vars = mapVarSet(vars_set, mapping)
+    def buildCostObjective(name, cost_func_folder):
+        """
+        the name is prefix in the large model as well
+        """
+        cf = importCostFunction(cost_func_folder)
+        # mapped_vars = mapVarSet(vars_set, mapping)
+        # filtering only vars relevant for that cost function, e.g. valsalva.brachial_pressure gives brachial_pressure
+        
+        mapped_vars = filterVarSet(vars_set, name + '.')
         objectives = cf.getObjectives(mapped_vars)
         cost = countTotalCost(objectives)
         costObjective = fun_lib.ObjectiveVar(name, value= cost, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)
         return costObjective
 
-    # valsalva supine
-    objectives.append(buildCostObjective('Valsalva sup', 'valsalva', {'model_var': 'costFunc_var'})
-    objectives.append(buildCostObjective('Baseline', 'optimizeBaseline', {'model_var': 'costFunc_var'})
-    objectives.append(buildCostObjective('Exercise', 'MaxExercise', {'model_var': 'costFunc_var'})
+
+    objectives.append(buildCostObjective('baseline', 'optimizeBaseline'))
+    objectives.append(buildCostObjective('exercise', 'MaxExercise'))
+    # open the data folder
+    vars_set['__targetValuesFilename'] = r"../../../data/Valsalva/targetValues_All_sitting.txt"
+    objectives.append(buildCostObjective('valsalva', 'valsalva'))
+    objectives.append(buildCostObjective('tilt', 'optimizeTilt'))
     
     return objectives

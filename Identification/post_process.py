@@ -17,6 +17,8 @@ VALUE_LOG_DIRNAME = '..\\Schedules'
 VALUE_LOG_FILENAME = '_current_costs.txt'
 DRAW_PLOTS = True
 READ_OBJECTIVES = True
+# If true loads ONLY non-constants
+OMIT_LOADING_PARAMS = True
 # // write the outputfiles
 
 
@@ -29,32 +31,37 @@ def writeCost(objectives):
         file.write('f(x) =' + repr(total_cost))
     print('Total costs: %s' % (total_cost))
 
+def getLogFilePath():
+    return fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME) + VALUE_LOG_FILENAME
+
 def writeLogHeader(objectives):
     """check if file exists and build header otherwise
     """
-
-    if not os.path.isfile(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME):
-        with open(VALUE_LOG_DIRNAME + VALUE_LOG_FILENAME, 'w') as file:
+    filepath = getLogFilePath()
+    if not os.path.isfile(filepath):
+        with open(filepath, 'w') as file:
             header = map(lambda o: o.name.rjust(5) + '_val,' + o.name.rjust(5) + '_trg, %', objectives)
             line = ',  '.join(header) + "  ,run, datetime"
             file.write(line + '\n')
 
-def logLine(objective, total_cost):
+def logLine(objective : fun_lib.ObjectiveVar, total_cost):
     # return ','.join(["%"val), str(cost), str(round(cost/sum*100))])
-    if objective.targetValue  is not None:
-        return '%.3e,%.3e,%02d' % (objective.value, objective.targetValue , round(objective.cost()/total_cost*100))
+    if objective.costFunctionType is fun_lib.CostFunctionType.DistanceFromZero:
+        target = "%d" % 0
+    elif objective.targetValue  is not None:
+        target = "%.3e" % objective.targetValue
     else:
-        s = ' in limit' if objective.inLimit() else 'out limit'
-        return '%.3e,%s,%02d' % (objective.value, s , round(objective.cost()/total_cost*100))
+        target = ' in limit' if objective.inLimit() else 'out limit'
+        
+    return '%.3e,%s,%02d' % (objective.value, target , round(objective.cost()/total_cost*100))
 
 
 def logOutput(objectives):
     # log the output, if the log directory exists. exit otherwise
 
-    log_dirname = fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME)
+    filepath = getLogFilePath()
     run = fun_lib.getRunNumber()
-    log_filename = log_dirname + VALUE_LOG_FILENAME
-    with open(log_filename, 'a') as file:
+    with open(filepath, 'a') as file:
         # prepare the line with value, cost value for this and percentage of total costs
         total_cost = sum(o.cost() for o in objectives)
         t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -68,8 +75,11 @@ def logOutput(objectives):
 def extractVars(d):
     # use just a subset or use all
     # vrs_names = ['Systemic1.posterior_tibial_T4_R236.u_C', 'Systemic1.aortic_arch_C2.port_a.pressure']
-    # vrs_names = d.names(block = 2)
-    vrs_names = d.names()
+    if OMIT_LOADING_PARAMS:
+        vrs_names = d.names(block = 2)
+    else:
+        vrs_names = d.names()
+
     timevar = d.abscissa(2)[0]
 
     var_set = {}

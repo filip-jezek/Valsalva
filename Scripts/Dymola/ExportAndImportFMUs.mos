@@ -1,0 +1,16 @@
+﻿// check the default translation settings, esp. rTol!
+
+eraseClasses({"ADAN_0main_SystemicTree_Tilt_OlufsenTriSeg_0tiltable_fmu_black_box"});
+eraseClasses({"ADAN_0main_SystemicTree_Exercise_OlufsenTriseg_0Exercise_fmu_black_box"});
+eraseClasses({"ADAN_0main_SystemicTree_Valsalva_OlufsenTriSeg_0valsalva_fmu_black_box"});
+eraseClasses({"ADAN_0main_SystemicTree_Baseline_OlufsenTriSeg_0base_fmu_black_box"});
+
+translateModelFMU("ADAN_main.SystemicTree.Baseline.OlufsenTriSeg_base", false, "", "2", "cs", false, 2);
+translateModelFMU("ADAN_main.SystemicTree.Valsalva.OlufsenTriSeg_valsalva", false, "", "2", "cs", false, 2);
+translateModelFMU("ADAN_main.SystemicTree.Tilt.OlufsenTriSeg_tiltable", false, "", "2", "cs", false, 2);
+translateModelFMU("ADAN_main.SystemicTree.Exercise.OlufsenTriseg_Exercise", false, "", "2", "cs", false, 2);
+
+importFMU("ADAN_0main_SystemicTree_Baseline_OlufsenTriSeg_0base.fmu", false, false, false, "");
+importFMU("ADAN_0main_SystemicTree_Exercise_OlufsenTriseg_0Exercise.fmu", false, false, false, "");
+importFMU("ADAN_0main_SystemicTree_Valsalva_OlufsenTriSeg_0valsalva.fmu", false, false, false, "");
+importFMU("ADAN_0main_SystemicTree_Tilt_OlufsenTriSeg_0tiltable.fmu", false, false, false, "");

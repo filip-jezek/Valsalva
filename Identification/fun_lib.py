@@ -48,14 +48,20 @@ class ObjectiveVar:
     def __cost_function(self, measured, target):
         # calculate costs. Could go negative or NaN for negative or zero measured values!
         if self.costFunctionType is CostFunctionType.Quadratic:
+            if self.targetValue is None:
+                return 0
             return self.weight*(measured - target)**2/(target**2)
         elif self.costFunctionType is CostFunctionType.Linear:
+            if self.targetValue is None:
+                return 0
             return self.weight*abs(measured - target)/target
         elif self.costFunctionType is CostFunctionType.QuadraticVariance:
+            if self.std is None:
+                self.std = self.targetValue*DEFAULT_STD_PERCENT/100
             # variance is squared standard deviation
             return self.weight*(measured - target)**2/(target*self.std)
         elif self.costFunctionType is CostFunctionType.DistanceFromZero:
-            return self.weight*self.targetValue
+            return self.weight*measured
         elif self.costFunctionType is CostFunctionType.Ignore:
             return 0
         else:
@@ -68,13 +74,7 @@ class ObjectiveVar:
         Calculates costs per variable as difference from target value and applies steep linear penalty for outside of the bounds values, if defined.
         """
         measured = self.value
-        if self.targetValue is None:
-            c = 0
-        else:
-            if self.std is None:
-                self.std = self.targetValue*DEFAULT_STD_PERCENT/100
-
-            c = self.__cost_function(measured, self.targetValue)
+        c = self.__cost_function(measured, self.targetValue)
 
         min_val = self.limit[0]
         max_val = self.limit[1]
@@ -273,11 +273,11 @@ def getRunNumber():
         return 0
 
 def getSafeLogDir(unsafeDir):
-    """ Try provided unsafeDir and falls back to current dir otherwise
+    """ Try provided unsafeDir and falls back to parent dir otherwise
     """
 
     if not os.path.isdir(unsafeDir):
-        return ''
+        return '..\\'
     else:
         return unsafeDir + '\\'
 

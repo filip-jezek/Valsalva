@@ -5,27 +5,26 @@ import fun_lib
 
 # // calculate the cost function
 
-def primaprim():
-    print("ok")
+def getObjectives(vars_set):
 
-def calculateCosts(vars_set):
-
-    # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
-    # Pa = vars_set['Pa']
-    # interval = findInterval(380, 400, vars_set['time'])
-    # Pa_avg = sum(Pa[interval]) / len(interval)
-
-    # cost = (Pa_avg - 100*133.32)**2
-
-    interval = fun_lib.findInterval(50, 60, vars_set['time'])
-    BPs = max(vars_set['Systemic1.brachial_L82.u_C'][interval])
-    BPd = min(vars_set['Systemic1.brachial_L82.u_C'][interval])
+    endTime = vars_set['time'][-1]
+    interval = fun_lib.findInterval(endTime - 10, endTime, vars_set['time'])
+    BPs = max(vars_set['brachial_pressure'][interval])
+    BPd = min(vars_set['brachial_pressure'][interval])
     
     # this shows quite a too low CO, probably due to sampling, sharp peaks and no interpolation
     # CO = sum(vars_set['heartComponent.aorticValve.q_in.q'][interval]) / len(interval)
 
-    CO = sum(vars_set['heartComponent.CO_LV2'][interval]) / len(interval)
+    CO = sum(vars_set['CO'][interval]) / len(interval)
 
-    costs = [(BPs / (120*133.32) - 1)**2,  (BPd / (80*133.32) - 1)**2, (CO / (6.34/1000/60) - 1)**2]
+    objectives = list()
 
-    return costs
+    def buildObjective(name, value, targetVal):
+        o = fun_lib.ObjectiveVar(name, value, targetVal)
+        objectives.append(o)
+
+    buildObjective('BPs', BPs, 120*133.32)
+    buildObjective('BPd', BPd, 80*133.32)
+    buildObjective('CO', CO, (6.34/1000/60))
+
+    return objectives
