@@ -1,4 +1,8 @@
-﻿// check the default translation settings, esp. rTol!
+﻿
+// check the default translation settings, esp. rTol!
+
+Advanced.SparseActivate=true;
+Advanced.NumberOfCores = 4;
 
 eraseClasses({"ADAN_0main_SystemicTree_Tilt_OlufsenTriSeg_0tiltable_fmu_black_box"});
 eraseClasses({"ADAN_0main_SystemicTree_Exercise_OlufsenTriseg_0Exercise_fmu_black_box"});
