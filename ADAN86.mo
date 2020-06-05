@@ -34857,7 +34857,7 @@ P_hs_plus_dist"),
           settings(
             V_PV_init=7.4e-05,
             tissues_gamma=0.5,
-            EvaluateFunctionalParams=false,
+            EvaluateFunctionalParams=true,
             baro_useAbsolutePressureTerm=false,
             baro_Ts=300,
             baro_f1=0.0031,

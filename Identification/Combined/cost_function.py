@@ -90,7 +90,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     objectives.append(buildCostObjective('baseline', 'optimizeBaseline'))
     objectives.append(buildCostObjective('exercise', 'MaxExercise'))
     # open the data folder
-    vars_set['__targetValuesFilename'] = r"../../../data/Valsalva/targetValues_All_sitting.txt"
+    vars_set['__targetValuesFilename'] = r"../../../data/Valsalva/targetValues_All_supine.txt"
     objectives.append(buildCostObjective('valsalva', 'valsalva'))
     objectives.append(buildCostObjective('tilt', 'optimizeTilt'))
     
