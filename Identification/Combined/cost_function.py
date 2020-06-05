@@ -1,5 +1,6 @@
 # This cost function just calls all the other cfs
 import fun_lib
+from fun_lib import ObjectiveVar, CostFunctionType
 import importlib
 from typing import Iterable
 
@@ -17,8 +18,19 @@ def importCostFunction(location):
     spec.loader.exec_module(cf)
     return cf
 
-def countTotalCost(objectives : Iterable[fun_lib.ObjectiveVar]):
-    active_obj = sum(1 for o in objectives if o.costFunctionType is not fun_lib.CostFunctionType.Ignore)
+def countTotalCost(objectives : Iterable[ObjectiveVar]):
+    active_obj = sum(1 for o in objectives if o.costFunctionType is not CostFunctionType.Ignore)
+    
+    def unifyCostFunc(o:ObjectiveVar):
+        if o.costFunctionType == CostFunctionType.Linear:
+            o.costFunctionType = CostFunctionType.LinearVariance
+        elif o.costFunctionType == CostFunctionType.Quadratic:
+            o.costFunctionType = CostFunctionType.QuadraticVariance
+        # ignored and distanceFromZero are ignored
+    
+    # to have comparable cost function values one must have the stds ready
+    map(unifyCostFunc, objectives)
+
     total_cost = sum(o.cost() for o in objectives)
     # weighing cost by numbr of objectives
     return total_cost / active_obj
@@ -71,7 +83,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         mapped_vars = filterVarSet(vars_set, name + '.')
         objectives = cf.getObjectives(mapped_vars)
         cost = countTotalCost(objectives)
-        costObjective = fun_lib.ObjectiveVar(name, value= cost, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)
+        costObjective = ObjectiveVar(name, value= cost, costFunctionType=CostFunctionType.DistanceFromZero)
         return costObjective
 
 

@@ -6,9 +6,75 @@ This file has been grabbed from https://github.com/ORNL-Modelica/ModelicaPy/blob
 """
 
 import os
+import re
+from datetime import datetime
+from typing import Iterable, Text
 
+def getKeysfromDsin(lines):
+    """ Reads initial parameter names from dymola dsin file or from any text file providing one param per line
+    """
 
-def create_dsinORfinal(dicSim, dicVars, dsFileIn='dsfinal.txt', dsFileOut='dsin.txt', simulator='dymola', autoRewrite = True):
+    if lines[0].startswith('#1'):
+        # marker for dsin type of file, so we would have to skip initial gibberish
+        initNamesSegment = False
+    else:
+        # lets start right over
+        initNamesSegment = True
+
+    keys = []
+    for i in range(len(lines)):
+        if not initNamesSegment and lines[i].startswith('char initialName'):
+            # marks begining of the segment
+            initNamesSegment = True
+            continue
+        if initNamesSegment and (lines[i] == '\n' or lines[i].startswith('double initialValue')):
+            # end of the segment
+            break
+        if initNamesSegment:
+            # add to list but trim the line breaks
+            keys.append(lines[i].rstrip('\n'))
+    
+    return keys
+
+def getValsFromDsin(lines:Iterable[Text], keys: Iterable[Text]):
+    """ Reads parameter initial value for all input parameters provided
+    """
+
+    params = {}
+    for key in keys:
+        isFound = False
+        for x in range(len(lines)):
+            lin = lines[x]
+            # we have to mark the key so its not found anywhere else
+            marked_key = '# ' + key
+            if marked_key + '\n' in lin:
+                isFound = True
+                value_line = lines[x-1]
+                values = list(map(float, value_line.split()))
+                params[key] = values[1]
+                break
+        if not isFound:
+            raise ValueError('%s not found.' % key)
+
+    return params
+
+def getInitParams(dsFileIn='dsin.txt', paramsFile='dsin.txt') -> dict: 
+    """ Gets dictionary of input parameters and its values
+    """
+    with open(dsFileIn) as fil:
+        lines_all = fil.readlines()
+
+    if dsFileIn == paramsFile:
+        lines_params = lines_all
+    else:
+        with open(paramsFile) as fil:
+            lines_params = fil.readlines()
+
+    keys = getKeysfromDsin(lines_params)
+    params = getValsFromDsin(lines_all, keys)
+    return params
+
+def create_dsinORfinal(dicSim, dicVars, dsFileIn='dsin.txt', dsFileOut='dsinTemp.txt', simulator='dymola', autoRewrite = True):
     '''
     Generate a new dsin.txt file with modified values from discSim and dicVars
     from a dsin.txt or dsfinal.txt file with a name specified by dsFileOut.
@@ -41,7 +107,7 @@ def create_dsinORfinal(dicSim, dicVars, dsFileIn='dsfinal.txt', dsFileOut='dsin.
             pass
         elif answer.lower() in ['n', 'no']:
             print('Program terminated')
-
+            return
         else:
             raise IOError('Response not recognized. Program terminated')
 
@@ -126,7 +192,8 @@ def create_dsinORfinal(dicSim, dicVars, dsFileIn='dsfinal.txt', dsFileOut='dsin.
         isFound = False
         for x in range(len(lines)):
             lin = lines[x]
-            if key in lin:
+            # we have to look up to end of line, due to parameters with the same prefix, e.g. amp_factor and amp_factor_min
+            if key + '\n' in lin:
                 isFound = True
                 temp = lines[x-1]
                 temp = list(map(float, temp.split()))
@@ -143,8 +210,85 @@ def create_dsinORfinal(dicSim, dicVars, dsFileIn='dsfinal.txt', dsFileOut='dsin.
     fnew.writelines(lines)
     fnew.close()
 
+def getInputParams(dsFileIn='dsin.txt', filter = ''):
+    """ Search dsin for tunable Real parameters (type 280), optionally filtering by beggining
+    """
+
+    tunable_params = []
+    with open(dsFileIn) as file:
+        lines = file.readlines()
+        for line in lines:
+            # seraches for pattern e.g. 'blbelbe 280   # settings.heart_R_LA'
+            res = re.search(r'(\d+)[ ]+# (%s[\w\.]+)' % filter, line)
+            if res is not None and res.groups()[0] == '280':
+                tunable_params.append(res.groups()[1])
+    
+    return tunable_params
+
+def writeTunableParamsFromDsin():
+    tunable_params = getInputParams(filter='settings')
+    with open('params_for_SA.txt', 'w') as file:
+        file.writelines('\n'.join(tunable_params))
+
+
+# prepare the dsin for genopt
+def getTemplateMapping(keys: dict) ->dict:
+    """Gets the mapping key: '%key%'
+    """
+    return {key:'%%%s%%' % key for key in keys.keys()}
+
+def createDsinTemplate(keys, dsFileIn = 'dsin.txt', dsFileOut = 'dsinTemplate.txt'):
+    template_mapping = getTemplateMapping(keys)
+    
+    # dicSim = {'StartTime': 0,'StopTime': 100}
+    dicSim = {}
+    # dicVars = {'m_flow': 10}
+
+    create_dsinORfinal(dicSim, template_mapping, dsFileIn=dsFileIn, dsFileOut=dsFileOut)
+
+def build_opt_command_file(init_params:dict, step = 0.1):
+    with open('opt_command_SA.txt', 'w') as file:
+        file.write("""/* GenOpt command file 
+Generated by manipulate_dsin.py at %s */
+
+Vary{
+""" % datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        for param_name, param_value in init_params.items():
+            value = float(param_value)
+            inputs = (param_name, value*(1 - step), value, value*(1+ step))
+            line = '  Parameter{ Name = %s; Min = %s; Ini = %s; Max = %s; Step = 1; }\n' % inputs
+            file.write(line)
+        
+        file.write("""\n}
+
+OptimizationSettings{
+MaxIte = 500;
+MaxEqualResults = 10;
+WriteStepNumber = false;
+UnitsOfExecution = 4;
+}
+
+Algorithm {
+Main = Parametric;
+StopAtError = false;
+}
+""")
+    # jsut to get back at proper  indent
+    pass
+
+
 if __name__ == "__main__":
-    dicSim = {'StartTime': 0,'StopTime': 100}
-    dicVars = {'m_flow': 10}
-    create_dsinORfinal(dicSim, dicVars)
- 
+
+    # generate the params_for_SA.txt parameters list, which may be further edited.
+    # uncomment if thats the first run
+
+    # writeTunableParamsFromDsin()
+
+    init_params = getInitParams(dsFileIn='dsin.txt', paramsFile='params_for_SA.txt')
+
+
+    build_opt_command_file(init_params)
+
+    createDsinTemplate(init_params)
+    print('Done, Johne')
+

@@ -15,9 +15,10 @@ DEFAULT_STD_PERCENT = 10
 class CostFunctionType(enum.Enum):
     Ignore = 0
     Quadratic = 1
-    Linear = 2
-    QuadraticVariance = 3
-    DistanceFromZero = 4
+    QuadraticVariance = 2
+    Linear = 3
+    LinearVariance = 4
+    DistanceFromZero = 5
     
 
 class ObjectiveVar:
@@ -51,17 +52,27 @@ class ObjectiveVar:
             if self.targetValue is None:
                 return 0
             return self.weight*(measured - target)**2/(target**2)
-        elif self.costFunctionType is CostFunctionType.Linear:
-            if self.targetValue is None:
-                return 0
-            return self.weight*abs(measured - target)/target
+
         elif self.costFunctionType is CostFunctionType.QuadraticVariance:
             if self.std is None:
                 self.std = self.targetValue*DEFAULT_STD_PERCENT/100
             # variance is squared standard deviation
             return self.weight*(measured - target)**2/(target*self.std)
+
+        elif self.costFunctionType is CostFunctionType.Linear:
+            if self.targetValue is None:
+                return 0
+            return self.weight*abs(measured - target)/target
+
+        elif self.costFunctionType is CostFunctionType.LinearVariance:
+            if self.std is None:
+                self.std = self.targetValue*DEFAULT_STD_PERCENT/100
+            # variance is squared standard deviation
+            return self.weight*abs(measured - target)/(self.std)
+
         elif self.costFunctionType is CostFunctionType.DistanceFromZero:
-            return self.weight*measured
+            return self.weight*abs(measured)
+
         elif self.costFunctionType is CostFunctionType.Ignore:
             return 0
         else:
