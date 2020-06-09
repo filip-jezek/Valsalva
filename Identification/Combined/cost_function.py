@@ -3,6 +3,7 @@ import fun_lib
 from fun_lib import ObjectiveVar, CostFunctionType
 import importlib
 from typing import Iterable
+import matplotlib.pyplot as plt
 
 DEFAULT_TARGETVARS_TAG = 'All_supine'
 
@@ -21,16 +22,6 @@ def importCostFunction(location):
 def countTotalCost(objectives : Iterable[ObjectiveVar]):
     active_obj = sum(1 for o in objectives if o.costFunctionType is not CostFunctionType.Ignore)
     
-    def unifyCostFunc(o:ObjectiveVar):
-        if o.costFunctionType == CostFunctionType.Linear:
-            o.costFunctionType = CostFunctionType.LinearVariance
-        elif o.costFunctionType == CostFunctionType.Quadratic:
-            o.costFunctionType = CostFunctionType.QuadraticVariance
-        # ignored and distanceFromZero are ignored
-    
-    # to have comparable cost function values one must have the stds ready
-    map(unifyCostFunc, objectives)
-
     total_cost = sum(o.cost() for o in objectives)
     # weighing cost by numbr of objectives
     return total_cost / active_obj
@@ -57,7 +48,8 @@ def filterVarSet(vars_set, filter_string):
     
     return filtered_vars
 
-def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARGETVARS_TAG + '.txt'):
+
+def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT_TARGETVARS_TAG + '.txt'):
     """ Gets all objectives for our combined CF.
     Trials:
     
@@ -70,22 +62,48 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         LV volumes (SV and EF) 
     max exercise"""
 
+    plt.close('all')
     objectives = list()
+    fig, axs = plt.subplots(nrows = 2, ncols = 2, sharex = True)
+
+    if '__plot_title' in vars_set:
+        fig.suptitle(vars_set['__plot_title'])
+        # get rid of the key
+        del vars_set['__plot_title']
+
+    
+    def flat2gen(alist):
+        # https://stackoverflow.com/questions/3172930/flattening-mixed-lists-in-python-containing-iterables-and-noniterables
+        for item in alist:
+            if isinstance(item, Iterable):
+                for subitem in item: 
+                    yield subitem
+            else:
+                yield item
+            
+    ax = list(flat2gen(axs))
+    axes_num = 0
 
     def buildCostObjective(name, cost_func_folder):
         """
         the name is prefix in the large model as well
         """
+        nonlocal axes_num
+        nonlocal ax
+
+        vars_set['__plot_axes'] = ax[axes_num]
+        axes_num = axes_num + 1
         cf = importCostFunction(cost_func_folder)
         # mapped_vars = mapVarSet(vars_set, mapping)
         # filtering only vars relevant for that cost function, e.g. valsalva.brachial_pressure gives brachial_pressure
         
         mapped_vars = filterVarSet(vars_set, name + '.')
         objectives = cf.getObjectives(mapped_vars)
-        cost = countTotalCost(objectives)
-        costObjective = ObjectiveVar(name, value= cost, costFunctionType=CostFunctionType.DistanceFromZero)
-        return costObjective
 
+        cost = countTotalCost(objectives)
+        costObjective = ObjectiveVar(name, value=cost, costFunctionType=CostFunctionType.DistanceFromZero)
+
+        return costObjective
 
     objectives.append(buildCostObjective('baseline', 'optimizeBaseline'))
     objectives.append(buildCostObjective('exercise', 'MaxExercise'))
@@ -93,5 +111,32 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     vars_set['__targetValuesFilename'] = r"../../../data/Valsalva/targetValues_All_supine.txt"
     objectives.append(buildCostObjective('valsalva', 'valsalva'))
     objectives.append(buildCostObjective('tilt', 'optimizeTilt'))
+
+    # def plotObjectives():
+    #     fignums = plt.get_fignums()
+    #     axes = []
+
+    #     for f in fignums:
+    #         if len(plt.figure(f).axes) > 0:
+    #             axes.append(plt.figure(f).axes)
+            
+        
+    #     # # unpack axes
+    #     # axes = list(f.axes for f in figs if f is not None and f.axes is not None and len(f.axes) > 0)
+    #     plt.close('all')
+    #     plt.figure()
+
+    #     _, ax = plt.subplots(nrows = len(axes), sharex = True)
+
+    #     ax.append(axes)
+    #     ax.
+
+    # plotObjectives()
+    
+    plt.savefig('temp.png')
+    plt.show()
+
+
+                
     
     return objectives

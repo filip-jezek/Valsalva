@@ -1,9 +1,40 @@
 import scipy.io as skipy
+import matplotlib.pyplot as plt
 import fun_lib
 # import DyMat
 # from matplotlib import pyplot as plt
 
 # // calculate the cost function
+
+def plotObjectives(vars_set, interval, objectives):
+    if '__plot_axes' in vars_set:
+        ax = vars_set['__plot_axes']
+    else:
+        fig = plt.figure()
+        ax = fig.subplots()
+
+    ax.plot(vars_set['time'], vars_set['brachial_pressure']/133.32, label='Brachial pressure mmHg')
+    ax.plot(vars_set['time'], vars_set['CO']*1000*60, label='CO l/min')
+
+    # bounds
+    # bounds
+    def plotBounds(objective_name, unitFactor, fmt = 'k', verticalalignment = 'bottom'):
+        # get the bounds from the target value
+        objective = next((o for o in objectives if o.name == objective_name))
+        val = objective.targetValue*unitFactor
+        ax.plot((vars_set['time'][interval[0]], vars_set['time'][interval[-1]]), [val]*2, fmt)
+        s = '%s %.6f' % (objective_name, objective.cost())
+        ax.text(vars_set['time'][interval[1]], val, s, 
+                horizontalalignment='right', 
+                verticalalignment=verticalalignment)
+
+    plotBounds('BPs', 1/133.32)
+    plotBounds('BPd', 1/133.32)
+    plotBounds('CO', 1000*60, fmt='r')
+
+    total_costs = sum(o.cost() for o in objectives)
+    ax.set_title('Baseline costs %.6f' % total_costs)
+
 
 def getObjectives(vars_set):
 
@@ -26,5 +57,11 @@ def getObjectives(vars_set):
     buildObjective('BPs', BPs, 120*133.32)
     buildObjective('BPd', BPd, 80*133.32)
     buildObjective('CO', CO, (6.34/1000/60))
+
+    # to have comparable cost function values one must have the stds ready
+    map(fun_lib.unifyCostFunc, objectives)
+
+    if '__draw_plots' in vars_set and vars_set['__draw_plots']:
+        plotObjectives(vars_set, interval, objectives)
 
     return objectives

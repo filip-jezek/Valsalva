@@ -12,7 +12,7 @@ import math
 DEFAULT_TARGETVARS_TAG = 'All_supine'
 
 
-def plotTargetValues(objectives, valsalva_start, valsalva_end, signal_end):
+def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, signal_end):
     # plot merged timecourse
     # valsalva_start = 20
     # valsalva_end = 35
@@ -34,12 +34,12 @@ def plotTargetValues(objectives, valsalva_start, valsalva_end, signal_end):
     c_HR = 'c'
 
     # baselines
-    plt.errorbar((valsalva_start/2), getTrgtVal('baseline_bp'), yerr=getTrgtVar('baseline_bp'), fmt = c_BP, barsabove = True, zorder=3)
-    plt.errorbar((valsalva_start/2), getTrgtVal('baseline_hr'), yerr=getTrgtVar('baseline_hr'), fmt = c_HR, barsabove = True, zorder=3)
+    ax.errorbar((valsalva_start/2), getTrgtVal('baseline_bp'), yerr=getTrgtVar('baseline_bp'), fmt = c_BP, barsabove = True, zorder=3)
+    ax.errorbar((valsalva_start/2), getTrgtVal('baseline_hr'), yerr=getTrgtVar('baseline_hr'), fmt = c_HR, barsabove = True, zorder=3)
     
     # recoveries
-    plt.errorbar((signal_end - 2.5), getTrgtVal('ph5_recovery')*baseline_bp, yerr=getTrgtVar('ph5_recovery')*baseline_bp, fmt = c_BP, barsabove = True, zorder=3)
-    plt.errorbar((signal_end - 2.5), getTrgtVal('ph5_hr_recovery')*baseline_hr, yerr=getTrgtVar('ph5_hr_recovery')*baseline_hr, fmt = c_HR, barsabove = True, zorder=3)
+    ax.errorbar((signal_end - 2.5), getTrgtVal('ph5_recovery')*baseline_bp, yerr=getTrgtVar('ph5_recovery')*baseline_bp, fmt = c_BP, barsabove = True, zorder=3)
+    ax.errorbar((signal_end - 2.5), getTrgtVal('ph5_hr_recovery')*baseline_hr, yerr=getTrgtVar('ph5_hr_recovery')*baseline_hr, fmt = c_HR, barsabove = True, zorder=3)
 
     def plotMetric(t_val, t_offset, val, baseline, color):
         val_mean = getTrgtVal(val)*baseline
@@ -47,7 +47,7 @@ def plotTargetValues(objectives, valsalva_start, valsalva_end, signal_end):
         t_mean = getTrgtVal(t_val) + t_offset
         t_std = getTrgtVar(t_val) 
         # zorder 3 is a workaround to show errorbars above the plots
-        plt.errorbar(t_mean, val_mean, yerr= val_std, xerr=t_std, fmt = color, barsabove = True, zorder=3, linewidth = 2)
+        ax.errorbar(t_mean, val_mean, yerr= val_std, xerr=t_std, fmt = color, barsabove = True, zorder=3, linewidth = 2)
 
     def plotBPMetric(t_val, t_offset, val, color = c_BP):
         plotMetric(t_val, t_offset, val, baseline_bp, color)
@@ -192,43 +192,49 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     if '__targetValuesFilename' in vars_set and vars_set['__targetValuesFilename'] is not None:
         fun_lib.updateObjectivesByValuesFromFile(vars_set['__targetValuesFilename'], objectives)
       
+    # to have comparable cost function values one must have the stds ready
+    map(fun_lib.unifyCostFunc, objectives)
+
     if '__draw_plots' in vars_set and vars_set['__draw_plots']:
-        plt.figure()
+        ax = fun_lib.getAxes(vars_set)
 
         if '__plot_title' in vars_set:
-            plt.title(vars_set['__plot_title'])
+            ax.title(vars_set['__plot_title'])
+        else:
+            total_costs = sum(o.cost() for o in objectives)
+            ax.set_title('Valsalva costs %.6f' % total_costs)
 
-        plt.plot(time, BP, 'b')
-        plt.plot(time, bp_mean, 'm')
-        plt.plot(time, TP, 'g')
-        plt.plot(time, HR)
-        # plt.plot(time, vars_set['heartRate.HR'], '--')
+        ax.plot(time, BP, 'b')
+        ax.plot(time, bp_mean, 'm')
+        ax.plot(time, TP, 'g')
+        ax.plot(time, HR)
+        # ax.plot(time, vars_set['heartRate.HR'], '--')
 
 
         # get objective by name shortcuts
         getObj = lambda name: fun_lib.getObjectiveByName(objectives, name).value
         
-        plt.plot(phase0, [baseline_bp]*2, 'k')
-        plt.plot(phase5, [getObj('ph5_recovery')*baseline_bp]*2, 'k')
+        ax.plot(phase0, [baseline_bp]*2, 'k')
+        ax.plot(phase5, [getObj('ph5_recovery')*baseline_bp]*2, 'k')
 
-        plt.plot(phase1, [getObj('ph1_peak'    )*baseline_bp]*2, 'k')
-        plt.plot(phase2, [getObj('ph2_mean_min')*baseline_bp]*2, 'k')
-        plt.plot(phase4, [getObj('ph4_drop'    )*baseline_bp]*2, 'k')
+        ax.plot(phase1, [getObj('ph1_peak'    )*baseline_bp]*2, 'k')
+        ax.plot(phase2, [getObj('ph2_mean_min')*baseline_bp]*2, 'k')
+        ax.plot(phase4, [getObj('ph4_drop'    )*baseline_bp]*2, 'k')
 
-        plt.plot(getObj('t_ph1_peak'    ) + phase1[0], getObj('ph1_peak'    )*baseline_bp, '*r')
-        plt.plot(getObj('t_ph2_mean_min') + phase2[0], getObj('ph2_mean_min')*baseline_bp, '*r')
-        plt.plot(getObj('t_ph2_max'     ) + phase4[0], getObj('ph2_max'     )*baseline_bp, '*r')        
-        plt.plot(getObj('t_ph4_drop'    ) + phase4[0], getObj('ph4_drop'    )*baseline_bp, '*r')
-        plt.plot(getObj('t_ph4_ovrshoot') + phase4[0], getObj('ph4_ovrshoot')*baseline_bp, '*r')
+        ax.plot(getObj('t_ph1_peak'    ) + phase1[0], getObj('ph1_peak'    )*baseline_bp, '*r')
+        ax.plot(getObj('t_ph2_mean_min') + phase2[0], getObj('ph2_mean_min')*baseline_bp, '*r')
+        ax.plot(getObj('t_ph2_max'     ) + phase4[0], getObj('ph2_max'     )*baseline_bp, '*r')        
+        ax.plot(getObj('t_ph4_drop'    ) + phase4[0], getObj('ph4_drop'    )*baseline_bp, '*r')
+        ax.plot(getObj('t_ph4_ovrshoot') + phase4[0], getObj('ph4_ovrshoot')*baseline_bp, '*r')
 
-        plt.plot(phase0, [baseline_hr]*2, 'c')
-        plt.plot(getObj('t_ph1_hr_min' ) + phase1[0], getObj('ph1_hr_min' )*baseline_hr, '*m')
-        plt.plot(getObj('t_ph4_hr_max' ) + phase4[0], getObj('ph4_hr_max' )*baseline_hr, '*m')
-        plt.plot(getObj('t_ph4_hr_drop') + phase4[0], getObj('ph4_hr_drop')*baseline_hr, '*m')
-        plt.plot(phase5, [getObj('ph5_hr_recovery')*baseline_hr]*2, 'c')
+        ax.plot(phase0, [baseline_hr]*2, 'c')
+        ax.plot(getObj('t_ph1_hr_min' ) + phase1[0], getObj('ph1_hr_min' )*baseline_hr, '*m')
+        ax.plot(getObj('t_ph4_hr_max' ) + phase4[0], getObj('ph4_hr_max' )*baseline_hr, '*m')
+        ax.plot(getObj('t_ph4_hr_drop') + phase4[0], getObj('ph4_hr_drop')*baseline_hr, '*m')
+        ax.plot(phase5, [getObj('ph5_hr_recovery')*baseline_hr]*2, 'c')
 
-        plotTargetValues(objectives, valsalva_start, valsalva_end, time[-1])
-        # plt.show(block = False)
+        plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time[-1])
+        # ax.show(block = False)
 
         if '__saveFig_path' in vars_set and vars_set['__saveFig_path'] is not None:
             plt.savefig(vars_set['__saveFig_path'], dpi = 300)

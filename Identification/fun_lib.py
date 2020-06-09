@@ -6,6 +6,7 @@ import numpy
 import scipy.signal as ss
 import os
 import re
+import matplotlib.pyplot as plt
 from typing import Iterable
 
 # For variance based cost function we need a guess of variance of any target variables
@@ -292,3 +293,34 @@ def getSafeLogDir(unsafeDir):
     else:
         return unsafeDir + '\\'
 
+def unifyCostFunc(o:ObjectiveVar):
+    """ Changes the objective cost function type to variance
+    """
+    if o.costFunctionType == CostFunctionType.Linear:
+        o.costFunctionType = CostFunctionType.LinearVariance
+    elif o.costFunctionType == CostFunctionType.Quadratic:
+        o.costFunctionType = CostFunctionType.QuadraticVariance
+
+def getAxes(vars_set : dict) -> plt.axes:
+    """ Gets axes from vars_set if defined, creates empty subplots figure otherwise 
+    """
+
+    if '__plot_axes' in vars_set:
+        return vars_set['__plot_axes']
+    else:
+        fig = plt.figure()
+        return fig.subplots()
+
+def plotObjectiveTarget(pack:tuple, objective_name:str, unitFactor:float, fmt = 'k', verticalalignment = 'bottom'):
+    """ Plots the objective target with label
+    pack = (objectives:list, ax:plt.axes, interval:range)
+    """
+    (objectives, vars_set, ax, interval) = pack
+    # get the bounds from the target value
+    objective = next((o for o in objectives if o.name == objective_name))
+    val = objective.targetValue*unitFactor
+    ax.plot((vars_set['time'][interval[0]], vars_set['time'][interval[-1]]), [val]*2, fmt)
+    s = '%s %.6f' % (objective_name, objective.cost())
+    ax.text(vars_set['time'][interval[-1]], val, s, 
+            horizontalalignment='right', 
+            verticalalignment=verticalalignment)

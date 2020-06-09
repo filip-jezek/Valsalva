@@ -276,6 +276,14 @@ StopAtError = false;
     # jsut to get back at proper  indent
     pass
 
+def writeInitParams(init_params:dict):
+    """ Writes params with default values into csv"""
+
+    with open('init_params_default_vals.csv', 'w') as file:
+        for param, val in init_params.items():
+            s = '%s,%s\n' % (param, val)
+            file.write(s)
+
 
 if __name__ == "__main__":
 
@@ -285,7 +293,9 @@ if __name__ == "__main__":
     # writeTunableParamsFromDsin()
 
     init_params = getInitParams(dsFileIn='dsin.txt', paramsFile='params_for_SA.txt')
-
+    
+    # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
+    writeInitParams(init_params)
 
     build_opt_command_file(init_params)
 

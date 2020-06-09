@@ -2,10 +2,24 @@ import scipy.io as skipy
 import fun_lib
 from statistics import mean
 # import DyMat
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 
 # // calculate the cost function
+def plotObjectives(vars_set, interval, objectives):
+    ax = fun_lib.getAxes(vars_set)
 
+    ax.plot(vars_set['time'], vars_set['brachial_pressure']/133.32, label='Brachial pressure mmHg')
+    ax.plot(vars_set['time'], vars_set['SV']*1e6, label='Stroke volume ml')    
+    ax.plot(vars_set['time'], vars_set['phi_baro']*100, label='phi %')    
+
+    pack = (objectives, vars_set, ax, interval)
+    fun_lib.plotObjectiveTarget(pack, 'BPs', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack, 'BPd', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack, 'SV', 1e6)
+    fun_lib.plotObjectiveTarget(pack, 'phi', 100)
+
+    total_costs = sum(o.cost() for o in objectives)
+    ax.set_title('Tilt costs %.6f' % total_costs)
 
 def getObjectives(vars_set):
 
@@ -33,5 +47,11 @@ def getObjectives(vars_set):
             ('phi', fun_lib.avg(vars_set['phi_baro'], interval), phi_target, None, 1)]
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight = o[4]), ov))
+
+    # to have comparable cost function values one must have the stds ready
+    map(fun_lib.unifyCostFunc, objectives)
+
+    if '__draw_plots' in vars_set and vars_set['__draw_plots']:
+        plotObjectives(vars_set, interval, objectives)
 
     return objectives
