@@ -44,12 +44,12 @@ for line in lines:
             if abs(param_cur_val) > abs(param_def_val)*1.001:
                 sa_tup = (param_short_name + '+', cost, param_cur_val, run)
                 sensitivity_list.append(sa_tup)
-                print(param_name + " is bigger")
+                # print(param_name + " is bigger")
 
             elif abs(param_cur_val) < abs(param_def_val)/1.001:
                 sa_tup = (param_short_name + '-', cost, param_cur_val, run)
                 sensitivity_list.append(sa_tup)
-                print(param_name + " is smaller")
+                # print(param_name + " is smaller")
             else:
                 # this parameter has not been changed
                 pass
@@ -74,9 +74,14 @@ plotlist = sensitivity_list[:num_to_plot]
 plotlist.reverse()
 heights = list((x[1] for x in plotlist))
 labels = list((x[0] for x in plotlist))
+dpi = 100
+plt.figure(figsize = [800/dpi, 800/dpi], dpi=dpi, )
 plt.barh(range(len(heights)), heights, tick_label = labels)
+plt.subplots_adjust(left=0.4)
+plt.xlabel('Total cost')
+plt.savefig('sa_result.png')
 plt.show()
-
+plt.figure
 # print('Sensitivity>', sensitivity_list)
 pass
 

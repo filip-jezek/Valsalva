@@ -17,22 +17,12 @@ def plotObjectives(vars_set, interval, objectives):
     ax.plot(vars_set['time'], vars_set['CO']*1000*60, label='CO l/min')
 
     # bounds
-    # bounds
-    def plotBounds(objective_name, unitFactor, fmt = 'k', verticalalignment = 'bottom'):
-        # get the bounds from the target value
-        objective = next((o for o in objectives if o.name == objective_name))
-        val = objective.targetValue*unitFactor
-        ax.plot((vars_set['time'][interval[0]], vars_set['time'][interval[-1]]), [val]*2, fmt)
-        s = '%s %.6f' % (objective_name, objective.cost())
-        ax.text(vars_set['time'][interval[1]], val, s, 
-                horizontalalignment='right', 
-                verticalalignment=verticalalignment)
+    pack = (objectives, vars_set, ax, interval)
+    fun_lib.plotObjectiveTarget(pack,'BPs', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'BPd', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'CO', 1000*60, fmt='r')
 
-    plotBounds('BPs', 1/133.32)
-    plotBounds('BPd', 1/133.32)
-    plotBounds('CO', 1000*60, fmt='r')
-
-    total_costs = sum(o.cost() for o in objectives)
+    total_costs = fun_lib.countTotalWeightedCost(objectives)
     ax.set_title('Baseline costs %.6f' % total_costs)
 
 

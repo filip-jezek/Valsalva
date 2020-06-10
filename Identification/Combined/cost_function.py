@@ -19,13 +19,6 @@ def importCostFunction(location):
     spec.loader.exec_module(cf)
     return cf
 
-def countTotalCost(objectives : Iterable[ObjectiveVar]):
-    active_obj = sum(1 for o in objectives if o.costFunctionType is not CostFunctionType.Ignore)
-    
-    total_cost = sum(o.cost() for o in objectives)
-    # weighing cost by numbr of objectives
-    return total_cost / active_obj
-    
 def mapVarSet(vars_set, mapping):
     """ Creates new varset with mapped input vars_set from simulation to that used in cost function (aka original model)
     All other (non-mapped) stay the same
@@ -64,14 +57,17 @@ def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT
 
     plt.close('all')
     objectives = list()
-    fig, axs = plt.subplots(nrows = 2, ncols = 2, sharex = True)
-
+    dpi = 100
+    fig, axs = plt.subplots(nrows = 2, ncols = 2, sharex = True, sharey = False, figsize = [1920/dpi, 1080/dpi], dpi=dpi)
+    
+    
     if '__plot_title' in vars_set:
-        fig.suptitle(vars_set['__plot_title'])
+        fig_title = vars_set['__plot_title']
         # get rid of the key
         del vars_set['__plot_title']
+    else:
+        fig_title = 'Debug run'
 
-    
     def flat2gen(alist):
         # https://stackoverflow.com/questions/3172930/flattening-mixed-lists-in-python-containing-iterables-and-noniterables
         for item in alist:
@@ -100,18 +96,18 @@ def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT
         mapped_vars = filterVarSet(vars_set, name + '.')
         objectives = cf.getObjectives(mapped_vars)
 
-        cost = countTotalCost(objectives)
+        cost = fun_lib.countTotalWeightedCost(objectives)
         costObjective = ObjectiveVar(name, value=cost, costFunctionType=CostFunctionType.DistanceFromZero)
 
         return costObjective
 
     objectives.append(buildCostObjective('baseline', 'optimizeBaseline'))
+    objectives.append(buildCostObjective('tilt', 'optimizeTilt'))
     objectives.append(buildCostObjective('exercise', 'MaxExercise'))
     # open the data folder
     vars_set['__targetValuesFilename'] = r"../../../data/Valsalva/targetValues_All_supine.txt"
     objectives.append(buildCostObjective('valsalva', 'valsalva'))
-    objectives.append(buildCostObjective('tilt', 'optimizeTilt'))
-
+    
     # def plotObjectives():
     #     fignums = plt.get_fignums()
     #     axes = []
@@ -133,7 +129,10 @@ def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT
 
     # plotObjectives()
     
-    plt.savefig('temp.png')
+    fig.suptitle(fig_title)
+
+    pic_path = fun_lib.getSafeLogDir(r'..\Schedules') + fig_title
+    plt.savefig(pic_path)
     plt.show()
 
 

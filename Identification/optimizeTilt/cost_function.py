@@ -18,7 +18,7 @@ def plotObjectives(vars_set, interval, objectives):
     fun_lib.plotObjectiveTarget(pack, 'SV', 1e6)
     fun_lib.plotObjectiveTarget(pack, 'phi', 100)
 
-    total_costs = sum(o.cost() for o in objectives)
+    total_costs = fun_lib.countTotalWeightedCost(objectives)
     ax.set_title('Tilt costs %.6f' % total_costs)
 
 def getObjectives(vars_set):

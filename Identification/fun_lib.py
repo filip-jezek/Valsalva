@@ -105,7 +105,7 @@ class ObjectiveVar:
             return True
 
 
-def getObjectiveByName(objective_iterable, name):
+def getObjectiveByName(objective_iterable, name) -> ObjectiveVar:
     """
     Returns objective of given name from the list
     """
@@ -300,6 +300,14 @@ def unifyCostFunc(o:ObjectiveVar):
         o.costFunctionType = CostFunctionType.LinearVariance
     elif o.costFunctionType == CostFunctionType.Quadratic:
         o.costFunctionType = CostFunctionType.QuadraticVariance
+
+def countTotalWeightedCost(objectives : Iterable[ObjectiveVar]) -> float:
+    """ Returns total objective costs, weighted by number of objectives """
+    active_obj = sum(1 for o in objectives if o.costFunctionType is not CostFunctionType.Ignore)
+    
+    total_cost = sum(o.cost() for o in objectives)
+    # weighing cost by numbr of objectives
+    return total_cost / active_obj
 
 def getAxes(vars_set : dict) -> plt.axes:
     """ Gets axes from vars_set if defined, creates empty subplots figure otherwise 

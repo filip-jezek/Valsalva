@@ -22,12 +22,15 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, signal_end):
     baseline_bp = fun_lib.getObjectiveByName(objectives, 'baseline_bp').value
     baseline_hr = fun_lib.getObjectiveByName(objectives, 'baseline_hr').value
 
-    # just a shortcut
+    # just a shortcuts
     def getTrgtVal(name):
         return fun_lib.getObjectiveByName(objectives, name).targetValue
     
     def getTrgtVar(name):
         return fun_lib.getObjectiveByName(objectives, name).std
+    
+    def getCost(name):
+        return fun_lib.getObjectiveByName(objectives, name).cost()
 
     # color for BP and HR
     c_BP = 'g'
@@ -41,11 +44,13 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, signal_end):
     ax.errorbar((signal_end - 2.5), getTrgtVal('ph5_recovery')*baseline_bp, yerr=getTrgtVar('ph5_recovery')*baseline_bp, fmt = c_BP, barsabove = True, zorder=3)
     ax.errorbar((signal_end - 2.5), getTrgtVal('ph5_hr_recovery')*baseline_hr, yerr=getTrgtVar('ph5_hr_recovery')*baseline_hr, fmt = c_HR, barsabove = True, zorder=3)
 
+    costs_legend = []
     def plotMetric(t_val, t_offset, val, baseline, color):
         val_mean = getTrgtVal(val)*baseline
         val_std = getTrgtVar(val)*baseline
         t_mean = getTrgtVal(t_val) + t_offset
         t_std = getTrgtVar(t_val) 
+        costs_legend.append('%s %.4f\n%s %.4f' % (val, getCost(val), t_val, getCost(t_val)))
         # zorder 3 is a workaround to show errorbars above the plots
         ax.errorbar(t_mean, val_mean, yerr= val_std, xerr=t_std, fmt = color, barsabove = True, zorder=3, linewidth = 2)
 
@@ -64,6 +69,11 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, signal_end):
     plotHRMetric('t_ph1_hr_min', valsalva_start, 'ph1_hr_min')
     plotHRMetric('t_ph4_hr_max', valsalva_end, 'ph4_hr_max')
     plotHRMetric('t_ph4_hr_drop', valsalva_end, 'ph4_hr_drop')
+
+    ax.text(0, 60, '\n'.join(costs_legend), 
+            horizontalalignment='left', 
+            verticalalignment='bottom', fontsize = 8)
+
     pass
 
 
@@ -201,25 +211,28 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         if '__plot_title' in vars_set:
             ax.title(vars_set['__plot_title'])
         else:
-            total_costs = sum(o.cost() for o in objectives)
+            total_costs = fun_lib.countTotalWeightedCost(objectives)
             ax.set_title('Valsalva costs %.6f' % total_costs)
 
-        ax.plot(time, BP, 'b')
+        # limit the initial BP to leave some place to show the costs
+        start_at = fun_lib.findLowestIndex(15, time)
+        ax.plot(time[start_at:], BP[start_at:], 'b')
         ax.plot(time, bp_mean, 'm')
-        ax.plot(time, TP, 'g')
+        # ax.plot(time, TP, 'g')
         ax.plot(time, HR)
         # ax.plot(time, vars_set['heartRate.HR'], '--')
 
 
         # get objective by name shortcuts
-        getObj = lambda name: fun_lib.getObjectiveByName(objectives, name).value
+        def getObj(name):
+            return fun_lib.getObjectiveByName(objectives, name).value
         
-        ax.plot(phase0, [baseline_bp]*2, 'k')
-        ax.plot(phase5, [getObj('ph5_recovery')*baseline_bp]*2, 'k')
+        # ax.plot(phase0, [baseline_bp]*2, 'k')
+        # ax.plot(phase5, [getObj('ph5_recovery')*baseline_bp]*2, 'k')
 
-        ax.plot(phase1, [getObj('ph1_peak'    )*baseline_bp]*2, 'k')
-        ax.plot(phase2, [getObj('ph2_mean_min')*baseline_bp]*2, 'k')
-        ax.plot(phase4, [getObj('ph4_drop'    )*baseline_bp]*2, 'k')
+        # ax.plot(phase1, [getObj('ph1_peak'    )*baseline_bp]*2, 'k')
+        # ax.plot(phase2, [getObj('ph2_mean_min')*baseline_bp]*2, 'k')
+        # ax.plot(phase4, [getObj('ph4_drop'    )*baseline_bp]*2, 'k')
 
         ax.plot(getObj('t_ph1_peak'    ) + phase1[0], getObj('ph1_peak'    )*baseline_bp, '*r')
         ax.plot(getObj('t_ph2_mean_min') + phase2[0], getObj('ph2_mean_min')*baseline_bp, '*r')

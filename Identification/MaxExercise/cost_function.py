@@ -22,7 +22,7 @@ def plotObjectives(vars_set, interval, objectives):
     fun_lib.plotObjectiveTarget(pack, 'Ts', 1, verticalalignment='top')
     fun_lib.plotObjectiveTarget(pack, 'Td', 1)
     
-    total_costs = sum(o.cost() for o in objectives)
+    total_costs = fun_lib.countTotalWeightedCost(objectives)
     ax.set_title('Exercise costs %.6f' % total_costs)
 
 
