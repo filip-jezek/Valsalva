@@ -273,7 +273,7 @@ def updateObjectivesByValuesFromFile(filename, objectives = None) -> Iterable[Ob
     
     return objectives
 
-def getRunNumber():
+def getRunNumber() -> str:
     """ Gets GenOpt run number using the name of the current working directory
     """
     cur_dirname = os.path.basename(os.getcwd())
@@ -302,12 +302,16 @@ def unifyCostFunc(o:ObjectiveVar):
         o.costFunctionType = CostFunctionType.QuadraticVariance
 
 def countTotalWeightedCost(objectives : Iterable[ObjectiveVar]) -> float:
-    """ Returns total objective costs, weighted by number of objectives """
+    """ Returns total objective costs, weighted by number of objectives - effectively returns mean of costs"""
     active_obj = sum(1 for o in objectives if o.costFunctionType is not CostFunctionType.Ignore)
     
     total_cost = sum(o.cost() for o in objectives)
     # weighing cost by numbr of objectives
     return total_cost / active_obj
+
+def countTotalSumCost(objectives : Iterable[ObjectiveVar]) -> float:
+    "Returns simple sum of all objectives costs"
+    return sum(o.cost() for o in objectives)    
 
 def getAxes(vars_set : dict) -> plt.axes:
     """ Gets axes from vars_set if defined, creates empty subplots figure otherwise 

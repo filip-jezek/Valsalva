@@ -68,6 +68,13 @@ def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT
     else:
         fig_title = 'Debug run'
 
+    if '__saveFig_path' in vars_set and vars_set['__saveFig_path'] is not None:
+        saveFig_path = vars_set['__saveFig_path']
+        # prevent child cost functions to save figures
+        del vars_set['__saveFig_path']
+    else:
+        saveFig_path = None
+
     def flat2gen(alist):
         # https://stackoverflow.com/questions/3172930/flattening-mixed-lists-in-python-containing-iterables-and-noniterables
         for item in alist:
@@ -129,11 +136,14 @@ def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT
 
     # plotObjectives()
     
-    fig.suptitle(fig_title)
+    fig.suptitle('%s costs %.6f' % (fig_title, fun_lib.countTotalSumCost(objectives)))
 
-    pic_path = fun_lib.getSafeLogDir(r'..\Schedules') + fig_title
-    plt.savefig(pic_path)
-    plt.show()
+    if saveFig_path is not None:
+        plt.savefig(saveFig_path)
+    
+    if fun_lib.getRunNumber() == 0:
+        # zero means debug
+        plt.show()
 
 
                 

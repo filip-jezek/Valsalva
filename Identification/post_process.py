@@ -24,7 +24,7 @@ OMIT_LOADING_PARAMS = True
 
 def writeCost(objectives):
 
-    total_cost = sum(o.cost() for o in objectives)
+    total_cost = fun_lib.countTotalSumCost(objectives)
     # total_cost = sum(costs)
     with open('dsout.out', 'w') as file:
         file.write("banik pico\n")
@@ -63,7 +63,7 @@ def logOutput(objectives):
     run = fun_lib.getRunNumber()
     with open(filepath, 'a') as file:
         # prepare the line with value, cost value for this and percentage of total costs
-        total_cost = sum(o.cost() for o in objectives)
+        total_cost = fun_lib.countTotalSumCost(objectives)
         t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         tail = "  ,%03d,%s, %.6e" % (run, t, total_cost)
         
@@ -118,7 +118,7 @@ cf = importCostFunction()
 if DRAW_PLOTS:
     var_set['__draw_plots'] = True
     var_set['__plot_title'] = "Run %i" % (fun_lib.getRunNumber())
-    var_set['__saveFig_path'] = "%sFitFig_%i.png" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
+    var_set['__saveFig_path'] = "%sFitFig_%03d.png" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
     
 objectives = cf.getObjectives(var_set)
 
