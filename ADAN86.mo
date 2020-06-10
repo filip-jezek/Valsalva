@@ -270,6 +270,8 @@ package ADAN_main
         annotation(choices(checkBox=true), Dialog(tab = "Other", group = "Hide results from dataset - levels"));
       parameter Boolean EvaluateFunctionalParams = true "Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation."
         annotation(choices(checkBox=true), Dialog(tab = "Other", group = "Other"));
+      parameter Real dummy = 1 "Dummy parameter not bound anywhere"
+          annotation(choices(checkBox=true), Dialog(tab = "Other", group = "Other"));
 
 
       // BAROREFLEX
@@ -6818,7 +6820,7 @@ P_hs/2")}));
             Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras" annotation(HideResult = settings.hideLevel1);
             Physiolibrary.Types.Volume V_n_phi = V_n
                 / (1 + (phi - settings.phi0)*settings.tissuesCompliance_PhiEffect)
-                * (1 + (phi - settings.phi0)*exercise*settings.exercise_factor_on_arterial_compliance) "Linearly dependent on phi" annotation(HideResult = settings.hideLevel1);
+                * (1 + (phi - settings.phi0)*exercise*settings.exercise_factor_on_tissue_compliance) "Linearly dependent on phi" annotation(HideResult = settings.hideLevel1);
             Physiolibrary.Types.Volume V_us_phi = V_us
               / (1 + settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi" annotation(HideResult = settings.hideLevel1);
 
@@ -34852,7 +34854,6 @@ P_hs_plus_dist"),
             UseThoracicPressureInput=true,
             UsePhiInput=true,
             aorticValve(calculateAdditionalMetrics=settings.EvaluateFunctionalParams),
-
             mitralValve(calculateAdditionalMetrics=settings.EvaluateFunctionalParams)),
           settings(
             V_PV_init=7.4e-05,
@@ -34868,6 +34869,7 @@ P_hs_plus_dist"),
           pulmonaryComponent(deadVolume=0.002, c_pv(CollapsingPressureVolume=
                   pulmonaryComponent.deadVolume, MinimalCollapsingPressure=-13332.2387415)),
           useAutonomousPhi(y=true));
+
       //    useAutonomousPhi(y=true),
 
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
