@@ -50,24 +50,28 @@ class ObjectiveVar:
     def __cost_function(self, measured, target):
         # calculate costs. Could go negative or NaN for negative or zero measured values!
         if self.costFunctionType is CostFunctionType.Quadratic:
-            if self.targetValue is None:
+            if target is None:
                 return 0
             return self.weight*(measured - target)**2/(target**2)
 
         elif self.costFunctionType is CostFunctionType.QuadraticVariance:
             if self.std is None:
-                self.std = self.targetValue*DEFAULT_STD_PERCENT/100
+                self.std = target*DEFAULT_STD_PERCENT/100
+            if target is None:
+                return 0            
             # variance is squared standard deviation
             return self.weight*(measured - target)**2/(target*self.std)
 
         elif self.costFunctionType is CostFunctionType.Linear:
-            if self.targetValue is None:
+            if target is None:
                 return 0
             return self.weight*abs(measured - target)/target
 
         elif self.costFunctionType is CostFunctionType.LinearVariance:
             if self.std is None:
-                self.std = self.targetValue*DEFAULT_STD_PERCENT/100
+                self.std = target*DEFAULT_STD_PERCENT/100
+            if target is None:
+                return 0
             # variance is squared standard deviation
             return self.weight*abs(measured - target)/(self.std)
 

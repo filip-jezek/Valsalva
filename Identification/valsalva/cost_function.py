@@ -44,6 +44,13 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, signal_end):
     ax.errorbar((signal_end - 2.5), getTrgtVal('ph5_recovery')*baseline_bp, yerr=getTrgtVar('ph5_recovery')*baseline_bp, fmt = c_BP, barsabove = True, zorder=3)
     ax.errorbar((signal_end - 2.5), getTrgtVal('ph5_hr_recovery')*baseline_hr, yerr=getTrgtVar('ph5_hr_recovery')*baseline_hr, fmt = c_HR, barsabove = True, zorder=3)
 
+    # sv lower limit
+    SV_min_objective = fun_lib.getObjectiveByName(objectives, 'SV_min')
+    limit_val = SV_min_objective.limit[0]
+    ax.plot([valsalva_start, valsalva_end], [limit_val]*2, 'r')
+    ax.text(valsalva_end, limit_val, 'SV lim %.4f' % SV_min_objective.cost(), horizontalalignment='right', 
+            verticalalignment='top', fontsize = 8, color='red')
+
     costs_legend = []
     def plotMetric(t_val, t_offset, val, baseline, color):
         val_mean = getTrgtVal(val)*baseline
@@ -99,13 +106,14 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
 
     # HR is system input (change in phi) from 70 to 89
     mmHg2SI = 133.32
-    # ml2SI = 1e-6
+    ml2SI = 1e-6
     # lpm2SI = 1e-3/60
     BPM2SI = 1/60
 
     BP = vars_set['brachial_pressure']
     # HR = vars_set['heartRate.HR']
     TP = vars_set['thoracic_pressure']
+    SV = vars_set['SV']
     time = vars_set['time']
 
     # make sure its in non-SI units
@@ -114,6 +122,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         BP = BP/mmHg2SI
         # HR = HR/BPM2SI
         TP = TP/mmHg2SI
+        SV = SV/ml2SI
 
     dt = vars_set['time'][2] - vars_set['time'][1]
     assert dt > 0, "The simulation must not store values at events."
@@ -162,7 +171,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
                     (HR     , phase1, 0      , numpy.min  , baseline_hr, 'ph1_hr_min' , COUNT),
                     (HR     , phase4, (0, 0) , numpy.max  , baseline_hr, 'ph4_hr_max' , COUNT),
                     (HR     , phase4, (0, 3) , numpy.min  , baseline_hr, 'ph4_hr_drop', COUNT),
-                    (HR     , phase5, 0      , numpy.mean , baseline_hr, 'ph5_hr_recovery', COUNT)                  ]
+                    (HR     , phase5, 0      , numpy.mean , baseline_hr, 'ph5_hr_recovery', COUNT)]
 
     time_values = [ (BP,      phase1, (-1, 0), numpy.argmax, 't_ph1_peak'    , COUNT),
                     (bp_mean, phase2, (0, -2), numpy.argmin, 't_ph2_mean_min', COUNT),
@@ -173,7 +182,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
                     (HR     , phase4, (0, 0) , numpy.argmax, 't_ph4_hr_max'  , COUNT),
                     (HR     , phase4, (0, 3) , numpy.argmin, 't_ph4_hr_drop' , COUNT)    ]
 
-    def getInterval(phase, phase_offset, time):
+    def getInterval(phase, phase_offset):
         if phase_offset is None:
             offset = (0, 0)
         elif isinstance(phase_offset, int):
@@ -185,19 +194,28 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
 
     def buildValueObjective(o):
         (sig, phase, phase_offset, fun, baseline, name, include_in_cost) = o
-        interval, _ = getInterval(phase, phase_offset, time)
+        interval, _ = getInterval(phase, phase_offset)
         value = fun(sig[interval])/baseline
         return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost)
 
     def buildTimeObjective(to):
         (sig, phase, phase_offset, fun, name, include_in_cost) = to
-        interval, offset = getInterval(phase, phase_offset, time)        
+        interval, offset = getInterval(phase, phase_offset)        
         value = time[fun(sig[interval])] + offset[0]
         return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost)        
 
     # map the inputs to ObjectiveVar
     objectives.extend(map(buildValueObjective, phase_values))
     objectives.extend(map(buildTimeObjective, time_values))
+    
+    #penalize by too low SV
+    phase2_interval, _ = getInterval(phase2, None)
+    sv_objective = fun_lib.ObjectiveVar(
+        'SV_min', 
+        numpy.min(SV[phase2_interval]), limit=[30, 150], std = 40*0.1, k_p=10)
+    objectives.append(sv_objective)
+
+    
 
     if '__targetValuesFilename' in vars_set and vars_set['__targetValuesFilename'] is not None:
         fun_lib.updateObjectivesByValuesFromFile(vars_set['__targetValuesFilename'], objectives)
@@ -218,6 +236,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         start_at = fun_lib.findLowestIndex(15, time)
         ax.plot(time[start_at:], BP[start_at:], 'b')
         ax.plot(time, bp_mean, 'm')
+        ax.plot(time, SV, 'y')
         # ax.plot(time, TP, 'g')
         ax.plot(time, HR)
         # ax.plot(time, vars_set['heartRate.HR'], '--')

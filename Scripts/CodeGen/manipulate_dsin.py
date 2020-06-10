@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 
-@author: Scott Greenwood
-This file has been grabbed from https://github.com/ORNL-Modelica/ModelicaPy/blob/master/modelicapy/gen_dsin.py at 460fa9d
+@author: Scott Greenwood, Filip Jezek
+This file has been grabbed from https://github.com/ORNL-Modelica/ModelicaPy/blob/master/modelicapy/gen_dsin.py at 460fa9d and modified by Filip Jezek, UMICH 2020
 """
 
 import os
@@ -226,6 +226,7 @@ def getInputParams(dsFileIn='dsin.txt', filter = ''):
     return tunable_params
 
 def writeTunableParamsFromDsin():
+    " Out of dsin.txt generates list of tunable parameters. Usually enough to run once."
     tunable_params = getInputParams(filter='settings')
     with open('params_for_SA.txt', 'w') as file:
         file.writelines('\n'.join(tunable_params))
@@ -289,7 +290,6 @@ if __name__ == "__main__":
 
     # generate the params_for_SA.txt parameters list, which may be further edited.
     # uncomment if thats the first run
-
     # writeTunableParamsFromDsin()
 
     init_params = getInitParams(dsFileIn='dsin.txt', paramsFile='params_for_SA.txt')
