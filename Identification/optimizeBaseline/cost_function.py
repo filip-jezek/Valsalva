@@ -17,7 +17,7 @@ def plotObjectives(vars_set, interval, objectives):
     ax.plot(vars_set['time'], vars_set['CO']*1000*60, label='CO l/min')
 
     # bounds
-    pack = (objectives, vars_set, ax, interval)
+    pack = (objectives, vars_set['time'], ax, interval)
     fun_lib.plotObjectiveTarget(pack,'BPs', 1/133.32)
     fun_lib.plotObjectiveTarget(pack,'BPd', 1/133.32)
     fun_lib.plotObjectiveTarget(pack,'CO', 1000*60, fmt='r')

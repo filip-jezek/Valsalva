@@ -12,11 +12,12 @@ import math
 DEFAULT_TARGETVARS_TAG = 'All_supine'
 
 
-def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, signal_end):
+def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time):
     # plot merged timecourse
     # valsalva_start = 20
     # valsalva_end = 35
     # signal_end = 55
+    signal_end = time[-1]
     
     # All targets are relative to baseline, so we have to have that set first
     baseline_bp = fun_lib.getObjectiveByName(objectives, 'baseline_bp').value
@@ -45,11 +46,8 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, signal_end):
     ax.errorbar((signal_end - 2.5), getTrgtVal('ph5_hr_recovery')*baseline_hr, yerr=getTrgtVar('ph5_hr_recovery')*baseline_hr, fmt = c_HR, barsabove = True, zorder=3)
 
     # sv lower limit
-    SV_min_objective = fun_lib.getObjectiveByName(objectives, 'SV_min')
-    limit_val = SV_min_objective.limit[0]
-    ax.plot([valsalva_start, valsalva_end], [limit_val]*2, 'r')
-    ax.text(valsalva_end, limit_val, 'SV lim %.4f' % SV_min_objective.cost(), horizontalalignment='right', 
-            verticalalignment='top', fontsize = 8, color='red')
+    pack = (objectives, time, ax, fun_lib.findInterval(valsalva_start, valsalva_end, time))
+    fun_lib.plotObjectiveLimit(pack, 'SV_min', 1, 'lower')
 
     costs_legend = []
     def plotMetric(t_val, t_offset, val, baseline, color):
@@ -265,7 +263,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         ax.plot(getObj('t_ph4_hr_drop') + phase4[0], getObj('ph4_hr_drop')*baseline_hr, '*m')
         ax.plot(phase5, [getObj('ph5_hr_recovery')*baseline_hr]*2, 'c')
 
-        plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time[-1])
+        plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time)
         # ax.show(block = False)
 
         if '__saveFig_path' in vars_set and vars_set['__saveFig_path'] is not None:

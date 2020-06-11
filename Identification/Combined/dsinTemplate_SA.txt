@@ -9,14 +9,14 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-       1                   # StopTime     Time at which integration stops
-       0                   # Increment    Communication step size, if > 0
-     500                   # nInterval    Number of communication intervals, if > 0
-  1.0000000000000000E-04   # Tolerance    Relative precision of signals for
+      60                   # StopTime     Time at which integration stops
+  4.0000000000000001E-02   # Increment    Communication step size, if > 0
+       0                   # nInterval    Number of communication intervals, if > 0
+  9.9999999999999995E-07   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
        0                   # MaxFixedStep Maximum step size of fixed step size
                            #              integrators, if > 0.0
-      15                   # Algorithm    Integration algorithm as integer (1...28)
+      29                   # Algorithm    Integration algorithm as integer (1...28)
                            #
                            #             | model|       |        | dense | state |
                            # Algorithm   | typ  | stiff | order  | output| event |
@@ -54,7 +54,7 @@ double method(27,1)
                            #          grid = 4   runs forever (stopped by model)
        1                   # nt       Use every NT time instant, if grid = 3
        3                   # dense    1/2/3 restart/step/interpolate GRID points
-       1                   # evgrid   0/1 do not/save event points in comm. time grid
+       0                   # evgrid   0/1 do not/save event points in comm. time grid
        1                   # evu      0/1 U-discontinuity does not/trigger events
        0                   # evuord       U-discontinuity order to consider (0,1,...)
        0                   # error    0/1/2 One message/warning/error messages
@@ -63,14 +63,14 @@ double method(27,1)
        0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
        0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
        0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
-       0                   # debug    flags for debug information (1<<0 uses pdebug) 
+   65536                   # debug    flags for debug information (1<<0 uses pdebug) 
      100                   # pdebug       priority of debug information (1...100)
        0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
        0                   # ordmax   Maximum allowed integration order, if > 0
        0                   # hmax     Maximum absolute stepsize, if > 0
        0                   # hmin     Minimum absolute stepsize, if > 0 (use with care!)
        0                   # h0       Stepsize to be attempted on first step, if > 0
-  1.0000000000000000E-14   # teps     Bound to check, if 2 equal time instants
+  2.0000000000000000E-14   # teps     Bound to check, if 2 equal time instants
   1.0000000000000000E-10   # eveps    Hysteresis epsilon at event points
       20                   # eviter   Maximum number of event iterations
   9.9999999999999995E-07   # delaym   Minimum time increment in delay buffers
@@ -85,16 +85,16 @@ double method(27,1)
 
 #    Output parameters
 int settings(13,1)
- 1                         # lprec    0/1 do not/store result data in double
+ 0                         # lprec    0/1 do not/store result data in double
  1                         # lx       0/1 do not/store x  (state variables)
- 0                         # lxd      0/1 do not/store xd (derivative of states)
+ 1                         # lxd      0/1 do not/store xd (derivative of states)
  1                         # lu       0/1 do not/store u  (input     signals)
  1                         # ly       0/1 do not/store y  (output    signals)
- 1                         # lz       0/1 do not/store z  (indicator signals)
+ 0                         # lz       0/1 do not/store z  (indicator signals)
  1                         # lw       0/1 do not/store w  (auxiliary signals)
- 0                         # la       0/1 do not/store a  (alias     signals)
+ 1                         # la       0/1 do not/store a  (alias     signals)
  0                         # lperf    0/1 do not/store performance indicators
- 1                         # levent   0/1 do not/store event point
+ 0                         # levent   0/1 do not/store event point
  1                         # lres     0/1 do not/store results on result file
  0                         # lshare   0/1 do not/store info data for shared memory on dsshare.txt
  1                         # lform    0/1 ASCII/Matlab-binary storage format of results
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(10065,103)
+char initialName(10060,103)
 settings.phi0
 settings.height
 settings.weight
@@ -179,7 +179,6 @@ settings.hideHeart
 settings.hideLevel0
 settings.hideLevel1
 settings.EvaluateFunctionalParams
-settings.dummy
 settings.baro_useAbsolutePressureTerm
 settings.baro_d0
 settings.baro_Ts
@@ -253,7 +252,6 @@ baseline.settings.blood_mu
 baseline.settings.blood_rho
 baseline.settings.hideSystemic
 baseline.settings.hideHeart
-baseline.settings.dummy
 baseline.settings.baro_d0
 baseline.settings.baro_Ts
 baseline.settings.baro_delta0_factor
@@ -2737,7 +2735,6 @@ exercise.settings.blood_mu
 exercise.settings.blood_rho
 exercise.settings.hideSystemic
 exercise.settings.hideHeart
-exercise.settings.dummy
 exercise.settings.baro_d0
 exercise.settings.baro_Ts
 exercise.settings.baro_delta0_factor
@@ -5225,7 +5222,6 @@ tilt.settings.blood_mu
 tilt.settings.blood_rho
 tilt.settings.hideSystemic
 tilt.settings.hideHeart
-tilt.settings.dummy
 tilt.settings.baro_d0
 tilt.settings.baro_Ts
 tilt.settings.baro_delta0_factor
@@ -7739,7 +7735,6 @@ valsalva.settings.blood_mu
 valsalva.settings.blood_rho
 valsalva.settings.hideSystemic
 valsalva.settings.hideHeart
-valsalva.settings.dummy
 valsalva.settings.baro_d0
 valsalva.settings.baro_Ts
 valsalva.settings.baro_delta0_factor
@@ -10169,16 +10164,16 @@ stepInterval
 CPUtime
 EventCounter
 
-double initialValue(10065,6)
- -1  2.5000000000000000E-01       0                       0                
+double initialValue(10060,6)
+ -1 %settings.phi0% 0.0 0.0
   1   280   # settings.phi0
- -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
+ -1 %settings.height% 0.0 1e+100
   1   280   # settings.height
- -1      70                       0                 1.0000000000000000E+100
+ -1 %settings.weight% 0.0 1e+100
   1   280   # settings.weight
- -1      35                       0                       0                
+ -1 %settings.age% 0.0 0.0
   1   280   # settings.age
- -1       1                       0                       0                
+ -1 %settings.HR_nominal% 0.0 0.0
   1   280   # settings.HR_nominal
  -1 %settings.HR_max% 0.0 0.0
   1   280   # settings.HR_max
@@ -10188,59 +10183,59 @@ double initialValue(10065,6)
   6   256   # settings.BSA
  -1       0                       0                       0                
   1   281   # settings.initByPressure
- -1  7.3999999999999996E-05       0                 1.0000000000000000E+100
+ -1 %settings.V_PV_init% 0.0 1e+100
   1   280   # settings.V_PV_init
- -1  1.3332238741500000E+05       0                 1.0000000000000000E+100
+ -1 %settings.heart_R_vlv% 0.0 1e+100
   1   280   # settings.heart_R_vlv
- -1  1.9998358112250001E+06       0                 1.0000000000000000E+100
+ -1 %settings.heart_R_LA% 0.0 1e+100
   1   280   # settings.heart_R_LA
- -1  1.9998358112250001E+06       0                 1.0000000000000000E+100
+ -1 %settings.heart_R_RA% 0.0 1e+100
   1   280   # settings.heart_R_RA
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1  1.6262499999999999E-02       0                       0                
+ -1 %settings.heart_drive_offset% 0.0 0.0
   1   280   # settings.heart_drive_offset
- -1  7.6875000000000001E-04       0                       0                
+ -1 %settings.heart_drive_offset_maxAct% 0.0 0.0
   1   280   # settings.heart_drive_offset_maxAct
- -1  1.4000000000000001E-01       0                       0                
+ -1 %settings.heart_drive_k_TS% 0.0 0.0
   1   280   # settings.heart_drive_k_TS
- -1  1.3000000000000000E-01       0                       0                
+ -1 %settings.heart_drive_k_TS_maxAct% 0.0 0.0
   1   280   # settings.heart_drive_k_TS_maxAct
  -1 %settings.heart_drive_k_TR% 0.0 0.0
   1   280   # settings.heart_drive_k_TR
  -1 %settings.heart_drive_k_TR_maxAct% 0.0 0.0
   1   280   # settings.heart_drive_k_TR_maxAct
- -1       1                       0                       0                
+ -1 %settings.heart_drive_drive% 0.0 0.0
   1   280   # settings.heart_drive_drive
   0       0                       0                       0                
   6   256   # settings.heart_drive_drive_maxAct
- -1  1.0000000000000001E-01       0                       0                
+ -1 %settings.heart_atr_Tact% 0.0 0.0
   1   280   # settings.heart_atr_Tact
- -1  5.0000000000000003E-02       0                       0                
+ -1 %settings.heart_atr_Emin% 0.0 0.0
   1   280   # settings.heart_atr_Emin
- -1  1.4999999999999999E-01       0                       0                
+ -1 %settings.heart_atr_Emax% 0.0 0.0
   1   280   # settings.heart_atr_Emax
- -1  1.2500000000000000E-01       0                       0                
+ -1 %settings.heart_atr_sigma_a% 0.0 0.0
   1   280   # settings.heart_atr_sigma_a
- -1  9.0375000000000005E-01       0                       0                
+ -1 %settings.heart_vntr_Vw_factor% 0.0 0.0
   1   280   # settings.heart_vntr_Vw_factor
- -1  1.0600000000000001E+00       0                       0                
+ -1 %settings.heart_vntr_AmRef_factor% 0.0 0.0
   1   280   # settings.heart_vntr_AmRef_factor
  -1 %settings.heart_vntr_sigma_act_factor% 0.0 0.0
   1   280   # settings.heart_vntr_sigma_act_factor
  -1 %settings.heart_vntr_sigma_actMaxAct_factor% 0.0 0.0
   1   280   # settings.heart_vntr_sigma_actMaxAct_factor
- -1       1                       0                       0                
+ -1 %settings.heart_vntr_k_passive_factor% 0.0 0.0
   1   280   # settings.heart_vntr_k_passive_factor
- -1  8.0000000000000004E-01       0                       0                
+ -1 %settings.thoracic_pressure_ratio% 0.0 0.0
   1   280   # settings.thoracic_pressure_ratio
- -1       1                       0                       0                
+ -1 %settings.hydrostaticLevel_correction% 0.0 0.0
   1   280   # settings.hydrostaticLevel_correction
- -1  1.1949015200000000E+08       0                 1.0000000000000000E+100
+ -1 %settings.TPR% 0.0 1e+100
   1   280   # settings.TPR
- -1  5.1189549999999997E+00       0                       0                
+ -1 %settings.TR_frac% 0.0 0.0
   1   280   # settings.TR_frac
  -1 %settings.k_E% 0.0 0.0
   1   280   # settings.k_E
@@ -10252,17 +10247,17 @@ double initialValue(10065,6)
   1   280   # settings.exercise_factor_on_arterial_compliance
  -1 %settings.R_vc% 0.0 0.0
   1   280   # settings.R_vc
- -1  2.6664477483000001E+03       0                       0                
+ -1 %settings.tissues_nominal_pressure% 0.0 0.0
   1   280   # settings.tissues_nominal_pressure
  -1 %settings.tissues_nominal_zpv% 0.0 1e+100
   1   280   # settings.tissues_nominal_zpv
- -1  7.9500000000000003E-04       0                 1.0000000000000000E+100
+ -1 %settings.tissues_nominal_stressed_volume% 0.0 1e+100
   1   280   # settings.tissues_nominal_stressed_volume
- -1  1.0500000000000000E-04       0                       0                
+ -1 %settings.tissues_nominal_cardiac_output% 0.0 0.0
   1   280   # settings.tissues_nominal_cardiac_output
  -1 %settings.Ra_factor% 0.0 0.0
   1   280   # settings.Ra_factor
- -1  1.2000000000000000E-05       0                       0                
+ -1 %settings.tissues_Ra_tau% 0.0 0.0
   1   280   # settings.tissues_Ra_tau
   0       0                       0                       0                
   6   256   # settings.Rv_factor
@@ -10274,7 +10269,7 @@ double initialValue(10065,6)
   1   280   # settings.tissuesCompliance_PhiEffect
  -1 %settings.exercise_factor_on_tissue_compliance% 0.0 0.0
   1   280   # settings.exercise_factor_on_tissue_compliance
- -1  5.0000000000000000E-01       0                       0                
+ -1 %settings.tissues_gamma% 0.0 0.0
   1   280   # settings.tissues_gamma
  -1 %settings.exercise_factor% 0.0 0.0
   1   280   # settings.exercise_factor
@@ -10286,29 +10281,29 @@ double initialValue(10065,6)
   1   281   # settings.UseNonLinear_VenousCompliance
  -1       1                       0                       0                
   1   281   # settings.veins_UsePhiEffect
- -1  5.0000000000000000E-01       0                       0                
+ -1 %settings.veins_gamma% 0.0 0.0
   1   280   # settings.veins_gamma
- -1       5                       0                       0                
+ -1 %settings.veins_alpha% 0.0 0.0
   1   280   # settings.veins_alpha
- -1  1.0000000000000001E-01       0                       0                
+ -1 %settings.veins_activation_tau% 0.0 0.0
   1   280   # settings.veins_activation_tau
- -1  1.5000000000000000E+00       0                       0                
+ -1 %settings.venous_diameter_correction% 0.0 0.0
   1   280   # settings.venous_diameter_correction
  -1       1                       0                       0                
   1   281   # settings.veins_ignoreViscosityResistance
  -1       1                       0                       0                
   1   281   # settings.veins_limitExternalPressure
- -1  2.8020000000000000E-01       0                       0                
+ -1 %settings.vessel_a% 0.0 0.0
   1   280   # settings.vessel_a
- -1 -5.0530000000000001E+02       0                       0                
+ -1 %settings.vessel_b% 0.0 0.0
   1   280   # settings.vessel_b
- -1  1.3239999999999999E-01       0                       0                
+ -1 %settings.vessel_c% 0.0 0.0
   1   280   # settings.vessel_c
- -1 -1.1140000000000001E+01       0                       0                
+ -1 %settings.vessel_d% 0.0 0.0
   1   280   # settings.vessel_d
- -1  4.0000000000000001E-03       0                       0                
+ -1 %settings.blood_mu% 0.0 0.0
   1   280   # settings.blood_mu
- -1    1050                       0                       0                
+ -1 %settings.blood_rho% 0.0 0.0
   1   280   # settings.blood_rho
  -1       0                       0                       0                
   1   281   # settings.hideSystemic
@@ -10322,33 +10317,31 @@ double initialValue(10065,6)
   1   281   # settings.hideLevel1
  -1       1                       0                       0                
   1   281   # settings.EvaluateFunctionalParams
- -1       1                       0                       0                
-  1   280   # settings.dummy
  -1       0                       0                       0                
   1   281   # settings.baro_useAbsolutePressureTerm
- -1  1.5000000000000000E+00       0                       0                
+ -1 %settings.baro_d0% 0.0 0.0
   1   280   # settings.baro_d0
  -1 %settings.baro_Ts% 0.0 0.0
   1   280   # settings.baro_Ts
  -1 %settings.baro_delta0_factor% 0.0 0.0
   1   280   # settings.baro_delta0_factor
- -1  5.9999999999999998E-01       0                       0                
+ -1 %settings.baro_delta0_aor% 0.0 0.0
   1   280   # settings.baro_delta0_aor
- -1  5.5000000000000004E-01       0                       0                
+ -1 %settings.baro_delta0_car% 0.0 0.0
   1   280   # settings.baro_delta0_car
  -1 %settings.baro_g% 0.0 0.0
   1   280   # settings.baro_g
- -1  3.5999999999999997E-02       0                       0                
+ -1 %settings.baro_fsn% 0.0 0.0
   1   280   # settings.baro_fsn
- -1  3.0999999999999999E-03       0                       0                
+ -1 %settings.baro_f1% 0.0 0.0
   1   280   # settings.baro_f1
- -1    4850                       0                       0                
+ -1 %settings.pulm_CO_target% 0.0 0.0
   1   280   # settings.pulm_CO_target
  -1 %settings.pulm_C_PV% 0.0 0.0
   1   280   # settings.pulm_C_PV
- -1  4.0503325095665003E-08       0                       0                
+ -1 %settings.pulm_C_PA% 0.0 0.0
   1   280   # settings.pulm_C_PA
- -1  2.1441532959300999E+07       0                 1.0000000000000000E+100
+ -1 %settings.pulm_R_PA% 0.0 1e+100
   1   280   # settings.pulm_R_PA
   0       0                       0                       0                
   6   256   # baseline.settings.phi0
@@ -10470,8 +10463,6 @@ double initialValue(10065,6)
   1   281   # baseline.settings.hideSystemic
  -1       0                       0                       0                
   1   281   # baseline.settings.hideHeart
- -1       1                       0                       0                
-  1   280   # baseline.settings.dummy
   0       0                       0                       0                
   6   256   # baseline.settings.baro_d0
   0       0                       0                       0                
@@ -15438,8 +15429,6 @@ double initialValue(10065,6)
   1   281   # exercise.settings.hideSystemic
  -1       0                       0                       0                
   1   281   # exercise.settings.hideHeart
- -1       1                       0                       0                
-  1   280   # exercise.settings.dummy
   0       0                       0                       0                
   6   256   # exercise.settings.baro_d0
   0       0                       0                       0                
@@ -20414,8 +20403,6 @@ double initialValue(10065,6)
   1   281   # tilt.settings.hideSystemic
  -1       0                       0                       0                
   1   281   # tilt.settings.hideHeart
- -1       1                       0                       0                
-  1   280   # tilt.settings.dummy
   0       0                       0                       0                
   6   256   # tilt.settings.baro_d0
   0       0                       0                       0                
@@ -25442,8 +25429,6 @@ double initialValue(10065,6)
   1   281   # valsalva.settings.hideSystemic
  -1       0                       0                       0                
   1   281   # valsalva.settings.hideHeart
- -1       1                       0                       0                
-  1   280   # valsalva.settings.dummy
   0       0                       0                       0                
   6   256   # valsalva.settings.baro_d0
   0       0                       0                       0                
@@ -30350,7 +30335,7 @@ double initialValue(10065,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(10065,152)
+char initialDescription(10060,152)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -30427,7 +30412,6 @@ Suppress writing output from heart, unless allowed by low level variables [:#(ty
 Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
 Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
 Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
-Dummy parameter not bound anywhere
 Use absolute distention term instead being relative to pulse pressure only [:#(type=Boolean)]
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
@@ -30501,7 +30485,6 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 [J.s2.m-5]
 Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
 Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
-Dummy parameter not bound anywhere
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
 Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account
@@ -32985,7 +32968,6 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 [J.s2.m-5]
 Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
 Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
-Dummy parameter not bound anywhere
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
 Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account
@@ -35473,7 +35455,6 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 [J.s2.m-5]
 Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
 Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
-Dummy parameter not bound anywhere
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
 Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account
@@ -37987,7 +37968,6 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 [J.s2.m-5]
 Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
 Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
-Dummy parameter not bound anywhere
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
 Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account

@@ -63,7 +63,7 @@ sensitivity_list.sort(key = lambda x: x[1])
 
 def printLine(line:tuple):
     # line = (name, cost, param_cur_val, run)
-    printline = '%.4f, %s, %d' % (line[1], line[0], line[3])
+    printline = '%.6f, %s, %d' % (line[1], line[0], line[3])
     print(printline)
     return printline
 

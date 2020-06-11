@@ -15,7 +15,7 @@ def plotObjectives(vars_set, interval, objectives):
     ax.plot(vars_set['time'], vars_set['TEjection'], label='TEjection')
     ax.plot(vars_set['time'], vars_set['TFilling'], label='TFilling')
 
-    pack = (objectives, vars_set, ax, interval)
+    pack = (objectives, vars_set['time'], ax, interval)
     fun_lib.plotObjectiveTarget(pack, 'BPs', 1/133.32)
     fun_lib.plotObjectiveTarget(pack, 'EDV', 1e6)
     fun_lib.plotObjectiveTarget(pack, 'ESV', 1e6)

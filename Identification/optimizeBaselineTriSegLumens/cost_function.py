@@ -1,10 +1,35 @@
 import scipy.io as skipy
 import fun_lib
 import re
+import matplotlib.pyplot as plt
 # import DyMat
 # from matplotlib import pyplot as plt
 
 # // calculate the cost function
+def plotObjectives(vars_set, interval, objectives):
+    if '__plot_axes' in vars_set:
+        ax = vars_set['__plot_axes']
+    else:
+        fig = plt.figure()
+        ax = fig.subplots()
+
+    ax.plot(vars_set['time'], vars_set['brachial_pressure']/133.32, label='Brachial pressure mmHg')
+    ax.plot(vars_set['time'], vars_set['CO']*1000*60, label='CO l/min')
+    ax.plot(vars_set['time'], vars_set['renal_capillary']/133.32, label='Capillary pressure')
+    ax.plot([vars_set['time'][interval[0]], vars_set['time'][interval[-1]]], [fun_lib.getObjectiveByName(objectives, 'EF').value*100]*2, label='EF')
+    ax.plot([vars_set['time'][interval[0]], vars_set['time'][interval[-1]]], [fun_lib.getObjectiveByName(objectives, 'PWV').value*1]*2, label='PWV')
+
+    # bounds
+    pack = (objectives, vars_set['time'], ax, interval)
+    fun_lib.plotObjectiveTarget(pack,'BPs', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'BPd', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'CO', 1000*60)
+    fun_lib.plotObjectiveTarget(pack,'BPk', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'EF', 100)
+    fun_lib.plotObjectiveLimit(pack, 'PWV', 1, 'lower', verticalalignment='top')
+
+    total_costs = fun_lib.countTotalWeightedCost(objectives)
+    ax.set_title('Baseline costs %.6f' % total_costs)
 
 
 def getObjectives(vars_set):
@@ -26,7 +51,9 @@ def getObjectives(vars_set):
     EF_target = 0.6
     pwv_bounds = [3.3, 10]
 
-    interval = fun_lib.findInterval(25, 30, vars_set['time'])
+    time = vars_set['time']
+
+    interval = fun_lib.findInterval(time[-1] - 5, time[-1], time)
 
     # Van Bortel 2012 siggest using 80 % of carotid to femoral distance
     # distance = vars_set['Systemic1.speedSegmentLength'][1]*0.8
@@ -47,5 +74,10 @@ def getObjectives(vars_set):
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3]), ov))
 
+    # to have comparable cost function values one must have the stds ready
+    map(fun_lib.unifyCostFunc, objectives)
+
+    if '__draw_plots' in vars_set and vars_set['__draw_plots']:
+        plotObjectives(vars_set, interval, objectives)
 
     return objectives

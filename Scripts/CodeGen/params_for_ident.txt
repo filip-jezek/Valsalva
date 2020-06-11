@@ -1,0 +1,16 @@
+settings.R_vc
+settings.Ra_factor
+settings.baro_Ts
+settings.baro_delta0_factor
+settings.baro_g
+settings.exercise_factor
+settings.exercise_factor_on_tissue_compliance
+settings.heart_drive_k_TR
+settings.heart_drive_k_TR_maxAct
+settings.heart_vntr_sigma_actMaxAct_factor
+settings.heart_vntr_sigma_act_factor
+settings.k_E
+settings.pulm_C_PV
+settings.tissuesCompliance_PhiEffect
+settings.tissues_nominal_zpv
+settings.HR_max

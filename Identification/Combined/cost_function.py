@@ -108,7 +108,7 @@ def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT
 
         return costObjective
 
-    objectives.append(buildCostObjective('baseline', 'optimizeBaseline'))
+    objectives.append(buildCostObjective('baseline', 'optimizeBaselineTriSegLumens'))
     objectives.append(buildCostObjective('tilt', 'optimizeTilt'))
     objectives.append(buildCostObjective('exercise', 'MaxExercise'))
     # open the data folder
