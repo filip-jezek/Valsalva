@@ -8,6 +8,7 @@ import os
 import re
 import matplotlib.pyplot as plt
 from typing import Iterable
+import importlib.util
 
 # For variance based cost function we need a guess of variance of any target variables
 # does not really work for timed variables though
@@ -352,3 +353,13 @@ def plotObjectiveLimit(pack:tuple, objective_name:str, unitFactor:float, limit:s
     ax.plot([time[interval[0]], time[interval[-1]]], [limit_val]*2, 'r')
     ax.text(time[interval[-1]], limit_val, '%s %s lim %.4f' % (objective_name, limit, SV_min_objective.cost()), horizontalalignment='right', 
             verticalalignment=verticalalignment, fontsize = 8, color='red')
+
+def importCostFunction(dir = '..\\'):
+    """ imports cost_function.py from parent directory
+    """
+
+    spec = importlib.util.spec_from_file_location(
+        'cost_function', dir + 'cost_function.py')
+    cf = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cf)
+    return cf

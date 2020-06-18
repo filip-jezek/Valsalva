@@ -35301,6 +35301,12 @@ P_hs_plus_dist"),
           extends ADAN_main.SystemicTree.Tilt.OlufsenTriSeg_SemiRecumberent(
               settings(baro_Ts(displayUnit="s") = 9));
         end OlufsenTriSeg_SemiRecumberent;
+
+        model SupineToSemirecumberentWithSemiExtendedLegs
+          "Reproducing the Wisconsin-Madison experiment"
+          extends ADAN_main.SystemicTree.Tilt.OlufsenTriSeg_SemiRecumberent(
+              Tilt_ramp(duration=0, startTime=60), Tilt_LegRaise(startTime=60));
+        end SupineToSemirecumberentWithSemiExtendedLegs;
       end Experiments;
 
       model base

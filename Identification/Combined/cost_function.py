@@ -6,13 +6,15 @@ from typing import Iterable
 import matplotlib.pyplot as plt
 
 DEFAULT_TARGETVARS_TAG = 'All_supine'
+TOP_LEVEL_FOLDER = '..\\..\\..\\'
+# TOP_LEVEL_FOLDER = '..\\'
 
 
 def importCostFunction(location):
     """Returns CF module, location is expected at sibling folder"""
 
     # working dir is in  'identification/combined/debug/' or sibling folder
-    path = '..\\..\\' + location + '\\cost_function.py'
+    path = TOP_LEVEL_FOLDER + 'Identification\\' + location + '\\cost_function.py'
     spec = importlib.util.spec_from_file_location(
         'cost_function', path)
     cf = importlib.util.module_from_spec(spec)
@@ -42,7 +44,7 @@ def filterVarSet(vars_set, filter_string):
     return filtered_vars
 
 
-def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT_TARGETVARS_TAG + '.txt'):
+def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top_level = '..\\..\\..\\'):
     """ Gets all objectives for our combined CF.
     Trials:
     
@@ -54,6 +56,7 @@ def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT
         brachial pressures
         LV volumes (SV and EF) 
     max exercise"""
+    TOP_LEVEL_FOLDER = top_level
 
     plt.close('all')
     objectives = list()
@@ -112,7 +115,7 @@ def getObjectives(vars_set:dict, targetsFileName = r'../targetValues_' + DEFAULT
     objectives.append(buildCostObjective('tilt', 'optimizeTilt'))
     objectives.append(buildCostObjective('exercise', 'MaxExercise'))
     # open the data folder
-    vars_set['__targetValuesFilename'] = r"../../../data/Valsalva/targetValues_All_supine.txt"
+    vars_set['__targetValuesFilename'] = targetsFolder + 'targetValues_All_supine.txt'
     objectives.append(buildCostObjective('valsalva', 'valsalva'))
     
     # def plotObjectives():

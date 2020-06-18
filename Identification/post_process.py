@@ -5,7 +5,6 @@ import DyMat
 import sys
 import os
 import time
-import importlib.util
 import re
 import fun_lib
 from datetime import datetime
@@ -89,42 +88,43 @@ def extractVars(d):
     return var_set
 
 
-def importCostFunction():
+def loadMatFile():
+    tic = time.time()
+    filename = 'dsres.mat'
+    if len(sys.argv) > 1:
+        filename = sys.argv[1]
 
-    spec = importlib.util.spec_from_file_location(
-        'cost_function', '..\\cost_function.py')
-    cf = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(cf)
-    return cf
+    d = DyMat.DyMatFile(filename)
+    toc = time.time()
+    print("Opening result in ", toc - tic, " s")
+
+    var_set = extractVars(d)
+
+    tic = time.time()
+    print("Loading result in ", -toc + tic, " s")
+    return var_set
+
+def getObjectives(var_set) -> fun_lib.ObjectiveVar:
+    tic = time.time()
+    cf = fun_lib.importCostFunction()
+
+    if DRAW_PLOTS:
+        var_set['__draw_plots'] = True
+        var_set['__plot_title'] = "Run %i" % (fun_lib.getRunNumber())
+        var_set['__saveFig_path'] = "%sFitFig_%03d.png" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
+        
+    objectives = cf.getObjectives(var_set)
+
+    print("Calculating costs in ", time.time() - tic, " s")
+    return objectives
 
 
-tic = time.time()
+if __name__ is '__main__':
 
-filename = 'dsres.mat'
-if len(sys.argv) > 1:
-    filename = sys.argv[1]
+    var_set = loadMatFile()
 
-d = DyMat.DyMatFile(filename)
-toc = time.time()
-print("Opening result in ", toc - tic, " s")
+    objectives = getObjectives(var_set)
 
-var_set = extractVars(d)
-
-toc = time.time()
-print("Loading result in ", toc - tic, " s")
-
-cf = importCostFunction()
-
-if DRAW_PLOTS:
-    var_set['__draw_plots'] = True
-    var_set['__plot_title'] = "Run %i" % (fun_lib.getRunNumber())
-    var_set['__saveFig_path'] = "%sFitFig_%03d.png" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
-    
-objectives = cf.getObjectives(var_set)
-
-print("Calculating costs in ", time.time() - tic, " s")
-
-writeCost(objectives)
-
-writeLogHeader(objectives)
-logOutput(objectives)
+    writeCost(objectives)
+    writeLogHeader(objectives)
+    logOutput(objectives)
