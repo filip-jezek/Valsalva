@@ -16,9 +16,10 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'ADAN_main.AdanVenousRed_Safaei.Baseline.base_TriSeg_OptimizedBaseline_init'
+base_model_full_path = 'ADAN_main.AdanVenousRed_Safaei.Baseline.OlufsenTriSeg_optimized_steadyState'
 relative_folder = ''
-steadyStateAt = 300
+exclude_filter = ['Ra_phi', 'v_in', 'A']
+steadyStateAt = 1599.03
 
 # get the main and path
 if '.' in base_model_full_path:
@@ -33,7 +34,7 @@ input_text = open('states.csv', 'r').read()
 incl_vars = '.+'
 match = r'([\w.]+\.(?:' + incl_vars + r');.+;)'
 m = re.findall(match, input_text)
-lines = (l for l in m)
+lines = (line for line in m if line.split(';', 1)[0].rsplit('.', 1)[-1] not in exclude_filter)
 
 # Build modelica Object Tree
 mc_tree = mc.ModelicaClass.BuildObjectTree(lines, root=base_model)

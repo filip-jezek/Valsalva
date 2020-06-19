@@ -28,7 +28,9 @@ class ModelicaClass:
             node = full_path
 
         mc = self.children.get(node)
-        if mc is None or mc.isValueType:
+        if mc is None:
+            return None
+        elif mc.isValueType:
             return mc
         else: 
             return mc.findNode(rest)
