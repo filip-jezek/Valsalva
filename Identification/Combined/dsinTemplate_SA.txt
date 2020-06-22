@@ -54,7 +54,7 @@ double method(27,1)
                            #          grid = 4   runs forever (stopped by model)
        1                   # nt       Use every NT time instant, if grid = 3
        3                   # dense    1/2/3 restart/step/interpolate GRID points
-       1                   # evgrid   0/1 do not/save event points in comm. time grid
+       0                   # evgrid   0/1 do not/save event points in comm. time grid
        1                   # evu      0/1 U-discontinuity does not/trigger events
        0                   # evuord       U-discontinuity order to consider (0,1,...)
        0                   # error    0/1/2 One message/warning/error messages
