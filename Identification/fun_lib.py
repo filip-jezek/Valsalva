@@ -257,8 +257,10 @@ def updateObjectivesByValuesFromFile(filename, objectives = None) -> Iterable[Ob
     if objectives is None:
         create = True
         objectives = list()
+        print('Getting objectives from %s ...' % filename)
     else:
         create = False
+        print('Updating objectives from %s ...' % filename)
 
     with open(filename, 'r') as file:
         lines = file.readlines()

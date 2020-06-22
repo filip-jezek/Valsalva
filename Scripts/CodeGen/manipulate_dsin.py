@@ -309,9 +309,25 @@ def writeInitParams(init_params:dict):
             s = '%s,%s\n' % (param, val)
             file.write(s)
 
+def prepareInitStates():
+    writeInitStatesFromDsin()
 
-if __name__ == "__main__":
+def prepareSA():
+    paramsFile = 'params_for_SA.txt'
+    # generate the params_for_SA.txt parameters list, which may be further edited.
+    # uncomment if thats the first run to get all tunable parameters
+    # writeTunableParamsFromDsin(paramsFile)
 
+    init_params = getInitParams(dsFileIn='dsin.txt', paramsFile=paramsFile)
+    
+    # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
+    writeInitParams(init_params)
+
+    build_opt_command_file('opt_command_SA.txt', init_params, step_frac=0.05)
+
+    createDsinTemplate(init_params, dsFileOut='dsinTemplate_SA.txt')
+
+def prepareIdent():
     paramsFile = 'params_for_ident.txt'
     # generate the params_for_SA.txt parameters list, which may be further edited.
     # uncomment if thats the first run to get all tunable parameters
@@ -322,10 +338,12 @@ if __name__ == "__main__":
     # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
     writeInitParams(init_params)
 
-    # build_opt_command_file('opt_command_SA.txt', init_params)
     build_opt_command_file('opt_command.txt', init_params, step_frac=0.2, run_type='identification', ident_step_frac=0.01)
 
-    # createDsinTemplate(init_params, dsFileOut='dsinTemplate_SA.txt')
-    createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt')
+    createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt')    
+
+if __name__ == "__main__":
+
+    prepareSA()
     print('Done, Johne')
 

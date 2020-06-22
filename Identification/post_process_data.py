@@ -13,6 +13,8 @@ import re
 from datetime import datetime
 import fun_lib
 import matplotlib.pyplot as plt
+
+from fun_lib import ObjectiveVar
 # from matplotlib import pyplot as plt
 # import re
 # import TerminalDS
@@ -21,22 +23,22 @@ import matplotlib.pyplot as plt
 # CONTROL ROOM
 DATA_FOLDER = R"..\data\Valsalva"
 COST_FUNCTION_FOLDER = R"..\Identification\valsalva"
-VALUE_LOG_DIRNAME = R'..\Schedules'
+VALUE_LOG_DIRNAME = R'..\data\Valsalva\ProcessLog'
 VALUE_LOG_FILENAME = '_current_costs.txt'
 
 # draws plots for each individual file
-DRAW_PLOTS = False
+DRAW_PLOTS = True
 # write the outputfiles with targetValues
-WRITE_FILE = False
+WRITE_FILE = True
 READ_OBJECTIVES = True
 USE_WEIGHING = True
 
 # file_set = 'Sitting V_OO'
 # files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04"]
-file_set = 'All sitting'
-files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"]
-# file_set = 'All supine'
-# files = ["V_00_sup_01", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"]
+# file_set = 'All sitting'
+# files = ["V_00_sit_01", "V_00_sit_02", "V_00_sit_03", "V_00_sit_04", "V_01_sit_01", "V_01_sit_02", "V_01_sit_03", "V_02_sit_01", "V_02_sit_02", "V_03_sit_01", "V_03_sit_02"]
+file_set = 'All supine'
+files = ["V_00_sup_01", "VEc_01_sup_01", "VEc_01_sup_02", "VEc_01_sup_03", "VEc_02_sup_01", "VEc_02_sup_02", "VEc_03_sup_01"]
 
 # </ COTRNOL ROM
 
@@ -83,7 +85,10 @@ def processObjectiveMetrics(objectiveMetrics):
     return (objectiveMeans, objectiveStds)
 
         
-
+def processCostMetrics(costMetrics : dict):
+    for subject, cost_list in costMetrics.items():
+        vals = (subject, numpy.mean(cost_list), numpy.std(cost_list))
+        print('Subject %2d has mean cost %.4f with SD %.4f' % vals)
 
 
 def getSubjectNum(s):
@@ -108,66 +113,55 @@ def getWeights(files):
     return weights
 
 
-def writeCost(objectives):
+def writeCost(objectives, filename='dsout.out'):
 
     total_cost = sum(o.cost() for o in objectives)
     # total_cost = sum(costs)
-    with open('dsout.out', 'w') as file:
+    with open(filename, 'w') as file:
         file.write("banik pico\n")
         file.write('f(x) =' + repr(total_cost))
+
+def getLogFilePath():
+    return fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME) + VALUE_LOG_FILENAME
 
 def writeLogHeader(objectives):
     """check if file exists and build header otherwise
     """
-
-    if not os.path.isfile(VALUE_LOG_DIRNAME + '\\' + VALUE_LOG_FILENAME):
-        with open(VALUE_LOG_DIRNAME + '\\' + VALUE_LOG_FILENAME, 'w') as file:
+    filepath = getLogFilePath()
+    if not os.path.isfile(filepath):
+        with open(filepath, 'w') as file:
             header = map(lambda o: o.name.rjust(5) + '_val,' + o.name.rjust(5) + '_trg, %', objectives)
-            line = ',  '.join(header) + "  ,run, datetime"
+            line = ',  '.join(header) + "  ,run, datetime, total_costs"
             file.write(line + '\n')
 
-def logLine(objective, total_cost):
+def logLine(objective : fun_lib.ObjectiveVar, total_cost):
     # return ','.join(["%"val), str(cost), str(round(cost/sum*100))])
-    if objective.targetValue  is not None:
-        return '%.3e,%.3e,%02d' % (objective.value, objective.targetValue , round(objective.cost()/total_cost*100))
+    if objective.costFunctionType is fun_lib.CostFunctionType.DistanceFromZero:
+        target = "%d" % 0
+    elif objective.targetValue  is not None:
+        target = "%.3e" % objective.targetValue
     else:
-        s = ' in limit' if objective.inLimit() else 'out limit'
-        return '%.3e,%s,%02d' % (objective.value, s , round(objective.cost()/total_cost*100))
+        target = ' in limit' if objective.inLimit() else 'out limit'
+        
+    return '%.3e,%s,%02d' % (objective.value, target , round(objective.cost()/total_cost*100))
 
 
 def logOutput(objectives):
     # log the output, if the log directory exists. exit otherwise
+    writeLogHeader(objectives)
 
-    log_dirname = VALUE_LOG_DIRNAME + '\\'
-    run = 0
-    # log_dirname = 'Schedules'
-
-    if not os.path.isdir(log_dirname):
-        log_dirname = '..\\'
-    else:
-        log_dirname = VALUE_LOG_DIRNAME + '\\'
-
-    
-    cur_dirname = os.path.basename(os.getcwd())
-    run_match = re.match(r'[\w-]*-(\d+)$', cur_dirname)
-
-    if run_match is not None:
-        run = int(run_match[1])
-    else:
-        run = 0
-
-        # log_filename = log_dirname + '\\' + cur_dirname + '_costs.txt'
-    log_filename = log_dirname + VALUE_LOG_FILENAME
-    with open(log_filename, 'a') as file:
+    filepath = getLogFilePath()
+    run = fun_lib.getRunNumber()
+    with open(filepath, 'a') as file:
         # prepare the line with value, cost value for this and percentage of total costs
-        total_cost = sum(o.cost() for o in objectives)
+        total_cost = fun_lib.countTotalSumCost(objectives)
         t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        tail = "  ,%03d,%s" % (run, t)
+        tail = "  ,%03d,%s, %.6e" % (run, t, total_cost)
         
-        string_seq = map(lambda o: logLine(o, total_cost), objectives)
+        wc = fun_lib.countTotalWeightedCost(objectives)
+        string_seq = map(lambda o: logLine(o, wc), objectives)
 
         file.write(',  '.join(string_seq) + tail + '\n')
-
 
 def extractVars(matdata, keyMapping):
 
@@ -180,7 +174,8 @@ def extractVars(matdata, keyMapping):
 
     for matkey, datakey in keyMapping:
         _, data = zip(*matdata[matkey])
-        var_set[datakey] = numpy.array(data)
+        if data is not None:
+            var_set[datakey] = numpy.array(data)
 
     return var_set
 
@@ -270,10 +265,10 @@ def plotTargetValues(targetValues, targetStds, styles = ('k', 'b', 'g', 'c')):
 
 objectiveMetrics = dict()
 cf = importCostFunction()
-weights = getWeights(files)
+# weights = getWeights(files)
+costMetrics = dict()
 
-
-for file, measurement_weight in zip(files, weights):
+for file in files:
     # filename = 'V_00_sit_01.mat'
     filename = file + '.mat'
     subject = getSubjectNum(file)
@@ -283,7 +278,8 @@ for file, measurement_weight in zip(files, weights):
 
     keyMapping = [ ['arterial_pressure', 'brachial_pressure'],
                 ['heart_rate','heartRate.HR'],
-                ['thoracic_pressure', 'Systemic1.thoracic_pressure']
+                ['thoracic_pressure', 'thoracic_pressure']
+               # ['thoracic_pressure', 'Systemic1.thoracic_pressure']
             ]
     var_set = extractVars(matdata, keyMapping)
 
@@ -300,11 +296,7 @@ for file, measurement_weight in zip(files, weights):
     
 
     objectives = cf.getObjectives(var_set)
-
-    #print cost
-    cost = sum(o.cost() for o in objectives)*measurement_weight
-    print("Cost of %s is %.4f, weighted by %.2f" % (file, round(cost, 4), measurement_weight))
-
+    logOutput(objectives)
 
     for objective in objectives:
         if subject not in objectiveMetrics:
@@ -313,9 +305,14 @@ for file, measurement_weight in zip(files, weights):
             objectiveMetrics[subject][objective.name] = list()
 
         objectiveMetrics[subject][objective.name].append(objective.value)
+    
+    if subject not in costMetrics:
+        costMetrics[subject] = list()
+    costMetrics[subject].append(fun_lib.countTotalWeightedCost(objectives))
 
     # writeCost(objectives)
 (targetVals, targetStds) = processObjectiveMetrics(objectiveMetrics)
+processCostMetrics(costMetrics)
 writeTargetValues(targetVals, targetStds, file_set)
 
 plt.figure()

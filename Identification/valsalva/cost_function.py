@@ -111,7 +111,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     BP = vars_set['brachial_pressure']
     # HR = vars_set['heartRate.HR']
     TP = vars_set['thoracic_pressure']
-    SV = vars_set['SV']
+    SV = vars_set['SV'] if 'SV' in vars_set else None
     time = vars_set['time']
 
     # make sure its in non-SI units
@@ -120,7 +120,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         BP = BP/mmHg2SI
         # HR = HR/BPM2SI
         TP = TP/mmHg2SI
-        SV = SV/ml2SI
+        SV = SV/ml2SI if SV is not None else None
 
     dt = vars_set['time'][2] - vars_set['time'][1]
     assert dt > 0, "The simulation must not store values at events."
@@ -206,11 +206,17 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     objectives.extend(map(buildValueObjective, phase_values))
     objectives.extend(map(buildTimeObjective, time_values))
     
-    #penalize by too low SV
-    phase2_interval, _ = getInterval(phase2, None)
+    # penalize by too low SV
+    if SV is not None:
+        phase2_interval, _ = getInterval(phase2, None)
+        sv_val = numpy.min(SV[phase2_interval])
+    else:
+        # we do not have the value, so just use the lower limit
+        sv_val = 30
+
     sv_objective = fun_lib.ObjectiveVar(
-        'SV_min', 
-        numpy.min(SV[phase2_interval]), limit=[30, 150], std = 40*0.1, k_p=10)
+            'SV_min', 
+            sv_val, limit=[30, 150], std = 40*0.1, k_p=10)
     objectives.append(sv_objective)
 
     
@@ -224,17 +230,18 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     if '__draw_plots' in vars_set and vars_set['__draw_plots']:
         ax = fun_lib.getAxes(vars_set)
 
+        total_costs = fun_lib.countTotalWeightedCost(objectives)
         if '__plot_title' in vars_set:
-            ax.title(vars_set['__plot_title'])
+            ax.set_title('%s costs %.6f' % (vars_set['__plot_title'], total_costs))
         else:
-            total_costs = fun_lib.countTotalWeightedCost(objectives)
             ax.set_title('Valsalva costs %.6f' % total_costs)
 
         # limit the initial BP to leave some place to show the costs
         start_at = fun_lib.findLowestIndex(15, time)
         ax.plot(time[start_at:], BP[start_at:], 'b')
         ax.plot(time, bp_mean, 'm')
-        ax.plot(time, SV, 'y')
+        if SV is not None:
+            ax.plot(time, SV, 'y')
         # ax.plot(time, TP, 'g')
         ax.plot(time, HR)
         # ax.plot(time, vars_set['heartRate.HR'], '--')

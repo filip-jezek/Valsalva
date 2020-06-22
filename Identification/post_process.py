@@ -66,7 +66,8 @@ def logOutput(objectives):
         t = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         tail = "  ,%03d,%s, %.6e" % (run, t, total_cost)
         
-        string_seq = map(lambda o: logLine(o, total_cost), objectives)
+        wc = fun_lib.countTotalWeightedCost(objectives)
+        string_seq = map(lambda o: logLine(o, wc), objectives)
 
         file.write(',  '.join(string_seq) + tail + '\n')
 
