@@ -33748,7 +33748,6 @@ P_hs_plus_dist"),
             heart_vntr_AmRef_factor=settings.heart_vntr_AmRef_factor,
             heart_vntr_sigma_act_factor=settings.heart_vntr_sigma_act_factor,
             heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
-
             heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
             thoracic_pressure_ratio=settings.thoracic_pressure_ratio,
             hydrostaticLevel_correction=settings.hydrostaticLevel_correction,
@@ -33756,26 +33755,20 @@ P_hs_plus_dist"),
             TR_frac=settings.TR_frac,
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
-
             R_vc=settings.R_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
-
             tissues_nominal_cardiac_output=settings.tissues_nominal_cardiac_output,
-
             Ra_factor=settings.Ra_factor,
             dummy=settings.dummy,
             baro_hr_delay=settings.baro_hr_delay,
             tissuesCompliance_PhiEffect=settings.tissuesCompliance_PhiEffect,
             exercise_factor_on_tissue_compliance=settings.exercise_factor_on_tissue_compliance,
-
             tissues_gamma=settings.tissues_gamma,
             exercise_factor=settings.exercise_factor,
             exercise_venous_pumping_factor=settings.exercise_venous_pumping_factor,
-
             UseNonLinear_VenousCompliance=settings.UseNonLinear_VenousCompliance,
-
             veins_UsePhiEffect=settings.veins_UsePhiEffect,
             veins_gamma=settings.veins_gamma,
             veins_alpha=settings.veins_alpha,
@@ -33794,6 +33787,7 @@ P_hs_plus_dist"),
             pulm_R_PA=settings.pulm_R_PA),
           fmi_StopTime=60, fmi_NumberOfSteps=steps)
           annotation (Placement(transformation(extent={{-82,44},{-62,64}})));
+
         ADAN_0main_SystemicTree_Exercise_OlufsenTriseg_0Exercise_fmu_black_box
           exercise(
           settings(
@@ -33824,7 +33818,6 @@ P_hs_plus_dist"),
             heart_vntr_AmRef_factor=settings.heart_vntr_AmRef_factor,
             heart_vntr_sigma_act_factor=settings.heart_vntr_sigma_act_factor,
             heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
-
             heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
             thoracic_pressure_ratio=settings.thoracic_pressure_ratio,
             hydrostaticLevel_correction=settings.hydrostaticLevel_correction,
@@ -33832,26 +33825,20 @@ P_hs_plus_dist"),
             TR_frac=settings.TR_frac,
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
-
             R_vc=settings.R_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
-
             tissues_nominal_cardiac_output=settings.tissues_nominal_cardiac_output,
-
             Ra_factor=settings.Ra_factor,
             dummy=settings.dummy,
             baro_hr_delay=settings.baro_hr_delay,
             tissuesCompliance_PhiEffect=settings.tissuesCompliance_PhiEffect,
             exercise_factor_on_tissue_compliance=settings.exercise_factor_on_tissue_compliance,
-
             tissues_gamma=settings.tissues_gamma,
             exercise_factor=settings.exercise_factor,
             exercise_venous_pumping_factor=settings.exercise_venous_pumping_factor,
-
             UseNonLinear_VenousCompliance=settings.UseNonLinear_VenousCompliance,
-
             veins_UsePhiEffect=settings.veins_UsePhiEffect,
             veins_gamma=settings.veins_gamma,
             veins_alpha=settings.veins_alpha,
@@ -33870,6 +33857,7 @@ P_hs_plus_dist"),
             pulm_R_PA=settings.pulm_R_PA),
           fmi_StopTime=60, fmi_NumberOfSteps=steps)
           annotation (Placement(transformation(extent={{38,42},{58,62}})));
+
         ADAN_0main_SystemicTree_Tilt_OlufsenTriSeg_0tiltable_fmu_black_box tilt(
           settings(
             phi0=settings.phi0,
@@ -33899,7 +33887,6 @@ P_hs_plus_dist"),
             heart_vntr_AmRef_factor=settings.heart_vntr_AmRef_factor,
             heart_vntr_sigma_act_factor=settings.heart_vntr_sigma_act_factor,
             heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
-
             heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
             thoracic_pressure_ratio=settings.thoracic_pressure_ratio,
             hydrostaticLevel_correction=settings.hydrostaticLevel_correction,
@@ -33907,26 +33894,20 @@ P_hs_plus_dist"),
             TR_frac=settings.TR_frac,
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
-
             R_vc=settings.R_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
-
             tissues_nominal_cardiac_output=settings.tissues_nominal_cardiac_output,
-
             Ra_factor=settings.Ra_factor,
             dummy=settings.dummy,
             baro_hr_delay=settings.baro_hr_delay,
             tissuesCompliance_PhiEffect=settings.tissuesCompliance_PhiEffect,
             exercise_factor_on_tissue_compliance=settings.exercise_factor_on_tissue_compliance,
-
             tissues_gamma=settings.tissues_gamma,
             exercise_factor=settings.exercise_factor,
             exercise_venous_pumping_factor=settings.exercise_venous_pumping_factor,
-
             UseNonLinear_VenousCompliance=settings.UseNonLinear_VenousCompliance,
-
             veins_UsePhiEffect=settings.veins_UsePhiEffect,
             veins_gamma=settings.veins_gamma,
             veins_alpha=settings.veins_alpha,
@@ -33975,7 +33956,6 @@ P_hs_plus_dist"),
             heart_vntr_AmRef_factor=settings.heart_vntr_AmRef_factor,
             heart_vntr_sigma_act_factor=settings.heart_vntr_sigma_act_factor,
             heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
-
             heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
             thoracic_pressure_ratio=settings.thoracic_pressure_ratio,
             hydrostaticLevel_correction=settings.hydrostaticLevel_correction,
@@ -33983,26 +33963,20 @@ P_hs_plus_dist"),
             TR_frac=settings.TR_frac,
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
-
             R_vc=settings.R_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
-
             tissues_nominal_cardiac_output=settings.tissues_nominal_cardiac_output,
-
             Ra_factor=settings.Ra_factor,
             dummy=settings.dummy,
             baro_hr_delay=settings.baro_hr_delay,
             tissuesCompliance_PhiEffect=settings.tissuesCompliance_PhiEffect,
             exercise_factor_on_tissue_compliance=settings.exercise_factor_on_tissue_compliance,
-
             tissues_gamma=settings.tissues_gamma,
             exercise_factor=settings.exercise_factor,
             exercise_venous_pumping_factor=settings.exercise_venous_pumping_factor,
-
             UseNonLinear_VenousCompliance=settings.UseNonLinear_VenousCompliance,
-
             veins_UsePhiEffect=settings.veins_UsePhiEffect,
             veins_gamma=settings.veins_gamma,
             veins_alpha=settings.veins_alpha,
@@ -34489,6 +34463,29 @@ P_hs_plus_dist"),
               __Dymola_Algorithm="Cvode"));
         end OlufsenTriSeg_optimized_steadyState_init;
       end Results;
+
+      model CombinedModels_FMUs_optimizedParams
+        "Parametrized as result of #1 optimization"
+        extends CombinedModels_FMUs(settings(
+            R_vc=1.675000e-01,
+            Ra_factor=3.410320e+00,
+            baro_Ts=1.230000e+02,
+            baro_delta0_factor=2.800000e-01,
+            baro_g=5.562000e-01,
+            exercise_factor=3.220000e+01,
+            exercise_factor_on_tissue_compliance=3.862500e-01,
+            heart_drive_k_TR=3.735000e-01,
+            heart_drive_k_TR_maxAct=1.224000e-01,
+            heart_vntr_sigma_actMaxAct_factor=2.025000e+01,
+            heart_vntr_sigma_act_factor=1.880000e+00,
+            k_E=3.688680e-01,
+            pulm_C_PV=1.930000e-07,
+            tissuesCompliance_PhiEffect=2.460000e-01,
+            tissues_nominal_zpv=2.188800e-03,
+            HR_max=3.060000e+00));
+        annotation (__Dymola_Commands(file(ensureSimulated=true) =
+              "\"Scripts/Dymola/ExportAndImportFMUs.mos\"" "Refresh FMUs"));
+      end CombinedModels_FMUs_optimizedParams;
     end Identification;
 
     package Baseline

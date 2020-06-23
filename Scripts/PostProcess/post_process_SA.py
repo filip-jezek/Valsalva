@@ -14,7 +14,7 @@ with open(initparams_path) as file:
         params_def[cols[0]] = cols[1]
 
 
-with open('OutputListingMain.txt') as file:
+with open('OutputListingMain_SA_2.txt') as file:
     lines = file.readlines()
 
 

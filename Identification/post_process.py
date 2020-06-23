@@ -120,12 +120,10 @@ def getObjectives(var_set) -> fun_lib.ObjectiveVar:
     return objectives
 
 
-if __name__ is '__main__':
+var_set = loadMatFile()
 
-    var_set = loadMatFile()
+objectives = getObjectives(var_set)
 
-    objectives = getObjectives(var_set)
-
-    writeCost(objectives)
-    writeLogHeader(objectives)
-    logOutput(objectives)
+writeCost(objectives)
+writeLogHeader(objectives)
+logOutput(objectives)
