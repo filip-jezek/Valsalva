@@ -344,6 +344,7 @@ def prepareIdent():
 
 if __name__ == "__main__":
 
-    prepareSA()
+    # prepareSA()
+    prepareIdent()
     print('Done, Johne')
 

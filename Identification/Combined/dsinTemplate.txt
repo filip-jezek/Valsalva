@@ -9,14 +9,14 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-       1                   # StopTime     Time at which integration stops
-       0                   # Increment    Communication step size, if > 0
-     500                   # nInterval    Number of communication intervals, if > 0
-  1.0000000000000000E-04   # Tolerance    Relative precision of signals for
+      60                   # StopTime     Time at which integration stops
+  4.0000000000000001E-02   # Increment    Communication step size, if > 0
+       0                   # nInterval    Number of communication intervals, if > 0
+  9.9999999999999995E-07   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
        0                   # MaxFixedStep Maximum step size of fixed step size
                            #              integrators, if > 0.0
-      15                   # Algorithm    Integration algorithm as integer (1...28)
+      29                   # Algorithm    Integration algorithm as integer (1...28)
                            #
                            #             | model|       |        | dense | state |
                            # Algorithm   | typ  | stiff | order  | output| event |
@@ -54,7 +54,7 @@ double method(27,1)
                            #          grid = 4   runs forever (stopped by model)
        1                   # nt       Use every NT time instant, if grid = 3
        3                   # dense    1/2/3 restart/step/interpolate GRID points
-       1                   # evgrid   0/1 do not/save event points in comm. time grid
+       0                   # evgrid   0/1 do not/save event points in comm. time grid
        1                   # evu      0/1 U-discontinuity does not/trigger events
        0                   # evuord       U-discontinuity order to consider (0,1,...)
        0                   # error    0/1/2 One message/warning/error messages
@@ -63,14 +63,14 @@ double method(27,1)
        0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
        0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
        0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
-       0                   # debug    flags for debug information (1<<0 uses pdebug) 
+   65536                   # debug    flags for debug information (1<<0 uses pdebug) 
      100                   # pdebug       priority of debug information (1...100)
        0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
        0                   # ordmax   Maximum allowed integration order, if > 0
        0                   # hmax     Maximum absolute stepsize, if > 0
        0                   # hmin     Minimum absolute stepsize, if > 0 (use with care!)
        0                   # h0       Stepsize to be attempted on first step, if > 0
-  1.0000000000000000E-14   # teps     Bound to check, if 2 equal time instants
+  2.0000000000000000E-14   # teps     Bound to check, if 2 equal time instants
   1.0000000000000000E-10   # eveps    Hysteresis epsilon at event points
       20                   # eviter   Maximum number of event iterations
   9.9999999999999995E-07   # delaym   Minimum time increment in delay buffers
@@ -85,16 +85,16 @@ double method(27,1)
 
 #    Output parameters
 int settings(13,1)
- 1                         # lprec    0/1 do not/store result data in double
+ 0                         # lprec    0/1 do not/store result data in double
  1                         # lx       0/1 do not/store x  (state variables)
- 0                         # lxd      0/1 do not/store xd (derivative of states)
+ 1                         # lxd      0/1 do not/store xd (derivative of states)
  1                         # lu       0/1 do not/store u  (input     signals)
  1                         # ly       0/1 do not/store y  (output    signals)
- 1                         # lz       0/1 do not/store z  (indicator signals)
+ 0                         # lz       0/1 do not/store z  (indicator signals)
  1                         # lw       0/1 do not/store w  (auxiliary signals)
- 0                         # la       0/1 do not/store a  (alias     signals)
+ 1                         # la       0/1 do not/store a  (alias     signals)
  0                         # lperf    0/1 do not/store performance indicators
- 1                         # levent   0/1 do not/store event point
+ 0                         # levent   0/1 do not/store event point
  1                         # lres     0/1 do not/store results on result file
  0                         # lshare   0/1 do not/store info data for shared memory on dsshare.txt
  1                         # lform    0/1 ASCII/Matlab-binary storage format of results
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(10065,103)
+char initialName(10054,103)
 settings.phi0
 settings.height
 settings.weight
@@ -180,6 +180,7 @@ settings.hideLevel0
 settings.hideLevel1
 settings.EvaluateFunctionalParams
 settings.dummy
+settings.baro_hr_delay
 settings.baro_useAbsolutePressureTerm
 settings.baro_d0
 settings.baro_Ts
@@ -233,7 +234,6 @@ baseline.settings.tissues_nominal_zpv
 baseline.settings.tissues_nominal_stressed_volume
 baseline.settings.tissues_nominal_cardiac_output
 baseline.settings.Ra_factor
-baseline.settings.tissues_Ra_tau
 baseline.settings.tissuesCompliance_PhiEffect
 baseline.settings.exercise_factor_on_tissue_compliance
 baseline.settings.tissues_gamma
@@ -243,7 +243,6 @@ baseline.settings.UseNonLinear_VenousCompliance
 baseline.settings.veins_UsePhiEffect
 baseline.settings.veins_gamma
 baseline.settings.veins_alpha
-baseline.settings.veins_activation_tau
 baseline.settings.venous_diameter_correction
 baseline.settings.vessel_a
 baseline.settings.vessel_b
@@ -254,6 +253,7 @@ baseline.settings.blood_rho
 baseline.settings.hideSystemic
 baseline.settings.hideHeart
 baseline.settings.dummy
+baseline.settings.baro_hr_delay
 baseline.settings.baro_d0
 baseline.settings.baro_Ts
 baseline.settings.baro_delta0_factor
@@ -2596,9 +2596,7 @@ baseline.pulmonaryComponent.c_pv.ExternalPressure
 baseline.pulmonaryComponent.c_pv.MinimalCollapsingPressure
 baseline.condHR.disconnected
 baseline.condHR.disconnectedValue
-baseline.condHR.delayTime
 baseline.condHR.uMax
-baseline.condHR.phi0
 baseline.condHR.phi_gain
 baseline.condHR.add.k1
 baseline.condHR.add.k2
@@ -2622,7 +2620,6 @@ baseline.condPhi.disconnected
 baseline.condPhi.disconnectedValue
 baseline.condPhi.delayTime
 baseline.condPhi.uMax
-baseline.condPhi.phi0
 baseline.condPhi.phi_gain
 baseline.condPhi.add.k1
 baseline.condPhi.add.k2
@@ -2630,7 +2627,6 @@ baseline.condHeartPhi.disconnected
 baseline.condHeartPhi.disconnectedValue
 baseline.condHeartPhi.delayTime
 baseline.condHeartPhi.uMax
-baseline.condHeartPhi.phi0
 baseline.condHeartPhi.phi_gain
 baseline.condHeartPhi.add.k1
 baseline.condHeartPhi.add.k2
@@ -2643,6 +2639,7 @@ baseline.femoral_pressure
 baseline.V_LV
 baseline.phi_baro
 baseline.SV
+baseline.HR
 baseline.TEjection
 baseline.TFilling
 baseline.thoracic_pressure
@@ -2672,6 +2669,7 @@ baseline.internal.femoral_pressure
 baseline.internal.V_LV
 baseline.internal.phi_baro
 baseline.internal.SV
+baseline.internal.HR
 baseline.internal.TEjection
 baseline.internal.TFilling
 baseline.internal.thoracic_pressure
@@ -2717,7 +2715,6 @@ exercise.settings.tissues_nominal_zpv
 exercise.settings.tissues_nominal_stressed_volume
 exercise.settings.tissues_nominal_cardiac_output
 exercise.settings.Ra_factor
-exercise.settings.tissues_Ra_tau
 exercise.settings.tissuesCompliance_PhiEffect
 exercise.settings.exercise_factor_on_tissue_compliance
 exercise.settings.tissues_gamma
@@ -2727,7 +2724,6 @@ exercise.settings.UseNonLinear_VenousCompliance
 exercise.settings.veins_UsePhiEffect
 exercise.settings.veins_gamma
 exercise.settings.veins_alpha
-exercise.settings.veins_activation_tau
 exercise.settings.venous_diameter_correction
 exercise.settings.vessel_a
 exercise.settings.vessel_b
@@ -2738,6 +2734,7 @@ exercise.settings.blood_rho
 exercise.settings.hideSystemic
 exercise.settings.hideHeart
 exercise.settings.dummy
+exercise.settings.baro_hr_delay
 exercise.settings.baro_d0
 exercise.settings.baro_Ts
 exercise.settings.baro_delta0_factor
@@ -5080,9 +5077,7 @@ exercise.pulmonaryComponent.c_pv.ExternalPressure
 exercise.pulmonaryComponent.c_pv.MinimalCollapsingPressure
 exercise.condHR.disconnected
 exercise.condHR.disconnectedValue
-exercise.condHR.delayTime
 exercise.condHR.uMax
-exercise.condHR.phi0
 exercise.condHR.phi_gain
 exercise.condHR.add.k1
 exercise.condHR.add.k2
@@ -5106,7 +5101,6 @@ exercise.condPhi.disconnected
 exercise.condPhi.disconnectedValue
 exercise.condPhi.delayTime
 exercise.condPhi.uMax
-exercise.condPhi.phi0
 exercise.condPhi.phi_gain
 exercise.condPhi.add.k1
 exercise.condPhi.add.k2
@@ -5114,7 +5108,6 @@ exercise.condHeartPhi.disconnected
 exercise.condHeartPhi.disconnectedValue
 exercise.condHeartPhi.delayTime
 exercise.condHeartPhi.uMax
-exercise.condHeartPhi.phi0
 exercise.condHeartPhi.phi_gain
 exercise.condHeartPhi.add.k1
 exercise.condHeartPhi.add.k2
@@ -5131,6 +5124,7 @@ exercise.femoral_pressure
 exercise.V_LV
 exercise.phi_baro
 exercise.SV
+exercise.HR
 exercise.TEjection
 exercise.TFilling
 exercise.thoracic_pressure
@@ -5160,6 +5154,7 @@ exercise.internal.femoral_pressure
 exercise.internal.V_LV
 exercise.internal.phi_baro
 exercise.internal.SV
+exercise.internal.HR
 exercise.internal.TEjection
 exercise.internal.TFilling
 exercise.internal.thoracic_pressure
@@ -5205,7 +5200,6 @@ tilt.settings.tissues_nominal_zpv
 tilt.settings.tissues_nominal_stressed_volume
 tilt.settings.tissues_nominal_cardiac_output
 tilt.settings.Ra_factor
-tilt.settings.tissues_Ra_tau
 tilt.settings.tissuesCompliance_PhiEffect
 tilt.settings.exercise_factor_on_tissue_compliance
 tilt.settings.tissues_gamma
@@ -5215,7 +5209,6 @@ tilt.settings.UseNonLinear_VenousCompliance
 tilt.settings.veins_UsePhiEffect
 tilt.settings.veins_gamma
 tilt.settings.veins_alpha
-tilt.settings.veins_activation_tau
 tilt.settings.venous_diameter_correction
 tilt.settings.vessel_a
 tilt.settings.vessel_b
@@ -5226,6 +5219,7 @@ tilt.settings.blood_rho
 tilt.settings.hideSystemic
 tilt.settings.hideHeart
 tilt.settings.dummy
+tilt.settings.baro_hr_delay
 tilt.settings.baro_d0
 tilt.settings.baro_Ts
 tilt.settings.baro_delta0_factor
@@ -7594,9 +7588,7 @@ tilt.pulmonaryComponent.c_pv.ExternalPressure
 tilt.pulmonaryComponent.c_pv.MinimalCollapsingPressure
 tilt.condHR.disconnected
 tilt.condHR.disconnectedValue
-tilt.condHR.delayTime
 tilt.condHR.uMax
-tilt.condHR.phi0
 tilt.condHR.phi_gain
 tilt.condHR.add.k1
 tilt.condHR.add.k2
@@ -7620,7 +7612,6 @@ tilt.condPhi.disconnected
 tilt.condPhi.disconnectedValue
 tilt.condPhi.delayTime
 tilt.condPhi.uMax
-tilt.condPhi.phi0
 tilt.condPhi.phi_gain
 tilt.condPhi.add.k1
 tilt.condPhi.add.k2
@@ -7628,7 +7619,6 @@ tilt.condHeartPhi.disconnected
 tilt.condHeartPhi.disconnectedValue
 tilt.condHeartPhi.delayTime
 tilt.condHeartPhi.uMax
-tilt.condHeartPhi.phi0
 tilt.condHeartPhi.phi_gain
 tilt.condHeartPhi.add.k1
 tilt.condHeartPhi.add.k2
@@ -7645,6 +7635,7 @@ tilt.femoral_pressure
 tilt.V_LV
 tilt.phi_baro
 tilt.SV
+tilt.HR
 tilt.TEjection
 tilt.TFilling
 tilt.thoracic_pressure
@@ -7674,6 +7665,7 @@ tilt.internal.femoral_pressure
 tilt.internal.V_LV
 tilt.internal.phi_baro
 tilt.internal.SV
+tilt.internal.HR
 tilt.internal.TEjection
 tilt.internal.TFilling
 tilt.internal.thoracic_pressure
@@ -7719,7 +7711,6 @@ valsalva.settings.tissues_nominal_zpv
 valsalva.settings.tissues_nominal_stressed_volume
 valsalva.settings.tissues_nominal_cardiac_output
 valsalva.settings.Ra_factor
-valsalva.settings.tissues_Ra_tau
 valsalva.settings.tissuesCompliance_PhiEffect
 valsalva.settings.exercise_factor_on_tissue_compliance
 valsalva.settings.tissues_gamma
@@ -7729,7 +7720,6 @@ valsalva.settings.UseNonLinear_VenousCompliance
 valsalva.settings.veins_UsePhiEffect
 valsalva.settings.veins_gamma
 valsalva.settings.veins_alpha
-valsalva.settings.veins_activation_tau
 valsalva.settings.venous_diameter_correction
 valsalva.settings.vessel_a
 valsalva.settings.vessel_b
@@ -7740,6 +7730,7 @@ valsalva.settings.blood_rho
 valsalva.settings.hideSystemic
 valsalva.settings.hideHeart
 valsalva.settings.dummy
+valsalva.settings.baro_hr_delay
 valsalva.settings.baro_d0
 valsalva.settings.baro_Ts
 valsalva.settings.baro_delta0_factor
@@ -10082,9 +10073,7 @@ valsalva.pulmonaryComponent.c_pv.ExternalPressure
 valsalva.pulmonaryComponent.c_pv.MinimalCollapsingPressure
 valsalva.condHR.disconnected
 valsalva.condHR.disconnectedValue
-valsalva.condHR.delayTime
 valsalva.condHR.uMax
-valsalva.condHR.phi0
 valsalva.condHR.phi_gain
 valsalva.condHR.add.k1
 valsalva.condHR.add.k2
@@ -10108,7 +10097,6 @@ valsalva.condPhi.disconnected
 valsalva.condPhi.disconnectedValue
 valsalva.condPhi.delayTime
 valsalva.condPhi.uMax
-valsalva.condPhi.phi0
 valsalva.condPhi.phi_gain
 valsalva.condPhi.add.k1
 valsalva.condPhi.add.k2
@@ -10116,7 +10104,6 @@ valsalva.condHeartPhi.disconnected
 valsalva.condHeartPhi.disconnectedValue
 valsalva.condHeartPhi.delayTime
 valsalva.condHeartPhi.uMax
-valsalva.condHeartPhi.phi0
 valsalva.condHeartPhi.phi_gain
 valsalva.condHeartPhi.add.k1
 valsalva.condHeartPhi.add.k2
@@ -10129,6 +10116,7 @@ valsalva.femoral_pressure
 valsalva.V_LV
 valsalva.phi_baro
 valsalva.SV
+valsalva.HR
 valsalva.TEjection
 valsalva.TFilling
 valsalva.thoracic_pressure
@@ -10158,6 +10146,7 @@ valsalva.internal.femoral_pressure
 valsalva.internal.V_LV
 valsalva.internal.phi_baro
 valsalva.internal.SV
+valsalva.internal.HR
 valsalva.internal.TEjection
 valsalva.internal.TFilling
 valsalva.internal.thoracic_pressure
@@ -10169,7 +10158,7 @@ stepInterval
 CPUtime
 EventCounter
 
-double initialValue(10065,6)
+double initialValue(10054,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
@@ -10325,6 +10314,8 @@ double initialValue(10065,6)
  -1       1                       0                       0                
   1   280   # settings.dummy
  -1       0                       0                       0                
+  1   280   # settings.baro_hr_delay
+ -1       0                       0                       0                
   1   281   # settings.baro_useAbsolutePressureTerm
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
@@ -10431,8 +10422,6 @@ double initialValue(10065,6)
   0       0                       0                       0                
   6   256   # baseline.settings.Ra_factor
   0       0                       0                       0                
-  6   256   # baseline.settings.tissues_Ra_tau
-  0       0                       0                       0                
   6   256   # baseline.settings.tissuesCompliance_PhiEffect
   0       0                       0                       0                
   6   256   # baseline.settings.exercise_factor_on_tissue_compliance
@@ -10451,8 +10440,6 @@ double initialValue(10065,6)
   0       0                       0                       0                
   6   256   # baseline.settings.veins_alpha
   0       0                       0                       0                
-  6   256   # baseline.settings.veins_activation_tau
-  0       0                       0                       0                
   6   256   # baseline.settings.venous_diameter_correction
  -1  2.8020000000000000E-01       0                       0                
   1   280   # baseline.settings.vessel_a
@@ -10470,8 +10457,10 @@ double initialValue(10065,6)
   1   281   # baseline.settings.hideSystemic
  -1       0                       0                       0                
   1   281   # baseline.settings.hideHeart
- -1       1                       0                       0                
-  1   280   # baseline.settings.dummy
+  0       0                       0                       0                
+  6   256   # baseline.settings.dummy
+  0       0                       0                       0                
+  6   256   # baseline.settings.baro_hr_delay
   0       0                       0                       0                
   6   256   # baseline.settings.baro_d0
   0       0                       0                       0                
@@ -15156,12 +15145,8 @@ double initialValue(10065,6)
   1   281   # baseline.condHR.disconnected
  -1  2.5000000000000000E-01       0                       0                
   1   280   # baseline.condHR.disconnectedValue
- -1       0                       0                       0                
-  1   280   # baseline.condHR.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # baseline.condHR.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # baseline.condHR.phi0
  -1       1                       0                       0                
   1   280   # baseline.condHR.phi_gain
  -1      -1                       0                       0                
@@ -15170,11 +15155,11 @@ double initialValue(10065,6)
   1   280   # baseline.condHR.add.k2
  -1    5320                       0                       0                
   1   280   # baseline.thoracic_pressure_ramp.amplitude
- -1      10                       0                 1.0000000000000000E+100
+ -1       1                       0                 1.0000000000000000E+100
   1   280   # baseline.thoracic_pressure_ramp.rising
- -1      20                       0                 1.0000000000000000E+100
+ -1      14                       0                 1.0000000000000000E+100
   1   280   # baseline.thoracic_pressure_ramp.width
- -1       2                       0                 1.0000000000000000E+100
+ -1       1                       0                 1.0000000000000000E+100
   1   280   # baseline.thoracic_pressure_ramp.falling
  -1     200                  9.9999999999999997E-61 1.0000000000000000E+100
   1   280   # baseline.thoracic_pressure_ramp.period
@@ -15208,8 +15193,6 @@ double initialValue(10065,6)
   1   280   # baseline.condPhi.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # baseline.condPhi.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # baseline.condPhi.phi0
  -1       1                       0                       0                
   1   280   # baseline.condPhi.phi_gain
  -1      -1                       0                       0                
@@ -15224,8 +15207,6 @@ double initialValue(10065,6)
   1   280   # baseline.condHeartPhi.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # baseline.condHeartPhi.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # baseline.condHeartPhi.phi0
  -1       1                       0                       0                
   1   280   # baseline.condHeartPhi.phi_gain
  -1      -1                       0                       0                
@@ -15250,6 +15231,8 @@ double initialValue(10065,6)
   6   320   # baseline.phi_baro
   0       0                       0                 1.0000000000000000E+100
   6   320   # baseline.SV
+  0       0                       0                       0                
+  6   320   # baseline.HR
   0       0                       0                       0                
   6   320   # baseline.TEjection
   0       0                       0                       0                
@@ -15308,6 +15291,8 @@ double initialValue(10065,6)
   6  1344   # baseline.internal.phi_baro
   0       0                       0                       0                
   6  1344   # baseline.internal.SV
+  0       0                       0                       0                
+  6  1344   # baseline.internal.HR
   0       0                       0                       0                
   6  1344   # baseline.internal.TEjection
   0       0                       0                       0                
@@ -15399,8 +15384,6 @@ double initialValue(10065,6)
   0       0                       0                       0                
   6   256   # exercise.settings.Ra_factor
   0       0                       0                       0                
-  6   256   # exercise.settings.tissues_Ra_tau
-  0       0                       0                       0                
   6   256   # exercise.settings.tissuesCompliance_PhiEffect
   0       0                       0                       0                
   6   256   # exercise.settings.exercise_factor_on_tissue_compliance
@@ -15419,8 +15402,6 @@ double initialValue(10065,6)
   0       0                       0                       0                
   6   256   # exercise.settings.veins_alpha
   0       0                       0                       0                
-  6   256   # exercise.settings.veins_activation_tau
-  0       0                       0                       0                
   6   256   # exercise.settings.venous_diameter_correction
  -1  2.8020000000000000E-01       0                       0                
   1   280   # exercise.settings.vessel_a
@@ -15438,8 +15419,10 @@ double initialValue(10065,6)
   1   281   # exercise.settings.hideSystemic
  -1       0                       0                       0                
   1   281   # exercise.settings.hideHeart
- -1       1                       0                       0                
-  1   280   # exercise.settings.dummy
+  0       0                       0                       0                
+  6   256   # exercise.settings.dummy
+  0       0                       0                       0                
+  6   256   # exercise.settings.baro_hr_delay
   0       0                       0                       0                
   6   256   # exercise.settings.baro_d0
   0       0                       0                       0                
@@ -20124,12 +20107,8 @@ double initialValue(10065,6)
   1   281   # exercise.condHR.disconnected
  -1  2.5000000000000000E-01       0                       0                
   1   280   # exercise.condHR.disconnectedValue
- -1       0                       0                       0                
-  1   280   # exercise.condHR.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # exercise.condHR.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # exercise.condHR.phi0
  -1       1                       0                       0                
   1   280   # exercise.condHR.phi_gain
  -1      -1                       0                       0                
@@ -20138,11 +20117,11 @@ double initialValue(10065,6)
   1   280   # exercise.condHR.add.k2
  -1    5320                       0                       0                
   1   280   # exercise.thoracic_pressure_ramp.amplitude
- -1      10                       0                 1.0000000000000000E+100
+ -1       1                       0                 1.0000000000000000E+100
   1   280   # exercise.thoracic_pressure_ramp.rising
- -1      20                       0                 1.0000000000000000E+100
+ -1      14                       0                 1.0000000000000000E+100
   1   280   # exercise.thoracic_pressure_ramp.width
- -1       2                       0                 1.0000000000000000E+100
+ -1       1                       0                 1.0000000000000000E+100
   1   280   # exercise.thoracic_pressure_ramp.falling
  -1     200                  9.9999999999999997E-61 1.0000000000000000E+100
   1   280   # exercise.thoracic_pressure_ramp.period
@@ -20176,8 +20155,6 @@ double initialValue(10065,6)
   1   280   # exercise.condPhi.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # exercise.condPhi.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # exercise.condPhi.phi0
  -1       1                       0                       0                
   1   280   # exercise.condPhi.phi_gain
  -1      -1                       0                       0                
@@ -20192,8 +20169,6 @@ double initialValue(10065,6)
   1   280   # exercise.condHeartPhi.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # exercise.condHeartPhi.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # exercise.condHeartPhi.phi0
  -1       1                       0                       0                
   1   280   # exercise.condHeartPhi.phi_gain
  -1      -1                       0                       0                
@@ -20226,6 +20201,8 @@ double initialValue(10065,6)
   6   320   # exercise.phi_baro
   0       0                       0                 1.0000000000000000E+100
   6   320   # exercise.SV
+  0       0                       0                       0                
+  6   320   # exercise.HR
   0       0                       0                       0                
   6   320   # exercise.TEjection
   0       0                       0                       0                
@@ -20284,6 +20261,8 @@ double initialValue(10065,6)
   6  1344   # exercise.internal.phi_baro
   0       0                       0                       0                
   6  1344   # exercise.internal.SV
+  0       0                       0                       0                
+  6  1344   # exercise.internal.HR
   0       0                       0                       0                
   6  1344   # exercise.internal.TEjection
   0       0                       0                       0                
@@ -20375,8 +20354,6 @@ double initialValue(10065,6)
   0       0                       0                       0                
   6   256   # tilt.settings.Ra_factor
   0       0                       0                       0                
-  6   256   # tilt.settings.tissues_Ra_tau
-  0       0                       0                       0                
   6   256   # tilt.settings.tissuesCompliance_PhiEffect
   0       0                       0                       0                
   6   256   # tilt.settings.exercise_factor_on_tissue_compliance
@@ -20395,8 +20372,6 @@ double initialValue(10065,6)
   0       0                       0                       0                
   6   256   # tilt.settings.veins_alpha
   0       0                       0                       0                
-  6   256   # tilt.settings.veins_activation_tau
-  0       0                       0                       0                
   6   256   # tilt.settings.venous_diameter_correction
  -1  2.8020000000000000E-01       0                       0                
   1   280   # tilt.settings.vessel_a
@@ -20414,8 +20389,10 @@ double initialValue(10065,6)
   1   281   # tilt.settings.hideSystemic
  -1       0                       0                       0                
   1   281   # tilt.settings.hideHeart
- -1       1                       0                       0                
-  1   280   # tilt.settings.dummy
+  0       0                       0                       0                
+  6   256   # tilt.settings.dummy
+  0       0                       0                       0                
+  6   256   # tilt.settings.baro_hr_delay
   0       0                       0                       0                
   6   256   # tilt.settings.baro_d0
   0       0                       0                       0                
@@ -25152,12 +25129,8 @@ double initialValue(10065,6)
   1   281   # tilt.condHR.disconnected
  -1  2.5000000000000000E-01       0                       0                
   1   280   # tilt.condHR.disconnectedValue
- -1       0                       0                       0                
-  1   280   # tilt.condHR.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # tilt.condHR.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # tilt.condHR.phi0
  -1       1                       0                       0                
   1   280   # tilt.condHR.phi_gain
  -1      -1                       0                       0                
@@ -25166,11 +25139,11 @@ double initialValue(10065,6)
   1   280   # tilt.condHR.add.k2
  -1    5320                       0                       0                
   1   280   # tilt.thoracic_pressure_ramp.amplitude
- -1      10                       0                 1.0000000000000000E+100
+ -1       1                       0                 1.0000000000000000E+100
   1   280   # tilt.thoracic_pressure_ramp.rising
- -1      20                       0                 1.0000000000000000E+100
+ -1      14                       0                 1.0000000000000000E+100
   1   280   # tilt.thoracic_pressure_ramp.width
- -1       2                       0                 1.0000000000000000E+100
+ -1       1                       0                 1.0000000000000000E+100
   1   280   # tilt.thoracic_pressure_ramp.falling
  -1     200                  9.9999999999999997E-61 1.0000000000000000E+100
   1   280   # tilt.thoracic_pressure_ramp.period
@@ -25204,8 +25177,6 @@ double initialValue(10065,6)
   1   280   # tilt.condPhi.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # tilt.condPhi.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # tilt.condPhi.phi0
  -1       1                       0                       0                
   1   280   # tilt.condPhi.phi_gain
  -1      -1                       0                       0                
@@ -25220,8 +25191,6 @@ double initialValue(10065,6)
   1   280   # tilt.condHeartPhi.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # tilt.condHeartPhi.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # tilt.condHeartPhi.phi0
  -1       1                       0                       0                
   1   280   # tilt.condHeartPhi.phi_gain
  -1      -1                       0                       0                
@@ -25234,7 +25203,7 @@ double initialValue(10065,6)
   1   280   # tilt.Tilt_ramp.duration
  -1       0                       0                       0                
   1   280   # tilt.Tilt_ramp.offset
- -1       0                       0                       0                
+ -1      10                       0                       0                
   1   280   # tilt.Tilt_ramp.startTime
   0       0                       0                       0                
   6   320   # tilt.brachial_pressure
@@ -25254,6 +25223,8 @@ double initialValue(10065,6)
   6   320   # tilt.phi_baro
   0       0                       0                 1.0000000000000000E+100
   6   320   # tilt.SV
+  0       0                       0                       0                
+  6   320   # tilt.HR
   0       0                       0                       0                
   6   320   # tilt.TEjection
   0       0                       0                       0                
@@ -25312,6 +25283,8 @@ double initialValue(10065,6)
   6  1344   # tilt.internal.phi_baro
   0       0                       0                       0                
   6  1344   # tilt.internal.SV
+  0       0                       0                       0                
+  6  1344   # tilt.internal.HR
   0       0                       0                       0                
   6  1344   # tilt.internal.TEjection
   0       0                       0                       0                
@@ -25403,8 +25376,6 @@ double initialValue(10065,6)
   0       0                       0                       0                
   6   256   # valsalva.settings.Ra_factor
   0       0                       0                       0                
-  6   256   # valsalva.settings.tissues_Ra_tau
-  0       0                       0                       0                
   6   256   # valsalva.settings.tissuesCompliance_PhiEffect
   0       0                       0                       0                
   6   256   # valsalva.settings.exercise_factor_on_tissue_compliance
@@ -25423,8 +25394,6 @@ double initialValue(10065,6)
   0       0                       0                       0                
   6   256   # valsalva.settings.veins_alpha
   0       0                       0                       0                
-  6   256   # valsalva.settings.veins_activation_tau
-  0       0                       0                       0                
   6   256   # valsalva.settings.venous_diameter_correction
  -1  2.8020000000000000E-01       0                       0                
   1   280   # valsalva.settings.vessel_a
@@ -25442,8 +25411,10 @@ double initialValue(10065,6)
   1   281   # valsalva.settings.hideSystemic
  -1       0                       0                       0                
   1   281   # valsalva.settings.hideHeart
- -1       1                       0                       0                
-  1   280   # valsalva.settings.dummy
+  0       0                       0                       0                
+  6   256   # valsalva.settings.dummy
+  0       0                       0                       0                
+  6   256   # valsalva.settings.baro_hr_delay
   0       0                       0                       0                
   6   256   # valsalva.settings.baro_d0
   0       0                       0                       0                
@@ -30128,12 +30099,8 @@ double initialValue(10065,6)
   1   281   # valsalva.condHR.disconnected
  -1  2.5000000000000000E-01       0                       0                
   1   280   # valsalva.condHR.disconnectedValue
- -1       0                       0                       0                
-  1   280   # valsalva.condHR.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # valsalva.condHR.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # valsalva.condHR.phi0
  -1       1                       0                       0                
   1   280   # valsalva.condHR.phi_gain
  -1      -1                       0                       0                
@@ -30180,8 +30147,6 @@ double initialValue(10065,6)
   1   280   # valsalva.condPhi.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # valsalva.condPhi.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # valsalva.condPhi.phi0
  -1       1                       0                       0                
   1   280   # valsalva.condPhi.phi_gain
  -1      -1                       0                       0                
@@ -30196,8 +30161,6 @@ double initialValue(10065,6)
   1   280   # valsalva.condHeartPhi.delayTime
  -1  9.9999999999999995E+59       0                       0                
   1   280   # valsalva.condHeartPhi.uMax
- -1  2.5000000000000000E-01       0                       0                
-  1   280   # valsalva.condHeartPhi.phi0
  -1       1                       0                       0                
   1   280   # valsalva.condHeartPhi.phi_gain
  -1      -1                       0                       0                
@@ -30222,6 +30185,8 @@ double initialValue(10065,6)
   6   320   # valsalva.phi_baro
   0       0                       0                 1.0000000000000000E+100
   6   320   # valsalva.SV
+  0       0                       0                       0                
+  6   320   # valsalva.HR
   0       0                       0                       0                
   6   320   # valsalva.TEjection
   0       0                       0                       0                
@@ -30280,6 +30245,8 @@ double initialValue(10065,6)
   6  1344   # valsalva.internal.phi_baro
   0       0                       0                       0                
   6  1344   # valsalva.internal.SV
+  0       0                       0                       0                
+  6  1344   # valsalva.internal.HR
   0       0                       0                       0                
   6  1344   # valsalva.internal.TEjection
   0       0                       0                       0                
@@ -30350,7 +30317,7 @@ double initialValue(10065,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(10065,152)
+char initialDescription(10054,152)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -30428,6 +30395,7 @@ Suppress writing output of non-physiological variables, used for debugging the m
 Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
 Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
 Dummy parameter not bound anywhere
+Delay between phi and HR [s|min]
 Use absolute distention term instead being relative to pulse pressure only [:#(type=Boolean)]
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
@@ -30481,7 +30449,6 @@ Tissues and small arteries and veins nominal pressure. Used for calculation of t
 Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance [m3|ml]
 Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances. [m3/s|ml/min]
 Exponential factor affecting arterioles resistance [1|%]
-guess from Pstras, Math Med Biol 2017 [s|min]
 Effect on tissue's compliance [1|%]
 Effect of venoconstriction [1|%]
 Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv) [1|%]
@@ -30491,7 +30458,6 @@ Use nonlinear compliance model in all large veins [:#(type=Boolean)]
 Use venoconstriction in all large veins [:#(type=Boolean)]
 Fraction of minimal collapsing diameter to nominal diameter [1|%]
 ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter [1|%]
-Integration delay for venous tone activation [s|s]
 Venous diameter enlargement to correspond to the arterial side [1|%]
 
 [m-1]
@@ -30502,6 +30468,7 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
 Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
 Dummy parameter not bound anywhere
+Delay between phi and HR [s|min]
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
 Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account
@@ -32844,9 +32811,7 @@ External pressure. Set zero if internal pressure is relative to external. Valid 
 [Pa|mmHg]
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
-Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -32870,7 +32835,6 @@ When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -32878,7 +32842,6 @@ When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -32891,6 +32854,7 @@ Gain of input signal 2
 [m3|ml]
 [|%]
 [m3|ml]
+[s-1|1/min]
 
 
 [Pa|mmHg]
@@ -32920,6 +32884,7 @@ relative tolerance for the internal solver of the fmu
 [m3]
 
 [m3]
+[s-1]
 
 
 [Pa]
@@ -32965,7 +32930,6 @@ Tissues and small arteries and veins nominal pressure. Used for calculation of t
 Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance [m3|ml]
 Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances. [m3/s|ml/min]
 Exponential factor affecting arterioles resistance [1|%]
-guess from Pstras, Math Med Biol 2017 [s|min]
 Effect on tissue's compliance [1|%]
 Effect of venoconstriction [1|%]
 Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv) [1|%]
@@ -32975,7 +32939,6 @@ Use nonlinear compliance model in all large veins [:#(type=Boolean)]
 Use venoconstriction in all large veins [:#(type=Boolean)]
 Fraction of minimal collapsing diameter to nominal diameter [1|%]
 ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter [1|%]
-Integration delay for venous tone activation [s|s]
 Venous diameter enlargement to correspond to the arterial side [1|%]
 
 [m-1]
@@ -32986,6 +32949,7 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
 Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
 Dummy parameter not bound anywhere
+Delay between phi and HR [s|min]
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
 Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account
@@ -35328,9 +35292,7 @@ External pressure. Set zero if internal pressure is relative to external. Valid 
 [Pa|mmHg]
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
-Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -35354,7 +35316,6 @@ When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -35362,7 +35323,6 @@ When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -35379,6 +35339,7 @@ Output y = offset for time < startTime [s]
 [m3|ml]
 [|%]
 [m3|ml]
+[s-1|1/min]
 
 
 [Pa|mmHg]
@@ -35408,6 +35369,7 @@ relative tolerance for the internal solver of the fmu
 [m3]
 
 [m3]
+[s-1]
 
 
 [Pa]
@@ -35453,7 +35415,6 @@ Tissues and small arteries and veins nominal pressure. Used for calculation of t
 Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance [m3|ml]
 Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances. [m3/s|ml/min]
 Exponential factor affecting arterioles resistance [1|%]
-guess from Pstras, Math Med Biol 2017 [s|min]
 Effect on tissue's compliance [1|%]
 Effect of venoconstriction [1|%]
 Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv) [1|%]
@@ -35463,7 +35424,6 @@ Use nonlinear compliance model in all large veins [:#(type=Boolean)]
 Use venoconstriction in all large veins [:#(type=Boolean)]
 Fraction of minimal collapsing diameter to nominal diameter [1|%]
 ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter [1|%]
-Integration delay for venous tone activation [s|s]
 Venous diameter enlargement to correspond to the arterial side [1|%]
 
 [m-1]
@@ -35474,6 +35434,7 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
 Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
 Dummy parameter not bound anywhere
+Delay between phi and HR [s|min]
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
 Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account
@@ -37842,9 +37803,7 @@ External pressure. Set zero if internal pressure is relative to external. Valid 
 [Pa|mmHg]
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
-Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -37868,7 +37827,6 @@ When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -37876,7 +37834,6 @@ When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -37893,6 +37850,7 @@ Output y = offset for time < startTime [s]
 [m3|ml]
 [|%]
 [m3|ml]
+[s-1|1/min]
 
 
 [Pa|mmHg]
@@ -37922,6 +37880,7 @@ relative tolerance for the internal solver of the fmu
 [m3]
 
 [m3]
+[s-1]
 
 
 [Pa]
@@ -37967,7 +37926,6 @@ Tissues and small arteries and veins nominal pressure. Used for calculation of t
 Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance [m3|ml]
 Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances. [m3/s|ml/min]
 Exponential factor affecting arterioles resistance [1|%]
-guess from Pstras, Math Med Biol 2017 [s|min]
 Effect on tissue's compliance [1|%]
 Effect of venoconstriction [1|%]
 Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv) [1|%]
@@ -37977,7 +37935,6 @@ Use nonlinear compliance model in all large veins [:#(type=Boolean)]
 Use venoconstriction in all large veins [:#(type=Boolean)]
 Fraction of minimal collapsing diameter to nominal diameter [1|%]
 ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter [1|%]
-Integration delay for venous tone activation [s|s]
 Venous diameter enlargement to correspond to the arterial side [1|%]
 
 [m-1]
@@ -37988,6 +37945,7 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
 Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
 Dummy parameter not bound anywhere
+Delay between phi and HR [s|min]
 Relative absolute term multiplicator
 Time constant of moving setpoint [s|min]
 Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account
@@ -40330,9 +40288,7 @@ External pressure. Set zero if internal pressure is relative to external. Valid 
 [Pa|mmHg]
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
-Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -40356,7 +40312,6 @@ When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -40364,7 +40319,6 @@ When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
-Default phi0
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -40377,6 +40331,7 @@ Gain of input signal 2
 [m3|ml]
 [|%]
 [m3|ml]
+[s-1|1/min]
 
 
 [Pa|mmHg]
@@ -40406,6 +40361,7 @@ relative tolerance for the internal solver of the fmu
 [m3]
 
 [m3]
+[s-1]
 
 
 [Pa]
