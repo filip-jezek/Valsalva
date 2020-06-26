@@ -1606,7 +1606,7 @@ type"),       Text(
           Real epsilon( start = 1) "Averaged distension ratio";
           parameter Physiolibrary.Types.Time Ts = 30 "Time constant for averaging";
           Real delta "Positive peaks detected";
-          parameter Real d0 = 1.5;
+          parameter Physiolibrary.Types.Fraction d0 = 1.5;
         //  Real delta2=delta*d "Positive peaks detected";
           parameter Real f0( unit = "Hz")= 300 "Base firing frequency";
           parameter Real delta0 = 0.4965 "Baseline delta";
@@ -29907,9 +29907,9 @@ P_hs_plus_dist"),
         annotation (Placement(transformation(extent={{38,-30},{26,-18}})));
     Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
         amplitude=40*133,
-        rising=2,
-        width=20,
-        falling=2,
+        rising=1,
+        width=14,
+        falling=1,
         period=200,
         nperiod=1,
         offset=0,
@@ -34237,8 +34237,12 @@ P_hs_plus_dist"),
         package Experiments
           model OlufsenTriSeg_optimized_steadyState
             extends
-              ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized(
-                settings(baro_Ts(displayUnit="s") = 15));
+              ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized_steadyState_init(
+                settings(baro_useAbsolutePressureTerm=true,  baro_Ts(displayUnit="s") = 300),
+              Systemic1(baroreflex_system(baroreceptor_carotid(d0=1.2),
+                    baroreceptor_aortic(d0=1.6))),
+              condTP(disconnected=false));
+
             annotation (experiment(
                 StopTime=1600,
                 Interval=0.04,
@@ -34483,7 +34487,7 @@ P_hs_plus_dist"),
             tissuesCompliance_PhiEffect=2.460000e-01,
             tissues_nominal_zpv=2.188800e-03,
             HR_max=3.060000e+00));
-        annotation (__Dymola_Commands(file(ensureSimulated=true) =
+        annotation (__Dymola_Commands(file(ensureSimulated=false)=
               "\"Scripts/Dymola/ExportAndImportFMUs.mos\"" "Refresh FMUs"));
       end CombinedModels_FMUs_optimizedParams;
     end Identification;
@@ -34671,7 +34675,7 @@ P_hs_plus_dist"),
 
       model TriSeg_base
         extends CVS_7af(
-          thoracic_pressure_ramp(rising=10, startTime=20),
+          thoracic_pressure_ramp(           startTime=20),
           redeclare replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Lumens
             heartComponent(
             UseFrequencyInput=true,
@@ -34718,6 +34722,7 @@ P_hs_plus_dist"),
       output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
       output Physiolibrary.Types.Fraction phi_baro = Systemic1.phi_baroreflex;
       output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
+      output Physiolibrary.Types.Frequency HR = heartRate.HR;
 
       //   parameter Real Vw_factor=1;
       //   parameter Real Amref_factor=0.95;
@@ -35766,7 +35771,8 @@ P_hs_plus_dist"),
             UsePhi_Input=true,
             UseTiltInput=true),
           redeclare replaceable Modelica.Blocks.Sources.BooleanExpression
-            useAutonomousPhi(y=true));
+            useAutonomousPhi(y=true),
+          settings(baro_useAbsolutePressureTerm=true));
 
         replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
           height=Modelica.Constants.pi/3,

@@ -291,12 +291,12 @@ def getRunNumber() -> str:
     else:
         return 0
 
-def getSafeLogDir(unsafeDir):
+def getSafeLogDir(unsafeDir, safe_rollback = '..\\'):
     """ Try provided unsafeDir and falls back to parent dir otherwise
     """
 
     if not os.path.isdir(unsafeDir):
-        return '..\\'
+        return safe_rollback
     else:
         return unsafeDir + '\\'
 

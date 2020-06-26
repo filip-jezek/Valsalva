@@ -2,6 +2,7 @@ import scipy.io as skipy
 import fun_lib
 import re
 import matplotlib.pyplot as plt
+import numpy
 # import DyMat
 # from matplotlib import pyplot as plt
 
@@ -26,7 +27,9 @@ def plotObjectives(vars_set, interval, objectives):
     fun_lib.plotObjectiveTarget(pack,'CO', 1000*60)
     fun_lib.plotObjectiveTarget(pack,'BPk', 1/133.32)
     fun_lib.plotObjectiveTarget(pack,'EF', 100)
+    fun_lib.plotObjectiveTarget(pack,'HR', 60, verticalalignment='top') 
     fun_lib.plotObjectiveLimit(pack, 'PWV', 1, 'lower', verticalalignment='top')
+    
 
     total_costs = fun_lib.countTotalWeightedCost(objectives)
     ax.set_title('Baseline costs %.6f' % total_costs)
@@ -43,12 +46,14 @@ def getObjectives(vars_set):
     mmHg2SI = 133.32
     ml2SI = 1e-6
     lpm2SI = 1e-3/60
+    bpm2SI = 1/60
 
     BPs_target = 120*mmHg2SI
     BPd_target = 80*mmHg2SI
     BPk_target = 20*mmHg2SI
     CO_target = 6.3*lpm2SI
     EF_target = 0.6
+    HR_target = 60*bpm2SI
     pwv_bounds = [3.3, 10]
 
     time = vars_set['time']
@@ -70,6 +75,7 @@ def getObjectives(vars_set):
             ('CO', sum(vars_set['CO'][interval]) / len(interval), CO_target, None),
             ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), EF_target, None),
             ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), BPk_target, None),
+            ('HR', numpy.mean(vars_set['HR']), HR_target, None),
             ('PWV', pwv, None, pwv_bounds)            ]
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3]), ov))

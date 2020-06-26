@@ -7,7 +7,7 @@ Modelica experiment file
 
 #    Experiment parameters
 double experiment(7,1)
-       0                   # StartTime    Time at which integration starts
+       0                   # StartTime    Time at which integration starts %dummy%
                            #              (and linearization and trimming time)
       60                   # StopTime     Time at which integration stops
   4.0000000000000001E-02   # Increment    Communication step size, if > 0
@@ -10151,17 +10151,17 @@ CPUtime
 EventCounter
 
 double initialValue(10046,6)
- -1 %settings.phi0% 0.0 0.0
+ -1 0.2375 0.0 0.0
   1   280   # settings.phi0
- -1 %settings.height% 0.0 1e+100
+ -1 1.7 0.0 1e+100
   1   280   # settings.height
- -1 %settings.weight% 0.0 1e+100
+ -1 70.0 0.0 1e+100
   1   280   # settings.weight
- -1 %settings.age% 0.0 0.0
+ -1 35.0 0.0 0.0
   1   280   # settings.age
- -1 %settings.HR_nominal% 0.0 0.0
+ -1 1.0 0.0 0.0
   1   280   # settings.HR_nominal
- -1 %settings.HR_max% 0.0 0.0
+ -1 3.0 0.0 0.0
   1   280   # settings.HR_max
   0       0                       0                       0                
   6   256   # settings.BMI
@@ -10169,61 +10169,61 @@ double initialValue(10046,6)
   6   256   # settings.BSA
  -1       0                       0                       0                
   1   281   # settings.initByPressure
- -1 %settings.V_PV_init% 0.0 1e+100
+ -1 7.400000000000001E-5 0.0 1e+100
   1   280   # settings.V_PV_init
- -1 %settings.heart_R_vlv% 0.0 1e+100
+ -1 133322.387415 0.0 1e+100
   1   280   # settings.heart_R_vlv
- -1 %settings.heart_R_LA% 0.0 1e+100
+ -1 1999835.811225 0.0 1e+100
   1   280   # settings.heart_R_LA
- -1 %settings.heart_R_RA% 0.0 1e+100
+ -1 1999835.811225 0.0 1e+100
   1   280   # settings.heart_R_RA
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1 %settings.heart_drive_offset% 0.0 0.0
+ -1 0.0162625 0.0 0.0
   1   280   # settings.heart_drive_offset
- -1 %settings.heart_drive_offset_maxAct% 0.0 0.0
+ -1 7.6875E-4 0.0 0.0
   1   280   # settings.heart_drive_offset_maxAct
- -1 %settings.heart_drive_k_TS% 0.0 0.0
+ -1 0.14 0.0 0.0
   1   280   # settings.heart_drive_k_TS
- -1 %settings.heart_drive_k_TS_maxAct% 0.0 0.0
+ -1 0.13 0.0 0.0
   1   280   # settings.heart_drive_k_TS_maxAct
- -1 %settings.heart_drive_k_TR% 0.0 0.0
+ -1 0.45 0.0 0.0
   1   280   # settings.heart_drive_k_TR
- -1 %settings.heart_drive_k_TR_maxAct% 0.0 0.0
+ -1 0.08 0.0 0.0
   1   280   # settings.heart_drive_k_TR_maxAct
- -1 %settings.heart_drive_drive% 0.0 0.0
+ -1 1.0 0.0 0.0
   1   280   # settings.heart_drive_drive
   0       0                       0                       0                
   6   256   # settings.heart_drive_drive_maxAct
- -1 %settings.heart_atr_Tact% 0.0 0.0
+ -1 0.1 0.0 0.0
   1   280   # settings.heart_atr_Tact
- -1 %settings.heart_atr_Emin% 0.0 0.0
+ -1 0.05 0.0 0.0
   1   280   # settings.heart_atr_Emin
- -1 %settings.heart_atr_Emax% 0.0 0.0
+ -1 0.15 0.0 0.0
   1   280   # settings.heart_atr_Emax
- -1 %settings.heart_atr_sigma_a% 0.0 0.0
+ -1 0.125 0.0 0.0
   1   280   # settings.heart_atr_sigma_a
- -1 %settings.heart_vntr_Vw_factor% 0.0 0.0
+ -1 0.90375 0.0 0.0
   1   280   # settings.heart_vntr_Vw_factor
- -1 %settings.heart_vntr_AmRef_factor% 0.0 0.0
+ -1 1.06 0.0 0.0
   1   280   # settings.heart_vntr_AmRef_factor
- -1 %settings.heart_vntr_sigma_act_factor% 0.0 0.0
+ -1 2.0 0.0 0.0
   1   280   # settings.heart_vntr_sigma_act_factor
- -1 %settings.heart_vntr_sigma_actMaxAct_factor% 0.0 0.0
+ -1 30.25 0.0 0.0
   1   280   # settings.heart_vntr_sigma_actMaxAct_factor
- -1 %settings.heart_vntr_k_passive_factor% 0.0 0.0
+ -1 1.0 0.0 0.0
   1   280   # settings.heart_vntr_k_passive_factor
- -1 %settings.thoracic_pressure_ratio% 0.0 0.0
+ -1 0.8 0.0 0.0
   1   280   # settings.thoracic_pressure_ratio
- -1 %settings.hydrostaticLevel_correction% 0.0 0.0
+ -1 1.0 0.0 0.0
   1   280   # settings.hydrostaticLevel_correction
- -1 %settings.TPR% 0.0 1e+100
+ -1 1.19490152E8 0.0 1e+100
   1   280   # settings.TPR
- -1 %settings.TR_frac% 0.0 0.0
+ -1 5.118955 0.0 0.0
   1   280   # settings.TR_frac
- -1 %settings.k_E% 0.0 0.0
+ -1 0.358125 0.0 0.0
   1   280   # settings.k_E
   0       0                       0                       0                
   6   256   # settings.tissues_nominal_arterioles_pressure
@@ -10231,19 +10231,19 @@ double initialValue(10046,6)
   1   281   # settings.arteries_UseVasoconstrictionEffect
  -1       0                       0                       0                
   1   280   # settings.exercise_factor_on_arterial_compliance
- -1 %settings.R_vc% 0.0 0.0
+ -1 0.25 0.0 0.0
   1   280   # settings.R_vc
- -1 %settings.tissues_nominal_pressure% 0.0 0.0
+ -1 2666.4477483 0.0 0.0
   1   280   # settings.tissues_nominal_pressure
- -1 %settings.tissues_nominal_zpv% 0.0 1e+100
+ -1 0.002304 0.0 1e+100
   1   280   # settings.tissues_nominal_zpv
- -1 %settings.tissues_nominal_stressed_volume% 0.0 1e+100
+ -1 7.95E-4 0.0 1e+100
   1   280   # settings.tissues_nominal_stressed_volume
- -1 %settings.tissues_nominal_cardiac_output% 0.0 0.0
+ -1 1.05E-4 0.0 0.0
   1   280   # settings.tissues_nominal_cardiac_output
- -1 %settings.Ra_factor% 0.0 0.0
+ -1 4.2625 0.0 0.0
   1   280   # settings.Ra_factor
- -1 %settings.tissues_Ra_tau% 0.0 0.0
+ -1 1.2E-5 0.0 0.0
   1   280   # settings.tissues_Ra_tau
   0       0                       0                       0                
   6   256   # settings.Rv_factor
@@ -10251,13 +10251,13 @@ double initialValue(10046,6)
   1   281   # settings.UseNonLinear_TissuesCompliance
  -1       1                       0                       0                
   1   281   # settings.tissues_UseStraighteningReaction2Phi
- -1 %settings.tissuesCompliance_PhiEffect% 0.0 0.0
+ -1 0.2 0.0 0.0
   1   280   # settings.tissuesCompliance_PhiEffect
  -1  2.0000000000000001E-01       0                       0                
   1   280   # settings.exercise_factor_on_tissue_compliance
- -1 %settings.tissues_gamma% 0.0 0.0
+ -1 0.5 0.0 0.0
   1   280   # settings.tissues_gamma
- -1 %settings.exercise_factor% 0.0 0.0
+ -1 40.0 0.0 0.0
   1   280   # settings.exercise_factor
  -1       0                       0                       0                
   1   280   # settings.exercise_venous_pumping_factor
@@ -10267,13 +10267,13 @@ double initialValue(10046,6)
   1   281   # settings.UseNonLinear_VenousCompliance
  -1       1                       0                       0                
   1   281   # settings.veins_UsePhiEffect
- -1 %settings.veins_gamma% 0.0 0.0
+ -1 0.5 0.0 0.0
   1   280   # settings.veins_gamma
- -1 %settings.veins_alpha% 0.0 0.0
+ -1 5.0 0.0 0.0
   1   280   # settings.veins_alpha
- -1 %settings.veins_activation_tau% 0.0 0.0
+ -1 0.1 0.0 0.0
   1   280   # settings.veins_activation_tau
- -1 %settings.venous_diameter_correction% 0.0 0.0
+ -1 1.5 0.0 0.0
   1   280   # settings.venous_diameter_correction
  -1       1                       0                       0                
   1   281   # settings.veins_ignoreViscosityResistance
@@ -10303,35 +10303,35 @@ double initialValue(10046,6)
   1   281   # settings.hideLevel1
  -1       1                       0                       0                
   1   281   # settings.EvaluateFunctionalParams
- -1 %settings.dummy% 0.0 0.0
+ -1 1.0 0.0 0.0
   1   280   # settings.dummy
- -1 %settings.baro_hr_delay% 0.0 0.0
+ -1 0.0 0.0 0.0
   1   280   # settings.baro_hr_delay
  -1       0                       0                       0                
   1   281   # settings.baro_useAbsolutePressureTerm
- -1 %settings.baro_d0% 0.0 0.0
+ -1 1.5 0.0 0.0
   1   280   # settings.baro_d0
- -1 %settings.baro_Ts% 0.0 0.0
+ -1 300.0 0.0 0.0
   1   280   # settings.baro_Ts
- -1 %settings.baro_delta0_factor% 0.0 0.0
+ -1 0.25 0.0 0.0
   1   280   # settings.baro_delta0_factor
- -1 %settings.baro_delta0_aor% 0.0 0.0
+ -1 0.6 0.0 0.0
   1   280   # settings.baro_delta0_aor
- -1 %settings.baro_delta0_car% 0.0 0.0
+ -1 0.55 0.0 0.0
   1   280   # settings.baro_delta0_car
- -1 %settings.baro_g% 0.0 0.0
+ -1 0.54 0.0 0.0
   1   280   # settings.baro_g
- -1 %settings.baro_fsn% 0.0 0.0
+ -1 0.036 0.0 0.0
   1   280   # settings.baro_fsn
- -1 %settings.baro_f1% 0.0 0.0
+ -1 0.0031 0.0 0.0
   1   280   # settings.baro_f1
- -1 %settings.pulm_CO_target% 0.0 0.0
+ -1 4850.0 0.0 0.0
   1   280   # settings.pulm_CO_target
- -1 %settings.pulm_C_PV% 0.0 0.0
+ -1 1.8751539396141E-7 0.0 0.0
   1   280   # settings.pulm_C_PV
- -1 %settings.pulm_C_PA% 0.0 0.0
+ -1 4.0503325095665E-8 0.0 0.0
   1   280   # settings.pulm_C_PA
- -1 %settings.pulm_R_PA% 0.0 1e+100
+ -1 2.1441532959301E7 0.0 1e+100
   1   280   # settings.pulm_R_PA
   0       0                       0                       0                
   6   256   # baseline.settings.phi0

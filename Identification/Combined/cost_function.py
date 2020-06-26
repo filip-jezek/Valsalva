@@ -6,15 +6,13 @@ from typing import Iterable
 import matplotlib.pyplot as plt
 
 DEFAULT_TARGETVARS_TAG = 'All_supine'
-TOP_LEVEL_FOLDER = '..\\..\\..\\'
-# TOP_LEVEL_FOLDER = '..\\'
 
 
 def importCostFunction(location):
     """Returns CF module, location is expected at sibling folder"""
 
     # working dir is in  'identification/combined/debug/' or sibling folder
-    path = TOP_LEVEL_FOLDER + 'Identification\\' + location + '\\cost_function.py'
+    path = location + '\\cost_function.py'
     spec = importlib.util.spec_from_file_location(
         'cost_function', path)
     cf = importlib.util.module_from_spec(spec)
@@ -56,7 +54,6 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
         brachial pressures
         LV volumes (SV and EF) 
     max exercise"""
-    TOP_LEVEL_FOLDER = top_level
 
     plt.close('all')
     objectives = list()
@@ -99,7 +96,7 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
 
         vars_set['__plot_axes'] = ax[axes_num]
         axes_num = axes_num + 1
-        cf = importCostFunction(cost_func_folder)
+        cf = importCostFunction(top_level + 'Identification\\' + cost_func_folder)
         # mapped_vars = mapVarSet(vars_set, mapping)
         # filtering only vars relevant for that cost function, e.g. valsalva.brachial_pressure gives brachial_pressure
         
@@ -144,7 +141,8 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
     if saveFig_path is not None:
         plt.savefig(saveFig_path)
     
-    if fun_lib.getRunNumber() == 0:
+    if '__showPlots' in vars_set and vars_set['__showPlots'] :
+    # and fun_lib.getRunNumber() == 0:
         # zero means debug
         plt.show()
 

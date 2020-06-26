@@ -16,9 +16,10 @@ import fun_lib
 
 # (prefix, cost_function folder, fmu name)
 model_infos = [
-        # ('baseline', 'optimizeBaselineTriSegLumens', 'ADAN_0main_SystemicTree_Baseline_OlufsenTriSeg_0base.fmu'), 
-        # ('exercise', 'MaxExercise', 'ADAN_0main_SystemicTree_Exercise_OlufsenTriseg_0Exercise.fmu'),
-        ('tilt', 'optimizeTilt', 'ADAN_0main_SystemicTree_Tilt_OlufsenTriSeg_0tiltable.fmu'),
+        ('baseline', 'optimizeBaselineTriSegLumens', 'ADAN_0main_SystemicTree_Baseline_OlufsenTriSeg_0base.fmu'), 
+        ('exercise', 'MaxExercise', 'ADAN_0main_SystemicTree_Exercise_OlufsenTriseg_0Exercise.fmu'),
+        ('tilt', 'optimizeTilt', 'ADAN_0main_0SystemicTree_0Tilt_0OlufsenTriSeg_0tiltable.fmu'),
+        # ('tilt_d', 'optimizeTilt', 'ADAN_0main_0SystemicTree_0Tilt_0OlufsenTriSeg_0tiltable_dymsolv.fmu'),
         ('valsalva', 'valsalva', 'ADAN_0main_SystemicTree_Valsalva_OlufsenTriSeg_0valsalva.fmu')]
 
 schedules = 'random_search_schedules.csv'
@@ -27,18 +28,31 @@ DRAW_PLOTS = True
 # output = ['brachial_pressure']
 
 def initSchedules(params:dict):
-    with open(schedules, 'w+') as file:
+    with open(schedules, 'w') as file:
         file.write('Run, cost, %s\n' % ', '.join(params.keys()))
 
 def writeSchedule(params:dict, cost, iter):
     if not os.path.exists(schedules):
         initSchedules(params)
 
-    with open(schedules, 'w+') as file:
+    with open(schedules, 'a') as file:
         line = '%03d, %.6f, %s\n' % (iter, cost, ', '.join('%.3e' % p for p in params.values()))
         file.write(line)
 
-def readInitParams(initparams_path = 'init_params_default_vals.csv'):
+def readInitParams(initparams_path = 'init_params_default_vals.csv', continue_params_path = 'random_search_schedules.csv'):
+
+    if os.path.exists(continue_params_path):
+        # lets continue where we ended
+        print('Continue from last run in ' + continue_params_path)
+        with open(continue_params_path, 'r') as file:
+            # Run, cost, param1, param2...
+            param_names = file.readline().rstrip('\n').split(',')[2:]
+            # last line should have the lowest costs - strip it off the \n and floatize
+            param_strings = (file.readlines()[-1].rstrip('\n').split(',')[2:])
+            param_vals = (float(v) for v in param_strings)
+        
+        params_def = dict(zip(param_names, param_vals))
+        return params_def
 
     if not os.path.exists(initparams_path):
         raise FileNotFoundError('init_params_default_vals.csv not found. Generate that using CodeGen/manipulate_dsin.py')
@@ -73,7 +87,10 @@ def initFmus() -> list:
         # read the model description
         model_description = fmpy.read_model_description(unzipdir)
         # instantiate the FMU
-        fmu_instance = fmpy.instantiate_fmu(unzipdir, model_description, 'CoSimulation', debug_logging=True, fmi_call_logger=logger, visible=True)
+        fmu_instance = fmpy.instantiate_fmu(unzipdir, model_description, 'CoSimulation')
+        # fmu_instance = fmpy.instantiate_fmu(unzipdir, model_description, 'CoSimulation', debug_logging=True, fmi_call_logger=logger, visible=True)
+        
+        # TODO this might be obsolete atm
         cf = fun_lib.importCostFunction(dir = '..\\' + cf_folder + '\\')
         fmu_init.append((fmu_instance, model_description, cf, prefix))
            
@@ -92,28 +109,33 @@ def convertResult(result, prefix = '', exclude = []):
 
 
 
-def runSimulations(fmu_init, params):
+def runSimulations(fmu_init, params, run):
+
     # reset the FMU instance instead of creating a new one
-    
+    combined_cost_func = fun_lib.importCostFunction(dir = '..\\Combined' + '\\')
     var_set = {}
-    for (fmu_instance, fmu_desc, cf, prefix) in fmu_init:
-        fmu_instance.reset()
-    
+
+    for (fmu_instance, fmu_desc, _, prefix) in fmu_init:
+        
+        # TODO do the paralelization
         result = fmpy.simulate_fmu(fmu_instance.unzipDirectory,
-                                stop_time=1,
+                                stop_time=60,
                                 start_values=params,
                                 model_description=fmu_desc,
                                 fmu_instance=fmu_instance
                                 )
 
         var_set.update(convertResult(result, prefix=prefix, exclude=params))
+        fmu_instance.reset()
 
     if DRAW_PLOTS:
         var_set['__draw_plots'] = True
-        var_set['__plot_title'] = "Run %i" % (fun_lib.getRunNumber())
-        var_set['__saveFig_path'] = "%sFitFig_%03d.png" % (fun_lib.getSafeLogDir('Schedules'), fun_lib.getRunNumber())
+        var_set['__plot_title'] = "Run %i" % (run)
+        var_set['__saveFig_path'] = "%sFitFig_%03d.png" % (fun_lib.getSafeLogDir('//Schedules', safe_rollback=''), run)
+        var_set['__showPlots'] = False
 
-    objectives = cf.getObjectives(var_set, targetsFolder = r"../data/Valsalva/", top_level = '..\\..\\')
+    
+    objectives = combined_cost_func.getObjectives(var_set, targetsFolder = r"../../data/Valsalva/", top_level = '..\\..\\')
 
     return objectives
 
@@ -129,7 +151,7 @@ def runOptimization():
 
         cur_params = shuffleParams(params)
         
-        objectives = runSimulations(fmu_init, cur_params)
+        objectives = runSimulations(fmu_init, cur_params, iter)
         
         cur_cost = fun_lib.countTotalSumCost(objectives)
 
