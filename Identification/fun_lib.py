@@ -330,21 +330,25 @@ def getAxes(vars_set : dict) -> plt.axes:
         fig = plt.figure()
         return fig.subplots()
 
-def plotObjectiveTarget(pack:tuple, objective_name:str, unitFactor:float, fmt = 'k', verticalalignment = 'bottom'):
+def plotObjectiveTarget(pack:tuple, objective_name:str, unitFactor:float, fmt = 'k', verticalalignment = 'bottom', showVal = True):
     """ Plots the objective target with label
     pack = (objectives:list, ax:plt.axes, interval:range)
     """
     (objectives, time, ax, interval) = pack
     # get the bounds from the target value
     objective = next((o for o in objectives if o.name == objective_name))
-    val = objective.targetValue*unitFactor
-    ax.plot((time[interval[0]], time[interval[-1]]), [val]*2, fmt)
-    s = '%s %.6f' % (objective_name, objective.cost())
-    ax.text(time[interval[-1]], val, s, 
+    targetVal = objective.targetValue*unitFactor
+    val = objective.value*unitFactor
+    ax.plot((time[interval[0]], time[interval[-1]]), [targetVal]*2, fmt)
+    if showVal:
+        s = '%s = %2f (%.6f)' % (objective_name, val, objective.cost())
+    else:
+        s = '%s %.6f' % (objective_name, objective.cost())
+    ax.text(time[interval[-1]], targetVal, s, 
             horizontalalignment='right', 
             verticalalignment=verticalalignment)
 
-def plotObjectiveLimit(pack:tuple, objective_name:str, unitFactor:float, limit:str, fmt = 'k', verticalalignment = 'bottom'):
+def plotObjectiveLimit(pack:tuple, objective_name:str, unitFactor:float, limit:str, fmt = 'k', verticalalignment = 'bottom', showVal = True):
     """ Plots the objective limit with label
     pack = (objectives:list, time:iterable, ax:plt.axes, interval:range)
     limit = 'lower' or 'upper'
@@ -352,8 +356,13 @@ def plotObjectiveLimit(pack:tuple, objective_name:str, unitFactor:float, limit:s
     (objectives, time, ax, interval) = pack
     SV_min_objective = getObjectiveByName(objectives, objective_name)
     limit_val = SV_min_objective.limit[0] if limit == 'lower' else SV_min_objective.limit[1]
+    val = SV_min_objective.value*unitFactor
     ax.plot([time[interval[0]], time[interval[-1]]], [limit_val]*2, 'r')
-    ax.text(time[interval[-1]], limit_val, '%s %s lim %.4f' % (objective_name, limit, SV_min_objective.cost()), horizontalalignment='right', 
+    if showVal:
+        s= '%s = %3f, %s lim at %3f (%.4f)' % (objective_name, val, limit, limit_val, SV_min_objective.cost())
+    else:
+        s = '%s %s lim %.4f' % (objective_name, limit, SV_min_objective.cost())
+    ax.text(time[interval[-1]], limit_val, s, horizontalalignment='right', 
             verticalalignment=verticalalignment, fontsize = 8, color='red')
 
 def importCostFunction(dir = '..\\'):

@@ -97,12 +97,9 @@ def loadMatFile():
 
     d = DyMat.DyMatFile(filename)
     toc = time.time()
-    print("Opening result in ", toc - tic, " s")
+    print("Opening %s in %.3f ms" % (filename, (toc - tic)*1000))
 
     var_set = extractVars(d)
-
-    tic = time.time()
-    print("Loading result in ", -toc + tic, " s")
     return var_set
 
 def getObjectives(var_set) -> fun_lib.ObjectiveVar:
@@ -119,11 +116,38 @@ def getObjectives(var_set) -> fun_lib.ObjectiveVar:
     print("Calculating costs in ", time.time() - tic, " s")
     return objectives
 
+def logCrash(line:str):
+    with open(fun_lib.getSafeLogDir('..\\Schedules') + 'errorLog.txt', 'a') as f:
+        s = '%s: At run %d sumfin went wong: %s\n' % (datetime.now(), fun_lib.getRunNumber(), line)
+        print(s)
+        f.write(s)
+        
 
-var_set = loadMatFile()
+def processDyMatFile():
+    try:
+        var_set = loadMatFile()
 
-objectives = getObjectives(var_set)
+        objectives = getObjectives(var_set)
 
-writeCost(objectives)
-writeLogHeader(objectives)
-logOutput(objectives)
+        writeCost(objectives)
+        writeLogHeader(objectives)
+        logOutput(objectives)
+
+    except FileNotFoundError as f:
+        # the simulation did not evens started
+        logCrash('Simulation output file %s not found, quitting.' % f.filename)
+        # objectives = [fun_lib.ObjectiveVar('Simulation failed', value = 1, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)]
+        # writeCost(objectives)
+        # logOutput(objectives)
+    except ValueError as v:
+        # most probably the simulation crashed mid-simulation. Lets provide a penalty for that
+        objectives = [fun_lib.ObjectiveVar('Simulation failed', value = 1, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)]
+        writeCost(objectives)
+        if 'time' in var_set:
+            t = '%.2f' % var_set['time'][-1]
+        else:
+            t = 'unknown'
+        logCrash('Simulation probably crashed at %s with following info: %s' % (t, v) )
+        logOutput(objectives)
+
+processDyMatFile()
