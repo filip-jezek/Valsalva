@@ -89,6 +89,10 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     __plot_title
     __saveFig_path
     __draw_plots"""
+    
+    
+    fun_lib.checkSimulationLength(vars_set['time'][-1],50)
+    
     # some control variables are not present in case of identification
     if '__targetValuesFilename' not in vars_set or vars_set['__targetValuesFilename'] is None:
         vars_set['__targetValuesFilename'] = targetsFileName
@@ -271,6 +275,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         ax.plot(phase5, [getObj('ph5_hr_recovery')*baseline_hr]*2, 'c')
 
         plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time)
+        ax.set_ylim([0, 165])
         # ax.show(block = False)
 
         if '__saveFig_path' in vars_set and vars_set['__saveFig_path'] is not None:

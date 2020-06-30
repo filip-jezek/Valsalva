@@ -11,6 +11,7 @@ ml2SI = 1e-6
 lpm2SI = 1e-3/60
 
 def plotObjectives(vars_set, interval, objectives):
+    
     ax = fun_lib.getAxes(vars_set)
 
     ax.plot(vars_set['time'], vars_set['brachial_pressure']/133.32, label='Brachial pressure mmHg')
@@ -30,9 +31,13 @@ def plotObjectives(vars_set, interval, objectives):
     
     total_costs = fun_lib.countTotalWeightedCost(objectives)
     ax.set_title('Exercise costs %.6f' % total_costs)
+    ax.set_ylim([0, 165])
+
 
 
 def getObjectives(vars_set):
+
+    fun_lib.checkSimulationLength(vars_set['time'][-1],10)
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
     # Pa = vars_set['Pa']

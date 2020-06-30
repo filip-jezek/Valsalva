@@ -139,15 +139,15 @@ def processDyMatFile():
         # objectives = [fun_lib.ObjectiveVar('Simulation failed', value = 1, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)]
         # writeCost(objectives)
         # logOutput(objectives)
-    except (ValueError, StopIteration) as e:
+    except fun_lib.SimulationResultIncompleteError as e:
         # most probably the simulation crashed mid-simulation. Lets provide a penalty for that
         objectives = [fun_lib.ObjectiveVar('Simulation failed', value = 1, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)]
         writeCost(objectives)
-        if 'time' in var_set:
-            t = '%.2f' % var_set['time'][-1]
-        else:
-            t = 'unknown'
-        logCrash('Simulation probably crashed at %s with following info: %s' % (t, e) )
+        # if 'time' in var_set:
+        #     t = '%.2f' % var_set['time'][-1]
+        # else:
+        #     t = 'unknown'
+        logCrash(e)
         logOutput(objectives)
 
 processDyMatFile()

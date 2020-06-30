@@ -9,10 +9,16 @@ import re
 import matplotlib.pyplot as plt
 from typing import Iterable
 import importlib.util
+import inspect
 
 # For variance based cost function we need a guess of variance of any target variables
 # does not really work for timed variables though
 DEFAULT_STD_PERCENT = 10
+
+class SimulationResultIncompleteError(ValueError):
+    def __init__(self, length:float, minimalLength:float, owner:str):
+        m = 'Incomplete simulation output, the simulation probably crashed at %.2f s (%.1f s required). At %s' % (length, minimalLength, owner)
+        super().__init__(m)
 
 class CostFunctionType(enum.Enum):
     Ignore = 0
@@ -374,3 +380,16 @@ def importCostFunction(dir = '..\\'):
     cf = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(cf)
     return cf
+
+def checkSimulationLength(simulationTime, minimalSimulationTime):
+
+    if simulationTime < minimalSimulationTime:
+        try:
+            # this must be errorproof
+            frame = inspect.stack()[1]
+            filename = frame[0].f_code.co_filename
+        except:
+            filename = 'Unknwon'
+
+        raise SimulationResultIncompleteError(simulationTime, minimalSimulationTime, filename)
+        

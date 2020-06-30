@@ -33,10 +33,14 @@ def plotObjectives(vars_set, interval, objectives):
 
     total_costs = fun_lib.countTotalWeightedCost(objectives)
     ax.set_title('Baseline costs %.6f' % total_costs)
+    ax.set_ylim([0, 140])
+
 
 
 def getObjectives(vars_set):
 
+    
+    fun_lib.checkSimulationLength(vars_set['time'][-1],10)
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
     # Pa = vars_set['Pa']
     # interval = findInterval(380, 400, vars_set['time'])
