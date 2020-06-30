@@ -35772,7 +35772,7 @@ P_hs_plus_dist"),
             UseTiltInput=true),
           redeclare replaceable Modelica.Blocks.Sources.BooleanExpression
             useAutonomousPhi(y=true),
-          settings(baro_useAbsolutePressureTerm=true));
+          settings(baro_useAbsolutePressureTerm=false));
 
         replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
           height=Modelica.Constants.pi/3,
