@@ -283,8 +283,38 @@ Vary{
 
             line = '  Parameter{ Name = %s; Min = %s; Ini = %s; Max = %s; Step = %s; }\n' % inputs
             file.write(line)
-        
-        file.write("""\n}
+
+        if run_type == 'identification':
+            file.write("""\n}
+OptimizationSettings{
+  MaxIte = 5000;
+  MaxEqualResults = 4;
+  WriteStepNumber = false;
+  UnitsOfExecution = 4;
+}
+
+Algorithm{
+  Main = GPSPSOCCHJ;
+  NeighborhoodTopology = vonNeumann;
+  NeighborhoodSize = 5;
+  NumberOfParticle = 16;
+  NumberOfGeneration = 20;
+  Seed = 1;
+  CognitiveAcceleration = 2.8;
+  SocialAcceleration = 1.3;
+  MaxVelocityGainContinuous = 0.5;
+  MaxVelocityDiscrete = 4;
+  ConstrictionGain = 0.5;
+  MeshSizeDivider = 2;
+  InitialMeshSizeExponent = 0;
+  MeshSizeExponentIncrement = 1;
+  NumberOfStepReduction = 4;
+}""" )
+            # jsut to get back at proper  indent
+            pass
+
+        else:        
+            file.write("""\n}
 
 OptimizationSettings{
 MaxIte = 500;
@@ -298,7 +328,8 @@ Main = Parametric;
 StopAtError = false;
 }
 """)
-    # jsut to get back at proper  indent
+
+    # jsut to get back at proper indent at the method end
     pass
 
 def writeInitParams(init_params:dict):
@@ -338,7 +369,7 @@ def prepareIdent():
     # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
     writeInitParams(init_params)
 
-    build_opt_command_file('opt_command.txt', init_params, step_frac=0.2, run_type='identification', ident_step_frac=0.01)
+    build_opt_command_file('opt_command.txt', init_params, step_frac=0.5, run_type='identification', ident_step_frac=0.01)
 
     createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt')    
 
