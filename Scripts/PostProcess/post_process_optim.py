@@ -86,3 +86,4 @@ def generateModel(modelName, pack):
 if __name__ is '__main__':
     pack = readOutputListing('OutputListingMain_optim.txt')
     generateModel('OlufsenTriSeg', pack)
+    

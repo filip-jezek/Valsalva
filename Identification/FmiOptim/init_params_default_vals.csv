@@ -1,0 +1,15 @@
+settings.Ra_factor,3.17162
+settings.baro_Ts,115.62
+settings.baro_delta0_factor,0.2688
+settings.baro_g,0.606258
+settings.exercise_factor,34.776
+settings.exercise_factor_on_tissue_compliance,0.343757
+settings.heart_drive_k_TR,0.38097
+settings.heart_drive_k_TR_maxAct,0.1224
+settings.heart_vntr_sigma_actMaxAct_factor,18.8325
+settings.heart_vntr_sigma_act_factor,1.974
+settings.k_E,0.350423
+settings.pulm_C_PV,1.99E-07
+settings.tissuesCompliance_PhiEffect,0.22878
+settings.tissues_nominal_zpv,0.00210124
+settings.HR_max,2.907

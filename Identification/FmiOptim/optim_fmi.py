@@ -16,7 +16,7 @@ import fun_lib
 
 # (prefix, cost_function folder, fmu name)
 model_infos = [
-        ('baseline', 'optimizeBaselineTriSegLumens', 'ADAN_0main_SystemicTree_Baseline_OlufsenTriSeg_0base.fmu'), 
+        ('baseline', 'optimizeBaselineTriSegLumens', 'ADAN_0main_SystemicTree_Identification_Results_OlufsenTriSeg_0optimized_0steadyState_0init.fmu'), 
         ('exercise', 'MaxExercise', 'ADAN_0main_SystemicTree_Exercise_OlufsenTriseg_0Exercise.fmu'),
         ('tilt', 'optimizeTilt', 'ADAN_0main_0SystemicTree_0Tilt_0OlufsenTriSeg_0tiltable.fmu'),
         # ('tilt_d', 'optimizeTilt', 'ADAN_0main_0SystemicTree_0Tilt_0OlufsenTriSeg_0tiltable_dymsolv.fmu'),
@@ -151,15 +151,21 @@ def runOptimization():
 
         cur_params = shuffleParams(params)
         
-        objectives = runSimulations(fmu_init, cur_params, iter)
-        
-        cur_cost = fun_lib.countTotalSumCost(objectives)
+        try:
+            objectives = runSimulations(fmu_init, cur_params, iter)
+            cur_cost = fun_lib.countTotalSumCost(objectives)
+            if cur_cost < cost:
+                # woohoo, better costs!
+                cost = cur_cost
+                params = cur_params
+                writeSchedule(params, cost, iter)
+        except:
+            writeSchedule(cur_params, 1.0, iter)
 
-        if cur_cost < cost:
-            # woohoo, better costs!
-            cost = cur_cost
-            params = cur_params
-            writeSchedule(params, cost, iter)
+            
+        
+        
+
 
     # clean up
     for (fmu_instance, _, _, _) in fmu_init:
