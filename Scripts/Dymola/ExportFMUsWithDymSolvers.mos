@@ -1,0 +1,4 @@
+﻿translateModelFMU("ADAN_main.SystemicTree.Baseline.OlufsenTriSeg_optimized_steadyState_init", false, "", "2", "csSolver", false, 2);
+translateModelFMU("ADAN_main.SystemicTree.Valsalva.OlufsenTriSeg_valsalva", false, "", "2", "csSolver", false, 2);
+translateModelFMU("ADAN_main.SystemicTree.Tilt.OlufsenTriSeg_tiltable", false, "", "2", "csSolver", false, 2);
+translateModelFMU("ADAN_main.SystemicTree.Exercise.OlufsenTriseg_Exercise", false, "", "2", "csSolver", false, 2);
