@@ -1,0 +1,20 @@
+﻿
+// check the default translation settings, esp. rTol!
+
+Advanced.SparseActivate=true;
+Advanced.NumberOfCores = 4;
+
+eraseClasses({"ADAN_0main_SystemicTree_Variants_OlufsenTriSeg_0opt_0LinearVeins_0init_fmu_black_box"});
+eraseClasses({"ADAN_0main_SystemicTree_Variants_OlufsenTriseg_0opt_0LinearVeins_0init_0valsalva_fmu_black_box"});
+eraseClasses({"ADAN_0main_SystemicTree_Variants_OlufsenTriseg_0opt_0LinearVeins_0init_0tiltable_fmu_black_box"});
+eraseClasses({"ADAN_0main_SystemicTree_Variants_OlufsenTriseg_0opt_0LinearVeins_0init_0Exercise_fmu_black_box"});
+
+base = translateModelFMU("ADAN_main.SystemicTree.Variants.OlufsenTriSeg_opt_LinearVeins_init", false, "", "2", "cs", false, 2);
+vals = translateModelFMU("ADAN_main.SystemicTree.Variants.OlufsenTriseg_opt_LinearVeins_init_valsalva", false, "", "2", "cs", false, 2);
+tilt = translateModelFMU("ADAN_main.SystemicTree.Variants.OlufsenTriseg_opt_LinearVeins_init_tiltable", false, "", "2", "cs", false, 2);
+exec = translateModelFMU("ADAN_main.SystemicTree.Variants.OlufsenTriseg_opt_LinearVeins_init_Exercise", false, "", "2", "cs", false, 2);
+
+importFMU(base + ".fmu", false, false, false, "");
+importFMU(vals + ".fmu", false, false, false, "");
+importFMU(tilt + ".fmu", false, false, false, "");
+importFMU(exec + ".fmu", false, false, false, "");

@@ -1,4 +1,5 @@
 # reads the measured data and passes them to cost_function to calculate proper metrics. Metrics are averaged and saved to file for further use
+# assumes current working dir
 
 import scipy.io as skipy
 import numpy

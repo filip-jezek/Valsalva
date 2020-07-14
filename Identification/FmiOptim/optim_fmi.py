@@ -1,4 +1,6 @@
-# test FMPy optim
+# Optimizes a set of fmis using a greedy random search
+# TODO paralelize the calculation of multiple FMI use cases at once
+
 import fmpy
 import os
 import random

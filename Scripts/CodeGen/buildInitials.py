@@ -16,10 +16,10 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'ADAN_main.AdanVenousRed_Safaei.Baseline.OlufsenTriSeg_optimized_steadyState'
-relative_folder = ''
+base_model_full_path = 'ADAN_main.AdanVenousRed_Safaei.Baseline.OlufsenTriSeg_opt_ssi_LinearVeins'
+relative_folder = '..\\..\\'
 exclude_filter = ['Ra_phi', 'v_in', 'A']
-steadyStateAt = 1599.03
+steadyStateAt = 300
 
 # get the main and path
 if '.' in base_model_full_path:
@@ -45,7 +45,7 @@ mat_file_path = relative_folder + base_model + '.mat'
 mat_date = str(datetime.datetime.fromtimestamp(os.path.getmtime(mat_file_path)))
 
 # open file with values
-d = DyMat.DyMatFile(base_model)
+d = DyMat.DyMatFile(mat_file_path)
 time = d.abscissa(2)[0]
 
 nmsList = d.names(block = 2)
