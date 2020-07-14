@@ -20,8 +20,8 @@ Algorithm{
   Main = GPSPSOCCHJ;
   NeighborhoodTopology = vonNeumann;
   NeighborhoodSize = 5;
-  NumberOfParticle = 16;
-  NumberOfGeneration = 20;
+  NumberOfParticle = 8;
+  NumberOfGeneration = 8;
   Seed = 1;
   CognitiveAcceleration = 2.8;
   SocialAcceleration = 1.3;
