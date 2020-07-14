@@ -189,7 +189,7 @@ package ADAN_main
         annotation(choices(checkBox=true), Dialog(tab = "Systemic", group = "Arteries"));
       parameter Fraction exercise_factor_on_arterial_compliance = 0 "Effect of venoconstriction"
         annotation(Dialog(tab = "Systemic", group = "Arteries", enable = arteries_UseVasoconstrictionEffect));
-      parameter Fraction R_vc = 0 "Effect fraction of venoconstriction on compliance"
+      parameter Fraction R_vc = 0 "Effect fraction of arterial vasoconstriction on arterial compliance"
         annotation(Dialog(tab = "Systemic", group = "Arteries", enable = arteries_UseVasoconstrictionEffect));
       // tissues
       parameter Pressure tissues_nominal_pressure=2666.4477483 "Tissues and small arteries and veins nominal pressure. Used for calculation of arteriole and venule resistances and tissues compliance"
@@ -231,11 +231,14 @@ package ADAN_main
       (tissues_nominal_pressure * (1+ TR_frac) - TPR*tissues_nominal_cardiac_output)/(1+TR_frac)
         "Venous pressure used for initialization and calculation of tissue venules resistances"
         annotation(Dialog(tab = "Systemic", group = "Veins"));
-      parameter Boolean UseNonLinear_VenousCompliance = false "Use nonlinear compliance model in all large veins" annotation(choices(checkBox=true), Dialog(tab = "Systemic", group = "Veins"));
+      //parameter Boolean UseNonLinear_VenousCompliance = false "Use nonlinear compliance model in all large veins" annotation(choices(checkBox=true), Dialog(tab = "Systemic", group = "Veins"));
       parameter Boolean veins_UsePhiEffect=true "Use venoconstriction in all large veins" annotation(choices(checkBox=true), Dialog(tab = "Systemic", group = "Veins"));
     //  parameter Pressure venous_p0 = 666.6 "Venous pressure used for initialization"    annotation(Dialog(tab = "Systemic", group = "Veins"));
       // parameter Real gamma;
       // parameter Real alpha;
+      parameter Fraction veins_C_phi = 0 "Phi effect on linear veins compliance" annotation(Dialog(tab = "Systemic", group = "Veins"));
+      parameter Fraction veins_ZPV_phi = 0 "Phi effect on linear veins ZPV" annotation(Dialog(tab = "Systemic", group = "Veins"));
+
       parameter Fraction veins_gamma=0.5    "Fraction of minimal collapsing diameter to nominal diameter"    annotation(Dialog(tab = "Systemic", group = "Veins"));
       parameter Fraction veins_alpha=5   "ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter"    annotation(Dialog(tab = "Systemic", group = "Veins"));
       parameter Time veins_activation_tau(displayUnit="s")=0.1
@@ -314,7 +317,14 @@ package ADAN_main
          21441532.959301                                       "Pulmonary vasculature resistance, mmHg*sec/mL "
         annotation(Dialog(tab = "Pulmonary", group = "General"));
 
-        annotation(Dialog(tab = "Heart", group = "TriSegOttesen drive"),
+
+      parameter Fraction experimental_zpv_factor = 0.5 "A fraction of venous nominal diameter which creates ZPV for linear veins";
+      parameter Fraction experimental_C_factor = 1 "A fraction of nominal C";
+
+       replaceable model veins = Subsystems.Systemic.Vessel_modules.vp_vein constrainedby
+        Subsystems.Systemic.Vessel_modules.Interfaces.bg_vessel;
+
+          annotation(Dialog(tab = "Heart", group = "TriSegOttesen drive"),
                    defaultComponentName =     "settings",
                  defaultComponentPrefixes = "outer",
                  missingInnerMessage =      "The Settings object is missing. Add a Settings to the top level and make it 'outer'",
@@ -6715,9 +6725,6 @@ public
                   rotation=90,
                   origin={-80,-20})));
 
-            Physiolibrary.Types.HydraulicCompliance compliance "Real compliance after all effects";
-            Physiolibrary.Types.Fraction vc_effect = 1 - settings.R_vc*(phi - phi0);
-
             protected
             Real _sinAlpha;
           equation
@@ -6725,11 +6732,6 @@ public
               _sinAlpha = sinAlpha;
             end if;
 
-            if UseVasoconstrictionEffect then
-              compliance = 2*Modelica.Constants.pi*((r*vc_effect)^3) *l/(E*h)/exp(Exercise*settings.exercise_factor_on_arterial_compliance);
-            else
-              compliance = C;
-            end if;
           //  h = r*(a*exp(b*r)+c*exp(d*r));
           //  I = rho*l/(Modelica.Constants.pi*(r)^2);
           //  C = 2*Modelica.Constants.pi*(r^3) *l/(E*h);
@@ -6974,10 +6976,18 @@ P_hs/2")}));
                                       V0 = p0*C + zpv);
               parameter Physiolibrary.Types.HydraulicCompliance C "compliance";
               parameter Physiolibrary.Types.Volume zpv "Zero pressure volume";
+
+              Physiolibrary.Types.Fraction vc_effect = 1 - settings.veins_C_phi*(phi_ - phi0);
+              Physiolibrary.Types.Fraction vzpv_effect = 1 - settings.veins_ZPV_phi *(phi_ - phi0);
+
             initial equation
-              p = p0;
+              if settings.initByPressure then
+                p = p0;
+              end if;
             equation
-              V = p * C + zpv;
+              assert(vc_effect > 0, "The venocostriction effect (veins_C_phi) makes the linear compliance zero or negative");
+
+              V = p * C*vc_effect + zpv*vzpv_effect;
             end compliance_linear;
 
             model compliance_nonLinear
@@ -7230,7 +7240,18 @@ P_hs/2")}));
 
           Real u_C(unit = "Pa", start = 10000.0, fixed = settings.initByPressure);
 
+          Physiolibrary.Types.HydraulicCompliance compliance "Real compliance after all effects";
+          Physiolibrary.Types.Fraction vc_effect = 1 - settings.R_vc*(phi - phi0);
+
         equation
+
+          if UseVasoconstrictionEffect then
+            // TODO divide for arteries and veins
+            compliance = 2*Modelica.Constants.pi*((r*vc_effect)^3) *l/(E*h)/exp(Exercise*settings.exercise_factor_on_arterial_compliance);
+          else
+            compliance = C;
+          end if;
+
           volume = (u_C)  *compliance + zpv "Lim 2013";
 
           if UseInertance then
@@ -7291,7 +7312,7 @@ P_hs/2")}));
           extends Interfaces.bg_vessel(
               UseOuter_thoracic_pressure=false,
           UseInertance = false,
-          zpv = l*Modelica.Constants.pi*((r*settings.venous_diameter_correction)^2),
+          zpv = l*Modelica.Constants.pi*((r*settings.venous_diameter_correction)^2)*settings.experimental_zpv_factor,
           R = 8*settings.blood_mu*l/(Modelica.Constants.pi*((r*settings.venous_diameter_correction)^4)),
           I = settings.blood_rho*l/(Modelica.Constants.pi*(r*settings.venous_diameter_correction)^2),
           V_min = compliant_vessel.V_min,
@@ -7404,7 +7425,10 @@ P_hs/2")}));
         end vp_vein;
 
         model vp_vein_linear "Vein with linear PV characteristics"
-          extends vp_vein(redeclare Interfaces.Compliances.compliance_linear compliant_vessel(C = C, zpv = zpv));
+          extends vp_vein(redeclare Interfaces.Compliances.compliance_linear compliant_vessel(
+          C = l*Modelica.Constants.pi*((r*settings.venous_diameter_correction)^2)/settings.tissues_nominal_venules_pressure*settings.experimental_C_factor,
+          zpv = l*Modelica.Constants.pi*((r*settings.venous_diameter_correction)^2)*settings.experimental_zpv_factor));
+
         end vp_vein_linear;
 
         model vp_vein_tDF "Extension of datafit"
@@ -7954,6 +7978,19 @@ P_hs/2")}));
           port_a.position + height = port_b.position;
 
         end vp_vein_tDF_leveled;
+
+        model vp_vein_linear_leveled
+          extends vp_vein_linear(
+            redeclare Interfaces.HydraulicPort_a_leveled port_a,
+            redeclare Interfaces.HydraulicPort_b_leveled port_b);
+          Modelica.SIunits.Position hydrostatic_level = (port_a.position + height/2);
+        //   Physiolibrary.Types.Pressure hydrostatic_pressure = hydrostatic_level*settings.blood_rho*Modelica.Constants.g_n "Total hydrostatic pressure at given point (synthetic)";
+        //   Physiolibrary.Types.Pressure hydraulic_pressure = p - hydrostatic_pressure "Vessel pressure without the hydrostatic part (synthetic)";
+
+        equation
+          port_a.position + height = port_b.position;
+
+        end vp_vein_linear_leveled;
 
         model systemic_tissue_leveled
             extends Interfaces.systemic_tissue_base(
@@ -13456,7 +13493,7 @@ P_hs_plus_dist"),
                 ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
               redeclare model Systemic_artery =
                 ADAN_main.Components.Subsystems.Systemic.Vessel_modules.pv_artery_leveled,
-              redeclare model Systemic_vein =
+              redeclare replaceable model Systemic_vein =
                 ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vp_vein_tDF_leveled,
               redeclare model Systemic_tissue =
                 ADAN_main.Components.Subsystems.Systemic.Vessel_modules.systemic_tissue_leveled,
@@ -26138,29 +26175,32 @@ P_hs_plus_dist"),
 
     model testCollapsiblePVChars
 
-      parameter Real alphaC = 2.5;
-      parameter Real alphaZPV = 2.5;
-      inner Physiolibrary.Types.Fraction ZPV_effect = 1/ (1 + alphaZPV*(phi_norm-1));
-      inner Physiolibrary.Types.Fraction C_effect = 1/(1 + alphaC*(phi_norm-1));
-      inner parameter Real gamma = 1/2;
-      inner parameter Real alpha = 5;// = T_pass/(T_pass + T_act_max);
+    //   parameter Real alphaC = 2.5;
+    //   parameter Real alphaZPV = 2.5;
+    //   inner Physiolibrary.Types.Fraction ZPV_effect = 1/ (1 + alphaZPV*(phi_norm-1));
+    //   inner Physiolibrary.Types.Fraction C_effect = 1/(1 + alphaC*(phi_norm-1));
+       inner Physiolibrary.Types.Fraction phi = phi_ramp.y;
+        inner Physiolibrary.Types.Fraction Exercise = 0;
+       inner Physiolibrary.Types.Pressure outer_pressure = 0;
+    //   inner parameter Real gamma = 1/2;
+    //   inner parameter Real alpha = 5;// = T_pass/(T_pass + T_act_max);
 
       inner parameter Physiolibrary.Types.Fraction venous_diameter_correction=1.5;
-      inner parameter Physiolibrary.Types.Fraction C_fact=1;
+    //   inner parameter Physiolibrary.Types.Fraction C_fact=1;
       inner Modelica.SIunits.Angle Tilt = 0;
 
-      inner parameter Physiolibrary.Types.Fraction cfactor=1;
+    //   inner parameter Physiolibrary.Types.Fraction cfactor=1;
       inner Physiolibrary.Types.Pressure thoracic_pressure = external_pressure.y;
 
       parameter Physiolibrary.Types.HydraulicCompliance totalCompliance=4.5003694550739e-07;
       parameter Physiolibrary.Types.Volume totalVolume=0.0004;
-      parameter Physiolibrary.Types.Fraction thisVolumeFraction = superior_vena_cava_C88.V0/totalVolume;
+      parameter Physiolibrary.Types.Fraction thisVolumeFraction = superior_vena_cava_C88.V_min /totalVolume;
       parameter Physiolibrary.Types.HydraulicCompliance targetCompliance = totalCompliance*thisVolumeFraction;
       Physiolibrary.Types.HydraulicCompliance thisCompliance = if noEvent( dP > 1e-6 or dP < -1e-6) then dV/dP else dV/1e-6;
       Physiolibrary.Types.HydraulicCompliance thisTotalCompliance = thisCompliance/thisVolumeFraction;
 
-      Real dP=der(superior_vena_cava_C88.p);
-      Real dV = der(superior_vena_cava_C88.V);
+       Real dP=der(superior_vena_cava_C88.p);
+       Real dV = der(superior_vena_cava_C88.volume);
 
       Physiolibrary.Types.Fraction phi_norm = phi_ramp.y "Normalized phi value to 1 by phi0 if UsePhi_input = true or by 0.25 otherwise";
 
@@ -26178,10 +26218,10 @@ P_hs_plus_dist"),
         width=0.0,
         falling=1000.0,
         period=2000.0,
-        nperiod=1,
+        nperiod=0,
         offset=0.0,
         startTime=0)
-        annotation (Placement(transformation(extent={{-100,-40},{-80,-20}})));
+        annotation (Placement(transformation(extent={{-106,-40},{-86,-20}})));
       Components.Obsolete.AdanVenousRed._b580e.Parameters_Venous_cellml.Parameters_Venous
         Parameters_Venous1
         annotation (Placement(transformation(extent={{-69,-87},{-49,-82}})));
@@ -26195,40 +26235,72 @@ P_hs_plus_dist"),
         width=900,
         falling=1,
         period=2000,
-        nperiod=1,
-        offset=4,
-        startTime=80)
+        nperiod=0,
+        offset=0.25,
+        startTime=0)
         annotation (Placement(transformation(extent={{-100,64},{-80,84}})));
       Modelica.Blocks.Sources.Trapezoid external_pressure(
-        amplitude=-2*5320.0,
+        amplitude=10*5320.0,
         rising=100,
         width=20,
         falling=10,
         period=2000.0,
         nperiod=1,
-        offset=5320.0,
-        startTime=20)
+        offset=-1000,
+        startTime=0)
         annotation (Placement(transformation(extent={{8,52},{28,72}})));
       Components.Subsystems.Systemic.Vessel_modules.vp_vein
         superior_vena_cava_C88(
         UseOuter_thoracic_pressure=false,
-        LimitBackflow=true,
-        phi_norm=phi_norm,
+        LimitBackflow=false,
         l=Parameters_Venous1.l_superior_vena_cava_C2,
         E=Parameters_Venous1.E_superior_vena_cava_C2,
         r=Parameters_Venous1.r_superior_vena_cava_C2)
         annotation (Placement(transformation(extent={{0,-2.5},{20,2.5}})));
       Modelica.Blocks.Sources.Trapezoid
                                    flow_ramp(
-        amplitude=2.5e-3/60,
-        rising=1,
+        amplitude=10e-3/60,
+        rising=100,
         width=1,
         falling=1,
         period=2000,
-        nperiod=1,
-        offset=2e-3/60,
-        startTime=40)
+        nperiod=0,
+        offset=0,
+        startTime=0)
         annotation (Placement(transformation(extent={{-128,16},{-108,36}})));
+      Components.Subsystems.Systemic.Vessel_modules.pv_artery pv_artery
+        annotation (Placement(transformation(extent={{0,18},{20,22}})));
+      outer Components.Settings settings(
+        R_vc =          1.574500e-01,
+        Ra_factor =          3.171620e+00,
+        baro_Ts =          1.156200e+02,
+        baro_delta0_factor =          2.688000e-01,
+        baro_g =          6.062580e-01,
+        exercise_factor =          3.477600e+01,
+        exercise_factor_on_tissue_compliance =          3.437570e-01,
+        heart_drive_k_TR =          3.809700e-01,
+        heart_drive_k_TR_maxAct =          1.224000e-01,
+        heart_vntr_sigma_actMaxAct_factor =          1.883250e+01,
+        heart_vntr_sigma_act_factor =          1.974000e+00,
+        k_E =          3.504230e-01,
+        pulm_C_PV =          1.987900e-07,
+        tissuesCompliance_PhiEffect =          2.287800e-01,
+        tissues_nominal_zpv =          2.101240e-03,
+        HR_max =          2.907000e+00)
+        annotation (Placement(transformation(extent={{-58,60},{-38,80}})));
+        Components.Subsystems.Systemic.Vessel_modules.vp_vein
+                      brachiocephalic_vein_R90(
+        volume(start=4.229372e-06, fixed=true),
+        l=Parameters_Venous1.l_brachiocephalic_vein_R90,
+        E=Parameters_Venous1.E_brachiocephalic_vein_R90,
+        r=Parameters_Venous1.r_brachiocephalic_vein_R90)
+          annotation (Placement(transformation(extent={{-1,-41},{19,-36}})));
+        Components.Subsystems.Systemic.Vessel_modules.vp_vein_linear brachiocephalic_vein_linear(
+        volume(fixed=false),
+        l=Parameters_Venous1.l_brachiocephalic_vein_R90,
+        E=Parameters_Venous1.E_brachiocephalic_vein_R90,
+        r=Parameters_Venous1.r_brachiocephalic_vein_R90)
+        annotation (Placement(transformation(extent={{1,-61},{21,-56}})));
     equation
       connect(unlimitedVolume1.y, resistor1.q_out) annotation (Line(
           points={{70,0},{60,0}},
@@ -26249,6 +26321,33 @@ P_hs_plus_dist"),
           points={{-107,26},{-90,26},{-90,7}},
           color={0,0,127},
           smooth=Smooth.Bezier));
+      connect(pv_artery.port_a, unlimitedPump.q_out) annotation (Line(
+          points={{0,20},{-80,20},{-80,0}},
+          color={0,0,0},
+          thickness=1));
+      connect(pv_artery.port_b, resistor1.q_in) annotation (Line(
+          points={{20,20},{40,20},{40,0}},
+          color={0,0,0},
+          thickness=1));
+      connect(brachiocephalic_vein_R90.port_b, unlimitedVolume1.y) annotation (Line(
+          points={{19,-38.5},{70,-38.5},{70,0}},
+          color={0,0,0},
+          thickness=1));
+      connect(brachiocephalic_vein_R90.port_a, unlimitedPump.q_out) annotation (
+          Line(
+          points={{-1,-38.5},{-80,-38.5},{-80,0}},
+          color={0,0,0},
+          thickness=1));
+      connect(brachiocephalic_vein_linear.port_b, unlimitedVolume1.y)
+        annotation (Line(
+          points={{21,-58.5},{70,-58.5},{70,0}},
+          color={0,0,0},
+          thickness=1));
+      connect(brachiocephalic_vein_linear.port_a, unlimitedPump.q_out)
+        annotation (Line(
+          points={{1,-58.5},{-80,-58.5},{-80,0}},
+          color={0,0,0},
+          thickness=1));
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
             coordinateSystem(preserveAspectRatio=false)),
         experiment(
@@ -34503,12 +34602,12 @@ P_hs_plus_dist"),
             tissues_UseStraighteningReaction2Phi=true,
             tissuesCompliance_PhiEffect=0.2,
             exercise_factor_on_tissue_compliance=0.2,
-            UseNonLinear_VenousCompliance=true,
             veins_activation_tau=0.1,
             hideLevel0=false,
             hideLevel1=false),
           phi(nperiod=0),
           condTP(disconnected=true));
+            //UseNonLinear_VenousCompliance=true,
 
         Modelica.Blocks.Logical.Switch switch1
           annotation (Placement(transformation(extent={{13,73},{27,87}})));
@@ -34551,8 +34650,9 @@ P_hs_plus_dist"),
           reinit(brachial_pressure_int, 0);
         end when;
 
-        connect(switch1.y, condHR.u) annotation (Line(points={{27.7,80},{70.35,80},{
-                70.35,-24},{57.2,-24}},    color={0,0,127}));
+        connect(switch1.y, condHR.u) annotation (Line(points={{27.7,80},{70.35,
+                80},{70.35,-24},{57.2,-24}},
+                                           color={0,0,127}));
         connect(useAutonomousPhi.y, switch1.u2) annotation (Line(points={{-1,80},
                 {11.6,80}},              color={255,0,255}));
         connect(Systemic1.phi_baroreflex, switch1.u1) annotation (Line(points={{-27.4,
@@ -34563,10 +34663,10 @@ P_hs_plus_dist"),
         connect(condHeartPhi.y, heartComponent.phi) annotation (Line(points={{43.4,
                 -6.00003},{28,-6.00003},{28,-16},{-16,-16}},
                                                       color={0,0,127}));
-        connect(condPhi.u, condHR.u) annotation (Line(points={{7.2,10},{70.35,10},{70.35,
-                -24},{57.2,-24}},            color={0,0,127}));
-        connect(condHeartPhi.u, condHR.u) annotation (Line(points={{57.2,-6.00003},{
-                70.35,-6.00003},{70.35,-24},{57.2,-24}},            color={0,0,
+        connect(condPhi.u, condHR.u) annotation (Line(points={{7.2,10},{70.35,
+                10},{70.35,-24},{57.2,-24}}, color={0,0,127}));
+        connect(condHeartPhi.u, condHR.u) annotation (Line(points={{57.2,
+                -6.00003},{70.35,-6.00003},{70.35,-24},{57.2,-24}}, color={0,0,
                 127}));
         annotation (experiment(
             StopTime=30,
@@ -35098,36 +35198,28 @@ P_hs_plus_dist"),
             common_iliac_vein_R26(volume(start=4.190835e-06, fixed=true)),
             external_iliac_vein_R28(volume(start=6.112059e-07, fixed=true)),
             internal_iliac_vein_T1_R30(volume(start=2.6143782e-06, fixed=true)),
-
             external_iliac_vein_R32(volume(start=7.088575e-06, fixed=true)),
             femoral_vein_R34(volume(start=3.0814348e-07, fixed=true)),
             femoral_vein_R38(volume(start=2.4424287e-06, fixed=true)),
             profunda_femoris_vein_T2_R40(volume(start=6.7587735e-06, fixed=true)),
-
             femoral_vein_R42(volume(start=1.7259254e-05, fixed=true)),
             femoral_vein_R46(volume(start=9.50517e-07, fixed=true)),
             popliteal_vein_R48(volume(start=3.8663393e-06, fixed=true)),
             anterior_tibial_vein_T4_R50(volume(start=1.0955602e-06, fixed=true)),
-
             popliteal_vein_R52(volume(start=8.6003234e-07, fixed=true)),
             posterior_tibial_vein_T6_R54(volume(start=1.6515086e-06, fixed=true)),
-
             external_iliac_vein_L58(volume(start=6.1195806e-07, fixed=true)),
             internal_iliac_vein_T1_L60(volume(start=2.689039e-06, fixed=true)),
-
             external_iliac_vein_L62(volume(start=6.9593e-06, fixed=true)),
             femoral_vein_L64(volume(start=3.602426e-07, fixed=true)),
             femoral_vein_L68(volume(start=2.442452e-06, fixed=true)),
             profunda_femoris_vein_T2_L70(volume(start=6.758814e-06, fixed=true)),
-
             femoral_vein_L72(volume(start=1.725943e-05, fixed=true)),
             femoral_vein_L76(volume(start=9.505208e-07, fixed=true)),
             popliteal_vein_L78(volume(start=3.866381e-06, fixed=true)),
             anterior_tibial_vein_T4_L80(volume(start=1.0956015e-06, fixed=true)),
-
             popliteal_vein_L82(volume(start=8.60047e-07, fixed=true)),
             posterior_tibial_vein_T6_L84(volume(start=1.6515473e-06, fixed=true)),
-
             brachiocephalic_vein_R90(volume(start=4.229372e-06, fixed=true)),
             brachiocephalic_vein_L124(volume(start=7.92589e-06, fixed=true)),
             vertebral_vein_R92(volume(start=2.6555442e-06, fixed=true)),
@@ -35135,7 +35227,6 @@ P_hs_plus_dist"),
             subclavian_vein_R96(volume(start=4.662005e-07, fixed=true)),
             internal_jugular_vein_R122(volume(start=1.84241e-05, fixed=true)),
             external_jugular_vein_R98(volume(start=1.2918364e-06, fixed=true)),
-
             subclavian_vein_R100(volume(start=1.9066546e-06, fixed=true)),
             axillary_vein_R102(volume(start=6.6998086e-06, fixed=true)),
             brachial_vein_R104(volume(start=1.3067267e-06, fixed=true)),
@@ -35146,12 +35237,9 @@ P_hs_plus_dist"),
             radial_vein_T3_R120(volume(start=9.488648e-07, fixed=true)),
             vertebral_vein_L126(volume(start=2.4835522e-06, fixed=true)),
             brachiocephalic_vein_L128(volume(start=4.8452915e-07, fixed=true)),
-
             subclavian_vein_L130(volume(start=4.145789e-07, fixed=true)),
             internal_jugular_vein_L156(volume(start=1.1182993e-05, fixed=true)),
-
             external_jugular_vein_L132(volume(start=1.2667307e-06, fixed=true)),
-
             subclavian_vein_L134(volume(start=1.8581874e-06, fixed=true)),
             axillary_vein_L136(volume(start=6.7759074e-06, fixed=true)),
             brachial_vein_L138(volume(start=1.3067234e-06, fixed=true)),
@@ -35177,8 +35265,8 @@ P_hs_plus_dist"),
               BP_min(start=39996.0, fixed=true),
               CO_acc(start=0.0, fixed=true)),
             ventricles(
-              LV_wall(ym(start=3.9639785, fixed=true), SL(start=2.256391, fixed
-                    =true)),
+              LV_wall(ym(start=3.9639785, fixed=true), SL(start=2.256391, fixed=
+                     true)),
               SEP_wall(SL(start=2.1946723, fixed=true)),
               RV_wall(SL(start=2.3319578, fixed=true)),
               calciumMechanics(cardiac_cycle(start=0.0, fixed=true)),
@@ -35622,6 +35710,29 @@ P_hs_plus_dist"),
           extends ADAN_main.SystemicTree.Tilt.OlufsenTriSeg_SemiRecumberent(
               Tilt_ramp(duration=0, startTime=60), Tilt_LegRaise(startTime=60));
         end SupineToSemirecumberentWithSemiExtendedLegs;
+
+        model OlufsenTriSeg_tiltable_sitAndValsalva
+          "tilting to sitting position, followed by valsalva"
+          extends OlufsenTriSeg_tiltable(
+            thoracic_pressure_ramp(
+              rising=1,
+              width=15,
+              falling=1,
+              startTime=60),
+            Systemic1(
+              femoral_R226(sinAlpha=0),
+              popliteal_R228(sinAlpha=0),
+              popliteal_L206(sinAlpha=0),
+              femoral_L204(sinAlpha=0),
+              femoral_vein_R42(sinAlpha=0),
+              femoral_vein_R46(sinAlpha=0),
+              popliteal_vein_R48(sinAlpha=0),
+              femoral_vein_L76(sinAlpha=0),
+              popliteal_vein_L78(sinAlpha=0),
+              femoral_vein_L72(sinAlpha=0)),
+            condTP(disconnected=false),
+            Tilt_ramp(height=0, startTime=10));
+        end OlufsenTriSeg_tiltable_sitAndValsalva;
       end Experiments;
 
       model base
@@ -35889,6 +36000,15 @@ P_hs_plus_dist"),
               __Dymola_Algorithm="Cvode"));
         end base_Exercise_SimpleCa_maxSV;
 
+        model test_CO
+          extends OlufsenTriseg_Exercise(
+            phi(
+              amplitude=0.25,
+              offset=1,
+              startTime=40),
+            condHeartPhi(uMax=1),
+            condHR(uMax=1));
+        end test_CO;
       end Experiments;
 
       model OlufsenTriseg_Exercise "Simplified heart model"
@@ -36059,6 +36179,293 @@ P_hs_plus_dist"),
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_valsalva_KosinskiBaro_longTs_Stimulation;
     end BaroreceptorStimulation;
+
+    package Variants "Variants of the base model, e.g. linear veins etc"
+      model OlufsenTriSeg_opt_LinearVeins "Experiment with linear veins"
+        extends Baseline.OlufsenTriSeg_optimized(Systemic1(
+              redeclare model Systemic_vein =
+                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vp_vein_linear),
+          useAutonomousPhi(y=false),
+          settings(V_PV_init(displayUnit="ml") = -0.0002, experimental_C_factor=2.0));
+
+      end OlufsenTriSeg_opt_LinearVeins;
+
+    model OlufsenTriSeg_opt_LinearVeins_init
+        "Steady state initialization from 2020-07-14 14:34:06.566249 at time 300.0"
+      extends OlufsenTriSeg_opt_LinearVeins(
+          Systemic1(
+            baroreflex_system(
+              baroreflex(fiSN(start = 0.2524993, fixed = true), fiSN_mean(start = 0.24710603, fixed = true)),
+              baroreceptor_aortic(fbr_int(start = 21.031265, fixed = true), epsilon(start = 1.6364919, fixed = true), s(start = 0.7869363, fixed = true)),
+              baroreceptor_carotid(fbr_int(start = 12.556395, fixed = true), epsilon(start = 1.2111481, fixed = true), s(start = 0.87278914, fixed = true))),
+            ascending_aorta_A(v(start = 5.5263713e-06, fixed = true), vol1(start = 8.887012e-06, fixed = true), vol2(start = 8.887294e-06, fixed = true)),
+            ascending_aorta_B(volume(start = 2.6418493e-05, fixed = true)),
+            ascending_aorta_C(volume(start = 2.443474e-05, fixed = true)),
+            ascending_aorta_D(volume(start = 2.230859e-05, fixed = true)),
+            aortic_arch_C2(volume(start = 2.041107e-05, fixed = true)),
+            brachiocephalic_trunk_C4(volume(start = 1.38132045e-05, fixed = true)),
+            aortic_arch_C46(volume(start = 1.20968025e-05, fixed = true)),
+            aortic_arch_C64(volume(start = 8.30671e-06, fixed = true)),
+            aortic_arch_C94(volume(start = 4.5674187e-05, fixed = true)),
+            thoracic_aorta_C96(volume(start = 8.207914e-06, fixed = true)),
+            thoracic_aorta_C100(volume(start = 6.317249e-06, fixed = true)),
+            thoracic_aorta_C104(volume(start = 1.1918243e-05, fixed = true)),
+            thoracic_aorta_C108(volume(start = 3.9169763e-06, fixed = true)),
+            thoracic_aorta_C112(volume(start = 6.508781e-05, fixed = true)),
+            abdominal_aorta_C114(volume(start = 1.344449e-06, fixed = true)),
+            abdominal_aorta_C136(volume(start = 5.648051e-06, fixed = true)),
+            abdominal_aorta_C164(volume(start = 1.6767207e-06, fixed = true)),
+            abdominal_aorta_C176(volume(start = 4.511394e-06, fixed = true)),
+            abdominal_aorta_C188(volume(start = 1.810299e-05, fixed = true)),
+            abdominal_aorta_C192(volume(start = 1.126774e-05, fixed = true)),
+            celiac_trunk_C116(volume(start = 0.00035785275, fixed = true)),
+            renal_L166(volume(start = 0.00032325642, fixed = true)),
+            renal_R178(volume(start = 0.00032035005, fixed = true)),
+            common_iliac_R216(volume(start = 9.327678e-06, fixed = true)),
+            internal_iliac_T1_R218(volume(start = 0.00017593219, fixed = true)),
+            external_iliac_R220(volume(start = 5.1446536e-06, fixed = true)),
+            femoral_R222(volume(start = 1.4707689e-06, fixed = true)),
+            profundus_T2_R224(volume(start = 0.00020175368, fixed = true)),
+            femoral_R226(volume(start = 1.2250596e-05, fixed = true)),
+            popliteal_R228(volume(start = 3.7541602e-06, fixed = true)),
+            anterior_tibial_T3_R230(volume(start = 2.663892e-05, fixed = true)),
+            popliteal_R232(volume(start = 1.8581432e-07, fixed = true)),
+            tibiofibular_trunk_R234(volume(start = 7.554153e-07, fixed = true)),
+            posterior_tibial_T4_R236(volume(start = 2.8912997e-05, fixed = true)),
+            common_iliac_L194(volume(start = 8.918453e-06, fixed = true)),
+            internal_iliac_T1_L196(volume(start = 0.0001759355, fixed = true)),
+            external_iliac_L198(volume(start = 5.1444567e-06, fixed = true)),
+            femoral_L200(volume(start = 1.4707241e-06, fixed = true)),
+            profundus_T2_L202(volume(start = 0.00020175676, fixed = true)),
+            femoral_L204(volume(start = 1.2251153e-05, fixed = true)),
+            popliteal_L206(volume(start = 3.7543484e-06, fixed = true)),
+            anterior_tibial_T3_L208(volume(start = 2.6639293e-05, fixed = true)),
+            popliteal_L210(volume(start = 1.8581943e-07, fixed = true)),
+            tibiofibular_trunk_L212(volume(start = 7.5545944e-07, fixed = true)),
+            posterior_tibial_T4_L214(volume(start = 2.8913468e-05, fixed = true)),
+            subclavian_R28(volume(start = 2.1108465e-06, fixed = true)),
+            subclavian_R30(volume(start = 2.76138e-06, fixed = true)),
+            axillary_R32(volume(start = 3.1625902e-06, fixed = true)),
+            brachial_R34(volume(start = 4.6393066e-06, fixed = true)),
+            ulnar_T2_R36(volume(start = 2.4197087e-07, fixed = true)),
+            ulnar_T2_R42(volume(start = 6.0820006e-05, fixed = true)),
+            radial_T1_R44(volume(start = 5.0003237e-05, fixed = true)),
+            subclavian_L66(volume(start = 5.0194644e-06, fixed = true)),
+            subclavian_L78(volume(start = 2.048446e-06, fixed = true)),
+            axillary_L80(volume(start = 3.161843e-06, fixed = true)),
+            brachial_L82(volume(start = 8.523778e-07, fixed = true)),
+            ulnar_T2_L84(volume(start = 2.4154994e-07, fixed = true)),
+            ulnar_T2_L90(volume(start = 6.078322e-05, fixed = true)),
+            radial_T1_L92(volume(start = 5.299981e-05, fixed = true)),
+            common_carotid_R6_A(volume(start = 5.270027e-06, fixed = true)),
+            common_carotid_R6_B(volume(start = 4.4929134e-06, fixed = true)),
+            common_carotid_R6_C(volume(start = 3.3524746e-06, fixed = true)),
+            internal_carotid_R8_A(volume(start = 1.280996e-06, fixed = true)),
+            internal_carotid_R8_B(volume(start = 8.09683e-07, fixed = true)),
+            internal_carotid_R8_C(volume(start = 7.203386e-05, fixed = true)),
+            external_carotid_T2_R26(volume(start = 7.234414e-05, fixed = true)),
+            common_carotid_L48_A(volume(start = 5.707676e-06, fixed = true)),
+            common_carotid_L48_B(volume(start = 5.005873e-06, fixed = true)),
+            common_carotid_L48_C(volume(start = 4.4384637e-06, fixed = true)),
+            common_carotid_L48_D(volume(start = 3.588538e-06, fixed = true)),
+            internal_carotid_L50_A(volume(start = 1.2807642e-06, fixed = true)),
+            internal_carotid_L50_B(volume(start = 8.09577e-07, fixed = true)),
+            internal_carotid_L50_C(volume(start = 7.203121e-05, fixed = true)),
+            external_carotid_T2_L62(volume(start = 7.2335075e-05, fixed = true)),
+            vertebral_L2(volume(start = 6.649548e-05, fixed = true)),
+            vertebral_R272(volume(start = 6.650899e-05, fixed = true)),
+            superior_vena_cava_C2(volume(start = 1.706292e-05, fixed = true)),
+            superior_vena_cava_C88(volume(start = 2.9403693e-05, fixed = true)),
+            inferior_vena_cava_C8(volume(start = 2.5597768e-05, fixed = true)),
+            hepatic_vein_T1_C10(volume(start = 1.0038075e-05, fixed = true)),
+            inferior_vena_cava_C12(volume(start = 6.949758e-05, fixed = true)),
+            inferior_vena_cava_C16(volume(start = 5.468753e-05, fixed = true)),
+            renal_vein_T1_R18(volume(start = 1.6123939e-05, fixed = true)),
+            inferior_vena_cava_C20(volume(start = 3.8155226e-06, fixed = true)),
+            renal_vein_T1_L22(volume(start = 1.42520985e-05, fixed = true)),
+            inferior_vena_cava_C24(volume(start = 0.0001523523, fixed = true)),
+            common_iliac_vein_L56(volume(start = 3.7456277e-05, fixed = true)),
+            common_iliac_vein_R26(volume(start = 3.4422876e-05, fixed = true)),
+            external_iliac_vein_R28(volume(start = 5.021792e-06, fixed = true)),
+            internal_iliac_vein_T1_R30(volume(start = 2.1512968e-05, fixed = true)),
+            external_iliac_vein_R32(volume(start = 5.8381942e-05, fixed = true)),
+            femoral_vein_R34(volume(start = 2.5383943e-06, fixed = true)),
+            femoral_vein_R38(volume(start = 2.0151767e-05, fixed = true)),
+            profunda_femoris_vein_T2_R40(volume(start = 5.6851968e-05, fixed = true)),
+            femoral_vein_R42(volume(start = 0.00014311404, fixed = true)),
+            femoral_vein_R46(volume(start = 7.882731e-06, fixed = true)),
+            popliteal_vein_R48(volume(start = 3.2238906e-05, fixed = true)),
+            anterior_tibial_vein_T4_R50(volume(start = 1.2560027e-05, fixed = true)),
+            popliteal_vein_R52(volume(start = 7.174824e-06, fixed = true)),
+            posterior_tibial_vein_T6_R54(volume(start = 1.510979e-05, fixed = true)),
+            external_iliac_vein_L58(volume(start = 5.0288463e-06, fixed = true)),
+            internal_iliac_vein_T1_L60(volume(start = 2.2132253e-05, fixed = true)),
+            external_iliac_vein_L62(volume(start = 5.732529e-05, fixed = true)),
+            femoral_vein_L64(volume(start = 2.9680893e-06, fixed = true)),
+            femoral_vein_L68(volume(start = 2.0155529e-05, fixed = true)),
+            profunda_femoris_vein_T2_L70(volume(start = 5.6862737e-05, fixed = true)),
+            femoral_vein_L72(volume(start = 0.00014314194, fixed = true)),
+            femoral_vein_L76(volume(start = 7.884217e-06, fixed = true)),
+            popliteal_vein_L78(volume(start = 3.2244967e-05, fixed = true)),
+            anterior_tibial_vein_T4_L80(volume(start = 1.2561283e-05, fixed = true)),
+            popliteal_vein_L82(volume(start = 7.176214e-06, fixed = true)),
+            posterior_tibial_vein_T6_L84(volume(start = 1.5111865e-05, fixed = true)),
+            brachiocephalic_vein_R90(volume(start = 3.457241e-05, fixed = true)),
+            brachiocephalic_vein_L124(volume(start = 6.480566e-05, fixed = true)),
+            vertebral_vein_R92(volume(start = 2.228121e-05, fixed = true)),
+            brachiocephalic_vein_R94(volume(start = 7.837579e-06, fixed = true)),
+            subclavian_vein_R96(volume(start = 3.8112298e-06, fixed = true)),
+            internal_jugular_vein_R122(volume(start = 0.00015054469, fixed = true)),
+            external_jugular_vein_R98(volume(start = 1.095506e-05, fixed = true)),
+            subclavian_vein_R100(volume(start = 1.5589061e-05, fixed = true)),
+            axillary_vein_R102(volume(start = 5.4815362e-05, fixed = true)),
+            brachial_vein_R104(volume(start = 1.1733692e-05, fixed = true)),
+            brachial_vein_R114(volume(start = 1.071113e-05, fixed = true)),
+            brachial_vein_R108(volume(start = 1.6380651e-06, fixed = true)),
+            ulnar_vein_T7_R110(volume(start = 1.5423175e-05, fixed = true)),
+            brachial_vein_R118(volume(start = 1.0437828e-06, fixed = true)),
+            radial_vein_T3_R120(volume(start = 1.088816e-05, fixed = true)),
+            vertebral_vein_L126(volume(start = 2.0808297e-05, fixed = true)),
+            brachiocephalic_vein_L128(volume(start = 3.9618053e-06, fixed = true)),
+            subclavian_vein_L130(volume(start = 3.3901442e-06, fixed = true)),
+            internal_jugular_vein_L156(volume(start = 9.1456786e-05, fixed = true)),
+            external_jugular_vein_L132(volume(start = 1.0740036e-05, fixed = true)),
+            subclavian_vein_L134(volume(start = 1.5197589e-05, fixed = true)),
+            axillary_vein_L136(volume(start = 5.546331e-05, fixed = true)),
+            brachial_vein_L138(volume(start = 1.17376285e-05, fixed = true)),
+            brachial_vein_L148(volume(start = 1.0785995e-05, fixed = true)),
+            brachial_vein_L142(volume(start = 1.6385547e-06, fixed = true)),
+            ulnar_vein_T7_L144(volume(start = 1.5419084e-05, fixed = true)),
+            brachial_vein_L152(volume(start = 1.0516295e-06, fixed = true)),
+            radial_vein_T3_L154(volume(start = 1.1106696e-05, fixed = true)),
+            mesenteric_artery(volume(start = 6.3813786e-06, fixed = true)),
+            splachnic_tissue(volume(start = 0.00025949875, fixed = true)),
+            splachnic_vein(volume(start = 8.43756e-05, fixed = true)),
+            coronary_arteries(volume(start = 3.6529304e-08, fixed = true)),
+            cardiac_tissue(volume(start = 0.000117522075, fixed = true)),
+            coronary_veins(volume(start = 3.041459e-07, fixed = true)),
+            brachial_L82_HeartLevel(volume(start = 3.7834498e-06, fixed = true))),
+          heartComponent(
+            mitralValve(BP_max(start = 805.92664, fixed = true), BP_min(start = 663.4355, fixed = true), CO_acc(start = 0.00010691206, fixed = true)),
+            aorticValve(BP_max(start = 15334.916, fixed = true), BP_min(start = 11398.866, fixed = true), CO_acc(start = 0.00010691199, fixed = true)),
+            ventricles(
+              LV_wall(ym(start = 3.9216194, fixed = true), SL(start = 2.2280812, fixed = true)),
+              SEP_wall(SL(start = 2.186389, fixed = true)),
+              RV_wall(SL(start = 2.329386, fixed = true)),
+              calciumMechanics(cardiac_cycle(start = 1.0, fixed = true)), V_LV(start = 0.0001846641, fixed = true), V_RV(start = 0.00023111871, fixed = true)),
+            ra(volume(start = 2.0696922e-05, fixed = true)),
+            la(volume(start = 4.7677488e-05, fixed = true))),
+          pulmonaryComponent(
+            c_pa(volume(start = 9.296634e-05, fixed = true)),
+            c_pv(volume(start = 0.0021692594, fixed = true))),
+          settings(initByPressure=false),
+          useAutonomousPhi(y=true),
+          condTP(disconnected=true));
+    end OlufsenTriSeg_opt_LinearVeins_init;
+
+      model OlufsenTriseg_opt_LinearVeins_init_Exercise "Simplified heart model"
+        extends OlufsenTriSeg_opt_LinearVeins_init(
+          Systemic1(
+            ulnar_T2_L90(UseExercise=false),
+            radial_T1_L92(UseExercise=false),
+            vertebral_L2(UseExercise=false),
+            ulnar_T2_R42(UseExercise=false),
+            radial_T1_R44(UseExercise=false),
+            internal_carotid_R8_C(UseExercise=false),
+            external_carotid_T2_R26(UseExercise=false),
+            vertebral_R272(UseExercise=false),
+            UseExerciseInput=true,
+            cardiac_tissue(UseExercise=true),
+            internal_iliac_T1_R218(UseExercise=true),
+            profundus_T2_R224(UseExercise=true),
+            anterior_tibial_T3_R230(UseExercise=true),
+            posterior_tibial_T4_R236(UseExercise=true),
+            posterior_tibial_T4_L214(UseExercise=true),
+            anterior_tibial_T3_L208(UseExercise=true),
+            profundus_T2_L202(UseExercise=true),
+            internal_iliac_T1_L196(UseExercise=true)),
+          useAutonomousPhi(y=false),
+          condHeartPhi(disconnected=false),
+          condHR(disconnected=false),
+      phi(  amplitude=0.75,
+            rising(displayUnit="s") = 0,
+            width(displayUnit="s") = 200,
+            falling(displayUnit="s") = 0,
+            period(displayUnit="s"),
+            nperiod=1,
+            offset=0.25,
+            startTime=0));
+
+        replaceable Modelica.Blocks.Sources.Ramp Exercise(
+          startTime=0,
+          height=1,
+          duration=0) constrainedby Modelica.Blocks.Interfaces.SO
+          annotation (Placement(transformation(extent={{-76,52},{-56,72}})));
+        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
+        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+      equation
+        connect(Exercise.y, Systemic1.exercise_input) annotation (Line(points={
+                {-55,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=60,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriseg_opt_LinearVeins_init_Exercise;
+
+      model OlufsenTriseg_opt_LinearVeins_init_tiltable
+        extends OlufsenTriSeg_opt_LinearVeins_init(
+                                heartComponent(UseFrequencyInput=true, UsePhiInput=true),
+          phi(
+            amplitude=0.38 - 0.25,
+            width=200,
+            nperiod=0,
+            startTime=10),
+          redeclare
+            Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt
+            Systemic1(
+            redeclare Components.Subsystems.Systemic.Vessel_modules.vp_vein_linear_leveled Systemic_vein,
+            UseThoracic_PressureInput=true,
+            UsePhi_Input=true,
+            UseTiltInput=true,
+            baroreflex_system(baroreceptor_carotid(d0=1.2), baroreceptor_aortic(d0=1.6))),
+          redeclare replaceable Modelica.Blocks.Sources.BooleanExpression
+            useAutonomousPhi(y=true),
+          settings(baro_useAbsolutePressureTerm=false));
+
+        replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
+          height=Modelica.Constants.pi/3,
+          startTime=10,
+          duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
+          annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
+      equation
+        connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-79,32},
+                {-22,32},{-22,20}},    color={0,0,127}));
+        annotation (experiment(
+            StopTime=60,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriseg_opt_LinearVeins_init_tiltable;
+
+      model OlufsenTriseg_opt_LinearVeins_init_valsalva
+        extends OlufsenTriSeg_opt_LinearVeins_init(
+          thoracic_pressure_ramp(
+            rising=0.5,
+            width=14,
+            falling=0.5,
+            startTime=20),
+          useAutonomousPhi(y=true),
+          condTP(disconnected=false),
+          phi(
+            amplitude=-0.0025,
+            rising=0,
+            width=60,
+            falling=0,
+            nperiod=1,
+            startTime=30));
+      end OlufsenTriseg_opt_LinearVeins_init_valsalva;
+    end Variants;
   annotation(preferredView="info",
   versionBuild=1,
   versionDate="2015-09-15",
