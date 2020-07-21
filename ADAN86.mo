@@ -36720,7 +36720,11 @@ P_hs_plus_dist"),
           pulmonaryComponent(
             c_pa(volume(start = 9.296634e-05, fixed = true)),
             c_pv(volume(start = 0.0021692594, fixed = true))),
-          settings(initByPressure=false),
+          settings(initByPressure=false,
+            veins_C_phi(displayUnit="1") = 0.40625,
+            veins_ZPV_phi=0.35,
+            experimental_zpv_factor(displayUnit="1") = 0.4035,
+            experimental_C_factor(displayUnit="1") = 0.3),
           useAutonomousPhi(y=true),
           condTP(disconnected=true));
     end OlufsenTriSeg_opt_LinearVeins_init;
@@ -36828,6 +36832,11 @@ P_hs_plus_dist"),
             nperiod=1,
             startTime=30));
       end OlufsenTriseg_opt_LinearVeins_init_valsalva;
+
+      model OlufsenTriSeg_opt_LinearVeins_init_oscillatingTest
+        extends OlufsenTriSeg_opt_LinearVeins_init(settings(veins_C_phi=0.5,
+              veins_ZPV_phi=0.5));
+      end OlufsenTriSeg_opt_LinearVeins_init_oscillatingTest;
     end Variants;
   annotation(preferredView="info",
   versionBuild=1,
