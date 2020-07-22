@@ -8,13 +8,14 @@ import time
 import re
 import fun_lib
 from datetime import datetime
+# import ast
 # from matplotlib import pyplot as plt
 # import re
 # import TerminalDS
 
 VALUE_LOG_DIRNAME = '..\\Schedules'
 VALUE_LOG_FILENAME = '_current_costs.txt'
-DRAW_PLOTS = True
+DRAW_PLOTS_OVERRIDE = False
 READ_OBJECTIVES = True
 # If true loads ONLY non-constants
 OMIT_LOADING_PARAMS = True
@@ -72,7 +73,7 @@ def logOutput(objectives):
         file.write(',  '.join(string_seq) + tail + '\n')
 
 
-def extractVars(d):
+def extractVars(d, prefix = None):
     # use just a subset or use all
     # vrs_names = ['Systemic1.posterior_tibial_T4_R236.u_C', 'Systemic1.aortic_arch_C2.port_a.pressure']
     if OMIT_LOADING_PARAMS:
@@ -83,30 +84,60 @@ def extractVars(d):
     timevar = d.abscissa(2)[0]
 
     var_set = {}
-    var_set['time'] = timevar
+
+    if prefix is None or prefix == '__None':
+        var_set['time'] = timevar
+    else:
+        var_set[prefix + '.' +  'time'] = timevar
+
     for vn in vrs_names:
-        var_set[vn] = d.data(vn)
+        if prefix is None or prefix == '__None':
+            var_set[vn] = d.data(vn)
+        else:
+            var_set[prefix + '.' + vn] = d.data(vn)
+           
     return var_set
 
 
-def loadMatFile():
-    tic = time.time()
-    filename = 'dsres.mat'
-    if len(sys.argv) > 1:
-        filename = sys.argv[1]
+def loadInputFiles():
+    
+    def loadMatFile(filename, prefix = None):
+        tic = time.time()
+        d = DyMat.DyMatFile(filename)
+        toc = time.time()
+        print("Opening %s in %.3f ms" % (filename, (toc - tic)*1000))
 
-    d = DyMat.DyMatFile(filename)
-    toc = time.time()
-    print("Opening %s in %.3f ms" % (filename, (toc - tic)*1000))
+        var_set = extractVars(d, prefix)
+        return var_set
 
-    var_set = extractVars(d)
-    return var_set
+    if len(sys.argv) == 1:
+        return loadMatFile('dsres.mat')
+    elif len(sys.argv) == 2:
+        return loadMatFile(sys.argv[1])
+    elif len(sys.argv) > 2:
+        # multiple files as parameters in the form:
+        # file1 prefix1 file2 prefix2 file3 prefix3
+        args = sys.argv[1:]
+        if len(args) % 2 == 1:
+            raise ValueError("The argument list must be even, i.e. file1 prefix1 file2 prefix2 file3 prefix3. Use __None for no prefix")
+        files = args[::2]
+        prefixes = args[1::2]
+        var_set_gen = (loadMatFile(f, p) for f, p in zip(files, prefixes))
+        var_set = {k: v for d in var_set_gen for k, v in d.items()}
+
+        # add drawing plts info
+        var_set['__draw_plots'] = True
+        # get current dir as a case name
+        var_set['__plot_title'] = "Case %s" % (os.path.basename(os.getcwd()))
+        var_set['__saveFig_path'] = "FitFig_0.png"
+
+        return var_set
 
 def getObjectives(var_set) -> fun_lib.ObjectiveVar:
     tic = time.time()
     cf = fun_lib.importCostFunction()
 
-    if DRAW_PLOTS:
+    if DRAW_PLOTS_OVERRIDE:
         var_set['__draw_plots'] = True
         var_set['__plot_title'] = "Run %i" % (fun_lib.getRunNumber())
         var_set['__saveFig_path'] = "%sFitFig_%03d.png" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
@@ -125,7 +156,7 @@ def logCrash(line:str):
 
 def processDyMatFile():
     try:
-        var_set = loadMatFile()
+        var_set = loadInputFiles()
 
         objectives = getObjectives(var_set)
 

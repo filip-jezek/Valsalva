@@ -1,0 +1,44 @@
+﻿// experiment_name = "LinearVeins";
+experiment_name = "NoVenousValves";
+baseDir = "Identification/Combined/";
+// we assume the current dir is the project root, i.e. the valsalva folder 
+// OR directly already the baseDir folder
+
+// lets check if we are in the basedir
+res = cd("../../" + baseDir);
+if not res then
+   // lets check the current experiment dir
+  res = cd("../../../" + baseDir);
+end if;
+
+if not res then
+  // so its not alraedy the current folder. Lets try project root
+  res = cd(baseDir);
+end if;
+
+if res then
+  // we found it 
+  if not Modelica.Utilities.Files.exist(experiment_name) then
+    Modelica.Utilities.Files.createDirectory(experiment_name);
+    "Creating experiment dir..";
+  else
+    "Experiment dir found.";
+  end if;
+  res = cd(experiment_name);
+end if;
+
+if res then
+  experimentSetupOutput(events = false);
+  simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_baseline", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-05, resultFile="UseCase_baseline");
+  simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_tiltable", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-05, resultFile="UseCase_tilt");
+  simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_exercise", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-05, resultFile="UseCase_exercise");
+  simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_valsalva", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-05, resultFile="UseCase_valsalva");
+  Modelica.Utilities.Files.copy("../../../Scripts/Dymola/RunUseCaseEval.bat", "RunUseCaseEval.bat", true);
+  post_process_res = Execute("RunUseCaseEval.bat");
+  
+  // get back to current dir three steps up
+  cd("../../../");
+  "Done, Johne! The res is " + String(post_process_res);
+else
+  "Wrong checkpoint!";
+end if;
