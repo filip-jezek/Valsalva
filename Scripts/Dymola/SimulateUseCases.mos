@@ -1,5 +1,8 @@
 ﻿// experiment_name = "LinearVeins";
-experiment_name = "NoVenousValves";
+// experiment_name = "NoVenousValves";
+// experiment_name = "MaxVenousValves";
+// experiment_name = "BreathingSignalZeroOffset";
+experiment_name = "BreathingSignalOffset";
 baseDir = "Identification/Combined/";
 // we assume the current dir is the project root, i.e. the valsalva folder 
 // OR directly already the baseDir folder
@@ -29,10 +32,13 @@ end if;
 
 if res then
   experimentSetupOutput(events = false);
-  simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_baseline", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-05, resultFile="UseCase_baseline");
-  simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_tiltable", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-05, resultFile="UseCase_tilt");
-  simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_exercise", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-05, resultFile="UseCase_exercise");
-  simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_valsalva", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-05, resultFile="UseCase_valsalva");
+    
+// simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_baseline", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="UseCase_baseline");
+  
+  // TILT WITH LINEAR VEINS simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_tiltable_linearVeins", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-05, resultFile="UseCase_tilt");
+// simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_tiltable", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="UseCase_tilt");  
+// simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_exercise", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="UseCase_exercise");
+simulateModel("ADAN_main.SystemicTree.Variants.UseCases.UseCase_valsalva", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="UseCase_valsalva");
   Modelica.Utilities.Files.copy("../../../Scripts/Dymola/RunUseCaseEval.bat", "RunUseCaseEval.bat", true);
   post_process_res = Execute("RunUseCaseEval.bat");
   

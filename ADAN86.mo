@@ -210,6 +210,10 @@ package ADAN_main
         annotation(choices(checkBox=true), Dialog(tab = "Systemic", group = "Tissues"));
       parameter Boolean tissues_UseStraighteningReaction2Phi = false "Use V_n dependency on phi (instead of V_u and V_max as used in Pstras)"
         annotation(choices(checkBox=true), Dialog(tab = "Systemic", group = "Tissues"));
+      parameter Physiolibrary.Types.Fraction tissues_V_max_breakPoint_Frac=1e-6
+        "Fraction of V_Max, that sets the point for changing exponential to linear PV characteristics. E.g. V_max = 500ml, frac = 1% > exponential up to 495ml, linear after"
+                                               annotation(Evaluate=false, choices(checkBox=true), Dialog(enable = UseNonLinear_TissuesCompliance and tissues_UseStraighteningReaction2Phi, tab = "Systemic", group = "Tissues"));
+
     //  parameter Boolean UseNonLinear_TissuesCompliance_PhiEffect = false
     //     annotation(choices(checkBox=true), Dialog(enable = UseNonLinear_TissuesCompliance, group = "Tissues"));
       parameter Fraction tissuesCompliance_PhiEffect=0.2   "Effect on tissue's compliance"
@@ -550,6 +554,7 @@ type"),       Text(
 */
       parameter Boolean disconnected=false   "When true, the parameter value is used as fixed output" annotation(choices(checkBox=true));
 
+      parameter Boolean UseAdditionalInput =  false "Use another input";
       parameter Real disconnectedValue = 0 "output for disconnected = true. Use SI units!" annotation(Dialog(enable = disconnected));
         MyDelay                              myDelay(   delayTime=delayTime,
             delayEnabled=delayEnabled)
@@ -563,13 +568,17 @@ type"),       Text(
         parameter Real uMin=-uMax "Lower limits of input signals";
         Modelica.Blocks.Math.Gain         gain(k=phi_gain)
           annotation (Placement(transformation(extent={{-78,-10},{-58,10}})));
-        Modelica.Blocks.Sources.Constant const_shiftOffset(k=(phi_gain - 1)*
-              phi0)
+        Modelica.Blocks.Sources.Constant const_shiftOffset(k=-(phi_gain - 1)*
+              phi0) if not UseAdditionalInput
           annotation (Placement(transformation(extent={{-78,24},{-62,38}})));
         parameter Real phi0=0.25 "Default phi0";
         parameter Real phi_gain=1 "Phi Gain multiplier";
-        Modelica.Blocks.Math.Add         add(k1=-1)
+        Modelica.Blocks.Math.Add         add3_1
           annotation (Placement(transformation(extent={{-38,-3},{-22,11}})));
+        Modelica.Blocks.Interfaces.RealInput
+                  u1 if UseAdditionalInput
+                    "Connector of Real input signal" annotation (Placement(
+              transformation(extent={{-142,70},{-102,110}})));
       protected
         Boolean showLimiterLine = not disconnected and (uMax <> Modelica.Constants.inf or uMax <> -uMin);
       equation
@@ -590,12 +599,14 @@ type"),       Text(
               color={0,0,127}));
         connect(u, gain.u)
           annotation (Line(points={{-120,0},{-80,0}}, color={0,0,127}));
-        connect(switch1.u1, add.y) annotation (Line(points={{-4,0},{-12,0},{-12,
-                4},{-21.2,4}}, color={0,0,127}));
-        connect(gain.y, add.u2) annotation (Line(points={{-57,0},{-48,0},{-48,
-                -0.2},{-39.6,-0.2}}, color={0,0,127}));
-        connect(const_shiftOffset.y, add.u1) annotation (Line(points={{-61.2,31},
-                {-46,31},{-46,8.2},{-39.6,8.2}}, color={0,0,127}));
+        connect(switch1.u1, add3_1.y) annotation (Line(points={{-4,0},{-12,0},{-12,4},
+                {-21.2,4}}, color={0,0,127}));
+        connect(gain.y, add3_1.u2) annotation (Line(points={{-57,0},{-48,0},{-48,-0.2},
+                {-39.6,-0.2}}, color={0,0,127}));
+        connect(const_shiftOffset.y, add3_1.u1) annotation (Line(points={{-61.2,31},{-46,
+                31},{-46,8.2},{-39.6,8.2}}, color={0,0,127}));
+        connect(u1, add3_1.u1) annotation (Line(points={{-122,90},{-46,90},{-46,8.2},{
+                -39.6,8.2}}, color={0,0,127}));
         annotation (Diagram(coordinateSystem(extent={{-100,-100},{100,100}})),
                                                                            Icon(
               coordinateSystem(extent={{-100,-80},{100,100}}),
@@ -6572,7 +6583,7 @@ Kalecky")}), experiment(
             Physiolibrary.Types.Pressure u_out annotation(HideResult = settings.hideLevel0);
             Physiolibrary.Types.VolumeFlowRate v_out annotation(HideResult = settings.hideLevel0);
 
-            Physiolibrary.Types.Volume volume(nominal = 1e-6);
+            Physiolibrary.Types.Volume volume(nominal = 1e-9);
             parameter Physiolibrary.Types.Volume V_min = 0;
           /*
 protected 
@@ -6811,12 +6822,14 @@ P_hs/2")}));
                 /(1 + exercise*settings.exercise_factor) "Venules resistance dependent on phi and exercise" annotation(HideResult = settings.hideLevel1);
 
             parameter Real k = C / (V_max - V_n) "For Pstras non-linear PV characteristics. For gamma = 0.0003750308";
-            parameter Physiolibrary.Types.Volume V_max = V_n + (V_n - zpv)*settings.tissues_gamma
+            parameter Physiolibrary.Types.Volume V_max(nominal = 1e-9) = V_n + (V_n - zpv)*settings.tissues_gamma
               " V_n is between zpv and V_max, parameterized by gamma. 1 means its in the center. For Pstras non-linear PV characteristics";
             parameter Physiolibrary.Types.Volume V_n = nominal_pressure*C + zpv
               "nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization";
             parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * k)
               "nonlinear Un-Stressed volume";
+            parameter Physiolibrary.Types.Volume volume_linearBreakpoint=V_max*(1 - settings.tissues_V_max_breakPoint_Frac)
+              "Maximal volume for nonlinear function, usually set as a fraction of V_max.";
 
             Real k_phi = C / (V_max - V_n_phi) "For Pstras non-linear PV characteristics" annotation(HideResult = settings.hideLevel1);
             Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras" annotation(HideResult = settings.hideLevel1);
@@ -6834,7 +6847,6 @@ P_hs/2")}));
           Physiolibrary.Types.VolumeFlowRate q_mc = if UseMuscleVenousPump then
               nominalFlow*exercise*settings.exercise_venous_pumping_factor
               else 0 "Flow given by muscle contractions during exercise is proportional to Rv";
-
           initial equation
           //  volume = nominal_pressure*C + zpv;
           equation
@@ -6865,13 +6877,22 @@ P_hs/2")}));
                 if not settings.UseNonLinear_TissuesCompliance then
                   volume = (u_C) *C + zpv;
                 elseif settings.tissues_UseStraighteningReaction2Phi then
+
                   // my expression based on straightening
-                  u_C = 1/k_phi*log((V_max - V_us)/max(1e-9, V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+            if noEvent(volume < volume_linearBreakpoint) then
+              u_C = 1/k_phi*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+                  else
+                    // linear steepness after break
+                    // linearized by derivation of original equation, slope = 1/k_phi/(1e-6), V_max - volume = 1e-6:, u_C at point: 1/k_phi*log((V_max - V_us)/(1e-6))
+                u_C - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)) = 1/
+                k_phi/(V_max - volume_linearBreakpoint)*(volume - (V_max -
+                V_max + volume_linearBreakpoint));
+                  end if;
 
                 else
                   // from Pstras
           //        u_C = 1/k*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
-                  u_C = 1/k*log((V_max_phi - V_us_phi)/max(1e-9, V_max_phi - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+                  u_C = 1/k*log((V_max_phi - V_us_phi)/(V_max_phi - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
 
                 end if;
 
@@ -11133,7 +11154,7 @@ P_hs_plus_dist"),
         //                                                     iconTransformation(extent={{130,162},
         //             {150,182}})));
 
-          Physiolibrary.Types.RealIO.PressureInput exercise_input=Exercise if            UseExerciseInput
+          Physiolibrary.Types.RealIO.FractionInput exercise_input=Exercise if            UseExerciseInput
             annotation (Placement(transformation(extent={{-200,-110},{-160,-70}}),
                 iconTransformation(extent={{-40,60},{0,100}})));
           outer Settings settings annotation (Placement(transformation(extent={{
@@ -30007,6 +30028,7 @@ P_hs_plus_dist"),
         HR_nom=settings.HR_nominal)
         constrainedby Components.Subsystems.Baroreflex.HeartRate
         annotation (Placement(transformation(extent={{38,-30},{26,-18}})));
+    replaceable
     Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
         amplitude=40*133,
         rising=1,
@@ -30015,7 +30037,7 @@ P_hs_plus_dist"),
         period=200,
         nperiod=1,
         offset=0,
-        startTime=40)
+        startTime=40) constrainedby Modelica.Blocks.Interfaces.SO
         annotation (Placement(transformation(extent={{-100,-50},{-80,-30}})));
       Components.Signals.ConditionalConnection condTP(disconnectedValue=0,
           disconnected=true) annotation (Placement(transformation(extent={{-69,-45.3333},
@@ -36262,6 +36284,56 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_SemiRecumberent;
+
+      model OlufsenTriSeg_tiltable_exercise
+        extends OlufsenTriSeg_tiltable(
+            Systemic1(
+            ulnar_T2_L90(UseExercise=false),
+            radial_T1_L92(UseExercise=false),
+            vertebral_L2(UseExercise=false),
+            ulnar_T2_R42(UseExercise=false),
+            radial_T1_R44(UseExercise=false),
+            internal_carotid_R8_C(UseExercise=false),
+            external_carotid_T2_R26(UseExercise=false),
+            vertebral_R272(UseExercise=false),
+            UseExerciseInput=true,
+            cardiac_tissue(UseExercise=true),
+            internal_iliac_T1_R218(UseExercise=true),
+            profundus_T2_R224(UseExercise=true),
+            anterior_tibial_T3_R230(UseExercise=true),
+            posterior_tibial_T4_R236(UseExercise=true),
+            posterior_tibial_T4_L214(UseExercise=true),
+            anterior_tibial_T3_L208(UseExercise=true),
+            profundus_T2_L202(UseExercise=true),
+            internal_iliac_T1_L196(UseExercise=true)),
+          useAutonomousPhi(y=false),
+          condHeartPhi(disconnected=false),
+          condHR(disconnected=false),
+      phi(
+            amplitude=0.2,
+            rising(displayUnit="s") = 60,
+            width(displayUnit="s"),
+            falling(displayUnit="s") = 0,
+            period(displayUnit="s"),
+            nperiod=1,
+            offset=1,
+            startTime=180),
+          Tilt_ramp(duration=1, startTime=30));
+
+        replaceable Modelica.Blocks.Sources.Ramp Exercise(
+          startTime=15,
+          height=1,
+          duration=0) constrainedby Modelica.Blocks.Interfaces.SO
+          annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
+      equation
+        connect(Systemic1.exercise_input, Exercise.y) annotation (Line(points={
+                {-28,36},{-42,36},{-42,62},{-79,62}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=70,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_tiltable_exercise;
     end Tilt;
 
     package Exercise
@@ -36534,25 +36606,14 @@ P_hs_plus_dist"),
         end UseCase_exercise;
 
         model UseCase_tiltable
-          extends OlufsenTriSeg_opt_LinearVeins_init(
-                                  heartComponent(UseFrequencyInput=true, UsePhiInput=true),
-            phi(
-              amplitude=0.38 - 0.25,
-              width=200,
-              nperiod=0,
-              startTime=10),
-            redeclare
+          extends UseCase_base(
+          redeclare
               Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt
               Systemic1(
-              redeclare model Systemic_vein =
-                  Components.Subsystems.Systemic.Vessel_modules.vp_vein_linear_leveled,
               UseThoracic_PressureInput=true,
               UsePhi_Input=true,
               UseTiltInput=true,
-              baroreflex_system(baroreceptor_carotid(d0=1.2), baroreceptor_aortic(d0=1.6))),
-            redeclare replaceable Modelica.Blocks.Sources.BooleanExpression
-              useAutonomousPhi(y=true),
-            settings(baro_useAbsolutePressureTerm=false));
+              UseExerciseInput=false));
 
           replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
             height=Modelica.Constants.pi/3,
@@ -36575,6 +36636,7 @@ P_hs_plus_dist"),
               rising=0.5,
               width=14,
               falling=0.5,
+              nperiod=1,
               startTime=20),
             useAutonomousPhi(y=true),
             condTP(disconnected=false),
@@ -36585,13 +36647,51 @@ P_hs_plus_dist"),
               falling=0,
               nperiod=1,
               startTime=30));
+          annotation (experiment(
+              StopTime=60,
+              Interval=0.02,
+              Tolerance=1e-09,
+              __Dymola_Algorithm="Cvode"));
         end UseCase_valsalva;
+
+        model UseCase_tiltable_linearVeins
+          extends UseCase_base(
+          redeclare
+              Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt
+              Systemic1(
+                      redeclare model Systemic_vein =
+
+                  Components.Subsystems.Systemic.Vessel_modules.vp_vein_linear_leveled,
+              UseThoracic_PressureInput=true,
+              UsePhi_Input=true,
+              UseTiltInput=true,
+              UseExerciseInput=false));
+
+          replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
+            height=Modelica.Constants.pi/3,
+            startTime=10,
+            duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
+            annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
+        equation
+          connect(Tilt_ramp.y, Systemic1.tilt_input) annotation (Line(points={{-79,32},
+                  {-22,32},{-22,20}},    color={0,0,127}));
+          annotation (experiment(
+              StopTime=60,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end UseCase_tiltable_linearVeins;
       end UseCases;
 
       model UseCase_base
         "Base class for model use cases. Choose any version to extend from here to affect all use cases. Built for testing model variants for all use cases."
-        extends NoVenousValves;
-      //   extends OlufsenTriSeg_opt_LinearVeins_init;
+        extends base;
+        // extends BreathingSignal;
+        //  extends NoVenousValves;
+        //  extends MaxVenousValves;
+        //  extends OlufsenTriSeg_opt_LinearVeins_init;
+
+
       end UseCase_base;
 
       model OlufsenTriSeg_opt_LinearVeins "Experiment with linear veins"
@@ -36837,6 +36937,22 @@ P_hs_plus_dist"),
             inferior_vena_cava_C24(LimitBackflow=true),
             inferior_vena_cava_C8(LimitBackflow=true)));
       end MaxVenousValves;
+
+      model BreathingSignal
+        extends Baseline.OlufsenTriSeg_optimized_steadyState_init(
+        condTP(disconnected=false,
+            UseAdditionalInput=true,
+            uMax=40*133), thoracic_pressure_ramp(amplitude=50*133, nperiod=0));
+      Modelica.Blocks.Sources.Sine      thoracic_pressure_ramp1(
+          amplitude=133.32*5,
+          freqHz(displayUnit="1/min") = 0.26666666666667,
+          offset=-133.32*4,
+          startTime=0)
+          annotation (Placement(transformation(extent={{-100,-10},{-80,10}})));
+      equation
+        connect(thoracic_pressure_ramp1.y, condTP.u1) annotation (Line(points={
+                {-79,0},{-70.54,0},{-70.54,-34}}, color={0,0,127}));
+      end BreathingSignal;
     end Variants;
   annotation(preferredView="info",
   versionBuild=1,
