@@ -2112,15 +2112,19 @@ type"),       Text(
           extends partialPulmonary(UseThoracic_PressureInput=false);
           import ADAN_main.Components.Constants.*;
 
+          replaceable
           Physiolibrary.Hydraulic.Components.Resistor r_pa(Resistance(
-                displayUnit="(mmHg.s)/ml") = settings.pulm_R_PA)
+                displayUnit="(mmHg.s)/ml") = settings.pulm_R_PA) constrainedby
+            Physiolibrary.Hydraulic.Interfaces.OnePort
             annotation (Placement(transformation(extent={{-12,-10},{8,10}})));
 
+          replaceable
           Physiolibrary.Hydraulic.Components.ElasticVessel c_pa(
             volume_start(displayUnit="ml") = 3.5e-05,
             Compliance(displayUnit="ml/mmHg") = settings.pulm_C_PA,
                        useExternalPressureInput=UseThoracic_PressureInput)
             annotation (Placement(transformation(extent={{-70,-30},{-50,-10}})));
+          replaceable
           Physiolibrary.Hydraulic.Components.ElasticVessel c_pv(
             volume_start(displayUnit="ml") = 65e-6 + deadVolume + settings.V_PV_init,
             ZeroPressureVolume=deadVolume,
@@ -2179,6 +2183,16 @@ type"),       Text(
         // R_PV   = 0.25;
 
         end PulmonaryTriSeg_Rat;
+
+        model PulmonaryTriSeg_NonLinear
+          extends PulmonaryTriSeg(redeclare
+              Physiolibrary.Hydraulic.Components.ResistorNonLinear r_pa);
+          annotation (Icon(graphics={  Line(
+                  points={{-64,-38},{-4,-38},{16,22}},
+                  color={0,0,0},
+                  smooth=Smooth.Bezier,
+                  thickness=0.5)}));
+        end PulmonaryTriSeg_NonLinear;
       end Pulmonary;
 
       package Heart
@@ -4659,7 +4673,26 @@ Simple")}),                                                                  Dia
                     rotation=270,
                     origin={0,100})));
               inner Physiolibrary.Types.Fraction phi = phi_input "Global provider of phi for any components interested";
+
+             Modelica.SIunits.Work currentWork_LV;
+             Physiolibrary.Types.Power power_LV;
+             Modelica.SIunits.Work currentWork_RV;
+             Physiolibrary.Types.Power power_RV;
+
             equation
+
+              // since the flow is derivation of volume, we have already differentiated it
+              der(currentWork_LV)  = P_LV*der(V_LV);
+              der(currentWork_RV)  = P_RV*der(V_RV);
+
+              when cardiac_cycle > 1 then
+                // anywhere, jsut to reset it once a cycle
+                reinit(currentWork_LV, 0);
+                reinit(currentWork_RV, 0);
+                power_LV = currentWork_LV*frequency;
+                power_RV = currentWork_RV*frequency;
+              end when;
+
               OnRV = V_RV > V_min;
               OnLV = V_LV > V_min;
 
@@ -4875,7 +4908,21 @@ Simple")}),                                                                  Dia
                         {80,20}})));
                         Physiolibrary.Types.Pressure thoracic_pressure_inside = thoracic_pressure_input
                   *max(min(volume /volume_min, 1), 0) "limiting external pressure for small or negative volumes";
+
+
+             Modelica.SIunits.Work currentWork;
+             Modelica.SIunits.Work work;
+
             equation
+
+              // since the flow is derivation of volume, we have already differentiated it
+              der(currentWork) = port_a.pressure*port_a.q;
+
+              when cardiac_cycle > 1 then
+                // anywhere, jsut to reset it once a cycle
+                reinit(currentWork, 0);
+                work = currentWork;
+              end when;
 
               if enabled then
 
@@ -6792,111 +6839,139 @@ P_hs/2")}));
 
           partial model systemic_tissue_base
             extends
-                ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Interfaces.bg_base(
-                  UseInertance=false, volume(start=V_n, fixed=not settings.initByPressure));
+              ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Interfaces.bg_base(
+                UseInertance=false, volume(start=V_n, fixed=not settings.initByPressure));
 
             parameter Physiolibrary.Types.HydraulicInertance I;
             parameter Physiolibrary.Types.HydraulicCompliance C;
             parameter Physiolibrary.Types.HydraulicResistance Ra "Arteriole resistance";
-            parameter Physiolibrary.Types.HydraulicResistance Rvis = 0.01/C "Elastic viscosity using Voigt model of in-series resistance";
-            parameter Physiolibrary.Types.HydraulicInertance I_e = I*1e-6;
+            parameter Physiolibrary.Types.HydraulicResistance Rvis=0.01/C
+              "Elastic viscosity using Voigt model of in-series resistance";
+            parameter Physiolibrary.Types.HydraulicInertance I_e=I*1e-6;
             parameter Physiolibrary.Types.HydraulicResistance Rv "venule resistance";
 
-            parameter Physiolibrary.Types.Volume zpv = 0 "Zero-pressure volume";
-            parameter Physiolibrary.Types.Pressure nominal_pressure = settings.tissues_nominal_pressure;
-            Physiolibrary.Types.Pressure u_C(start = nominal_pressure, nominal = 1000, fixed = settings.initByPressure);
+            parameter Physiolibrary.Types.Volume zpv=0 "Zero-pressure volume";
+            parameter Physiolibrary.Types.Pressure nominal_pressure=settings.tissues_nominal_pressure;
+            Physiolibrary.Types.Pressure u_C(
+              start=nominal_pressure,
+              nominal=1000,
+              fixed=settings.initByPressure);
 
-            Physiolibrary.Types.Pressure u(nominal = 1000) annotation(HideResult = settings.hideLevel1);
+            Physiolibrary.Types.Pressure u(nominal=1000)
+              annotation (HideResult=settings.hideLevel1);
 
-            Physiolibrary.Types.Pressure u_in_hs "Output pressure including the hydrostatic pressure" annotation(HideResult = settings.hideLevel1);
-            Physiolibrary.Types.Pressure u_out_hs "Output pressure including the hydrostatic pressure" annotation(HideResult = settings.hideLevel1);
+            Physiolibrary.Types.Pressure u_in_hs
+              "Output pressure including the hydrostatic pressure"
+              annotation (HideResult=settings.hideLevel1);
+            Physiolibrary.Types.Pressure u_out_hs
+              "Output pressure including the hydrostatic pressure"
+              annotation (HideResult=settings.hideLevel1);
 
             // Physiolibrary.Types.HydraulicResistancse Ra_phi_inf = Ra*exp((phi-phi0)*settings.Ra_factor)/exp(exercise*settings.exercise_factor) "Arterioles resistance dependent on phi";
-            Physiolibrary.Types.HydraulicResistance Ra_phi_inf = Ra
-                *(1 + (phi - settings.phi0) * settings.Ra_factor)
-                /(1 + exercise*settings.exercise_factor) "Arterioles resistance dependent on phi and exercise" annotation(HideResult = settings.hideLevel1);
-            Physiolibrary.Types.HydraulicResistance Ra_phi(start = Ra, fixed = false) "Delayed arterioles resistance dependent on phi" annotation(HideResult = settings.hideLevel1);
-          //  Physiolibrary.Types.HydraulicResistance Rv_phi = Rv*exp((phi-phi0)*settings.Rv_factor) "Arterioles resistance dependent on phi";
-            Physiolibrary.Types.HydraulicResistance Rv_phi = Rv
-                *(1 + (phi - settings.phi0) * settings.Rv_factor)
-                /(1 + exercise*settings.exercise_factor) "Venules resistance dependent on phi and exercise" annotation(HideResult = settings.hideLevel1);
+            Physiolibrary.Types.HydraulicResistance Ra_phi_inf=Ra*(1 + (phi - settings.phi0)
+                *settings.Ra_factor)/(1 + exercise*settings.exercise_factor)
+              "Arterioles resistance dependent on phi and exercise"
+              annotation (HideResult=settings.hideLevel1);
+            Physiolibrary.Types.HydraulicResistance Ra_phi(start=Ra, fixed=false)
+              "Delayed arterioles resistance dependent on phi"
+              annotation (HideResult=settings.hideLevel1);
+            //  Physiolibrary.Types.HydraulicResistance Rv_phi = Rv*exp((phi-phi0)*settings.Rv_factor) "Arterioles resistance dependent on phi";
+            Physiolibrary.Types.HydraulicResistance Rv_phi=Rv*(1 + (phi - settings.phi0)*
+                settings.Rv_factor)/(1 + exercise*settings.exercise_factor)
+              "Venules resistance dependent on phi and exercise"
+              annotation (HideResult=settings.hideLevel1);
 
-            parameter Real k = C / (V_max - V_n) "For Pstras non-linear PV characteristics. For gamma = 0.0003750308";
-            parameter Physiolibrary.Types.Volume V_max(nominal = 1e-9) = V_n + (V_n - zpv)*settings.tissues_gamma
+            parameter Real k=C/(V_max - V_n)
+              "For Pstras non-linear PV characteristics. For gamma = 0.0003750308";
+            parameter Physiolibrary.Types.Volume V_max(nominal=1e-9) = V_n + (V_n - zpv)*
+              settings.tissues_gamma
               " V_n is between zpv and V_max, parameterized by gamma. 1 means its in the center. For Pstras non-linear PV characteristics";
-            parameter Physiolibrary.Types.Volume V_n = nominal_pressure*C + zpv
+            parameter Physiolibrary.Types.Volume V_n=nominal_pressure*C + zpv
               "nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization";
-            parameter Physiolibrary.Types.Volume V_us = V_max - (V_max - V_n)*exp(nominal_pressure * k)
-              "nonlinear Un-Stressed volume";
-            parameter Physiolibrary.Types.Volume volume_linearBreakpoint=V_max*(1 - settings.tissues_V_max_breakPoint_Frac)
+            parameter Physiolibrary.Types.Volume V_us=V_max - (V_max - V_n)*exp(
+                nominal_pressure*k) "nonlinear Un-Stressed volume";
+            parameter Physiolibrary.Types.Volume volume_linearBreakpoint=V_max*(1 -
+                settings.tissues_V_max_breakPoint_Frac)
               "Maximal volume for nonlinear function, usually set as a fraction of V_max.";
 
-            Real k_phi = C / (V_max - V_n_phi) "For Pstras non-linear PV characteristics" annotation(HideResult = settings.hideLevel1);
-            Physiolibrary.Types.Volume V_max_phi = V_max - (V_us - V_us_phi) "From Pstras" annotation(HideResult = settings.hideLevel1);
-            Physiolibrary.Types.Volume V_n_phi = V_n
-                / (1 + (phi - settings.phi0)*settings.tissuesCompliance_PhiEffect)
-                * (1 + (phi - settings.phi0)*exercise*settings.exercise_factor_on_tissue_compliance) "Linearly dependent on phi" annotation(HideResult = settings.hideLevel1);
-            Physiolibrary.Types.Volume V_us_phi = V_us
-              / (1 + settings.tissuesCompliance_PhiEffect*(phi - settings.phi0)) "Linearly dependent on phi" annotation(HideResult = settings.hideLevel1);
+            Real k_phi=C/(V_max - V_n_phi) "For Pstras non-linear PV characteristics"
+              annotation (HideResult=settings.hideLevel1);
+            Physiolibrary.Types.Volume V_max_phi=V_max - (V_us - V_us_phi) "From Pstras"
+              annotation (HideResult=settings.hideLevel1);
+            Physiolibrary.Types.Volume V_n_phi=V_n/(1 + (phi - settings.phi0)*settings.tissuesCompliance_PhiEffect)
+                *(1 + (phi - settings.phi0)*exercise*settings.exercise_factor_on_tissue_compliance)
+              "Linearly dependent on phi" annotation (HideResult=settings.hideLevel1);
+            Physiolibrary.Types.Volume V_us_phi=V_us/(1 + settings.tissuesCompliance_PhiEffect
+                *(phi - settings.phi0)) "Linearly dependent on phi"
+              annotation (HideResult=settings.hideLevel1);
 
-          //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
-          //       *(phi - phi0)) "Nonlinear compliance unstressed volume affected by phi";
+            //   Physiolibrary.Types.Fraction phi_shift=(1 + settings.tissues_compliance_phi_shift
+            //       *(phi - phi0)) "Nonlinear compliance unstressed volume affected by phi";
 
-          parameter Boolean UseMuscleVenousPump = false;
-          parameter Physiolibrary.Types.VolumeFlowRate nominalFlow = ((settings.tissues_nominal_pressure - settings.tissues_nominal_venules_pressure)/Rv) "Backcalculated nominal flow";
-          Physiolibrary.Types.VolumeFlowRate q_mc = if UseMuscleVenousPump then
-              nominalFlow*exercise*settings.exercise_venous_pumping_factor
-              else 0 "Flow given by muscle contractions during exercise is proportional to Rv";
+            parameter Boolean UseMuscleVenousPump=false;
+            parameter Physiolibrary.Types.VolumeFlowRate nominalFlow=((settings.tissues_nominal_pressure
+                 - settings.tissues_nominal_venules_pressure)/Rv)
+              "Backcalculated nominal flow";
+            Physiolibrary.Types.VolumeFlowRate q_mc=if UseMuscleVenousPump then
+                nominalFlow*exercise*settings.exercise_venous_pumping_factor else 0
+              "Flow given by muscle contractions during exercise is proportional to Rv";
+
+          Physiolibrary.Types.HydraulicCompliance C_calculated = volume/(u_C - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)));
           initial equation
-          //  volume = nominal_pressure*C + zpv;
+            //  volume = nominal_pressure*C + zpv;
           equation
             assert(Rv_phi > 0, "The exercise_factor too high, driving the venous resistance negative!");
 
-              if settings.tissues_Ra_tau == 0 then
-                Ra_phi = Ra_phi_inf;
+            if settings.tissues_Ra_tau == 0 then
+              Ra_phi = Ra_phi_inf;
+            else
+              der(Ra_phi)*settings.tissues_Ra_tau = Ra_phi_inf - Ra_phi;
+            end if;
+
+            if UseInertance then
+              der(v_in) = (u_in_hs - u - Ra_phi*v_in)/I;
+              der(v_out) = (u - u_out_hs - Rv_phi*(v_out - q_mc))/I_e;
+            else
+              0 = u_in_hs - u - Ra_phi*(v_in - q_mc);
+              0 = (u - u_out_hs - Rv_phi*(v_out - q_mc));
+              // (u - u_out_hs)/Rv + q_mc = v_out;
+            end if;
+
+            der(volume) = (v_in - v_out);
+            if UseOuter_thoracic_pressure then
+              u = u_C + Rvis*(v_in - v_out) + thoracic_pressure*thoracic_pressure_ratio;
+            else
+              u = u_C + Rvis*(v_in - v_out);
+            end if;
+
+            if not settings.UseNonLinear_TissuesCompliance then
+              volume = (u_C)*C + zpv;
+            elseif settings.tissues_UseStraighteningReaction2Phi then
+
+              // my expression based on straightening
+              //   if noEvent(volume < volume_linearBreakpoint) then
+              if noEvent(volume < volume_linearBreakpoint) then
+                u_C = 1/k_phi*log((V_max - V_us)/(V_max - volume))
+                  "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
               else
-                der(Ra_phi)*settings.tissues_Ra_tau =  Ra_phi_inf - Ra_phi;
+                // linear steepness after break
+                // linearized by derivation of original equation, slope = 1/k_phi/(1e-6), V_max - volume = 1e-6:, u_C at point: 1/k_phi*log((V_max - V_us)/(1e-6))
+                u_C - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)) = 1/
+                  k_phi/(V_max - volume_linearBreakpoint)*(volume - (V_max - V_max +
+                  volume_linearBreakpoint));
               end if;
 
-                if UseInertance then
-                  der(v_in) =(u_in_hs - u - Ra_phi*v_in)/I;
-                  der(v_out) =(u - u_out_hs - Rv_phi*(v_out - q_mc))/I_e;
-                else
-                  0 = u_in_hs - u - Ra_phi *(v_in - q_mc);
-                  0 =(u - u_out_hs - Rv_phi *(v_out - q_mc));
-                  // (u - u_out_hs)/Rv + q_mc = v_out;
-                end if;
+            else
+              // from Pstras
+              //        u_C = 1/k*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+              u_C = 1/k*log((V_max_phi - V_us_phi)/(V_max_phi - volume))
+                "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
 
-                der(volume) = (v_in-v_out);
-                if UseOuter_thoracic_pressure then
-                  u =u_C + Rvis*(v_in - v_out) + thoracic_pressure*thoracic_pressure_ratio;
-                else
-                  u =u_C + Rvis*(v_in - v_out);
-                end if;
+            end if;
 
-                if not settings.UseNonLinear_TissuesCompliance then
-                  volume = (u_C) *C + zpv;
-                elseif settings.tissues_UseStraighteningReaction2Phi then
-
-                  // my expression based on straightening
-            if noEvent(volume < volume_linearBreakpoint) then
-              u_C = 1/k_phi*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
-                  else
-                    // linear steepness after break
-                    // linearized by derivation of original equation, slope = 1/k_phi/(1e-6), V_max - volume = 1e-6:, u_C at point: 1/k_phi*log((V_max - V_us)/(1e-6))
-                u_C - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)) = 1/
-                k_phi/(V_max - volume_linearBreakpoint)*(volume - (V_max -
-                V_max + volume_linearBreakpoint));
-                  end if;
-
-                else
-                  // from Pstras
-          //        u_C = 1/k*log((V_max - V_us)/(V_max - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
-                  u_C = 1/k*log((V_max_phi - V_us_phi)/(V_max_phi - volume)) "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
-
-                end if;
-
-            annotation (Icon(graphics={Polygon(
+            annotation (
+              Icon(graphics={
+                  Polygon(
                     points={{-20,-26},{-2,2},{-18,2},{12,30},{8,30},{24,36},{30,30},{26,30},
                         {6,10},{18,10},{-6,-24},{-20,-26}},
                     fillColor={0,0,0},
@@ -6914,7 +6989,7 @@ P_hs/2")}));
                     lineColor={0,0,0},
                     textString="%exercise_ratio%",
                     visible=DynamicSelect(false, UseExercise and not exercise_ratio == 1))}),
-                                                 Documentation(info="<html>
+              Documentation(info="<html>
 <p>When <span style=\"font-family: Courier New;\">UseNonLinearCompliance</span> is true, then this formula is applied (from <span style=\"font-family: Courier New; color: #006400;\">Pstras, Math Med Biol 2017,&nbsp;10.1093/imammb/dqw008):</span></p>
 <p><img src=\"modelica://ADAN_main/Resources/tissuePV.png\"/></p>
 <p>Otherwise, the linear (green) relation is used instead.</p>
@@ -30012,7 +30087,7 @@ P_hs_plus_dist"),
         nperiod=0,
         offset=0.25,
         startTime=20)
-        annotation (HideResult = true, Placement(transformation(extent={{-70,70},{-50,
+        annotation (Placement(transformation(extent={{-70,70},{-50,
                 90}})));
       inner Components.Settings settings(
         tissues_nominal_cardiac_output=0.000105)
@@ -33645,7 +33720,7 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{-80,-20},{-60,0}})));
 
         // used regex find '(\w+)=we' and replace with \1=settings.\1
-        Exercise.OlufsenTriseg_Exercise
+        Exercise.OlufsenTriSeg_exercise
                                     olufsenTriseg_Exercise(settings(
             phi0=settings.phi0,
             height=settings.height,
@@ -34907,7 +34982,8 @@ P_hs_plus_dist"),
             UseFrequencyInput=true,
             UseThoracicPressureInput=true,
             UsePhiInput=true),
-          redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg
+          redeclare replaceable
+                    Components.Subsystems.Pulmonary.PulmonaryTriSeg
             pulmonaryComponent(UseThoracic_PressureInput=true),
                 heartRate(HR_nom(displayUnit="1/min")),
           condHR(disconnected=false),
@@ -36284,56 +36360,6 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_SemiRecumberent;
-
-      model OlufsenTriSeg_tiltable_exercise
-        extends OlufsenTriSeg_tiltable(
-            Systemic1(
-            ulnar_T2_L90(UseExercise=false),
-            radial_T1_L92(UseExercise=false),
-            vertebral_L2(UseExercise=false),
-            ulnar_T2_R42(UseExercise=false),
-            radial_T1_R44(UseExercise=false),
-            internal_carotid_R8_C(UseExercise=false),
-            external_carotid_T2_R26(UseExercise=false),
-            vertebral_R272(UseExercise=false),
-            UseExerciseInput=true,
-            cardiac_tissue(UseExercise=true),
-            internal_iliac_T1_R218(UseExercise=true),
-            profundus_T2_R224(UseExercise=true),
-            anterior_tibial_T3_R230(UseExercise=true),
-            posterior_tibial_T4_R236(UseExercise=true),
-            posterior_tibial_T4_L214(UseExercise=true),
-            anterior_tibial_T3_L208(UseExercise=true),
-            profundus_T2_L202(UseExercise=true),
-            internal_iliac_T1_L196(UseExercise=true)),
-          useAutonomousPhi(y=false),
-          condHeartPhi(disconnected=false),
-          condHR(disconnected=false),
-      phi(
-            amplitude=0.2,
-            rising(displayUnit="s") = 60,
-            width(displayUnit="s"),
-            falling(displayUnit="s") = 0,
-            period(displayUnit="s"),
-            nperiod=1,
-            offset=1,
-            startTime=180),
-          Tilt_ramp(duration=1, startTime=30));
-
-        replaceable Modelica.Blocks.Sources.Ramp Exercise(
-          startTime=15,
-          height=1,
-          duration=0) constrainedby Modelica.Blocks.Interfaces.SO
-          annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
-      equation
-        connect(Systemic1.exercise_input, Exercise.y) annotation (Line(points={
-                {-28,36},{-42,36},{-42,62},{-79,62}}, color={0,0,127}));
-        annotation (experiment(
-            StopTime=70,
-            Interval=0.02,
-            Tolerance=1e-06,
-            __Dymola_Algorithm="Cvode"));
-      end OlufsenTriSeg_tiltable_exercise;
     end Tilt;
 
     package Exercise
@@ -36341,7 +36367,7 @@ P_hs_plus_dist"),
       package Experiments
         model base_Exercise_SimpleCa_maxSV
           extends
-            ADAN_main.SystemicTree.Exercise.OlufsenTriseg_Exercise(
+            ADAN_main.SystemicTree.Exercise.OlufsenTriSeg_exercise(
             Exercise(startTime=10),
             phi(
               amplitude=0.75,
@@ -36370,7 +36396,7 @@ P_hs_plus_dist"),
         end base_Exercise_SimpleCa_maxSV;
 
         model test_CO
-          extends OlufsenTriseg_Exercise(
+          extends OlufsenTriSeg_exercise(
             phi(
               amplitude=0.25,
               offset=1,
@@ -36378,9 +36404,30 @@ P_hs_plus_dist"),
             condHeartPhi(uMax=1),
             condHR(uMax=1));
         end test_CO;
+
+        package KnockOffExperiments
+          model base
+            extends OlufsenTriSeg_tiltable_exercise;
+          end base;
+        end KnockOffExperiments;
+
+        model OlufsenTriseg_Exercise_NonLInPumRes
+          extends OlufsenTriSeg_tiltable_exercise(
+            redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear
+              pulmonaryComponent(UseThoracic_PressureInput=true, r_pa(
+                  nominalFlow(displayUnit="m3/s"), nominalDp(displayUnit="mmHg")
+                   = 1599.86864898)),
+            phi(
+              amplitude=0.75,
+              offset=0.25,
+                startTime=20),
+            Exercise(startTime=20),
+            Tilt_ramp(startTime=0));
+
+        end OlufsenTriseg_Exercise_NonLInPumRes;
       end Experiments;
 
-      model OlufsenTriseg_Exercise "Simplified heart model"
+      model OlufsenTriSeg_exercise "Simplified heart model"
         extends Baseline.OlufsenTriSeg_optimized_steadyState_init(
           Systemic1(
             ulnar_T2_L90(UseExercise=false),
@@ -36428,7 +36475,123 @@ P_hs_plus_dist"),
             Interval=0.02,
             Tolerance=1e-05,
             __Dymola_Algorithm="Cvode"));
-      end OlufsenTriseg_Exercise;
+      end OlufsenTriSeg_exercise;
+
+      model OlufsenTriSeg_tiltable_exercise
+        extends Tilt.OlufsenTriSeg_tiltable(
+          Systemic1(
+            ulnar_T2_L90(UseExercise=false),
+            radial_T1_L92(UseExercise=false),
+            vertebral_L2(UseExercise=false),
+            ulnar_T2_R42(UseExercise=false),
+            radial_T1_R44(UseExercise=false),
+            internal_carotid_R8_C(UseExercise=false),
+            external_carotid_T2_R26(UseExercise=false),
+            vertebral_R272(UseExercise=false),
+            UseExerciseInput=true,
+            cardiac_tissue(UseExercise=true),
+            internal_iliac_T1_R218(UseExercise=true),
+            profundus_T2_R224(UseExercise=true),
+            anterior_tibial_T3_R230(UseExercise=true),
+            posterior_tibial_T4_R236(UseExercise=true),
+            posterior_tibial_T4_L214(UseExercise=true),
+            anterior_tibial_T3_L208(UseExercise=true),
+            profundus_T2_L202(UseExercise=true),
+            internal_iliac_T1_L196(UseExercise=true)),
+          useAutonomousPhi(y=false),
+          condHeartPhi(disconnected=false),
+          condHR(disconnected=false),
+          phi(
+            amplitude=0.1,
+            rising(displayUnit="s") = 0,
+            width(displayUnit="s") = 10,
+            falling(displayUnit="s") = 0,
+            period(displayUnit="s") = 60,
+            nperiod=0,
+            offset=1,
+            startTime=40),
+          Tilt_ramp(duration=1, startTime=5),
+          settings(tissues_V_max_breakPoint_Frac=1e-05));
+
+        replaceable Modelica.Blocks.Sources.Ramp Exercise(
+          startTime=0,
+          height=1,
+          duration=1) constrainedby Modelica.Blocks.Interfaces.SO
+          annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
+      equation
+        connect(Systemic1.exercise_input, Exercise.y) annotation (Line(points={
+                {-28,36},{-42,36},{-42,62},{-79,62}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=60,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_tiltable_exercise;
+
+      model OlufsenTriSeg_tiltable_exercise_MusclePump
+        extends OlufsenTriSeg_tiltable_exercise(
+          Tilt_ramp(startTime=0),
+          phi(nperiod=0),
+          Systemic1(
+            UseOuter_PressureInput=true,
+            profunda_femoris_vein_T2_R40(UseOuter_external_pressure=true,
+                LimitBackflow=true),
+            anterior_tibial_vein_T4_R50(UseOuter_external_pressure=true,
+                LimitBackflow=true),
+            popliteal_vein_R52(UseOuter_external_pressure=true, LimitBackflow=
+                  true),
+            posterior_tibial_vein_T6_R54(UseOuter_external_pressure=true,
+                LimitBackflow=true),
+            internal_iliac_vein_T1_L60(UseOuter_external_pressure=true,
+                LimitBackflow=true),
+            profunda_femoris_vein_T2_L70(UseOuter_external_pressure=true,
+                LimitBackflow=true),
+            anterior_tibial_vein_T4_L80(UseOuter_external_pressure=true,
+                LimitBackflow=true),
+            popliteal_vein_L82(UseOuter_external_pressure=true, LimitBackflow=
+                  true),
+            posterior_tibial_vein_T6_L84(UseOuter_external_pressure=true,
+                LimitBackflow=true),
+            internal_iliac_vein_T1_R30(UseOuter_external_pressure=true,
+                LimitBackflow=true),
+            popliteal_vein_R48(LimitBackflow=true),
+            popliteal_vein_L78(LimitBackflow=true),
+            femoral_vein_R38(LimitBackflow=true),
+            femoral_vein_L68(LimitBackflow=true),
+            external_iliac_vein_R28(LimitBackflow=true),
+            external_iliac_vein_L58(LimitBackflow=true),
+            internal_iliac_T1_R218(LimitBackflow=true),
+            profundus_T2_R224(LimitBackflow=true),
+            anterior_tibial_T3_R230(LimitBackflow=true),
+            posterior_tibial_T4_R236(LimitBackflow=true),
+            profundus_T2_L202(LimitBackflow=true),
+            anterior_tibial_T3_L208(LimitBackflow=true),
+            posterior_tibial_T4_L214(LimitBackflow=true),
+            internal_iliac_T1_L196(LimitBackflow=true)));
+      replaceable Modelica.Blocks.Sources.Sine muscle_pump_pressure(
+          freqHz=2,
+          startTime=60,
+          amplitude=40*133,
+          offset=0) constrainedby Modelica.Blocks.Sources.Trapezoid
+          annotation (Placement(transformation(extent={{-100,-10},{-80,10}})));
+        Components.Signals.ConditionalConnection condEP(
+          disconnected=false,
+          disconnectedValue=0,
+          uMin=0)
+          annotation (Placement(transformation(extent={{-69,-5.3333},{-55,6.6667}})));
+
+      Physiolibrary.Types.Volume pulsating_venous_volume = Systemic1.internal_iliac_vein_T1_R30.volume + Systemic1.profunda_femoris_vein_T2_R40.volume + Systemic1.anterior_tibial_vein_T4_R50.volume + Systemic1.posterior_tibial_vein_T6_R54.volume + Systemic1.internal_iliac_vein_T1_L60.volume + Systemic1.profunda_femoris_vein_T2_L70.volume + Systemic1.anterior_tibial_vein_T4_L80.volume + Systemic1.posterior_tibial_vein_T6_L84.volume + Systemic1.popliteal_vein_R52.volume + Systemic1.popliteal_vein_L82.volume;
+      equation
+        connect(muscle_pump_pressure.y, condEP.u) annotation (Line(points={{-79,0},{-74.7,
+                0},{-74.7,3.33333e-05},{-70.4,3.33333e-05}}, color={0,0,127}));
+        connect(condEP.y, Systemic1.Outer_pressure_input) annotation (Line(points={{-54.3,
+                3.33333e-05},{-28,0},{-28,20}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=90,
+            Interval=0.02,
+            Tolerance=1e-07,
+            __Dymola_Algorithm="Cvode"));
+      end OlufsenTriSeg_tiltable_exercise_MusclePump;
     end Exercise;
 
     package Valsalva
@@ -36512,6 +36675,37 @@ P_hs_plus_dist"),
             condTP(disconnected=false),
             Tilt_ramp(startTime=1000));
         end OlufsenTriSeg_valsalva_KosinskiBaro_tiltable_sit;
+
+        model OlufsenTriSeg_valsalva_exhale
+          "LArge exhale at the end of the valsalva"
+          extends OlufsenTriSeg_valsalva(condTP(UseAdditionalInput=true));
+        replaceable
+        Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp1(
+            rising=0.5,
+            width=0,
+            falling=2,
+            startTime=34.5,
+            amplitude=20*133,
+            period=200,
+            nperiod=1,
+            offset=0)     constrainedby Modelica.Blocks.Sources.Trapezoid
+            annotation (Placement(transformation(extent={{-100,-20},{-80,0}})));
+        equation
+          connect(thoracic_pressure_ramp1.y, condTP.u1) annotation (Line(points=
+                 {{-79,-10},{-76,-10},{-76,-34},{-70.54,-34}}, color={0,0,127}));
+        end OlufsenTriSeg_valsalva_exhale;
+
+        model OlufsenTriSeg_valsalva_inhale
+          extends OlufsenTriSeg_valsalva_exhale(thoracic_pressure_ramp1(
+                amplitude=-10*133, startTime=35));
+        end OlufsenTriSeg_valsalva_inhale;
+
+        model OlufsenTriSeg_valsalva_NonLinPulmonary
+          extends OlufsenTriSeg_valsalva(redeclare
+              Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear
+              pulmonaryComponent(UseThoracic_PressureInput=true, r_pa(
+                  nominalFlow(displayUnit="l/min"))));
+        end OlufsenTriSeg_valsalva_NonLinPulmonary;
       end Experiments;
 
       model OlufsenTriSeg_valsalva
@@ -36530,6 +36724,11 @@ P_hs_plus_dist"),
             falling=0,
             nperiod=1,
             startTime=30));
+        annotation (experiment(
+            StopTime=60,
+            Interval=0.02,
+            Tolerance=1e-07,
+            __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_valsalva;
 
     end Valsalva;
@@ -36660,7 +36859,6 @@ P_hs_plus_dist"),
               Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt
               Systemic1(
                       redeclare model Systemic_vein =
-
                   Components.Subsystems.Systemic.Vessel_modules.vp_vein_linear_leveled,
               UseThoracic_PressureInput=true,
               UsePhi_Input=true,
