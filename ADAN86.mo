@@ -98,7 +98,7 @@ package ADAN_main
        parameter Frequency HR_max=3   "maximal heart rate"
         annotation(Dialog(group = "General"));
       final parameter Real BMI = weight/(height^2) annotation(Dialog(group = "General"));
-      final parameter Real BSA = 0.007184*weight^0.425*height^0.725 "Du Bois formula for body surface area" annotation(Dialog(group = "General"));
+      final parameter Real BSA = 0.007184*weight^0.425*(height*100)^0.725 "Du Bois formula for body surface area" annotation(Dialog(group = "General"));
 
       //INITILIZATION
       parameter Boolean initByPressure = true "Use nominal pressure to initialize vessel volume. False to use volume directly"
@@ -4682,8 +4682,8 @@ Simple")}),                                                                  Dia
             equation
 
               // since the flow is derivation of volume, we have already differentiated it
-              der(currentWork_LV)  = P_LV*der(V_LV);
-              der(currentWork_RV)  = P_RV*der(V_RV);
+              der(currentWork_LV)  = -P_LV*der(V_LV);
+              der(currentWork_RV)  = -P_RV*der(V_RV);
 
               when cardiac_cycle > 1 then
                 // anywhere, jsut to reset it once a cycle
@@ -35025,7 +35025,9 @@ P_hs_plus_dist"),
       output Physiolibrary.Types.Fraction phi_baro = Systemic1.phi_baroreflex;
       output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
       output Physiolibrary.Types.Frequency HR = heartRate.HR;
-
+      Real CI = CO*1000*60/settings.BSA "Cardiac index l/min/m2";
+      Physiolibrary.Types.Power CardiacPowerBrachial = brachial_pressure_mean*CO;
+      Physiolibrary.Types.PowerPerMass CardiacPowerIndex = brachial_pressure_mean*CO/settings.BSA;
       //   parameter Real Vw_factor=1;
       //   parameter Real Amref_factor=0.95;
       //   parameter Physiolibrary.Types.HydraulicResistance TPR=119990148.6735;
@@ -36415,15 +36417,23 @@ P_hs_plus_dist"),
           extends OlufsenTriSeg_tiltable_exercise(
             redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear
               pulmonaryComponent(UseThoracic_PressureInput=true, r_pa(
-                  nominalFlow(displayUnit="m3/s"), nominalDp(displayUnit="mmHg")
-                   = 1599.86864898)),
+                nominalFlow(displayUnit="l/min"),
+                nominalDp(displayUnit="mmHg"),
+                nominalExerciseFlow(displayUnit="l/min"),
+                maxLinearFlow(displayUnit="l/min") = 1.6666666666667e-05)),
             phi(
               amplitude=0.75,
+              nperiod=1,
               offset=0.25,
                 startTime=20),
             Exercise(startTime=20),
             Tilt_ramp(startTime=0));
 
+          annotation (experiment(
+              StopTime=60,
+              Interval=0.02,
+              Tolerance=1e-07,
+              __Dymola_Algorithm="Cvode"));
         end OlufsenTriseg_Exercise_NonLInPumRes;
       end Experiments;
 
