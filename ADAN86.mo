@@ -1957,6 +1957,83 @@ type"),       Text(
                 end if;
 
           end inset_Pulmonary_ADAN_VR_b580e;
+
+          model ResistorNonLinearPulmonary
+            "Hydraulic resistor, where the pressure-flow characteristic is exponentially non-linear"
+           extends Physiolibrary.Hydraulic.Interfaces.OnePort;
+           extends Physiolibrary.Icons.HydraulicResistor;
+
+           // initizalization
+            parameter Physiolibrary.Types.HydraulicResistance nominalTPR(
+                displayUnit="(dyn.s)/cm5")=20000000;
+            parameter Physiolibrary.Types.Pressure nominalDp=nominalTPR*
+                nominalFlow;
+            parameter Physiolibrary.Types.VolumeFlowRate nominalFlow(
+                displayUnit="l/min")=0.0001;
+            parameter Physiolibrary.Types.HydraulicResistance baseResistanceAtNominals=nominalDp
+                /(nominalFlow^exp_);
+            parameter Physiolibrary.Types.HydraulicResistance nominalExerciseTPR=10000000
+              "TPR at maximal flow during maximal exercise";
+            parameter Physiolibrary.Types.VolumeFlowRate nominalExerciseFlow=
+                0.00033333333333333;
+            parameter Real nominalExp_ = log(nominalExerciseTPR*nominalExerciseFlow/base)/log(nominalExerciseFlow);
+          //  parameter Types.HydraulicResistance baseResistanceAtTPR = nominalTPR*nominalFlow/(nominalFlow^exp_);
+
+            parameter Physiolibrary.Types.HydraulicResistance base(start=1e7)=
+              baseResistanceAtNominals
+              "Base for exponential conductance, as in dp = base*Q^Exp";
+            parameter Real exp_(start = 1)=nominalExp_   "Exponent of conductance base, as in dp = base*Q^Exp";
+            parameter Physiolibrary.Types.VolumeFlowRate maxLinearFlow=
+                nominalFlow
+              "Maximal flow having constant TPR to prevent multistable simulation";
+            Physiolibrary.Types.HydraulicResistance TPR_limit=base*(
+                maxLinearFlow^exp_)/maxLinearFlow;
+            Physiolibrary.Types.HydraulicResistance TPR=if noEvent(q_in.q > 0)
+                 then dp/q_in.q else 0;
+          equation
+
+            // we must allow also negative flows
+            // linear flow under the limit, also
+            if noEvent(dp >= 0 and abs(q_in.q) > maxLinearFlow) then
+                  q_in.q = (dp/base)^(1/exp_);
+            elseif noEvent(dp < 0 and abs(q_in.q) > maxLinearFlow) then
+                q_in.q = -(-dp/base)^(1/exp_);
+            else
+              // linear characteristics inbetween
+                q_in.q = dp/TPR_limit;
+            end if;
+
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{
+                      -100,-100},{100,100}}),
+                             graphics={Text(
+                    extent={{-220,-40},{200,-80}},
+                    lineColor={0,0,255},
+                    fillColor={58,117,175},
+                    fillPattern=FillPattern.Solid,
+                    textString="%name"), Line(
+                    points={{-100,-60},{26,-26},{80,80}},
+                    color={0,0,0},
+                    smooth=Smooth.Bezier,
+                    thickness=0.5)}),
+              Documentation(revisions="<html>
+<p><i>2020</i></p>
+<p>Filip Jezek, University of Michigan</p>
+</html>",       info="<html>
+<p>This hydraulic conductance (resistance) element contains two connector sides. No hydraulic medium volume is changing in this element during simulation. That means that sum of flow in both connector sides is zero. The flow through element is determined by an exponential relation:</p>
+<p><img src=\"modelica://Physiolibrary/Resources/Images/equations/equation-BpFHrLEf.png\" alt=\"dp = base*Q^exp_
+\"/></p>
+<p>where base and exp are parameters.</p>
+<p>To prevent infinite resistance at small flow, one can adjust linear working areas. When the flow is below maxLinearFlow, then the following linear </p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q_in.q&nbsp;=&nbsp;(dp/base)^(1/exp_);</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;<span style=\"color: #0000ff;\">elseif&nbsp;</span><span style=\"color: #ff0000;\">noEvent</span>(dp&nbsp;&lt;&nbsp;0<span style=\"font-family: Courier New; color: #0000ff;\">&nbsp;and&nbsp;</span><span style=\"color: #ff0000;\">abs</span>(q_in.q)&nbsp;&gt;&nbsp;maxLinearFlow)<span style=\"font-family: Courier New; color: #0000ff;\">&nbsp;then</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q_in.q&nbsp;=&nbsp;-(-dp/base)^(1/exp_);</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;<span style=\"color: #0000ff;\">else</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: #006400;\">//&nbsp;linear&nbsp;characteristics&nbsp;inbetween</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q_in.q&nbsp;=&nbsp;dp/TPR_limit;</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;<span style=\"color: #0000ff;\">end&nbsp;if</span>;</p>
+<p><br><b>Ohm&apos;s law</b>. It is used conductance (=1/resistance) because it could be numerical zero better then infinity in resistance. </p>
+</html>"));
+          end ResistorNonLinearPulmonary;
         end Auxiliary;
 
         partial model partialPulmonary
@@ -2186,7 +2263,7 @@ type"),       Text(
 
         model PulmonaryTriSeg_NonLinear
           extends PulmonaryTriSeg(redeclare
-              Physiolibrary.Hydraulic.Components.ResistorNonLinear r_pa);
+              Auxiliary.ResistorNonLinearPulmonary r_pa);
           annotation (Icon(graphics={  Line(
                   points={{-64,-38},{-4,-38},{16,22}},
                   color={0,0,0},
@@ -36408,9 +36485,48 @@ P_hs_plus_dist"),
         end test_CO;
 
         package KnockOffExperiments
-          model base
+          model knockOff_base
             extends OlufsenTriSeg_tiltable_exercise;
-          end base;
+            annotation (__Dymola_Commands(file=
+                    "\"Scripts/Dymola/ExecuteExerciseKnockOffExperiments.mos\""
+                  "Execute all knock off experiments."));
+          end knockOff_base;
+
+          model KnockOff_NonLinearTissues
+            extends knockOff_base(settings(UseNonLinear_TissuesCompliance=false));
+          end KnockOff_NonLinearTissues;
+
+          model KnockOff_TissueComplianceReaction
+            extends knockOff_base(settings(exercise_factor_on_tissue_compliance
+                  =0));
+          end KnockOff_TissueComplianceReaction;
+
+          model KnockOff_ArterialCompliance
+            extends knockOff_base(settings(TPR(displayUnit="(Pa.s)/m3"), R_vc=0));
+          end KnockOff_ArterialCompliance;
+
+          model KnockOff_TissueResistance
+            extends knockOff_base(settings(Ra_factor=0));
+          end KnockOff_TissueResistance;
+
+          model KnockOff_Venoconstriction
+            extends knockOff_base(settings(veins_UsePhiEffect=false));
+          end KnockOff_Venoconstriction;
+
+          model KnockOff_Chronotropy
+            extends knockOff_base(condHR(disconnected=true, delayEnabled=false));
+          end KnockOff_Chronotropy;
+
+          model KnockOff_Inotropy
+            extends knockOff_base(settings(heart_vntr_sigma_actMaxAct_factor=
+                    settings.heart_vntr_sigma_act_factor));
+          end KnockOff_Inotropy;
+
+          model KnockOff_Lusitropy
+            "Do not change drive offset and relaxing timing."
+            extends knockOff_base(settings(heart_drive_offset_maxAct=settings.heart_drive_offset,
+                  heart_drive_k_TR_maxAct(displayUnit="s") = settings.heart_drive_k_TR));
+          end KnockOff_Lusitropy;
         end KnockOffExperiments;
 
         model OlufsenTriseg_Exercise_NonLInPumRes
