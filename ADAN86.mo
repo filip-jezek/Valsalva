@@ -36516,7 +36516,11 @@ P_hs_plus_dist"),
             extends OlufsenTriSeg_tiltable_exercise;
             annotation (__Dymola_Commands(file=
                     "\"Scripts/Dymola/ExecuteExerciseKnockOffExperiments.mos\""
-                  "Execute all knock off experiments."));
+                  "Execute all knock off experiments."), experiment(
+                StopTime=60,
+                Interval=0.02,
+                Tolerance=1e-07,
+                __Dymola_Algorithm="Cvode"));
           end knockOff_base;
 
           model KnockOff_NonLinearTissues
@@ -36533,7 +36537,19 @@ P_hs_plus_dist"),
           end KnockOff_ArterialCompliance;
 
           model KnockOff_TissueResistance
-            extends knockOff_base(settings(Ra_factor=0));
+            extends knockOff_base(settings(Ra_factor=0, exercise_factor=exerciseFactor_used));
+            parameter Physiolibrary.Types.Fraction maxphi = 1;
+            parameter Physiolibrary.Types.Fraction Ra_nominal = 3.17162 "Enter nominal tissues arterial resistance";
+            parameter Physiolibrary.Types.Fraction exerciseFactor_nominal = 34.776 "Enter nominal exercise factor";
+            Physiolibrary.Types.Fraction exerciseFactor_corrected "Output of the calculation - this shall be the correct exercise factor, given the Ra is knocekd off";
+            parameter Physiolibrary.Types.Fraction exerciseFactor_used = 9.58864 "Set the corrected factor here.";
+            Physiolibrary.Types.Fraction nominalModifier = (1 + (maxphi - settings.phi0)
+                *Ra_nominal)/(1 + exerciseFactor_nominal);
+            Physiolibrary.Types.Fraction currentModifier = (1 + (maxphi - settings.phi0)
+                *0)/(1 + exerciseFactor_corrected);
+          equation
+            nominalModifier = currentModifier;
+            assert(abs(exerciseFactor_used / exerciseFactor_corrected -1) < 0.01, "You have to manually input the corrected factor " + String(exerciseFactor_corrected) +" here to avoid tedious calculations.");
           end KnockOff_TissueResistance;
 
           model KnockOff_Venoconstriction
