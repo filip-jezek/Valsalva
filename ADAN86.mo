@@ -145,7 +145,7 @@ package ADAN_main
         "Phi effect on muscle contraction strength. Nominal drive means zeo effect"
         annotation(Dialog(tab = "Heart", group = "TriSegOttesen drive"));
       // TriSeg atria
-      parameter Time heart_atr_Tact=0.1    "Time from start of the atrial cycle"
+      parameter Time heart_atr_Tact=0    "Time from start of the atrial cycle"
         annotation(Dialog(tab = "Heart", group = "Simple atria"));
       parameter Real heart_atr_Emin = 0.05 "Elasticity at contraction"
         annotation(Dialog(tab = "Heart", group = "Simple atria"));
@@ -1964,15 +1964,14 @@ type"),       Text(
            extends Physiolibrary.Icons.HydraulicResistor;
 
            // initizalization
-            parameter Physiolibrary.Types.HydraulicResistance nominalTPR(
-                displayUnit="(dyn.s)/cm5")=20000000;
+            parameter Physiolibrary.Types.HydraulicResistance nominalTPR=20000000;
             parameter Physiolibrary.Types.Pressure nominalDp=nominalTPR*
                 nominalFlow;
-            parameter Physiolibrary.Types.VolumeFlowRate nominalFlow(
-                displayUnit="l/min")=0.0001;
+            parameter Physiolibrary.Types.VolumeFlowRate nominalFlow=0.0001;
             parameter Physiolibrary.Types.HydraulicResistance baseResistanceAtNominals=nominalDp
                 /(nominalFlow^exp_);
-            parameter Physiolibrary.Types.HydraulicResistance nominalExerciseTPR=10000000
+            parameter Physiolibrary.Types.HydraulicResistance nominalExerciseTPR(
+                displayUnit="(Pa.s)/m3")=nominalTPR/2
               "TPR at maximal flow during maximal exercise";
             parameter Physiolibrary.Types.VolumeFlowRate nominalExerciseFlow=
                 0.00033333333333333;
@@ -2263,7 +2262,8 @@ type"),       Text(
 
         model PulmonaryTriSeg_NonLinear
           extends PulmonaryTriSeg(redeclare
-              Auxiliary.ResistorNonLinearPulmonary r_pa);
+              Auxiliary.ResistorNonLinearPulmonary r_pa(maxLinearFlow(
+                  displayUnit="l/min") = 1.6666666666667e-05));
           annotation (Icon(graphics={  Line(
                   points={{-64,-38},{-4,-38},{16,22}},
                   color={0,0,0},
@@ -4617,8 +4617,9 @@ type"),       Text(
               parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
               parameter Real sigma_act=7.5*120 "mmHg ";
               parameter Real sigma_act_maxAct = sigma_act "Sigma at maximal activation";
+              parameter Physiolibrary.Types.Fraction phi_limit = 0 "Minimal value of phi to drop to. Experimental parameter, try using phi0 here";
               Real sigma_act_coeff "Slope of sigma change for activation. Calculated from nominal and max active";
-              Real sigma_act_phi = sigma_act*(1 + sigma_act_coeff*(phi - phi0));
+              Real sigma_act_phi = sigma_act*(1 + sigma_act_coeff*max(phi_limit,phi - phi0));
 
               // not used in the current version. Using k_passive instead
             //  parameter Real sigma_pas=7.5*7 "mmHg";
@@ -4659,6 +4660,8 @@ type"),       Text(
               Real sigmapas=k_passive*(SLo/2 - L0) + sigma_collagen;
               // Active forces could not go negative
               Real sigmaact=max(0, sigma_act_phi*C*(SL - SLrest)*(SLo - SL)/LSEiso);
+              Real debug_SL = (SL - SLrest);
+              Real debug_SLo = (SLo - SL);
               // Total forces
               Real sigmaM=sigmaact + sigmapas;
               // equilibrium of forces at junction circle already in base class
@@ -4962,7 +4965,7 @@ Simple")}),                                                                  Dia
             parameter Boolean enabled = true "Atria enabled. False means thay are disabled and are therefore not filling nor pulsing"
              annotation(choices(checkBox=true));
 
-            parameter Physiolibrary.Types.Time Tact = 0.10;
+            parameter Physiolibrary.Types.Time Tact = 0.10 annotation (Evaluate = false);
             //
               Real atriaCycle "Time from start of the atrial cycle";
 
@@ -6404,9 +6407,17 @@ Kalecky")}), experiment(
               V_LV(start=0.00015), V_RV(start=0.00015)) constrainedby
             Auxiliary.TriSegMechanics_components.partialVentricles
             annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
-          Auxiliary.TriSegMechanics_components.Atrium ra
+          Auxiliary.TriSegMechanics_components.Atrium ra(
+            Tact(displayUnit="s") = settings.heart_atr_Tact,
+            Emin=settings.heart_atr_Emin,
+            Emax=settings.heart_atr_Emax,
+            sigma_a=settings.heart_atr_sigma_a)
             annotation (Placement(transformation(extent={{-40,26},{-60,6}})));
-          Auxiliary.TriSegMechanics_components.Atrium la
+          Auxiliary.TriSegMechanics_components.Atrium la(
+            Tact=settings.heart_atr_Tact,
+            Emin=settings.heart_atr_Emin,
+            Emax=settings.heart_atr_Emax,
+            sigma_a=settings.heart_atr_sigma_a)
             annotation (Placement(transformation(extent={{40,-10},{60,10}})));
 
         Physiolibrary.Types.Volume volume;
@@ -6560,7 +6571,7 @@ Kalecky")}), experiment(
                 offset=settings.heart_drive_offset,
                 offset_maxAct=settings.heart_drive_offset_maxAct,
                 k_TS_maxAct=settings.heart_drive_k_TS_maxAct,
-                k_TR_maxAct(displayUnit="s") = settings.heart_drive_k_TS_maxAct,
+                k_TR_maxAct(displayUnit="s") = settings.heart_drive_k_TR_maxAct,
                 drive=settings.heart_drive_drive,
                 k_TS=settings.heart_drive_k_TS,
                 k_TR=settings.heart_drive_k_TR),
@@ -35030,6 +35041,19 @@ P_hs_plus_dist"),
               Systemic1(baroreflex_system(baroreceptor_carotid(epsilon(start=
                         1.19)), baroreceptor_aortic(epsilon(start=1.59)))));
         end OlufsenTriSeg_baroInitTs60;
+
+        model OTS_O_SS_I_NonLInearPR "Nonlinear pulmonary resistance"
+          extends OlufsenTriSeg_optimized_steadyState_init(redeclare
+              Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear
+              pulmonaryComponent(UseThoracic_PressureInput=true));
+
+          Physiolibrary.Types.Pressure PAavg(start = 14*133);
+          Physiolibrary.Types.Pressure PVavg(start = 5*133);
+          parameter Modelica.SIunits.Time tau = 10;
+        equation
+          tau*der(PAavg) = pulmonaryComponent.c_pa.q_in.pressure - PAavg;
+          tau*der(PVavg) = pulmonaryComponent.c_pv.q_in.pressure - PVavg;
+        end OTS_O_SS_I_NonLInearPR;
       end Experiments;
 
       model nominals
@@ -35536,6 +35560,9 @@ P_hs_plus_dist"),
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
         output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
         output Physiolibrary.Types.Pressure thoracic_pressure = Systemic1.thoracic_pressure;
+        output Physiolibrary.Types.Pressure P_pa = pulmonaryComponent.r_pa.q_in.pressure "Pressure in pulmonary arteries";
+        output Physiolibrary.Types.Pressure P_pv = pulmonaryComponent.r_pa.q_out.pressure "Pressure in pulmonary veins";
+
         annotation (experiment(
             StopTime=1800,
             Interval=0.04,
@@ -36497,8 +36524,8 @@ P_hs_plus_dist"),
           end KnockOff_NonLinearTissues;
 
           model KnockOff_TissueComplianceReaction
-            extends knockOff_base(settings(exercise_factor_on_tissue_compliance
-                  =0));
+            extends knockOff_base(settings(exercise_factor_on_tissue_compliance=
+                   0));
           end KnockOff_TissueComplianceReaction;
 
           model KnockOff_ArterialCompliance
@@ -36539,11 +36566,12 @@ P_hs_plus_dist"),
                 maxLinearFlow(displayUnit="l/min") = 1.6666666666667e-05)),
             phi(
               amplitude=0.75,
+              width=100,
               nperiod=1,
               offset=0.25,
                 startTime=20),
             Exercise(startTime=20),
-            Tilt_ramp(startTime=0));
+            Tilt_ramp(startTime=40));
 
           annotation (experiment(
               StopTime=60,
@@ -36582,20 +36610,20 @@ P_hs_plus_dist"),
             width(displayUnit="s") = 200,
             falling(displayUnit="s") = 0,
             period(displayUnit="s"),
-            nperiod=1,
+            nperiod=0,
             offset=0.25,
             startTime=0));
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           startTime=0,
-          height=1,
+          height=0,
           duration=0) constrainedby Modelica.Blocks.Interfaces.SO
-          annotation (Placement(transformation(extent={{-76,52},{-56,72}})));
+          annotation (Placement(transformation(extent={{-80,40},{-60,60}})));
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
         output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
       equation
-        connect(Exercise.y, Systemic1.exercise_input) annotation (Line(points={
-                {-55,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
+        connect(Exercise.y, Systemic1.exercise_input) annotation (Line(points={{-59,50},
+                {-34,50},{-34,36},{-28,36}},          color={0,0,127}));
         annotation (experiment(
             StopTime=60,
             Interval=0.02,

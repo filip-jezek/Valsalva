@@ -210,12 +210,14 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     objectives.extend(map(buildValueObjective, phase_values))
     objectives.extend(map(buildTimeObjective, time_values))
     
-    # penalize by too low SV
+    # penalize by too low SV in wide area - SV should not go below also in phase 4
     if SV is not None:
-        phase2_interval, _ = getInterval(phase2, None)
-        sv_val = numpy.min(SV[phase2_interval])
+        # phase2_interval, _ = getInterval(phase2, None)
+        # interval spans from phase 2 to end of phase4 or begginging of recovery, whichever is larger
+        minSV_interval = (phase2[0], max(phase5[0], phase4[-1]))
+        sv_val = numpy.min(SV[minSV_interval])
     else:
-        # we do not have the value, so just use the lower limit
+        # we do not have the value, so just usethe lower limit
         sv_val = 30
 
     sv_objective = fun_lib.ObjectiveVar(

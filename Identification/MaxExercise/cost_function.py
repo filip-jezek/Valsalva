@@ -15,7 +15,7 @@ def plotObjectives(vars_set, interval, objectives):
     ax = fun_lib.getAxes(vars_set)
 
     ax.plot(vars_set['time'], vars_set['brachial_pressure']/133.32, label='Brachial pressure mmHg')
-    ax.plot(vars_set['time'], vars_set['V_LV']*1000*1000, label='V_LV ml')
+    # ax.plot(vars_set['time'], vars_set['V_LV']*1000*1000, label='V_LV ml')
     ax.plot(vars_set['time'], vars_set['CO']/lpm2SI, label='CO')
 
     # ax.plot(vars_set['time'], vars_set['TEjection'], label='TEjection')
@@ -27,6 +27,10 @@ def plotObjectives(vars_set, interval, objectives):
     fun_lib.plotObjectiveTarget(pack, 'ESV', 1e6)
     fun_lib.plotObjectiveTarget(pack, 'Ts', 1, verticalalignment='top')
     fun_lib.plotObjectiveTarget(pack, 'Td', 1)
+    fun_lib.plotObjectiveTarget(pack,'Ppa', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'Ppa_s', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'Ppa_d', 1/133.32)        
+    fun_lib.plotObjectiveTarget(pack,'Ppv', 1/133.32)
     fun_lib.plotObjectiveLimit(pack, 'CO', 1/lpm2SI, 'lower')
     
     total_costs = fun_lib.countTotalWeightedCost(objectives)
@@ -50,6 +54,10 @@ def getObjectives(vars_set):
     EDV_target = 133*ml2SI
     ESV_target = 27*ml2SI
     CO_min = 18*lpm2SI
+    Ppa_target = 14*mmHg2SI # (Kovacs Eur Respir J 2009)
+    Ppv_target = 8*mmHg2SI # (Kovacs Eur Respir J 2009)
+    Ppas_target = 20.5*mmHg2SI # (Kovacs Eur Respir J 2009)
+    Ppad_target = 8.6*mmHg2SI # (Kovacs Eur Respir J 2009)
 
     t = vars_set['time'][-1]
     interval = fun_lib.findInterval(t-5, t, vars_set['time'])
@@ -61,6 +69,10 @@ def getObjectives(vars_set):
             ('CO', numpy.mean(vars_set['CO']), None, [CO_min, 40*lpm2SI], 1e-3),
             ('Ts', max(vars_set['TEjection'][interval]), 0.166, [0.1, 0.2], 1e-4),
             ('Td', max(vars_set['TFilling'][interval]), 0.138, [0.1, 0.2], 1e-4),
+            ('Ppa', numpy.mean(vars_set['P_pa'][interval]), Ppa_target, None, .1),
+            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, .1),
+            ('Ppa_s', numpy.max(vars_set['P_pa'][interval]), Ppas_target, None, 0.01),
+            ('Ppa_d', numpy.min(vars_set['P_pa'][interval]), Ppad_target, None, 0.01),
         ]
     
     # make it a dict?

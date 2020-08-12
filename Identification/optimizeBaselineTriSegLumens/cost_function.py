@@ -28,6 +28,10 @@ def plotObjectives(vars_set, interval, objectives):
     fun_lib.plotObjectiveTarget(pack,'BPk', 1/133.32)
     fun_lib.plotObjectiveTarget(pack,'EF', 100)
     fun_lib.plotObjectiveTarget(pack,'HR', 60, verticalalignment='top') 
+    fun_lib.plotObjectiveTarget(pack,'Ppa', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'Ppa_s', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'Ppa_d', 1/133.32)        
+    fun_lib.plotObjectiveTarget(pack,'Ppv', 1/133.32)
     fun_lib.plotObjectiveLimit(pack, 'PWV', 1, 'lower', verticalalignment='top')
     
 
@@ -58,6 +62,10 @@ def getObjectives(vars_set):
     CO_target = 6.3*lpm2SI
     EF_target = 0.6
     HR_target = 60*bpm2SI
+    Ppa_target = 14*mmHg2SI # (Kovacs Eur Respir J 2009)
+    Ppv_target = 8*mmHg2SI # (Kovacs Eur Respir J 2009)
+    Ppas_target = 20.5*mmHg2SI # (Kovacs Eur Respir J 2009)
+    Ppad_target = 8.6*mmHg2SI # (Kovacs Eur Respir J 2009)
     pwv_bounds = [3.3, 10]
 
     time = vars_set['time']
@@ -74,15 +82,20 @@ def getObjectives(vars_set):
         distance)
 
     # build costs
-    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), BPs_target, None),
-            ('BPd', min(vars_set['brachial_pressure'][interval]), BPd_target, None),
-            ('CO', sum(vars_set['CO'][interval]) / len(interval), CO_target, None),
-            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), EF_target, None),
-            ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), BPk_target, None),
-            ('HR', numpy.mean(vars_set['HR']), HR_target, None),
+    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), BPs_target, None, 10),
+            ('BPd', min(vars_set['brachial_pressure'][interval]), BPd_target, None, 10),
+            ('CO', sum(vars_set['CO'][interval]) / len(interval), CO_target, None, 10),
+            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), EF_target, None, 1),
+            ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), BPk_target, None, 1),
+            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1),
+            ('Ppa', numpy.mean(vars_set['P_pa'][interval]), Ppa_target, None, 1),
+            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, 1),
+            ('Ppa_s', numpy.max(vars_set['P_pa'][interval]), Ppas_target, None, 0.1),
+            ('Ppa_d', numpy.min(vars_set['P_pa'][interval]), Ppad_target, None, 0.1),
             ('PWV', pwv, None, pwv_bounds)            ]
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3]), ov))
+
 
     # to have comparable cost function values one must have the stds ready
     map(fun_lib.unifyCostFunc, objectives)
