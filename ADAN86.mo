@@ -488,6 +488,29 @@ type"),       Text(
       algorithm
         pou :=i^j;
       end pow;
+
+      model LeveledPressureFlowConverter
+        "Converts PressureFlow to leveled pressure flow and back at given level."
+        Subsystems.Systemic.Vessel_modules.Interfaces.HydraulicPort_b_leveled
+          hydraulicPort_b_leveled annotation (Placement(transformation(extent={
+                  {30,-10},{50,10}}), iconTransformation(extent={{30,-10},{50,
+                  10}})));
+        Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_a annotation (
+            Placement(transformation(extent={{-50,-10},{-30,10}}),
+              iconTransformation(extent={{-50,-10},{-30,10}})));
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{
+                  -40,-40},{40,40}}), graphics={Polygon(
+                points={{0,40},{40,0},{0,-40},{-40,0},{0,40}},
+                lineColor={162,29,33},
+                lineThickness=0.5,
+                fillColor={215,215,215},
+                fillPattern=FillPattern.Solid), Line(
+                points={{-20,0},{20,0}},
+                color={162,29,33},
+                thickness=0.5,
+                arrow={Arrow.Open,Arrow.Open})}), Diagram(coordinateSystem(
+                preserveAspectRatio=false, extent={{-40,-40},{40,40}})));
+      end LeveledPressureFlowConverter;
     end Interfaces;
 
     package Signals
@@ -4965,7 +4988,8 @@ Simple")}),                                                                  Dia
             parameter Boolean enabled = true "Atria enabled. False means thay are disabled and are therefore not filling nor pulsing"
              annotation(choices(checkBox=true));
 
-            parameter Physiolibrary.Types.Time Tact = 0.10 annotation (Evaluate = false);
+            parameter Physiolibrary.Types.Time Tact= 0
+                                                    annotation (Evaluate = false);
             //
               Real atriaCycle "Time from start of the atrial cycle";
 
@@ -6661,22 +6685,22 @@ Kalecky")}), experiment(
             extends Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a;
             Modelica.SIunits.Height position;
               annotation (Icon(graphics={Ellipse(
-                      extent={{-12,12},{8,-8}},
-                      lineColor={28,108,200},
+                      extent={{-22,20},{18,-20}},
+                      lineColor={162,29,33},
                       fillColor={238,46,47},
                       fillPattern=FillPattern.Solid,
-                      pattern=LinePattern.None)}));
+                      lineThickness=0.5)}));
           end HydraulicPort_a_leveled;
 
           connector HydraulicPort_b_leveled
             extends Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b;
             Modelica.SIunits.Height position;
               annotation (Icon(graphics={Ellipse(
-                      extent={{-10,10},{10,-10}},
-                      lineColor={28,108,200},
+                      extent={{-22,20},{18,-20}},
+                      lineColor={162,29,33},
                       fillColor={238,46,47},
                       fillPattern=FillPattern.Solid,
-                      pattern=LinePattern.None)}));
+                      lineThickness=0.5)}));
           end HydraulicPort_b_leveled;
 
           partial model bg_base "base for all systemic cicrulation vessel modules (arteries, veins, tissues), contains ports and basic IO interfaces"
@@ -36898,7 +36922,9 @@ P_hs_plus_dist"),
             StopTime=60,
             Interval=0.02,
             Tolerance=1e-07,
-            __Dymola_Algorithm="Cvode"));
+            __Dymola_Algorithm="Cvode"), Documentation(info="<html>
+<p>This model simulates Valsalva maneuver, based on the normal resting supine case</p>
+</html>"));
       end OlufsenTriSeg_valsalva;
 
     end Valsalva;
