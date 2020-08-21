@@ -5109,17 +5109,14 @@ Simple")}),                                                                  Dia
             parameter Boolean enabled = true "Atria enabled. False means thay are disabled and are therefore not filling nor pulsing"
              annotation(choices(checkBox=true));
 
-            parameter Physiolibrary.Types.Time Tact= 0
-                                                    annotation (Evaluate = false);
-
              parameter Real Emin = 0.05;
              parameter Real Emax = 0.15;
 
-              Real _E = (Emin + Emax*drivingFunction);
+              Real _E = (Emin + Emax*drivingFunction) "Elastance function in ml/mmhg";
               Physiolibrary.Types.HydraulicElastance E=_E/Constants.ml_per_mmhg2SI;
 
               Physiolibrary.Types.Volume volume(start=100e-6);// = _VLA*Constants.ml2SI;
-              parameter Physiolibrary.Types.Volume volume_min = 5e-6;
+              parameter Physiolibrary.Types.Volume volume_min = 5e-6 "Volume limiter for external pressures";
 
               Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input  annotation (Placement(
                     transformation(extent={{-20,-20},{20,20}},
@@ -5144,7 +5141,6 @@ Simple")}),                                                                  Dia
               end when;
 
               if enabled then
-
                 der(volume) = port_a.q;
                 port_a.pressure =E*volume + thoracic_pressure_inside;
               else
@@ -6570,17 +6566,17 @@ Kalecky")}), experiment(
               V_LV(start=0.00015), V_RV(start=0.00015)) constrainedby
             Auxiliary.TriSegMechanics_components.partialVentricles
             annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
-          Auxiliary.TriSegMechanics_components.Atrium ra(
-            Tact(displayUnit="s") = settings.heart_atr_Tact,
+          Auxiliary.TriSegMechanics_components.AtriumSimple
+                                                      ra(
+            enabled=false,
             Emin=settings.heart_atr_Emin,
-            Emax=settings.heart_atr_Emax,
-            sigma_a=settings.heart_atr_sigma_a)
+            Emax=settings.heart_atr_Emax)
             annotation (Placement(transformation(extent={{-52,26},{-32,6}})));
-          Auxiliary.TriSegMechanics_components.Atrium la(
-            Tact=settings.heart_atr_Tact,
+          Auxiliary.TriSegMechanics_components.AtriumSimple
+                                                      la(
+            enabled=false,
             Emin=settings.heart_atr_Emin,
-            Emax=settings.heart_atr_Emax,
-            sigma_a=settings.heart_atr_sigma_a)
+            Emax=settings.heart_atr_Emax)
             annotation (Placement(transformation(extent={{40,-10},{60,10}})));
 
         Physiolibrary.Types.Volume volume;
@@ -6714,14 +6710,16 @@ Kalecky")}), experiment(
                   {-106,0},{-96,0},{-96,34},{-87,34}}, color={0,0,127}));
           connect(HR0.y, calciumMechanics.frequency) annotation (Line(points={{-87,0},{-96,
                   0},{-96,34},{-87,34}}, color={0,0,127}));
-          connect(calciumMechanics.drivingFunction, ra.cardiac_cycle) annotation (Line(
-                points={{-67,34},{-62,34},{-62,16},{-52,16}}, color={0,140,72}));
-          connect(calciumMechanics.drivingFunction, la.cardiac_cycle) annotation (Line(
-                points={{-67,34},{30,34},{30,0},{40,0}}, color={0,140,72}));
           connect(calciumMechanics._phi, phi) annotation (Line(points={{-87,40},
                   {-92,40},{-92,70},{-100,70}}, color={0,0,127}));
           connect(calciumMechanics._phi, phi0.y) annotation (Line(points={{-87,
                   40},{-92,40},{-92,70},{-81,70}}, color={0,0,127}));
+          connect(calciumMechanics.drivingFunction, ra.drivingFunction)
+            annotation (Line(points={{-67,34},{-60,34},{-60,16},{-52,16}},
+                color={0,140,72}));
+          connect(calciumMechanics.drivingFunction, la.drivingFunction)
+            annotation (Line(points={{-67,34},{34,34},{34,0},{40,0}}, color={0,
+                  140,72}));
           annotation (Icon(graphics={                       Text(
                   extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
@@ -6849,7 +6847,7 @@ Kalecky")}), experiment(
                 Placement(transformation(extent={{-110,-10},{-90,10}}),
                   iconTransformation(extent={{-110,-10},{-90,10}})),
                   Dialog(tab = "Redeclares"), HideResult = settings.hideLevel1);
-            replaceable Interfaces.HydraulicPort_b_leveled port_b if not terminator                                                                            annotation (
+            replaceable Interfaces.HydraulicPort_b_leveled port_b annotation (
                 Placement(transformation(extent={{90,-10},{110,10}}), iconTransformation(
                     extent={{90,-10},{110,10}})),
                   Dialog(tab = "Redeclares"), HideResult = settings.hideLevel1);
@@ -6858,7 +6856,6 @@ Kalecky")}), experiment(
               annotation (Placement(transformation(extent={{-100,20},{-90,30}})));
 
             public
-            parameter Boolean terminator = false annotation(choices(checkBox=true));
             parameter Boolean UseInertance = true annotation(choices(checkBox=true));
             parameter Boolean UseOuter_thoracic_pressure=false   annotation(dialog(enabled=not UseOuter_external_pressure), choices(checkBox=true));
             parameter Boolean UseOuter_external_pressure=false   annotation(dialog(enabled=not UseOuter_thoracic_pressure), choices(checkBox=true));
@@ -6972,8 +6969,7 @@ Kalecky")}), experiment(
 
           partial model PartialSystemicVessel
             "Base model for all systemic arteries and veins"
-            extends PartialSystemicElement(
-                            final terminator=false);
+            extends PartialSystemicElement;
             outer Modelica.SIunits.Angle Tilt;
             outer Physiolibrary.Types.Fraction Exercise;
             Physiolibrary.Types.Pressure P_hs = height*settings.blood_rho*Modelica.Constants.g_n "Hydrostatic pressure of whole vessel at actual orientation"  annotation(HideResult = settings.hideLevel1);
@@ -7830,12 +7826,13 @@ P_hs/2")}));
 
           parameter Physiolibrary.Types.Volume zpv=0 "Zero-pressure volume";
           parameter Physiolibrary.Types.Pressure nominal_pressure=settings.tissues_nominal_pressure;
-          Physiolibrary.Types.Pressure u_C(
-            start=nominal_pressure,
-            nominal=1000,
-            fixed=settings.initByPressure);
+            Physiolibrary.Types.Pressure p_C(
+              start=nominal_pressure,
+              nominal=1000,
+              fixed=settings.initByPressure)
+              "Inner pressure of compliant chamber (after viscoelastic resistance)";
 
-          Physiolibrary.Types.Pressure p(nominal=1000) "inner pressure";
+          Physiolibrary.Types.Pressure p(nominal=1000) "middle pressure (at joint of viscous forces)";
 
           Physiolibrary.Types.Pressure p_in_hs=p_out   + P_hs/2 - P_hs_plus_dist
             "Arterial side pressure including the hydrostatic pressure";
@@ -7886,7 +7883,7 @@ P_hs/2")}));
               nominalFlow*exercise*settings.exercise_venous_pumping_factor else 0
             "Flow given by muscle contractions during exercise is proportional to Rv";
 
-        Physiolibrary.Types.HydraulicCompliance C_calculated = volume/(u_C - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)));
+        Physiolibrary.Types.HydraulicCompliance C_calculated = volume/(p_C - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)));
 
           outer Modelica.SIunits.Angle Tilt(unit= "deg");
           Physiolibrary.Types.Pressure P_hs = height*settings.blood_rho*Modelica.Constants.g_n "Hydrostatic pressure of the whole tissue";
@@ -7920,28 +7917,31 @@ P_hs/2")}));
           end if;
 
           if UseOuter_thoracic_pressure then
-            p = u_C + Rvis*(q_in -q_out)  + thoracic_pressure*thoracic_pressure_ratio;
+            p =p_C  + Rvis*(q_in -q_out)  + thoracic_pressure*thoracic_pressure_ratio;
           else
-            p = u_C + Rvis*(q_in -q_out);
+            p =p_C  + Rvis*(q_in -q_out);
           end if;
 
           if not settings.UseNonLinear_TissuesCompliance then
-            volume = (u_C)*C + zpv;
+            volume = (p_C)*C + zpv;
           elseif settings.tissues_UseStraighteningReaction2Phi then
             // my expression based on straightening
             if noEvent(volume < volume_linearBreakpoint) then
-              u_C = 1/k_phi*log((V_max - V_us)/(V_max - volume))
+                p_C
+                  = 1/k_phi*log((V_max - V_us)/(V_max - volume))
                 "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
             else
               // linear steepness after volume too close to maximal volume
               // linearized by derivation of original equation, slope = 1/k_phi/(1e-6), V_max - volume = 1e-6:, u_C at point: 1/k_phi*log((V_max - V_us)/(1e-6))
-              u_C - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)) = 1/
+                p_C
+                  - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)) = 1/
                 k_phi/(V_max - volume_linearBreakpoint)*(volume - (V_max - V_max +
                 volume_linearBreakpoint));
             end if;
           else
             // Using the variant from Pstras
-            u_C = 1/k*log((V_max_phi - V_us_phi)/(V_max_phi - volume))
+              p_C
+                = 1/k*log((V_max_phi - V_us_phi)/(V_max_phi - volume))
               "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
           end if;
 
@@ -7996,13 +7996,13 @@ P_hs/2")}));
                   lineThickness=0.5),
                 Line(points={{-80,0},{80,0}}, color={28,108,200}),
                 Line(
-                  points={{14,-3.68679e-16},{46,4.04254e-15}},
+                  points={{14,-3.68679e-16},{52,2.93663e-15}},
                   color={28,108,200},
                   origin={0,-14},
                   rotation=90),
-                Ellipse(extent={{-14,50},{14,22}}, lineColor={28,108,200}),
+                Ellipse(extent={{-14,66},{14,38}}, lineColor={28,108,200}),
                 Text(
-                  extent={{-14,30},{14,42}},
+                  extent={{-14,46},{14,58}},
                   lineColor={28,108,200},
                   textString="C"),
                 Rectangle(
@@ -8011,7 +8011,7 @@ P_hs/2")}));
                   fillColor={255,255,255},
                   fillPattern=FillPattern.Solid),
                 Text(
-                  extent={{-66,-6},{-38,6}},
+                  extent={{-64,-6},{-36,6}},
                   lineColor={28,108,200},
                   textString="Ra"),
                 Rectangle(
@@ -8020,7 +8020,7 @@ P_hs/2")}));
                   fillColor={255,255,255},
                   fillPattern=FillPattern.Solid),
                 Text(
-                  extent={{34,-6},{62,6}},
+                  extent={{36,-6},{64,6}},
                   lineColor={28,108,200},
                   textString="Rv"),
                 Text(
@@ -8059,7 +8059,28 @@ P_hs_plus_dist"),
                   lineColor={28,108,200},
                   origin={-28,38},
                   rotation=90,
-                  textString="+ %add_length / 2")}));
+                  textString="+ %add_length / 2"),
+                Rectangle(
+                  extent={{-14,6},{14,-6}},
+                  lineColor={28,108,200},
+                  fillColor={255,255,255},
+                  fillPattern=FillPattern.Solid,
+                  origin={0,20},
+                  rotation=90),
+                Text(
+                  extent={{-14,-6},{14,6}},
+                  lineColor={28,108,200},
+                  origin={0,20},
+                  rotation=90,
+                  textString="Rvis"),
+                Text(
+                  extent={{-14,-10},{14,2}},
+                  lineColor={28,108,200},
+                  textString="p"),
+                Text(
+                  extent={{2,32},{30,44}},
+                  lineColor={28,108,200},
+                  textString="p_C")}));
         end Systemic_tissue;
 
         model CollapsibleVesselSegment
@@ -13836,14 +13857,6 @@ P_hs_plus_dist"),
             annotation (Placement(transformation(extent={{-156,-16},{-124,16}})));
           Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter1
             annotation (Placement(transformation(extent={{158,-16},{126,16}})));
-          replaceable
-            Vessel_modules.Ascending_aorta
-            ascending_aorta_A constrainedby Vessel_modules.Ascending_aorta(
-            l=systemicParameters.l_ascending_aorta_A,
-            E=systemicParameters.E_ascending_aorta_A,
-            r=systemicParameters.r_ascending_aorta_A) annotation (Placement(
-                transformation(extent={{-81,-3},{-61,2}})),
-              __Dymola_choicesAllMatching=true);
         equation
           connect(port_a, leveledPressureFlowConverter.port_a) annotation (Line(
               points={{-320,80},{-238,80},{-238,0},{-156,0}},
@@ -13859,14 +13872,9 @@ P_hs_plus_dist"),
               points={{10,0},{126,0}},
               color={162,29,33},
               thickness=0.5));
-          connect(internal_carotid_R8_C.port_a, ascending_aorta_A.port_b)
-            annotation (Line(
-              points={{-10,0},{-35.5,0},{-35.5,-0.5},{-61,-0.5}},
-              color={162,29,33},
-              thickness=0.5));
-          connect(ascending_aorta_A.port_a, leveledPressureFlowConverter.leveledPort_b)
-            annotation (Line(
-              points={{-81,-0.5},{-102.5,-0.5},{-102.5,0},{-124,0}},
+          connect(leveledPressureFlowConverter.leveledPort_b,
+            internal_carotid_R8_C.port_a) annotation (Line(
+              points={{-124,0},{-68,0},{-68,0},{-10,0}},
               color={162,29,33},
               thickness=0.5));
         end Systemic_SimpleLumped;
@@ -33760,7 +33768,7 @@ P_hs_plus_dist"),
 
       output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
       Real brachial_pressure_int "integration of pressure to find the true mean";
-      output Physiolibrary.Types.Pressure renal_capillary = Systemic1.renal_L166.u_C;
+      output Physiolibrary.Types.Pressure renal_capillary=Systemic1.renal_L166.p_C;
       equation
         der(brachial_pressure_int) = brachial_pressure;
 
@@ -35464,7 +35472,7 @@ P_hs_plus_dist"),
 
         output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
         Real brachial_pressure_int "integration of pressure to find the true mean";
-        output Physiolibrary.Types.Pressure renal_capillary = Systemic1.renal_L166.u_C;
+        output Physiolibrary.Types.Pressure renal_capillary=Systemic1.renal_L166.p_C;
         equation
           BMI = weight/(height^2);
           aortic_length = aortic_length_calc;
@@ -35605,7 +35613,7 @@ P_hs_plus_dist"),
 
       output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
       Real brachial_pressure_int "integration of pressure to find the true mean";
-      output Physiolibrary.Types.Pressure renal_capillary = Systemic1.renal_L166.u_C;
+      output Physiolibrary.Types.Pressure renal_capillary=Systemic1.renal_L166.p_C;
       output Physiolibrary.Types.VolumeFlowRate CO = heartComponent.aorticValve.CO;
       output Physiolibrary.Types.Pressure carotid_pressure = Systemic1.common_carotid_L48_D.u_C;
       output Physiolibrary.Types.Pressure femoral_pressure = Systemic1.femoral_L200.u_C;
@@ -36078,6 +36086,12 @@ P_hs_plus_dist"),
         tissuesCompliance_PhiEffect =          2.287800e-01,
         tissues_nominal_zpv =          2.101240e-03,
         HR_max =          2.907000e+00));
+
+      Physiolibrary.Types.Volume totalVolume = Systemic1.total_volume + heartComponent.volume + pulmonaryComponent.volume;
+        annotation (experiment(
+            Interval=0.02,
+            Tolerance=1e-07,
+            __Dymola_Algorithm="Cvode"));
     end OlufsenTriSeg_optimized;
 
       model OlufsenTriSeg_optimized_steadyState_init
