@@ -47,7 +47,8 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time):
 
     # sv lower limit
     pack = (objectives, time, ax, fun_lib.findInterval(valsalva_start, valsalva_end, time))
-    fun_lib.plotObjectiveLimit(pack, 'SV_min', 1, 'lower')
+    fun_lib.plotObjectiveLimit(pack, 'SV_min_valsalva', 1, 'lower')
+    fun_lib.plotObjectiveLimit(pack, 'SV_min_recovery', 1, 'lower')
 
     costs_legend = []
     def plotMetric(t_val, t_offset, val, baseline, color):
@@ -212,18 +213,24 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     
     # penalize by too low SV in wide area - SV should not go below also in phase 4
     if SV is not None:
-        # phase2_interval, _ = getInterval(phase2, None)
-        # interval spans from phase 2 to end of phase4 or begginging of recovery, whichever is larger
-        minSV_interval = (phase2[0], max(phase5[0], phase4[-1]))
-        sv_val = numpy.min(SV[minSV_interval])
+        # during valsalva SV should not go below 25ml
+        phase2_interval, _ = getInterval(phase2, None)
+        sv_val_valsalva = numpy.min(SV[minSV_interval])
+        # interval spans from valsalva release to complete recovery - we should not go below 90% of normal SV, but lets say 60%
+        recovery_interval = getInterval(phase4, [3, 4])
+        sv_val_recovery = numpy.min(SV[minSV_interval])
     else:
         # we do not have the value, so just usethe lower limit
-        sv_val = 30
+        sv_val_valsalva = 30
 
     sv_objective = fun_lib.ObjectiveVar(
-            'SV_min', 
-            sv_val, limit=[30, 150], std = 40*0.1, k_p=10)
+            'SV_min_valsalva', 
+            sv_val_valsalva, limit=[25, 150], std = 25*0.1, k_p=10)
     objectives.append(sv_objective)
+
+    sv_objective = fun_lib.ObjectiveVar(
+            'SV_min_recovery', 
+            sv_val_recovery, limit=[60, 200], std = 60*0.1, k_p=10)
 
     
 
