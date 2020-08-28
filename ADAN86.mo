@@ -107,16 +107,13 @@ package ADAN_main
         annotation(Dialog(group = "General"));
       // HEART
       // general
-      parameter Physiolibrary.Types.HydraulicResistance heart_R_vlv=
-          133322.387415
+      parameter Physiolibrary.Types.HydraulicResistance heart_R_vlv=133322.387415
       "Open valve resistance"
         annotation(Dialog(tab = "Heart", group = "General"));
-      parameter Physiolibrary.Types.HydraulicResistance heart_R_LA=
-          1999835.811225
+      parameter Physiolibrary.Types.HydraulicResistance heart_R_LA=1999835.811225
       "Resistance of left atrium"
         annotation(Dialog(tab = "Heart", group = "General"));
-      parameter Physiolibrary.Types.HydraulicResistance heart_R_RA=
-          1999835.811225
+      parameter Physiolibrary.Types.HydraulicResistance heart_R_RA=1999835.811225
       "Resistance of the right atrium"
         annotation(Dialog(tab = "Heart", group = "General"));
       // Smith
@@ -150,8 +147,7 @@ package ADAN_main
         annotation(Dialog(tab = "Heart", group = "Simple atria"));
       parameter Fraction heart_drive_atr_D_0=0.25 "nominal driving offset as a fraction of E_0"
         annotation(Dialog(tab="Heart",   group="Simple atria"));
-       parameter Physiolibrary.Types.HydraulicElastance heart_atr_E_0=
-          26664477.483                                                             "Maximal elastance 0.05 + 0.15 mmhg/ml"  annotation(Dialog(tab="Heart",   group="Simple atria"));
+       parameter Physiolibrary.Types.HydraulicElastance heart_atr_E_0=26664477.483 "Maximal elastance 0.05 + 0.15 mmhg/ml"  annotation(Dialog(tab="Heart",   group="Simple atria"));
 
 
       // TriSeg ventricles
@@ -189,8 +185,10 @@ package ADAN_main
         annotation(choices(checkBox=true), Dialog(tab = "Systemic", group = "Arteries"));
       parameter Fraction exercise_factor_on_arterial_compliance = 0 "Effect of venoconstriction"
         annotation(Dialog(tab = "Systemic", group = "Arteries", enable = arteries_UseVasoconstrictionEffect));
-      parameter Fraction R_vc = 0 "Effect fraction of arterial vasoconstriction on arterial compliance"
-        annotation(Dialog(tab = "Systemic", group = "Arteries", enable = arteries_UseVasoconstrictionEffect));
+      parameter Physiolibrary.Types.Fraction eta_vc=0
+        "Effect fraction of arterial vasoconstriction on arterial compliance"
+        annotation(Dialog(tab="Systemic",   group="Arteries",   enable=
+              arteries_UseVasoconstrictionEffect));
       // tissues
       parameter Pressure tissues_nominal_pressure=2666.4477483 "Tissues and small arteries and veins nominal pressure. Used for calculation of arteriole and venule resistances and tissues compliance"
         annotation(Dialog(tab = "Systemic", group = "Tissues"));
@@ -226,6 +224,9 @@ package ADAN_main
         annotation (Dialog(tab = "Systemic", group = "Tissues"));
       parameter Fraction exercise_venous_pumping_factor = 0 "Contraction of large veins"
         annotation (Dialog(tab = "Systemic", group = "Tissues"));
+      parameter Fraction eta_adenosine = 0 "Effect of adenosine on total peripheral resistance"
+        annotation (Dialog(tab = "Systemic", group = "Tissues"));
+
 
         //  parameter Fraction tissues_compliance_phi_shift=0 "complinace dependency on phi" annotation(Dialog(tab = "Systemic", group = "Tissues"));
 
@@ -311,14 +312,13 @@ package ADAN_main
       // PULMONARY
       parameter Real pulm_CO_target=4850 "mL/min"
         annotation(Dialog(tab = "Pulmonary", group = "General"));
-      parameter Physiolibrary.Types.HydraulicCompliance pulm_C_PV=
-          1.8751539396141e-07                                                      "Pulmonary venous compliance"
+      parameter Physiolibrary.Types.HydraulicCompliance pulm_C_PV=1.8751539396141e-07
+                                                                                   "Pulmonary venous compliance"
         annotation(Dialog(tab = "Pulmonary", group = "General"));
-      parameter Physiolibrary.Types.HydraulicCompliance pulm_C_PA=
-          4.0503325095665e-08                                                                                                           "Pulmonary arterial compliance, CO_target/15/_HR mL/mmHg"
+      parameter Physiolibrary.Types.HydraulicCompliance pulm_C_PA=4.0503325095665e-08                                                   "Pulmonary arterial compliance, CO_target/15/_HR mL/mmHg"
         annotation(Dialog(tab = "Pulmonary", group = "General"));
-      parameter Physiolibrary.Types.HydraulicResistance pulm_R_PA=
-          21441532.959301                                      "Pulmonary vasculature resistance, mmHg*sec/mL "
+      parameter Physiolibrary.Types.HydraulicResistance pulm_R_PA=21441532.959301
+                                                               "Pulmonary vasculature resistance, mmHg*sec/mL "
         annotation(Dialog(tab = "Pulmonary", group = "General"));
 
 
@@ -1182,6 +1182,27 @@ type"),       Text(
           parameter Real delta0_factor=1 "Baseline delta factor";
         end HrDataElement_Kosinski;
       end DataFit;
+
+      model Phi_factor "Multiplies the signal with the relative phi"
+        Modelica.Blocks.Interfaces.RealInput u
+          annotation (Placement(transformation(extent={{-20,-20},{20,20}},
+              rotation=-90,
+              origin={0,100})));
+        Modelica.Blocks.Interfaces.RealOutput y annotation (Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=-90,
+              origin={0,-100})));
+        Physiolibrary.Types.RealIO.FractionInput phi "Sympathetic activation"
+          annotation (Placement(transformation(extent={{-120,-20},{-80,20}})));
+
+      parameter Physiolibrary.Types.Fraction phi0 = 0.25;
+      parameter Physiolibrary.Types.Fraction eta "Factor to multiply the relative phi";
+
+      equation
+        y = u*(1 + eta*(phi - phi0));
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+              coordinateSystem(preserveAspectRatio=false)));
+      end Phi_factor;
     end Signals;
 
     package Basic
@@ -2093,6 +2114,15 @@ type"),       Text(
 <p><br><b>Ohm&apos;s law</b>. It is used conductance (=1/resistance) because it could be numerical zero better then infinity in resistance. </p>
 </html>"));
           end ResistorNonLinearPulmonary;
+
+          model OuterAdenosine "Reads the outer adenosine factor"
+            Physiolibrary.Types.RealIO.FractionOutput adenosineDoseOutput "Sympathetic activation"
+              annotation (Placement(transformation(extent={{80,-20},{120,20}})));
+            outer Physiolibrary.Types.Fraction AdenosineDose;
+
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end OuterAdenosine;
         end Auxiliary;
 
         partial model partialPulmonary
@@ -2249,10 +2279,11 @@ type"),       Text(
           import ADAN_main.Components.Constants.*;
 
           replaceable
-          Physiolibrary.Hydraulic.Components.Resistor r_pa(Resistance(
+          Physiolibrary.Hydraulic.Components.Resistor r_pa(useConductanceInput=true,
+                                                           Resistance(
                 displayUnit="(mmHg.s)/ml") = settings.pulm_R_PA) constrainedby
             Physiolibrary.Hydraulic.Interfaces.OnePort
-            annotation (Placement(transformation(extent={{-12,-10},{8,10}})));
+            annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
 
           replaceable
           Physiolibrary.Hydraulic.Components.ElasticVessel c_pa(
@@ -2268,19 +2299,31 @@ type"),       Text(
                        useExternalPressureInput=UseThoracic_PressureInput)
             annotation (Placement(transformation(extent={{50,-30},{70,-10}})));
 
+          Physiolibrary.Types.Constants.HydraulicConductanceConst hydraulicConductance(
+              k=1/settings.pulm_R_PA)
+            annotation (Placement(transformation(extent={{-28,76},{-20,84}})));
+          Signals.Phi_factor phi_factor(phi0=0, eta=1)
+            annotation (Placement(transformation(extent={{-10,30},{10,50}})));
+          Physiolibrary.Types.RealIO.FractionInput adenosine if UseAdenosineInput
+            "Adenosine dose"
+            annotation (Placement(transformation(extent={{-120,20},{-80,60}})));
+          Physiolibrary.Types.Constants.FractionConst fraction if not UseAdenosineInput
+            annotation (Placement(transformation(extent={{-90,46},{-82,54}})));
+
+        parameter Boolean UseAdenosineInput = false;
         equation
           volume = c_pa.volume + c_pv.volume - deadVolume;
 
           connect(port_a, r_pa.q_in) annotation (Line(
-              points={{-100,0},{-12,0}},
+              points={{-100,0},{-10,0}},
               color={0,0,0},
               thickness=1));
           connect(c_pa.q_in, r_pa.q_in) annotation (Line(
-              points={{-60,-20},{-60,0},{-12,0}},
+              points={{-60,-20},{-60,0},{-10,0}},
               color={0,0,0},
               thickness=1));
           connect(r_pa.q_out, port_b) annotation (Line(
-              points={{8,0},{100,0}},
+              points={{10,0},{100,0}},
               color={0,0,0},
               thickness=1));
           connect(c_pv.q_in, port_b) annotation (Line(
@@ -2291,6 +2334,14 @@ type"),       Text(
             annotation (Line(points={{-52,-12},{-8,-12},{-8,-100}}, color={0,0,127}));
           connect(c_pv.externalPressure, thoracic_pressure)
             annotation (Line(points={{68,-12},{-8,-12},{-8,-100}}, color={0,0,127}));
+          connect(hydraulicConductance.y, phi_factor.u)
+            annotation (Line(points={{-19,80},{0,80},{0,50}}, color={0,0,127}));
+          connect(phi_factor.y, r_pa.cond)
+            annotation (Line(points={{0,30},{0,6}}, color={0,0,127}));
+          connect(adenosine, phi_factor.phi)
+            annotation (Line(points={{-100,40},{-10,40}}, color={0,0,127}));
+          connect(fraction.y, phi_factor.phi) annotation (Line(points={{-81,50},{-54,50},
+                  {-54,40},{-10,40}}, color={0,0,127}));
           annotation (Documentation(info="<html>
 <p><b>Convention</b>:</p>
 <p><br>The parameters are UPPERCASE, similarly to the Matlab source code.</p>
@@ -7821,14 +7872,14 @@ P_hs/2")}));
             "Venous side pressure including the hydrostatic pressure";
 
           Physiolibrary.Types.HydraulicResistance Ra_phi_inf=Ra*(1 + (phi - settings.phi0)
-              *settings.Ra_factor)/(1 + exercise*settings.exercise_factor)
+              *settings.Ra_factor)/(1 + exercise*settings.exercise_factor)/(1 + settings.eta_adenosine*adenosine/2)
             "Arterioles resistance dependent on phi and exercise"
             annotation (HideResult=settings.hideLevel1);
           Physiolibrary.Types.HydraulicResistance Ra_phi(start=Ra, fixed=false)
             "Delayed arterioles resistance dependent on phi"
             annotation (HideResult=settings.hideLevel1);
           Physiolibrary.Types.HydraulicResistance Rv_phi=Rv*(1 + (phi - settings.phi0)*
-              settings.Rv_factor)/(1 + exercise*settings.exercise_factor)
+              settings.Rv_factor)/(1 + exercise*settings.exercise_factor)/(1 + settings.eta_adenosine*adenosine/2)
             "Venules resistance dependent on phi and exercise"
             annotation (HideResult=settings.hideLevel1);
 
@@ -7877,6 +7928,7 @@ P_hs/2")}));
           Modelica.SIunits.Height height=port_b.position - port_a.position "height difference between connectors. Already includes Tilt information, as the distances in ports are tilted";
           Modelica.SIunits.Position hydrostatic_level = port_a.position + (height + sin(Tilt)*added_height)/2;
 
+          outer Physiolibrary.Types.Fraction adenosine "adenosine dose fraction";
         equation
           assert(Rv_phi > 0, "The exercise_factor too high, driving the venous resistance negative!");
 
@@ -11768,6 +11820,7 @@ P_hs_plus_dist"),
           inner Physiolibrary.Types.Pressure outer_pressure;
           inner Physiolibrary.Types.Fraction phi "a systemic acitvation fraction, 1 being maximal possible. Normal resting is believed to be 1/4 of the maximum (0.25)";
           inner Physiolibrary.Types.Fraction Exercise;
+          inner Physiolibrary.Types.Fraction adenosine;
 
           parameter Boolean UseBaroreflexOutput = false annotation(choices(checkBox=true));
           parameter Boolean UseThoracic_PressureInput = false annotation(choices(checkBox=true));
@@ -11776,6 +11829,8 @@ P_hs_plus_dist"),
           parameter Boolean UsePhi_Input = false annotation(choices(checkBox=true));
           parameter Boolean UseTiltInput = false annotation(choices(checkBox=true));
           parameter Boolean UseExerciseInput = false annotation(choices(checkBox=true));
+          parameter Boolean UseAdenosineInput = false annotation(choices(checkBox=true));
+
 
 
           Modelica.Blocks.Interfaces.RealInput tilt_input = Tilt if UseTiltInput annotation (Placement(
@@ -11815,6 +11870,8 @@ P_hs_plus_dist"),
                 transformation(extent={{-192,138},{-172,158}}),
                                                             iconTransformation(extent={{-24,164},
                     {-4,184}})));
+          Physiolibrary.Types.RealIO.FractionInput adenosineInput = adenosine if UseAdenosineInput "Adenosine input"
+            annotation (Placement(transformation(extent={{-340,20},{-300,60}})));
         equation
           if not UseThoracic_PressureInput then
             thoracic_pressure = 0;
@@ -11830,6 +11887,9 @@ P_hs_plus_dist"),
           end if;
           if not UseExerciseInput then
             Exercise = 0;
+          end if;
+          if not UseAdenosineInput then
+            adenosine = 0;
           end if;
           connect(baroreflex_system.phi,phi_baroreflex)
                                                   annotation (Line(points={{-222,152},
@@ -26774,7 +26834,7 @@ P_hs_plus_dist"),
       Components.Subsystems.Systemic.Vessel_modules.Artery pv_artery
         annotation (Placement(transformation(extent={{0,18},{20,22}})));
       outer Components.Settings settings(
-        R_vc=1.574500e-01,
+        eta_vc=1.574500e-01,
         Ra_factor=3.171620e+00,
         baro_Ts=1.156200e+02,
         baro_delta0_factor=2.688000e-01,
@@ -32182,12 +32242,13 @@ P_hs_plus_dist"),
         model tree_auto_allRegulations
           extends tree_autonomic_base(settings(
               arteries_UseVasoconstrictionEffect=true,
-              R_vc=0.2,
               Ra_factor=0.2,
               tissues_Ra_tau(displayUnit="s") = 1e-3,
               tissues_UseStraighteningReaction2Phi=true,
               tissuesCompliance_PhiEffect=1,
-              veins_UsePhiEffect=true));
+              veins_UsePhiEffect=true,
+              eta_vc=
+                   0.2));
           annotation (experiment(
               StopTime=300,
               Interval=0.02,
@@ -32197,11 +32258,12 @@ P_hs_plus_dist"),
         model tree_auto_valsalva_all
           extends tree_autonomic_base(condTP(disconnected=false), settings(
               arteries_UseVasoconstrictionEffect=true,
-              R_vc=0.2,
               Ra_factor=0.2,
               tissues_UseStraighteningReaction2Phi=true,
               tissuesCompliance_PhiEffect=1,
-              veins_UsePhiEffect=true));
+              veins_UsePhiEffect=true,
+              eta_vc=
+                   0.2));
           annotation (experiment(
               StopTime=80,
               Interval=0.02,
@@ -32810,7 +32872,6 @@ P_hs_plus_dist"),
               heart_alphaE(displayUnit="1") = 1,
               tissues_nominal_arterioles_pressure(displayUnit="mmHg"),
               arteries_UseVasoconstrictionEffect=true,
-              R_vc=1,
               Ra_factor=0.1,
               tissues_Ra_tau(displayUnit="s") = 1e-3,
               Rv_factor=settings.Ra_factor,
@@ -32821,7 +32882,8 @@ P_hs_plus_dist"),
               exercise_factor(displayUnit="%") = 10,
               exercise_venous_pumping_factor=0.2,
               tissues_nominal_venules_pressure=1066.57909932,
-              veins_UsePhiEffect=true),
+              veins_UsePhiEffect=true,
+              eta_vc=1),
             Systemic1(
               UseOuter_PressureInput=true,
               UseExerciseInput=true,
@@ -32921,7 +32983,6 @@ P_hs_plus_dist"),
               heart_alphaE(displayUnit="1") = 1,
               tissues_nominal_arterioles_pressure(displayUnit="mmHg"),
               arteries_UseVasoconstrictionEffect=false,
-              R_vc=0,
               Ra_factor=0.1,
               tissues_Ra_tau(displayUnit="s") = 1e-3,
               Rv_factor=settings.Ra_factor,
@@ -32932,7 +32993,8 @@ P_hs_plus_dist"),
               exercise_factor(displayUnit="%") = 10,
               exercise_venous_pumping_factor=0.2,
               tissues_nominal_venules_pressure=1066.57909932,
-              veins_UsePhiEffect=true),
+              veins_UsePhiEffect=true,
+              eta_vc=0),
             Systemic1(
               UseOuter_PressureInput=true,
               UseExerciseInput=true,
@@ -33030,13 +33092,13 @@ P_hs_plus_dist"),
             settings(
               arteries_UseVasoconstrictionEffect=true,
               exercise_factor_on_arterial_compliance=1,
-              R_vc=0.2,
               Ra_factor=0.2,
               tissues_Ra_tau(displayUnit="s") = 1e-3,
               tissues_UseStraighteningReaction2Phi=true,
               tissuesCompliance_PhiEffect=1,
               exercise_factor(displayUnit="1") = 10,
-              veins_UsePhiEffect=true),
+              veins_UsePhiEffect=true,
+              eta_vc=0.2),
             Systemic1(
               UseExerciseInput=true,
               anterior_tibial_T3_R230(UseExercise=true),
@@ -33114,11 +33176,11 @@ P_hs_plus_dist"),
                   true),
             Exercfise(rising=20),
             settings(
-              R_vc=0.2,
               hidePulmonary=false,
               hideLevel0=true,
               hideLevel1=true,
-              EvaluateFunctionalParams=true),
+              EvaluateFunctionalParams=true,
+              eta_vc=0.2),
             Systemic1(
               superior_vena_cava_C88(disableVenoconstriction=true),
               superior_vena_cava_C2(r(displayUnit="cm") = 0.04,
@@ -33980,10 +34042,10 @@ P_hs_plus_dist"),
             startTime=0),
           Tilt_ramp(startTime=0),
           settings(
-            R_vc=0.5,
             Ra_factor=4.2625,
             tissuesCompliance_PhiEffect=0.2,
-            tissues_gamma=0.5),
+            tissues_gamma=0.5,
+            eta_vc=0.5),
           heartRate(HR_max=3.1666666666667),
           heartComponent(ventricles(redeclare
                 Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.Driving_Olufsen
@@ -34054,22 +34116,23 @@ P_hs_plus_dist"),
         inner Components.Settings settings(
           initByPressure=false,
           heart_alphaE=0.2,
-            arteries_UseVasoconstrictionEffect=true,
+          arteries_UseVasoconstrictionEffect=true,
           exercise_factor_on_arterial_compliance=0.2,
-            UseNonLinear_TissuesCompliance=true,
-            tissues_UseStraighteningReaction2Phi=true,
+          UseNonLinear_TissuesCompliance=true,
+          tissues_UseStraighteningReaction2Phi=true,
           exercise_factor_on_tissue_compliance=0.2,
           heart_vntr_AmRef_factor=1.06,
           heart_vntr_Vw_factor=0.90375,
-            TR_frac(displayUnit="%") = 5.118955,
-            TPR(displayUnit="(mmHg.min)/l") = 119490152,
+          TR_frac(displayUnit="%") = 5.118955,
+          TPR(displayUnit="(mmHg.min)/l") = 119490152,
           V_PV_init(displayUnit="ml"),
-            k_E(displayUnit="1") = 0.358125,
-            baro_f1=0.00418,
-          R_vc=0.5,
+          k_E(displayUnit="1") = 0.358125,
+          baro_f1=0.00418,
+          eta_vc=0.5,
           Ra_factor=4.2625,
           tissuesCompliance_PhiEffect=0.2,
-          tissues_gamma=0.5)                                 annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+          tissues_gamma=0.5)
+          annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
          // sv = sv,
         Baseline.OlufsenTriSeg_base olufsenTriSeg_base(settings(
             phi0=settings.phi0,
@@ -34103,7 +34166,6 @@ P_hs_plus_dist"),
 
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34144,7 +34206,8 @@ P_hs_plus_dist"),
             heart_drive_TR=settings.heart_drive_TR,
             heart_drive_TR_maxAct=settings.heart_drive_TR_maxAct,
             heart_drive_D_0=settings.heart_drive_D_0,
-            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct)) if true
+            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
+            eta_vc=settings.eta_vc)) if true
           annotation (Placement(transformation(extent={{-80,40},{-60,60}})));
 
         Tilt.OlufsenTriSeg_tiltable olufsenTriSeg_tiltable(settings(
@@ -34177,7 +34240,6 @@ P_hs_plus_dist"),
 
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34218,7 +34280,8 @@ P_hs_plus_dist"),
             heart_drive_TR=settings.heart_drive_TR,
             heart_drive_TR_maxAct=settings.heart_drive_TR_maxAct,
             heart_drive_D_0=settings.heart_drive_D_0,
-            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct)) if true
+            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
+            eta_vc=settings.eta_vc)) if true
           annotation (Placement(transformation(extent={{-20,40},{0,60}})));
 
         Valsalva.OlufsenTriSeg_valsalva olufsenTriSeg_valsalva(settings(
@@ -34251,7 +34314,6 @@ P_hs_plus_dist"),
 
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34292,7 +34354,8 @@ P_hs_plus_dist"),
             heart_drive_TR=settings.heart_drive_TR,
             heart_drive_TR_maxAct=settings.heart_drive_TR_maxAct,
             heart_drive_D_0=settings.heart_drive_D_0,
-            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct)) if true
+            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
+            eta_vc=settings.eta_vc)) if true
           annotation (Placement(transformation(extent={{-80,-20},{-60,0}})));
 
         // used regex find '(\w+)=we' and replace with \1=settings.\1
@@ -34326,7 +34389,6 @@ P_hs_plus_dist"),
 
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34367,7 +34429,8 @@ P_hs_plus_dist"),
             heart_drive_TR=settings.heart_drive_TR,
             heart_drive_TR_maxAct=settings.heart_drive_TR_maxAct,
             heart_drive_D_0=settings.heart_drive_D_0,
-            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct)) if true
+            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
+            eta_vc=settings.eta_vc)) if true
           annotation (Placement(transformation(extent={{40,40},{60,60}})));
 
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
@@ -34402,27 +34465,28 @@ P_hs_plus_dist"),
       model CombinedModels_FMUs
         "All model variants combined for identification by importing FMU2 CS to have separate solver events"
         Components.Settings settings(
-            UseNonLinear_TissuesCompliance=true,
-            tissues_UseStraighteningReaction2Phi=true,
-            tissuesCompliance_PhiEffect=0.2,
-            exercise_factor_on_tissue_compliance=0.2,
-            UseNonLinear_VenousCompliance=true,
-            veins_activation_tau=0.1,
-            heart_vntr_AmRef_factor = 1.06,
-            heart_vntr_Vw_factor = 0.90375,
-            TR_frac(displayUnit="%") = 5.118955,
-            TPR(displayUnit="(mmHg.min)/l") = 119490152,
-            k_E(displayUnit="1") = 0.358125,
-            initByPressure=false,
-            V_PV_init=7.4e-05,
-            tissues_gamma=0.5,
-            baro_useAbsolutePressureTerm=false,
-            baro_Ts=300,
-            baro_f1=0.0031,
-            arteries_UseVasoconstrictionEffect=true,
-            exercise_factor_on_arterial_compliance=0,
-            R_vc=0.25,
-            exercise_factor=40)       annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+          UseNonLinear_TissuesCompliance=true,
+          tissues_UseStraighteningReaction2Phi=true,
+          tissuesCompliance_PhiEffect=0.2,
+          exercise_factor_on_tissue_compliance=0.2,
+          UseNonLinear_VenousCompliance=true,
+          veins_activation_tau=0.1,
+          heart_vntr_AmRef_factor=1.06,
+          heart_vntr_Vw_factor=0.90375,
+          TR_frac(displayUnit="%") = 5.118955,
+          TPR(displayUnit="(mmHg.min)/l") = 119490152,
+          k_E(displayUnit="1") = 0.358125,
+          initByPressure=false,
+          V_PV_init=7.4e-05,
+          tissues_gamma=0.5,
+          baro_useAbsolutePressureTerm=false,
+          baro_Ts=300,
+          baro_f1=0.0031,
+          arteries_UseVasoconstrictionEffect=true,
+          exercise_factor_on_arterial_compliance=0,
+          eta_vc=0.25,
+          exercise_factor=40)
+          annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
 
                                         /* test
    ,R_vc=0.5,
@@ -34477,7 +34541,7 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
+            R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34556,7 +34620,7 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
+            R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34635,7 +34699,7 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
+            R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34714,7 +34778,7 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
+            R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34788,27 +34852,28 @@ P_hs_plus_dist"),
       model CombinedModels_FMUsTest
         "All model variants combined for identification by importing FMU2 CS to have separate solver events"
         Components.Settings settings(
-            UseNonLinear_TissuesCompliance=true,
-            tissues_UseStraighteningReaction2Phi=true,
-            tissuesCompliance_PhiEffect=0.2,
-            exercise_factor_on_tissue_compliance=0.2,
-            UseNonLinear_VenousCompliance=true,
-            veins_activation_tau=0.1,
-            heart_vntr_AmRef_factor = 1.06,
-            heart_vntr_Vw_factor = 0.90375,
-            TR_frac(displayUnit="%") = 5.118955,
-            TPR(displayUnit="(mmHg.min)/l") = 119490152,
-            k_E(displayUnit="1") = 0.358125,
-            initByPressure=false,
-            V_PV_init=7.4e-05,
-            tissues_gamma=0.5,
-            baro_useAbsolutePressureTerm=false,
-            baro_Ts=300,
-            baro_f1=0.0031,
-            arteries_UseVasoconstrictionEffect=true,
-            exercise_factor_on_arterial_compliance=0,
-            R_vc=0.25,
-            exercise_factor=40)       annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+          UseNonLinear_TissuesCompliance=true,
+          tissues_UseStraighteningReaction2Phi=true,
+          tissuesCompliance_PhiEffect=0.2,
+          exercise_factor_on_tissue_compliance=0.2,
+          UseNonLinear_VenousCompliance=true,
+          veins_activation_tau=0.1,
+          heart_vntr_AmRef_factor=1.06,
+          heart_vntr_Vw_factor=0.90375,
+          TR_frac(displayUnit="%") = 5.118955,
+          TPR(displayUnit="(mmHg.min)/l") = 119490152,
+          k_E(displayUnit="1") = 0.358125,
+          initByPressure=false,
+          V_PV_init=7.4e-05,
+          tissues_gamma=0.5,
+          baro_useAbsolutePressureTerm=false,
+          baro_Ts=300,
+          baro_f1=0.0031,
+          arteries_UseVasoconstrictionEffect=true,
+          exercise_factor_on_arterial_compliance=0,
+          eta_vc=0.25,
+          exercise_factor=40)
+          annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
 
                                         /* test
    ,R_vc=0.5,
@@ -34861,7 +34926,7 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
+            R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34934,7 +34999,6 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -34974,7 +35038,8 @@ P_hs_plus_dist"),
             heart_drive_TR=settings.heart_drive_TR,
             heart_drive_TR_maxAct=settings.heart_drive_TR_maxAct,
             heart_drive_D_0=settings.heart_drive_D_0,
-            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct))
+            heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
+            eta_vc=settings.eta_vc))
           annotation (Placement(transformation(extent={{-40,80},{-20,100}})));
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false), graphics={
@@ -35028,7 +35093,6 @@ P_hs_plus_dist"),
       model CombinedModels_FMUs_optimizedParams
         "Parametrized as result of #1 optimization"
         extends CombinedModels_FMUs(settings(
-            R_vc=1.675000e-01,
             Ra_factor=3.410320e+00,
             baro_Ts=1.230000e+02,
             baro_delta0_factor=2.800000e-01,
@@ -35043,7 +35107,9 @@ P_hs_plus_dist"),
             tissues_nominal_zpv=2.188800e-03,
             HR_max=3.060000e+00,
             heart_drive_TR = 3.735000e-01,
-            heart_drive_TR_maxAct = 1.224000e-01));
+            heart_drive_TR_maxAct = 1.224000e-01,
+            eta_vc=
+                 1.675000e-01));
         annotation (__Dymola_Commands(file(ensureSimulated=false)=
               "\"Scripts/Dymola/ExportAndImportFMUs.mos\"" "Refresh FMUs"));
       end CombinedModels_FMUs_optimizedParams;
@@ -35051,7 +35117,6 @@ P_hs_plus_dist"),
       model CombinedModels_FMUs_optimizedParams2
         "Parametrized as result of #2 optimization"
         extends CombinedModels_FMUs(settings(
-          R_vc =          1.574500e-01,
           Ra_factor =          3.171620e+00,
           baro_Ts =          1.156200e+02,
           baro_delta0_factor =          2.688000e-01,
@@ -35066,7 +35131,8 @@ P_hs_plus_dist"),
           tissues_nominal_zpv =          2.101240e-03,
           HR_max =          2.907000e+00,
           heart_drive_TR =            3.809700e-01,
-          heart_drive_TR_maxAct =            1.224000e-01));
+          heart_drive_TR_maxAct =            1.224000e-01,
+          eta_vc =        1.574500e-01));
         annotation (__Dymola_Commands(file(ensureSimulated=false)=
               "\"Scripts/Dymola/ExportAndImportFMUs.mos\"" "Refresh FMUs"));
       end CombinedModels_FMUs_optimizedParams2;
@@ -35076,7 +35142,7 @@ P_hs_plus_dist"),
 
         Components.Settings settings(
           HR_max=2.907,
-          R_vc=0.15745,
+          eta_vc=0.15745,
           Ra_factor=3.17162,
           TPR(displayUnit="(mmHg.min)/l") = 119490152,
           TR_frac(displayUnit="%") = 5.118955,
@@ -35148,7 +35214,7 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
+            R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -35227,7 +35293,7 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
+            R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -35306,7 +35372,7 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
+            R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -35385,7 +35451,7 @@ P_hs_plus_dist"),
             k_E=settings.k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
 
-            R_vc=settings.R_vc,
+            R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_nominal_pressure,
             tissues_nominal_zpv=settings.tissues_nominal_zpv,
             tissues_nominal_stressed_volume=settings.tissues_nominal_stressed_volume,
@@ -35484,7 +35550,6 @@ P_hs_plus_dist"),
               heart_alphaE=0.2,
               arteries_UseVasoconstrictionEffect=true,
               exercise_factor_on_arterial_compliance=0.2,
-              R_vc=0.2,
               Rv_factor=settings.Ra_factor,
               UseNonLinear_TissuesCompliance=true,
               tissues_UseStraighteningReaction2Phi=true,
@@ -35493,7 +35558,8 @@ P_hs_plus_dist"),
               UseNonLinear_VenousCompliance=true,
               veins_activation_tau=0.1,
               hideLevel0=true,
-              hideLevel1=true));
+              hideLevel1=true,
+              eta_vc=0.2));
 
           Modelica.Blocks.Logical.Switch switch1
             annotation (Placement(transformation(extent={{10,52},{24,66}})));
@@ -35633,6 +35699,31 @@ P_hs_plus_dist"),
           tau*der(PAavg) = pulmonaryComponent.c_pa.q_in.pressure - PAavg;
           tau*der(PVavg) = pulmonaryComponent.c_pv.q_in.pressure - PVavg;
         end OTS_O_SS_I_NonLInearPR;
+
+        model adenosine
+          extends OlufsenTriSeg_optimized_steadyState_init(
+            Systemic1(UseAdenosineInput=true),
+            pulmonaryComponent(UseAdenosineInput=true),
+            settings(eta_adenosine=1));
+        replaceable Modelica.Blocks.Sources.Trapezoid adenosine(
+            startTime=20,
+            amplitude=1,
+            rising=20,
+            width=20,
+            falling=1,
+            period=200,
+            nperiod=1,
+            offset=0) constrainedby Modelica.Blocks.Sources.Trapezoid
+            annotation (Placement(transformation(extent={{-102,26},{-82,46}})));
+            Physiolibrary.Types.HydraulicResistance tsr = (heartComponent.aorticValve.q_out.pressure - heartComponent.tricuspidValve.q_in.pressure)/max(CO, 1e-6) "Total systemic resistance";
+            Physiolibrary.Types.HydraulicResistance tpr = (heartComponent.pulmonaryValve.q_out.pressure - heartComponent.mitralValve.q_in.pressure)/max(CO, 1e-6) "Total systemic resistance";
+
+        equation
+          connect(adenosine.y, Systemic1.adenosineInput) annotation (Line(points={{-81,36},
+                  {-70,36},{-70,32},{-58,32}}, color={0,0,127}));
+          connect(adenosine.y, pulmonaryComponent.adenosine)
+            annotation (Line(points={{-81,36},{-81,-48},{-34,-48}}, color={0,0,127}));
+        end adenosine;
       end Experiments;
 
       model nominals
@@ -35673,14 +35764,14 @@ P_hs_plus_dist"),
             heart_alphaE=0.2,
             arteries_UseVasoconstrictionEffect=true,
             exercise_factor_on_arterial_compliance=0.2,
-            R_vc=0.2,
             UseNonLinear_TissuesCompliance=true,
             tissues_UseStraighteningReaction2Phi=true,
             tissuesCompliance_PhiEffect=0.2,
             exercise_factor_on_tissue_compliance=0.2,
             veins_activation_tau=0.1,
             hideLevel0=false,
-            hideLevel1=false),
+            hideLevel1=false,
+            eta_vc=0.2),
           condTP(disconnected=true));
             //UseNonLinear_VenousCompliance=true,
 
@@ -36127,10 +36218,10 @@ P_hs_plus_dist"),
             baro_f1=0.0031,
             arteries_UseVasoconstrictionEffect=true,
             exercise_factor_on_arterial_compliance=0,
-            R_vc=0.25,
             exercise_factor=40,
             tissues_Ra_tau=0,
-            veins_activation_tau=0),
+            veins_activation_tau=0,
+            eta_vc=0.25),
           pulmonaryComponent(deadVolume=0.002, c_pv(CollapsingPressureVolume=
                   pulmonaryComponent.deadVolume, MinimalCollapsingPressure=-13332.2387415)),
 
@@ -36154,7 +36245,6 @@ P_hs_plus_dist"),
     model OlufsenTriSeg_optimized
       "Generated by PostProcess/postprocess_optim.py at 2020-07-02 12:26:25.749501 with cost 0.075148 lowest at run 306"
       extends OlufsenTriSeg_base(settings(
-        R_vc =          1.574500e-01,
         Ra_factor =          3.171620e+00,
         baro_Ts =          1.156200e+02,
         baro_delta0_factor =          2.688000e-01,
@@ -36169,7 +36259,8 @@ P_hs_plus_dist"),
         tissues_nominal_zpv =          2.101240e-03,
         HR_max =          2.907000e+00,
         heart_drive_TR =            3.809700e-01,
-        heart_drive_TR_maxAct =            1.224000e-01));
+        heart_drive_TR_maxAct =            1.224000e-01,
+        eta_vc =        1.574500e-01));
 
       Physiolibrary.Types.Volume totalVolume = Systemic1.total_volume + heartComponent.volume + pulmonaryComponent.volume;
         annotation (experiment(
@@ -36390,10 +36481,11 @@ P_hs_plus_dist"),
       package Experiments
         model OlufsenTriseg_tiltable_reparam
           extends OlufsenTriSeg_tiltable( settings(
-              R_vc=0.5,
               Ra_factor=4.2625,
               tissuesCompliance_PhiEffect=0.2,
-              tissues_gamma=0.5));
+              tissues_gamma=0.5,
+              eta_vc=
+                   0.5));
         end OlufsenTriseg_tiltable_reparam;
 
         model OptimizedExercise_tiltable
@@ -36673,9 +36765,9 @@ P_hs_plus_dist"),
               UseTiltInput=true),
             heartComponent(UseFrequencyInput=true, UsePhiInput=true),
             settings(
-              R_vc=0,
               Ra_factor=0,
-              tissuesCompliance_PhiEffect=0));
+              tissuesCompliance_PhiEffect=0,
+              eta_vc=0));
 
           replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
             height=Modelica.Constants.pi/3,
@@ -36772,10 +36864,10 @@ P_hs_plus_dist"),
                 baroreflex(f1=0.0031))),
             heartComponent(UseFrequencyInput=true, UsePhiInput=true),
             settings(
-              R_vc=0.5,
               Ra_factor=4.2625,
               tissuesCompliance_PhiEffect=0.2,
-              tissues_gamma=0.5),
+              tissues_gamma=0.5,
+              eta_vc=0.5),
             useAutonomousPhi(y=true));
 
           replaceable Modelica.Blocks.Sources.Trapezoid
@@ -36866,7 +36958,6 @@ P_hs_plus_dist"),
             heart_alphaE=0.2,
             arteries_UseVasoconstrictionEffect=true,
             exercise_factor_on_arterial_compliance=0.2,
-            R_vc=0.2,
             Rv_factor=settings.Ra_factor,
             UseNonLinear_TissuesCompliance=true,
             tissues_UseStraighteningReaction2Phi=true,
@@ -36876,7 +36967,8 @@ P_hs_plus_dist"),
             veins_activation_tau=0.1,
             veins_ignoreViscosityResistance=true,
             hideLevel0=false,
-            hideLevel1=false),
+            hideLevel1=false,
+            eta_vc=0.2),
           Tilt_ramp(
             height=Modelica.Constants.pi/3,
             duration=2,
@@ -37131,7 +37223,8 @@ P_hs_plus_dist"),
           end KnockOff_TissueComplianceReaction;
 
           model KnockOff_ArterialCompliance
-            extends knockOff_base(settings(TPR(displayUnit="(Pa.s)/m3"), R_vc=0));
+            extends knockOff_base(settings(TPR(displayUnit="(Pa.s)/m3"), eta_vc=
+                                                                              0));
           end KnockOff_ArterialCompliance;
 
           model KnockOff_TissueResistance
