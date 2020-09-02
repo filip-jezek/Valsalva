@@ -2091,26 +2091,25 @@ type"),       Text(
            extends Physiolibrary.Icons.HydraulicResistor;
 
            // initizalization
-            parameter Physiolibrary.Types.HydraulicResistance nominalTPR=20000000;
-            parameter Physiolibrary.Types.Pressure nominalDp=nominalTPR*
-                nominalFlow;
-            parameter Physiolibrary.Types.VolumeFlowRate nominalFlow=0.0001;
-            parameter Physiolibrary.Types.HydraulicResistance baseResistanceAtNominals=nominalDp
-                /(nominalFlow^exp_);
-            parameter Physiolibrary.Types.HydraulicResistance nominalExerciseTPR(
-                displayUnit="(Pa.s)/m3")=nominalTPR/2
-              "TPR at maximal flow during maximal exercise";
-            parameter Physiolibrary.Types.VolumeFlowRate nominalExerciseFlow=
-                0.00033333333333333;
-            parameter Real nominalExp_ = log(nominalExerciseTPR*nominalExerciseFlow/base)/log(nominalExerciseFlow);
-          //  parameter Types.HydraulicResistance baseResistanceAtTPR = nominalTPR*nominalFlow/(nominalFlow^exp_);
+            parameter Physiolibrary.Types.HydraulicResistance R_nom=20000000
+              "Nominal resistance at nominal flow";
+            parameter Physiolibrary.Types.Pressure dp_nom=R_nom*Q_nom
+              "nominal pressure drop (use default)";
+            parameter Physiolibrary.Types.VolumeFlowRate Q_nom=0.0001 "nominal flow";
+            parameter Physiolibrary.Types.HydraulicResistance base_nom=dp_nom/(Q_nom^exp_)
+              "Base resistance at nominal values.";
+            parameter Physiolibrary.Types.HydraulicResistance R_nom_maxQ(displayUnit="(Pa.s)/m3")=
+                 R_nom/2 "TPR at maximal flow during maximal exercise";
+            parameter Physiolibrary.Types.VolumeFlowRate Q_nom_maxQ=0.00033333333333333
+              "Nominal flow for maximal flow case (e.g. exercise)";
+            parameter Real _exp_nom=log(R_nom_maxQ*Q_nom_maxQ/base)/log(Q_nom_maxQ)
+              "Exponent at nominals";
 
-            parameter Physiolibrary.Types.HydraulicResistance base(start=1e7)=
-              baseResistanceAtNominals
+            parameter Physiolibrary.Types.HydraulicResistance base(start=1e7) = base_nom
               "Base for exponential conductance, as in dp = base*Q^Exp";
-            parameter Real exp_(start = 1)=nominalExp_   "Exponent of conductance base, as in dp = base*Q^Exp";
-            parameter Physiolibrary.Types.VolumeFlowRate maxLinearFlow=
-                nominalFlow
+            parameter Real exp_(start=1) = _exp_nom
+              "Exponent of conductance base, as in dp = base*Q^Exp. Set to 1 for linear characteristics.";
+            parameter Physiolibrary.Types.VolumeFlowRate maxLinearFlow=Q_nom
               "Maximal flow having constant TPR to prevent multistable simulation";
             Physiolibrary.Types.HydraulicResistance TPR_limit=base*(
                 maxLinearFlow^exp_)/maxLinearFlow;
@@ -2169,6 +2168,91 @@ type"),       Text(
             annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                   coordinateSystem(preserveAspectRatio=false)));
           end OuterAdenosine;
+
+          model ResistorNonLinearPulmonaryInput
+            "Hydraulic resistor, where the pressure-flow characteristic is exponentially non-linear. Optional conductance input for nominal flow"
+           extends Physiolibrary.Hydraulic.Interfaces.OnePort;
+           extends Physiolibrary.Icons.HydraulicResistor;
+
+           parameter Boolean useConductanceInput = false;
+           parameter Boolean useNonlinearResistance = false;
+           parameter Physiolibrary.Types.HydraulicResistance R_nom_fixed = 20000000;
+
+
+           // initizalization
+            Physiolibrary.Types.HydraulicResistance R_nom
+              "Nominal resistance at nominal flow";
+            Physiolibrary.Types.Pressure dp_nom=R_nom*Q_nom
+              "nominal pressure drop (use default)";
+            parameter Physiolibrary.Types.VolumeFlowRate Q_nom=0.0001 "nominal flow";
+            Physiolibrary.Types.HydraulicResistance base= dp_nom/(Q_nom^exp_)
+              "Base for exponential conductance, as in dp = base*Q^Exp, calculated from nominal values.";
+            parameter Physiolibrary.Types.HydraulicResistance R_nom_maxQ(displayUnit="(Pa.s)/m3")=
+                 20000000 "Resistance at maximal flow during maximal exercise";
+            parameter Physiolibrary.Types.VolumeFlowRate Q_nom_maxQ=0.00033333333333333
+              "Nominal flow for maximal flow case (e.g. exercise)";
+            Real exp_(start=1)=if useNonlinearResistance then log(R_nom_maxQ*Q_nom_maxQ/base)/log(Q_nom_maxQ) else 1
+              "Exponent of conductance base, as in dp = base*Q^Exp. Set to 1 for linear characteristics. Calculated from nominals.";
+
+            parameter Physiolibrary.Types.VolumeFlowRate maxLinearFlow=Q_nom
+              "Maximal flow having constant TPR to prevent multistable simulation";
+            Physiolibrary.Types.HydraulicResistance TPR_limit=base*(
+                maxLinearFlow^exp_)/maxLinearFlow;
+            Physiolibrary.Types.HydraulicResistance TPR=if noEvent(q_in.q > 0)
+                 then dp/q_in.q else 0;
+            Physiolibrary.Types.RealIO.HydraulicConductanceInput
+                                                   cond(start=Conductance)=1/R_nom if useConductanceInput
+                                                             annotation (Placement(
+                  transformation(extent={{-20,-20},{20,20}},
+                  rotation=270,
+                  origin={-54,30})));
+          equation
+            if not useConductanceInput then
+              R_nom = R_nom_fixed;
+            end if;
+
+            // we must allow also negative flows
+            // linear flow under the limit, also
+            if noEvent(dp >= 0 and abs(q_in.q) > maxLinearFlow) then
+                  q_in.q = (dp/base)^(1/exp_);
+            elseif noEvent(dp < 0 and abs(q_in.q) > maxLinearFlow) then
+                q_in.q = -(-dp/base)^(1/exp_);
+            else
+              // linear characteristics inbetween
+                q_in.q = dp/TPR_limit;
+            end if;
+
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{
+                      -100,-100},{100,100}}),
+                             graphics={Text(
+                    extent={{-220,-40},{200,-80}},
+                    lineColor={0,0,255},
+                    fillColor={58,117,175},
+                    fillPattern=FillPattern.Solid,
+                    textString="%name"), Line(
+                    points={{-100,-60},{26,-26},{80,80}},
+                    color={0,0,0},
+                    smooth=Smooth.Bezier,
+                    thickness=0.5)}),
+              Documentation(revisions="<html>
+<p><i>2020</i></p>
+<p>Filip Jezek, University of Michigan</p>
+</html>",       info="<html>
+<p>This hydraulic conductance (resistance) element contains two connector sides. No hydraulic medium volume is changing in this element during simulation. That means that sum of flow in both connector sides is zero. The flow through element is determined by an exponential relation:</p>
+<p><img src=\"modelica://Physiolibrary/Resources/Images/equations/equation-BpFHrLEf.png\" alt=\"dp = base*Q^exp_
+\"/></p>
+<p>where base and exp are parameters.</p>
+<p>To prevent infinite resistance at small flow, one can adjust linear working areas. When the flow is below maxLinearFlow, then the following linear </p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q_in.q&nbsp;=&nbsp;(dp/base)^(1/exp_);</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;<span style=\"color: #0000ff;\">elseif&nbsp;</span><span style=\"color: #ff0000;\">noEvent</span>(dp&nbsp;&lt;&nbsp;0<span style=\"font-family: Courier New; color: #0000ff;\">&nbsp;and&nbsp;</span><span style=\"color: #ff0000;\">abs</span>(q_in.q)&nbsp;&gt;&nbsp;maxLinearFlow)<span style=\"font-family: Courier New; color: #0000ff;\">&nbsp;then</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q_in.q&nbsp;=&nbsp;-(-dp/base)^(1/exp_);</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;<span style=\"color: #0000ff;\">else</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: #006400;\">//&nbsp;linear&nbsp;characteristics&nbsp;inbetween</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q_in.q&nbsp;=&nbsp;dp/TPR_limit;</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;<span style=\"color: #0000ff;\">end&nbsp;if</span>;</p>
+<p><br><b>Ohm&apos;s law</b>. It is used conductance (=1/resistance) because it could be numerical zero better then infinity in resistance. </p>
+</html>"));
+          end ResistorNonLinearPulmonaryInput;
         end Auxiliary;
 
         partial model partialPulmonary
@@ -2324,6 +2408,8 @@ type"),       Text(
           extends partialPulmonary(UseThoracic_PressureInput=false);
           import ADAN_main.Components.Constants.*;
 
+          parameter Boolean UseAdenosineInput = false annotation(choices(checkBox=true));
+
           replaceable
           Physiolibrary.Hydraulic.Components.Resistor r_pa(useConductanceInput=true,
                                                            Resistance(
@@ -2353,10 +2439,10 @@ type"),       Text(
           Physiolibrary.Types.RealIO.FractionInput adenosine if UseAdenosineInput
             "Adenosine dose"
             annotation (Placement(transformation(extent={{-120,20},{-80,60}})));
-          Physiolibrary.Types.Constants.FractionConst fraction if not UseAdenosineInput
+          Physiolibrary.Types.Constants.FractionConst fraction(k=0) if
+                                                                  not UseAdenosineInput
             annotation (Placement(transformation(extent={{-90,46},{-82,54}})));
 
-        parameter Boolean UseAdenosineInput = false;
         equation
           volume = c_pa.volume + c_pv.volume - deadVolume;
 
@@ -30583,7 +30669,10 @@ P_hs_plus_dist"),
     partial model partialCVS "Base class for circulatory model"
       extends Physiolibrary.Icons.CardioVascular;
       replaceable Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt
-        SystemicComponent(brachial_vein_L138(UseInertance=true))
+        SystemicComponent(
+        UseThoracic_PressureInput=true,
+        UsePhi_Input=true,
+        brachial_vein_L138(UseInertance=true))
                            annotation (
           __Dymola_choicesAllMatching=true, Placement(transformation(extent={{-58,18},
                 {18,48}})));
@@ -30594,7 +30683,8 @@ P_hs_plus_dist"),
         UseThoracicPressureInput=true,
         HR=1) constrainedby Components.Subsystems.Heart.partialHeart
         annotation (Placement(transformation(extent={{-16,-32},{-36,-12}})));
-      replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent
+      replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent(
+          UseThoracic_PressureInput=true)
       constrainedby Components.Subsystems.Pulmonary.partialPulmonary annotation (HideResult=settings.hidePulmonary,
           Placement(transformation(extent={{-34,-62},{-14,-42}})));
     Modelica.Blocks.Sources.Trapezoid phi_fixed(
@@ -30690,6 +30780,12 @@ P_hs_plus_dist"),
                                   color={0,0,127}));
       connect(condHeartPhi.y, heartComponent.phi) annotation (Line(points={{43.4,
               -16},{14,-16},{14,-16},{-16,-16}},    color={0,0,127}));
+      connect(switch1.y, condHRPhi.u) annotation (Line(points={{36.725,78},{80,
+              78},{80,-32},{57.2,-32}}, color={0,0,127}));
+      connect(switch1.y, condSystemicPhi.u) annotation (Line(points={{36.725,78},
+              {80,78},{80,20},{57.2,20}}, color={0,0,127}));
+      connect(switch1.y, condHeartPhi.u) annotation (Line(points={{36.725,78},{
+              80,78},{80,-16},{57.2,-16}}, color={0,0,127}));
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
             coordinateSystem(preserveAspectRatio=false)),
         experiment(
@@ -35824,15 +35920,6 @@ P_hs_plus_dist"),
           condTP(disconnected=true));
             //UseNonLinear_VenousCompliance=true,
 
-        Modelica.Blocks.Logical.Switch switch1
-          annotation (Placement(transformation(extent={{13,73},{27,87}})));
-        Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi(y=false)
-          annotation (Placement(transformation(extent={{-22,70},{-2,90}})));
-        Components.Signals.ConditionalConnection condHeartPhi(disconnectedValue=
-             0.25, disconnected=false,
-          phi0=settings.phi0)          annotation (Placement(transformation(
-                extent={{56,-10.7408},{44,-0.07406}})));
-
         output Physiolibrary.Types.Pressure brachial_pressure=SystemicComponent.brachial_L82_HeartLevel.p_C;
 
       output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
@@ -35867,26 +35954,6 @@ P_hs_plus_dist"),
           reinit(brachial_pressure_int, 0);
         end when;
 
-        connect(switch1.y, condHRPhi.u) annotation (Line(points={{27.7,80},{
-                70.35,80},{70.35,-32},{57.2,-32}},
-                                         color={0,0,127}));
-        connect(useAutonomousPhi.y, switch1.u2) annotation (Line(points={{-1,80},
-                {11.6,80}},              color={255,0,255}));
-        connect(SystemicComponent.phi_baroreflex, switch1.u1) annotation (Line(
-              points={{-27.4,45.4},{-27.4,92},{4,92},{4,85.6},{11.6,85.6}},
-              color={0,0,127}));
-        connect(phi_fixed.y, switch1.u3) annotation (Line(points={{-35,84},{-38,
-                84},{-38,74.4},{11.6,74.4}},
-                                    color={0,0,127}));
-        connect(condHeartPhi.y, heartComponent.phi) annotation (Line(points={{43.4,
-                -6.00003},{28,-6.00003},{28,-16},{-16,-16}},
-                                                      color={0,0,127}));
-        connect(condSystemicPhi.u, condHRPhi.u) annotation (Line(points={{57.2,20},
-                {70.35,20},{70.35,-32},{57.2,-32}},
-                                             color={0,0,127}));
-        connect(condHeartPhi.u, condHRPhi.u) annotation (Line(points={{57.2,
-                -6.00003},{70.35,-6.00003},{70.35,-32},{57.2,-32}},
-                                                          color={0,0,127}));
         annotation (experiment(
             StopTime=30,
             Interval=0.01,
@@ -37335,9 +37402,9 @@ P_hs_plus_dist"),
               startTime=20),
             redeclare Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear
               pulmonaryComponent(UseThoracic_PressureInput=true, r_pa(
-                nominalFlow(displayUnit="l/min"),
-                nominalDp(displayUnit="mmHg"),
-                nominalExerciseFlow(displayUnit="l/min"),
+                Q_nom(displayUnit="l/min"),
+                dp_nom(displayUnit="mmHg"),
+                Q_nom_maxQ(displayUnit="l/min"),
                 maxLinearFlow(displayUnit="l/min") = 1.6666666666667e-05)),
             Exercise(startTime=20),
             Tilt_ramp(startTime=40));
@@ -37634,8 +37701,8 @@ P_hs_plus_dist"),
         model OlufsenTriSeg_valsalva_NonLinPulmonary
           extends OlufsenTriSeg_valsalva(redeclare
               Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear
-              pulmonaryComponent(UseThoracic_PressureInput=true, r_pa(
-                  nominalFlow(displayUnit="l/min"))));
+              pulmonaryComponent(UseThoracic_PressureInput=true, r_pa(Q_nom(
+                    displayUnit="l/min"))));
         end OlufsenTriSeg_valsalva_NonLinPulmonary;
       end Experiments;
 
