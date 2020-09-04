@@ -7045,8 +7045,8 @@ Kalecky")}), experiment(
             Physiolibrary.Types.VolumeFlowRate q_out = - port_b.q
               "Output flow (positive in normal blood flow direction).";
 
-            Physiolibrary.Types.Volume volume(nominal = 1e-9);
-            parameter Physiolibrary.Types.Volume V_min = 0;
+            Physiolibrary.Types.Volume volume(nominal = 1e-9) "Actual volume";
+            parameter Physiolibrary.Types.Volume V_min = 1e-6 "Minimal volume for limiting effects (e.g. collapsing, external pressure..)";
 
           // CHECKVALVE FUNCTIONALITY
 
@@ -30692,10 +30692,6 @@ P_hs_plus_dist"),
         baro_tau_s =       1.156200e+02,
         baro_xi_delta0 =              2.688000e-01,
         tissues_chi_R =            3.477600e+01));
-
-
-
-
       extends ADAN_main.SystemicTree.Identification.SteadyState.init;
     end CardiovascularSystem;
 
