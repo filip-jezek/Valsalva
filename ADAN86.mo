@@ -2017,10 +2017,24 @@ type"),       Text(
         end HeartRate;
 
         model HeartRate_HRMinMax "Extesion to use parametrization using resting at maximal HR"
-          extends HeartRate(H0 = HR_nom - H1*phi0, H1 = HR_max - H0);
           parameter Physiolibrary.Types.Fraction phi0;
           parameter Physiolibrary.Types.Frequency HR_max = 3;
           parameter Physiolibrary.Types.Frequency HR_nom = 1;
+
+          Physiolibrary.Types.Frequency H0 = HR_nom - H1*phi0;
+          Physiolibrary.Types.Frequency H1 = HR_max - H0;
+
+          Physiolibrary.Types.RealIO.FrequencyOutput HR annotation (Placement(
+                transformation(extent={{90,-10},{110,10}}), iconTransformation(extent={{92,-10},
+                    {112,10}})));
+          Physiolibrary.Types.RealIO.FractionInput
+                                               phi annotation (Placement(transformation(
+                  extent={{-120,-20},{-80,20}}),iconTransformation(extent={{-120,-20},{-80,
+                    20}})));
+
+        equation
+          HR = H0 + H1*phi;
+
         end HeartRate_HRMinMax;
 
         model Baroreflex_system "Baroreflex system as in Kosinksi et al 2018"
@@ -5583,62 +5597,6 @@ Simple")}),                                                                  Dia
                 __Dymola_Algorithm="Dassl"));
           end TestCalciumMechanics;
 
-          model TestTriSegMechVentricles
-            Auxiliary.TriSegMechanics_components.Ventricles_Lumens ventricles(
-                V_LV(start=l), V_RV(start=r)) annotation (Placement(
-                  transformation(extent={{-10,-10},{10,10}})));
-            Modelica.Blocks.Sources.Ramp ramp(
-              height=0,
-              duration=10,
-              offset=1,
-              startTime=5) annotation (Placement(transformation(extent={{-74,
-                      -16},{-54,4}})));
-            Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
-                  displayUnit="(mmHg.min)/l") = 159986864.898)
-              annotation (Placement(transformation(extent={{40,10},{60,30}})));
-            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P=
-                  2666.4477483)
-              annotation (Placement(transformation(extent={{90,10},{70,30}})));
-            Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
-                  displayUnit="(mmHg.min)/l") = 159986864.898) annotation (
-                Placement(transformation(extent={{40,-30},{60,-10}})));
-            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P=
-                  2666.4477483) annotation (Placement(transformation(extent={{
-                      90,-30},{70,-10}})));
-            Modelica.Blocks.Sources.Ramp ramp1(
-              height=40*133,
-              duration=10,
-              offset=0,
-              startTime=5) annotation (Placement(transformation(extent={{-36,-52},{-16,-32}})));
-              parameter Physiolibrary.Types.Volume r=0.0001;
-              parameter Physiolibrary.Types.Volume l=0.0001;
-          equation
-            connect(ramp.y, ventricles.frequency) annotation (Line(points={{-53,
-                    -6},{-32,-6},{-32,0},{-10,0}}, color={0,0,127}));
-            connect(resistor.q_out, unlimitedVolume.y) annotation (Line(
-                points={{60,20},{70,20}},
-                color={0,0,0},
-                thickness=1));
-            connect(resistor1.q_out, unlimitedVolume1.y) annotation (Line(
-                points={{60,-20},{70,-20}},
-                color={0,0,0},
-                thickness=1));
-            connect(ramp1.y, ventricles.thoracic_pressure_input) annotation (Line(points={
-                    {-15,-42},{-8,-42},{-8,-40},{0,-40},{0,-10}}, color={0,0,127}));
-            connect(ventricles.port_rv, resistor.q_in) annotation (Line(
-                points={{8,6},{24,6},{24,20},{40,20}},
-                color={0,0,0},
-                thickness=1));
-            connect(resistor1.q_in, ventricles.port_lv) annotation (Line(
-                points={{40,-20},{26,-20},{26,-6},{8,-6}},
-                color={0,0,0},
-                thickness=1));
-            annotation (
-              Icon(coordinateSystem(preserveAspectRatio=false)),
-              Diagram(coordinateSystem(preserveAspectRatio=false)),
-              experiment(__Dymola_NumberOfIntervals=1500, __Dymola_Algorithm="Cvode"));
-          end TestTriSegMechVentricles;
-
           model TestTriSegMechVentriclesOld
             Auxiliary.TriSegMechanics_components.Ventricles_Lumens ventricles
               annotation (Placement(transformation(extent={{-64,-10},{-44,10}})));
@@ -5763,6 +5721,70 @@ Simple")}),                                                                  Dia
                   coordinateSystem(preserveAspectRatio=false)),
               experiment(StopTime=4, __Dymola_Algorithm="Dassl"));
           end offsets;
+
+          model TestTriSegMechVentricles
+            Auxiliary.TriSegMechanics_components.Ventricles_Lumens ventricles(
+                V_LV(start=l), V_RV(start=r)) annotation (Placement(
+                  transformation(extent={{-10,-10},{10,10}})));
+            Modelica.Blocks.Sources.Ramp ramp(
+              height=0,
+              duration=10,
+              offset=1,
+              startTime=0) annotation (Placement(transformation(extent={{-74,
+                      -16},{-54,4}})));
+            Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
+                  displayUnit="(mmHg.min)/l") = 159986864.898)
+              annotation (Placement(transformation(extent={{40,10},{60,30}})));
+            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P=
+                  2666.4477483)
+              annotation (Placement(transformation(extent={{90,10},{70,30}})));
+            Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
+                  displayUnit="(mmHg.min)/l") = 159986864.898) annotation (
+                Placement(transformation(extent={{40,-30},{60,-10}})));
+            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P=
+                  2666.4477483) annotation (Placement(transformation(extent={{
+                      90,-30},{70,-10}})));
+            Modelica.Blocks.Sources.Ramp ramp1(
+              height=0,
+              duration=10,
+              offset=0,
+              startTime=0) annotation (Placement(transformation(extent={{-36,-52},{-16,-32}})));
+              parameter Physiolibrary.Types.Volume r=0.0001;
+              parameter Physiolibrary.Types.Volume l=0.0001;
+            Modelica.Blocks.Sources.Ramp phi(
+              height=0,
+              duration=10,
+              offset=0,
+              startTime=0) annotation (Placement(transformation(extent={{-58,66},
+                      {-38,86}})));
+          equation
+            connect(ramp.y, ventricles.frequency) annotation (Line(points={{-53,
+                    -6},{-32,-6},{-32,0},{-10,0}}, color={0,0,127}));
+            connect(resistor.q_out, unlimitedVolume.y) annotation (Line(
+                points={{60,20},{70,20}},
+                color={0,0,0},
+                thickness=1));
+            connect(resistor1.q_out, unlimitedVolume1.y) annotation (Line(
+                points={{60,-20},{70,-20}},
+                color={0,0,0},
+                thickness=1));
+            connect(ramp1.y, ventricles.thoracic_pressure_input) annotation (Line(points={
+                    {-15,-42},{-8,-42},{-8,-40},{0,-40},{0,-10}}, color={0,0,127}));
+            connect(ventricles.port_rv, resistor.q_in) annotation (Line(
+                points={{8,4},{24,4},{24,20},{40,20}},
+                color={0,0,0},
+                thickness=1));
+            connect(resistor1.q_in, ventricles.port_lv) annotation (Line(
+                points={{40,-20},{26,-20},{26,-6},{8,-6}},
+                color={0,0,0},
+                thickness=1));
+            connect(ventricles.phi_input, phi.y) annotation (Line(points={{0,10},
+                    {-18,10},{-18,76},{-37,76}}, color={0,0,127}));
+            annotation (
+              Icon(coordinateSystem(preserveAspectRatio=false)),
+              Diagram(coordinateSystem(preserveAspectRatio=false)),
+              experiment(__Dymola_NumberOfIntervals=1500, __Dymola_Algorithm="Cvode"));
+          end TestTriSegMechVentricles;
         end Testers;
 
         partial model partialHeart
@@ -8542,7 +8564,7 @@ P_hs/2")}));
 
         //Physiolibrary.Types.HydraulicCompliance C_calculated = volume/(p_C - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)));
 
-          outer Modelica.SIunits.Angle Tilt(unit= "deg");
+          outer Modelica.SIunits.Angle Tilt;
           Physiolibrary.Types.Pressure P_hs = height*settings.blood_rho*Modelica.Constants.g_n "Hydrostatic pressure of the whole tissue";
           Physiolibrary.Types.Pressure P_hs_plus_dist=added_height/2*settings.blood_rho*
               Modelica.Constants.g_n "Hydrostatic pressure of the half of additional distance (gravity center)";
