@@ -125,8 +125,7 @@ package ADAN_main
 <li>when the objects (i.e. the DataStructure dummy) are modified by both parents, only the first prevails and the parent parametrization is simply dropped. </li>
 <li>One would expect Diamond_ab and Diamond_ba to both have ds with true and true, however that is not the case - the second parent is always ignored.</li>
 </ul>
-</html>"),
-          Diagram(graphics={Text(
+</html>"),Diagram(graphics={Text(
                 extent={{-64,-52},{64,-34}},
                 lineColor={238,46,47},
                 lineThickness=1,
@@ -13472,8 +13471,8 @@ P_hs_plus_dist"),
               points={{35,49.5},{29,49.5}},
               color={238,46,47},
               thickness=1));
-          connect(splanchnic_tissue.port_b, splanchnic_vein.port_a) annotation
-            (Line(
+          connect(splanchnic_tissue.port_b, splanchnic_vein.port_a) annotation (
+             Line(
               points={{55,49.5},{60,49.5}},
               color={28,108,200},
               thickness=1));
@@ -13560,8 +13559,8 @@ P_hs_plus_dist"),
                 thoracic_pressure_ratio=settings.syst_abd_P_th_ratio),
             celiac_trunk_C116(UseOuter_thoracic_pressure=true,
                 thoracic_pressure_ratio=settings.syst_abd_P_th_ratio),
-            renal_R178(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio
-                =settings.syst_abd_P_th_ratio),
+            renal_R178(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                 settings.syst_abd_P_th_ratio),
             hepatic_vein_T1_C10(UseOuter_thoracic_pressure=true,
                 thoracic_pressure_ratio=settings.syst_abd_P_th_ratio),
             renal_vein_T1_R18(UseOuter_thoracic_pressure=true,
@@ -13578,8 +13577,8 @@ P_hs_plus_dist"),
                 thoracic_pressure_ratio=settings.syst_abd_P_th_ratio),
             renal_vein_T1_L22(UseOuter_thoracic_pressure=true,
                 thoracic_pressure_ratio=settings.syst_abd_P_th_ratio),
-            renal_L166(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio
-                =settings.syst_abd_P_th_ratio));
+            renal_L166(UseOuter_thoracic_pressure=true, thoracic_pressure_ratio=
+                 settings.syst_abd_P_th_ratio));
         Physiolibrary.Types.Volume total_volume = volume_arterial + volume_peripheral + volume_venous;
           Physiolibrary.Types.Volume volume_arterial = ascending_aorta_A.volume +
             ascending_aorta_B.volume +
@@ -34573,8 +34572,8 @@ P_hs_plus_dist"),
               tissues_chi_R=settings.tissues_chi_R,
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
-              syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect))
-            if                                        true
+              syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect)) if
+                                                      true
             annotation (Placement(transformation(extent={{-80,40},{-60,60}})));
 
           Tilt.OlufsenTriSeg_tiltable olufsenTriSeg_tiltable(settings(
@@ -34638,8 +34637,8 @@ P_hs_plus_dist"),
               tissues_chi_R=settings.tissues_chi_R,
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
-              syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect))
-            if                                        true
+              syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect)) if
+                                                      true
             annotation (Placement(transformation(extent={{-20,40},{0,60}})));
 
           Valsalva.OlufsenTriSeg_valsalva olufsenTriSeg_valsalva(settings(
@@ -34703,8 +34702,8 @@ P_hs_plus_dist"),
               tissues_chi_R=settings.tissues_chi_R,
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
-              syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect))
-            if                                        true
+              syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect)) if
+                                                      true
             annotation (Placement(transformation(extent={{-80,-20},{-60,0}})));
 
           // used regex find '(\w+)=we' and replace with \1=settings.\1
@@ -34769,8 +34768,8 @@ P_hs_plus_dist"),
               tissues_chi_R=settings.tissues_chi_R,
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
-              syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect))
-            if                                        true
+              syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect)) if
+                                                      true
             annotation (Placement(transformation(extent={{40,40},{60,60}})));
 
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
@@ -37524,8 +37523,7 @@ P_hs_plus_dist"),
       end Experiments;
 
       model OlufsenTriSeg_exercise "Simplified heart model"
-        extends
-          Identification.SteadyState.OlufsenTriSeg_optimized_steadyState_init(
+        extends ADAN_main.SystemicTree.CardiovascularSystem(
           SystemicComponent(
             ulnar_T2_L90(UseExercise=false),
             radial_T1_L92(UseExercise=false),
@@ -37548,20 +37546,22 @@ P_hs_plus_dist"),
           condHRPhi(disconnected=false),
           phi_fixed(
             amplitude=0.75,
-            rising(displayUnit="s") = 0,
+            rising(displayUnit="s") = 10,
             width(displayUnit="s") = 200,
             falling(displayUnit="s") = 0,
             period(displayUnit="s"),
-            nperiod=0,
+            nperiod=1,
             offset=0.25,
             startTime=0),
           useAutonomousPhi(y=false),
           condHeartPhi(disconnected=false));
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
+          offset=0,
           startTime=0,
-          height=0,
-          duration=0) constrainedby Modelica.Blocks.Interfaces.SO
+          height=1,
+          duration=10)
+                      constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-80,40},{-60,60}})));
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
         output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
@@ -37571,7 +37571,7 @@ P_hs_plus_dist"),
         annotation (experiment(
             StopTime=60,
             Interval=0.02,
-            Tolerance=1e-05,
+            Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_exercise;
 
