@@ -1624,7 +1624,7 @@ type"),       Text(
       model IdealValveResistanceWithMeasurements
         "Adds additional output calculations"
         extends Physiolibrary.Hydraulic.Components.IdealValveResistance;
-        parameter Boolean calculateAdditionalMetrics = true
+        parameter Boolean calculateAdditionalMetrics = false
           annotation(Evaluate=true, HideResult=true, choices(checkBox=true));
         parameter Boolean useCycleInput=false
           "Use any signal of beating cycle which resets to zero for precise calculations of throughput"
@@ -5722,69 +5722,6 @@ Simple")}),                                                                  Dia
               experiment(StopTime=4, __Dymola_Algorithm="Dassl"));
           end offsets;
 
-          model TestTriSegMechVentricles
-            Auxiliary.TriSegMechanics_components.Ventricles_Lumens ventricles(
-                V_LV(start=l), V_RV(start=r)) annotation (Placement(
-                  transformation(extent={{-10,-10},{10,10}})));
-            Modelica.Blocks.Sources.Ramp ramp(
-              height=0,
-              duration=10,
-              offset=1,
-              startTime=0) annotation (Placement(transformation(extent={{-74,
-                      -16},{-54,4}})));
-            Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
-                  displayUnit="(mmHg.min)/l") = 159986864.898)
-              annotation (Placement(transformation(extent={{40,10},{60,30}})));
-            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P=
-                  2666.4477483)
-              annotation (Placement(transformation(extent={{90,10},{70,30}})));
-            Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
-                  displayUnit="(mmHg.min)/l") = 159986864.898) annotation (
-                Placement(transformation(extent={{40,-30},{60,-10}})));
-            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P=
-                  2666.4477483) annotation (Placement(transformation(extent={{
-                      90,-30},{70,-10}})));
-            Modelica.Blocks.Sources.Ramp ramp1(
-              height=0,
-              duration=10,
-              offset=0,
-              startTime=0) annotation (Placement(transformation(extent={{-36,-52},{-16,-32}})));
-              parameter Physiolibrary.Types.Volume r=0.0001;
-              parameter Physiolibrary.Types.Volume l=0.0001;
-            Modelica.Blocks.Sources.Ramp phi(
-              height=0,
-              duration=10,
-              offset=0,
-              startTime=0) annotation (Placement(transformation(extent={{-58,66},
-                      {-38,86}})));
-          equation
-            connect(ramp.y, ventricles.frequency) annotation (Line(points={{-53,
-                    -6},{-32,-6},{-32,0},{-10,0}}, color={0,0,127}));
-            connect(resistor.q_out, unlimitedVolume.y) annotation (Line(
-                points={{60,20},{70,20}},
-                color={0,0,0},
-                thickness=1));
-            connect(resistor1.q_out, unlimitedVolume1.y) annotation (Line(
-                points={{60,-20},{70,-20}},
-                color={0,0,0},
-                thickness=1));
-            connect(ramp1.y, ventricles.thoracic_pressure_input) annotation (Line(points={
-                    {-15,-42},{-8,-42},{-8,-40},{0,-40},{0,-10}}, color={0,0,127}));
-            connect(ventricles.port_rv, resistor.q_in) annotation (Line(
-                points={{8,4},{24,4},{24,20},{40,20}},
-                color={0,0,0},
-                thickness=1));
-            connect(resistor1.q_in, ventricles.port_lv) annotation (Line(
-                points={{40,-20},{26,-20},{26,-6},{8,-6}},
-                color={0,0,0},
-                thickness=1));
-            connect(ventricles.phi_input, phi.y) annotation (Line(points={{0,10},
-                    {-18,10},{-18,76},{-37,76}}, color={0,0,127}));
-            annotation (
-              Icon(coordinateSystem(preserveAspectRatio=false)),
-              Diagram(coordinateSystem(preserveAspectRatio=false)),
-              experiment(__Dymola_NumberOfIntervals=1500, __Dymola_Algorithm="Cvode"));
-          end TestTriSegMechVentricles;
         end Testers;
 
         partial model partialHeart
@@ -27571,7 +27508,7 @@ P_hs_plus_dist"),
         "Factor scaling duration of contraction";
     equation
       connect(heartComponent.phi, condHeartPhi.y) annotation (Line(points={{-16,-16},
-              {60,-16},{60,42},{54.6,42}},      color={0,0,127}));
+              {60,-16},{60,-16},{43.4,-16}},    color={0,0,127}));
       annotation (experiment(
           StopTime=15,
           Interval=0.02,
@@ -27642,6 +27579,464 @@ P_hs_plus_dist"),
       connect(heart.phi, heartRate2_1.phi) annotation (Line(points={{10,6},{44,
               6},{44,70},{78,70},{78,0},{66,0}}, color={0,0,127}));
     end TestTriSegMechLumens_OttesenFriving;
+
+  package OMTests
+    model CardiovascularSystem
+        "A base model with manually added settings and steady state initialization"
+      extends ADAN_main.SystemicTree.Identification.SteadyState.init(
+          useAutonomousPhi(y=true),  settings(
+            EvaluateFunctionalParams=true,
+            HR_max=2.907,
+            UseNonLinear_TissuesCompliance=true,
+            V_PV_init=7.4e-05,
+            baro_f1=0.0031,
+            baro_useAbsolutePressureTerm=false,
+            eta_vc=0.15745,
+            heart_drive_TR(displayUnit="s") = 0.38,
+            heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
+            heart_vntr_AmRef_factor=1.06,
+            heart_vntr_Vw_factor=0.90375,
+            heart_vntr_sigma_actMaxAct_factor=18.8325,
+            heart_vntr_sigma_act_factor=1.974,
+            syst_art_k_E=0.350423,
+            syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
+            syst_TR_frac=5.118955,
+            syst_art_UseVasoconstrictionEffect=true,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissues_ZPV_nom=0.00210124,
+            tissues_eta_C=0.22878,
+            tissues_eta_Ra=3.17162,
+            tissues_gamma=0.5,
+            tissues_tau_R(displayUnit="s") = 0,
+            veins_activation_tau=0,
+            baro_g =          6.062580e-01,
+            baro_tau_s =       1.156200e+02,
+            baro_xi_delta0 =              2.688000e-01,
+            pulm_C_PV =          1.987900e-07,
+            tissues_chi_R =            3.477600e+01));
+      extends SystemicTree.Auxiliary.partialCVS_outputs(useAutonomousPhi(y=true));
+
+      annotation (experiment(
+          StopTime=60,
+          Interval=0.02,
+          Tolerance=1e-07,
+          __Dymola_Algorithm="Cvode"));
+    end CardiovascularSystem;
+
+    model CVS_simplified "Base class for circulatory model"
+      extends Physiolibrary.Icons.CardioVascular;
+      replaceable Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt SystemicComponent(UseBaroreflexOutput = false, UseThoracic_PressureInput = false, UsePhi_Input = false, brachial_vein_L138(UseInertance = true)) annotation (
+        __Dymola_choicesAllMatching = true,
+        Placement(transformation(extent = {{-58, 18}, {18, 48}})));
+      public
+      replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Simple heartComponent(UseFrequencyInput = false, UseThoracicPressureInput = false, UsePhiInput = false) constrainedby
+          Components.Subsystems.Heart.partialHeart                                                                                                                                                                                 annotation (
+         Placement(transformation(extent = {{-16, -32}, {-36, -12}})));
+      replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent(
+          UseThoracic_PressureInput=false)                                                                                       constrainedby
+          Components.Subsystems.Pulmonary.partialPulmonary                                                                                                                                      annotation (
+         HideResult = settings.hidePulmonary,
+         Placement(transformation(extent = {{-34, -62}, {-14, -42}})));
+      inner Components.Settings settings(
+        EvaluateFunctionalParams=true,
+        HR_max=2.907,
+        UseNonLinear_TissuesCompliance=true,
+        V_PV_init=7.4e-05,
+        baro_f1=0.0031,
+        baro_useAbsolutePressureTerm=false,
+        eta_vc=0.15745,
+        heart_drive_TR(displayUnit="s") = 0.38,
+        heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
+        heart_vntr_AmRef_factor=1.06,
+        heart_vntr_Vw_factor=0.90375,
+        heart_vntr_sigma_actMaxAct_factor=18.8325,
+        heart_vntr_sigma_act_factor=1.974,
+        syst_art_k_E=0.350423,
+        syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
+        syst_TR_frac=5.118955,
+        syst_art_UseVasoconstrictionEffect=true,
+        tissues_UseStraighteningReaction2Phi=true,
+        tissues_ZPV_nom=0.00210124,
+        tissues_eta_C=0.22878,
+        tissues_eta_Ra=3.17162,
+        tissues_gamma=0.5,
+        tissues_tau_R(displayUnit="s") = 0,
+        veins_activation_tau=0,
+        baro_g=6.062580e-01,
+        baro_tau_s=1.156200e+02,
+        baro_xi_delta0=2.688000e-01,
+        pulm_C_PV=1.987900e-07,
+        tissues_chi_R=3.477600e+01,
+        initByPressure=false,
+        tissues_CO_nom=0.000105)
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+    equation
+      connect(SystemicComponent.port_b, heartComponent.sv) annotation (
+        Line(points = {{18, 28}, {24, 28}, {24, -12}, {-16, -12}}, color = {0, 0, 0}, thickness = 1));
+      connect(heartComponent.sa, SystemicComponent.port_a) annotation (
+        Line(points = {{-36, -12}, {-64, -12}, {-64, 28}, {-58, 28}}, color = {0, 0, 0}, thickness = 1));
+      connect(heartComponent.pv, pulmonaryComponent.port_b) annotation (
+        Line(points = {{-16, -32}, {-8, -32}, {-8, -52}, {-14, -52}}, color = {0, 0, 0}, thickness = 1));
+      connect(pulmonaryComponent.port_a, heartComponent.pa) annotation (
+        Line(points = {{-34, -52}, {-42, -52}, {-42, -32}, {-36, -32}}, color = {0, 0, 0}, thickness = 1));
+      annotation (
+        Icon(coordinateSystem(preserveAspectRatio = false)),
+        Diagram(coordinateSystem(preserveAspectRatio = false)),
+        experiment(StopTime = 10, Interval = 0.02, Tolerance = 1e-06));
+    end CVS_simplified;
+
+    model systemic "Base class for circulatory model"
+      extends Physiolibrary.Icons.CardioVascular;
+      replaceable Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt SystemicComponent(UseBaroreflexOutput = false, UseThoracic_PressureInput = false, UsePhi_Input = false, brachial_vein_L138(UseInertance = true)) annotation (
+        __Dymola_choicesAllMatching = true,
+        Placement(transformation(extent = {{-58, 18}, {18, 48}})));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P = 13332.2387415) annotation (
+        Placement(transformation(extent = {{-96, 18}, {-76, 38}})));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P = 266.64477483) annotation (
+        Placement(transformation(extent = {{50, 18}, {30, 38}})));
+      inner Components.Settings settings(
+        EvaluateFunctionalParams=true,
+        HR_max=2.907,
+        UseNonLinear_TissuesCompliance=true,
+        V_PV_init=7.4e-05,
+        baro_f1=0.0031,
+        baro_useAbsolutePressureTerm=false,
+        eta_vc=0.15745,
+        heart_drive_TR(displayUnit="s") = 0.38,
+        heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
+        heart_vntr_AmRef_factor=1.06,
+        heart_vntr_Vw_factor=0.90375,
+        heart_vntr_sigma_actMaxAct_factor=18.8325,
+        heart_vntr_sigma_act_factor=1.974,
+        syst_art_k_E=0.350423,
+        syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
+        syst_TR_frac=5.118955,
+        syst_art_UseVasoconstrictionEffect=true,
+        tissues_UseStraighteningReaction2Phi=true,
+        tissues_ZPV_nom=0.00210124,
+        tissues_eta_C=0.22878,
+        tissues_eta_Ra=3.17162,
+        tissues_gamma=0.5,
+        tissues_tau_R(displayUnit="s") = 0,
+        veins_activation_tau=0,
+        baro_g=6.062580e-01,
+        baro_tau_s=1.156200e+02,
+        baro_xi_delta0=2.688000e-01,
+        pulm_C_PV=1.987900e-07,
+        tissues_chi_R=3.477600e+01,
+        initByPressure=false,
+        tissues_CO_nom=0.000105)
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+    equation
+      connect(SystemicComponent.port_a, unlimitedVolume.y) annotation (
+        Line(points = {{-58, 28}, {-76, 28}}, color = {0, 0, 0}, thickness = 1));
+      connect(SystemicComponent.port_b, unlimitedVolume1.y) annotation (
+        Line(points = {{18, 28}, {30, 28}}, color = {0, 0, 0}, thickness = 1));
+      annotation (
+        Icon(coordinateSystem(preserveAspectRatio = false)),
+        Diagram(coordinateSystem(preserveAspectRatio = false)),
+        experiment(StopTime = 10, Interval = 0.02, Tolerance = 1e-06));
+    end systemic;
+
+    model pulmonary "Base class for circulatory model"
+      extends Physiolibrary.Icons.CardioVascular;
+      replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent(UseThoracic_PressureInput = false) constrainedby
+          Components.Subsystems.Pulmonary.partialPulmonary                                                                                                                                       annotation (
+         HideResult = settings.hidePulmonary,
+         Placement(transformation(extent={{-10,-10},{10,10}})));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P = 1333.22387415) annotation (
+        Placement(transformation(extent={{-94,-10},{-74,10}})));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P = 2666.4477483) annotation (
+        Placement(transformation(extent={{90,-10},{70,10}})));
+      Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(displayUnit="(mmHg.min)/l")=
+             7999.3432449)                                                                            annotation (
+        Placement(visible = true, transformation(origin={-42,0},     extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(displayUnit="(Pa.s)/m3")=
+             0.001)                                                                                   annotation (
+        Placement(visible = true, transformation(origin={38,0},      extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      inner Components.Settings settings(
+        EvaluateFunctionalParams=true,
+        HR_max=2.907,
+        UseNonLinear_TissuesCompliance=true,
+        V_PV_init=7.4e-05,
+        baro_f1=0.0031,
+        baro_useAbsolutePressureTerm=false,
+        eta_vc=0.15745,
+        heart_drive_TR(displayUnit="s") = 0.38,
+        heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
+        heart_vntr_AmRef_factor=1.06,
+        heart_vntr_Vw_factor=0.90375,
+        heart_vntr_sigma_actMaxAct_factor=18.8325,
+        heart_vntr_sigma_act_factor=1.974,
+        syst_art_k_E=0.350423,
+        syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
+        syst_TR_frac=5.118955,
+        syst_art_UseVasoconstrictionEffect=true,
+        tissues_UseStraighteningReaction2Phi=true,
+        tissues_ZPV_nom=0.00210124,
+        tissues_eta_C=0.22878,
+        tissues_eta_Ra=3.17162,
+        tissues_gamma=0.5,
+        tissues_tau_R(displayUnit="s") = 0,
+        veins_activation_tau=0,
+        baro_g=6.062580e-01,
+        baro_tau_s=1.156200e+02,
+        baro_xi_delta0=2.688000e-01,
+        pulm_C_PV=1.987900e-07,
+        tissues_chi_R=3.477600e+01,
+        initByPressure=false,
+        tissues_CO_nom=0.000105)
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+    equation
+      connect(unlimitedVolume.y, resistor.q_in) annotation (Line(
+          points={{-74,0},{-52,0}},
+          color={0,0,0},
+          thickness=1));
+      connect(resistor.q_out, pulmonaryComponent.port_a) annotation (Line(
+          points={{-32,0},{-10,0}},
+          color={0,0,0},
+          thickness=1));
+      connect(unlimitedVolume1.y, resistor1.q_out) annotation (Line(
+          points={{70,0},{48,0}},
+          color={0,0,0},
+          thickness=1));
+      connect(resistor1.q_in, pulmonaryComponent.port_b) annotation (Line(
+          points={{28,0},{10,0}},
+          color={0,0,0},
+          thickness=1));
+      annotation (
+        Icon(coordinateSystem(preserveAspectRatio = false)),
+        Diagram(coordinateSystem(preserveAspectRatio = false)),
+        experiment(StopTime = 10, Interval = 0.02, Tolerance = 1e-06));
+    end pulmonary;
+
+    model heart "Base class for circulatory model"
+      extends Physiolibrary.Icons.CardioVascular;
+      replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Simple heart(
+          tricuspidValve(useChatteringProtection=false),
+          pulmonaryValve(useChatteringProtection=true),
+          mitralValve(useChatteringProtection=false),
+          aorticValve(useChatteringProtection=true)) constrainedby
+          Components.Subsystems.Pulmonary.partialPulmonary annotation (
+            HideResult=settings.hidePulmonary, Placement(transformation(extent=
+                  {{-10,-10},{10,10}})));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P = 1333.22387415) annotation (
+        Placement(transformation(extent={{-96,0},{-76,20}})));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P=
+              13332.2387415)                                                             annotation (
+        Placement(transformation(extent={{94,8},{74,28}})));
+      Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
+              displayUnit="(mmHg.min)/l") = 7999.3432449)                                             annotation (
+        Placement(visible = true, transformation(origin={-44,10},    extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
+              displayUnit="(Pa.s)/m3") = 0.001)                                                       annotation (
+        Placement(visible = true, transformation(origin={42,18},     extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume2(P=
+              666.611937075)                                                             annotation (
+        Placement(transformation(extent={{-98,-28},{-78,-8}})));
+      Physiolibrary.Hydraulic.Components.Resistor resistor2(Resistance(
+              displayUnit="(mmHg.min)/l") = 7999.3432449)                                             annotation (
+        Placement(visible = true, transformation(origin={-46,-18},   extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume3(P=
+              2666.4477483)                                                              annotation (
+        Placement(transformation(extent={{96,-32},{76,-12}})));
+      Physiolibrary.Hydraulic.Components.Resistor resistor3(Resistance(
+              displayUnit="(Pa.s)/m3") = 0.001)                                                       annotation (
+        Placement(visible = true, transformation(origin={44,-22},    extent = {{-10, -10}, {10, 10}}, rotation = 0)));
+      inner Components.Settings settings(
+          EvaluateFunctionalParams=true,
+          HR_max=2.907,
+          UseNonLinear_TissuesCompliance=true,
+          V_PV_init=7.4e-05,
+          baro_f1=0.0031,
+          baro_useAbsolutePressureTerm=false,
+          eta_vc=0.15745,
+          heart_drive_TR(displayUnit="s") = 0.38,
+          heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
+          heart_vntr_AmRef_factor=1.06,
+          heart_vntr_Vw_factor=0.90375,
+          heart_vntr_sigma_actMaxAct_factor=18.8325,
+          heart_vntr_sigma_act_factor=1.974,
+          syst_art_k_E=0.350423,
+          syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
+          syst_TR_frac=5.118955,
+          syst_art_UseVasoconstrictionEffect=true,
+          tissues_UseStraighteningReaction2Phi=true,
+          tissues_ZPV_nom=0.00210124,
+          tissues_eta_C=0.22878,
+          tissues_eta_Ra=3.17162,
+          tissues_gamma=0.5,
+          tissues_tau_R(displayUnit="s") = 0,
+          veins_activation_tau=0,
+          baro_g=6.062580e-01,
+          baro_tau_s=1.156200e+02,
+          baro_xi_delta0=2.688000e-01,
+          pulm_C_PV=1.987900e-07,
+          tissues_chi_R=3.477600e+01,
+          initByPressure=false,
+          tissues_CO_nom=0.000105)
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+      replaceable
+      Physiolibrary.Hydraulic.Components.ElasticVessel c_sa(
+          volume_start(displayUnit="ml") = 3.5e-05,
+          Compliance(displayUnit="ml/mmHg") = settings.pulm_C_PA,
+          useExternalPressureInput=false)
+        annotation (Placement(transformation(extent={{4,30},{24,50}})));
+      replaceable
+      Physiolibrary.Hydraulic.Components.ElasticVessel c_pa1(
+          volume_start(displayUnit="ml") = 3.5e-05,
+          Compliance(displayUnit="ml/mmHg") = settings.pulm_C_PA,
+          useExternalPressureInput=false)
+        annotation (Placement(transformation(extent={{18,-76},{38,-56}})));
+    equation
+        connect(unlimitedVolume.y, resistor.q_in) annotation (Line(
+            points={{-76,10},{-54,10}},
+            color={0,0,0},
+            thickness=1));
+        connect(unlimitedVolume1.y, resistor1.q_out) annotation (Line(
+            points={{74,18},{52,18}},
+            color={0,0,0},
+            thickness=1));
+        connect(heart.sv, resistor.q_out) annotation (Line(
+            points={{-10,10},{-34,10}},
+            color={0,0,0},
+            thickness=1));
+        connect(unlimitedVolume2.y, resistor2.q_in) annotation (Line(
+            points={{-78,-18},{-56,-18}},
+            color={0,0,0},
+            thickness=1));
+        connect(resistor2.q_out, heart.pv) annotation (Line(
+            points={{-36,-18},{-24,-18},{-24,-10},{-10,-10}},
+            color={0,0,0},
+            thickness=1));
+        connect(unlimitedVolume3.y, resistor3.q_out) annotation (Line(
+            points={{76,-22},{54,-22}},
+            color={0,0,0},
+            thickness=1));
+        connect(heart.sa, resistor1.q_in) annotation (Line(
+            points={{10,10},{18,10},{18,18},{32,18}},
+            color={0,0,0},
+            thickness=1));
+        connect(heart.pa, resistor3.q_in) annotation (Line(
+            points={{10,-10},{24,-10},{24,-22},{34,-22}},
+            color={0,0,0},
+            thickness=1));
+        connect(c_sa.q_in, resistor1.q_in) annotation (Line(
+            points={{14,40},{16,40},{16,10},{18,10},{18,18},{32,18}},
+            color={0,0,0},
+            thickness=1));
+        connect(c_pa1.q_in, resistor3.q_in) annotation (Line(
+            points={{28,-66},{22,-66},{22,-10},{24,-10},{24,-22},{34,-22}},
+            color={0,0,0},
+            thickness=1));
+      annotation (
+        Icon(coordinateSystem(preserveAspectRatio = false)),
+        Diagram(coordinateSystem(preserveAspectRatio = false)),
+        experiment(
+            StopTime=10,
+            Interval=0.02,
+            Tolerance=1e-05,
+            __Dymola_Algorithm="Dassl"));
+    end heart;
+
+    model TestTriSegMechVentricles
+      Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.Ventricles_Lumens
+          ventricles(V_LV(start=l), V_RV(start=r))
+          annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
+      Modelica.Blocks.Sources.Ramp ramp(
+        height=0,
+        duration=10,
+        offset=1,
+        startTime=0) annotation (Placement(transformation(extent={{-74,
+                -16},{-54,4}})));
+      Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
+            displayUnit="(mmHg.min)/l") = 159986864.898)
+        annotation (Placement(transformation(extent={{40,10},{60,30}})));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P=
+            2666.4477483)
+        annotation (Placement(transformation(extent={{90,10},{70,30}})));
+      Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
+            displayUnit="(mmHg.min)/l") = 159986864.898) annotation (
+          Placement(transformation(extent={{40,-30},{60,-10}})));
+      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P=
+            2666.4477483) annotation (Placement(transformation(extent={{
+                90,-30},{70,-10}})));
+      Modelica.Blocks.Sources.Ramp ramp1(
+        height=0,
+        duration=10,
+        offset=0,
+        startTime=0) annotation (Placement(transformation(extent={{-36,-52},{-16,-32}})));
+        parameter Physiolibrary.Types.Volume r=0.0001;
+        parameter Physiolibrary.Types.Volume l=0.0001;
+      Modelica.Blocks.Sources.Ramp phi(
+        height=0,
+        duration=10,
+        offset=0,
+        startTime=0) annotation (Placement(transformation(extent={{-58,66},
+                {-38,86}})));
+      inner Components.Settings settings(
+          EvaluateFunctionalParams=true,
+          HR_max=2.907,
+          UseNonLinear_TissuesCompliance=true,
+          V_PV_init=7.4e-05,
+          baro_f1=0.0031,
+          baro_useAbsolutePressureTerm=false,
+          eta_vc=0.15745,
+          heart_drive_TR(displayUnit="s") = 0.38,
+          heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
+          heart_vntr_AmRef_factor=1.06,
+          heart_vntr_Vw_factor=0.90375,
+          heart_vntr_sigma_actMaxAct_factor=18.8325,
+          heart_vntr_sigma_act_factor=1.974,
+          syst_art_k_E=0.350423,
+          syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
+          syst_TR_frac=5.118955,
+          syst_art_UseVasoconstrictionEffect=true,
+          tissues_UseStraighteningReaction2Phi=true,
+          tissues_ZPV_nom=0.00210124,
+          tissues_eta_C=0.22878,
+          tissues_eta_Ra=3.17162,
+          tissues_gamma=0.5,
+          tissues_tau_R(displayUnit="s") = 0,
+          veins_activation_tau=0,
+          baro_g=6.062580e-01,
+          baro_tau_s=1.156200e+02,
+          baro_xi_delta0=2.688000e-01,
+          pulm_C_PV=1.987900e-07,
+          tissues_chi_R=3.477600e+01,
+          initByPressure=false,
+          tissues_CO_nom=0.000105)
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+    equation
+      connect(ramp.y, ventricles.frequency) annotation (Line(points={{-53,
+              -6},{-32,-6},{-32,0},{-10,0}}, color={0,0,127}));
+      connect(resistor.q_out, unlimitedVolume.y) annotation (Line(
+          points={{60,20},{70,20}},
+          color={0,0,0},
+          thickness=1));
+      connect(resistor1.q_out, unlimitedVolume1.y) annotation (Line(
+          points={{60,-20},{70,-20}},
+          color={0,0,0},
+          thickness=1));
+      connect(ramp1.y, ventricles.thoracic_pressure_input) annotation (Line(points={
+              {-15,-42},{-8,-42},{-8,-40},{0,-40},{0,-10}}, color={0,0,127}));
+      connect(ventricles.port_rv, resistor.q_in) annotation (Line(
+          points={{8,4},{24,4},{24,20},{40,20}},
+          color={0,0,0},
+          thickness=1));
+      connect(resistor1.q_in, ventricles.port_lv) annotation (Line(
+          points={{40,-20},{26,-20},{26,-6},{8,-6}},
+          color={0,0,0},
+          thickness=1));
+      connect(ventricles.phi_input, phi.y) annotation (Line(points={{0,10},
+              {-18,10},{-18,76},{-37,76}}, color={0,0,127}));
+      annotation (
+        Icon(coordinateSystem(preserveAspectRatio=false)),
+        Diagram(coordinateSystem(preserveAspectRatio=false)),
+        experiment(Tolerance=1e-06, __Dymola_Algorithm="Dassl"));
+    end TestTriSegMechVentricles;
+  end OMTests;
+
   end tests;
 
   package SimpleValsalva "Simplest valsalva, reimplemented from Dan Beard's Matlab code "
