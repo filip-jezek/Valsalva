@@ -3,13 +3,20 @@
 */
 
 Vary{
-  Parameter{ Name = TPR; Min = 1e7; Ini = 1.1999014867350000E+08; Max = 1e9; Step = 1e6; }
-  Parameter{ Name = TR_frac; Min = 2; Ini = 5.3333300000000001E+00; Max = 10; Step = 0.01; }
-  Parameter{ Name = V_PV_init; Min = 1e-3; Ini = 2.1397999999999999E-03; Max = 3e-3; Step = 10e-6; }
-  Parameter{ Name = k_E; Min = 0.1; Ini = 0.4; Max = 0.8; Step = 0.01; }
-  Parameter{ Name = Vw_factor; Min = 0.8; Ini = 1; Max = 1.4; Step = 0.01; }
-  Parameter{ Name = Amref_factor; Min = 0.8; Ini = 0.95; Max = 1.4; Step = 0.01; }
-  
+  Parameter{ Name = TPR; Min = 1e7; Ini = 1.1943019464636000E+08; Max = 1e9; Step = 1e6; }
+  Parameter{ Name = TPR_frac; Min = 2; Ini = 5.1189549999999997E+00; Max = 10; Step = 0.01; }
+  Parameter{ Name = V_PV_init; Min = -1e-3; Ini = 0; Max = 1e-3; Step = 10e-6; }
+  Parameter{ Name = k_E; Min = 0.1; Ini = 3.5042299999999998E-01; Max = 0.8; Step = 0.1; }
+  Parameter{ Name = xi_Vw; Min = 0.8; Ini = 9.0375000000000005E-01; Max = 1.4; Step = 0.01; }
+  Parameter{ Name = xi_Amref; Min = 0.8; Ini = 0.95; Max = 1.4; Step = 0.01; }
+  Parameter{ Name = xi_sigma_act; Min = 0.8; Ini = 1.974; Max = 2.4; Step = 0.01; }
+  Parameter{ Name = D0; Min = 0.01; Ini = 0.0162625; Max = 0.04; Step = 5e-3; }
+  Parameter{ Name = pulm_R           ; Min = 2.1441532959300999E+06; Ini = 2.1441532959300999E+07; Max = 2.1441532959300999E+08; Step = 1e6; }
+  Parameter{ Name = pulm_C_PA           ; Min = 4e-9; Ini = 4.0503325095665003E-08; Max = 4e-7; Step = 1e-9; }
+  Parameter{ Name = atr_D_0 ; Min = 0.1; Ini = 0.25; Max = 0.9; Step = 0.05; }
+  Parameter{ Name = atr_E_0       ; Min = 2.6664477482999999E+06; Ini = 2.6664477482999999E+07; Max = 4.6664477482999999E+08; Step = 1e6; }
+  // Parameter{ Name = pulm_C_PV        ; Min = 1.00E-07; Ini = 1.9879000000000000E-07; Max = 1e-6; Step = 1e-8; }
+
 }
 
 OptimizationSettings{
