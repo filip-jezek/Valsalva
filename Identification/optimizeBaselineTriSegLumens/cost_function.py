@@ -59,14 +59,14 @@ def getObjectives(vars_set):
     BPs_target = 120*mmHg2SI
     BPd_target = 80*mmHg2SI
     BPk_target = 20*mmHg2SI
-    CO_target = 6.3*lpm2SI
+    CO_target = 5.76*lpm2SI
     EF_target = 0.6
     HR_target = 60*bpm2SI
     Ppa_target = 14*mmHg2SI # (Kovacs Eur Respir J 2009)
     Ppv_target = 8*mmHg2SI # (Kovacs Eur Respir J 2009)
     Ppas_target = 20.8*mmHg2SI # (Kovacs Eur Respir J 2009)
     Ppad_target = 8.8*mmHg2SI # (Kovacs Eur Respir J 2009)
-    pwv_bounds = [4, 10]
+    pwv_bounds = [5, 10]
 
     time = vars_set['time']
 
