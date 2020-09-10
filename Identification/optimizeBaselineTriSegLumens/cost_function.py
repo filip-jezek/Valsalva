@@ -86,20 +86,20 @@ def getObjectives(vars_set):
             ('BPd', min(vars_set['brachial_pressure'][interval]), BPd_target, None, 10),
             ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1),
             ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1),
-            ('ESV_la', numpy.min(vars_set['V_la'][interval]), 41*ml2SI, None, 1),
-            ('EDV_la', numpy.max(vars_set['V_la'][interval]), 87*ml2SI, None, 1),
+            ('ESV_la', numpy.min(vars_set['V_la'][interval]), 41*ml2SI, None, .1),
+            ('EDV_la', numpy.max(vars_set['V_la'][interval]), 87*ml2SI, None, .1),
 # set by assumption and loop closed
 #            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1), 
 # set by EDV and ESV
-#            ('CO', sum(vars_set['CO'][interval]) / len(interval), CO_target, None, 10),
+            ('CO', sum(vars_set['CO'][interval]) / len(interval), CO_target, None, 10),
 #            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), EF_target, None, 1),
             ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), BPk_target, None, 1),
-            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.8*mmHg2SI, None, 1),
-            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, 1),
-            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, 1),
-            ('PWV', pwv, None, pwv_bounds)            ]
+            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.8*mmHg2SI, None, .5),
+            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, .5),
+            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, .1),
+            ('PWV', pwv, None, pwv_bounds, None)            ]
 
-    objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3]), ov))
+    objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight=o[4]), ov))
 
 
     # to have comparable cost function values one must have the stds ready

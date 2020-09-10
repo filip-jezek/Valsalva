@@ -11612,7 +11612,7 @@ double initialValue(11477,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1  %D0%       0                       0                
+ -1  %heart_drive_D_0%       0                       0                
   1   280   # settings.heart_drive_D_0
  -1  7.6875000000000001E-04       0                       0                
   1   280   # settings.heart_drive_D_0_maxAct
@@ -11626,15 +11626,15 @@ double initialValue(11477,6)
   1   280   # settings.heart_drive_TR_maxAct
  -1 -1.4000000000000001E-01       0                       0                
   1   280   # settings.heart_drive_atr_Tact
- -1  %atr_D_0%       0                       0                
+ -1  %heart_drive_atr_D_0%       0                       0                
   1   280   # settings.heart_drive_atr_D_0
- -1  %atr_E_0%       0                       0                
+ -1  %heart_atr_E_0%       0                       0                
   1   280   # settings.heart_atr_E_0
- -1  %xi_Vw%       0                       0                
+ -1  %heart_vntr_xi_Vw%       0                       0                
   1   280   # settings.heart_vntr_xi_Vw
- -1  %xi_Amref%       0                       0                
+ -1  %heart_vntr_xi_AmRef%       0                       0                
   1   280   # settings.heart_vntr_xi_AmRef
- -1  %xi_sigma_act%       0                       0                
+ -1  %heart_vntr_xi_sigma_act%       0                       0                
   1   280   # settings.heart_vntr_xi_sigma_act
  -1  1.8832500000000000E+01       0                       0                
   1   280   # settings.heart_vntr_sigma_actMaxAct_factor
@@ -11642,13 +11642,13 @@ double initialValue(11477,6)
   1   280   # settings.heart_vntr_k_passive_factor
  -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
- -1  %TPR%       0                 1.0000000000000000E+100
+ -1  %syst_TPR%       0                 1.0000000000000000E+100
   1   280   # settings.syst_TPR
- -1  %TPR_frac%       0                       0                
+ -1  %syst_TR_frac%       0                       0                
   1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
- -1  %k_E%       0                       0                
+ -1  %syst_art_k_E%       0                       0                
   1   280   # settings.syst_art_k_E
   0       1                       0                       0                
   6   257   # settings.syst_art_UseVasoconstrictionEffect
