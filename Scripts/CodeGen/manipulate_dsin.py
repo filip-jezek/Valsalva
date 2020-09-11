@@ -210,7 +210,7 @@ def create_dsinORfinal(dicSim, dicVars, dsFileIn='dsin.txt', dsFileOut='dsinTemp
     fnew.writelines(lines)
     fnew.close()
 
-def getInputParams(dsFileIn='dsin.txt', filter = '', accept = (1, 2)):
+def getInputParams(dsFileIn='dsin.txt', filter = '', types = (280, 272), accept = (1, 2)):
     """ Search dsin for tunable Real parameters (type 280), optionally filtering by beggining
 
     Parameters
@@ -227,13 +227,13 @@ def getInputParams(dsFileIn='dsin.txt', filter = '', accept = (1, 2)):
             res = re.search(r'(\d+)[ ]+(\d+)[ ]+# (%s[\w\.]+)' % filter, line)
             if res is not None:
                 
-                if res.groups()[1] == '280' and int(res.groups()[0]) in accept:
+                if int(res.groups()[1]) in types and int(res.groups()[0]) in accept:
                     tunable_params.append(res.groups()[2])
     
     return tunable_params
 
-def writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'states.csv'):
-    initStates = getInputParams(dsFileIn, accept = [2])
+def writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'states.csv', accept = [2, 6], types = (280, 272, 361)):
+    initStates = getInputParams(dsFileIn, accept = accept, types = types)
 
     with open(dsFileIn) as file:
         lines = file.readlines()
@@ -340,9 +340,6 @@ def writeInitParams(init_params:dict):
             s = '%s,%s\n' % (param, val)
             file.write(s)
 
-def prepareInitStates():
-    writeInitStatesFromDsin()
-
 def prepareSA():
     paramsFile = 'params_for_SA.txt'
     # generate the params_for_SA.txt parameters list, which may be further edited.
@@ -375,7 +372,8 @@ def prepareIdent():
 
 if __name__ == "__main__":
 
-    prepareSA()
+    writeInitStatesFromDsin()
+    # prepareSA()
     # prepareIdent()
     print('Done, Johne')
 

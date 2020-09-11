@@ -1,7 +1,8 @@
 """ Generates extending model with steady state parametrization, read from .mat simulation result.
 
 Make sure all states listed in states.csv does not have initial equations.
-Deleting state from the states.csv will diable generation of the initial value
+Deleting state from the states.csv will disable generation of the initial value
+Use writeInitStatesFromDsin() from ManipulateDsin to generate states.csv
 
 MIT licence
 Filip Ježek, University of Michigan. 2019
@@ -16,10 +17,10 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'ADAN_main.AdanVenousRed_Safaei.Baseline.OlufsenTriSeg_opt_ssi_LinearVeins'
-relative_folder = '..\\..\\'
-exclude_filter = ['Ra_phi', 'v_in', 'A']
-steadyStateAt = 300
+base_model_full_path = 'ADAN_main.SystemicTree.Identification.SteadyState.Optimized_ss_baro'
+relative_folder = ''
+exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
+steadyStateAt = 120
 
 # get the main and path
 if '.' in base_model_full_path:
