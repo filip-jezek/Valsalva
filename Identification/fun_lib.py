@@ -56,6 +56,10 @@ class ObjectiveVar:
 
     def __cost_function(self, measured, target):
         # calculate costs. Could go negative or NaN for negative or zero measured values!
+        print(self.name)
+        print(self.weight)
+        print(measured)
+        print(target)
         if self.costFunctionType is CostFunctionType.Quadratic:
             if target is None:
                 return 0
