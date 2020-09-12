@@ -372,8 +372,8 @@ def prepareIdent():
 
 if __name__ == "__main__":
 
-    writeInitStatesFromDsin()
+    # writeInitStatesFromDsin()
     # prepareSA()
-    # prepareIdent()
+    prepareIdent()
     print('Done, Johne')
 
