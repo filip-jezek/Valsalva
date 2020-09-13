@@ -33491,8 +33491,6 @@ double initialValue(11475,6)
   0       0                       0                       0                
   6   260   # heartComponent.mitralValve.q_in.pressure
   0       0                       0                       0                
-  6   388   # heartComponent.mitralValve.q_in.q
-  0       0                       0                       0                
   6   260   # heartComponent.mitralValve.q_out.pressure
   0       0                       0                       0                
   6   256   # heartComponent.mitralValve.dp
@@ -46058,5 +46056,4 @@ Body height, estimated from aortic length calculation. Have to eb manually set t
 Rezai, Blood Press Monit 2013, for male subjects [m]
 Left atrium volume output [m3|ml]
 Flow in mitral valve [m3/s|ml/min]
-[s]
 
