@@ -11058,7 +11058,6 @@ heartComponent.pulmonaryValve.unitPressure
 heartComponent.pulmonaryValve.unitFlow
 heartComponent.pulmonaryValve._Ron
 heartComponent.mitralValve.q_in.pressure
-heartComponent.mitralValve.q_in.q
 heartComponent.mitralValve.q_out.pressure
 heartComponent.mitralValve.dp
 heartComponent.mitralValve.useChatteringProtection
@@ -11578,6 +11577,7 @@ aortic_length
 height
 aortic_length_calc2
 V_la
+q_mv
 
 double initialValue(11475,6)
  -1  2.5000000000000000E-01       0                       0                
@@ -34530,6 +34530,8 @@ double initialValue(11475,6)
   6   256   # aortic_length_calc2
   0  4.9317445000000000E-05       0                 1.0000000000000000E+100
   4   256   # V_la
+  0       0                       0                       0                
+  4   256   # q_mv
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -45536,7 +45538,6 @@ Forward threshold pressure [Pa|mmHg]
 [m3/s|ml/min]
 forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
 Pressure [Pa|mmHg]
-Volume flow [m3/s|ml/min]
 Pressure [Pa|mmHg]
 Pressure gradient [Pa|mmHg]
 [:#(type=Boolean)]
@@ -46056,4 +46057,6 @@ Length of the whole aorta for comparison to body size [m]
 Body height, estimated from aortic length calculation. Have to eb manually set to settings due to computational procedure [m]
 Rezai, Blood Press Monit 2013, for male subjects [m]
 Left atrium volume output [m3|ml]
+Flow in mitral valve [m3/s|ml/min]
+[s]
 
