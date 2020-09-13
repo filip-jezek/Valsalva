@@ -11598,19 +11598,19 @@ double initialValue(11475,6)
   6   256   # settings.BSA
   0       0                       0                       0                
   6   257   # settings.initByPressure
- -1       -0.001315                 -1.0000000000000000E-02 1.0000000000000000E+100
+ -1       -0.00128452                 -1.0000000000000000E-02 1.0000000000000000E+100
   1   280   # settings.V_PV_init
  -1  1.3332238741500000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
- -1  1.9998358112250001E+06       0                 1.0000000000000000E+100
+ -1  3768089.5       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
- -1  1.9998358112250001E+06       0                 1.0000000000000000E+100
+ -1  3768089.5       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_RA
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1  0.0116125       0                       0                
+ -1  0.015249182       0                       0                
   1   280   # settings.heart_drive_D_0
  -1  7.6875000000000001E-04       0                       0                
   1   280   # settings.heart_drive_D_0_maxAct
@@ -11622,17 +11622,17 @@ double initialValue(11475,6)
   1   280   # settings.heart_drive_TR
  -1  1.2239999999999999E-01       0                       0                
   1   280   # settings.heart_drive_TR_maxAct
- -1 -1.4000000000000001E-01       0                       0                
-  1   280   # settings.heart_drive_atr_Tact
- -1  0.396875       0                       0                
+  0 -1.4000000000000001E-01       0                       0                
+  6   256   # settings.heart_drive_atr_Tact
+ -1  0.9509065       0                       0                
   1   280   # settings.heart_drive_atr_D_0
- -1  2.77625E7       0                       0                
+ -1  1.61473E7       0                       0                
   1   280   # settings.heart_atr_E_0
- -1  0.965       0                       0                
+ -1  1.013795       0                       0                
   1   280   # settings.heart_vntr_xi_Vw
- -1  0.87125       0                       0                
+ -1  0.97       0                       0                
   1   280   # settings.heart_vntr_xi_AmRef
- -1  1.2525       0                       0                
+ -1  1.483175       0                       0                
   1   280   # settings.heart_vntr_xi_sigma_act
  -1  1.8832500000000000E+01       0                       0                
   1   280   # settings.heart_vntr_sigma_actMaxAct_factor
@@ -11640,13 +11640,13 @@ double initialValue(11475,6)
   1   280   # settings.heart_vntr_k_passive_factor
  -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
- -1  1.32562496E8       0                 1.0000000000000000E+100
+ -1  1.29647808E8       0                 1.0000000000000000E+100
   1   280   # settings.syst_TPR
- -1  4.801875       0                       0                
+ -1  5.30635       0                       0                
   1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
- -1  0.43125       0                       0                
+ -1  0.41650015       0                       0                
   1   280   # settings.syst_art_k_E
   0       1                       0                       0                
   6   257   # settings.syst_art_UseVasoconstrictionEffect
@@ -11756,9 +11756,9 @@ double initialValue(11475,6)
   1   280   # settings.pulm_CO_target
  -1  1.9879000000000000E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1  3.84375E-8       0                       0                
+ -1  2.7375E-8       0                       0                
   1   280   # settings.pulm_C_PA
- -1  7940000.0       0                 1.0000000000000000E+100
+ -1  1.3107414E7       0                 1.0000000000000000E+100
   1   280   # settings.pulm_R
  -1       1                       0                       0                
   1   280   # settings.pulm_R_exp
@@ -33876,8 +33876,8 @@ double initialValue(11475,6)
   6   256   # heartComponent.ventricles.RV_wall.debug_SLo
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.sigmaM
- -1       0                       0                       0                
-  1   280   # heartComponent.ventricles.calciumMechanics.t_offset
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.t_offset
   0       1                       0                       0                
   6   257   # heartComponent.ventricles.calciumMechanics.usePhiInput
   0       0                       0                       0                
@@ -33885,7 +33885,7 @@ double initialValue(11475,6)
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.calciumMechanics.frequency
  -1       0                       0                       0                
-  2   272   # heartComponent.ventricles.calciumMechanics.cardiac_cycle
+  2   280   # heartComponent.ventricles.calciumMechanics.cardiac_cycle
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.calciumMechanics.der(cardiac_cycle)
   0       0                       0                       0                
@@ -34052,7 +34052,7 @@ double initialValue(11475,6)
   6  1280   # heartComponent.idealValve_deactivable1.unitPressure
   0       1                       0                       0                
   6  1280   # heartComponent.idealValve_deactivable1.unitFlow
-  0       0                       0                       0                
+  0 -1.4000000000000001E-01       0                       0                
   6   256   # heartComponent.calciumMechanics.t_offset
   0       1                       0                       0                
   6   257   # heartComponent.calciumMechanics.usePhiInput
@@ -34106,9 +34106,9 @@ double initialValue(11475,6)
   6   256   # pulmonaryComponent.r_pa.dp
   0       0                       0                       0                
   6   257   # pulmonaryComponent.r_pa.useConductanceInput
- -1       0                       0                       0                
+ -1       1                       0                       0                
   1   281   # pulmonaryComponent.r_pa.useNonlinearResistance
- -1       0                       0                       0                
+ -1       1                       0                       0                
   1   281   # pulmonaryComponent.r_pa.useNominalParametrization
   0       0                       0                 1.0000000000000000E+100
   6   256   # pulmonaryComponent.r_pa.R_nom_fixed
@@ -34122,8 +34122,8 @@ double initialValue(11475,6)
   6   256   # pulmonaryComponent.r_pa.base
  -1  2.0000000000000000E+07       0                 1.0000000000000000E+100
   1   280   # pulmonaryComponent.r_pa.R_nom_maxQ
- -1  3.3333333333333002E-04       0                       0                
-  1   280   # pulmonaryComponent.r_pa.Q_nom_maxQ
+  0       0                       0                       0                
+  6   256   # pulmonaryComponent.r_pa.Q_nom_maxQ
   0       1                       0                       0                
   6   288   # pulmonaryComponent.r_pa.exp_
   0  1.6666666666667000E-05       0                       0                
@@ -34592,8 +34592,8 @@ Du Bois formula for body surface area [kg]
 Use nominal pressure to initialize vessel volume. False to use volume directly [:#(type=Boolean)]
 Volume adjustment [m3|ml]
 Open valve resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Resistance of left atrium [(Pa.s)/m3|(mmHg.min)/ml]
-Resistance of the right atrium [(Pa.s)/m3|(mmHg.min)/ml]
+Resistance of left atrium [(Pa.s)/m3|(mmHg.min)/l]
+Resistance of the right atrium [(Pa.s)/m3|(mmHg.min)/l]
 For Smith heart - linear dependency of active elastance on phi [1|%]
 For Smith heart - linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi [1|%]
 nominal driving offset [1|%]
