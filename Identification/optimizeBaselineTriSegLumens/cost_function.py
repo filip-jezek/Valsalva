@@ -72,12 +72,13 @@ def getObjectives(vars_set):
 
     time = vars_set['time']
 
-    interval = fun_lib.findInterval(time[-1] - 2, time[-1], time)
+    interval = fun_lib.findInterval(time[-1] - 5, time[-1]-1, time)
 
     # mitral valve flow ratio spontaneous:atrial contraction is about 2:1 
     vla_1st_Peak_i = fun_lib.findInterval(39.8, 40, time)
     vla_2nd_Peak_i = fun_lib.findInterval(39.2, 39.4, time)
     vla_peak_frac = numpy.max(vars_set['q_mv'][vla_1st_Peak_i])/numpy.max(vars_set['q_mv'][vla_2nd_Peak_i])
+    vla_peak_frac = fun_lib.calculateQ_MV(vars_set['q_mv'], time, interval)
     vla_peak_target = 2
 
     # Van Bortel 2012 siggest using 80 % of carotid to femoral distance

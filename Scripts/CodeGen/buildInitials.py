@@ -20,7 +20,8 @@ import datetime
 base_model_full_path = 'ADAN_main.SystemicTree.Identification.SteadyState.Optimized_ss_baro'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
-steadyStateAt = 120
+# mid-cycle to avoid event collision during initialization 
+steadyStateAt = 179.9
 
 # get the main and path
 if '.' in base_model_full_path:

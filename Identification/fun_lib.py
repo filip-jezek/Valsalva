@@ -181,6 +181,33 @@ def calculateEF(volumes):
     edv = max(volumes)
     return (edv - esv)/edv
 
+def calculateQ_MV(q, time, interval):
+    """ Returns a fraction of passive and atrial active(second bump) heart filling rate
+
+    q : flow signal
+    time : time set
+    interval : guess range interval in which to search. May overflow during search, so leave at least one beat buffer.
+
+    """
+    # find the first peak in the interval
+    max_index = numpy.argmax(q[interval]) + interval[0]
+
+    # find an one beat interval - lloking for first zero or negative flow (closed valve)
+    min_index = next(i for  i, v in enumerate(q[max_index:]) if v <= 0) + max_index
+
+    # get the peak in reverse direction
+    m = 0
+    for v in reversed(q[max_index:min_index]):
+        # find a maximum
+        m = max(m, v)
+        # detect a decrease by 10% from max and stop right there, before hitting the main peak
+        if v <= 0.9*m:
+            break
+    
+    return q[max_index]/m
+    
+    
+
 def getOddWindow(time, dt):
     win = round(time/dt)
     return int(win) if win%2 == 1 else int(win) + 1
