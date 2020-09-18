@@ -56,7 +56,6 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
     max exercise"""
 
     plt.close('all')
-    objectives = list()
     dpi = 100
     fig, axs = plt.subplots(nrows = 2, ncols = 2, sharex = True, sharey = False, figsize = [1920/dpi, 1080/dpi], dpi=dpi)
     
@@ -74,6 +73,11 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
         del vars_set['__saveFig_path']
     else:
         saveFig_path = None
+    
+    if '__objectivesLog_path' in vars_set:
+        objectivesLog_path = vars_set['__objectivesLog_path']
+    else:
+        objectivesLog_path = None
 
     def flat2gen(alist):
         # https://stackoverflow.com/questions/3172930/flattening-mixed-lists-in-python-containing-iterables-and-noniterables
@@ -87,7 +91,10 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
     ax = list(flat2gen(axs))
     axes_num = 0
 
-    def buildCostObjective(name, cost_func_folder):
+    cost_objectives = []
+    all_objectives = []
+
+    def buildCostObjective(name, cost_func_folder, weight):
         """
         the name is prefix in the large model as well
         """
@@ -102,18 +109,31 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
         
         mapped_vars = filterVarSet(vars_set, name + '.')
         objectives = cf.getObjectives(mapped_vars)
+        
+        # normalize to variance type cost function
+        map(fun_lib.unifyCostFunc, objectives)
 
         cost = fun_lib.countTotalWeightedCost(objectives)
-        costObjective = ObjectiveVar(name, value=cost, costFunctionType=CostFunctionType.DistanceFromZero)
+        costObjective = ObjectiveVar(name, value=cost, costFunctionType=CostFunctionType.DistanceFromZero, weight=weight)
+        # add it to the set
+        cost_objectives.append(costObjective)
 
-        return costObjective
+        
+        # prepare to compare to all objectives in a log
+        def sumObjectives(o:ObjectiveVar):
+            o.name = name + '.' + o.name
+            o.weight = weight * o.weight
+            return o
 
-    objectives.append(buildCostObjective('baseline', 'optimizeBaselineTriSegLumens'))
-    objectives.append(buildCostObjective('tilt', 'optimizeTilt'))
-    objectives.append(buildCostObjective('exercise', 'MaxExercise'))
+        all_objectives.extend(map(sumObjectives, objectives))
+
+    # they append inside
+    buildCostObjective('baseline', 'optimizeBaselineTriSegLumens', 10)
+    buildCostObjective('tilt', 'optimizeTilt', 1)
+    buildCostObjective('exercise', 'MaxExercise', 1)
     # open the data folder
     vars_set['__targetValuesFilename'] = targetsFolder + 'targetValues_All_supine.txt'
-    objectives.append(buildCostObjective('valsalva', 'valsalva'))
+    buildCostObjective('valsalva', 'valsalva', 1)
     
     # def plotObjectives():
     #     fignums = plt.get_fignums()
@@ -135,8 +155,18 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
     #     ax.
 
     # plotObjectives()
+    if objectivesLog_path is not None:
+        with open(objectivesLog_path, 'w') as file:
+            total_cost = fun_lib.countTotalSumCost(all_objectives)
+            file.write('Name, value, target, %%, total = %.6e\n')
+            for o in sorted(all_objectives, key = lambda o: o.cost(), reverse=True):
+                s = '%s,%.3e,%s,%02d\n' % (o.name, o.value, o.target_log(), round(o.cost()/total_cost*100))
+                file.write(s)
+
+
+
     
-    fig.suptitle('%s costs %.6f' % (fig_title, fun_lib.countTotalSumCost(objectives)))
+    fig.suptitle('%s costs %.6f' % (fig_title, fun_lib.countTotalSumCost(cost_objectives)))
 
     if saveFig_path is not None:
         plt.savefig(saveFig_path)
@@ -149,4 +179,4 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
 
                 
     
-    return objectives
+    return cost_objectives

@@ -115,6 +115,19 @@ class ObjectiveVar:
         else:
             return True
 
+    def target_log(self):
+        if self.costFunctionType is CostFunctionType.DistanceFromZero:
+            target = "%d" % 0
+        elif self.targetValue  is not None:
+            target = "%.3e" % self.targetValue
+        else:
+            target = ' in limit' if self.inLimit() else 'out limit'
+        
+        return target
+
+    def __repr__(self):
+        return '%s,%.3e,%s' % (self.name, self.value, self.target_log)
+
 
 def getObjectiveByName(objective_iterable, name) -> ObjectiveVar:
     """

@@ -98,7 +98,7 @@ def getObjectives(vars_set):
             ('ESV_la', numpy.min(vars_set['V_la'][interval]), 41*ml2SI, None, .1),
             ('EDV_la', numpy.max(vars_set['V_la'][interval]), 87*ml2SI, None, .1),
             ('Q_MV_f', vla_peak_frac, vla_peak_target, None, 1),
-            
+            ('HR', numpy.mean(vars_set['HR'][interval]) , 64/60, None, 1),
 # set by assumption and loop closed
 #            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1), 
 # set by EDV and ESV

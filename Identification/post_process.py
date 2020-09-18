@@ -46,14 +46,9 @@ def writeLogHeader(objectives):
 
 def logLine(objective : fun_lib.ObjectiveVar, total_cost):
     # return ','.join(["%"val), str(cost), str(round(cost/sum*100))])
-    if objective.costFunctionType is fun_lib.CostFunctionType.DistanceFromZero:
-        target = "%d" % 0
-    elif objective.targetValue  is not None:
-        target = "%.3e" % objective.targetValue
-    else:
-        target = ' in limit' if objective.inLimit() else 'out limit'
+
         
-    return '%.3e,%s,%02d' % (objective.value, target , round(objective.cost()/total_cost*100))
+    return '%.3e,%s,%02d' % (objective.value, objective.target_log() , round(objective.cost()/total_cost*100))
 
 
 def logOutput(objectives):
@@ -142,6 +137,9 @@ def getObjectives(var_set) -> fun_lib.ObjectiveVar:
         var_set['__plot_title'] = "Run %i" % (fun_lib.getRunNumber())
         var_set['__saveFig_path'] = "%sFitFig_%03d.png" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
         
+    # log combined output
+    var_set['__objectivesLog_path'] = "%sobjectiveLog_%03d.csv" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
+
     objectives = cf.getObjectives(var_set)
 
     print("Calculating costs in ", time.time() - tic, " s")
@@ -172,12 +170,11 @@ def processDyMatFile():
         # logOutput(objectives)
     except fun_lib.SimulationResultIncompleteError as e:
         # most probably the simulation crashed mid-simulation. Lets provide a penalty for that
-        objectives = [fun_lib.ObjectiveVar('Simulation failed', value = 100, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)]
+        objectives = [fun_lib.ObjectiveVar('Simulation failed', value = 10, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)]
+
+        # comment out if you want to halt the optim
         writeCost(objectives)
-        # if 'time' in var_set:
-        #     t = '%.2f' % var_set['time'][-1]
-        # else:
-        #     t = 'unknown'
+
         logCrash(e)
         logOutput(objectives)
 
