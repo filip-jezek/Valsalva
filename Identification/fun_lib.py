@@ -126,7 +126,7 @@ class ObjectiveVar:
         return target
 
     def __repr__(self):
-        return '%s,%.3e,%s' % (self.name, self.value, self.target_log)
+        return '%s,%.3e,%s' % (self.name, self.value, self.target_log())
 
 
 def getObjectiveByName(objective_iterable, name) -> ObjectiveVar:

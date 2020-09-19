@@ -136,13 +136,14 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     bp_mean = fun_lib.getMeanRR(BP, peaks)
 
     # find valsalva start and end
+    sim_start = fun_lib.getValsalvaStart(time, SV, threshold = 1e-3)
     valsalva_start = fun_lib.getValsalvaStart(time, TP, threshold=10)
     valsalva_end = fun_lib.getValsalvaEnd(valsalva_start, time, TP, threshold=10)
     valsalva = (valsalva_start, valsalva_end)
     
     # divide valsalva phases    
     # pre-valsalva
-    phase0 = (0, valsalva_start)
+    phase0 = (sim_start, valsalva_start)
     # overshoot phase at start of the valsalva
     phase1 = (valsalva_start, valsalva_start + 5)
     # min mean pressure during valsalva
