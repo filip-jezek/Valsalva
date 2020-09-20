@@ -62,10 +62,10 @@ class ObjectiveVar:
             return self.weight*(measured - target)**2/(target**2)
 
         elif self.costFunctionType is CostFunctionType.QuadraticVariance:
-            if self.std is None:
-                self.std = target*DEFAULT_STD_PERCENT/100
             if target is None:
                 return 0            
+            if self.std is None:
+                self.std = target*DEFAULT_STD_PERCENT/100
             # variance is squared standard deviation
             return self.weight*(measured - target)**2/(target*self.std)
 
@@ -75,10 +75,10 @@ class ObjectiveVar:
             return self.weight*abs(measured - target)/target
 
         elif self.costFunctionType is CostFunctionType.LinearVariance:
-            if self.std is None:
-                self.std = target*DEFAULT_STD_PERCENT/100
             if target is None:
                 return 0
+            if self.std is None:
+                self.std = target*DEFAULT_STD_PERCENT/100
             # variance is squared standard deviation
             return self.weight*abs(measured - target)/(self.std)
 

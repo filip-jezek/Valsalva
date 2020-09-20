@@ -215,7 +215,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     # penalize by too low SV in wide area - SV should not go below also in phase 4
     if SV is not None:
         # during valsalva SV should not go below 25ml
-        phase2_interval, _ = getInterval(phase2, None)
+        phase2_interval, _ = getInterval(phase2, (2, -1))
         sv_val_valsalva = numpy.min(SV[phase2_interval])
         # interval spans from valsalva release to complete recovery - we should not go below 90% of normal SV, but lets say 60%
         recovery_interval, _ = getInterval(phase4, [3, 4])
@@ -226,20 +226,21 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
 
     sv_objective = fun_lib.ObjectiveVar(
             'SV_min_valsalva', 
-            sv_val_valsalva, limit=[25, 150], std = 25*0.1, k_p=10)
+            sv_val_valsalva, limit=[25, 150], std = 25*0.1, k_p=1)
     objectives.append(sv_objective)
 
     sv_objective = fun_lib.ObjectiveVar(
             'SV_min_recovery', 
             sv_val_recovery, limit=[60, 200], std = 60*0.1, k_p=10)
+    objectives.append(sv_objective)            
 
     
 
     if '__targetValuesFilename' in vars_set and vars_set['__targetValuesFilename'] is not None:
         fun_lib.updateObjectivesByValuesFromFile(vars_set['__targetValuesFilename'], objectives)
       
-    # to have comparable cost function values one must have the stds ready
-    map(fun_lib.unifyCostFunc, objectives)
+    # # to have comparable cost function values one must have the stds ready
+    # map(fun_lib.unifyCostFunc, objectives)
 
     if '__draw_plots' in vars_set and vars_set['__draw_plots']:
         ax = fun_lib.getAxes(vars_set)

@@ -111,7 +111,8 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
         objectives = cf.getObjectives(mapped_vars)
         
         # normalize to variance type cost function
-        map(fun_lib.unifyCostFunc, objectives)
+        for o in objectives:
+            fun_lib.unifyCostFunc(o)
 
         cost = fun_lib.countTotalWeightedCost(objectives)
         costObjective = ObjectiveVar(name, value=cost, costFunctionType=CostFunctionType.DistanceFromZero, weight=weight)
@@ -158,7 +159,7 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
     if objectivesLog_path is not None:
         with open(objectivesLog_path, 'w') as file:
             total_cost = fun_lib.countTotalSumCost(all_objectives)
-            file.write('Name, value, target, %%, total = %.6e\n')
+            file.write('Name, value, target, %%, total = %.6e\n' % total_cost)
             for o in sorted(all_objectives, key = lambda o: o.cost(), reverse=True):
                 s = '%s,%.3e,%s,%02d\n' % (o.name, o.value, o.target_log(), round(o.cost()/total_cost*100))
                 file.write(s)
