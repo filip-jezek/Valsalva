@@ -37239,19 +37239,13 @@ P_hs_plus_dist"),
               heart_atr_Emax=settings.heart_atr_Emax,
               heart_atr_sigma_a=settings.heart_atr_sigma_a,
               heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
-
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
-
               exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
-
               UseNonLinear_TissuesCompliance=settings.UseNonLinear_TissuesCompliance,
-
               tissues_UseStraighteningReaction2Phi=settings.tissues_UseStraighteningReaction2Phi,
-
               veins_gamma=settings.veins_gamma,
               veins_activation_tau=settings.veins_activation_tau,
               baro_useAbsolutePressureTerm=settings.baro_useAbsolutePressureTerm,
-
               baro_d0=settings.baro_d0,
               baro_delta0_aor=settings.baro_delta0_aor,
               baro_delta0_car=settings.baro_delta0_car,
@@ -37269,7 +37263,6 @@ P_hs_plus_dist"),
               heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
               eta_vc=settings.eta_vc,
               syst_tissues_hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
-
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -37288,7 +37281,6 @@ P_hs_plus_dist"),
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
               syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect,
-
               pulm_R=settings.pulm_R,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
@@ -37312,19 +37304,13 @@ P_hs_plus_dist"),
               heart_atr_Emax=settings.heart_atr_Emax,
               heart_atr_sigma_a=settings.heart_atr_sigma_a,
               heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
-
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
-
               exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
-
               UseNonLinear_TissuesCompliance=settings.UseNonLinear_TissuesCompliance,
-
               tissues_UseStraighteningReaction2Phi=settings.tissues_UseStraighteningReaction2Phi,
-
               veins_gamma=settings.veins_gamma,
               veins_activation_tau=settings.veins_activation_tau,
               baro_useAbsolutePressureTerm=settings.baro_useAbsolutePressureTerm,
-
               baro_d0=settings.baro_d0,
               baro_delta0_aor=settings.baro_delta0_aor,
               baro_delta0_car=settings.baro_delta0_car,
@@ -37342,7 +37328,6 @@ P_hs_plus_dist"),
               heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
               eta_vc=settings.eta_vc,
               syst_tissues_hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
-
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -37361,7 +37346,6 @@ P_hs_plus_dist"),
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
               syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect,
-
               pulm_R=settings.pulm_R,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
@@ -37386,19 +37370,13 @@ P_hs_plus_dist"),
               heart_atr_Emax=settings.heart_atr_Emax,
               heart_atr_sigma_a=settings.heart_atr_sigma_a,
               heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
-
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
-
               exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
-
               UseNonLinear_TissuesCompliance=settings.UseNonLinear_TissuesCompliance,
-
               tissues_UseStraighteningReaction2Phi=settings.tissues_UseStraighteningReaction2Phi,
-
               veins_gamma=settings.veins_gamma,
               veins_activation_tau=settings.veins_activation_tau,
               baro_useAbsolutePressureTerm=settings.baro_useAbsolutePressureTerm,
-
               baro_d0=settings.baro_d0,
               baro_delta0_aor=settings.baro_delta0_aor,
               baro_delta0_car=settings.baro_delta0_car,
@@ -37416,7 +37394,6 @@ P_hs_plus_dist"),
               heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
               eta_vc=settings.eta_vc,
               syst_tissues_hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
-
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -37435,7 +37412,6 @@ P_hs_plus_dist"),
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
               syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect,
-
               pulm_R=settings.pulm_R,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
@@ -38021,7 +37997,7 @@ P_hs_plus_dist"),
                   lineColor={28,108,200},
                   textString="Exercise")}),
             experiment(
-              StopTime=60,
+              StopTime=120,
               Interval=0.01,
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
