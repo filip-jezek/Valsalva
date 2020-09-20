@@ -92,7 +92,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     __draw_plots"""
     
     
-    fun_lib.checkSimulationLength(vars_set['time'][-1],50)
+    fun_lib.checkSimulationLength(vars_set['time'][-1],110)
     
     # some control variables are not present in case of identification
     if '__targetValuesFilename' not in vars_set or vars_set['__targetValuesFilename'] is None:
