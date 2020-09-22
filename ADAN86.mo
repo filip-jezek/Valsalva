@@ -5142,6 +5142,15 @@ Simple")}),                                                                  Dia
               connect(calciumMechanics.phiInput, phi_input) annotation (Line(
                     points={{-61,-10},{-70,-10},{-70,100},{0,100}}, color={0,0,
                       127}));
+              annotation (Icon(graphics={
+                              Bitmap(extent={{-100,-100},{100,100}}, fileName=
+                          "modelica://Physiolibrary/Resources/Icons/komoraSrdce.png",
+                      origin={10,-46},
+                      rotation=270),
+                              Bitmap(extent={{100,-100},{-100,100}}, fileName=
+                          "modelica://Physiolibrary/Resources/Icons/komoraSrdce.png",
+                      origin={10,30},
+                      rotation=270)}));
             end partialVentricles;
 
             model Ventricles_Calcium
@@ -5316,6 +5325,8 @@ Simple")}),                                                                  Dia
                   sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
                       7.5*120,
                   C(fixed=false)));
+              annotation (Icon(graphics={Rectangle(extent={{-100,100},{100,-100}},
+                        lineColor={28,108,200})}));
             end Ventricles_Lumens_Simple;
 
             model Atrium
@@ -5445,7 +5456,13 @@ Simple")}),                                                                  Dia
               end if;
 
 
-              annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={                       Bitmap(extent={{-100,100},
+                          {100,-100}},
+                                 fileName=
+                          "modelica://Physiolibrary/Resources/Icons/sequerestedVolume.png"),
+                      Rectangle(extent={{-100,100},{100,-100}}, lineColor={28,
+                          108,200})}),                                       Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end AtriumSimple;
           end TriSegMechanics_components;
@@ -5759,21 +5776,21 @@ Simple")}),                                                                  Dia
           parameter Physiolibrary.Types.Frequency HR = 1 "Heart rate, when not specified externally" annotation(Dialog(enabled = not UseFrequencyInput));
 
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a sv
-            annotation (Placement(transformation(extent={{-110,90},{-90,110}})));
+            annotation (Placement(transformation(extent={{-110,46},{-90,66}})));
           Physiolibrary.Types.RealIO.FrequencyInput frequency_input if UseFrequencyInput annotation (Placement(
                 transformation(extent={{-126,-20},{-86,20}}), iconTransformation(extent={{-120,
                     -20},{-80,20}})));
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a pv
-            annotation (Placement(transformation(extent={{-110,-110},{-90,-90}})));
+            annotation (Placement(transformation(extent={{90,-44},{110,-24}})));
           Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input if UseThoracicPressureInput  annotation (Placement(
                 transformation(extent={{-20,-20},{20,20}},
                 rotation=90,
                 origin={0,-100}),                             iconTransformation(extent={{-20,
                     -120},{20,-80}})));
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b pa
-            annotation (Placement(transformation(extent={{90,-110},{110,-90}})));
+            annotation (Placement(transformation(extent={{90,46},{110,66}})));
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b sa
-            annotation (Placement(transformation(extent={{90,90},{110,110}})));
+            annotation (Placement(transformation(extent={{-110,-44},{-90,-24}})));
 
           Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit="1/min")=
                  HR) if
@@ -5785,10 +5802,10 @@ Simple")}),                                                                  Dia
                 rotation=270,
                 origin={0,-86})));
           Physiolibrary.Types.RealIO.FractionInput phi if UsePhiInput
-            annotation (Placement(transformation(extent={{-120,50},{-80,90}}),
+            annotation (Placement(transformation(extent={{-120,58},{-80,98}}),
                 iconTransformation(extent={{-120,40},{-80,80}})));
           Physiolibrary.Types.Constants.FractionConst phi0(k=settings.phi0) if not UsePhiInput
-            annotation (Placement(transformation(extent={{-90,66},{-82,74}})));
+            annotation (Placement(transformation(extent={{-90,74},{-82,82}})));
 
 
           outer Settings settings
@@ -6820,12 +6837,12 @@ Kalecky")}), experiment(
               Placement(transformation(
                 extent={{-4,4},{4,-4}},
                 rotation=270,
-                origin={8,22})));
+                origin={12,22})));
           Basic.IdealValve_deactivable idealValve_deactivable1 annotation (
               Placement(transformation(
                 extent={{-4,-4},{4,4}},
                 rotation=90,
-                origin={8,-14})));
+                origin={12,-18})));
           Auxiliary.TriSegMechanics_components.Driving_Olufsen calciumMechanics(
             TR_maxAct(displayUnit="s") = settings.heart_drive_TR_maxAct,
             t_offset=-settings.heart_drive_TS,
@@ -6840,11 +6857,11 @@ Kalecky")}), experiment(
         equation
           volume =ra.volume + la.volume + ventricles.V_LV + ventricles.V_RV;
           connect(pulmonaryValve.q_out, pa) annotation (Line(
-              points={{84,56},{92,56},{92,-100},{100,-100}},
+              points={{84,56},{92,56},{92,56},{100,56}},
               color={0,0,0},
               thickness=1));
           connect(aorticValve.q_out, sa) annotation (Line(
-              points={{-80,-34},{-96,-34},{-96,-64},{100,-64},{100,100}},
+              points={{-80,-34},{-100,-34}},
               color={0,0,0},
               thickness=1));
           connect(tricuspidValve.q_in, r_SystemicVenousInflow.q_out) annotation (Line(
@@ -6852,7 +6869,7 @@ Kalecky")}), experiment(
               color={0,0,0},
               thickness=1));
           connect(r_SystemicVenousInflow.q_in, sv) annotation (Line(
-              points={{-72,56},{-86,56},{-86,100},{-100,100}},
+              points={{-72,56},{-86,56},{-86,56},{-100,56}},
               color={0,0,0},
               thickness=1));
           connect(mitralValve.q_in, r_PulmonaryVenousInflow.q_out) annotation (Line(
@@ -6860,7 +6877,7 @@ Kalecky")}), experiment(
               color={0,0,0},
               thickness=1));
           connect(r_PulmonaryVenousInflow.q_in, pv) annotation (Line(
-              points={{80,-34},{86,-34},{86,-100},{-100,-100}},
+              points={{80,-34},{86,-34},{86,-34},{100,-34}},
               color={0,0,0},
               thickness=1));
           connect(tricuspidValve.q_out, pulmonaryValve.q_in) annotation (Line(
@@ -6884,7 +6901,7 @@ Kalecky")}), experiment(
               color={0,0,0},
               thickness=1));
           connect(aorticValve.cardiac_cycle, ventricles.cardiac_cycle)
-            annotation (Line(points={{-70,-24},{16,-24},{16,0},{10,0}},color={244,125,
+            annotation (Line(points={{-70,-24},{30,-24},{30,0},{10,0}},color={244,125,
                   35}));
           connect(ventricles.thoracic_pressure_input, P0.y) annotation (Line(
                 points={{0,-10},{0,-81},{8.88178e-16,-81}}, color={162,29,33},
@@ -6911,43 +6928,42 @@ Kalecky")}), experiment(
               thickness=0.5));
           connect(ventricles.port_rv, idealValve_deactivable.q_out) annotation (
              Line(
-              points={{8,4},{8,18}},
+              points={{8,4},{12,4},{12,18}},
               color={0,0,0},
               thickness=1));
           connect(idealValve_deactivable.q_in, pulmonaryValve.q_in) annotation (
              Line(
-              points={{8,26},{8,56},{64,56}},
+              points={{12,26},{12,56},{64,56}},
               color={0,0,0},
               thickness=1));
           connect(ventricles.port_lv, idealValve_deactivable1.q_out)
             annotation (Line(
-              points={{8,-6},{8,-10}},
+              points={{8,-6},{12,-6},{12,-14}},
               color={0,0,0},
               thickness=1));
           connect(idealValve_deactivable1.q_in, aorticValve.q_in) annotation (
               Line(
-              points={{8,-18},{8,-34},{-60,-34}},
+              points={{12,-22},{12,-34},{-60,-34}},
               color={0,0,0},
               thickness=1));
           connect(ventricles.volumeLimiterRV, idealValve_deactivable.ActivateLimiter)
-            annotation (Line(points={{4,10},{4,22},{8,22}}, color={255,0,255}));
+            annotation (Line(points={{4,10},{4,22},{12,22}},color={255,0,255}));
           connect(ventricles.volumeLimiterLV, idealValve_deactivable1.ActivateLimiter)
-            annotation (Line(points={{4,-10},{4,-14},{8,-14}}, color={255,0,255}));
-          connect(ventricles.phi_input, phi0.y) annotation (Line(points={{0,10},{0,70},{
-                  -81,70}},         color={0,0,127}));
-          connect(ventricles.phi_input, phi) annotation (Line(points={{0,10},{0,70},{-100,
-                  70}},           color={0,0,127}));
+            annotation (Line(points={{4,-10},{4,-18},{12,-18}},color={255,0,255}));
+          connect(ventricles.phi_input, phi0.y) annotation (Line(points={{0,10},{
+                  0,78},{-81,78}},  color={0,0,127}));
+          connect(ventricles.phi_input, phi) annotation (Line(points={{0,10},{0,
+                  78},{-100,78}}, color={0,0,127}));
           connect(mitralValve.cardiac_cycle, ventricles.cardiac_cycle)
-            annotation (Line(points={{30,-24},{16,-24},{16,0},{10,0}},
-                                                              color={244,125,35}));
+            annotation (Line(points={{30,-24},{30,0},{10,0}}, color={244,125,35}));
           connect(frequency_input, calciumMechanics.frequency) annotation (Line(points={
                   {-106,0},{-96,0},{-96,34},{-87,34}}, color={0,0,127}));
           connect(HR0.y, calciumMechanics.frequency) annotation (Line(points={{-87,0},{-96,
                   0},{-96,34},{-87,34}}, color={0,0,127}));
-          connect(calciumMechanics.phiInput, phi) annotation (Line(points={{-87,
-                  40},{-92,40},{-92,70},{-100,70}}, color={0,0,127}));
-          connect(calciumMechanics.phiInput, phi0.y) annotation (Line(points={{
-                  -87,40},{-92,40},{-92,70},{-81,70}}, color={0,0,127}));
+          connect(calciumMechanics.phiInput, phi) annotation (Line(points={{-87,40},
+                  {-92,40},{-92,78},{-100,78}},     color={0,0,127}));
+          connect(calciumMechanics.phiInput, phi0.y) annotation (Line(points={{-87,40},
+                  {-92,40},{-92,78},{-81,78}},         color={0,0,127}));
           connect(calciumMechanics.D, ra.D) annotation (Line(points={{-67,34},{
                   -60,34},{-60,16},{-52.4,16}}, color={0,140,72}));
           connect(calciumMechanics.D, la.D) annotation (Line(points={{-67,34},{
