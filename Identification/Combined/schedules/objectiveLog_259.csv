@@ -1,0 +1,38 @@
+Name, value, target, %, total = 1.036815e+01
+valsalva.t_ph4_drop,1.680e+00,9.823e-01,16
+valsalva.SV_min_recovery,5.242e+01,out limit,15
+valsalva.t_ph1_hr_min,0.000e+00,2.615e+00,14
+valsalva.t_ph2_mean_min,0.000e+00,8.104e+00,11
+valsalva.t_ph4_hr_max,9.900e-01,2.256e+00,09
+valsalva.t_ph4_ovrshoot,4.710e+00,3.644e+00,08
+valsalva.ph4_drop,7.390e-01,9.725e-01,08
+baseline.CO,9.798e-05,9.600e-05,04
+valsalva.ph4_hr_drop,9.433e-01,8.273e-01,03
+valsalva.ph2_mean_min,1.160e+00,1.037e+00,02
+valsalva.t_ph1_peak,3.820e+00,2.902e+00,02
+baseline.ESV,6.239e-05,6.000e-05,02
+baseline.EDV,1.554e-04,1.500e-04,01
+baseline.BPs,1.616e+04,1.600e+04,01
+valsalva.ph1_hr_min,1.003e+00,9.409e-01,01
+valsalva.t_ph4_hr_drop,7.450e+00,6.503e+00,01
+valsalva.ph1_peak,1.452e+00,1.400e+00,01
+baseline.Ppad,1.132e+03,1.173e+03,01
+baseline.ESV_la,4.406e-05,4.100e-05,01
+valsalva.ph5_hr_recovery,9.866e-01,9.349e-01,00
+valsalva.ph2_max,1.205e+00,1.147e+00,00
+valsalva.ph5_recovery,9.798e-01,1.011e+00,00
+valsalva.ph4_hr_max,1.381e+00,1.330e+00,00
+baseline.Q_MV_f,1.974e+00,2.000e+00,00
+baseline.Ppas,2.723e+03,2.773e+03,00
+baseline.BPd,1.063e+04,1.067e+04,00
+baseline.HR,1.054e+00,1.067e+00,00
+valsalva.ph4_ovrshoot,1.133e+00,1.116e+00,00
+baseline.EDV_la,8.477e-05,8.700e-05,00
+baseline.Ppv,1.084e+03,1.067e+03,00
+baseline.BPk,2.678e+03,2.666e+03,00
+baseline.PWV,5.416e+00, in limit,00
+valsalva.baseline_bp,9.541e+01,1.155e+02,00
+valsalva.baseline_hr,6.298e+01,7.082e+01,00
+valsalva.SV_min_valsalva,6.304e+01, in limit,00
+valsalva.SV_min_midValsalva,6.304e+01, in limit,00
+valsalva.t_ph2_max,-3.400e+00,-2.286e+00,-3

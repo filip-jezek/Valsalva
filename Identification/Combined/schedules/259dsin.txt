@@ -9,7 +9,7 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-      120                   # StopTime     Time at which integration stops
+     120                   # StopTime     Time at which integration stops
   1.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
   9.9999999999999995E-07   # Tolerance    Relative precision of signals for
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(10063,109)
+char initialName(10131,109)
 settings.phi0
 settings.height
 settings.weight
@@ -195,6 +195,8 @@ settings.pulm_C_PV
 settings.pulm_C_PA
 settings.pulm_R
 settings.pulm_R_exp
+settings.pulm_PV_R_vis
+settings.pulm_tp_pleural_frac
 settings.experimental_zpv_factor
 settings.experimental_C_factor
 baseline.settings.phi0
@@ -270,6 +272,8 @@ baseline.settings.pulm_C_PV
 baseline.settings.pulm_C_PA
 baseline.settings.pulm_R
 baseline.settings.pulm_R_exp
+baseline.settings.pulm_PV_R_vis
+baseline.settings.pulm_tp_pleural_frac
 baseline.settings.experimental_zpv_factor
 baseline.settings.experimental_C_factor
 baseline.SystemicComponent.brachial_division
@@ -2592,6 +2596,7 @@ baseline.pulmonaryComponent.c_pv.MinimalCollapsingPressure
 baseline.pulmonaryComponent.phi_factor.phi0
 baseline.pulmonaryComponent.phi_factor.eta
 baseline.pulmonaryComponent.fraction.k
+baseline.pulmonaryComponent.R_pv_visc.Resistance
 baseline.phi_fixed.amplitude
 baseline.phi_fixed.rising
 baseline.phi_fixed.width
@@ -2614,14 +2619,14 @@ baseline.thoracic_pressure_ramp.period
 baseline.thoracic_pressure_ramp.nperiod
 baseline.thoracic_pressure_ramp.offset
 baseline.thoracic_pressure_ramp.startTime
-baseline.condTP.disconnected
-baseline.condTP.disconnectedValue
-baseline.condTP.delayTime
-baseline.condTP.uMax
-baseline.condTP.phi0
-baseline.condTP.phi_gain
-baseline.condTP.add3_1.k1
-baseline.condTP.add3_1.k2
+baseline.condTP_EP.disconnected
+baseline.condTP_EP.disconnectedValue
+baseline.condTP_EP.delayTime
+baseline.condTP_EP.uMax
+baseline.condTP_EP.phi0
+baseline.condTP_EP.const_offset
+baseline.condTP_EP.add3_1.k1
+baseline.condTP_EP.add3_1.k2
 baseline.condSystemicPhi.disconnected
 baseline.condSystemicPhi.disconnectedValue
 baseline.condSystemicPhi.delayTime
@@ -2636,6 +2641,15 @@ baseline.condHeartPhi.uMax
 baseline.condHeartPhi.phi_gain
 baseline.condHeartPhi.add3_1.k1
 baseline.condHeartPhi.add3_1.k2
+baseline.condTP_IP.disconnected
+baseline.condTP_IP.disconnectedValue
+baseline.condTP_IP.delayTime
+baseline.condTP_IP.uMax
+baseline.condTP_IP.phi0
+baseline.condTP_IP.phi_gain
+baseline.condTP_IP.const_offset
+baseline.condTP_IP.add3_1.k1
+baseline.condTP_IP.add3_1.k2
 baseline.brachial_pressure
 baseline.brachial_pressure_mean
 baseline.renal_capillary
@@ -2654,6 +2668,8 @@ baseline.P_pv
 baseline.speedSegmentLength
 baseline.V_la
 baseline.q_mv
+baseline.CPUtime
+baseline.EventCounter
 baseline.fmi_loggingOn
 baseline.fmi_StartTime
 baseline.fmi_StopTime
@@ -2687,6 +2703,8 @@ baseline.internal.P_pv
 baseline.internal.speedSegmentLength
 baseline.internal.V_la
 baseline.internal.q_mv
+baseline.internal.CPUtime
+baseline.internal.EventCounter
 exercise.settings.phi0
 exercise.settings.height
 exercise.settings.age
@@ -2760,6 +2778,8 @@ exercise.settings.pulm_C_PV
 exercise.settings.pulm_C_PA
 exercise.settings.pulm_R
 exercise.settings.pulm_R_exp
+exercise.settings.pulm_PV_R_vis
+exercise.settings.pulm_tp_pleural_frac
 exercise.settings.experimental_zpv_factor
 exercise.settings.experimental_C_factor
 exercise.SystemicComponent.brachial_division
@@ -5082,6 +5102,7 @@ exercise.pulmonaryComponent.c_pv.MinimalCollapsingPressure
 exercise.pulmonaryComponent.phi_factor.phi0
 exercise.pulmonaryComponent.phi_factor.eta
 exercise.pulmonaryComponent.fraction.k
+exercise.pulmonaryComponent.R_pv_visc.Resistance
 exercise.phi_fixed.rising
 exercise.phi_fixed.width
 exercise.phi_fixed.falling
@@ -5102,14 +5123,14 @@ exercise.thoracic_pressure_ramp.period
 exercise.thoracic_pressure_ramp.nperiod
 exercise.thoracic_pressure_ramp.offset
 exercise.thoracic_pressure_ramp.startTime
-exercise.condTP.disconnected
-exercise.condTP.disconnectedValue
-exercise.condTP.delayTime
-exercise.condTP.uMax
-exercise.condTP.phi0
-exercise.condTP.phi_gain
-exercise.condTP.add3_1.k1
-exercise.condTP.add3_1.k2
+exercise.condTP_EP.disconnected
+exercise.condTP_EP.disconnectedValue
+exercise.condTP_EP.delayTime
+exercise.condTP_EP.uMax
+exercise.condTP_EP.phi0
+exercise.condTP_EP.const_offset
+exercise.condTP_EP.add3_1.k1
+exercise.condTP_EP.add3_1.k2
 exercise.condSystemicPhi.disconnected
 exercise.condSystemicPhi.disconnectedValue
 exercise.condSystemicPhi.delayTime
@@ -5124,6 +5145,15 @@ exercise.condHeartPhi.uMax
 exercise.condHeartPhi.phi_gain
 exercise.condHeartPhi.add3_1.k1
 exercise.condHeartPhi.add3_1.k2
+exercise.condTP_IP.disconnected
+exercise.condTP_IP.disconnectedValue
+exercise.condTP_IP.delayTime
+exercise.condTP_IP.uMax
+exercise.condTP_IP.phi0
+exercise.condTP_IP.phi_gain
+exercise.condTP_IP.const_offset
+exercise.condTP_IP.add3_1.k1
+exercise.condTP_IP.add3_1.k2
 exercise.Exercise.height
 exercise.Exercise.duration
 exercise.Exercise.offset
@@ -5146,6 +5176,8 @@ exercise.P_pv
 exercise.speedSegmentLength
 exercise.V_la
 exercise.q_mv
+exercise.CPUtime
+exercise.EventCounter
 exercise.fmi_loggingOn
 exercise.fmi_StartTime
 exercise.fmi_StopTime
@@ -5179,6 +5211,8 @@ exercise.internal.P_pv
 exercise.internal.speedSegmentLength
 exercise.internal.V_la
 exercise.internal.q_mv
+exercise.internal.CPUtime
+exercise.internal.EventCounter
 tilt.settings.phi0
 tilt.settings.height
 tilt.settings.age
@@ -5252,6 +5286,8 @@ tilt.settings.pulm_C_PV
 tilt.settings.pulm_C_PA
 tilt.settings.pulm_R
 tilt.settings.pulm_R_exp
+tilt.settings.pulm_PV_R_vis
+tilt.settings.pulm_tp_pleural_frac
 tilt.settings.experimental_zpv_factor
 tilt.settings.experimental_C_factor
 tilt.SystemicComponent.brachial_division
@@ -7574,6 +7610,7 @@ tilt.pulmonaryComponent.c_pv.MinimalCollapsingPressure
 tilt.pulmonaryComponent.phi_factor.phi0
 tilt.pulmonaryComponent.phi_factor.eta
 tilt.pulmonaryComponent.fraction.k
+tilt.pulmonaryComponent.R_pv_visc.Resistance
 tilt.phi_fixed.amplitude
 tilt.phi_fixed.rising
 tilt.phi_fixed.width
@@ -7596,14 +7633,14 @@ tilt.thoracic_pressure_ramp.period
 tilt.thoracic_pressure_ramp.nperiod
 tilt.thoracic_pressure_ramp.offset
 tilt.thoracic_pressure_ramp.startTime
-tilt.condTP.disconnected
-tilt.condTP.disconnectedValue
-tilt.condTP.delayTime
-tilt.condTP.uMax
-tilt.condTP.phi0
-tilt.condTP.phi_gain
-tilt.condTP.add3_1.k1
-tilt.condTP.add3_1.k2
+tilt.condTP_EP.disconnected
+tilt.condTP_EP.disconnectedValue
+tilt.condTP_EP.delayTime
+tilt.condTP_EP.uMax
+tilt.condTP_EP.phi0
+tilt.condTP_EP.const_offset
+tilt.condTP_EP.add3_1.k1
+tilt.condTP_EP.add3_1.k2
 tilt.condSystemicPhi.disconnected
 tilt.condSystemicPhi.disconnectedValue
 tilt.condSystemicPhi.delayTime
@@ -7618,6 +7655,15 @@ tilt.condHeartPhi.uMax
 tilt.condHeartPhi.phi_gain
 tilt.condHeartPhi.add3_1.k1
 tilt.condHeartPhi.add3_1.k2
+tilt.condTP_IP.disconnected
+tilt.condTP_IP.disconnectedValue
+tilt.condTP_IP.delayTime
+tilt.condTP_IP.uMax
+tilt.condTP_IP.phi0
+tilt.condTP_IP.phi_gain
+tilt.condTP_IP.const_offset
+tilt.condTP_IP.add3_1.k1
+tilt.condTP_IP.add3_1.k2
 tilt.Tilt_ramp.height
 tilt.Tilt_ramp.duration
 tilt.Tilt_ramp.offset
@@ -7640,6 +7686,8 @@ tilt.P_pv
 tilt.speedSegmentLength
 tilt.V_la
 tilt.q_mv
+tilt.CPUtime
+tilt.EventCounter
 tilt.fmi_loggingOn
 tilt.fmi_StartTime
 tilt.fmi_StopTime
@@ -7673,6 +7721,8 @@ tilt.internal.P_pv
 tilt.internal.speedSegmentLength
 tilt.internal.V_la
 tilt.internal.q_mv
+tilt.internal.CPUtime
+tilt.internal.EventCounter
 valsalva.settings.phi0
 valsalva.settings.height
 valsalva.settings.age
@@ -7746,6 +7796,8 @@ valsalva.settings.pulm_C_PV
 valsalva.settings.pulm_C_PA
 valsalva.settings.pulm_R
 valsalva.settings.pulm_R_exp
+valsalva.settings.pulm_PV_R_vis
+valsalva.settings.pulm_tp_pleural_frac
 valsalva.settings.experimental_zpv_factor
 valsalva.settings.experimental_C_factor
 valsalva.SystemicComponent.brachial_division
@@ -10068,6 +10120,7 @@ valsalva.pulmonaryComponent.c_pv.MinimalCollapsingPressure
 valsalva.pulmonaryComponent.phi_factor.phi0
 valsalva.pulmonaryComponent.phi_factor.eta
 valsalva.pulmonaryComponent.fraction.k
+valsalva.pulmonaryComponent.R_pv_visc.Resistance
 valsalva.phi_fixed.amplitude
 valsalva.phi_fixed.rising
 valsalva.phi_fixed.width
@@ -10090,14 +10143,14 @@ valsalva.thoracic_pressure_ramp.period
 valsalva.thoracic_pressure_ramp.nperiod
 valsalva.thoracic_pressure_ramp.offset
 valsalva.thoracic_pressure_ramp.startTime
-valsalva.condTP.disconnected
-valsalva.condTP.disconnectedValue
-valsalva.condTP.delayTime
-valsalva.condTP.uMax
-valsalva.condTP.phi0
-valsalva.condTP.phi_gain
-valsalva.condTP.add3_1.k1
-valsalva.condTP.add3_1.k2
+valsalva.condTP_EP.disconnected
+valsalva.condTP_EP.disconnectedValue
+valsalva.condTP_EP.delayTime
+valsalva.condTP_EP.uMax
+valsalva.condTP_EP.phi0
+valsalva.condTP_EP.const_offset
+valsalva.condTP_EP.add3_1.k1
+valsalva.condTP_EP.add3_1.k2
 valsalva.condSystemicPhi.disconnected
 valsalva.condSystemicPhi.disconnectedValue
 valsalva.condSystemicPhi.delayTime
@@ -10112,6 +10165,15 @@ valsalva.condHeartPhi.uMax
 valsalva.condHeartPhi.phi_gain
 valsalva.condHeartPhi.add3_1.k1
 valsalva.condHeartPhi.add3_1.k2
+valsalva.condTP_IP.disconnected
+valsalva.condTP_IP.disconnectedValue
+valsalva.condTP_IP.delayTime
+valsalva.condTP_IP.uMax
+valsalva.condTP_IP.phi0
+valsalva.condTP_IP.phi_gain
+valsalva.condTP_IP.const_offset
+valsalva.condTP_IP.add3_1.k1
+valsalva.condTP_IP.add3_1.k2
 valsalva.brachial_pressure
 valsalva.brachial_pressure_mean
 valsalva.renal_capillary
@@ -10130,6 +10192,8 @@ valsalva.P_pv
 valsalva.speedSegmentLength
 valsalva.V_la
 valsalva.q_mv
+valsalva.CPUtime
+valsalva.EventCounter
 valsalva.fmi_loggingOn
 valsalva.fmi_StartTime
 valsalva.fmi_StopTime
@@ -10163,11 +10227,15 @@ valsalva.internal.P_pv
 valsalva.internal.speedSegmentLength
 valsalva.internal.V_la
 valsalva.internal.q_mv
+valsalva.internal.CPUtime
+valsalva.internal.EventCounter
 steps
 endTime
 stepInterval
+CPUtime
+EventCounter
 
-double initialValue(10063,6)
+double initialValue(10131,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
@@ -10186,9 +10254,9 @@ double initialValue(10063,6)
   6   256   # settings.BSA
  -1       1                       0                       0                
   1   281   # settings.initByPressure
- -1 -1.2975000000000000E-03 -1.0000000000000000E-02 1.0000000000000000E+100
+ -1 -0.0012175 -0.01 1e+100
   1   280   # settings.V_PV_init
- -1 1.185 0.0 0.0
+ -1  1.1850000000000001E+00       0                       0                
   1   280   # settings.chi_phi
  -1  1.3332238741500000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
@@ -10202,15 +10270,15 @@ double initialValue(10063,6)
   1   280   # settings.heart_gammaE
  -1  1.3933990000000000E-02       0                       0                
   1   280   # settings.heart_drive_D_0
- -1 5.765625E-4 0.0 0.0
+ -1 5.404375E-4 0.0 0.0
   1   280   # settings.heart_drive_D_0_maxAct
  -1  1.4000000000000001E-01       0                       0                
   1   280   # settings.heart_drive_TS
- -1 0.1079 0.0 0.0
+ -1  1.0790000000000000E-01       0                       0                
   1   280   # settings.heart_drive_TS_maxAct
  -1  3.8000000000000000E-01       0                       0                
   1   280   # settings.heart_drive_TR
- -1 0.095472 0.0 0.0
+ -1  9.5472000000000001E-02       0                       0                
   1   280   # settings.heart_drive_TR_maxAct
  -1 -1.4000000000000001E-01       0                       0                
   1   280   # settings.heart_drive_atr_Tact
@@ -10224,11 +10292,11 @@ double initialValue(10063,6)
   1   280   # settings.heart_vntr_xi_AmRef
  -1  1.5298000000000000E+00       0                       0                
   1   280   # settings.heart_vntr_xi_sigma_act
- -1 16.007626 0.0 0.0
+ -1  1.6007629999999999E+01       0                       0                
   1   280   # settings.heart_vntr_sigma_actMaxAct_factor
  -1       1                       0                       0                
   1   280   # settings.heart_vntr_k_passive_factor
- -1 0.832 0.0 0.0
+ -1 0.998 0.0 0.0
   1   280   # settings.syst_abd_P_th_ratio
  -1  1.3046590000000000E+08       0                 1.0000000000000000E+100
   1   280   # settings.syst_TPR
@@ -10236,11 +10304,11 @@ double initialValue(10063,6)
   1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
- -1 0.4226095 0.0 0.0
+ -1  4.2260950000000003E-01       0                       0                
   1   280   # settings.syst_art_k_E
  -1       1                       0                       0                
   1   281   # settings.syst_art_UseVasoconstrictionEffect
- -1 0.1267 0.0 0.0
+ -1  1.2670000000000001E-01       0                       0                
   1   280   # settings.eta_vc
  -1       1                       0                       0                
   1   280   # settings.syst_tissues_hydrostaticLevel_correction
@@ -10256,7 +10324,7 @@ double initialValue(10063,6)
   1   280   # settings.tissues_SV_nom
  -1  1.0500000000000000E-04       0                       0                
   1   280   # settings.tissues_CO_nom
- -1 3.3936327 0.0 0.0
+ -1  3.3936329999999999E+00       0                       0                
   1   280   # settings.tissues_eta_Ra
  -1       0                       0                       0                
   1   280   # settings.tissues_tau_R
@@ -10268,13 +10336,13 @@ double initialValue(10063,6)
   1   281   # settings.tissues_UseStraighteningReaction2Phi
  -1  9.9999999999999995E-07       0                       0                
   1   280   # settings.tissues_V_max_breakPoint_Frac
- -1 0.2676726 0.0 0.0
+ -1  2.6767259999999998E-01       0                       0                
   1   280   # settings.tissues_eta_C
  -1  5.0000000000000000E-01       0                       0                
   1   280   # settings.tissues_gamma
- -1 29.376 0.0 0.0
+ -1  2.9376000000000001E+01       0                       0                
   1   280   # settings.tissues_chi_R
- -1 -0.12 0.0 0.0
+ -1 -1.2000000000000000E-01       0                       0                
   1   280   # settings.tissue_chi_C
  -1       0                       0                       0                
   1   280   # settings.veins_chi_pump
@@ -10282,7 +10350,7 @@ double initialValue(10063,6)
   1   280   # settings.eta_adenosine
  -1       1                       0                       0                
   1   281   # settings.veins_UsePhiEffect
- -1 0.09 0.0 0.0
+ -1  8.9999999999999997E-02       0                       0                
   1   280   # settings.veins_C_phi
  -1       0                       0                       0                
   1   280   # settings.veins_ZPV_phi
@@ -10328,7 +10396,7 @@ double initialValue(10063,6)
   1   281   # settings.baro_useAbsolutePressureTerm
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
- -1 98.37 0.0 0.0
+ -1  9.8370000000000005E+01       0                       0                
   1   280   # settings.baro_tau_s
  -1  2.6879999999999998E-01       0                       0                
   1   280   # settings.baro_xi_delta0
@@ -10338,20 +10406,24 @@ double initialValue(10063,6)
   1   280   # settings.baro_delta0_car
  -1  6.0625799999999996E-01       0                       0                
   1   280   # settings.baro_g
- -1 0.0320656 0.0 0.0
+ -1 0.0350656 0.0 0.0
   1   280   # settings.baro_fsn
- -1 0.003379 0.0 0.0
+ -1 0.003279 0.0 0.0
   1   280   # settings.baro_f1
  -1    4850                       0                       0                
   1   280   # settings.pulm_CO_target
- -1 1.968021E-7 0.0 0.0
+ -1 2.555521E-7 0.0 0.0
   1   280   # settings.pulm_C_PV
- -1 3.8195513E-8 0.0 0.0
+ -1  3.8195510000000003E-08       0                       0                
   1   280   # settings.pulm_C_PA
- -1 1.4388562E7 0.0 1e+100
+ -1  1.4388560000000000E+07       0                 1.0000000000000000E+100
   1   280   # settings.pulm_R
- -1 0.915 0.0 0.0
+ -1  9.1500000000000004E-01       0                       0                
   1   280   # settings.pulm_R_exp
+ -1 1227.5 0.0 1e+100
+  1   280   # settings.pulm_PV_R_vis
+ -1 0.82 0.0 0.0
+  1   280   # settings.pulm_tp_pleural_frac
  -1  5.0000000000000000E-01       0                       0                
   1   280   # settings.experimental_zpv_factor
  -1       1                       0                       0                
@@ -10478,8 +10550,8 @@ double initialValue(10063,6)
   6   256   # baseline.settings.baro_hr_delay
  -1  1.5000000000000000E+00       0                       0                
   1   280   # baseline.settings.baro_d0
-  0       0                       0                       0                
-  6   256   # baseline.settings.baro_tau_s
+ -1      10                       0                       0                
+  1   280   # baseline.settings.baro_tau_s
   0       0                       0                       0                
   6   256   # baseline.settings.baro_xi_delta0
   0       0                       0                       0                
@@ -10502,6 +10574,10 @@ double initialValue(10063,6)
   6   256   # baseline.settings.pulm_R
   0       0                       0                       0                
   6   256   # baseline.settings.pulm_R_exp
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # baseline.settings.pulm_PV_R_vis
+  0       0                       0                       0                
+  6   256   # baseline.settings.pulm_tp_pleural_frac
  -1  5.0000000000000000E-01       0                       0                
   1   280   # baseline.settings.experimental_zpv_factor
  -1       1                       0                       0                
@@ -15146,6 +15222,8 @@ double initialValue(10063,6)
   1   280   # baseline.pulmonaryComponent.phi_factor.eta
  -1       0                       0                       0                
   1   280   # baseline.pulmonaryComponent.fraction.k
+ -1       1                       0                 1.0000000000000000E+100
+  1   280   # baseline.pulmonaryComponent.R_pv_visc.Resistance
  -1  7.5000000000000000E-01       0                       0                
   1   280   # baseline.phi_fixed.amplitude
  -1       2                       0                 1.0000000000000000E+100
@@ -15191,21 +15269,21 @@ double initialValue(10063,6)
  -1      40                       0                       0                
   1   280   # baseline.thoracic_pressure_ramp.startTime
  -1       1                       0                       0                
-  1   281   # baseline.condTP.disconnected
+  1   281   # baseline.condTP_EP.disconnected
  -1       0                       0                       0                
-  1   280   # baseline.condTP.disconnectedValue
+  1   280   # baseline.condTP_EP.disconnectedValue
  -1       0                       0                       0                
-  1   280   # baseline.condTP.delayTime
+  1   280   # baseline.condTP_EP.delayTime
  -1  9.9999999999999995E+59       0                       0                
-  1   280   # baseline.condTP.uMax
+  1   280   # baseline.condTP_EP.uMax
  -1  2.5000000000000000E-01       0                       0                
-  1   280   # baseline.condTP.phi0
+  1   280   # baseline.condTP_EP.phi0
+ -1       0                       0                       0                
+  1   280   # baseline.condTP_EP.const_offset
  -1       1                       0                       0                
-  1   280   # baseline.condTP.phi_gain
+  1   280   # baseline.condTP_EP.add3_1.k1
  -1       1                       0                       0                
-  1   280   # baseline.condTP.add3_1.k1
- -1       1                       0                       0                
-  1   280   # baseline.condTP.add3_1.k2
+  1   280   # baseline.condTP_EP.add3_1.k2
  -1       0                       0                       0                
   1   281   # baseline.condSystemicPhi.disconnected
  -1  2.5000000000000000E-01       0                       0                
@@ -15234,6 +15312,24 @@ double initialValue(10063,6)
   1   280   # baseline.condHeartPhi.add3_1.k1
  -1       1                       0                       0                
   1   280   # baseline.condHeartPhi.add3_1.k2
+ -1       1                       0                       0                
+  1   281   # baseline.condTP_IP.disconnected
+ -1       0                       0                       0                
+  1   280   # baseline.condTP_IP.disconnectedValue
+ -1       0                       0                       0                
+  1   280   # baseline.condTP_IP.delayTime
+ -1  9.9999999999999995E+59       0                       0                
+  1   280   # baseline.condTP_IP.uMax
+ -1       0                       0                       0                
+  1   280   # baseline.condTP_IP.phi0
+ -1       1                       0                       0                
+  1   280   # baseline.condTP_IP.phi_gain
+ -1       0                       0                       0                
+  1   280   # baseline.condTP_IP.const_offset
+ -1       1                       0                       0                
+  1   280   # baseline.condTP_IP.add3_1.k1
+ -1       1                       0                       0                
+  1   280   # baseline.condTP_IP.add3_1.k2
   0       0                       0                       0                
   6   320   # baseline.brachial_pressure
   0       0                       0                       0                
@@ -15270,6 +15366,10 @@ double initialValue(10063,6)
   6   320   # baseline.V_la
   0       0                       0                       0                
   6   320   # baseline.q_mv
+  0       0                       0                       0                
+  6   320   # baseline.CPUtime
+  0       0                       0                       0                
+  6   320   # baseline.EventCounter
  -1       0                       0                       0                
   1   281   # baseline.fmi_loggingOn
  -1      60                       0                       0                
@@ -15336,6 +15436,10 @@ double initialValue(10063,6)
   6  1344   # baseline.internal.V_la
   0       0                       0                       0                
   6  1344   # baseline.internal.q_mv
+  0       0                       0                       0                
+  6  1344   # baseline.internal.CPUtime
+  0       0                       0                       0                
+  6  1344   # baseline.internal.EventCounter
   0       0                       0                       0                
   6   256   # exercise.settings.phi0
   0       0                       0                 1.0000000000000000E+100
@@ -15482,6 +15586,10 @@ double initialValue(10063,6)
   6   256   # exercise.settings.pulm_R
   0       0                       0                       0                
   6   256   # exercise.settings.pulm_R_exp
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # exercise.settings.pulm_PV_R_vis
+  0       0                       0                       0                
+  6   256   # exercise.settings.pulm_tp_pleural_frac
  -1  5.0000000000000000E-01       0                       0                
   1   280   # exercise.settings.experimental_zpv_factor
  -1       1                       0                       0                
@@ -20126,6 +20234,8 @@ double initialValue(10063,6)
   1   280   # exercise.pulmonaryComponent.phi_factor.eta
  -1       0                       0                       0                
   1   280   # exercise.pulmonaryComponent.fraction.k
+ -1       1                       0                 1.0000000000000000E+100
+  1   280   # exercise.pulmonaryComponent.R_pv_visc.Resistance
  -1       5                       0                 1.0000000000000000E+100
   1   280   # exercise.phi_fixed.rising
  -1      50                       0                 1.0000000000000000E+100
@@ -20167,21 +20277,21 @@ double initialValue(10063,6)
  -1      40                       0                       0                
   1   280   # exercise.thoracic_pressure_ramp.startTime
  -1       1                       0                       0                
-  1   281   # exercise.condTP.disconnected
+  1   281   # exercise.condTP_EP.disconnected
  -1       0                       0                       0                
-  1   280   # exercise.condTP.disconnectedValue
+  1   280   # exercise.condTP_EP.disconnectedValue
  -1       0                       0                       0                
-  1   280   # exercise.condTP.delayTime
+  1   280   # exercise.condTP_EP.delayTime
  -1  9.9999999999999995E+59       0                       0                
-  1   280   # exercise.condTP.uMax
+  1   280   # exercise.condTP_EP.uMax
  -1  2.5000000000000000E-01       0                       0                
-  1   280   # exercise.condTP.phi0
+  1   280   # exercise.condTP_EP.phi0
+ -1       0                       0                       0                
+  1   280   # exercise.condTP_EP.const_offset
  -1       1                       0                       0                
-  1   280   # exercise.condTP.phi_gain
+  1   280   # exercise.condTP_EP.add3_1.k1
  -1       1                       0                       0                
-  1   280   # exercise.condTP.add3_1.k1
- -1       1                       0                       0                
-  1   280   # exercise.condTP.add3_1.k2
+  1   280   # exercise.condTP_EP.add3_1.k2
  -1       0                       0                       0                
   1   281   # exercise.condSystemicPhi.disconnected
  -1  2.5000000000000000E-01       0                       0                
@@ -20210,6 +20320,24 @@ double initialValue(10063,6)
   1   280   # exercise.condHeartPhi.add3_1.k1
  -1       1                       0                       0                
   1   280   # exercise.condHeartPhi.add3_1.k2
+ -1       1                       0                       0                
+  1   281   # exercise.condTP_IP.disconnected
+ -1       0                       0                       0                
+  1   280   # exercise.condTP_IP.disconnectedValue
+ -1       0                       0                       0                
+  1   280   # exercise.condTP_IP.delayTime
+ -1  9.9999999999999995E+59       0                       0                
+  1   280   # exercise.condTP_IP.uMax
+ -1       0                       0                       0                
+  1   280   # exercise.condTP_IP.phi0
+ -1       1                       0                       0                
+  1   280   # exercise.condTP_IP.phi_gain
+ -1       0                       0                       0                
+  1   280   # exercise.condTP_IP.const_offset
+ -1       1                       0                       0                
+  1   280   # exercise.condTP_IP.add3_1.k1
+ -1       1                       0                       0                
+  1   280   # exercise.condTP_IP.add3_1.k2
  -1       1                       0                       0                
   1   280   # exercise.Exercise.height
  -1       5                       0                 1.0000000000000000E+100
@@ -20254,11 +20382,15 @@ double initialValue(10063,6)
   6   320   # exercise.V_la
   0       0                       0                       0                
   6   320   # exercise.q_mv
+  0       0                       0                       0                
+  6   320   # exercise.CPUtime
+  0       0                       0                       0                
+  6   320   # exercise.EventCounter
  -1       0                       0                       0                
   1   281   # exercise.fmi_loggingOn
- -1      60                       0                       0                
+ -1     200                       0                       0                
   1   280   # exercise.fmi_StartTime
- -1     120                       0                       0                
+ -1     320                       0                       0                
   1   280   # exercise.fmi_StopTime
   0       0                       0                       0                
   6   256   # exercise.fmi_NumberOfSteps
@@ -20320,6 +20452,10 @@ double initialValue(10063,6)
   6  1344   # exercise.internal.V_la
   0       0                       0                       0                
   6  1344   # exercise.internal.q_mv
+  0       0                       0                       0                
+  6  1344   # exercise.internal.CPUtime
+  0       0                       0                       0                
+  6  1344   # exercise.internal.EventCounter
   0       0                       0                       0                
   6   256   # tilt.settings.phi0
   0       0                       0                 1.0000000000000000E+100
@@ -20466,6 +20602,10 @@ double initialValue(10063,6)
   6   256   # tilt.settings.pulm_R
   0       0                       0                       0                
   6   256   # tilt.settings.pulm_R_exp
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # tilt.settings.pulm_PV_R_vis
+  0       0                       0                       0                
+  6   256   # tilt.settings.pulm_tp_pleural_frac
  -1  5.0000000000000000E-01       0                       0                
   1   280   # tilt.settings.experimental_zpv_factor
  -1       1                       0                       0                
@@ -25110,6 +25250,8 @@ double initialValue(10063,6)
   1   280   # tilt.pulmonaryComponent.phi_factor.eta
  -1       0                       0                       0                
   1   280   # tilt.pulmonaryComponent.fraction.k
+ -1       1                       0                 1.0000000000000000E+100
+  1   280   # tilt.pulmonaryComponent.R_pv_visc.Resistance
  -1  7.5000000000000000E-01       0                       0                
   1   280   # tilt.phi_fixed.amplitude
  -1       2                       0                 1.0000000000000000E+100
@@ -25155,21 +25297,21 @@ double initialValue(10063,6)
  -1      40                       0                       0                
   1   280   # tilt.thoracic_pressure_ramp.startTime
  -1       1                       0                       0                
-  1   281   # tilt.condTP.disconnected
+  1   281   # tilt.condTP_EP.disconnected
  -1       0                       0                       0                
-  1   280   # tilt.condTP.disconnectedValue
+  1   280   # tilt.condTP_EP.disconnectedValue
  -1       0                       0                       0                
-  1   280   # tilt.condTP.delayTime
+  1   280   # tilt.condTP_EP.delayTime
  -1  9.9999999999999995E+59       0                       0                
-  1   280   # tilt.condTP.uMax
+  1   280   # tilt.condTP_EP.uMax
  -1  2.5000000000000000E-01       0                       0                
-  1   280   # tilt.condTP.phi0
+  1   280   # tilt.condTP_EP.phi0
+ -1       0                       0                       0                
+  1   280   # tilt.condTP_EP.const_offset
  -1       1                       0                       0                
-  1   280   # tilt.condTP.phi_gain
+  1   280   # tilt.condTP_EP.add3_1.k1
  -1       1                       0                       0                
-  1   280   # tilt.condTP.add3_1.k1
- -1       1                       0                       0                
-  1   280   # tilt.condTP.add3_1.k2
+  1   280   # tilt.condTP_EP.add3_1.k2
  -1       0                       0                       0                
   1   281   # tilt.condSystemicPhi.disconnected
  -1  2.5000000000000000E-01       0                       0                
@@ -25198,6 +25340,24 @@ double initialValue(10063,6)
   1   280   # tilt.condHeartPhi.add3_1.k1
  -1       1                       0                       0                
   1   280   # tilt.condHeartPhi.add3_1.k2
+ -1       1                       0                       0                
+  1   281   # tilt.condTP_IP.disconnected
+ -1       0                       0                       0                
+  1   280   # tilt.condTP_IP.disconnectedValue
+ -1       0                       0                       0                
+  1   280   # tilt.condTP_IP.delayTime
+ -1  9.9999999999999995E+59       0                       0                
+  1   280   # tilt.condTP_IP.uMax
+ -1       0                       0                       0                
+  1   280   # tilt.condTP_IP.phi0
+ -1       1                       0                       0                
+  1   280   # tilt.condTP_IP.phi_gain
+ -1       0                       0                       0                
+  1   280   # tilt.condTP_IP.const_offset
+ -1       1                       0                       0                
+  1   280   # tilt.condTP_IP.add3_1.k1
+ -1       1                       0                       0                
+  1   280   # tilt.condTP_IP.add3_1.k2
  -1  1.0471975511965976E+00       0                       0                
   1   280   # tilt.Tilt_ramp.height
  -1       5                       0                 1.0000000000000000E+100
@@ -25242,11 +25402,15 @@ double initialValue(10063,6)
   6   320   # tilt.V_la
   0       0                       0                       0                
   6   320   # tilt.q_mv
+  0       0                       0                       0                
+  6   320   # tilt.CPUtime
+  0       0                       0                       0                
+  6   320   # tilt.EventCounter
  -1       0                       0                       0                
   1   281   # tilt.fmi_loggingOn
- -1       0                       0                       0                
+ -1     200                       0                       0                
   1   280   # tilt.fmi_StartTime
- -1     120                       0                       0                
+ -1     320                       0                       0                
   1   280   # tilt.fmi_StopTime
   0       0                       0                       0                
   6   256   # tilt.fmi_NumberOfSteps
@@ -25308,6 +25472,10 @@ double initialValue(10063,6)
   6  1344   # tilt.internal.V_la
   0       0                       0                       0                
   6  1344   # tilt.internal.q_mv
+  0       0                       0                       0                
+  6  1344   # tilt.internal.CPUtime
+  0       0                       0                       0                
+  6  1344   # tilt.internal.EventCounter
   0       0                       0                       0                
   6   256   # valsalva.settings.phi0
   0       0                       0                 1.0000000000000000E+100
@@ -25454,6 +25622,10 @@ double initialValue(10063,6)
   6   256   # valsalva.settings.pulm_R
   0       0                       0                       0                
   6   256   # valsalva.settings.pulm_R_exp
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # valsalva.settings.pulm_PV_R_vis
+  0       0                       0                       0                
+  6   256   # valsalva.settings.pulm_tp_pleural_frac
  -1  5.0000000000000000E-01       0                       0                
   1   280   # valsalva.settings.experimental_zpv_factor
  -1       1                       0                       0                
@@ -30098,6 +30270,8 @@ double initialValue(10063,6)
   1   280   # valsalva.pulmonaryComponent.phi_factor.eta
  -1       0                       0                       0                
   1   280   # valsalva.pulmonaryComponent.fraction.k
+ -1       1                       0                 1.0000000000000000E+100
+  1   280   # valsalva.pulmonaryComponent.R_pv_visc.Resistance
  -1  7.5000000000000000E-01       0                       0                
   1   280   # valsalva.phi_fixed.amplitude
  -1       2                       0                 1.0000000000000000E+100
@@ -30126,7 +30300,7 @@ double initialValue(10063,6)
   1   280   # valsalva.condHRPhi.add3_1.k1
  -1       1                       0                       0                
   1   280   # valsalva.condHRPhi.add3_1.k2
- -1    5320                       0                       0                
+ -1  5.3327999999999993E+03       0                       0                
   1   280   # valsalva.thoracic_pressure_ramp.amplitude
  -1       1                       0                 1.0000000000000000E+100
   1   280   # valsalva.thoracic_pressure_ramp.rising
@@ -30143,21 +30317,21 @@ double initialValue(10063,6)
  -1      20                       0                       0                
   1   280   # valsalva.thoracic_pressure_ramp.startTime
  -1       0                       0                       0                
-  1   281   # valsalva.condTP.disconnected
+  1   281   # valsalva.condTP_EP.disconnected
  -1       0                       0                       0                
-  1   280   # valsalva.condTP.disconnectedValue
+  1   280   # valsalva.condTP_EP.disconnectedValue
  -1       0                       0                       0                
-  1   280   # valsalva.condTP.delayTime
+  1   280   # valsalva.condTP_EP.delayTime
  -1  9.9999999999999995E+59       0                       0                
-  1   280   # valsalva.condTP.uMax
+  1   280   # valsalva.condTP_EP.uMax
  -1  2.5000000000000000E-01       0                       0                
-  1   280   # valsalva.condTP.phi0
+  1   280   # valsalva.condTP_EP.phi0
+ -1       0                       0                       0                
+  1   280   # valsalva.condTP_EP.const_offset
  -1       1                       0                       0                
-  1   280   # valsalva.condTP.phi_gain
+  1   280   # valsalva.condTP_EP.add3_1.k1
  -1       1                       0                       0                
-  1   280   # valsalva.condTP.add3_1.k1
- -1       1                       0                       0                
-  1   280   # valsalva.condTP.add3_1.k2
+  1   280   # valsalva.condTP_EP.add3_1.k2
  -1       0                       0                       0                
   1   281   # valsalva.condSystemicPhi.disconnected
  -1  2.5000000000000000E-01       0                       0                
@@ -30186,6 +30360,24 @@ double initialValue(10063,6)
   1   280   # valsalva.condHeartPhi.add3_1.k1
  -1       1                       0                       0                
   1   280   # valsalva.condHeartPhi.add3_1.k2
+ -1       0                       0                       0                
+  1   281   # valsalva.condTP_IP.disconnected
+ -1       0                       0                       0                
+  1   280   # valsalva.condTP_IP.disconnectedValue
+ -1       0                       0                       0                
+  1   280   # valsalva.condTP_IP.delayTime
+ -1  9.9999999999999995E+59       0                       0                
+  1   280   # valsalva.condTP_IP.uMax
+ -1       0                       0                       0                
+  1   280   # valsalva.condTP_IP.phi0
+ -1       1                       0                       0                
+  1   280   # valsalva.condTP_IP.phi_gain
+ -1       0                       0                       0                
+  1   280   # valsalva.condTP_IP.const_offset
+ -1       1                       0                       0                
+  1   280   # valsalva.condTP_IP.add3_1.k1
+ -1       1                       0                       0                
+  1   280   # valsalva.condTP_IP.add3_1.k2
   0       0                       0                       0                
   6   320   # valsalva.brachial_pressure
   0       0                       0                       0                
@@ -30222,6 +30414,10 @@ double initialValue(10063,6)
   6   320   # valsalva.V_la
   0       0                       0                       0                
   6   320   # valsalva.q_mv
+  0       0                       0                       0                
+  6   320   # valsalva.CPUtime
+  0       0                       0                       0                
+  6   320   # valsalva.EventCounter
  -1       0                       0                       0                
   1   281   # valsalva.fmi_loggingOn
  -1      60                       0                       0                
@@ -30289,11 +30485,19 @@ double initialValue(10063,6)
   0       0                       0                       0                
   6  1344   # valsalva.internal.q_mv
   0       0                       0                       0                
+  6  1344   # valsalva.internal.CPUtime
+  0       0                       0                       0                
+  6  1344   # valsalva.internal.EventCounter
+  0       0                       0                       0                
   6   256   # steps
  -1     120                       0                       0                
   1   280   # endTime
  -1  1.0000000000000000E-02       0                       0                
   1   280   # stepInterval
+  0       0                       0                       0                
+  4   256   # CPUtime
+  0       0                       0                       0                
+  4   256   # EventCounter
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -30344,7 +30548,7 @@ double initialValue(10063,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(10063,186)
+char initialDescription(10131,186)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -30366,7 +30570,7 @@ Minimal driving offset at maximal activation [1|%]
 nominal systolic contraction time [s|s]
 nominal systolic contraction time at maximal activation [s|min]
 Systolic relaxation time [s|s]
-minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
+minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
 Time from start of the atrial cycle [s|s]
 nominal driving offset as a fraction of E_0 [1|%]
 Maximal elastance 0.05 + 0.15 mmhg/ml [Pa/m3|mmHg/ml]
@@ -30430,13 +30634,15 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [Hz|Hz]
+rising factor of the sympathetic activation phi [Hz] [Hz|1/min]
 decrease factor of the phi
 mL/min [m3/s]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
 Pulmonary arterial compliance, CO_target/15/_HR mL/mmHg [m3/Pa|ml/mmHg]
-Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(dyn.s)/cm5]
+Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(mmHg.min)/ml]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp)
+Pulmonary veins viscoleastic resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
 A fraction of venous nominal diameter which creates ZPV for linear veins [1|%]
 A fraction of nominal C [1|%]
 Baseline resting phi [1|%]
@@ -30457,7 +30663,7 @@ Minimal driving offset at maximal activation [1|%]
 nominal systolic contraction time [s|s]
 nominal systolic contraction time at maximal activation [s|min]
 Systolic relaxation time [s|s]
-minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
+minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
 nominal driving offset as a fraction of E_0 [1|%]
 Maximal elastance 0.05 + 0.15 mmhg/ml [Pa/m3|mmHg/ml]
 Factor affecting ventricular walls volume [1|%]
@@ -30505,13 +30711,15 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [s-1|Hz]
+rising factor of the sympathetic activation phi [Hz] [s-1|1/min]
 decrease factor of the phi
 mL/min [m3/s]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
 Pulmonary arterial compliance, CO_target/15/_HR mL/mmHg [m3/Pa|ml/mmHg]
-Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(dyn.s)/cm5]
+Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(mmHg.min)/ml]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp)
+Pulmonary veins viscoleastic resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
 A fraction of venous nominal diameter which creates ZPV for linear veins [|%]
 A fraction of nominal C [|%]
 The height at which the left brachial artery is divided to have pressure measure at heart level [m|cm]
@@ -32834,6 +33042,7 @@ External pressure. Set zero if internal pressure is relative to external. Valid 
 [|%]
 Factor to multiply the relative phi [|%]
 Constant Fraction output value [|%]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
 Amplitude of trapezoid
 Rising duration of trapezoid [s]
 Width duration of trapezoid [s]
@@ -32861,7 +33070,7 @@ output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
 Default phi0
-Phi Gain multiplier
+
 Gain of input signal 1
 Gain of input signal 2
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
@@ -32876,6 +33085,15 @@ output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
 Phi Gain multiplier
+Gain of input signal 1
+Gain of input signal 2
+When true, the parameter value is used as fixed output [:#(type=Boolean)]
+output for disconnected = true. Use SI units!
+Delay time of output with respect to input signal [s]
+Upper limits of input signals
+Default phi0
+Phi Gain multiplier
+
 Gain of input signal 1
 Gain of input signal 2
 [Pa|mmHg]
@@ -32896,6 +33114,8 @@ Pressure in pulmonary veins [Pa|mmHg]
 Distance between carotid_L48 and femoral_R222 for calculating pulse wave propagation speed
 Left atrium volume output [m3|ml]
 Flow in mitral valve [m3/s|ml/min]
+[s]
+
 [:#(type=Boolean)]
 
 
@@ -32929,6 +33149,8 @@ relative tolerance for the internal solver of the fmu
 
 [m3]
 [m3/s]
+[s]
+
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 
@@ -32947,7 +33169,7 @@ Minimal driving offset at maximal activation [1|%]
 nominal systolic contraction time [s|s]
 nominal systolic contraction time at maximal activation [s|min]
 Systolic relaxation time [s|s]
-minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
+minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
 nominal driving offset as a fraction of E_0 [1|%]
 Maximal elastance 0.05 + 0.15 mmhg/ml [Pa/m3|mmHg/ml]
 Factor affecting ventricular walls volume [1|%]
@@ -32995,13 +33217,15 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [s-1|Hz]
+rising factor of the sympathetic activation phi [Hz] [s-1|1/min]
 decrease factor of the phi
 mL/min [m3/s]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
 Pulmonary arterial compliance, CO_target/15/_HR mL/mmHg [m3/Pa|ml/mmHg]
-Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(dyn.s)/cm5]
+Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(mmHg.min)/ml]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp)
+Pulmonary veins viscoleastic resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
 A fraction of venous nominal diameter which creates ZPV for linear veins [|%]
 A fraction of nominal C [|%]
 The height at which the left brachial artery is divided to have pressure measure at heart level [m|cm]
@@ -35324,6 +35548,7 @@ External pressure. Set zero if internal pressure is relative to external. Valid 
 [|%]
 Factor to multiply the relative phi [|%]
 Constant Fraction output value [|%]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
 Rising duration of trapezoid [s|s]
 Width duration of trapezoid [s|s]
 Falling duration of trapezoid [s|s]
@@ -35349,7 +35574,7 @@ output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
 Default phi0
-Phi Gain multiplier
+
 Gain of input signal 1
 Gain of input signal 2
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
@@ -35364,6 +35589,15 @@ output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
 Phi Gain multiplier
+Gain of input signal 1
+Gain of input signal 2
+When true, the parameter value is used as fixed output [:#(type=Boolean)]
+output for disconnected = true. Use SI units!
+Delay time of output with respect to input signal [s]
+Upper limits of input signals
+Default phi0
+Phi Gain multiplier
+
 Gain of input signal 1
 Gain of input signal 2
 Height of ramps
@@ -35388,6 +35622,8 @@ Pressure in pulmonary veins [Pa|mmHg]
 Distance between carotid_L48 and femoral_R222 for calculating pulse wave propagation speed
 Left atrium volume output [m3|ml]
 Flow in mitral valve [m3/s|ml/min]
+[s]
+
 [:#(type=Boolean)]
 
 
@@ -35421,6 +35657,8 @@ relative tolerance for the internal solver of the fmu
 
 [m3]
 [m3/s]
+[s]
+
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 
@@ -35439,7 +35677,7 @@ Minimal driving offset at maximal activation [1|%]
 nominal systolic contraction time [s|s]
 nominal systolic contraction time at maximal activation [s|min]
 Systolic relaxation time [s|s]
-minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
+minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
 nominal driving offset as a fraction of E_0 [1|%]
 Maximal elastance 0.05 + 0.15 mmhg/ml [Pa/m3|mmHg/ml]
 Factor affecting ventricular walls volume [1|%]
@@ -35487,13 +35725,15 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [s-1|Hz]
+rising factor of the sympathetic activation phi [Hz] [s-1|1/min]
 decrease factor of the phi
 mL/min [m3/s]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
 Pulmonary arterial compliance, CO_target/15/_HR mL/mmHg [m3/Pa|ml/mmHg]
-Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(dyn.s)/cm5]
+Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(mmHg.min)/ml]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp)
+Pulmonary veins viscoleastic resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
 A fraction of venous nominal diameter which creates ZPV for linear veins [|%]
 A fraction of nominal C [|%]
 The height at which the left brachial artery is divided to have pressure measure at heart level [m|cm]
@@ -37816,6 +38056,7 @@ External pressure. Set zero if internal pressure is relative to external. Valid 
 [|%]
 Factor to multiply the relative phi [|%]
 Constant Fraction output value [|%]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
 Amplitude of trapezoid
 Rising duration of trapezoid [s]
 Width duration of trapezoid [s]
@@ -37843,7 +38084,7 @@ output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
 Default phi0
-Phi Gain multiplier
+
 Gain of input signal 1
 Gain of input signal 2
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
@@ -37858,6 +38099,15 @@ output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
 Phi Gain multiplier
+Gain of input signal 1
+Gain of input signal 2
+When true, the parameter value is used as fixed output [:#(type=Boolean)]
+output for disconnected = true. Use SI units!
+Delay time of output with respect to input signal [s]
+Upper limits of input signals
+Default phi0
+Phi Gain multiplier
+
 Gain of input signal 1
 Gain of input signal 2
 Height of ramps [rad]
@@ -37882,6 +38132,8 @@ Pressure in pulmonary veins [Pa|mmHg]
 Distance between carotid_L48 and femoral_R222 for calculating pulse wave propagation speed
 Left atrium volume output [m3|ml]
 Flow in mitral valve [m3/s|ml/min]
+[s]
+
 [:#(type=Boolean)]
 
 
@@ -37915,6 +38167,8 @@ relative tolerance for the internal solver of the fmu
 
 [m3]
 [m3/s]
+[s]
+
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 
@@ -37933,7 +38187,7 @@ Minimal driving offset at maximal activation [1|%]
 nominal systolic contraction time [s|s]
 nominal systolic contraction time at maximal activation [s|min]
 Systolic relaxation time [s|s]
-minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
+minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
 nominal driving offset as a fraction of E_0 [1|%]
 Maximal elastance 0.05 + 0.15 mmhg/ml [Pa/m3|mmHg/ml]
 Factor affecting ventricular walls volume [1|%]
@@ -37981,13 +38235,15 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [s-1|Hz]
+rising factor of the sympathetic activation phi [Hz] [s-1|1/min]
 decrease factor of the phi
 mL/min [m3/s]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
 Pulmonary arterial compliance, CO_target/15/_HR mL/mmHg [m3/Pa|ml/mmHg]
-Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(dyn.s)/cm5]
+Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(mmHg.min)/ml]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp)
+Pulmonary veins viscoleastic resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
 A fraction of venous nominal diameter which creates ZPV for linear veins [|%]
 A fraction of nominal C [|%]
 The height at which the left brachial artery is divided to have pressure measure at heart level [m|cm]
@@ -40310,6 +40566,7 @@ External pressure. Set zero if internal pressure is relative to external. Valid 
 [|%]
 Factor to multiply the relative phi [|%]
 Constant Fraction output value [|%]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
 Amplitude of trapezoid
 Rising duration of trapezoid [s]
 Width duration of trapezoid [s]
@@ -40337,7 +40594,7 @@ output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
 Default phi0
-Phi Gain multiplier
+
 Gain of input signal 1
 Gain of input signal 2
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
@@ -40352,6 +40609,15 @@ output for disconnected = true. Use SI units!
 Delay time of output with respect to input signal [s]
 Upper limits of input signals
 Phi Gain multiplier
+Gain of input signal 1
+Gain of input signal 2
+When true, the parameter value is used as fixed output [:#(type=Boolean)]
+output for disconnected = true. Use SI units!
+Delay time of output with respect to input signal [s]
+Upper limits of input signals
+Default phi0
+Phi Gain multiplier
+
 Gain of input signal 1
 Gain of input signal 2
 [Pa|mmHg]
@@ -40372,6 +40638,8 @@ Pressure in pulmonary veins [Pa|mmHg]
 Distance between carotid_L48 and femoral_R222 for calculating pulse wave propagation speed
 Left atrium volume output [m3|ml]
 Flow in mitral valve [m3/s|ml/min]
+[s]
+
 [:#(type=Boolean)]
 
 
@@ -40405,7 +40673,11 @@ relative tolerance for the internal solver of the fmu
 
 [m3]
 [m3/s]
+[s]
 
 
+
+
+[s]
 
 
