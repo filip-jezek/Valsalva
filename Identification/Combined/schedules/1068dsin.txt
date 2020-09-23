@@ -10188,7 +10188,7 @@ double initialValue(10063,6)
   1   281   # settings.initByPressure
  -1 -1.2975000000000000E-03 -1.0000000000000000E-02 1.0000000000000000E+100
   1   280   # settings.V_PV_init
- -1 1.09 0.0 0.0
+ -1 1.185 0.0 0.0
   1   280   # settings.chi_phi
  -1  1.3332238741500000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
@@ -10202,15 +10202,15 @@ double initialValue(10063,6)
   1   280   # settings.heart_gammaE
  -1  1.3933990000000000E-02       0                       0                
   1   280   # settings.heart_drive_D_0
- -1 7.22625E-4 0.0 0.0
+ -1 5.765625E-4 0.0 0.0
   1   280   # settings.heart_drive_D_0_maxAct
  -1  1.4000000000000001E-01       0                       0                
   1   280   # settings.heart_drive_TS
- -1 0.1287 0.0 0.0
+ -1 0.1079 0.0 0.0
   1   280   # settings.heart_drive_TS_maxAct
  -1  3.8000000000000000E-01       0                       0                
   1   280   # settings.heart_drive_TR
- -1 0.118728 0.0 0.0
+ -1 0.095472 0.0 0.0
   1   280   # settings.heart_drive_TR_maxAct
  -1 -1.4000000000000001E-01       0                       0                
   1   280   # settings.heart_drive_atr_Tact
@@ -10224,11 +10224,11 @@ double initialValue(10063,6)
   1   280   # settings.heart_vntr_xi_AmRef
  -1  1.5298000000000000E+00       0                       0                
   1   280   # settings.heart_vntr_xi_sigma_act
- -1 18.0792 0.0 0.0
+ -1 16.007626 0.0 0.0
   1   280   # settings.heart_vntr_sigma_actMaxAct_factor
  -1       1                       0                       0                
   1   280   # settings.heart_vntr_k_passive_factor
- -1 0.808 0.0 0.0
+ -1 0.832 0.0 0.0
   1   280   # settings.syst_abd_P_th_ratio
  -1  1.3046590000000000E+08       0                 1.0000000000000000E+100
   1   280   # settings.syst_TPR
@@ -10236,11 +10236,11 @@ double initialValue(10063,6)
   1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
- -1 0.4266095 0.0 0.0
+ -1 0.4226095 0.0 0.0
   1   280   # settings.syst_art_k_E
  -1       1                       0                       0                
   1   281   # settings.syst_art_UseVasoconstrictionEffect
- -1 0.15895 0.0 0.0
+ -1 0.1267 0.0 0.0
   1   280   # settings.eta_vc
  -1       1                       0                       0                
   1   280   # settings.syst_tissues_hydrostaticLevel_correction
@@ -10256,7 +10256,7 @@ double initialValue(10063,6)
   1   280   # settings.tissues_SV_nom
  -1  1.0500000000000000E-04       0                       0                
   1   280   # settings.tissues_CO_nom
- -1 3.2033362 0.0 0.0
+ -1 3.3936327 0.0 0.0
   1   280   # settings.tissues_eta_Ra
  -1       0                       0                       0                
   1   280   # settings.tissues_tau_R
@@ -10268,13 +10268,13 @@ double initialValue(10063,6)
   1   281   # settings.tissues_UseStraighteningReaction2Phi
  -1  9.9999999999999995E-07       0                       0                
   1   280   # settings.tissues_V_max_breakPoint_Frac
- -1 0.2379312 0.0 0.0
+ -1 0.2676726 0.0 0.0
   1   280   # settings.tissues_eta_C
  -1  5.0000000000000000E-01       0                       0                
   1   280   # settings.tissues_gamma
- -1 32.776 0.0 0.0
+ -1 29.376 0.0 0.0
   1   280   # settings.tissues_chi_R
- -1 -0.1 0.0 0.0
+ -1 -0.12 0.0 0.0
   1   280   # settings.tissue_chi_C
  -1       0                       0                       0                
   1   280   # settings.veins_chi_pump
@@ -10282,7 +10282,7 @@ double initialValue(10063,6)
   1   280   # settings.eta_adenosine
  -1       1                       0                       0                
   1   281   # settings.veins_UsePhiEffect
- -1 0.05 0.0 0.0
+ -1 0.09 0.0 0.0
   1   280   # settings.veins_C_phi
  -1       0                       0                       0                
   1   280   # settings.veins_ZPV_phi
@@ -10328,7 +10328,7 @@ double initialValue(10063,6)
   1   281   # settings.baro_useAbsolutePressureTerm
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
- -1 112.17 0.0 0.0
+ -1 98.37 0.0 0.0
   1   280   # settings.baro_tau_s
  -1  2.6879999999999998E-01       0                       0                
   1   280   # settings.baro_xi_delta0
@@ -10338,19 +10338,19 @@ double initialValue(10063,6)
   1   280   # settings.baro_delta0_car
  -1  6.0625799999999996E-01       0                       0                
   1   280   # settings.baro_g
- -1 0.0337016 0.0 0.0
+ -1 0.0320656 0.0 0.0
   1   280   # settings.baro_fsn
- -1 0.003317 0.0 0.0
+ -1 0.003379 0.0 0.0
   1   280   # settings.baro_f1
  -1    4850                       0                       0                
   1   280   # settings.pulm_CO_target
- -1 1.908384E-7 0.0 0.0
+ -1 1.968021E-7 0.0 0.0
   1   280   # settings.pulm_C_PV
- -1 3.7625433E-8 0.0 0.0
+ -1 3.8195513E-8 0.0 0.0
   1   280   # settings.pulm_C_PA
- -1 1.4540018E7 0.0 1e+100
+ -1 1.4388562E7 0.0 1e+100
   1   280   # settings.pulm_R
- -1 1.04 0.0 0.0
+ -1 0.915 0.0 0.0
   1   280   # settings.pulm_R_exp
  -1  5.0000000000000000E-01       0                       0                
   1   280   # settings.experimental_zpv_factor
