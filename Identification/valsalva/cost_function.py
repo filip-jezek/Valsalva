@@ -213,22 +213,25 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     objectives.extend(map(buildTimeObjective, time_values))
     
     # penalize by too low SV in wide area - SV should not go below also in phase 4
-    if SV is not None:
-        # during valsalva SV should not go below 25ml
-        phase2_interval, _ = getInterval(phase2, (2, -1))
-        sv_val_valsalva = numpy.min(SV[phase2_interval])
-        # interval spans from valsalva release to complete recovery - we should not go below 90% of normal SV, but lets say 60%
-        recovery_interval, _ = getInterval(phase4, [3, 4])
-        sv_val_recovery = numpy.min(SV[recovery_interval])
-    else:
-        # we do not have the value, so just usethe lower limit
-        sv_val_valsalva = 30
-
+    # during valsalva SV should not go below 25ml
+    phase2_interval, _ = getInterval(phase2, (2, -1))
+    sv_val_valsalva = numpy.min(SV[phase2_interval])
     sv_objective = fun_lib.ObjectiveVar(
             'SV_min_valsalva', 
             sv_val_valsalva, limit=[25, 150], std = 25*0.1, k_p=10)
     objectives.append(sv_objective)
 
+    # The decrease should be slower
+    phase1_interval, _ = getInterval(phase1, None)
+    sv_val_midValsalva = numpy.min(SV[phase1_interval])
+    sv_objective = fun_lib.ObjectiveVar(
+            'SV_min_midValsalva', 
+            sv_val_valsalva, limit=[60, 150], std = 50*0.1, k_p=10)
+    objectives.append(sv_objective)
+
+    # interval spans from valsalva release to complete recovery - we should not go below 90% of normal SV, but lets say 60%
+    recovery_interval, _ = getInterval(phase4, [3, 4])
+    sv_val_recovery = numpy.min(SV[recovery_interval])
     sv_objective = fun_lib.ObjectiveVar(
             'SV_min_recovery', 
             sv_val_recovery, limit=[60, 200], std = 60*0.1, k_p=10)

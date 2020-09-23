@@ -130,8 +130,8 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
 
     # they append inside
     buildCostObjective('baseline', 'optimizeBaselineTriSegLumens', 10)
-    buildCostObjective('tilt', 'optimizeTilt', 1)
-    buildCostObjective('exercise', 'MaxExercise', 1)
+#    buildCostObjective('tilt', 'optimizeTilt', 1)
+#    buildCostObjective('exercise', 'MaxExercise', 1)
     # open the data folder
     vars_set['__targetValuesFilename'] = targetsFolder + 'targetValues_All_supine.txt'
     buildCostObjective('valsalva', 'valsalva', 1)
