@@ -433,3 +433,10 @@ def checkSimulationLength(simulationTime, minimalSimulationTime):
 
         raise SimulationResultIncompleteError(simulationTime, minimalSimulationTime, filename)
         
+def writeToFile(filename, time:Iterable, signal:Iterable):
+    with open(filename, 'w') as file:
+        file.write('Time, var\n')
+        for t, s in zip(time, signal):
+            file.write('%.2f, %.6e\n' % (t, s))
+    
+    print("Written to %s, mate" % filename)

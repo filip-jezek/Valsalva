@@ -143,7 +143,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
     
     # divide valsalva phases    
     # pre-valsalva
-    phase0 = (sim_start, valsalva_start)
+    phase0 = (sim_start + 2, valsalva_start)
     # overshoot phase at start of the valsalva
     phase1 = (valsalva_start, valsalva_start + 5)
     # min mean pressure during valsalva

@@ -368,6 +368,13 @@ Algorithm{
   MeshSizeExponentIncrement = 1;
   NumberOfStepReduction = 4;
 }""" )
+# Algorithm{
+#  Main = GPSHookeJeeves;
+#  MeshSizeDivider = 2;
+#  InitialMeshSizeExponent = 0;
+#  MeshSizeExponentIncrement = 1;
+#  NumberOfStepReduction = 6;
+# }""" )
             # jsut to get back at proper  indent
             pass
 
