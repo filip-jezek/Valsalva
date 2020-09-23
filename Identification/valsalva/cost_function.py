@@ -226,7 +226,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
 
     sv_objective = fun_lib.ObjectiveVar(
             'SV_min_valsalva', 
-            sv_val_valsalva, limit=[25, 150], std = 25*0.1, k_p=1)
+            sv_val_valsalva, limit=[25, 150], std = 25*0.1, k_p=10)
     objectives.append(sv_objective)
 
     sv_objective = fun_lib.ObjectiveVar(
