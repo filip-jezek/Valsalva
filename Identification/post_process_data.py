@@ -208,12 +208,12 @@ def writeTargetValues(targetValues, targetStds, file_set):
 
 
 
-def plotTargetValues(targetValues, targetStds, styles = ('k', 'b', 'g', 'c')):
+def plotTargetValues(targetValues, targetStds, styles = ('k', 'b', 'g', 'c', 'y', 'm')):
     """    PLots in the curent plot.
-    styles = (bp_base_s, bp_s, hr_base_s, hr_s)
+    styles = (bp_base_s, bp_s, hr_base_s, hr_s, pp_base_s, pp_s)
     """
 
-    (bp_base_s, bp_s, hr_base_s, hr_s) = styles
+    (bp_base_s, bp_s, hr_base_s, hr_s, pp_base_s, pp_s) = styles
 
     # plot merged timecourse
     valsalva_start = 20
@@ -223,6 +223,7 @@ def plotTargetValues(targetValues, targetStds, styles = ('k', 'b', 'g', 'c')):
     recovery_bp = targetValues['ph5_recovery']*baseline_bp
     baseline_hr = targetValues['baseline_hr']
     recovery_hr = targetValues['ph5_hr_recovery']*baseline_hr
+    baseline_pp = targetValues['baseline_pp']
 
     plt.plot((0, valsalva_start), [baseline_bp]*2, bp_base_s)
     plt.errorbar((valsalva_start/2), baseline_bp, yerr=targetStds['baseline_bp'], fmt = bp_s)
@@ -233,6 +234,9 @@ def plotTargetValues(targetValues, targetStds, styles = ('k', 'b', 'g', 'c')):
     plt.errorbar((valsalva_start/2), baseline_hr, yerr=targetStds['baseline_hr'], fmt = hr_s)
     plt.plot((signal_end - 5, signal_end), [recovery_hr]*2, hr_base_s)
     plt.errorbar((signal_end - 2.5), recovery_hr, yerr=targetStds['ph5_hr_recovery']*baseline_bp, fmt = hr_s)
+
+    plt.plot((0, valsalva_start), [baseline_pp]*2, pp_base_s)
+    plt.errorbar((valsalva_start/2), baseline_pp, yerr=targetStds['baseline_pp'], fmt = pp_s)
 
     def plotMetric(t_val, t_offset, val, baseline, color):
         val_mean = targetValues[val]*baseline
@@ -247,6 +251,10 @@ def plotTargetValues(targetValues, targetStds, styles = ('k', 'b', 'g', 'c')):
 
     def plotHRMetric(t_val, t_offset, val, color = hr_s):
         plotMetric(t_val, t_offset, val, baseline_hr, color)    
+    
+    def plotPPMetric(t_val, t_offset, val, color = pp_s):
+        plotMetric(t_val, t_offset, val, baseline_pp, color)    
+    
 
     plotBPMetric('t_ph1_peak', valsalva_start, 'ph1_peak')
     plotBPMetric('t_ph2_mean_min', valsalva_start, 'ph2_mean_min')
@@ -258,6 +266,10 @@ def plotTargetValues(targetValues, targetStds, styles = ('k', 'b', 'g', 'c')):
     plotHRMetric('t_ph4_hr_max', valsalva_end, 'ph4_hr_max')
     plotHRMetric('t_ph4_hr_drop', valsalva_end, 'ph4_hr_drop')
     plotHRMetric('t_ph4_ovrshoot', valsalva_end, 'ph5_hr_recovery')
+
+    plotPPMetric('t_ph2_mean_min', valsalva_start, 'pp_ph2_mean_min')
+    plotPPMetric('t_ph2_max', valsalva_end, 'pp_ph2_max')
+    plotPPMetric('t_ph4_drop', valsalva_end, 'pp_ph4_drop')
 
     plt.title('Avg metrics of \'%s\' with %d elements' % (file_set, len(files)))
     plt.ylim(-10, 180)
@@ -337,7 +349,8 @@ def getAndPlotTargetVals(file_set, style):
     plotTargetValues(targetVals, targetStds, style)
 
 plt.figure()
-getAndPlotTargetVals('All sitting', ('k', 'b', 'g', 'c'))
-getAndPlotTargetVals('All supine', ('k--', 'r', 'g--', 'm'))
-plt.title('Sit (full, blue, cyan) vs. supine (dashed, red, magenta) comparisson')
+getAndPlotTargetVals('All sitting', ('k', 'b', 'k', 'c', 'k', 'g'))
+getAndPlotTargetVals('All supine', ('k--', 'r:', 'k--', 'm:', 'k--', 'y:'))
+plt.title('Sit (full, blue, cyan, green) vs. supine (dashed, red, magenta, yellow) comparisson')
+plt.xlabel('mmHg, BPM, mmHg')
 plt.savefig(getTargetFileName('sit vs supine').replace('.txt', '.png') , dpi = 300)

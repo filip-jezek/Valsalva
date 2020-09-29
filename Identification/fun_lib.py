@@ -65,20 +65,20 @@ class ObjectiveVar:
             if target is None:
                 return 0            
             if self.std is None:
-                self.std = target*DEFAULT_STD_PERCENT/100
+                self.std = abs(target*DEFAULT_STD_PERCENT/100)
             # variance is squared standard deviation
             return self.weight*(measured - target)**2/(target*self.std)
 
         elif self.costFunctionType is CostFunctionType.Linear:
             if target is None:
                 return 0
-            return self.weight*abs(measured - target)/target
+            return self.weight*abs(measured - target)/abs(target)
 
         elif self.costFunctionType is CostFunctionType.LinearVariance:
             if target is None:
                 return 0
             if self.std is None:
-                self.std = target*DEFAULT_STD_PERCENT/100
+                self.std = abs(target*DEFAULT_STD_PERCENT/100)
             # variance is squared standard deviation
             return self.weight*abs(measured - target)/(self.std)
 
@@ -282,6 +282,26 @@ def getMeanRR(sig, peaks):
     means[peaks[-1]:] = [means[peaks[-1]-1]]*l
 
     return numpy.array(means)
+
+def getPPulseRR(sig, peaks):
+    """ Returns pulse pressure inbetween the peaks """
+
+    pp = [0]*len(sig)
+    for i in range(1, len(peaks)):
+        # loop from 2nd
+        # take range inbetween the means
+        rng = slice(peaks[i-1], peaks[i], 1)
+        # take mean from two peaks
+        pp[rng] = [sig[rng].max() - sig[rng].min()]*(rng.stop-rng.start)
+    
+    # fill in the begining - value of first peak, long up to first peak indice
+    pp[0: peaks[0]] = [pp[peaks[0]]]*peaks[0]
+
+    # fill in the last
+    l = len(pp[peaks[-1]:] )
+    pp[peaks[-1]:] = [pp[peaks[-1]-1]]*l
+
+    return numpy.array(pp)
 
 def getValsalvaStart(time, thoracic_pressure, threshold = 1330):
     
