@@ -114,12 +114,12 @@ def getInitParams(dsFileIn='dsin.txt', paramsFile='dsin.txt') -> dict:
                 if l.startswith('#'):
                     continue
                 s = l.rstrip('\n').split(',')
-                if len(s) == 1:
-                    op = OptimParam(s[0])
+                if len(s) >= 5: 
+                    op = OptimParam(s[0], min=s[2], max=s[3], step=s[4])                    
                 elif len(s) == 4: 
                     op = OptimParam(s[0], min=s[2], max=s[3])
-                elif len(s) == 5: 
-                    op = OptimParam(s[0], min=s[2], max=s[3], step=s[4])                    
+                elif len(s) >= 1:
+                    op = OptimParam(s[0])
                 ops[s[0]] = op
 
         params = getValsFromDsin(lines_all, ops.keys())
@@ -271,6 +271,7 @@ def getInputParams(dsFileIn='dsin.txt', filter = '', types = (280, 272), accept 
     Parameters
 
     filter  optional filter eg. filter='system.' returns params 'system.R' but not 'level.system.R'
+    types   280 being Real parameter,  272 initial value
     accept  optional variable type, 1 being parameters and 2 for initial values only. Default is both.
     """
 
@@ -287,17 +288,17 @@ def getInputParams(dsFileIn='dsin.txt', filter = '', types = (280, 272), accept 
     
     return tunable_params
 
-def writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'states.csv', accept = [2, 6], types = (280, 272, 361)):
-    initStates = getInputParams(dsFileIn, accept = accept, types = types)
+def writeInitStatesFromDsin(dsFileIn = 'dsin.txt', filter = '', outputFile = 'states.csv', accept = [2, 6], types = (280, 272, 361)):
+    initStates = getInputParams(dsFileIn, filter = filter, accept = accept, types = types)
 
     with open(dsFileIn) as file:
         lines = file.readlines()
 
     initStatesVals = getValsFromDsin(lines, initStates)
-    initStatesLines = list('%s;%.3e;\n' % (k, v) for (k, v) in initStatesVals.items())
+    initStatesLines = list('%s,%.3e\n' % (k, v) for (k, v) in initStatesVals.items())
 
     with open(outputFile, 'w') as file:
-        file.write('State variable;end value;\n')
+        file.write('# State variable;end value;\n')
         file.writelines(initStatesLines)
 
 def writeTunableParamsFromDsin(outputFile, filter='settings.'):
@@ -397,10 +398,10 @@ StopAtError = false;
     # jsut to get back at proper indent at the method end
     pass
 
-def writeInitParams(init_params:dict):
+def writeInitParams(init_params:dict, paramsFile = 'init_params_default_vals.csv'):
     """ Writes params with default values into csv"""
 
-    with open('init_params_default_vals.csv', 'w') as file:
+    with open(paramsFile, 'w') as file:
         file.write('# name, value, [min, max, step]\n')
         for param, optimParam in init_params.items():
 
@@ -410,16 +411,29 @@ def writeInitParams(init_params:dict):
                 s = '%s,%s,0,0,0\n' % (param, optimParam.value)
             file.write(s)
 
-def prepareSA():
-    paramsFile = 'params_for_SA.txt'
+def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False, minMaxRange = 0):
+    """
+
+    params
+
+    regenerateParamsFromDsin        rewrite the input file
+    minMaxRange     fraction of minmax span. Keeps the loaded val if 0.    
+    """
+   
     # generate the params_for_SA.txt parameters list, which may be further edited.
     # uncomment if thats the first run to get all tunable parameters
-    # writeTunableParamsFromDsin(paramsFile)
+    if regenerateParamsFromDsin:
+        writeTunableParamsFromDsin(paramsFile)
 
     init_params = getInitParams(dsFileIn='dsin.txt', paramsFile=paramsFile)
+
+    if minMaxRange > 0:
+        for op in init_params.values():
+            op._min = op.value*(1 + minMaxRange)
+            op._max = op.value*(1 - minMaxRange)
     
     # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
-    writeInitParams(init_params)
+    writeInitParams(init_params, paramsFile = paramsFile)
 
     build_opt_command_file('opt_command_SA.txt', init_params, step_frac=0.05)
 
@@ -443,8 +457,8 @@ def prepareIdent():
 
 if __name__ == "__main__":
 
-    # writeInitStatesFromDsin()
-    # prepareSA()
-    prepareIdent()
+    # writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'params_for_SA.txt', filter = 'settings.', accept = [1, 2], types = (280, 272, 361))
+    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0)
+    # prepareIdent()
     print('Done, Johne')
 

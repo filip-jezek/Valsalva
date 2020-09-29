@@ -84,7 +84,7 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time):
     pass
 
 
-def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARGETVARS_TAG + '.txt'):
+def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetValues_' + DEFAULT_TARGETVARS_TAG + '.txt'):
     """ Returns dict of objectives
     control variables:
     __targetValuesFilename
@@ -227,7 +227,7 @@ def getObjectives(vars_set, targetsFileName = r'../targetValues_' + DEFAULT_TARG
         o = fun_lib.getObjectiveByName(objectives, timeObjName).value + phase[0]
         i = fun_lib.findLowestIndex(o, time)
         value = ppulse[i]/baseline_pp
-        return fun_lib.ObjectiveVar(name, value=value)
+        return fun_lib.ObjectiveVar(name, value=value, weight=100)
     
     objectives.extend(map(buildPPObjective, pp_values))
     

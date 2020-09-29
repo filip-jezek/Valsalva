@@ -2480,7 +2480,7 @@ type"),       Text(
             annotation (Placement(transformation(extent={{-90,46},{-82,54}})));
 
           replaceable Physiolibrary.Hydraulic.Components.Resistor R_pv_visc(
-              useConductanceInput=false, Resistance(displayUnit="(Pa.s)/m3") =
+              useConductanceInput=false, Resistance(displayUnit="(Pa.s)/m3")=
               1) constrainedby Physiolibrary.Hydraulic.Components.Resistor
             annotation (Placement(transformation(
                 extent={{-10,-10},{10,10}},
@@ -2553,6 +2553,13 @@ type"),       Text(
         model PulmonaryTriSeg_NonLinear
           extends PulmonaryTriSeg(redeclare Basic.Resistor_NonLinear r_pa(
                 maxLinearFlow(displayUnit="l/min") = 1.6666666666667e-05));
+          replaceable Physiolibrary.Hydraulic.Components.ElasticVessel c_pv_instant(
+            volume_start(displayUnit="ml") = 1e-06,
+            ZeroPressureVolume=0,
+            Compliance(displayUnit="ml/mmHg") = settings.pulm_C_PV*1e-6,
+            useExternalPressureInput=false)
+            "Instantenous elasticity with negligibly small compliance just to prevent numerical issues"
+            annotation (Placement(transformation(extent={{48,10},{68,30}})));
           annotation (Icon(graphics={  Line(
                   points={{-64,-38},{-4,-38},{16,22}},
                   color={0,0,0},
@@ -34453,7 +34460,6 @@ P_hs_plus_dist"),
           extends Auxiliary.partialCVS(
             condTP_EP(disconnected=true),
             SystemicComponent(UseThoracic_PressureInput=true, UsePhi_Input=true),
-
             condHRPhi(disconnected=true),
             condSystemicPhi(disconnected=true),
             phi_fixed(
@@ -40386,6 +40392,41 @@ P_hs_plus_dist"),
               pulmonaryComponent(UseThoracic_PressureInput=true, r_pa(Q_nom(
                     displayUnit="l/min"))));
         end OlufsenTriSeg_valsalva_NonLinPulmonary;
+
+        model PulmonaryCompliance "Increased pulmonary compliance"
+          extends CVS_valsalva(
+          settings(
+              V_PV_init=1e-06*(-1297.5 - 100),
+              syst_abd_P_th_ratio=0.6,
+              eta_vc=0.24,
+              tissues_eta_Ra=4.003633,
+              pulm_C_PV=9.0007389101479e-08), heartComponent(ra(enabled=false),
+                la(enabled=false)));
+        end PulmonaryCompliance;
+
+        model ViscoElastic
+          "Added viscoelastic resistance to 1% of the compliance"
+          extends CVS_valsalva(pulmonaryComponent(R_pv_visc(Resistance=0.1/
+                    settings.pulm_C_PV)));
+        end ViscoElastic;
+
+        model pleuralPressureDrop
+          extends CVS_valsalva(settings(pulm_tp_pleural_frac=0.9));
+        end pleuralPressureDrop;
+
+        model ComplianceViscoElasticPleural "All at once"
+          extends CVS_valsalva(
+          settings(
+          pulm_tp_pleural_frac=0.9,
+          V_PV_init=1e-06*(-1297.5 + 200), pulm_C_PV=3.7503078792283e-07),
+        pulmonaryComponent(R_pv_visc(Resistance=0.01/settings.pulm_C_PV)));
+
+        end ComplianceViscoElasticPleural;
+
+        model delays "with delays estimated from pstras"
+          extends CVS_valsalva(
+            condSystemicPhi(delayEnabled=true, delayTime=2));
+        end delays;
       end Experiments;
 
       model CVS_valsalva
@@ -40398,9 +40439,9 @@ P_hs_plus_dist"),
           condTP_EP(disconnected=false),
           thoracic_pressure_ramp(
             amplitude=40*133.32,
-            rising=1,
-            width=14,
-            falling=1,
+            rising=0.1,
+            width=14.8,
+            falling=0.1,
             period=60,
             nperiod=-1,
             startTime=20));
@@ -40606,7 +40647,6 @@ P_hs_plus_dist"),
             ascending_aorta_D(volume(start=2.230859e-05, fixed=true)),
             aortic_arch_C2(volume(start=2.041107e-05, fixed=true)),
             brachiocephalic_trunk_C4(volume(start=1.38132045e-05, fixed=true)),
-
             aortic_arch_C46(volume(start=1.20968025e-05, fixed=true)),
             aortic_arch_C64(volume(start=8.30671e-06, fixed=true)),
             aortic_arch_C94(volume(start=4.5674187e-05, fixed=true)),
@@ -40691,43 +40731,34 @@ P_hs_plus_dist"),
             common_iliac_vein_R26(volume(start=3.4422876e-05, fixed=true)),
             external_iliac_vein_R28(volume(start=5.021792e-06, fixed=true)),
             internal_iliac_vein_T1_R30(volume(start=2.1512968e-05, fixed=true)),
-
             external_iliac_vein_R32(volume(start=5.8381942e-05, fixed=true)),
             femoral_vein_R34(volume(start=2.5383943e-06, fixed=true)),
             femoral_vein_R38(volume(start=2.0151767e-05, fixed=true)),
             profunda_femoris_vein_T2_R40(volume(start=5.6851968e-05, fixed=true)),
-
             femoral_vein_R42(volume(start=0.00014311404, fixed=true)),
             femoral_vein_R46(volume(start=7.882731e-06, fixed=true)),
             popliteal_vein_R48(volume(start=3.2238906e-05, fixed=true)),
             anterior_tibial_vein_T4_R50(volume(start=1.2560027e-05, fixed=true)),
-
             popliteal_vein_R52(volume(start=7.174824e-06, fixed=true)),
             posterior_tibial_vein_T6_R54(volume(start=1.510979e-05, fixed=true)),
-
             external_iliac_vein_L58(volume(start=5.0288463e-06, fixed=true)),
             internal_iliac_vein_T1_L60(volume(start=2.2132253e-05, fixed=true)),
-
             external_iliac_vein_L62(volume(start=5.732529e-05, fixed=true)),
             femoral_vein_L64(volume(start=2.9680893e-06, fixed=true)),
             femoral_vein_L68(volume(start=2.0155529e-05, fixed=true)),
             profunda_femoris_vein_T2_L70(volume(start=5.6862737e-05, fixed=true)),
-
             femoral_vein_L72(volume(start=0.00014314194, fixed=true)),
             femoral_vein_L76(volume(start=7.884217e-06, fixed=true)),
             popliteal_vein_L78(volume(start=3.2244967e-05, fixed=true)),
             anterior_tibial_vein_T4_L80(volume(start=1.2561283e-05, fixed=true)),
-
             popliteal_vein_L82(volume(start=7.176214e-06, fixed=true)),
             posterior_tibial_vein_T6_L84(volume(start=1.5111865e-05, fixed=true)),
-
             brachiocephalic_vein_R90(volume(start=3.457241e-05, fixed=true)),
             brachiocephalic_vein_L124(volume(start=6.480566e-05, fixed=true)),
             vertebral_vein_R92(volume(start=2.228121e-05, fixed=true)),
             brachiocephalic_vein_R94(volume(start=7.837579e-06, fixed=true)),
             subclavian_vein_R96(volume(start=3.8112298e-06, fixed=true)),
             internal_jugular_vein_R122(volume(start=0.00015054469, fixed=true)),
-
             external_jugular_vein_R98(volume(start=1.095506e-05, fixed=true)),
             subclavian_vein_R100(volume(start=1.5589061e-05, fixed=true)),
             axillary_vein_R102(volume(start=5.4815362e-05, fixed=true)),
@@ -40739,12 +40770,9 @@ P_hs_plus_dist"),
             radial_vein_T3_R120(volume(start=1.088816e-05, fixed=true)),
             vertebral_vein_L126(volume(start=2.0808297e-05, fixed=true)),
             brachiocephalic_vein_L128(volume(start=3.9618053e-06, fixed=true)),
-
             subclavian_vein_L130(volume(start=3.3901442e-06, fixed=true)),
             internal_jugular_vein_L156(volume(start=9.1456786e-05, fixed=true)),
-
             external_jugular_vein_L132(volume(start=1.0740036e-05, fixed=true)),
-
             subclavian_vein_L134(volume(start=1.5197589e-05, fixed=true)),
             axillary_vein_L136(volume(start=5.546331e-05, fixed=true)),
             brachial_vein_L138(volume(start=1.17376285e-05, fixed=true)),
