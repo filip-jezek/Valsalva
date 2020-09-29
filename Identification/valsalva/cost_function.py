@@ -218,16 +218,16 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
     objectives.extend(map(buildTimeObjective, time_values))
 
     # Get pulse pressures
-    pp_values = [('pp_ph2_mean_min', 't_ph2_mean_min', phase2),
-          ('pp_ph2_max', 't_ph2_max', phase4), # realtive to phase 4
-          ('pp_ph4_drop', 't_ph4_drop', phase4)]
+    pp_values = [('pp_ph2_mean_min', 't_ph2_mean_min', phase2, 1),
+          ('pp_ph2_max', 't_ph2_max', phase4, 1), # realtive to phase 4
+          ('pp_ph4_drop', 't_ph4_drop', phase4, 100)]
 
     def buildPPObjective(po):
-        (name, timeObjName, phase) = po
+        (name, timeObjName, phase, weight) = po
         o = fun_lib.getObjectiveByName(objectives, timeObjName).value + phase[0]
         i = fun_lib.findLowestIndex(o, time)
         value = ppulse[i]/baseline_pp
-        return fun_lib.ObjectiveVar(name, value=value, weight=100)
+        return fun_lib.ObjectiveVar(name, value=value, weight=weight)
     
     objectives.extend(map(buildPPObjective, pp_values))
     
