@@ -278,6 +278,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         start_at = fun_lib.findLowestIndex(15, time)
         ax.plot(time[start_at:], BP[start_at:], 'b')
         ax.plot(time, bp_mean, 'm')
+        ax.plot(time, ppulse, 'c')
         if SV is not None:
             ax.plot(time, SV, 'y')
         # ax.plot(time, TP, 'g')
@@ -307,6 +308,10 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         ax.plot(getObj('t_ph4_hr_max' ) + phase4[0], getObj('ph4_hr_max' )*baseline_hr, '*m')
         ax.plot(getObj('t_ph4_hr_drop') + phase4[0], getObj('ph4_hr_drop')*baseline_hr, '*m')
         ax.plot(phase5, [getObj('ph5_hr_recovery')*baseline_hr]*2, 'c')
+
+        ax.plot(getObj('t_ph2_mean_min') + phase2[0], getObj('pp_ph2_mean_min')*baseline_pp, '*y')
+        ax.plot(getObj('t_ph2_max') + phase4[0], getObj('pp_ph2_max')*baseline_pp, '*y')
+        ax.plot(getObj('t_ph4_drop') + phase4[0], getObj('pp_ph4_drop')*baseline_pp, '*y')
 
         plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time)
         ax.set_ylim([0, 165])

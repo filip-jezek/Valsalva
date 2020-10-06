@@ -15,7 +15,7 @@ from datetime import datetime
 
 VALUE_LOG_DIRNAME = '..\\Schedules'
 VALUE_LOG_FILENAME = '_current_costs.txt'
-DRAW_PLOTS_OVERRIDE = False
+DRAW_PLOTS_OVERRIDE = True
 READ_OBJECTIVES = True
 # If true loads ONLY non-constants
 OMIT_LOADING_PARAMS = True
