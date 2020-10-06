@@ -3,9 +3,11 @@ clear
 close all;
 
 %% BIG CITY lOOP
-files  = {'V_00_sup', 'V_01_sit', 'V_02_sit', 'V_03_sit', 'VEc_01_sup', 'VEc_02_sup', 'VEc_03_sup'};
+% files  = {'V_00_sup', 'V_01_sit', 'V_02_sit', 'V_03_sit', 'VEc_01_sup', 'VEc_02_sup', 'VEc_03_sup'};
+files  = {'VEc_01_sup'};
 folder = "Valsalva/";
 % files = {'V_00_sit_01', 'V_00_sit_02', 'V_00_sit_03', 'V_00_sit_04'}
+% files  = {'VEc_01_sup.mat'}
 useSeqExt = true;
 % folder = "";
 % toSeconds = 1;
@@ -20,9 +22,13 @@ for i = 1:length(files)
     filename = char(files(i))
     % filename = "Valsalva/V_00_sup";
     filename_open = folder + filename + ".txt";
+    % filename_open = folder + filename
+    
     % dataset = import_txt_data('data/V_0' + string(i) + '_sit.txt');
     dataset = import_txt_data(filename_open);
-    fs = 1/(dataset.Time(3)- dataset.Time(2))./toSeconds
+    % open(filename_open)
+    % dataset
+    fs = 1/(dataset.Time(3)- dataset.Time(2))./toSeconds;
     
     
     %% decimate the dataset

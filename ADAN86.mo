@@ -2128,6 +2128,161 @@ type"),       Text(
               __Dymola_Algorithm="Cvode"));
         end testNonLin;
       end tests;
+
+      model ElasticVessel_nonLinearAtanh
+        "Elastic container for non-linear large veins atanh"
+       extends Physiolibrary.Icons.ElasticBalloon;
+       extends Physiolibrary.SteadyStates.Interfaces.SteadyState(state_start=
+              volume_start);
+        Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a q_in
+          annotation (Placement(transformation(extent={{-14,-14},{14,14}})));
+        parameter Physiolibrary.Types.Volume volume_start=1e-11 "Volume start value"
+          annotation (Dialog(group="Initialization"));                                 //default = 1e-5 ml
+        Physiolibrary.Types.Volume excessVolume
+          "Additional volume, that generate pressure";
+
+         parameter Boolean useV0Input = false
+          "=true, if zero-pressure-volume input is used"
+          annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
+
+         parameter Physiolibrary.Types.Volume ZeroPressureVolume=1e-11
+          "Maximal volume, that does not generate pressure if useV0Input=false"
+          annotation (Dialog(enable=not useV0Input)); //default = 1e-5 ml
+
+          parameter Physiolibrary.Types.Volume CollapsingPressureVolume=1e-12
+          "Maximal volume, which generate negative collapsing pressure"; //default = 1e-6 ml
+
+         Physiolibrary.Types.RealIO.VolumeInput zeroPressureVolume(start=
+              ZeroPressureVolume)=zpv if useV0Input annotation (Placement(
+              transformation(
+              extent={{-20,-20},{20,20}},
+              rotation=270,
+              origin={-80,80})));
+        parameter Boolean useComplianceInput = false
+          "=true, if compliance input is used"
+          annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
+        parameter Physiolibrary.Types.HydraulicCompliance Compliance=1
+          "Compliance if useComplianceInput=false"
+          annotation (Dialog(enable=not useComplianceInput));
+
+        Physiolibrary.Types.RealIO.HydraulicComplianceInput compliance(start=
+              Compliance)=c if useComplianceInput annotation (Placement(
+              transformation(
+              extent={{-20,-20},{20,20}},
+              rotation=270,
+              origin={0,80})));
+        parameter Boolean useExternalPressureInput = false
+          "=true, if external pressure input is used"
+          annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
+        parameter Physiolibrary.Types.Pressure ExternalPressure=0
+          "External pressure. Set zero if internal pressure is relative to external. Valid only if useExternalPressureInput=false."
+          annotation (Dialog(enable=not useExternalPressureInput));
+        parameter Physiolibrary.Types.Pressure MinimalCollapsingPressure=-101325;
+        Physiolibrary.Types.RealIO.PressureInput externalPressure(start=
+              ExternalPressure)=ep if useExternalPressureInput annotation (Placement(
+              transformation(
+              extent={{-20,-20},{20,20}},
+              rotation=270,
+              origin={80,80})));
+
+        Physiolibrary.Types.RealIO.VolumeOutput volume annotation (Placement(
+              transformation(
+              extent={{-20,-20},{20,20}},
+              rotation=270,
+              origin={0,-100}), iconTransformation(
+              extent={{-20,-20},{20,20}},
+              rotation=270,
+              origin={60,-100})));
+        Physiolibrary.Types.Pressure p_transm = q_in.pressure - ep;
+        parameter Physiolibrary.Types.Volume Vmax = 500e-6;
+        parameter Physiolibrary.Types.Volume V0 =   350e-6;
+        parameter Physiolibrary.Types.Pressure P0 = 133.32;
+        parameter Real gamma = 1.5;
+        parameter Real kappa = 5;
+      protected
+        Physiolibrary.Types.Volume zpv;
+        Physiolibrary.Types.HydraulicCompliance c;
+        Physiolibrary.Types.Pressure ep;
+        parameter Physiolibrary.Types.Pressure a=MinimalCollapsingPressure/log(
+            Modelica.Constants.eps);
+        constant Real pi = Modelica.Constants.pi;
+
+      equation
+        if not useV0Input then
+          zpv=ZeroPressureVolume;
+        end if;
+        if not useComplianceInput then
+          c=Compliance;
+        end if;
+        if not useExternalPressureInput then
+          ep=ExternalPressure;
+        end if;
+        excessVolume = volume - zpv;
+
+      //
+      // c0 = v0/p0
+       // v0 = len*pi*2*r^2
+       // p0 = 5 mmHg
+       //
+       // C = alpha*c0;
+       // v0 = alpha*V000
+       // v00 = r^2*pi*len
+       // zero pressure volume = current volume at p0
+       // ressitances?
+      // gth, E, r
+      // melchior
+
+      // p_transm = atanh((volume-V0)./(Vmax-V0)) + P0;
+
+      // tanh(p_transm - P0) = (volume-V0)/(Vmax-V0);
+      // p_transm = tan(gamma*(volume-V0)./(Vmax-V0)) + P0;
+
+      p_transm = P0*volume./V0 - exp(-kappa*(volume./V0-1));
+
+      //   q_in.pressure =
+      //   smooth(0,
+      //     if noEvent(volume>CollapsingPressureVolume) then
+      //       (excessVolume/c + ep)
+      //     else
+      //       (a*log(max(Modelica.Constants.eps,volume/CollapsingPressureVolume)) + ep));
+        //then: normal physiological state
+        //else: abnormal collapsing state
+
+        //Collapsing state: the max function prevents the zero or negative input to logarithm, the logarithm brings more negative pressure for smaller volume
+        //However this collapsing is limited with numerical precission, which is reached relatively soon.
+
+        state = volume; // der(volume) =  q_in.q;
+        change = q_in.q;
+       // assert(volume>=-Modelica.Constants.eps,"Collapsing of vessels are not supported!");
+       annotation (
+          Icon(coordinateSystem(preserveAspectRatio=false,extent={{-100,-100},{
+                  100,100}}), graphics={Text(
+                extent={{-318,-140},{160,-100}},
+                textString="%name",
+                lineColor={0,0,255}), Line(
+                points={{-100,-80},{24,-64},{68,60}},
+                color={0,140,72},
+                thickness=1,
+                arrow={Arrow.None,Arrow.Filled},
+                smooth=Smooth.Bezier)}),       Documentation(revisions="<html>
+<p><i>2009-2014 - </i>Marek Matejak, Charles University, Prague, Czech Republic</p>
+<ul>
+<li>initial implementation </li>
+</ul>
+<p>4.5.2015 - Tom&aacute;&scaron; Kulh&aacute;nek, Charles University, Prague, Czech Republic</p>
+<ul>
+<li>fix of external pressure</li>
+</ul>
+</html>",   info="<html>
+<p>Pressure can be generated by an elastic tissue surrounding some accumulated volume. Typically there is a threshold volume, below which the relative pressure is equal to external pressure and the wall of the blood vessels is not stressed. But if the volume rises above this value, the pressure increases proportionally. The slope in this pressure-volume characteristic is called &ldquo;Compliance&rdquo;.</p>
+<ul>
+<li>Increassing volume above ZeroPressureVolume (V0) generate positive pressure (greater than external pressure) lineary dependent on excess volume.</li>
+<li>Decreasing volume below CollapsingPressureVolume (V00) generate negative pressure (lower than external pressure) logarithmicaly dependent on volume.</li>
+<li>Otherwise external pressure is presented as pressure inside ElasticVessel.</li>
+</ul>
+<p><br><img src=\"modelica://Physiolibrary/Resources/Images/UserGuide/ElasticVessel_PV.png\"/></p>
+</html>"));
+      end ElasticVessel_nonLinearAtanh;
     end Basic;
 
     package Subsystems
@@ -2856,12 +3011,10 @@ type"),       Text(
             Compliance(displayUnit="ml/mmHg") = settings.pulm_C_PA,
                        useExternalPressureInput=UseThoracic_PressureInput)
             annotation (Placement(transformation(extent={{-70,-60},{-50,-40}})));
-          Basic.ElasticVesselNonLinearPstras               c_pv(
-          volume(start=deadVolume + 250e-6),
-            C(displayUnit="ml/mmHg") = 2.25018E-07,
-            zpv=deadVolume,
-            nominal_pressure(displayUnit="mmHg") = 1066.58,
-            gamma=0.25,useExternalPressureInput=UseThoracic_PressureInput)
+          Basic.ElasticVessel_nonLinearAtanh               c_pv(
+            volume(start=0.00044),
+                       useExternalPressureInput=UseThoracic_PressureInput,
+            P0=1066.57909932)
             annotation (Placement(transformation(extent={{50,-60},{70,-40}})));
 
           Physiolibrary.Types.Constants.HydraulicConductanceConst
@@ -41812,8 +41965,8 @@ P_hs_plus_dist"),
           extends CVS_valsalva_test(
             redeclare
               Components.Subsystems.Pulmonary.PulmonaryTriSegNonLOnearVeins
-              pulmonaryComponent(UseThoracic_PressureInput=true, c_pv(volume(
-                    start=0.0023))),
+              pulmonaryComponent(UseThoracic_PressureInput=true, c_pv(
+                  volume_start=0.00035, volume(start=0.00035, fixed=false))),
             condTP_EP(disconnected=false),
             thoracic_pressure_ramp(nperiod=-1));
         end CVS_VS_nonlinPV;
@@ -41824,6 +41977,19 @@ P_hs_plus_dist"),
                 Compliance=2.250184727537e-07,
                 volume(start=4000e-6))));
         end CVS_VS_base;
+
+        model CVS_VS_suction
+          extends CVS_valsalva_test(
+            settings(heart_drive_D_0_maxAct=0),
+            phi_fixed(
+              amplitude=0.74,
+              rising=15,
+              width=13,
+              falling=1,
+              period=60,
+              nperiod=-1),
+            useAutonomousPhi(y=true));
+        end CVS_VS_suction;
       end Experiments;
 
       model CVS_valsalva
