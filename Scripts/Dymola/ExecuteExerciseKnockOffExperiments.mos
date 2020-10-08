@@ -1,0 +1,29 @@
+﻿Advanced.SparseActivate=true;
+Advanced.NumberOfCores = 4;
+Advanced.FilesToKeep = 20;
+
+removePlots();
+removeResults();
+
+
+// Exercise
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ExerciseKnockOff_base");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_NonLinearTissues", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ExerciseKnockOff_NonLinearTissues");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_TissueComplianceReaction", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ExerciseKnockOff_TissueComplianceReaction");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_ArterialCompliance", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ExerciseKnockOff_ArterialCompliance");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_TissueResistance", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ExerciseKnockOff_TissueResistance");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_Venoconstriction", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ExerciseKnockOff_Venoconstriction");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_Chronotropy", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ExerciseKnockOff_Chronotropy");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_Inotropy", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ExerciseKnockOff_Inotropy");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_Lusitropy", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ExerciseKnockOff_Lusitropy");
+
+// Valsalva
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.KnockOffExperiments.KnockOff_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ValsalvaKnockOff__base");
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.KnockOffExperiments.KnockOff_NonLinearTissues", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ValsalvaKnockOff__NonLinearTissues");
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.KnockOffExperiments.KnockOff_TissueComplianceReaction", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ValsalvaKnockOff__TissueComplianceReaction");
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.KnockOffExperiments.KnockOff_ArterialCompliance", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ValsalvaKnockOff__ArterialCompliance");
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.KnockOffExperiments.KnockOff_TissueResistance", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ValsalvaKnockOff__TissueResistance");
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.KnockOffExperiments.KnockOff_Venoconstriction", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ValsalvaKnockOff__Venoconstriction");
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.KnockOffExperiments.KnockOff_Chronotropy", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ValsalvaKnockOff__Chronotropy");
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.KnockOffExperiments.KnockOff_Inotropy", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ValsalvaKnockOff__Inotropy");
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.KnockOffExperiments.KnockOff_Lusitropy", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="ValsalvaKnockOff__Lusitropy");

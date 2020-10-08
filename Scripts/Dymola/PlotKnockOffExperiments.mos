@@ -1,0 +1,15 @@
+﻿Advanced.SparseActivate=true;
+Advanced.NumberOfCores = 4;
+
+removePlots();
+removeResults();
+
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="base");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_NonLinearTissues", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="KnockOff_NonLinearTissues");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_TissueComplianceReaction", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="KnockOff_TissueComplianceReaction");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_ArterialCompliance", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="KnockOff_ArterialCompliance");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_TissueResistance", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="KnockOff_TissueResistance");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_Venoconstriction", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="KnockOff_Venoconstriction");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_Chronotropy", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="KnockOff_Chronotropy");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_Inotropy", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="KnockOff_Inotropy");
+simulateModel("ADAN_main.SystemicTree.Exercise.Experiments.KnockOffExperiments.KnockOff_Lusitropy", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="KnockOff_Lusitropy");

@@ -1,0 +1,65 @@
+﻿translateModel("ADAN_main.SystemicTree.Valsalva.Experiments.CVS_VS_nonlinPV");
+
+// baseline
+
+pulmonaryComponent.c_pv.volume_full = 0.0010;
+pulmonaryComponent.c_pv.ZeroPressureVolume = 0.000001;
+pulmonaryComponent.c_pv.V0 = 0.000350;
+pulmonaryComponent.c_pv.volume = 0.000350;
+pulmonaryComponent.c_pv.p_transm_full=4000;
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.CVS_VS_nonlinPV", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="baseline");
+
+// low compliance case
+pulmonaryComponent.c_pv.volume_full = 0.0010;
+pulmonaryComponent.c_pv.ZeroPressureVolume = 0.000001;
+pulmonaryComponent.c_pv.V0 = 0.000100;
+pulmonaryComponent.c_pv.volume = 0.000100;
+pulmonaryComponent.c_pv.p_transm_full=12000;
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.CVS_VS_nonlinPV", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="low_PVcompliance");
+
+
+// high compliance case
+pulmonaryComponent.c_pv.volume_full = 0.0020;
+pulmonaryComponent.c_pv.ZeroPressureVolume = 0.000001;
+pulmonaryComponent.c_pv.V0 = 0.000800;
+pulmonaryComponent.c_pv.volume = 0.000800;
+pulmonaryComponent.c_pv.p_transm_full=3000;
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.CVS_VS_nonlinPV", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="high_PVCompliance");
+
+
+// low volume nonlin
+pulmonaryComponent.c_pv.volume_full = 0.00100;
+pulmonaryComponent.c_pv.ZeroPressureVolume = 0.000300;
+pulmonaryComponent.c_pv.V0 = 0.000350;
+pulmonaryComponent.c_pv.volume = 0.000350;
+pulmonaryComponent.c_pv.p_transm_full=4000;
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.CVS_VS_nonlinPV", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="nonlin_lowvol");
+
+// high volume nonlin
+pulmonaryComponent.c_pv.volume_full = 0.000400;
+pulmonaryComponent.c_pv.ZeroPressureVolume = 0.000001;
+pulmonaryComponent.c_pv.V0 = 0.000350;
+pulmonaryComponent.c_pv.volume = 0.000350;
+pulmonaryComponent.c_pv.p_transm_full=4000;
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.CVS_VS_nonlinPV", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="nonlin_highvol");
+
+
+// high volume
+pulmonaryComponent.c_pv.volume_full = 0.0010;
+pulmonaryComponent.c_pv.ZeroPressureVolume = 0.000001;
+pulmonaryComponent.c_pv.V0 = 0.000350;
+pulmonaryComponent.c_pv.volume = 0.000650;
+pulmonaryComponent.c_pv.p_transm_full=4000;
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.CVS_VS_nonlinPV", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="volume_overfilled");
+
+
+// low volume
+pulmonaryComponent.c_pv.volume_full = 0.0010;
+pulmonaryComponent.c_pv.ZeroPressureVolume = 0.000001;
+pulmonaryComponent.c_pv.V0 = 0.000350;
+pulmonaryComponent.c_pv.volume = 0.000050;
+pulmonaryComponent.c_pv.p_transm_full=4000;
+simulateModel("ADAN_main.SystemicTree.Valsalva.Experiments.CVS_VS_nonlinPV", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="volume_underfilled");
+
+
+
