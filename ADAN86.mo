@@ -2105,18 +2105,39 @@ type"),       Text(
             Compliance=1.9501600971987e-07,
             Vmax=0.0024)
             annotation (Placement(transformation(extent={{20,-58},{40,-38}})));
-          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump1(
-              SolutionFlow=1e-06)
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump1(SolutionFlow=1e-06)
             annotation (Placement(transformation(extent={{-54,-58},{-34,-38}})));
+          ElasticVesselComponent elasticVesselComponent(volume(start=0.00015),
+              Compliance=2.250184727537e-07)
+            annotation (Placement(transformation(extent={{12,26},{32,46}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump2(SolutionFlow=1e-06)
+            annotation (Placement(transformation(extent={{-54,26},{-34,46}})));
+          ElasticVessel_nonLinearExp elasticVessel_nonLinearExp(
+            ZeroPressureVolume=0.0001,
+            volume(start=-1.5e-05),
+            P0=1066.57909932,
+            volume_full=0.0004,
+            p_transm_full=5332.8954966)
+            annotation (Placement(transformation(extent={{22,-90},{42,-70}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump3(SolutionFlow=1e-06)
+            annotation (Placement(transformation(extent={{-56,-90},{-36,-70}})));
         equation
           connect(unlimitedPump.q_out, elasticVesselNonLinearPstras.q_in) annotation (
               Line(
               points={{-34,-4},{26,-4}},
               color={0,0,0},
               thickness=1));
-          connect(unlimitedPump1.q_out, elasticVessel_nonLinear.q_in)
-            annotation (Line(
+          connect(unlimitedPump1.q_out, elasticVessel_nonLinear.q_in) annotation (Line(
               points={{-34,-48},{30,-48}},
+              color={0,0,0},
+              thickness=1));
+          connect(unlimitedPump2.q_out, elasticVesselComponent.q_in) annotation (Line(
+              points={{-34,36},{22,36}},
+              color={0,0,0},
+              thickness=1));
+          connect(unlimitedPump3.q_out, elasticVessel_nonLinearExp.q_in) annotation (
+              Line(
+              points={{-36,-80},{32,-80}},
               color={0,0,0},
               thickness=1));
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
@@ -2127,19 +2148,38 @@ type"),       Text(
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end testNonLin;
+
+        model TestPVChars
+
+
+        Physiolibrary.Types.Pressure p_transm;
+        Physiolibrary.Types.Pressure nt = exp(-kappa*(volume./V0-1));
+        Physiolibrary.Types.Volume volume(start = 150e-6);
+        parameter Physiolibrary.Types.Volume V0 = 250e-6;
+        parameter Physiolibrary.Types.Pressure P0 = 1066;
+        Real kappa;
+        parameter Physiolibrary.Types.Volume zpv = 100e-6;
+
+        equation
+          // define the kappa
+          P0*zpv/V0 = exp(-kappa*(zpv/V0-1));
+
+          der(volume) = 1e-6;
+          p_transm = P0*volume/V0 - nt;
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                coordinateSystem(preserveAspectRatio=false)));
+        end TestPVChars;
       end tests;
 
-      model ElasticVessel_nonLinearAtanh
+      model ElasticVessel_nonLinearExp
         "Elastic container for non-linear large veins atanh"
        extends Physiolibrary.Icons.ElasticBalloon;
-       extends Physiolibrary.SteadyStates.Interfaces.SteadyState(state_start=
-              volume_start);
         Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a q_in
           annotation (Placement(transformation(extent={{-14,-14},{14,14}})));
-        parameter Physiolibrary.Types.Volume volume_start=1e-11 "Volume start value"
-          annotation (Dialog(group="Initialization"));                                 //default = 1e-5 ml
-        Physiolibrary.Types.Volume excessVolume
-          "Additional volume, that generate pressure";
+      //   parameter Physiolibrary.Types.Volume volume_start=1e-11 "Volume start value"
+      //     annotation (Dialog(group="Initialization"));                                 //default = 1e-5 ml
+      //   Physiolibrary.Types.Volume excessVolume
+      //     "Additional volume, that generate pressure";
 
          parameter Boolean useV0Input = false
           "=true, if zero-pressure-volume input is used"
@@ -2158,19 +2198,19 @@ type"),       Text(
               extent={{-20,-20},{20,20}},
               rotation=270,
               origin={-80,80})));
-        parameter Boolean useComplianceInput = false
-          "=true, if compliance input is used"
-          annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
-        parameter Physiolibrary.Types.HydraulicCompliance Compliance=1
+      //   parameter Boolean useComplianceInput = false
+      //     "=true, if compliance input is used"
+      //     annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
+        parameter Physiolibrary.Types.HydraulicCompliance Compliance=V0/P0
           "Compliance if useComplianceInput=false"
           annotation (Dialog(enable=not useComplianceInput));
 
-        Physiolibrary.Types.RealIO.HydraulicComplianceInput compliance(start=
-              Compliance)=c if useComplianceInput annotation (Placement(
-              transformation(
-              extent={{-20,-20},{20,20}},
-              rotation=270,
-              origin={0,80})));
+      //   Physiolibrary.Types.RealIO.HydraulicComplianceInput compliance(start=
+      //         Compliance)=c if useComplianceInput annotation (Placement(
+      //         transformation(
+      //         extent={{-20,-20},{20,20}},
+      //         rotation=270,
+      //         origin={0,80})));
         parameter Boolean useExternalPressureInput = false
           "=true, if external pressure input is used"
           annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
@@ -2197,11 +2237,19 @@ type"),       Text(
         parameter Physiolibrary.Types.Volume Vmax = 500e-6;
         parameter Physiolibrary.Types.Volume V0 =   350e-6;
         parameter Physiolibrary.Types.Pressure P0 = 133.32;
-        parameter Real gamma = 1.5;
-        parameter Real kappa = 5;
+
+        parameter Physiolibrary.Types.Volume volume_full =   400;
+        parameter Physiolibrary.Types.Pressure p_transm_full = 20*133.32;
+
+
+        Real kappa "Steepness of the negative exponential is defined by ZPV";
+        Real gamma(start = 10) "steepness of the overfilled exponential";
+
+        Physiolibrary.Types.Pressure negativeExponential= - exp(-kappa*(volume / V0 - 1));
+        Physiolibrary.Types.Pressure positiveExponential= exp(gamma*(volume/V0 - 1))    "A negative exponential to subtrack at low volumes";
       protected
         Physiolibrary.Types.Volume zpv;
-        Physiolibrary.Types.HydraulicCompliance c;
+       // Physiolibrary.Types.HydraulicCompliance c;
         Physiolibrary.Types.Pressure ep;
         parameter Physiolibrary.Types.Pressure a=MinimalCollapsingPressure/log(
             Modelica.Constants.eps);
@@ -2211,13 +2259,13 @@ type"),       Text(
         if not useV0Input then
           zpv=ZeroPressureVolume;
         end if;
-        if not useComplianceInput then
-          c=Compliance;
-        end if;
+      //   if not useComplianceInput then
+      //     c=Compliance;
+      //   end if;
         if not useExternalPressureInput then
           ep=ExternalPressure;
         end if;
-        excessVolume = volume - zpv;
+       // excessVolume = volume - zpv;
 
       //
       // c0 = v0/p0
@@ -2237,7 +2285,17 @@ type"),       Text(
       // tanh(p_transm - P0) = (volume-V0)/(Vmax-V0);
       // p_transm = tan(gamma*(volume-V0)./(Vmax-V0)) + P0;
 
-      p_transm = P0*volume./V0 - exp(-kappa*(volume./V0-1));
+      // p_transm = P0*volume./V0 - exp(-kappa*(volume./V0-1));
+
+
+        // define the kappa
+        P0*zpv/V0 = exp(-kappa*(zpv/V0-1));
+
+        // define the gamma
+        p_transm_full =P0*volume_full/V0 - exp(-kappa*(volume_full / V0 - 1)) + exp(gamma*(volume_full/V0 - 1));
+
+      //  der(volume) = 1e-6;
+        p_transm =P0*volume/V0 + negativeExponential + positiveExponential;
 
       //   q_in.pressure =
       //   smooth(0,
@@ -2251,8 +2309,8 @@ type"),       Text(
         //Collapsing state: the max function prevents the zero or negative input to logarithm, the logarithm brings more negative pressure for smaller volume
         //However this collapsing is limited with numerical precission, which is reached relatively soon.
 
-        state = volume; // der(volume) =  q_in.q;
-        change = q_in.q;
+        der(volume) =  q_in.q;
+
        // assert(volume>=-Modelica.Constants.eps,"Collapsing of vessels are not supported!");
        annotation (
           Icon(coordinateSystem(preserveAspectRatio=false,extent={{-100,-100},{
@@ -2282,7 +2340,7 @@ type"),       Text(
 </ul>
 <p><br><img src=\"modelica://Physiolibrary/Resources/Images/UserGuide/ElasticVessel_PV.png\"/></p>
 </html>"));
-      end ElasticVessel_nonLinearAtanh;
+      end ElasticVessel_nonLinearExp;
     end Basic;
 
     package Subsystems
@@ -3011,9 +3069,9 @@ type"),       Text(
             Compliance(displayUnit="ml/mmHg") = settings.pulm_C_PA,
                        useExternalPressureInput=UseThoracic_PressureInput)
             annotation (Placement(transformation(extent={{-70,-60},{-50,-40}})));
-          Basic.ElasticVessel_nonLinearAtanh               c_pv(
+          Basic.ElasticVessel_nonLinearExp c_pv(
             volume(start=0.00044),
-                       useExternalPressureInput=UseThoracic_PressureInput,
+            useExternalPressureInput=UseThoracic_PressureInput,
             P0=1066.57909932)
             annotation (Placement(transformation(extent={{50,-60},{70,-40}})));
 
@@ -15175,7 +15233,7 @@ P_hs_plus_dist"),
             Modelica.Blocks.Math.Gain venousSideTiltNode(final k=1)
               "Only a node for simpler arrangement of connections of the tilt angle."
               annotation (Placement(transformation(extent={{-120,-52},{-100,-32}})));
-            Modelica.Blocks.Interfaces.RealInput stand_input "leg angle in radians: sitting = 0rad, standing = pi/2 rad"
+            Modelica.Blocks.Interfaces.RealInput femur_angle "leg angle in radians: sitting = 0rad, standing = pi/2 rad"
                                                                                    annotation (Placement(
                 transformation(extent={{-208,-94},{-168,-54}}),
                                                               iconTransformation(extent={{-162,
@@ -15205,9 +15263,9 @@ P_hs_plus_dist"),
               annotation (Line(points={{137,-36},{214,-36},{214,-23}}, color={0,0,127}));
             connect(arterialSideTiltNode.y, femoral_vein_R34.TiltInput)
               annotation (Line(points={{137,-36},{214,-36},{214,-5}}, color={0,0,127}));
-            connect(stand_input, venousSideTiltNode.u) annotation (Line(points={{-188,-74},
+            connect(femur_angle, venousSideTiltNode.u) annotation (Line(points={{-188,-74},
                     {-156,-74},{-156,-42},{-122,-42}}, color={0,0,127}));
-            connect(stand_input, arterialSideTiltNode.u) annotation (Line(points={{-188,-74},
+            connect(femur_angle, arterialSideTiltNode.u) annotation (Line(points={{-188,-74},
                     {90,-74},{90,-36},{114,-36}}, color={0,0,127}));
           end SystemicAV_Sit_Stand_chair;
 
@@ -15228,7 +15286,19 @@ P_hs_plus_dist"),
               anterior_tibial_vein_T4_L80(sinAlpha=0),
               popliteal_vein_L82(sinAlpha=0),
               posterior_tibial_vein_T6_L84(sinAlpha=0),
-              profunda_femoris_vein_T2_L70(sinAlpha=0));
+              profunda_femoris_vein_T2_L70(sinAlpha=0),
+              femoral_R222(sinAlpha=1),
+              femoral_L200(sinAlpha=1),
+              femoral_L204(sinAlpha=1),
+              femoral_R226(sinAlpha=1),
+              femoral_vein_R38(sinAlpha=-1),
+              femoral_vein_R42(sinAlpha=-1),
+              femoral_vein_R46(sinAlpha=-1),
+              femoral_vein_L64(sinAlpha=-1),
+              femoral_vein_L68(sinAlpha=-1),
+              femoral_vein_L72(sinAlpha=-1),
+              femoral_vein_L76(sinAlpha=-1),
+              femoral_vein_R34(sinAlpha=-1));
           end SystemicAV_SemiRecumbent;
 
           model SystemicAV_Sit_Stand_bed
@@ -33592,7 +33662,7 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{-16,-32},{-36,-12}})));
         replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent(
             UseThoracic_PressureInput=true,
-            deadVolume=0.002, r_pa(
+          deadVolume=0,       r_pa(
               R_nom_fixed=settings.pulm_R,
               Q_nom=settings.pulm_CO_target,
               useNonlinearResistance=true,
@@ -34029,7 +34099,7 @@ P_hs_plus_dist"),
                                cardiac_cycle(start = 0.91466665 - settings.heart_drive_atr_Tact -1, fixed = true))),
             pulmonaryComponent(
               c_pa(volume(start = 4.78778e-05, fixed = true)),
-              c_pv(volume(start = 0.002200931 + pulmonaryComponent.deadVolume - 2000e-6 + settings.V_PV_init - (-1297.5e-6), fixed = true))),
+              c_pv(volume(start = 0.000200931 + settings.V_PV_init - (-1297.5e-6), fixed = true))),
           settings(initByPressure=false));
 
         annotation (experiment(
@@ -34249,7 +34319,7 @@ P_hs_plus_dist"),
               brachial_L82_HeartLevel(q_in(start = 2.655711e-06, fixed = true), volume(start = 3.5419416e-06, fixed = true))),
             pulmonaryComponent(
               c_pa(volume(start = 4.78778e-05, fixed = true)),
-              c_pv(volume(start = 0.002200931 + pulmonaryComponent.deadVolume - 2000e-6 + settings.V_PV_init - (-1297.5e-6), fixed = true))),
+              c_pv(volume(start = 0.000200931 + settings.V_PV_init - (-1297.5e-6), fixed = true))),
           settings(initByPressure=false));
 
         annotation (experiment(
@@ -41033,8 +41103,7 @@ P_hs_plus_dist"),
         model SupineToSemirecumberentWithSemiExtendedLegs
           "Reproducing the Wisconsin-Madison experiment"
           extends ADAN_main.SystemicTree.Tilt.CVS_SemiRecumberent(
-              Tilt_ramp(duration=0,
-              startTime=0),                        Tilt_LegRaise(startTime=30));
+              Tilt_ramp(duration=0, startTime=800),Tilt_LegRaise(startTime=30));
         end SupineToSemirecumberentWithSemiExtendedLegs;
 
         model OlufsenTriSeg_tiltable_sitAndValsalva
@@ -41269,7 +41338,7 @@ P_hs_plus_dist"),
       equation
         connect(Tilt_ramp.y, SystemicComponent.tilt_input) annotation (Line(
               points={{-79,32},{-22,32},{-22,20}}, color={0,0,127}));
-        connect(SystemicComponent.legsUp_input, Tilt_LegRaise.y) annotation (
+        connect(SystemicComponent.femur_angle, Tilt_LegRaise.y) annotation (
             Line(points={{-40.2,20},{-42,20},{-42,62},{-79,62}}, color={0,0,127}));
         annotation (experiment(
             StopTime=130,
@@ -41962,11 +42031,14 @@ P_hs_plus_dist"),
         end CVS_SimplestHeart;
 
         model CVS_VS_nonlinPV
-          extends CVS_valsalva_test(
-            redeclare
-              Components.Subsystems.Pulmonary.PulmonaryTriSegNonLOnearVeins
+          extends CVS_valsalva(
+            redeclare Components.Subsystems.Pulmonary.PulmonaryTriSegNonLOnearVeins
               pulmonaryComponent(UseThoracic_PressureInput=true, c_pv(
-                  volume_start=0.00035, volume(start=0.00035, fixed=false))),
+                volume_full=0.001,
+                p_transm_full=13332.2387415,
+                ZeroPressureVolume=1e-06,
+                volume(start=0.00035, fixed=false),
+                V0=0.00035)),
             condTP_EP(disconnected=false),
             thoracic_pressure_ramp(nperiod=-1));
         end CVS_VS_nonlinPV;
@@ -42002,7 +42074,8 @@ P_hs_plus_dist"),
           condTP_EP(disconnected=false),
           settings(veins_ignoreViscosityResistance=true),
           useAutonomousPhi(y=true),
-          phi_fixed(startTime=200));
+          phi_fixed(startTime=200),
+          pulmonaryComponent(deadVolume=0));
         annotation (experiment(
             StopTime=60,
             Interval=0.01,
