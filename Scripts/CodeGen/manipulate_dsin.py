@@ -61,7 +61,7 @@ def getValsFromDsin(lines:Iterable[Text], keys: Iterable[Text]):
 class OptimParam:
     """Just a simple data struct representing the optim parameter """
     
-    def __init__(self, name, value = None, min = None, max = None, step = None, minmaxdev = 0.25):
+    def __init__(self, name, value = None, min = None, max = None, step = None, minmaxdev = 0.1):
 
         self.name = name
         self.value = value 
@@ -88,7 +88,9 @@ class OptimParam:
 
     @property
     def step(self):
-        return self.value*0.01 if self._step is None and self.value is not None else self._step
+        # return self._step
+        # return self.value*0.01 if self._step is None and self.value is not None else self._step
+        return 0 if self._step is None else self._step
 
 def getInitParams(dsFileIn='dsin.txt', paramsFile='dsin.txt') -> dict: 
     """ Gets dictionary of input parameters and its values
@@ -335,7 +337,7 @@ Vary{
             if run_type == 'sensitivity':
                 step = '1'
             elif run_type == 'identification':
-                step = optimParam.step
+                step = optimParam.step if optimParam.step != 0 else value*(1 * ident_step_frac)
 
             min_ = optimParam.min if optimParam.min is not None else value*(1 - step_frac)
             max_ = optimParam.max if optimParam.max is not None else value*(1+ step_frac)
@@ -423,7 +425,7 @@ def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False
     # generate the params_for_SA.txt parameters list, which may be further edited.
     # uncomment if thats the first run to get all tunable parameters
     if regenerateParamsFromDsin:
-        writeTunableParamsFromDsin(paramsFile)
+        writeTunableParamsFromDsin(paramsFile, filter='')
 
     init_params = getInitParams(dsFileIn='dsin.txt', paramsFile=paramsFile)
 

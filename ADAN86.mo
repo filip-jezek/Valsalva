@@ -183,7 +183,7 @@ package ADAN_main
       parameter Volume V_PV_init(min = -10e-3)=0                           "Volume adjustment"
         annotation(Dialog(group = "General"));
 
-      parameter Fraction chi_phi = 1 "Maximal sympathetic activation during exercise" annotation(Dialog(group = "General"));
+      parameter Fraction chi_phi=1   "Maximal sympathetic activation during exercise" annotation(Dialog(group = "General"));
 
       // HEART
       // general
@@ -420,7 +420,8 @@ package ADAN_main
         annotation(Dialog(tab = "Baroreflex", group = "Efferent baroreflex"));
 
       // PULMONARY
-      parameter Real pulm_CO_target=4850 "mL/min"
+      parameter Physiolibrary.Types.VolumeFlowRate pulm_CO_target=8.0833333333333e-05
+                                                                  "mL/min"
         annotation(Dialog(tab = "Pulmonary", group = "General"));
       parameter Physiolibrary.Types.HydraulicCompliance pulm_C_PV=1.8751539396141e-07
                                                                                    "Pulmonary venous compliance"
@@ -430,13 +431,18 @@ package ADAN_main
       parameter Physiolibrary.Types.HydraulicResistance pulm_R=21441532.959301
         "Pulmonary vasculature resistance, mmHg*sec/mL "
         annotation(Dialog(tab="Pulmonary",   group="General"));
+
+      parameter Physiolibrary.Types.VolumeFlowRate pulm_q_nom_maxq = 8.0833333333333e-05
+                                                                  "Flow at which the resistance is halved"
+        annotation(Dialog(tab = "Pulmonary", group = "General"));
+
       parameter Real pulm_R_exp=1
-        "Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp)"
+        "Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp). Not used when pulm_q_nom_maxq is used"
         annotation(Dialog(tab="Pulmonary",   group="General"));
-      parameter Physiolibrary.Types.HydraulicResistance pulm_PV_R_vis = 1e3
-        "Pulmonary veins viscoleastic resistance"
+      parameter Physiolibrary.Types.HydraulicResistance pulm_PV_R_vis=1e6
+        "Pulmonary veins viscoelastic resistance"
         annotation(Dialog(tab="Pulmonary",   group="General"));
-      parameter Fraction pulm_tp_pleural_frac = 1 "Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure"
+      parameter Fraction pulm_tp_pleural_frac=1   "Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure"
       annotation(Dialog(tab="Pulmonary",   group="General"));
     //   parameter Physiolibrary.Types.Pressure pulm_dP_pleural=0
     //     "Pressure drop of airway pressure applied to heart and systemic due to pleural sac"
@@ -5483,6 +5489,15 @@ type"),       Text(
               // experimentally moved from child class - Its a bug that it must be here, should be only in LumensSimple
               parameter Real L0=0.907 "micron";
               parameter Real k_passive_negative=50 "mN / mm^2 / micro ";
+              parameter Physiolibrary.Types.Fraction phi0=0.25;
+              parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
+              parameter Real SLrest=1.51 "microns";
+              // Collagen force
+              parameter Real SLcollagen=2.25;
+              // threshold for collagen activation, microns
+              parameter Real PConcollagen=0.01;
+              // contriubtion of collagen (??)
+              parameter Real PExpcollagen=70;
 
 
               Real Tm "Represenattive midwall tension";
@@ -5844,7 +5859,7 @@ type"),       Text(
               extends partialVentricleWall(UseCardiacCycleInput=false,
                   UseFrequencyInput=false);
               outer Physiolibrary.Types.Fraction phi;
-              parameter Physiolibrary.Types.Fraction phi0=0.25;
+
               Real sinalpha = Tx/Tm;
               Modelica.SIunits.Angle alpha = asin(sinalpha);
 
@@ -5869,10 +5884,12 @@ type"),       Text(
               // Real epsf=(1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4;
               // Real SLo(nominal=1e-6) = Lsref*exp(epsf);
               // Real SL(nominal=1e-6, start=2.3) "sarcomere length, um";
+              // parameter Physiolibrary.Types.Fraction phi0=0.25;
+
+
               // Triseg parameters
 
               parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
-              parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
               parameter Real sigma_act=7.5*120 "mmHg ";
               parameter Real sigma_act_maxAct = sigma_act "Sigma at maximal activation";
               parameter Physiolibrary.Types.Fraction phi_limit = 0 "Minimal value of phi to drop to. Experimental parameter, try using phi0 here";
@@ -5881,7 +5898,7 @@ type"),       Text(
 
               // not used in the current version. Using k_passive instead
             //  parameter Real sigma_pas=7.5*7 "mmHg";
-              parameter Real SLrest=1.51 "microns";
+            //   parameter Real SLrest=1.51 "microns";
 
               // same parameters as in driving function. Change with care.
             //   parameter Modelica.SIunits.Time tauD=0.032 "Factor scaling contraction decay time";
@@ -5897,14 +5914,6 @@ type"),       Text(
 
               // Sliding velocities -- Eq. (B2) Lumens et al.
               Real dSL=((SLo - SL)/LSEiso - 1)*vmax;
-
-              // Collagen force
-              parameter Real SLcollagen=2.25;
-              // threshold for collagen activation, microns
-              parameter Real PConcollagen=0.01;
-              // contriubtion of collagen (??)
-              parameter Real PExpcollagen=70;
-              // expresion of collagen (??), unitless
 
               parameter Real k_passive=50 "mN / mm^2 / micro";
               parameter Real k_passive_negative=50 "mN / mm^2 / micro";
@@ -33698,19 +33707,42 @@ P_hs_plus_dist"),
           SystemicComponent(
           UseThoracic_PressureInput=true,
           UsePhi_Input=true,
-          brachial_vein_L138(UseInertance=true))
-                             annotation (
+          brachial_vein_L138(UseInertance=true),
+          baroreflex_system(baroreceptor_carotid(
+              f0=baro_f0,
+              a=baro_a,
+              b=baro_b)))    annotation (
             __Dymola_choicesAllMatching=true, Placement(transformation(extent={{-58,18},
                   {18,48}})));
 
       public
-        replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Simple heartComponent(
+        replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Simple
+          heartComponent(
           UseFrequencyInput=true,
           UseThoracicPressureInput=true,
           UsePhiInput=true,
           mitralValve(calculateAdditionalMetrics=true),
-          aorticValve(calculateAdditionalMetrics=true))
-                constrainedby Components.Subsystems.Heart.partialHeart
+          aorticValve(calculateAdditionalMetrics=true),
+          ventricles(
+            LV_wall(
+              Lsref=heart_vntr_Lsref,
+              L0=heart_vntr_L0,
+              phi0=settings.phi0,
+              SLrest=heart_vntr_SLrest,
+              SLcollagen=heart_vntr_SLcollagen),
+            SEP_wall(
+              Lsref=heart_vntr_Lsref,
+              L0=heart_vntr_L0,
+              phi0=settings.phi0,
+              SLrest=heart_vntr_SLrest,
+              SLcollagen=heart_vntr_SLcollagen),
+            RV_wall(
+              Lsref=heart_vntr_Lsref,
+              L0=heart_vntr_L0,
+              phi0=settings.phi0,
+              SLrest=heart_vntr_SLrest,
+              SLcollagen=heart_vntr_SLcollagen))) constrainedby
+          Components.Subsystems.Heart.partialHeart
           annotation (Placement(transformation(extent={{-16,-32},{-36,-12}})));
         replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent(
             UseThoracic_PressureInput=true,
@@ -33719,7 +33751,8 @@ P_hs_plus_dist"),
               Q_nom=settings.pulm_CO_target,
               useNonlinearResistance=true,
               useNominalParametrization=true,
-              Q_nom_maxQ=settings.pulm_R/2))
+            R_nom_maxQ=settings.pulm_R/2,
+            Q_nom_maxQ=settings.pulm_q_nom_maxq))
         constrainedby Components.Subsystems.Pulmonary.partialPulmonary annotation (
             Placement(transformation(extent={{-34,-62},{-14,-42}})));
       Modelica.Blocks.Sources.Trapezoid phi_fixed(
@@ -33793,6 +33826,13 @@ P_hs_plus_dist"),
           const_offset=0) "Thoracic pressure effect on extra-pleural circulatory"
           annotation (Placement(transformation(extent={{-69,-43.3333},{-55,
                   -31.3333}})));
+        parameter Real heart_vntr_Lsref=1.9 " Resting SL, micron ";
+        parameter Real heart_vntr_L0=0.907 "micron";
+        parameter Real heart_vntr_SLcollagen=2.25;
+        parameter Real heart_vntr_SLrest=1.51 "microns";
+        parameter Real baro_a=0.0651;
+        parameter Real baro_b=0.2004;
+        parameter Real baro_f0=300 "Base firing frequency";
       equation
         connect(SystemicComponent.port_b, heartComponent.sv) annotation (Line(
             points={{18,28},{24,28},{24,-16.4},{-16,-16.4}},
@@ -33983,12 +34023,7 @@ P_hs_plus_dist"),
               tissues_tau_R(displayUnit="s") = 0,
               veins_C_phi = 9.000000e-02,
               veins_activation_tau=0),
-               pulmonaryComponent(deadVolume=0.002, r_pa(
-              R_nom_fixed=settings.pulm_R,
-              Q_nom=settings.pulm_CO_target,
-              useNonlinearResistance=true,
-              useNominalParametrization=true,
-              Q_nom_maxQ=settings.pulm_R/2)));
+               pulmonaryComponent(deadVolume=0.002));
       end partialCVS_optimizedCombined;
 
       partial model partialCVS_ss
@@ -38626,14 +38661,14 @@ P_hs_plus_dist"),
 
         model base_TriSeg_SA "for sensitivity analysis"
           extends Obsolete.TriSeg_base(heartComponent(ventricles(LV_wall(
-                  Lsref=Lsref,
+                  Lsref=heart_vntr_Lsref,
                   vmax=vmax,
                   LSEiso=LSEiso,
-                  SLrest=SLrest,
-                  SLcollagen=SLcollagen,
+                  SLrest=heart_vntr_SLrest,
+                  SLcollagen=heart_vntr_SLcollagen,
                   PConcollagen=PConcollagen,
                   PExpcollagen=PExpcollagen,
-                  L0=L0))));
+                  L0=heart_vntr_L0))));
           parameter Real Lsref = Lsref_frac*1.9 " Resting SL, micron ";
           parameter Real vmax = vmax_frac*7 "micron/sec";
           parameter Real LSEiso = LSEiso_frac*0.04 "micron";
@@ -42129,9 +42164,9 @@ P_hs_plus_dist"),
 
         model CVS_VS_TriSegL0 "Testing suction by increasing L0"
           extends CVS_VS_nonlinPV(heartComponent(ventricles(
-                SEP_wall(L0=L0),
-                LV_wall(L0=L0),
-                RV_wall(L0=L0))));
+                SEP_wall(L0=heart_vntr_L0),
+                LV_wall(L0=heart_vntr_L0),
+                RV_wall(L0=heart_vntr_L0))));
 
           parameter Real L0 = 0.907*1.5 "MOdifieer to L0";
         end CVS_VS_TriSegL0;
@@ -42189,9 +42224,9 @@ P_hs_plus_dist"),
 
         model CVS_VS_SLRest "Variation on SLRest"
           extends CVS_valsalva(heartComponent(ventricles(
-                SEP_wall(Lsref=Lsref),
-                LV_wall(Lsref=Lsref),
-                RV_wall(Lsref=Lsref))));
+                SEP_wall(Lsref=heart_vntr_Lsref),
+                LV_wall(Lsref=heart_vntr_Lsref),
+                RV_wall(Lsref=heart_vntr_Lsref))));
           parameter Real Lsref=1.5 " Resting SL, micron ";
         end CVS_VS_SLRest;
 
@@ -42206,9 +42241,8 @@ P_hs_plus_dist"),
 
         model CVS_VS_overfilled
           extends CVS_valsalva(pulmonaryComponent(
-                               c_pv(volume(start=650 + settings.V_PV_init),
-                  Compliance(displayUnit="m3/Pa") = 0.000350/(8*133.332))),
-              settings(V_PV_init=0));
+                               c_pv(volume(start=650e-6 + settings.V_PV_init), Compliance(
+                    displayUnit="m3/Pa") = 0.000350/(8*133.332))), settings(V_PV_init=0));
 
         end CVS_VS_overfilled;
       end Experiments;
@@ -42221,7 +42255,9 @@ P_hs_plus_dist"),
         extends CardiovascularSystem(
           condTP_PC(disconnected=false),
           condTP_IP(disconnected=false),
-          settings(veins_ignoreViscosityResistance=true),
+          settings(veins_ignoreViscosityResistance=true,
+            pulm_q_nom_maxq=0.00025,
+            pulm_PV_R_vis(displayUnit="(mmHg.min)/l")),
           useAutonomousPhi(y=true),
           phi_fixed(startTime=200),
           pulmonaryComponent(deadVolume=0),
