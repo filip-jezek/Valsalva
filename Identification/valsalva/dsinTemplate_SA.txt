@@ -10,7 +10,7 @@ double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
       60                   # StopTime     Time at which integration stops
-  2.0000000000000000E-02   # Increment    Communication step size, if > 0
+  1.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
   9.9999999999999995E-07   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
@@ -54,7 +54,7 @@ double method(27,1)
                            #          grid = 4   runs forever (stopped by model)
        1                   # nt       Use every NT time instant, if grid = 3
        3                   # dense    1/2/3 restart/step/interpolate GRID points
-       1                   # evgrid   0/1 do not/save event points in comm. time grid
+       0                   # evgrid   0/1 do not/save event points in comm. time grid
        1                   # evu      0/1 U-discontinuity does not/trigger events
        0                   # evuord       U-discontinuity order to consider (0,1,...)
        0                   # error    0/1/2 One message/warning/error messages
@@ -86,12 +86,12 @@ double method(27,1)
 #    Output parameters
 int settings(13,1)
  0                         # lprec    0/1 do not/store result data in double
- 1                         # lx       0/1 do not/store x  (state variables)
- 1                         # lxd      0/1 do not/store xd (derivative of states)
- 1                         # lu       0/1 do not/store u  (input     signals)
+ 0                         # lx       0/1 do not/store x  (state variables)
+ 0                         # lxd      0/1 do not/store xd (derivative of states)
+ 0                         # lu       0/1 do not/store u  (input     signals)
  1                         # ly       0/1 do not/store y  (output    signals)
  0                         # lz       0/1 do not/store z  (indicator signals)
- 1                         # lw       0/1 do not/store w  (auxiliary signals)
+ 0                         # lw       0/1 do not/store w  (auxiliary signals)
  1                         # la       0/1 do not/store a  (alias     signals)
  0                         # lperf    0/1 do not/store performance indicators
  0                         # levent   0/1 do not/store event point
