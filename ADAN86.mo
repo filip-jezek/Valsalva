@@ -2342,6 +2342,24 @@ type"),       Text(
 <p><br><img src=\"modelica://Physiolibrary/Resources/Images/UserGuide/ElasticVessel_PV.png\"/></p>
 </html>"));
       end ElasticVessel_nonLinearExp;
+
+      model ResistanceWithInertance "Resistance and inertance merged into one component for easier replacements"
+        extends Physiolibrary.Hydraulic.Interfaces.OnePort;
+        parameter Physiolibrary.Types.HydraulicResistance resistance
+          "Hydraulic conductance if useConductanceInput=false";
+        parameter Physiolibrary.Types.HydraulicInertance inertance "Inertance";
+        Physiolibrary.Types.Pressure dp_resistive = q_in.q*resistance;
+        Physiolibrary.Types.Pressure dp_inertive =  der(q_in.q)*inertance;
+      equation
+
+        dp_resistive + dp_inertive = dp;
+
+        annotation (Icon(graphics={  Bitmap(extent={{-100,-40},{46,46}},
+                  fileName="modelica://Physiolibrary/Resources/Icons/resistance.png"),
+                                               Bitmap(extent={{-16,-30},{144,36}},
+                  fileName=
+                    "modelica://Physiolibrary/Resources/Icons/ventilatorInertance.png")}));
+      end ResistanceWithInertance;
     end Basic;
 
     package Subsystems
@@ -5462,8 +5480,10 @@ type"),       Text(
               parameter Real Amref "midwall reference surface area, cm^2";
               parameter Real Lsref=1.9 " Resting SL, micron ";
 
-              // experimentally moved from child class
+              // experimentally moved from child class - Its a bug that it must be here, should be only in LumensSimple
               parameter Real L0=0.907 "micron";
+              parameter Real k_passive_negative=50 "mN / mm^2 / micro ";
+
 
               Real Tm "Represenattive midwall tension";
               Real Tx=Tm*2*xm*ym/(xm^2 + ym^2) "Axial midwall component";
@@ -5476,7 +5496,7 @@ type"),       Text(
               Real z=3*Cm*Vw/(2*Am) "Ratio of wall thickness to midwall radius of curvature of curved wall segment";
               Real epsf=(1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4 "Natural myofiber strain";
               Real SLo(nominal=1e-6) = Lsref*exp(epsf) "Sarcomere length";
-              Real SL(nominal=1e-6, start=2.3) "sarcomere length, um";
+              Real SL(nominal=1e-6, start=2.3) "Length of sarcomere contractile element, um";
 
               Modelica.Blocks.Interfaces.RealInput frequency if UseFrequencyInput "Stimulation frequency"
                 annotation (Placement(transformation(extent={{-120,80},{-80,120}})));
@@ -5887,6 +5907,7 @@ type"),       Text(
               // expresion of collagen (??), unitless
 
               parameter Real k_passive=50 "mN / mm^2 / micro";
+              parameter Real k_passive_negative=50 "mN / mm^2 / micro";
               // moved to base class
               //  parameter Real L0=0.907 "micron";
 
@@ -5896,7 +5917,7 @@ type"),       Text(
 
               // Passive forces (Lumens) do not really work here atm so we are using DAB variant
               // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
-              Real sigmapas=k_passive*(SLo/2 - L0) + sigma_collagen;
+              Real sigmapas=max(0, k_passive*(SLo/2 - L0)) + min(0, k_passive_negative*(SLo/2 - L0)) + sigma_collagen;
               // Active forces could not go negative
               Real sigmaact=max(0, sigma_act_phi*C*(SL - SLrest)*(SLo - SL)/LSEiso);
               Real debug_SL = (SL - SLrest);
@@ -5970,15 +5991,13 @@ Simple")}),                                                                  Dia
                     origin={0,100})));
               outer Settings settings annotation (Placement(transformation(
                       extent={{-100,80},{-80,100}})));
+              replaceable model VentricleWall = VentricleWall_Calcium constrainedby
+                partialVentricleWall;
 
-              replaceable partialVentricleWall LV_wall constrainedby
-                partialVentricleWall
-                annotation (Placement(transformation(extent={{-10,30},{10,50}})));
-              replaceable partialVentricleWall SEP_wall
-                constrainedby partialVentricleWall
+              replaceable VentricleWall LV_wall   annotation (Placement(transformation(extent={{-10,30},{10,50}})));
+              replaceable VentricleWall SEP_wall
                 annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
-              replaceable partialVentricleWall RV_wall
-                constrainedby partialVentricleWall
+              replaceable VentricleWall RV_wall
                 annotation (Placement(transformation(extent={{-10,-50},{10,-30}})));
               replaceable ADAN_main.Components.Subsystems.Heart.Auxiliary.partialDriving
                 calciumMechanics(usePhiInput=true) constrainedby
@@ -6123,24 +6142,26 @@ Simple")}),                                                                  Dia
               extends partialVentricles_TS(
                 redeclare replaceable Driving_Lumens calciumMechanics(
                     usePhiInput=true),
-                redeclare replaceable VentricleWall_Lumens LV_wall(
+                redeclare replaceable model VentricleWall =
+                    VentricleWall_Lumens,
+                 LV_wall(
                   Vw=89,
                   Amref=0.95*86,
                   sigma_act=sigma_act_factor*7.5*120,
-                  k_passive=k_passive_factor*50) constrainedby
-                  partialVentricleWall(xm=xm_LV, ym=ym),
-                redeclare replaceable VentricleWall_Lumens SEP_wall(
+                  k_passive=k_passive_factor*50,
+                                       xm=xm_LV, ym=ym),
+                SEP_wall(
                   Vw=34,
                   Amref=0.95*39,
                   sigma_act=sigma_act_factor*7.5*120,
-                  k_passive=k_passive_factor*50) constrainedby
-                  partialVentricleWall(xm=xm_SEP, ym=ym),
-                redeclare replaceable VentricleWall_Lumens RV_wall(
+                  k_passive=k_passive_factor*50,
+                                       xm=xm_SEP, ym=ym),
+            RV_wall(
                   Vw=27,
                   Amref=0.95*110,
                   sigma_act=sigma_act_factor*7.5*120,
-                  k_passive=k_passive_factor*50) constrainedby
-                  partialVentricleWall(xm=xm_RV, ym=ym));
+                  k_passive=k_passive_factor*50,
+                                       xm=xm_RV, ym=ym));
 
               Real ptrans_LV=2*LV_wall.Tx/ym;
               Real ptrans_RV=2*RV_wall.Tx/ym;
@@ -6212,8 +6233,8 @@ Simple")}),                                                                  Dia
                   TS=settings.heart_drive_TS,
                   TR=settings.heart_drive_TR,
                   usePhiInput=true),
-                redeclare
-                  Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimple
+                redeclare model VentricleWall =
+                    Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimple,
                   LV_wall(
                   Vw=settings.heart_vntr_xi_Vw*89,
                   Amref=settings.heart_vntr_xi_AmRef*86,
@@ -6222,8 +6243,6 @@ Simple")}),                                                                  Dia
                   sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
                       7.5*120,
                   C(fixed=false)),
-                redeclare
-                  Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimple
                   RV_wall(
                   Vw=settings.heart_vntr_xi_Vw*27,
                   Amref=settings.heart_vntr_xi_AmRef*110,
@@ -6231,8 +6250,6 @@ Simple")}),                                                                  Dia
                   sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
                       7.5*120,
                   C(fixed=false)),
-                redeclare
-                  Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimple
                   SEP_wall(
                   Vw=settings.heart_vntr_xi_Vw*34,
                   Amref=settings.heart_vntr_xi_AmRef*39,
@@ -6240,6 +6257,7 @@ Simple")}),                                                                  Dia
                   sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
                       7.5*120,
                   C(fixed=false)));
+
               annotation (Icon(graphics={Rectangle(extent={{-100,100},{100,-100}},
                         lineColor={28,108,200}), Text(
                       extent={{-20,80},{70,-58}},
@@ -7739,11 +7757,17 @@ Kalecky")}), experiment(
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=R_vlv) annotation (Placement(transformation(extent={{-60,-44},{-80,-24}})));
 
+          replaceable
           Physiolibrary.Hydraulic.Components.Resistor r_SystemicVenousInflow(Resistance=
-               settings.heart_R_RA) "Resistance of the inflow to the atria"
+               settings.heart_R_RA) constrainedby
+            Physiolibrary.Hydraulic.Interfaces.OnePort
+                                    "Resistance of the inflow to the atria"
             annotation (Placement(transformation(extent={{-72,46},{-52,66}})));
+          replaceable
           Physiolibrary.Hydraulic.Components.Resistor r_PulmonaryVenousInflow(
-              Resistance=settings.heart_R_LA) "Resistance of the inflow to the atria"
+              Resistance=settings.heart_R_LA) constrainedby
+            Physiolibrary.Hydraulic.Interfaces.OnePort
+                                              "Resistance of the inflow to the atria"
             annotation (Placement(transformation(extent={{80,-44},{60,-24}})));
           replaceable Auxiliary.TriSegMechanics_components.Ventricles_Calcium
             ventricles(V_LV(start=0.00015), V_RV(start=0.00015)) constrainedby
@@ -7970,6 +7994,29 @@ Kalecky")}), experiment(
         // R_AV   = R_vlv + R_TAC; % resistance across aortic valve
 
         end Heart_TriSegMechanics_Rat;
+
+        model Heart_TriSegMechanics_Simple_AtrialValves "Triseg simple variant with atrial valves"
+          extends Heart_TriSegMechanics_Simple(redeclare
+              Physiolibrary.Hydraulic.Components.IdealValveResistance
+              r_SystemicVenousInflow(_Goff=1/(settings.heart_R_RA*atrial_res_frac), _Ron=
+                  settings.heart_R_RA/atrial_res_frac),
+                                           redeclare
+              Physiolibrary.Hydraulic.Components.IdealValveResistance
+              r_PulmonaryVenousInflow(_Goff=1/(settings.heart_R_LA*atrial_res_frac), _Ron=
+                  settings.heart_R_LA/atrial_res_frac));
+
+          parameter Physiolibrary.Types.Fraction atrial_res_frac = 1 "Increase in atrial inflow resistance at backflow";
+        end Heart_TriSegMechanics_Simple_AtrialValves;
+
+        model Heart_TriSegMechanics_Simple_AtrialInertia "TriSeg simple variant with atrial inertance"
+          extends Heart_TriSegMechanics_Simple(redeclare Basic.ResistanceWithInertance
+              r_SystemicVenousInflow(resistance=settings.heart_R_RA, inertance(
+                  displayUnit="mmHg.s2/ml") = inertance),      redeclare
+              Basic.ResistanceWithInertance r_PulmonaryVenousInflow(resistance=settings.heart_R_LA,
+                inertance(displayUnit="mmHg.s2/ml") = inertance));
+          parameter Physiolibrary.Types.HydraulicInertance inertance(
+              displayUnit="mmHg.s2/ml") = 10678.18997523 "Inertance";
+        end Heart_TriSegMechanics_Simple_AtrialInertia;
       end Heart;
 
       package Systemic
@@ -42119,6 +42166,51 @@ P_hs_plus_dist"),
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end PericardiumTest;
+
+        model CVS_VS_AtrialValves
+          extends CVS_valsalva(redeclare
+              Components.Subsystems.Heart.Heart_TriSegMechanics_Simple_AtrialValves
+              heartComponent(
+              UseFrequencyInput=true,
+              UseThoracicPressureInput=true,
+              UsePhiInput=true,
+              atrial_res_frac=2));
+        end CVS_VS_AtrialValves;
+
+        model CVS_VS_AtrialInertance
+          extends CVS_valsalva(redeclare
+              Components.Subsystems.Heart.Heart_TriSegMechanics_Simple_AtrialInertia
+              heartComponent(
+              UseFrequencyInput=true,
+              UseThoracicPressureInput=true,
+              UsePhiInput=true,
+              r_SystemicVenousInflow(inertance(displayUnit="mmHg.s2/ml"))));
+        end CVS_VS_AtrialInertance;
+
+        model CVS_VS_SLRest "Variation on SLRest"
+          extends CVS_valsalva(heartComponent(ventricles(
+                SEP_wall(Lsref=Lsref),
+                LV_wall(Lsref=Lsref),
+                RV_wall(Lsref=Lsref))));
+          parameter Real Lsref=1.5 " Resting SL, micron ";
+        end CVS_VS_SLRest;
+
+        model CVS_VS_NonLinSigmaPas
+          "Piecewise non-linear sigmaPassive for creating negative tension during VS"
+          extends CVS_valsalva(heartComponent(ventricles(
+                LV_wall(k_passive_negative=k_passive_negative),
+                SEP_wall(k_passive_negative=k_passive_negative),
+                RV_wall(k_passive_negative=k_passive_negative))));
+          parameter Real k_passive_negative=100 "mN / mm^2 / micro";
+        end CVS_VS_NonLinSigmaPas;
+
+        model CVS_VS_overfilled
+          extends CVS_valsalva(pulmonaryComponent(
+                               c_pv(volume(start=650 + settings.V_PV_init),
+                  Compliance(displayUnit="m3/Pa") = 0.000350/(8*133.332))),
+              settings(V_PV_init=0));
+
+        end CVS_VS_overfilled;
       end Experiments;
 
       model CVS_valsalva
@@ -42132,7 +42224,8 @@ P_hs_plus_dist"),
           settings(veins_ignoreViscosityResistance=true),
           useAutonomousPhi(y=true),
           phi_fixed(startTime=200),
-          pulmonaryComponent(deadVolume=0));
+          pulmonaryComponent(deadVolume=0),
+          condTP_EP1(disconnected=false));
         annotation (experiment(
             StopTime=60,
             Interval=0.01,
