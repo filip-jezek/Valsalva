@@ -29,8 +29,8 @@ def plotObjectives(vars_set, interval, objectives):
     # fun_lib.plotObjectiveTarget(pack,'EF', 100)
     fun_lib.plotObjectiveTarget(pack,'HR', 60, verticalalignment='top') 
     # fun_lib.plotObjectiveTarget(pack,'Ppa', 1/133.32)
-    fun_lib.plotObjectiveTarget(pack,'Ppa_s', 1/133.32)
-    fun_lib.plotObjectiveTarget(pack,'Ppa_d', 1/133.32)        
+    fun_lib.plotObjectiveTarget(pack,'Ppas', 1/133.32)
+    fun_lib.plotObjectiveTarget(pack,'Ppad', 1/133.32)        
     fun_lib.plotObjectiveTarget(pack,'Ppv', 1/133.32)
     fun_lib.plotObjectiveLimit(pack, 'PWV', 1, 'lower', verticalalignment='top')
     
@@ -38,6 +38,7 @@ def plotObjectives(vars_set, interval, objectives):
     total_costs = fun_lib.countTotalWeightedCost(objectives)
     ax.set_title('Baseline costs %.6f' % total_costs)
     ax.set_ylim([0, 140])
+    ax.set_xlim(60, 120)
 
 
 
@@ -98,6 +99,8 @@ def getObjectives(vars_set):
             ('ESV_la', numpy.min(vars_set['V_la'][interval]), 41*ml2SI, None, .1),
             ('EDV_la', numpy.max(vars_set['V_la'][interval]), 87*ml2SI, None, .1),
             ('Q_MV_f', vla_peak_frac, vla_peak_target, None, 1),
+            ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, .1),
+            ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, .1),            
             ('HR', numpy.mean(vars_set['HR'][interval]) , 64/60, None, 1),
 # set by assumption and loop closed
 #            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1), 

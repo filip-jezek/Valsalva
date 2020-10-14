@@ -22,6 +22,7 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time):
     # All targets are relative to baseline, so we have to have that set first
     baseline_bp = fun_lib.getObjectiveByName(objectives, 'baseline_bp').value
     baseline_hr = fun_lib.getObjectiveByName(objectives, 'baseline_hr').value
+    baseline_pp = fun_lib.getObjectiveByName(objectives, 'baseline_pp').value
 
     # just a shortcuts
     def getTrgtVal(name):
@@ -36,27 +37,29 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time):
     # color for BP and HR
     c_BP = 'g'
     c_HR = 'c'
+    c_PP = 'm'
 
     # baselines
     ax.errorbar((valsalva_start/2), getTrgtVal('baseline_bp'), yerr=getTrgtVar('baseline_bp'), fmt = c_BP, barsabove = True, zorder=3)
     ax.errorbar((valsalva_start/2), getTrgtVal('baseline_hr'), yerr=getTrgtVar('baseline_hr'), fmt = c_HR, barsabove = True, zorder=3)
+    ax.errorbar((valsalva_start/2), getTrgtVal('baseline_pp'), yerr=getTrgtVar('baseline_pp'), fmt = c_PP, barsabove = True, zorder=3)    
     
     # recoveries
     ax.errorbar((signal_end - 2.5), getTrgtVal('ph5_recovery')*baseline_bp, yerr=getTrgtVar('ph5_recovery')*baseline_bp, fmt = c_BP, barsabove = True, zorder=3)
     ax.errorbar((signal_end - 2.5), getTrgtVal('ph5_hr_recovery')*baseline_hr, yerr=getTrgtVar('ph5_hr_recovery')*baseline_hr, fmt = c_HR, barsabove = True, zorder=3)
 
     # sv lower limit
-    if 'SV_min_valsalva' in objectives:
+    if len([o for o in objectives if o.name == 'SV_min_valsalva']) > 0:
         pack = (objectives, time, ax, fun_lib.findInterval(valsalva_start, valsalva_end, time))
         fun_lib.plotObjectiveLimit(pack, 'SV_min_valsalva', 1, 'lower')
         fun_lib.plotObjectiveLimit(pack, 'SV_min_recovery', 1, 'lower')
 
     costs_legend = []
-    def plotMetric(t_val, t_offset, val, baseline, color):
+    def plotMetric(t_val, t_offset, val, baseline, color, showYerr = True, showXerr = True):
         val_mean = getTrgtVal(val)*baseline
-        val_std = getTrgtVar(val)*baseline
+        val_std = getTrgtVar(val)*baseline if showYerr else None
         t_mean = getTrgtVal(t_val) + t_offset
-        t_std = getTrgtVar(t_val) 
+        t_std = getTrgtVar(t_val) if showXerr else None
         costs_legend.append('%s %.4f\n%s %.4f' % (val, getCost(val), t_val, getCost(t_val)))
         # zorder 3 is a workaround to show errorbars above the plots
         ax.errorbar(t_mean, val_mean, yerr= val_std, xerr=t_std, fmt = color, barsabove = True, zorder=3, linewidth = 2)
@@ -67,6 +70,9 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time):
     def plotHRMetric(t_val, t_offset, val, color = c_HR):
         plotMetric(t_val, t_offset, val, baseline_hr, color)    
 
+    def plotPPMetric(t_val, t_offset, val, color = c_PP):
+        plotMetric(t_val, t_offset, val, baseline_pp, color, showXerr=False)    
+
     plotBPMetric('t_ph1_peak', valsalva_start, 'ph1_peak')
     plotBPMetric('t_ph2_mean_min', valsalva_start, 'ph2_mean_min')
     plotBPMetric('t_ph2_max', valsalva_end, 'ph2_max')
@@ -76,6 +82,10 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time):
     plotHRMetric('t_ph1_hr_min', valsalva_start, 'ph1_hr_min')
     plotHRMetric('t_ph4_hr_max', valsalva_end, 'ph4_hr_max')
     plotHRMetric('t_ph4_hr_drop', valsalva_end, 'ph4_hr_drop')
+
+    plotPPMetric('t_ph2_mean_min', valsalva_start, 'pp_ph2_mean_min')
+    plotPPMetric('t_ph2_max', valsalva_end, 'pp_ph2_max')
+    plotPPMetric('t_ph4_drop', valsalva_end, 'pp_ph4_drop')
 
     ax.text(0, 60, '\n'.join(costs_legend), 
             horizontalalignment='left', 
@@ -114,11 +124,16 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
     # lpm2SI = 1e-3/60
     BPM2SI = 1/60
 
-    BP = vars_set['brachial_pressure']
+    # simulation starts when the BP gets over 10 Pa
+    sim_start_i = fun_lib.findLowestIndex(10, vars_set['brachial_pressure'])
+    sim_start_t = vars_set['time'][sim_start_i]
+    print('Valsalva simulation starts at %0.0fs' % sim_start_t)
+
+    BP = vars_set['brachial_pressure'][sim_start_i:]
     # HR = vars_set['heartRate.HR']
-    TP = vars_set['thoracic_pressure']
-    SV = vars_set['SV'] if 'SV' in vars_set else None
-    time = vars_set['time']
+    TP = vars_set['thoracic_pressure'][sim_start_i:]
+    SV = vars_set['SV'][sim_start_i:] if 'SV' in vars_set else None
+    time = vars_set['time'][sim_start_i:] - sim_start_t
 
     # make sure its in non-SI units
     if numpy.mean(BP) > 200:
@@ -128,7 +143,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         TP = TP/mmHg2SI
         SV = SV/ml2SI if SV is not None else None
 
-    dt = vars_set['time'][2] - vars_set['time'][1]
+    dt = time[2] - time[1]
     assert dt > 0, "The simulation must not store values at events."
 
     
@@ -138,14 +153,13 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
     ppulse = fun_lib.getPPulseRR(BP,peaks)
 
     # find valsalva start and end
-    sim_start = fun_lib.getValsalvaStart(time, BP, threshold = 10)
     valsalva_start = fun_lib.getValsalvaStart(time, TP, threshold=10)
     valsalva_end = fun_lib.getValsalvaEnd(valsalva_start, time, TP, threshold=10)
     valsalva = (valsalva_start, valsalva_end)
     
     # divide valsalva phases    
     # pre-valsalva
-    phase0 = (sim_start + 2, valsalva_start)
+    phase0 = (2, valsalva_start)
     # overshoot phase at start of the valsalva
     phase1 = (valsalva_start, valsalva_start + 5)
     # min mean pressure during valsalva
@@ -162,7 +176,6 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
     baseline_hr = HR[baseline_interval].mean()
     baseline_pp = ppulse[baseline_interval].mean()
 
-    
     IGNORE = fun_lib.CostFunctionType.Ignore
     COUNT = fun_lib.CostFunctionType.Quadratic
     # construct objectives
@@ -170,26 +183,6 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
     objectives.append(fun_lib.ObjectiveVar('baseline_bp', baseline_bp, costFunctionType=IGNORE))
     objectives.append(fun_lib.ObjectiveVar('baseline_hr', baseline_hr, costFunctionType=IGNORE))
     objectives.append(fun_lib.ObjectiveVar('baseline_pp', baseline_pp, costFunctionType=IGNORE))
-
-    phase_values = [(BP     , phase1, (-1, 0), numpy.max  , baseline_bp, 'ph1_peak'    , COUNT),
-                    (bp_mean, phase2, (0, -2), numpy.min  , baseline_bp, 'ph2_mean_min', COUNT),
-                    (bp_mean, phase4,(-7, -7), numpy.max  , baseline_bp, 'ph2_max'     , COUNT),
-                    (bp_mean, phase4,(-2, 0), numpy.min  , baseline_bp, 'ph4_drop'    , COUNT),
-                    (bp_mean, phase4, (2, 5) , numpy.max  , baseline_bp, 'ph4_ovrshoot', COUNT),
-                    (bp_mean, phase5, 0      , numpy.mean , baseline_bp, 'ph5_recovery', COUNT),
-                    (HR     , phase1, 0      , numpy.min  , baseline_hr, 'ph1_hr_min' , COUNT),
-                    (HR     , phase4, (0, 0) , numpy.max  , baseline_hr, 'ph4_hr_max' , COUNT),
-                    (HR     , phase4, (0, 3) , numpy.min  , baseline_hr, 'ph4_hr_drop', COUNT),
-                    (HR     , phase5, 0      , numpy.mean , baseline_hr, 'ph5_hr_recovery', COUNT)]
-
-    time_values = [ (BP,      phase1, (-1, 0), numpy.argmax, 't_ph1_peak'    , COUNT),
-                    (bp_mean, phase2, (0, -2), numpy.argmin, 't_ph2_mean_min', COUNT),
-                    (bp_mean, phase4,(-7, -7), numpy.argmax, 't_ph2_max'     , COUNT),# relative to phase 4 !!!
-                    (bp_mean, phase4, (-2, 0), numpy.argmin, 't_ph4_drop'    , COUNT),
-                    (bp_mean, phase4, (2, 5) , numpy.argmax, 't_ph4_ovrshoot', COUNT),
-                    (HR     , phase1, 0      , numpy.argmin, 't_ph1_hr_min'  , COUNT),
-                    (HR     , phase4, (0, 0) , numpy.argmax, 't_ph4_hr_max'  , COUNT),
-                    (HR     , phase4, (0, 3) , numpy.argmin, 't_ph4_hr_drop' , COUNT)    ]
 
     def getInterval(phase, phase_offset):
         if phase_offset is None:
@@ -213,22 +206,41 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         value = time[fun(sig[interval])] + offset[0]
         return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost)        
 
-    # map the inputs to ObjectiveVar
-    objectives.extend(map(buildValueObjective, phase_values))
-    objectives.extend(map(buildTimeObjective, time_values))
-
-    # Get pulse pressures
-    pp_values = [('pp_ph2_mean_min', 't_ph2_mean_min', phase2, 1),
-          ('pp_ph2_max', 't_ph2_max', phase4, 1), # realtive to phase 4
-          ('pp_ph4_drop', 't_ph4_drop', phase4, 100)]
-
     def buildPPObjective(po):
         (name, timeObjName, phase, weight) = po
         o = fun_lib.getObjectiveByName(objectives, timeObjName).value + phase[0]
         i = fun_lib.findLowestIndex(o, time)
         value = ppulse[i]/baseline_pp
         return fun_lib.ObjectiveVar(name, value=value, weight=weight)
-    
+
+    phase_values = [(BP     , phase1, (-1, 0), numpy.max  , baseline_bp, 'ph1_peak'    , IGNORE),
+                    (bp_mean, phase2, (0, -2), numpy.min  , baseline_bp, 'ph2_mean_min', COUNT),
+                    (bp_mean, phase4,(-7, -7), numpy.max  , baseline_bp, 'ph2_max'     , COUNT),
+                    (bp_mean, phase4,(-2, 0), numpy.min  , baseline_bp, 'ph4_drop'    , COUNT),
+                    (bp_mean, phase4, (2, 5) , numpy.max  , baseline_bp, 'ph4_ovrshoot', COUNT),
+                    (bp_mean, phase5, 0      , numpy.mean , baseline_bp, 'ph5_recovery', COUNT),
+                    (HR     , phase1, 0      , numpy.min  , baseline_hr, 'ph1_hr_min' , COUNT),
+                    (HR     , phase4, (0, 0) , numpy.max  , baseline_hr, 'ph4_hr_max' , COUNT),
+                    (HR     , phase4, (0, 3) , numpy.min  , baseline_hr, 'ph4_hr_drop', COUNT),
+                    (HR     , phase5, 0      , numpy.mean , baseline_hr, 'ph5_hr_recovery', COUNT)]
+
+    time_values = [ (BP,      phase1, (-1, 0), numpy.argmax, 't_ph1_peak'    , IGNORE),
+                    (bp_mean, phase2, (0, -2), numpy.argmin, 't_ph2_mean_min', COUNT),
+                    (bp_mean, phase4,(-7, -7), numpy.argmax, 't_ph2_max'     , IGNORE),# relative to phase 4 !!!
+                    (bp_mean, phase4, (-2, 0), numpy.argmin, 't_ph4_drop'    , COUNT),
+                    (bp_mean, phase4, (2, 5) , numpy.argmax, 't_ph4_ovrshoot', COUNT),
+                    (HR     , phase1, 0      , numpy.argmin, 't_ph1_hr_min'  , COUNT),
+                    (HR     , phase4, (0, 0) , numpy.argmax, 't_ph4_hr_max'  , COUNT),
+                    (HR     , phase4, (0, 3) , numpy.argmin, 't_ph4_hr_drop' , COUNT)    ]
+
+    # Get pulse pressures
+    pp_values = [('pp_ph2_mean_min', 't_ph2_mean_min', phase2, 1),
+          ('pp_ph2_max', 't_ph2_max', phase4, 1), # realtive to phase 4
+          ('pp_ph4_drop', 't_ph4_drop', phase4, 1)]
+
+    # map the inputs to ObjectiveVar
+    objectives.extend(map(buildValueObjective, phase_values))
+    objectives.extend(map(buildTimeObjective, time_values))
     objectives.extend(map(buildPPObjective, pp_values))
     
     # penalize by too low SV in wide area - SV should not go below also in phase 4
@@ -238,7 +250,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         sv_val_valsalva = numpy.min(SV[phase2_interval])
         sv_objective = fun_lib.ObjectiveVar(
                 'SV_min_valsalva', 
-                sv_val_valsalva, limit=[25, 150], std = 25*0.1, k_p=10)
+                sv_val_valsalva, limit=[25, 150], std = 25*0.1, k_p=1)
         objectives.append(sv_objective)
 
         # The decrease should be slower
@@ -246,7 +258,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         sv_val_midValsalva = numpy.min(SV[phase1_interval])
         sv_objective = fun_lib.ObjectiveVar(
                 'SV_min_midValsalva', 
-                sv_val_valsalva, limit=[60, 150], std = 50*0.1, k_p=10)
+                sv_val_valsalva, limit=[60, 150], std = 50*0.1, k_p=1)
         objectives.append(sv_objective)
 
         # interval spans from valsalva release to complete recovery - we should not go below 90% of normal SV, but lets say 60%
@@ -254,7 +266,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         sv_val_recovery = numpy.min(SV[recovery_interval])
         sv_objective = fun_lib.ObjectiveVar(
                 'SV_min_recovery', 
-                sv_val_recovery, limit=[60, 200], std = 60*0.1, k_p=10)
+                sv_val_recovery, limit=[60, 200], std = 60*0.1, k_p=1)
         objectives.append(sv_objective)            
 
     
@@ -275,8 +287,8 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
             ax.set_title('Valsalva costs %.6f' % total_costs)
 
         # limit the initial BP to leave some place to show the costs
-        start_at = fun_lib.findLowestIndex(15, time)
-        ax.plot(time[start_at:], BP[start_at:], 'b')
+        start_at_i = fun_lib.findLowestIndex(15, time)
+        ax.plot(time[start_at_i:], BP[start_at_i:], 'b')
         ax.plot(time, bp_mean, 'm')
         ax.plot(time, ppulse, 'c')
         if SV is not None:
@@ -315,6 +327,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
 
         plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time)
         ax.set_ylim([0, 165])
+        ax.set_xlim(0, 60)
         # ax.show(block = False)
 
         if '__saveFig_path' in vars_set and vars_set['__saveFig_path'] is not None:

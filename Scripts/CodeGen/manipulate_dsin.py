@@ -425,7 +425,7 @@ def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False
     # generate the params_for_SA.txt parameters list, which may be further edited.
     # uncomment if thats the first run to get all tunable parameters
     if regenerateParamsFromDsin:
-        writeTunableParamsFromDsin(paramsFile, filter='')
+        writeTunableParamsFromDsin(paramsFile)
 
     init_params = getInitParams(dsFileIn='dsin.txt', paramsFile=paramsFile)
 

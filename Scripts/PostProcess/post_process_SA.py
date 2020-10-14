@@ -18,7 +18,7 @@ with open(initparams_path) as file:
         params_def[cols[0]] = cols[1]
 
 
-with open('OutputListingMain_SA_PPdrop.txt') as file:
+with open('..\\OutputListingMain.txt') as file:
     lines = file.readlines()
 
 

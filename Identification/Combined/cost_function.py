@@ -57,7 +57,7 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
 
     plt.close('all')
     dpi = 100
-    fig, axs = plt.subplots(nrows = 2, ncols = 2, sharex = True, sharey = False, figsize = [1920/dpi, 1080/dpi], dpi=dpi)
+    fig, axs = plt.subplots(nrows = 2, ncols = 2, sharex = False, sharey = False, figsize = [1920/dpi, 1080/dpi], dpi=dpi)
     
     
     if '__plot_title' in vars_set:
@@ -129,7 +129,7 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
         all_objectives.extend(map(sumObjectives, objectives))
 
     # they append inside
-    buildCostObjective('baseline', 'optimizeBaselineTriSegLumens', 10)
+    buildCostObjective('baseline', 'optimizeBaselineTriSegLumens', 1)
 #    buildCostObjective('tilt', 'optimizeTilt', 1)
 #    buildCostObjective('exercise', 'MaxExercise', 1)
     # open the data folder
