@@ -129,7 +129,7 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
         all_objectives.extend(map(sumObjectives, objectives))
 
     # they append inside
-    buildCostObjective('baseline', 'optimizeBaselineTriSegLumens', 1)
+    buildCostObjective('baseline', 'optimizeBaselineTriSegLumens', 10)
 #    buildCostObjective('tilt', 'optimizeTilt', 1)
 #    buildCostObjective('exercise', 'MaxExercise', 1)
     # open the data folder

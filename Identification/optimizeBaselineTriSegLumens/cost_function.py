@@ -101,7 +101,7 @@ def getObjectives(vars_set):
             ('Q_MV_f', vla_peak_frac, vla_peak_target, None, 1),
             ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, .1),
             ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, .1),            
-            ('HR', numpy.mean(vars_set['HR'][interval]) , 64/60, None, 1),
+            ('HR', numpy.mean(vars_set['HR'][interval]) , 64/60, None, 10),
 # set by assumption and loop closed
 #            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1), 
 # set by EDV and ESV
@@ -109,7 +109,7 @@ def getObjectives(vars_set):
 #            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), EF_target, None, 1),
             ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), BPk_target, None, 1),
             ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.8*mmHg2SI, None, .5),
-            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, .5),
+            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, .1),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, .1),
             ('PWV', pwv, None, pwv_bounds, 1)            ]
 

@@ -89,7 +89,7 @@ with open('sa_runs.csv', 'w') as file:
 
 # sort by costs
 sensitivity_list.sort(key = lambda x: x[1])
-num_to_plot = 70
+num_to_plot = 30
 plotlist = sensitivity_list[:num_to_plot]
 plotlist.reverse()
 heights = list((x[1] for x in plotlist))

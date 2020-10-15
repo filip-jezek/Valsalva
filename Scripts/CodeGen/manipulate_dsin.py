@@ -400,17 +400,38 @@ StopAtError = false;
     # jsut to get back at proper indent at the method end
     pass
 
-def writeInitParams(init_params:dict, paramsFile = 'init_params_default_vals.csv'):
+def writeInitParams(init_params:dict, paramsFile = 'init_params_default_vals.csv', step_frac_override = None, ident_frac_override = None):
     """ Writes params with default values into csv"""
 
     with open(paramsFile, 'w') as file:
         file.write('# name, value, [min, max, step]\n')
         for param, optimParam in init_params.items():
 
-            if optimParam.min is not None:
-                s = '%s,%s,%s,%s,%s\n' % (param, optimParam.value, optimParam.min, optimParam.max, optimParam.step)
+            if ident_frac_override is not None:
+                min_ = optimParam.value - abs(optimParam.value)*ident_frac_override
+            elif optimParam.min is None:
+                # insert at least something
+                min_ = optimParam.value - abs(optimParam.value)*0.5
             else:
-                s = '%s,%s,0,0,0\n' % (param, optimParam.value)
+                min_ = optimParam.min
+
+            if ident_frac_override is not None:
+                max_ = optimParam.value + abs(optimParam.value)*ident_frac_override
+            elif optimParam.max is None:
+                # insert at least something
+                max_ = optimParam.value + abs(optimParam.value)*0.5
+            else:
+                max_ = optimParam.max
+
+            if ident_frac_override is not None:
+                step_ = optimParam.value*step_frac_override
+            elif optimParam.step is None or optimParam.step == 0:
+                # insert at least something
+                step_ = optimParam.value*0.01
+            else:
+                step_ = optimParam.step
+
+            s = '%s,%s,%s,%s,%s\n' % (param, optimParam.value, min_, max_, step_)
             file.write(s)
 
 def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False, minMaxRange = 0):
@@ -441,8 +462,8 @@ def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False
 
     createDsinTemplate(init_params, dsFileOut='dsinTemplate_SA.txt')
 
-def prepareIdent():
-    paramsFile = 'init_params_default_vals.csv'
+def prepareIdent(overrideFracs = False):
+    paramsFile = 'params_for_ident.txt'
     # generate the params_for_SA.txt parameters list, which may be further edited.
     # uncomment if thats the first run to get all tunable parameters
     # writeTunableParamsFromDsin(paramsFile)
@@ -450,9 +471,12 @@ def prepareIdent():
     init_params = getInitParams(dsFileIn='dsin.txt', paramsFile=paramsFile)
     
     # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
-    writeInitParams(init_params)
+    if overrideFracs:
+        writeInitParams(init_params, paramsFile=paramsFile, step_frac_override=0.05, ident_frac_override=0.5)
+    else:
+        writeInitParams(init_params, paramsFile=paramsFile)
 
-    build_opt_command_file('opt_command.txt', init_params, step_frac=0.5, run_type='identification', ident_step_frac=0.01)
+    build_opt_command_file('opt_command.txt', init_params, run_type='identification')
 
     createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt')    
     
@@ -460,7 +484,7 @@ def prepareIdent():
 if __name__ == "__main__":
 
     # writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'params_for_SA.txt', filter = 'settings.', accept = [1, 2], types = (280, 272, 361))
-    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0)
-    # prepareIdent()
+    # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0)
+    prepareIdent(overrideFracs=False)
     print('Done, Johne')
 
