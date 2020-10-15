@@ -18,7 +18,7 @@ with open(initparams_path) as file:
         params_def[cols[0]] = cols[1]
 
 
-with open('..\\OutputListingMain.txt') as file:
+with open('..\\OutputListingMain_SA.txt') as file:
     lines = file.readlines()
 
 
@@ -50,20 +50,21 @@ for line in lines:
             run = int(cols[0])
             # absolute values to counter negative parameters
             # 1/1000 tolerance of numeric precision
-            if abs(param_cur_val) > abs(param_def_val)*1.001:
+            if param_cur_val > param_def_val + abs(param_def_val)*0.001:
                 sa_tup = (param_short_name + '+', cost, param_cur_val, run)
                 sensitivity_list.append(sa_tup)
+                break
                 # print(param_name + " is bigger")
 
-            elif abs(param_cur_val) < abs(param_def_val)/1.001:
+            elif param_cur_val < param_def_val - abs(param_def_val)*0.001:
                 sa_tup = (param_short_name + '-', cost, param_cur_val, run)
                 sensitivity_list.append(sa_tup)
+                break
                 # print(param_name + " is smaller")
             else:
                 # this parameter has not been changed
                 pass
 
-sensitivity_list.sort(key = lambda x: x[1])
 s_mean = numpy.median([k[1] for k in sensitivity_list])
 
 def printLine(line:tuple):
@@ -73,19 +74,29 @@ def printLine(line:tuple):
     return printline
 
 with open('sa_output.csv', 'w') as file:
+    # sort by costs
+    sensitivity_list.sort(key = lambda x: x[1])
     file.write('# Cost, param, run # with mean of %.3f\n' % s_mean)
-
     lines = '\n'.join(list(map(printLine, sensitivity_list)))
     file.writelines(lines)
 
-num_to_plot = 30
+with open('sa_runs.csv', 'w') as file:
+    # sort by run
+    sensitivity_list.sort(key = lambda x: x[3])
+    file.write('# run, param, param value, cost %.3f\n' % s_mean)
+    lines = '\n'.join(list(map(lambda l:'%d, %s, %.3e, %.6f' % (l[3], l[0], l[2], l[1]), sensitivity_list)))
+    file.writelines(lines)
+
+# sort by costs
+sensitivity_list.sort(key = lambda x: x[1])
+num_to_plot = 70
 plotlist = sensitivity_list[:num_to_plot]
 plotlist.reverse()
 heights = list((x[1] for x in plotlist))
 labels = list(('%s (%03d)' % (x[0], x[3]) for x in plotlist))
 dpi = 100
 plt.figure(figsize = [800/dpi, 800/dpi], dpi=dpi)
-plt.rc('ytick', labelsize=8)
+plt.rc('ytick', labelsize=6)
 plt.axvline(x=s_mean, color='r')
 plt.barh(range(len(heights)), heights, tick_label = labels)
 

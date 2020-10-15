@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(10146,109)
+char initialName(10150,109)
 settings.phi0
 settings.height
 settings.weight
@@ -117,6 +117,7 @@ settings.chi_phi
 settings.heart_R_vlv
 settings.heart_R_LA
 settings.heart_R_RA
+settings.heart_I_A
 settings.heart_alphaE
 settings.heart_gammaE
 settings.heart_drive_D_0
@@ -210,6 +211,9 @@ settings.pulm_tp_pleural_frac
 settings.experimental_zpv_factor
 settings.experimental_C_factor
 settings.experimental_L0
+settings.Td_phi_syst
+settings.Td_phi_hr
+settings.Td_phi_heart
 baseline.settings.phi0
 baseline.settings.height
 baseline.settings.age
@@ -10250,7 +10254,7 @@ stepInterval
 CPUtime
 EventCounter
 
-double initialValue(10146,6)
+double initialValue(10150,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -10259,7 +10263,7 @@ double initialValue(10146,6)
   6   256   # settings.weight
  -1      35                       0                       0                
   1   280   # settings.age
- -1 %settings.HR_nominal% 0.0 0.0
+ -1  1.0666666666667000E+00       0                       0                
   1   280   # settings.HR_nominal
  -1 %settings.HR_max% 0.0 0.0
   1   280   # settings.HR_max
@@ -10279,6 +10283,8 @@ double initialValue(10146,6)
   1   280   # settings.heart_R_LA
  -1 %settings.heart_R_RA% 0.0 1e+100
   1   280   # settings.heart_R_RA
+ -1 %settings.heart_I_A% 0.0 0.0
+  1   280   # settings.heart_I_A
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
@@ -10373,15 +10379,15 @@ double initialValue(10146,6)
   1   280   # settings.eta_adenosine
  -1       1                       0                       0                
   1   281   # settings.veins_UsePhiEffect
- -1 %settings.veins_C_phi% 0.0 0.0
+ -1  8.9999999999999997E-02       0                       0                
   1   280   # settings.veins_C_phi
  -1       0                       0                       0                
   1   280   # settings.veins_ZPV_phi
  -1 %settings.veins_gamma% 0.0 0.0
   1   280   # settings.veins_gamma
- -1 %settings.veins_alpha% 0.0 0.0
+ -1       5                       0                       0                
   1   280   # settings.veins_alpha
- -1       0                       0                       0                
+ -1 %settings.veins_activation_tau% 0.0 0.0
   1   280   # settings.veins_activation_tau
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.veins_diameter_correction
@@ -10417,7 +10423,7 @@ double initialValue(10146,6)
   1   280   # settings.baro_hr_delay
  -1       0                       0                       0                
   1   281   # settings.baro_useAbsolutePressureTerm
- -1 %settings.baro_d0% 0.0 0.0
+ -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
  -1 %settings.baro_tau_s% 0.0 0.0
   1   280   # settings.baro_tau_s
@@ -10445,7 +10451,7 @@ double initialValue(10146,6)
   1   280   # settings.pulm_C_PV
  -1 %settings.pulm_C_PA% 0.0 0.0
   1   280   # settings.pulm_C_PA
- -1 %settings.pulm_P_PV_nom% 0.0 0.0
+ -1  1.0665599999999999E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
@@ -10465,6 +10471,12 @@ double initialValue(10146,6)
   1   280   # settings.experimental_C_factor
  -1  9.0700000000000003E-01       0                       0                
   1   280   # settings.experimental_L0
+ -1 %settings.Td_phi_syst% 0.0 0.0
+  1   280   # settings.Td_phi_syst
+ -1 %settings.Td_phi_hr% 0.0 0.0
+  1   280   # settings.Td_phi_hr
+ -1 %settings.Td_phi_heart% 0.0 0.0
+  1   280   # settings.Td_phi_heart
   0       0                       0                       0                
   6   256   # baseline.settings.phi0
   0       0                       0                 1.0000000000000000E+100
@@ -10517,14 +10529,14 @@ double initialValue(10146,6)
   6   256   # baseline.settings.heart_vntr_sigma_actMaxAct_factor
   0       0                       0                       0                
   6   256   # baseline.settings.heart_vntr_k_passive_factor
- -1  1.8999999999999999E+00       0                       0                
-  1   280   # baseline.settings.heart_vntr_Lsref
- -1  9.0700000000000003E-01       0                       0                
-  1   280   # baseline.settings.heart_vntr_L0
- -1  2.2500000000000000E+00       0                       0                
-  1   280   # baseline.settings.heart_vntr_SLcollagen
- -1  1.5100000000000000E+00       0                       0                
-  1   280   # baseline.settings.heart_vntr_SLrest
+  0       0                       0                       0                
+  6   256   # baseline.settings.heart_vntr_Lsref
+  0       0                       0                       0                
+  6   256   # baseline.settings.heart_vntr_L0
+  0       0                       0                       0                
+  6   256   # baseline.settings.heart_vntr_SLcollagen
+  0       0                       0                       0                
+  6   256   # baseline.settings.heart_vntr_SLrest
   0       0                       0                       0                
   6   256   # baseline.settings.syst_abd_P_th_ratio
   0       0                       0                 1.0000000000000000E+100
@@ -15531,14 +15543,14 @@ double initialValue(10146,6)
   6   256   # exercise.settings.heart_vntr_sigma_actMaxAct_factor
   0       0                       0                       0                
   6   256   # exercise.settings.heart_vntr_k_passive_factor
- -1  1.8999999999999999E+00       0                       0                
-  1   280   # exercise.settings.heart_vntr_Lsref
- -1  9.0700000000000003E-01       0                       0                
-  1   280   # exercise.settings.heart_vntr_L0
- -1  2.2500000000000000E+00       0                       0                
-  1   280   # exercise.settings.heart_vntr_SLcollagen
- -1  1.5100000000000000E+00       0                       0                
-  1   280   # exercise.settings.heart_vntr_SLrest
+  0       0                       0                       0                
+  6   256   # exercise.settings.heart_vntr_Lsref
+  0       0                       0                       0                
+  6   256   # exercise.settings.heart_vntr_L0
+  0       0                       0                       0                
+  6   256   # exercise.settings.heart_vntr_SLcollagen
+  0       0                       0                       0                
+  6   256   # exercise.settings.heart_vntr_SLrest
   0       0                       0                       0                
   6   256   # exercise.settings.syst_abd_P_th_ratio
   0       0                       0                 1.0000000000000000E+100
@@ -20549,14 +20561,14 @@ double initialValue(10146,6)
   6   256   # tilt.settings.heart_vntr_sigma_actMaxAct_factor
   0       0                       0                       0                
   6   256   # tilt.settings.heart_vntr_k_passive_factor
- -1  1.8999999999999999E+00       0                       0                
-  1   280   # tilt.settings.heart_vntr_Lsref
- -1  9.0700000000000003E-01       0                       0                
-  1   280   # tilt.settings.heart_vntr_L0
- -1  2.2500000000000000E+00       0                       0                
-  1   280   # tilt.settings.heart_vntr_SLcollagen
- -1  1.5100000000000000E+00       0                       0                
-  1   280   # tilt.settings.heart_vntr_SLrest
+  0       0                       0                       0                
+  6   256   # tilt.settings.heart_vntr_Lsref
+  0       0                       0                       0                
+  6   256   # tilt.settings.heart_vntr_L0
+  0       0                       0                       0                
+  6   256   # tilt.settings.heart_vntr_SLcollagen
+  0       0                       0                       0                
+  6   256   # tilt.settings.heart_vntr_SLrest
   0       0                       0                       0                
   6   256   # tilt.settings.syst_abd_P_th_ratio
   0       0                       0                 1.0000000000000000E+100
@@ -25571,14 +25583,14 @@ double initialValue(10146,6)
   6   256   # valsalva.settings.heart_vntr_sigma_actMaxAct_factor
   0       0                       0                       0                
   6   256   # valsalva.settings.heart_vntr_k_passive_factor
- -1  1.8999999999999999E+00       0                       0                
-  1   280   # valsalva.settings.heart_vntr_Lsref
- -1  9.0700000000000003E-01       0                       0                
-  1   280   # valsalva.settings.heart_vntr_L0
- -1  2.2500000000000000E+00       0                       0                
-  1   280   # valsalva.settings.heart_vntr_SLcollagen
- -1  1.5100000000000000E+00       0                       0                
-  1   280   # valsalva.settings.heart_vntr_SLrest
+  0       0                       0                       0                
+  6   256   # valsalva.settings.heart_vntr_Lsref
+  0       0                       0                       0                
+  6   256   # valsalva.settings.heart_vntr_L0
+  0       0                       0                       0                
+  6   256   # valsalva.settings.heart_vntr_SLcollagen
+  0       0                       0                       0                
+  6   256   # valsalva.settings.heart_vntr_SLrest
   0       0                       0                       0                
   6   256   # valsalva.settings.syst_abd_P_th_ratio
   0       0                       0                 1.0000000000000000E+100
@@ -30593,7 +30605,7 @@ double initialValue(10146,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(10146,186)
+char initialDescription(10150,186)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -30608,6 +30620,7 @@ Maximal sympathetic activation during exercise [1|%]
 Open valve resistance [(Pa.s)/m3|(mmHg.min)/ml]
 Resistance of left atrium [(Pa.s)/m3|(dyn.s)/cm5]
 Resistance of the right atrium [(Pa.s)/m3|(dyn.s)/cm5]
+Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
 For Smith heart - linear dependency of active elastance on phi [1|%]
 For Smith heart - linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi [1|%]
 nominal driving offset [1|%]
@@ -30701,6 +30714,9 @@ Pressure drop of airway pressure applied to heart and systemic due to pleural sa
 A fraction of venous nominal diameter which creates ZPV for linear veins [1|%]
 A fraction of nominal C [1|%]
 
+[s]
+[s]
+[s]
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 

@@ -195,6 +195,7 @@ package ADAN_main
       parameter Physiolibrary.Types.HydraulicResistance heart_R_RA=1999835.811225
       "Resistance of the right atrium"
         annotation(Dialog(tab = "Heart", group = "General"));
+      parameter Physiolibrary.Types.HydraulicInertance heart_I_A = 10678 "Inertance of the atrial inflow"  annotation(Dialog(tab = "Heart", group = "General"));
       // Smith
       parameter Physiolibrary.Types.Fraction heart_alphaE(min = 0, max = 1.33) = 0 "For Smith heart - linear dependency of active elastance on phi"
         annotation(Dialog(tab = "Heart", group = "Smith"));
@@ -461,7 +462,9 @@ package ADAN_main
       parameter Fraction experimental_zpv_factor=0.5   "A fraction of venous nominal diameter which creates ZPV for linear veins";
       parameter Fraction experimental_C_factor=1   "A fraction of nominal C";
       parameter Real experimental_L0=0.907;
-
+      parameter Modelica.SIunits.Time Td_phi_syst = 0;
+      parameter Modelica.SIunits.Time Td_phi_hr = 0;
+      parameter Modelica.SIunits.Time Td_phi_heart = 0;
           annotation(Dialog(tab = "Heart", group = "TriSegOttesen drive"),
                    defaultComponentName =     "settings",
                  defaultComponentPrefixes = "outer",
@@ -6257,7 +6260,13 @@ Simple")}),                                                                  Dia
                   LV_wall(
                   Vw=settings.heart_vntr_xi_Vw*89,
                   Amref=settings.heart_vntr_xi_AmRef*86,
+                  Lsref=settings.heart_vntr_Lsref,
+                  L0=settings.heart_vntr_L0,
+                  k_passive_negative=k_passive_factor*50,
                   phi0=settings.phi0,
+                  SLrest=settings.heart_vntr_SLrest,
+                  SLcollagen=settings.heart_vntr_SLcollagen,
+                  PConcollagen=settings.heart_vntr_,
                   sigma_act=settings.heart_vntr_xi_sigma_act*7.5*120,
                   sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
                       7.5*120,
@@ -6265,6 +6274,12 @@ Simple")}),                                                                  Dia
                   RV_wall(
                   Vw=settings.heart_vntr_xi_Vw*27,
                   Amref=settings.heart_vntr_xi_AmRef*110,
+                  Lsref=settings.heart_vntr_Lsref,
+                  L0=settings.heart_vntr_L0,
+                  k_passive_negative=k_passive_factor*50,
+                  SLrest=settings.heart_vntr_SLrest,
+                  SLcollagen=settings.heart_vntr_SLcollagen,
+                  PConcollagen=settings.heart_vntr_,
                   sigma_act=settings.heart_vntr_xi_sigma_act*7.5*120,
                   sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
                       7.5*120,
@@ -6272,6 +6287,12 @@ Simple")}),                                                                  Dia
                   SEP_wall(
                   Vw=settings.heart_vntr_xi_Vw*34,
                   Amref=settings.heart_vntr_xi_AmRef*39,
+                  Lsref=settings.heart_vntr_Lsref,
+                  L0=settings.heart_vntr_L0,
+                  k_passive_negative=k_passive_factor*50,
+                  SLrest=settings.heart_vntr_SLrest,
+                  SLcollagen=settings.heart_vntr_SLcollagen,
+                  PConcollagen=settings.heart_vntr_,
                   sigma_act=settings.heart_vntr_xi_sigma_act*7.5*120,
                   sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
                       7.5*120,
@@ -33730,32 +33751,13 @@ P_hs_plus_dist"),
                   {18,48}})));
 
       public
-        replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Simple
+        replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Simple_AtrialInertia
           heartComponent(
           UseFrequencyInput=true,
           UseThoracicPressureInput=true,
           UsePhiInput=true,
           mitralValve(calculateAdditionalMetrics=true),
-          aorticValve(calculateAdditionalMetrics=true),
-          ventricles(
-            LV_wall(
-              Lsref=settings.heart_vntr_Lsref,
-              L0=settings.heart_vntr_L0,
-              phi0=settings.phi0,
-              SLrest=settings.heart_vntr_SLrest,
-              SLcollagen=settings.heart_vntr_SLcollagen),
-            SEP_wall(
-              Lsref=settings.heart_vntr_Lsref,
-              L0=settings.heart_vntr_L0,
-              phi0=settings.phi0,
-              SLrest=settings.heart_vntr_SLrest,
-              SLcollagen=settings.heart_vntr_SLcollagen),
-            RV_wall(
-              Lsref=settings.heart_vntr_Lsref,
-              L0=settings.heart_vntr_L0,
-              phi0=settings.phi0,
-              SLrest=settings.heart_vntr_SLrest,
-              SLcollagen=settings.heart_vntr_SLcollagen))) constrainedby
+          aorticValve(calculateAdditionalMetrics=true)) constrainedby
           Components.Subsystems.Heart.partialHeart
           annotation (Placement(transformation(extent={{-16,-32},{-36,-12}})));
         replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent(
@@ -33766,7 +33768,8 @@ P_hs_plus_dist"),
               useNonlinearResistance=true,
               useNominalParametrization=true,
             R_nom_maxQ=settings.pulm_R/2,
-            Q_nom_maxQ=settings.pulm_q_nom_maxq))
+            Q_nom_maxQ=settings.pulm_q_nom_maxq),
+          R_pv_visc(Resistance=settings.pulm_PV_R_vis))
         constrainedby Components.Subsystems.Pulmonary.partialPulmonary annotation (
             Placement(transformation(extent={{-34,-62},{-14,-42}})));
       Modelica.Blocks.Sources.Trapezoid phi_fixed(
@@ -33784,6 +33787,8 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
         Components.Signals.ConditionalConnection condHRPhi(
           disconnectedValue=settings.phi0,
+          delayEnabled=true,
+          delayTime=settings.Td_phi_hr,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,-36.7408},
                   {44,-26.0741}})));
         replaceable Components.Subsystems.Baroreflex.HeartRate_HRMinMax
@@ -33813,6 +33818,8 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condSystemicPhi(
           disconnectedValue=0.25,
           disconnected=false,
+          delayEnabled=true,
+          delayTime=settings.Td_phi_syst,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
                   15.5556},{44,25.5556}})));
         Modelica.Blocks.Logical.Switch switch1
@@ -33822,6 +33829,8 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condHeartPhi(
           disconnectedValue=0.25,
           disconnected=false,
+          delayEnabled=true,
+          delayTime=settings.Td_phi_heart,
           phi0=settings.phi0)          annotation (Placement(transformation(
                 extent={{56,-20.7408},{44,-10.0741}})));
         Components.Signals.ConditionalConnection condTP_IP(
@@ -39359,6 +39368,10 @@ P_hs_plus_dist"),
               heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act,
               heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+              heart_vntr_Lsref=settings.heart_vntr_Lsref,
+              heart_vntr_L0=settings.heart_vntr_L0,
+              heart_vntr_SLcollagen=settings.heart_vntr_SLcollagen,
+              heart_vntr_SLrest=settings.heart_vntr_SLrest,
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -39392,10 +39405,10 @@ P_hs_plus_dist"),
               pulm_R_exp=settings.pulm_R_exp,
               pulm_PV_R_vis=settings.pulm_PV_R_vis,
               pulm_tp_pleural_frac=settings.pulm_tp_pleural_frac,
-                baro_a=settings.baro_a,
-                baro_b=settings.baro_b,
-                baro_f0=settings.baro_f0,
-                pulm_q_nom_maxq=settings.pulm_q_nom_maxq),
+              baro_a=settings.baro_a,
+              baro_b=settings.baro_b,
+              baro_f0=settings.baro_f0,
+              pulm_q_nom_maxq=settings.pulm_q_nom_maxq),
             fmi_StartTime=60,
             fmi_StopTime=120,
             fmi_NumberOfSteps=steps,
@@ -39430,6 +39443,10 @@ P_hs_plus_dist"),
               heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act,
               heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+              heart_vntr_Lsref=settings.heart_vntr_Lsref,
+              heart_vntr_L0=settings.heart_vntr_L0,
+              heart_vntr_SLcollagen=settings.heart_vntr_SLcollagen,
+              heart_vntr_SLrest=settings.heart_vntr_SLrest,
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -39463,10 +39480,10 @@ P_hs_plus_dist"),
               pulm_R_exp=settings.pulm_R_exp,
               pulm_PV_R_vis=settings.pulm_PV_R_vis,
               pulm_tp_pleural_frac=settings.pulm_tp_pleural_frac,
-                baro_a=settings.baro_a,
-                baro_b=settings.baro_b,
-                baro_f0=settings.baro_f0,
-                pulm_q_nom_maxq=settings.pulm_q_nom_maxq),
+              baro_a=settings.baro_a,
+              baro_b=settings.baro_b,
+              baro_f0=settings.baro_f0,
+              pulm_q_nom_maxq=settings.pulm_q_nom_maxq),
             fmi_StartTime=60,
             fmi_StopTime=120,
             fmi_NumberOfSteps=steps,
@@ -39501,6 +39518,10 @@ P_hs_plus_dist"),
               heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act,
               heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+              heart_vntr_Lsref=settings.heart_vntr_Lsref,
+              heart_vntr_L0=settings.heart_vntr_L0,
+              heart_vntr_SLcollagen=settings.heart_vntr_SLcollagen,
+              heart_vntr_SLrest=settings.heart_vntr_SLrest,
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -39534,10 +39555,10 @@ P_hs_plus_dist"),
               pulm_R_exp=settings.pulm_R_exp,
               pulm_PV_R_vis=settings.pulm_PV_R_vis,
               pulm_tp_pleural_frac=settings.pulm_tp_pleural_frac,
-                baro_a=settings.baro_a,
-                baro_b=settings.baro_b,
-                baro_f0=settings.baro_f0,
-                pulm_q_nom_maxq=settings.pulm_q_nom_maxq),
+              baro_a=settings.baro_a,
+              baro_b=settings.baro_b,
+              baro_f0=settings.baro_f0,
+              pulm_q_nom_maxq=settings.pulm_q_nom_maxq),
             fmi_StartTime=0,
             fmi_StopTime=120,
             fmi_NumberOfSteps=steps,
@@ -39572,6 +39593,10 @@ P_hs_plus_dist"),
               heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act,
               heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+              heart_vntr_Lsref=settings.heart_vntr_Lsref,
+              heart_vntr_L0=settings.heart_vntr_L0,
+              heart_vntr_SLcollagen=settings.heart_vntr_SLcollagen,
+              heart_vntr_SLrest=settings.heart_vntr_SLrest,
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -39605,10 +39630,10 @@ P_hs_plus_dist"),
               pulm_R_exp=settings.pulm_R_exp,
               pulm_PV_R_vis=settings.pulm_PV_R_vis,
               pulm_tp_pleural_frac=settings.pulm_tp_pleural_frac,
-                baro_a=settings.baro_a,
-                baro_b=settings.baro_b,
-                baro_f0=settings.baro_f0,
-                pulm_q_nom_maxq=settings.pulm_q_nom_maxq),
+              baro_a=settings.baro_a,
+              baro_b=settings.baro_b,
+              baro_f0=settings.baro_f0,
+              pulm_q_nom_maxq=settings.pulm_q_nom_maxq),
             fmi_StartTime=60,
             fmi_StopTime=120,
             fmi_NumberOfSteps=steps,

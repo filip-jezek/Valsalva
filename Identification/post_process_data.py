@@ -300,7 +300,7 @@ for file in files:
         var_set['__draw_plots'] = True
 
         var_set['__plot_title'] = file
-        var_set['__saveFig_path'] = fun_lib.getSafeLogDir(COST_FUNCTION_FOLDER)  + file + '.png'
+        var_set['__saveFig_path'] = fun_lib.getSafeLogDir(DATA_FOLDER)  + file + '.png'
     
     if READ_OBJECTIVES:
        var_set['__targetValuesFilename'] = getTargetFileName(file_set)
@@ -354,3 +354,4 @@ getAndPlotTargetVals('All supine', ('k--', 'r:', 'k--', 'm:', 'k--', 'y:'))
 plt.title('Sit (full, blue, cyan, green) vs. supine (dashed, red, magenta, yellow) comparisson')
 plt.xlabel('mmHg, BPM, mmHg')
 plt.savefig(getTargetFileName('sit vs supine').replace('.txt', '.png') , dpi = 300)
+print('Its all done, sire')

@@ -460,7 +460,7 @@ def prepareIdent():
 if __name__ == "__main__":
 
     # writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'params_for_SA.txt', filter = 'settings.', accept = [1, 2], types = (280, 272, 361))
-    # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0)
-    prepareIdent()
+    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0)
+    # prepareIdent()
     print('Done, Johne')
 

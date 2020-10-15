@@ -163,7 +163,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
     # overshoot phase at start of the valsalva
     phase1 = (valsalva_start, valsalva_start + 5)
     # min mean pressure during valsalva
-    phase2 = (valsalva_start+2, valsalva_end)
+    phase2 = (valsalva_start, valsalva_end)
     # drop and overshoot after valsalva release
     phase4 = (valsalva_end, valsalva_end + 7)
     # recovery - all is getting to normal
@@ -213,10 +213,10 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         value = ppulse[i]/baseline_pp
         return fun_lib.ObjectiveVar(name, value=value, weight=weight)
 
-    phase_values = [(BP     , phase1, (-1, 0), numpy.max  , baseline_bp, 'ph1_peak'    , IGNORE),
-                    (bp_mean, phase2, (0, -2), numpy.min  , baseline_bp, 'ph2_mean_min', COUNT),
+    phase_values = [(bp_mean, phase1, (-1, 0), numpy.max  , baseline_bp, 'ph1_peak'    , COUNT),
+                    (bp_mean, phase2, (2, -2), numpy.min  , baseline_bp, 'ph2_mean_min', COUNT),
                     (bp_mean, phase4,(-7, -7), numpy.max  , baseline_bp, 'ph2_max'     , COUNT),
-                    (bp_mean, phase4,(-2, 0), numpy.min  , baseline_bp, 'ph4_drop'    , COUNT),
+                    (bp_mean, phase4,(-2, -3), numpy.min  , baseline_bp, 'ph4_drop'    , COUNT),
                     (bp_mean, phase4, (2, 5) , numpy.max  , baseline_bp, 'ph4_ovrshoot', COUNT),
                     (bp_mean, phase5, 0      , numpy.mean , baseline_bp, 'ph5_recovery', COUNT),
                     (HR     , phase1, 0      , numpy.min  , baseline_hr, 'ph1_hr_min' , COUNT),
@@ -224,10 +224,10 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
                     (HR     , phase4, (0, 3) , numpy.min  , baseline_hr, 'ph4_hr_drop', COUNT),
                     (HR     , phase5, 0      , numpy.mean , baseline_hr, 'ph5_hr_recovery', COUNT)]
 
-    time_values = [ (BP,      phase1, (-1, 0), numpy.argmax, 't_ph1_peak'    , IGNORE),
-                    (bp_mean, phase2, (0, -2), numpy.argmin, 't_ph2_mean_min', COUNT),
+    time_values = [ (bp_mean, phase1, (-1, 0), numpy.argmax, 't_ph1_peak'    , IGNORE),
+                    (bp_mean, phase2, (2, -2), numpy.argmin, 't_ph2_mean_min', COUNT),
                     (bp_mean, phase4,(-7, -7), numpy.argmax, 't_ph2_max'     , IGNORE),# relative to phase 4 !!!
-                    (bp_mean, phase4, (-2, 0), numpy.argmin, 't_ph4_drop'    , COUNT),
+                    (bp_mean, phase4, (-2, -3), numpy.argmin, 't_ph4_drop'    , COUNT),
                     (bp_mean, phase4, (2, 5) , numpy.argmax, 't_ph4_ovrshoot', COUNT),
                     (HR     , phase1, 0      , numpy.argmin, 't_ph1_hr_min'  , COUNT),
                     (HR     , phase4, (0, 0) , numpy.argmax, 't_ph4_hr_max'  , COUNT),
