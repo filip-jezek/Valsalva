@@ -33728,7 +33728,17 @@ P_hs_plus_dist"),
       extends Auxiliary.partialCVS_ss(
         condHRPhi(delayEnabled=false),
         condHeartPhi(delayEnabled=false),
-        condSystemicPhi(delayEnabled=false));
+        condSystemicPhi(delayEnabled=false),
+        settings(
+          V_PV_init=0.0001,
+          heart_drive_D_0(displayUnit="1") = 0.025,
+          heart_drive_D_0_maxAct(displayUnit="1") = 0.025,
+          pulm_C_PV=3.0002463033826e-07,
+          pulm_P_PV_nom=1333.22387415,
+          pulm_R(displayUnit="(dyn.s)/cm5"),
+          pulm_PV_R_vis(displayUnit="(dyn.s)/cm5")));
+      annotation (__Dymola_Commands(file(ensureSimulated=true) =
+            "\"EvaluateSimulation.mos\"" "EvaluateUseCases"));
     end CardiovascularSystem;
 
     package Auxiliary
