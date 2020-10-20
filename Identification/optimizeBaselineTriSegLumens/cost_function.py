@@ -38,7 +38,7 @@ def plotObjectives(vars_set, interval, objectives):
     total_costs = fun_lib.countTotalWeightedCost(objectives)
     ax.set_title('Baseline costs %.6f' % total_costs)
     ax.set_ylim([0, 140])
-    ax.set_xlim(60, 120)
+    # ax.set_xlim(60, 120)
 
 
 

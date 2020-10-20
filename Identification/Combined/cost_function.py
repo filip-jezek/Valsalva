@@ -164,13 +164,16 @@ def getObjectives(vars_set:dict):
     #     ax.
 
     # plotObjectives()
-    fun_lib.logObjectives(vars_set['__LOG_ALL_OBJECTIVES_PATH'], all_objectives, vars_set['__SORT_COSTS_BY'])
+    fun_lib.logObjectives(vars_set['__LOG_ALL_OBJECTIVES_PATH'], all_objectives, vars_set['__SORT_COSTS_BY'], compare_to_log_path=vars_set['__LOG_ALL_OBJECTIVES_PATH_BASE'])
 
     
     fig.suptitle('%s costs %.6f' % (fig_title, fun_lib.countTotalSumCost(cost_objectives)))
 
     if saveFig_path is not None:
-        plt.savefig(saveFig_path)
+        try:
+            plt.savefig(saveFig_path)
+        except PermissionError:
+            print('Writing the figure failed, permission denied')
     
     if '__showPlots' in vars_set and vars_set['__showPlots'] :
     # and fun_lib.getRunNumber() == 0:

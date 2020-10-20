@@ -1,6 +1,10 @@
 ﻿// Assume simulation in this dir
 /*
-cd c:/home/UMICH/Valsalva/Identification/SimulationEvaluation
 */
+cd c:/home/UMICH/Valsalva/Identification/SimulationEvaluation
+
+simulateModel("ADAN_main.SystemicTree.Baseline.CVS_baseline", stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_baseline");
+simulateModel("ADAN_main.SystemicTree.Valsalva.CVS_valsalva", stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_valsalva");
+
 
 Execute("EvalSimulation.bat");
