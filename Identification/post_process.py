@@ -8,17 +8,13 @@ import time
 import re
 import fun_lib
 from datetime import datetime
+import json
 # import ast
 # from matplotlib import pyplot as plt
 # import re
 # import TerminalDS
 
-VALUE_LOG_DIRNAME = '..\\Schedules'
-VALUE_LOG_FILENAME = '_current_costs.txt'
-DRAW_PLOTS_OVERRIDE = True
-READ_OBJECTIVES = True
-# If true loads ONLY non-constants
-OMIT_LOADING_PARAMS = True
+# SETTINGSFILE = 'post_process_options.json'
 # // write the outputfiles
 
 
@@ -31,13 +27,13 @@ def writeCost(objectives):
         file.write('f(x) =' + repr(total_cost))
     print('Total costs: %s' % (total_cost))
 
-def getLogFilePath():
-    return fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME) + VALUE_LOG_FILENAME
+def getLogFilePath(var_set):
+    return fun_lib.getSafeLogDir(var_set['__VALUE_LOG_DIRNAME']) + var_set['__VALUE_LOG_FILENAME']
 
-def writeLogHeader(objectives):
+def writeLogHeader(objectives, var_set):
     """check if file exists and build header otherwise
     """
-    filepath = getLogFilePath()
+    filepath = getLogFilePath(var_set)
     if not os.path.isfile(filepath):
         with open(filepath, 'w') as file:
             header = map(lambda o: o.name.rjust(5) + '_val,' + o.name.rjust(5) + '_trg, %', objectives)
@@ -51,10 +47,10 @@ def logLine(objective : fun_lib.ObjectiveVar, total_cost):
     return '%.3e,%s,%02d' % (objective.value, objective.target_log() , round(objective.cost()/total_cost*100))
 
 
-def logOutput(objectives):
+def logOutput(objectives, var_set):
     # log the output, if the log directory exists. exit otherwise
 
-    filepath = getLogFilePath()
+    filepath = getLogFilePath(var_set)
     run = fun_lib.getRunNumber()
     with open(filepath, 'a') as file:
         # prepare the line with value, cost value for this and percentage of total costs
@@ -68,17 +64,15 @@ def logOutput(objectives):
         file.write(',  '.join(string_seq) + tail + '\n')
 
 
-def extractVars(d, prefix = None):
+def extractVars(d, var_set, prefix = None):
     # use just a subset or use all
     # vrs_names = ['Systemic1.posterior_tibial_T4_R236.u_C', 'Systemic1.aortic_arch_C2.port_a.pressure']
-    if OMIT_LOADING_PARAMS:
+    if var_set['__OMIT_LOADING_PARAMS']:
         vrs_names = d.names(block = 2)
     else:
         vrs_names = d.names()
 
     timevar = d.abscissa(2)[0]
-
-    var_set = {}
 
     if prefix is None or prefix == '__None':
         var_set['time'] = timevar
@@ -94,7 +88,7 @@ def extractVars(d, prefix = None):
     return var_set
 
 
-def loadInputFiles():
+def loadInputFiles(var_set):
     
     def loadMatFile(filename, prefix = None):
         tic = time.time()
@@ -102,26 +96,31 @@ def loadInputFiles():
         toc = time.time()
         print("Opening %s in %.3f ms" % (filename, (toc - tic)*1000))
 
-        var_set = extractVars(d, prefix)
-        return var_set
+        extractVars(d, var_set, prefix = prefix)
 
-    if len(sys.argv) == 1:
+    if '__inputFiles' in var_set and var_set['__inputFiles'] is not None:
+        inputFile_args = var_set['__inputFiles']
+    else:
+        inputFile_args = sys.argv[1:]
+
+    if len(inputFile_args) == 0:
         return loadMatFile('dsres.mat')
-    elif len(sys.argv) == 2:
-        return loadMatFile(sys.argv[1])
-    elif len(sys.argv) > 2:
+    elif len(inputFile_args) == 1:
+        return loadMatFile(inputFile_args[0])
+    elif len(inputFile_args) > 2:
         # multiple files as parameters in the form:
         # file1 prefix1 file2 prefix2 file3 prefix3
-        args = sys.argv[1:]
-        if len(args) % 2 == 1:
+        if len(inputFile_args) % 2 == 1:
             raise ValueError("The argument list must be even, i.e. file1 prefix1 file2 prefix2 file3 prefix3. Use __None for no prefix")
-        files = args[::2]
-        prefixes = args[1::2]
-        var_set_gen = (loadMatFile(f, p) for f, p in zip(files, prefixes))
-        var_set = {k: v for d in var_set_gen for k, v in d.items()}
+        files = inputFile_args[::2]
+        prefixes = inputFile_args[1::2]
 
-        # add drawing plts info
-        var_set['__draw_plots'] = True
+        for f, p in zip(files, prefixes):
+            loadMatFile(f, p)
+        
+        # var_setUpdate = {k: v for d in var_set_gen for k, v in d.items()}
+        # var_set.update(var_setUpdate)
+
         # get current dir as a case name
         var_set['__plot_title'] = "Case %s" % (os.path.basename(os.getcwd()))
         var_set['__saveFig_path'] = "FitFig_0.png"
@@ -130,41 +129,72 @@ def loadInputFiles():
 
 def getObjectives(var_set) -> fun_lib.ObjectiveVar:
     tic = time.time()
-    cf = fun_lib.importCostFunction()
+    cf = fun_lib.importCostFunction(dir = var_set['__COST_FUNC_PATH'])
 
-    if DRAW_PLOTS_OVERRIDE:
+    if var_set['__DRAW_PLOTS_OVERRIDE']:
         var_set['__draw_plots'] = True
         var_set['__plot_title'] = "Run %i" % (fun_lib.getRunNumber())
-        var_set['__saveFig_path'] = "%sFitFig_%03d.png" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
+        var_set['__saveFig_path'] = "%sFitFig_%03d.png" % (fun_lib.getSafeLogDir(var_set['__VALUE_LOG_DIRNAME']), fun_lib.getRunNumber())
         
-    # log combined output
-    var_set['__objectivesLog_path'] = "%sobjectiveLog_%03d.csv" % (fun_lib.getSafeLogDir(VALUE_LOG_DIRNAME), fun_lib.getRunNumber())
+    # log combined output if supported by the cost function
+    var_set['__objectivesLog_path'] = "%sobjectiveLog_%03d.csv" % (fun_lib.getSafeLogDir(var_set['__VALUE_LOG_DIRNAME']), fun_lib.getRunNumber())
 
     objectives = cf.getObjectives(var_set)
 
     print("Calculating costs in ", time.time() - tic, " s")
     return objectives
 
-def logCrash(line:str):
-    with open(fun_lib.getSafeLogDir('..\\Schedules') + 'errorLog.txt', 'a') as f:
+def logCrash(logdirname, line:str):
+    with open(fun_lib.getSafeLogDir(logdirname) + 'errorLog.txt', 'a') as f:
         s = '%s: At run %d sumfin went wong: %s\n' % (datetime.now(), fun_lib.getRunNumber(), line)
         print(s)
         f.write(s)
         
+def importOptions(var_set:dict, settingsFile = 'post_process_options.json'):
+    """ Updates params from settings file (returns true) or loads default (returns False). 
+    """
+    defaultOptionsString = r"""{ 
+        "__VALUE_LOG_DIRNAME" : "..\\Schedules",
+        "__VALUE_LOG_FILENAME" : "_current_costs.txt",
+        "__DRAW_PLOTS_OVERRIDE" : true,
+        "__READ_OBJECTIVES" : true,
+        "__OMIT_LOADING_PARAMS" : true,
+		"__COST_FUNC_PATH" : "..\\",
+		"__SORT_COSTS_BY" : "name",
+		"__LOG_ALL_OBJECTIVES_PATH" : null,
+		"__targetValuesFilename" : "../../../data/Valsalva/targetValues_All_supine.txt"
+}"""
+
+    if not os.path.exists(settingsFile):
+        sets = json.loads(defaultOptionsString)
+        var_set.update(sets) 
+        return False   
+    else:
+        with open(settingsFile) as file:
+            sets = json.load(file)
+            var_set.update(sets)
+            return True
 
 def processDyMatFile():
+    
+    var_set = {}
+    # import options
+    importOptions(var_set)
+
     try:
-        var_set = loadInputFiles()
+        
+        loadInputFiles(var_set)
 
         objectives = getObjectives(var_set)
 
         writeCost(objectives)
-        writeLogHeader(objectives)
-        logOutput(objectives)
+        writeLogHeader(objectives, var_set)
+        logOutput(objectives, var_set)
+        fun_lib.logObjectives(var_set['__LOG_ALL_OBJECTIVES_PATH'], objectives, var_set['__SORT_COSTS_BY'])
 
     except FileNotFoundError as f:
         # the simulation did not evens started
-        logCrash('Simulation output file %s not found, quitting.' % f.filename)
+        logCrash(var_set['__VALUE_LOG_DIRNAME'], 'Simulation output file %s not found, quitting.' % f.filename)
         # objectives = [fun_lib.ObjectiveVar('Simulation failed', value = 1, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)]
         # writeCost(objectives)
         # logOutput(objectives)
@@ -175,7 +205,7 @@ def processDyMatFile():
         # comment out if you want to halt the optim
         writeCost(objectives)
 
-        logCrash(e)
-        logOutput(objectives)
+        logCrash(var_set['__VALUE_LOG_DIRNAME'], e)
+        logOutput(objectives, var_set)
 
 processDyMatFile()

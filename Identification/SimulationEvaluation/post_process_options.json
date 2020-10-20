@@ -1,0 +1,14 @@
+{ 
+        "__VALUE_LOG_DIRNAME" : "",
+        "__VALUE_LOG_FILENAME" : "_current_costs.txt",
+        "__DRAW_PLOTS_OVERRIDE" : true,
+        "__READ_OBJECTIVES" : true,
+        "__OMIT_LOADING_PARAMS" : true,
+		"__COST_FUNC_PATH" : "..\\Combined\\",
+		"__SORT_COSTS_BY_OPTIONS" : "id, costs, name",
+		"__SORT_COSTS_BY" : "costs",
+		"__LOG_ALL_OBJECTIVES_PATH" : "all_objectives.txt",
+		"__targetValuesFilename" : "../../data/Valsalva/targetValues_All_supine.txt",
+		"__inputFiles" : ["CVS_baseline.mat", "baseline", "CVS_valsalva.mat", "valsalva"],
+		"__root_path" : "..\\..\\"
+}

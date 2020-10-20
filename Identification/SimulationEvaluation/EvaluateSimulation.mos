@@ -1,0 +1,6 @@
+﻿// Assume simulation in this dir
+/*
+cd c:/home/UMICH/Valsalva/Identification/SimulationEvaluation
+*/
+
+Execute("EvalSimulation.bat");

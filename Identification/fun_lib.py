@@ -120,10 +120,17 @@ class ObjectiveVar:
             target = "%d" % 0
         elif self.targetValue  is not None:
             target = "%.3e" % self.targetValue
+        elif self.limit is not None:
+            if self.value < self.limit[1]:
+                # lower than upper bound - print the lower one
+                target = '>%0.3f' % self.limit[0]
+            else: # self.value >
+                target = '<%0.3f' %self.limit[0]
+                # target = ' in limit' if self.inLimit() else 'out limit'
         else:
-            target = ' in limit' if self.inLimit() else 'out limit'
+            target = ' ??wat?? '
         
-        return target
+        return target.ljust(9)
 
     def __repr__(self):
         return '%s,%.3e,%s' % (self.name, self.value, self.target_log())
@@ -460,3 +467,32 @@ def writeToFile(filename, time:Iterable, signal:Iterable):
             file.write('%.2f, %.6e\n' % (t, s))
     
     print("Written to %s, mate" % filename)
+
+def logObjectives(objectivesLog_path, objectives, sortBy = 'cost'):
+    if objectivesLog_path is not None:
+        if '%' in objectivesLog_path:
+            # update with Run number, of supported
+            objectivesLog_path = objectivesLog_path % getRunNumber()
+
+        with open(objectivesLog_path, 'w') as file:
+            total_cost = countTotalSumCost(objectives)
+
+            max_name_len = max(len(o.name) for o in objectives)
+
+            # tab spaces fro longest header, otherwise for 9 places
+            header_names = 'Name'.ljust(max_name_len)
+
+
+            file.write('%s, value    , target   , cost     , %%   , total = %.6e\n' % (header_names, total_cost))
+
+            def sortedObjectives():
+                if sortBy == 'costs':
+                    return sorted(objectives, key = lambda o: o.cost(), reverse=True)
+                elif sortBy == 'id':
+                    return objectives 
+                elif sortBy == 'name':
+                    return sorted(objectives, key = lambda o: o.name, reverse=False)
+            
+            for o in sortedObjectives():
+                s = '%s,%.3e ,%s , %.3e ,%02.1d \n' % (o.name.ljust(max_name_len), o.value, o.target_log(), o.cost(), round(o.cost()/total_cost*100))
+                file.write(s)
