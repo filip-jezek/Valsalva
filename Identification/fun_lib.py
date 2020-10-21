@@ -53,6 +53,7 @@ class ObjectiveVar:
         self.costFunctionType = costFunctionType
         # standard deviation
         self.std = std
+        self.base_cost = None
 
     def __cost_function(self, measured, target):
         # calculate costs. Could go negative or NaN for negative or zero measured values!
@@ -120,20 +121,44 @@ class ObjectiveVar:
             target = "%d" % 0
         elif self.targetValue  is not None:
             target = "%.3e" % self.targetValue
+        elif self.limit is not None:
+            if self.value < self.limit[1]:
+                # lower than upper bound - print the lower one
+                target = '>%0.3f' % self.limit[0]
+            else: # self.value >
+                target = '<%0.3f' %self.limit[0]
+                # target = ' in limit' if self.inLimit() else 'out limit'
         else:
-            target = ' in limit' if self.inLimit() else 'out limit'
+            target = ' ??wat?? '
         
-        return target
+        return target.ljust(9)
 
     def __repr__(self):
         return '%s,%.3e,%s' % (self.name, self.value, self.target_log())
+
+    def cost_to_base_comparisson(self) -> float:
+        c = self.cost()
+        if self.base_cost is None:
+            return ''
+        elif self.base_cost == 0 and c == 0:
+            return ''
+        elif self.base_cost == 0 and c > 0:
+            return '+Inf'
+        elif self.base_cost == 0 and c < 0:
+            # improbable :)
+            return '-Inf'
+        else:
+            return '%+0.0f' % ((self.cost() - self.base_cost)/self.base_cost*100)
 
 
 def getObjectiveByName(objective_iterable, name) -> ObjectiveVar:
     """
     Returns objective of given name from the list
     """
-    return next((i for i in objective_iterable if i.name == name))
+    try:
+        return next((i for i in objective_iterable if i.name == name))
+    except StopIteration:
+        return None
 
 def findInterval(t_from, t_to, timeArr):
     return range(findLowestIndex(t_from, timeArr), findLowestIndex(t_to, timeArr))
@@ -360,11 +385,16 @@ def getRunNumber() -> str:
 def getSafeLogDir(unsafeDir, safe_rollback = '..\\'):
     """ Try provided unsafeDir and falls back to parent dir otherwise
     """
+    if len(unsafeDir) == 0:
+        # its current dir, thats fine
+        return ''
+    
+    unsafeDir_path = unsafeDir.rstrip('\\') + '\\'
 
-    if not os.path.isdir(unsafeDir):
+    if not os.path.isdir(unsafeDir_path):
         return safe_rollback
     else:
-        return unsafeDir + '\\'
+        return unsafeDir_path
 
 def unifyCostFunc(o:ObjectiveVar):
     """ Changes the objective cost function type to variance
@@ -460,3 +490,40 @@ def writeToFile(filename, time:Iterable, signal:Iterable):
             file.write('%.2f, %.6e\n' % (t, s))
     
     print("Written to %s, mate" % filename)
+
+def logObjectives(objectivesLog_path, objectives, sortBy = 'cost', compare_to_log_path = None):
+    if compare_to_log_path is not None:
+        with open(compare_to_log_path) as file:
+            for line in file.readlines():
+                # find in objectives
+                o = getObjectiveByName(objectives, line.split(',')[0].strip(' '))
+                if o is not None:
+                    o.base_cost = float(line.split(',')[3])
+
+    if objectivesLog_path is not None:
+        if '%' in objectivesLog_path:
+            # update with Run number, of supported
+            objectivesLog_path = objectivesLog_path % getRunNumber()
+
+        with open(objectivesLog_path, 'w') as file:
+            total_cost = countTotalSumCost(objectives)
+
+            max_name_len = max(len(o.name) for o in objectives)
+
+            # tab spaces fro longest header, otherwise for 9 places
+            header_names = 'Name'.ljust(max_name_len)
+
+
+            file.write('%s, value    , target   , cost     ,%% tot, [%% base costs], total = %.6e\n' % (header_names, total_cost))
+
+            def sortedObjectives() -> Iterable[ObjectiveVar]:
+                if sortBy == 'costs':
+                    return sorted(objectives, key = lambda o: o.cost(), reverse=True)
+                elif sortBy == 'id':
+                    return objectives 
+                elif sortBy == 'name':
+                    return sorted(objectives, key = lambda o: o.name, reverse=False)
+            
+            for o in sortedObjectives():
+                s = '%s,%.3e ,%s ,%.3e , %02.0f  , %s\n' % (o.name.ljust(max_name_len), o.value, o.target_log(), o.cost(), round(o.cost()/total_cost*100), o.cost_to_base_comparisson())
+                file.write(s)

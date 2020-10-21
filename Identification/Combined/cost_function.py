@@ -42,7 +42,8 @@ def filterVarSet(vars_set, filter_string):
     return filtered_vars
 
 
-def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top_level = '..\\..\\..\\'):
+# def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top_level = '..\\..\\..\\'):
+def getObjectives(vars_set:dict):
     """ Gets all objectives for our combined CF.
     Trials:
     
@@ -59,7 +60,9 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
     dpi = 100
     fig, axs = plt.subplots(nrows = 2, ncols = 2, sharex = False, sharey = False, figsize = [1920/dpi, 1080/dpi], dpi=dpi)
     
-    
+    if '__root_path' not in vars_set:
+        vars_set['__root_path'] = '..\\..\\..\\'
+
     if '__plot_title' in vars_set:
         fig_title = vars_set['__plot_title']
         # get rid of the key
@@ -101,9 +104,16 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
         nonlocal axes_num
         nonlocal ax
 
+        # check if there are results for this particular use case
+        if len([v for v in vars_set.keys() if v.startswith(name + '.')]) == 0:
+            o = ObjectiveVar('IGNORING %s' % name, value=0, targetValue=0, costFunctionType=CostFunctionType.Ignore)
+            cost_objectives.append(o)
+            all_objectives.append(o)
+            return
+
         vars_set['__plot_axes'] = ax[axes_num]
         axes_num = axes_num + 1
-        cf = importCostFunction(top_level + 'Identification\\' + cost_func_folder)
+        cf = importCostFunction(vars_set['__root_path'] + 'Identification\\' + cost_func_folder)
         # mapped_vars = mapVarSet(vars_set, mapping)
         # filtering only vars relevant for that cost function, e.g. valsalva.brachial_pressure gives brachial_pressure
         
@@ -130,10 +140,8 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
 
     # they append inside
     buildCostObjective('baseline', 'optimizeBaselineTriSegLumens', 10)
-#    buildCostObjective('tilt', 'optimizeTilt', 1)
+    buildCostObjective('tilt', 'optimizeTilt', 1)
 #    buildCostObjective('exercise', 'MaxExercise', 1)
-    # open the data folder
-    vars_set['__targetValuesFilename'] = targetsFolder + 'targetValues_All_supine.txt'
     buildCostObjective('valsalva', 'valsalva', 1)
     
     # def plotObjectives():
@@ -156,21 +164,16 @@ def getObjectives(vars_set:dict, targetsFolder = r"../../../data/Valsalva/", top
     #     ax.
 
     # plotObjectives()
-    if objectivesLog_path is not None:
-        with open(objectivesLog_path, 'w') as file:
-            total_cost = fun_lib.countTotalSumCost(all_objectives)
-            file.write('Name, value, target, %%, total = %.6e\n' % total_cost)
-            for o in sorted(all_objectives, key = lambda o: o.cost(), reverse=True):
-                s = '%s,%.3e,%s,%02d\n' % (o.name, o.value, o.target_log(), round(o.cost()/total_cost*100))
-                file.write(s)
-
-
+    fun_lib.logObjectives(vars_set['__LOG_ALL_OBJECTIVES_PATH'], all_objectives, vars_set['__SORT_COSTS_BY'], compare_to_log_path=vars_set['__LOG_ALL_OBJECTIVES_PATH_BASE'])
 
     
     fig.suptitle('%s costs %.6f' % (fig_title, fun_lib.countTotalSumCost(cost_objectives)))
 
     if saveFig_path is not None:
-        plt.savefig(saveFig_path)
+        try:
+            plt.savefig(saveFig_path)
+        except PermissionError:
+            print('Writing the figure failed, permission denied')
     
     if '__showPlots' in vars_set and vars_set['__showPlots'] :
     # and fun_lib.getRunNumber() == 0:
