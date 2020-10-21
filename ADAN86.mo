@@ -210,6 +210,14 @@ package ADAN_main
       parameter Fraction heart_drive_D_0_maxAct=0.00076875
         "Minimal driving offset at maximal activation" annotation(Dialog(tab="Heart",   group=
               "TriSegOttesen drive"));
+
+      parameter Physiolibrary.Types.HydraulicElastance heart_drive_D_A=2*7.5*
+          120 "Amplitude of resting elastance"
+        annotation(Dialog(tab="Heart",   group="TriSegOttesen drive"));
+      parameter Physiolibrary.Types.HydraulicElastance heart_drive_D_A_actMax=
+          30.25*7.5*120
+        "Amplitude of ventricular elastance at maximal activation"
+        annotation(Dialog(tab="Heart",   group="TriSegOttesen drive"));
       parameter Time  heart_drive_TS(displayUnit="s")=0.14
                                           "nominal systolic contraction time"
         annotation(Dialog(tab="Heart",   group="TriSegOttesen drive"));
@@ -227,7 +235,9 @@ package ADAN_main
         annotation(Dialog(tab = "Heart", group = "Simple atria"));
       parameter Fraction heart_drive_atr_D_0=0.25 "nominal driving offset as a fraction of E_0"
         annotation(Dialog(tab="Heart",   group="Simple atria"));
-       parameter Physiolibrary.Types.HydraulicElastance heart_atr_E_0=26664477.483 "Maximal elastance 0.05 + 0.15 mmhg/ml"  annotation(Dialog(tab="Heart",   group="Simple atria"));
+      parameter Physiolibrary.Types.HydraulicElastance heart_atr_D_A=26664477.483
+        "Atrial elastance peak - Maximal elastance 0.05 + 0.15 mmhg/ml"                                                     annotation(Dialog(tab="Heart",   group=
+              "Simple atria"));
 
       // TriSeg ventricles
       parameter Physiolibrary.Types.Fraction heart_vntr_xi_Vw=1
@@ -236,12 +246,6 @@ package ADAN_main
       parameter Physiolibrary.Types.Fraction heart_vntr_xi_AmRef=1
         "Factor affecting ventricular diameters"
         annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
-      parameter Physiolibrary.Types.Fraction heart_vntr_xi_sigma_act=2
-        "Factor adjusting systolic strength"
-        annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
-      parameter Fraction heart_vntr_sigma_actMaxAct_factor=30.25
-        "Factor affecting systolic strength"
-        annotation(Dialog(tab = "Heart", group = "TriSegOttesen ventricles"));
       parameter Fraction heart_vntr_k_passive_factor=1
         "Factor affecting diastolic compliance"
         annotation(Dialog(tab = "Heart", group = "TriSegOttesen ventricles"));
@@ -3238,7 +3242,7 @@ type"),       Text(
           model AtriumSimple "Simple atrium with external driving function"
             Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_a
               annotation (Placement(transformation(extent={{-10,-90},{10,-70}})));
-            Physiolibrary.Types.RealIO.FractionInput D
+            Modelica.Blocks.Interfaces.RealInput     D
               "Driving function fro activation of the atrial muscles"
               annotation (Placement(transformation(extent={{-114,-10},{-94,10}})));
 
@@ -3247,13 +3251,13 @@ type"),       Text(
 
           //  parameter Real Emin = 0.05 "tats 25%";
           //  parameter Real Emax = 0.15;
-           parameter Physiolibrary.Types.HydraulicElastance E_0=26664477.483
-                                                                      "0.05 + 0.15 mmhg/ml";
+          //  parameter Physiolibrary.Types.HydraulicElastance E_0=26664477.483
+          //                                                             "0.05 + 0.15 mmhg/ml";
 
           //   Real _E = (Emin + Emax*drivingFunction) "Elastance function in ml/mmhg";
           //   Physiolibrary.Types.HydraulicElastance E=_E/Constants.ml_per_mmhg2SI;
 
-            Physiolibrary.Types.HydraulicElastance E=E_0*D;
+            Physiolibrary.Types.HydraulicElastance E=D;
 
             Physiolibrary.Types.Volume volume(start=100e-6);// = _VLA*Constants.ml2SI;
             parameter Physiolibrary.Types.Volume volume_min=5e-06  "Volume limiter for external pressures";
@@ -5389,6 +5393,12 @@ type"),       Text(
               Real D_0_phi=D_0*(1 + D_0_coeff*(phi_ - phi0))
                 "D_0 but with phi effect included";
 
+              parameter Physiolibrary.Types.HydraulicElastance D_A=26664477.483 "Peak amplitude at rest";
+              parameter Physiolibrary.Types.HydraulicElastance D_A_maxAct=26664477.483 "Peak amplitude at maximal activation";
+              Real D_A_coeff "Slope of max amplitude change for activation. Calculated from nominal and max active";
+              Physiolibrary.Types.HydraulicElastance D_A_phi = D_A*(1 + D_A_coeff*(phi_ - phi0));
+
+
               parameter Real TS=0.1 "nominal systolic contraction time";
               parameter Real TS_maxAct=0.1
                 "nominal systolic contraction at maximal activation";
@@ -5408,15 +5418,16 @@ type"),       Text(
               Boolean systolicContraction=tm >= 0 and tm < TS_phi;
               Boolean systolicRelaxation=tm >= TS_phi and tm < TR_phi + TS_phi;
             equation
-              // these equations for known XXX_maxAct parameters calculate the _coeff slopes
+              // these equations for known XXX_maxAct parameters calculate the _coeff slopes at maximal activation (=1)
               TS_maxAct = TS*(1 + TS_coeff*(1 - phi0));
               TR_maxAct = TR*(1 + TR_coeff*(1 - phi0));
               D_0_maxAct = D_0*(1 + D_0_coeff*(1 - phi0));
+              D_A_maxAct = D_A*(1 + D_A_coeff*(1 - phi0));
 
             if systolicContraction then
-                D =(1 - D_0_phi)/2*(1 - cos(Modelica.Constants.pi*tm/TS_phi)) + D_0_phi;
+                D =(D_A_phi - D_0_phi)/2*(1 - cos(Modelica.Constants.pi*tm/TS_phi)) + D_0_phi;
             elseif systolicRelaxation then
-                D =(1 - D_0_phi)/2*(1 + cos(Modelica.Constants.pi*(tm - TS_phi)/TR_phi)) +
+                D =(D_A_phi - D_0_phi)/2*(1 + cos(Modelica.Constants.pi*(tm - TS_phi)/TR_phi)) +
                   D_0_phi;
             else
                 D =0 + D_0_phi;
@@ -5903,11 +5914,11 @@ type"),       Text(
               // Triseg parameters
 
               parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
-              parameter Real sigma_act=7.5*120 "mmHg ";
-              parameter Real sigma_act_maxAct = sigma_act "Sigma at maximal activation";
-              parameter Physiolibrary.Types.Fraction phi_limit = 0 "Minimal value of phi to drop to. Experimental parameter, try using phi0 here";
-              Real sigma_act_coeff "Slope of sigma change for activation. Calculated from nominal and max active";
-              Real sigma_act_phi = sigma_act*(1 + sigma_act_coeff*max(phi_limit,phi - phi0));
+            //   parameter Real sigma_act=7.5*120 "mmHg ";
+            //   parameter Real sigma_act_maxAct = sigma_act "Sigma at maximal activation";
+            //   parameter Physiolibrary.Types.Fraction phi_limit = 0 "Minimal value of phi to drop to. Experimental parameter, try using phi0 here";
+            //   Real sigma_act_coeff "Slope of sigma change for activation. Calculated from nominal and max active";
+            //   Real sigma_act_phi = sigma_act*(1 + sigma_act_coeff*max(phi_limit,phi - phi0));
 
               // not used in the current version. Using k_passive instead
             //  parameter Real sigma_pas=7.5*7 "mmHg";
@@ -5921,7 +5932,7 @@ type"),       Text(
 
             //   Real CL=tanh(4*(SL - SLrest)^2) "increase of activation with sarcomere length";
             //   Real T=tauSC*(0.29 + 0.3*SL) "decrease of activation duration with decrease of sarcomere length";
-              Real C(fixed = false) "activation function, related to intracellular calcium conncentration";
+            //   Real C(fixed = false) "activation function, related to intracellular calcium conncentration";
             //   Real dC=CL*drivingInput/tauR + (Crest - C)/(1 + exp((T - cardiac_cycle/
             //       frequency)/tauD))/tauD;
 
@@ -5941,7 +5952,7 @@ type"),       Text(
               // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
               Real sigmapas=max(0, k_passive*(SLo/2 - L0)) + min(0, k_passive_negative*(SLo/2 - L0)) + sigma_collagen;
               // Active forces could not go negative
-              Real sigmaact=max(0, sigma_act_phi*C*(SL - SLrest)*(SLo - SL)/LSEiso);
+              Real sigmaact=max(0, D*(SL - SLrest)*(SLo - SL)/LSEiso);
               Real debug_SL = (SL - SLrest);
               Real debug_SLo = (SLo - SL);
               // Total forces
@@ -5949,10 +5960,10 @@ type"),       Text(
               // equilibrium of forces at junction circle already in base class
 
             equation
-              sigma_act_maxAct = sigma_act*(1 + sigma_act_coeff*(1 - phi0));
+            //   sigma_act_maxAct = sigma_act*(1 + sigma_act_coeff*(1 - phi0));
 
               // der(C) = dC;
-              C =D;
+            //   C =D;
               der(SL) = dSL;
 
               Tm = (Vw*sigmaM/(2*Am))*(1 + (z^2)/3 + (z^4)/5);
@@ -6169,19 +6180,16 @@ Simple")}),                                                                  Dia
                  LV_wall(
                   Vw=89,
                   Amref=0.95*86,
-                  sigma_act=sigma_act_factor*7.5*120,
                   k_passive=k_passive_factor*50,
                                        xm=xm_LV, ym=ym),
                 SEP_wall(
                   Vw=34,
                   Amref=0.95*39,
-                  sigma_act=sigma_act_factor*7.5*120,
                   k_passive=k_passive_factor*50,
                                        xm=xm_SEP, ym=ym),
             RV_wall(
                   Vw=27,
                   Amref=0.95*110,
-                  sigma_act=sigma_act_factor*7.5*120,
                   k_passive=k_passive_factor*50,
                                        xm=xm_RV, ym=ym));
 
@@ -6247,6 +6255,8 @@ Simple")}),                                                                  Dia
               extends Ventricles_Lumens(
                 redeclare Auxiliary.TriSegMechanics_components.Driving_Olufsen
                   calciumMechanics(
+                  D_A=settings.heart_drive_D_A,
+                  D_A_maxAct=settings.heart_drive_D_A_actMax,
                   TR_maxAct(displayUnit="s") = settings.heart_drive_TR_maxAct,
                   phi0=settings.phi0,
                   D_0=settings.heart_drive_D_0,
@@ -6257,7 +6267,7 @@ Simple")}),                                                                  Dia
                   usePhiInput=true),
                 redeclare model VentricleWall =
                     Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimple,
-                  LV_wall(
+                LV_wall(
                   Vw=settings.heart_vntr_xi_Vw*89,
                   Amref=settings.heart_vntr_xi_AmRef*86,
                   Lsref=settings.heart_vntr_Lsref,
@@ -6265,35 +6275,23 @@ Simple")}),                                                                  Dia
                   k_passive_negative=k_passive_factor*50,
                   phi0=settings.phi0,
                   SLrest=settings.heart_vntr_SLrest,
-                  SLcollagen=settings.heart_vntr_SLcollagen,
-                  sigma_act=settings.heart_vntr_xi_sigma_act*7.5*120,
-                  sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
-                      7.5*120,
-                  C(fixed=false)),
-                  RV_wall(
+                  SLcollagen=settings.heart_vntr_SLcollagen),
+                RV_wall(
                   Vw=settings.heart_vntr_xi_Vw*27,
                   Amref=settings.heart_vntr_xi_AmRef*110,
                   Lsref=settings.heart_vntr_Lsref,
                   L0=settings.heart_vntr_L0,
                   k_passive_negative=k_passive_factor*50,
                   SLrest=settings.heart_vntr_SLrest,
-                  SLcollagen=settings.heart_vntr_SLcollagen,
-                  sigma_act=settings.heart_vntr_xi_sigma_act*7.5*120,
-                  sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
-                      7.5*120,
-                  C(fixed=false)),
-                  SEP_wall(
+                  SLcollagen=settings.heart_vntr_SLcollagen),
+                SEP_wall(
                   Vw=settings.heart_vntr_xi_Vw*34,
                   Amref=settings.heart_vntr_xi_AmRef*39,
                   Lsref=settings.heart_vntr_Lsref,
                   L0=settings.heart_vntr_L0,
                   k_passive_negative=k_passive_factor*50,
                   SLrest=settings.heart_vntr_SLrest,
-                  SLcollagen=settings.heart_vntr_SLcollagen,
-                  sigma_act=settings.heart_vntr_xi_sigma_act*7.5*120,
-                  sigma_act_maxAct=settings.heart_vntr_sigma_actMaxAct_factor*
-                      7.5*120,
-                  C(fixed=false)));
+                  SLcollagen=settings.heart_vntr_SLcollagen));
 
               annotation (Icon(graphics={Rectangle(extent={{-100,100},{100,-100}},
                         lineColor={28,108,200}), Text(
@@ -6612,12 +6610,34 @@ Simple")}),                                                                  Dia
 
           model offsets
             Auxiliary.TriSegMechanics_components.Driving_Olufsen drivingOlufsen(
-                t_offset=0) annotation (Placement(transformation(extent={{-20,
-                      -48},{0,-28}})));
+              t_offset=0,
+              usePhiInput=true,
+              phi0=settings.phi0,
+              D_0=settings.heart_drive_D_0,
+              D_0_maxAct=settings.heart_drive_D_0_maxAct,
+              D_A=settings.heart_drive_D_A,
+              D_A_maxAct=settings.heart_drive_D_A_actMax,
+              TS=settings.heart_drive_TS,
+              TS_maxAct=settings.heart_drive_TS_maxAct,
+              TR=settings.heart_drive_TR,
+              TR_maxAct=settings.heart_drive_TR_maxAct) annotation (Placement(
+                  transformation(extent={{-20,-48},{0,-28}})));
             Auxiliary.TriSegMechanics_components.Driving_Olufsen
-              drivingOlufsenDelayed(t_offset=0.2)
-              annotation (Placement(transformation(extent={{18,-12},{38,8}})));
-            Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit="1/min") = 1)
+              drivingOlufsenDelayed(
+              D_A=settings.heart_atr_D_A,
+              D_A_maxAct=settings.heart_atr_D_A,
+              TR_maxAct(displayUnit="s") = settings.heart_drive_TR_maxAct,
+              t_offset=-settings.heart_drive_TS,
+              usePhiInput=true,
+              phi0=settings.phi0,
+              D_0=settings.heart_drive_D_0,
+              D_0_maxAct=settings.heart_drive_D_0_maxAct,
+              TS_maxAct=settings.heart_drive_TS_maxAct,
+              TS=settings.heart_drive_TS,
+              TR=settings.heart_drive_TR)
+              annotation (Placement(transformation(extent={{26,-6},{46,14}})));
+            Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit="Hz")
+                 = 1)
               annotation (Placement(transformation(extent={{-88,-16},{-80,-8}})));
 
               inner parameter Physiolibrary.Types.Fraction phi = 0.25;
@@ -6626,20 +6646,82 @@ Simple")}),                                                                  Dia
             Physiolibrary.Types.Constants.PressureConst  HR1(k(displayUnit=
                     "1/min") = 0)
               annotation (Placement(transformation(extent={{74,-32},{66,-24}})));
+            Modelica.Blocks.Sources.Ramp ramp(duration=100)
+              annotation (Placement(transformation(extent={{-86,40},{-66,60}})));
+            inner Settings settings(
+              V_PV_init=0.0001,
+              heart_drive_D_0(displayUnit="1") = 0.025,
+              heart_drive_D_0_maxAct(displayUnit="1") = 5e-4,
+              pulm_C_PV=3.0002463033826e-07,
+              pulm_P_PV_nom=1333.22387415,
+              pulm_R(displayUnit="(dyn.s)/cm5") = 14388560,
+              pulm_PV_R_vis(displayUnit="(dyn.s)/cm5"),
+              initByPressure=false,
+              height=1.7132,
+              tissues_CO_nom=0.000105,
+              EvaluateFunctionalParams=true,
+              HR_max=2.907,
+              HR_nominal=1.0666666666667,
+              UseNonLinear_TissuesCompliance=true,
+              baro_f1=3.379000e-03,
+              baro_fsn=0.0320656,
+              baro_g=0.606258,
+              baro_tau_s=98.37,
+              baro_useAbsolutePressureTerm=false,
+              baro_xi_delta0=2.688000e-01,
+              chi_phi=1.185,
+              eta_vc=0.1267,
+              heart_R_LA(displayUnit="(dyn.s)/cm5") = 3766520,
+              heart_R_RA(displayUnit="(dyn.s)/cm5") = 3766520,
+              heart_atr_D_A=16803550,
+              heart_drive_TR(displayUnit="s") = 0.38,
+              heart_drive_TR_maxAct=0.095472,
+              heart_drive_TS_maxAct=0.1079,
+              heart_drive_atr_D_0=0.5902815,
+              heart_drive_D_A_actMax=16.00763,
+              heart_vntr_xi_AmRef=0.9118,
+              heart_vntr_xi_Vw=0.8908231,
+              heart_drive_D_A=1.5298,
+              pulm_C_PA=3.819551e-08,
+              pulm_R_exp=9.150000e-01,
+              syst_TPR=130465900,
+              syst_TR_frac=5.21529,
+              syst_abd_P_th_ratio=0.832,
+              syst_art_UseVasoconstrictionEffect=true,
+              syst_art_k_E=0.4226095,
+              tissue_chi_C=-0.12,
+              tissues_UseStraighteningReaction2Phi=true,
+              tissues_ZPV_nom=0.00210124,
+              tissues_chi_R=29.376,
+              tissues_eta_C=0.2676726,
+              tissues_eta_Ra=3.393633,
+              tissues_gamma=0.5,
+              tissues_tau_R(displayUnit="s") = 0,
+              veins_C_phi=0.09,
+              veins_activation_tau=0) annotation (Placement(transformation(
+                    extent={{-100,80},{-80,100}})));
           equation
             connect(HR0.y, drivingOlufsen.frequency) annotation (Line(points={{-79,-12},
                     {-68,-12},{-68,-38},{-19,-38}},
                                                color={0,0,127}));
-            connect(HR0.y, drivingOlufsenDelayed.frequency) annotation (Line(points={{-79,
-                    -12},{-64,-12},{-64,18},{-4,18},{-4,10},{0,10},{0,-2},{19,-2}}, color=
+            connect(HR0.y, drivingOlufsenDelayed.frequency) annotation (Line(points={{-79,-12},
+                    {-64,-12},{-64,18},{-4,18},{-4,10},{0,10},{0,4},{27,4}},        color=
                    {0,0,127}));
             connect(atrium.thoracic_pressure_input, HR1.y)
               annotation (Line(points={{38,-28},{65,-28}}, color={0,0,127}));
             connect(drivingOlufsen.cardiac_cycle, atrium.cardiac_cycle)
-              annotation (Line(points={{0.2,-28},{18,-28}}, color={0,0,127}));
+              annotation (Line(points={{1,-32},{10,-32},{10,-28},{18,-28}},
+                                                            color={0,0,127}));
+            connect(ramp.y, drivingOlufsenDelayed.phiInput) annotation (Line(points={{-65,
+                    50},{16,50},{16,10},{27,10}}, color={0,0,127}));
+            connect(ramp.y, drivingOlufsen.phiInput) annotation (Line(points={{-65,50},{-32,
+                    50},{-32,-32},{-19,-32}}, color={0,0,127}));
             annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                   coordinateSystem(preserveAspectRatio=false)),
-              experiment(StopTime=4, __Dymola_Algorithm="Dassl"));
+              experiment(
+                StopTime=100,
+                Interval=0.01,
+                __Dymola_Algorithm="Dassl"));
           end offsets;
 
         end Testers;
@@ -7810,9 +7892,9 @@ Kalecky")}), experiment(
             ventricles(V_LV(start=0.00015), V_RV(start=0.00015)) constrainedby
             Auxiliary.TriSegMechanics_components.partialVentricles_TS
             annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
-          Auxiliary.AtriumSimple ra(enabled=true, E_0=settings.heart_atr_E_0)
+          Auxiliary.AtriumSimple ra(enabled=true)
             annotation (Placement(transformation(extent={{-52,26},{-32,6}})));
-          Auxiliary.AtriumSimple la(enabled=true, E_0=settings.heart_atr_E_0)
+          Auxiliary.AtriumSimple la(enabled=true)
             annotation (Placement(transformation(extent={{40,-10},{60,10}})));
 
         Physiolibrary.Types.Volume volume;
@@ -7827,6 +7909,8 @@ Kalecky")}), experiment(
                 rotation=90,
                 origin={12,-18})));
           Auxiliary.TriSegMechanics_components.Driving_Olufsen calciumMechanics(
+            D_A=settings.heart_atr_D_A,
+            D_A_maxAct=settings.heart_atr_D_A,
             TR_maxAct(displayUnit="s") = settings.heart_drive_TR_maxAct,
             t_offset=-settings.heart_drive_TS,
             usePhiInput=true,
@@ -29357,8 +29441,8 @@ P_hs_plus_dist"),
         tissue_chi_C=3.437570e-01,
         heart_drive_TR=3.809700e-01,
         heart_drive_TR_maxAct=1.224000e-01,
-        heart_vntr_sigma_actMaxAct_factor=1.883250e+01,
-        heart_vntr_xi_sigma_act=1.974000e+00,
+        heart_drive_D_A_actMax=1.883250e+01,
+        heart_drive_D_A=1.974000e+00,
         syst_art_k_E=3.504230e-01,
         pulm_C_PV=1.987900e-07,
         tissues_eta_C=2.287800e-01,
@@ -30068,7 +30152,6 @@ P_hs_plus_dist"),
             eta_vc=0.15745,
             heart_drive_TR(displayUnit="s") = 0.38,
             heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
-            heart_vntr_sigma_actMaxAct_factor=18.8325,
             syst_art_k_E=0.350423,
             syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
             syst_TR_frac=5.118955,
@@ -30087,7 +30170,8 @@ P_hs_plus_dist"),
             tissues_chi_R =            3.477600e+01,
             heart_vntr_xi_Vw =   0.90375,
             heart_vntr_xi_AmRef =   1.06,
-            heart_vntr_xi_sigma_act =   1.974));
+            heart_drive_D_A =           1.974,
+            heart_drive_D_A_actMax =          18.8325));
       extends SystemicTree.Auxiliary.partialCVS_outputs(useAutonomousPhi(y=true));
 
       annotation (experiment(
@@ -30123,8 +30207,8 @@ P_hs_plus_dist"),
           heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
           heart_vntr_xi_AmRef=1.06,
           heart_vntr_xi_Vw=0.90375,
-          heart_vntr_sigma_actMaxAct_factor=18.8325,
-          heart_vntr_xi_sigma_act=1.974,
+          heart_drive_D_A_actMax=18.8325,
+          heart_drive_D_A=1.974,
           syst_art_k_E=0.350423,
           syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
           syst_TR_frac=5.118955,
@@ -30180,8 +30264,8 @@ P_hs_plus_dist"),
           heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
           heart_vntr_xi_AmRef=1.06,
           heart_vntr_xi_Vw=0.90375,
-          heart_vntr_sigma_actMaxAct_factor=18.8325,
-          heart_vntr_xi_sigma_act=1.974,
+          heart_drive_D_A_actMax=18.8325,
+          heart_drive_D_A=1.974,
           syst_art_k_E=0.350423,
           syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
           syst_TR_frac=5.118955,
@@ -30240,8 +30324,8 @@ P_hs_plus_dist"),
           heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
           heart_vntr_xi_AmRef=1.06,
           heart_vntr_xi_Vw=0.90375,
-          heart_vntr_sigma_actMaxAct_factor=18.8325,
-          heart_vntr_xi_sigma_act=1.974,
+          heart_drive_D_A_actMax=18.8325,
+          heart_drive_D_A=1.974,
           syst_art_k_E=0.350423,
           syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
           syst_TR_frac=5.118955,
@@ -30329,8 +30413,8 @@ P_hs_plus_dist"),
           heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
           heart_vntr_xi_AmRef=1.06,
           heart_vntr_xi_Vw=0.90375,
-          heart_vntr_sigma_actMaxAct_factor=18.8325,
-          heart_vntr_xi_sigma_act=1.974,
+          heart_drive_D_A_actMax=18.8325,
+          heart_drive_D_A=1.974,
           syst_art_k_E=0.350423,
           syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
           syst_TR_frac=5.118955,
@@ -30460,8 +30544,8 @@ P_hs_plus_dist"),
           heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
           heart_vntr_xi_AmRef=1.06,
           heart_vntr_xi_Vw=0.90375,
-          heart_vntr_sigma_actMaxAct_factor=18.8325,
-          heart_vntr_xi_sigma_act=1.974,
+          heart_drive_D_A_actMax=18.8325,
+          heart_drive_D_A=1.974,
           syst_art_k_E=0.350423,
           syst_TPR(displayUnit="(mmHg.min)/l") = 119430194.64636,
           syst_TR_frac=5.118955,
@@ -33731,13 +33815,17 @@ P_hs_plus_dist"),
         condSystemicPhi(delayEnabled=false),
         settings(
           V_PV_init=0.0001,
-          heart_drive_D_0(displayUnit="1") = 0.025,
-          heart_drive_D_0_maxAct(displayUnit="1") = 0.025,
+          heart_drive_D_0(displayUnit="1") = 0.025*1.5*7.5*120,
+          heart_drive_D_0_maxAct(displayUnit="1") = 0,
+          heart_drive_D_A(displayUnit="Pa/m3") = 1.5*7.5*120,
+          heart_drive_D_A_actMax(displayUnit="Pa/m3") = 16*7.5*120,
+          heart_drive_atr_D_0(displayUnit="1") = 0.5902815*16803550,
+          heart_atr_D_A(displayUnit="Pa/m3"),
           pulm_C_PV=3.0002463033826e-07,
           pulm_P_PV_nom=1333.22387415,
           pulm_R(displayUnit="(dyn.s)/cm5"),
           pulm_PV_R_vis(displayUnit="(dyn.s)/cm5")));
-      annotation (__Dymola_Commands(file(ensureSimulated=true) =
+      annotation (__Dymola_Commands(file(ensureSimulated=true)=
             "\"EvaluateSimulation.mos\"" "EvaluateUseCases"));
     end CardiovascularSystem;
 
@@ -34029,17 +34117,14 @@ P_hs_plus_dist"),
             eta_vc=0.1267,
               heart_R_LA(displayUnit="(dyn.s)/cm5") = 3766520,
               heart_R_RA(displayUnit="(dyn.s)/cm5") = 3766520,
-            heart_atr_E_0=16803550,
             heart_drive_D_0=0.01393399,
             heart_drive_D_0_maxAct=0.0005765625,
               heart_drive_TR(displayUnit="s") = 0.38,
             heart_drive_TR_maxAct=0.095472,
             heart_drive_TS_maxAct=0.1079,
             heart_drive_atr_D_0=0.5902815,
-            heart_vntr_sigma_actMaxAct_factor=16.00763,
             heart_vntr_xi_AmRef=0.9118,
             heart_vntr_xi_Vw=0.8908231,
-            heart_vntr_xi_sigma_act=1.5298,
             pulm_C_PA=3.819551e-08,
             pulm_C_PV=1.968021e-07,
             pulm_R=14388560,
@@ -34058,7 +34143,10 @@ P_hs_plus_dist"),
             tissues_gamma=0.5,
               tissues_tau_R(displayUnit="s") = 0,
             veins_C_phi=0.09,
-              veins_activation_tau=0));
+              veins_activation_tau=0,
+            heart_atr_D_A=16803550,
+            heart_drive_D_A =       1.5298,
+            heart_drive_D_A_actMax =          16.00763));
       end partialCVS_optimizedCombined;
 
       partial model partialCVS_ss
@@ -37898,7 +37986,6 @@ P_hs_plus_dist"),
             eta_vc=0.15745,
               heart_drive_TR(displayUnit="s") = 0.38,
               heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
-            heart_vntr_sigma_actMaxAct_factor=18.8325,
               syst_art_UseVasoconstrictionEffect=true,
               tissues_UseStraighteningReaction2Phi=true,
             tissues_ZPV_nom=0.00210124,
@@ -37918,15 +38005,16 @@ P_hs_plus_dist"),
             syst_art_k_E=0.4226095,
             heart_vntr_xi_Vw=0.8908231,
             heart_vntr_xi_AmRef=0.9118,
-            heart_vntr_xi_sigma_act=1.5298,
             heart_drive_D_0=0.01393399,
             pulm_R(displayUnit="(dyn.s)/cm5") = 15145850,
             pulm_C_PA(displayUnit="ml/mmHg") = 3.800549e-08,
             heart_drive_atr_D_0=0.5902815,
-            heart_atr_E_0=16803550,
             heart_R_LA(displayUnit="(dyn.s)/cm5") = 3766520,
             heart_R_RA(displayUnit="(dyn.s)/cm5") = 3766520,
-            baro_fsn(displayUnit="Hz") = 0.03272),
+            baro_fsn(displayUnit="Hz") = 0.03272,
+            heart_atr_D_A=16803550,
+            heart_drive_D_A =       1.5298,
+            heart_drive_D_A_actMax =          18.8325),
                pulmonaryComponent(deadVolume=0.002, r_pa(
               R_nom_fixed=settings.pulm_R,
               Q_nom=settings.pulm_CO_target,
@@ -37946,7 +38034,6 @@ P_hs_plus_dist"),
         "Parametrized as result of #1 optimization"
         extends Identification.CombinedModel.CombinedModels_FMUs(settings(
             baro_g=5.562000e-01,
-            heart_vntr_sigma_actMaxAct_factor=2.025000e+01,
             pulm_C_PV=1.930000e-07,
             HR_max=3.060000e+00,
             heart_drive_TR=3.735000e-01,
@@ -37960,7 +38047,8 @@ P_hs_plus_dist"),
             baro_xi_delta0=2.800000e-01,
             tissues_chi_R=3.220000e+01,
             tissue_chi_C=3.862500e-01,
-            heart_vntr_xi_sigma_act=1.880000e+00));
+            heart_drive_D_A =       1.880000e+00,
+            heart_drive_D_A_actMax =          2.025000e+01));
         annotation (__Dymola_Commands(file(ensureSimulated=false)=
               "\"Scripts/Dymola/ExportAndImportFMUs.mos\"" "Refresh FMUs"));
       end CombinedModels_FMUs_optimizedParams;
@@ -37969,7 +38057,6 @@ P_hs_plus_dist"),
         "Parametrized as result of #2 optimization"
         extends Identification.CombinedModel.CombinedModels_FMUs(settings(
             baro_g=6.062580e-01,
-            heart_vntr_sigma_actMaxAct_factor=1.883250e+01,
             pulm_C_PV=1.987900e-07,
             HR_max=2.907000e+00,
             heart_drive_TR=3.809700e-01,
@@ -37983,7 +38070,8 @@ P_hs_plus_dist"),
             baro_xi_delta0=2.688000e-01,
             tissues_chi_R=3.477600e+01,
             tissue_chi_C=3.437570e-01,
-            heart_vntr_xi_sigma_act=1.974000e+00));
+            heart_drive_D_A =       1.974000e+00,
+            heart_drive_D_A_actMax =          1.883250e+01));
         annotation (__Dymola_Commands(file(ensureSimulated=false)=
               "\"Scripts/Dymola/ExportAndImportFMUs.mos\"" "Refresh FMUs"));
       end CombinedModels_FMUs_optimizedParams2;
@@ -38012,8 +38100,8 @@ P_hs_plus_dist"),
           heart_drive_TR_maxAct=0.1224,
           heart_vntr_xi_AmRef=1.06,
           heart_vntr_xi_Vw=0.90375,
-          heart_vntr_sigma_actMaxAct_factor=18.8325,
-          heart_vntr_xi_sigma_act=1.974,
+          heart_drive_D_A_actMax=18.8325,
+          heart_drive_D_A=1.974,
           initByPressure=false,
           syst_art_k_E=0.350423,
           pulm_C_PV=1.9879e-07,
@@ -38021,8 +38109,8 @@ P_hs_plus_dist"),
           tissues_UseStraighteningReaction2Phi=true,
           tissues_gamma=0.5,
           tissues_ZPV_nom=0.00210124,
-          veins_activation_tau=0.1) annotation (Placement(transformation(
-                extent={{-100,80},{-80,100}})));
+          veins_activation_tau=0.1)
+          annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
 
         replaceable
           ADAN_0main_SystemicTree_Variants_OlufsenTriSeg_0opt_0LinearVeins_0init_fmu_black_box
@@ -38052,15 +38140,17 @@ P_hs_plus_dist"),
             heart_atr_sigma_a=settings.heart_atr_sigma_a,
             heart_vntr_Vw_factor=settings.heart_vntr_xi_Vw,
             heart_vntr_AmRef_factor=settings.heart_vntr_xi_AmRef,
-            heart_vntr_sigma_act_factor=settings.heart_vntr_xi_sigma_act,
-            heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
+            heart_vntr_sigma_act_factor=settings.heart_drive_D_A,
+            heart_vntr_sigma_actMaxAct_factor=settings.heart_drive_D_A_actMax,
             heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
             thoracic_pressure_ratio=settings.syst_abd_P_th_ratio,
             hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
             TPR=settings.syst_TPR,
             TR_frac=settings.syst_TR_frac,
             k_E=settings.syst_art_k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
             R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_P_nom,
             tissues_nominal_zpv=settings.tissues_ZPV_nom,
@@ -38124,15 +38214,17 @@ P_hs_plus_dist"),
             heart_atr_sigma_a=settings.heart_atr_sigma_a,
             heart_vntr_Vw_factor=settings.heart_vntr_xi_Vw,
             heart_vntr_AmRef_factor=settings.heart_vntr_xi_AmRef,
-            heart_vntr_sigma_act_factor=settings.heart_vntr_xi_sigma_act,
-            heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
+            heart_vntr_sigma_act_factor=settings.heart_drive_D_A,
+            heart_vntr_sigma_actMaxAct_factor=settings.heart_drive_D_A_actMax,
             heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
             thoracic_pressure_ratio=settings.syst_abd_P_th_ratio,
             hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
             TPR=settings.syst_TPR,
             TR_frac=settings.syst_TR_frac,
             k_E=settings.syst_art_k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
             R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_P_nom,
             tissues_nominal_zpv=settings.tissues_ZPV_nom,
@@ -38196,15 +38288,17 @@ P_hs_plus_dist"),
             heart_atr_sigma_a=settings.heart_atr_sigma_a,
             heart_vntr_Vw_factor=settings.heart_vntr_xi_Vw,
             heart_vntr_AmRef_factor=settings.heart_vntr_xi_AmRef,
-            heart_vntr_sigma_act_factor=settings.heart_vntr_xi_sigma_act,
-            heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
+            heart_vntr_sigma_act_factor=settings.heart_drive_D_A,
+            heart_vntr_sigma_actMaxAct_factor=settings.heart_drive_D_A_actMax,
             heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
             thoracic_pressure_ratio=settings.syst_abd_P_th_ratio,
             hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
             TPR=settings.syst_TPR,
             TR_frac=settings.syst_TR_frac,
             k_E=settings.syst_art_k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
             R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_P_nom,
             tissues_nominal_zpv=settings.tissues_ZPV_nom,
@@ -38268,15 +38362,17 @@ P_hs_plus_dist"),
             heart_atr_sigma_a=settings.heart_atr_sigma_a,
             heart_vntr_Vw_factor=settings.heart_vntr_xi_Vw,
             heart_vntr_AmRef_factor=settings.heart_vntr_xi_AmRef,
-            heart_vntr_sigma_act_factor=settings.heart_vntr_xi_sigma_act,
-            heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
+            heart_vntr_sigma_act_factor=settings.heart_drive_D_A,
+            heart_vntr_sigma_actMaxAct_factor=settings.heart_drive_D_A_actMax,
             heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
             thoracic_pressure_ratio=settings.syst_abd_P_th_ratio,
             hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
             TPR=settings.syst_TPR,
             TR_frac=settings.syst_TR_frac,
             k_E=settings.syst_art_k_E,
             exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
             R_vc=settings.eta_vc,
             tissues_nominal_pressure=settings.tissues_P_nom,
             tissues_nominal_zpv=settings.tissues_ZPV_nom,
@@ -38360,7 +38456,6 @@ P_hs_plus_dist"),
             eta_vc=0.15745,
             heart_drive_TR(displayUnit="s") = 0.38,
             heart_drive_TR_maxAct(displayUnit="s") = 0.1224,
-            heart_vntr_sigma_actMaxAct_factor=18.8325,
             syst_art_UseVasoconstrictionEffect=true,
             tissues_UseStraighteningReaction2Phi=true,
             tissues_ZPV_nom=0.00210124,
@@ -38380,15 +38475,16 @@ P_hs_plus_dist"),
             syst_art_k_E=0.4226095,
             heart_vntr_xi_Vw=0.8908231,
             heart_vntr_xi_AmRef=0.9118,
-            heart_vntr_xi_sigma_act=1.5298,
             heart_drive_D_0=0.01393399,
             pulm_R(displayUnit="(dyn.s)/cm5") = 15145850,
             pulm_C_PA(displayUnit="ml/mmHg") = 3.800549e-08,
             heart_drive_atr_D_0=0.5902815,
-            heart_atr_E_0=16803550,
             heart_R_LA(displayUnit="(dyn.s)/cm5") = 3766520,
             heart_R_RA(displayUnit="(dyn.s)/cm5") = 3766520,
-            baro_fsn(displayUnit="Hz") = 0.03272),
+            baro_fsn(displayUnit="Hz") = 0.03272,
+            heart_atr_D_A=16803550,
+            heart_drive_D_A =       1.5298,
+            heart_drive_D_A_actMax =          18.8325),
           pulmonaryComponent(deadVolume=0.002, r_pa(
               R_nom_fixed=settings.pulm_R,
               Q_nom=settings.pulm_CO_target,
@@ -38422,7 +38518,6 @@ P_hs_plus_dist"),
             "Generated by PostProcess/postprocess_optim.py at 2020-07-02 12:26:25.749501 with cost 0.075148 lowest at run 306"
           extends Obsolete.OlufsenTriSeg_base(settings(
                 baro_g=6.062580e-01,
-                heart_vntr_sigma_actMaxAct_factor=1.883250e+01,
                 pulm_C_PV=1.987900e-07,
                 HR_max=2.907000e+00,
                 heart_drive_TR=3.809700e-01,
@@ -38435,7 +38530,8 @@ P_hs_plus_dist"),
                 baro_tau_s=1.156200e+02,
                 baro_xi_delta0=2.688000e-01,
                 tissues_chi_R=3.477600e+01,
-                heart_vntr_xi_sigma_act =   1.974000e+00));
+                heart_drive_D_A =           1.974000e+00,
+                heart_drive_D_A_actMax =          1.883250e+01));
 
             Physiolibrary.Types.Volume totalVolume=SystemicComponent.total_volume
                  + heartComponent.volume + pulmonaryComponent.volume;
@@ -38472,12 +38568,12 @@ P_hs_plus_dist"),
             syst_art_k_E = 2.504230e-01,
             heart_vntr_xi_Vw = 1.063750e+00,
             heart_vntr_xi_AmRef = 9.300000e-01,
-            heart_vntr_xi_sigma_act = 1.394000e+00,
             heart_drive_D_0 = 1.126250e-02,
             pulm_R = 5.441532e+06,
             pulm_C_PA = 3.050332e-08,
             heart_drive_atr_D_0 = 7.500000e-01,
-            heart_atr_E_0 = 2.066448e+07));
+            heart_atr_D_A = 2.066448e+07,
+            heart_drive_D_A =         1.394000e+00));
         end OlufsenTriSeg_optimized1;
 
         model OlufsenTriSeg_optimized2
@@ -38489,12 +38585,12 @@ P_hs_plus_dist"),
               syst_art_k_E=4.062500e-01,
               heart_vntr_xi_Vw=1.000625e+00,
               heart_vntr_xi_AmRef=9.012500e-01,
-              heart_vntr_xi_sigma_act=1.325000e+00,
               heart_drive_D_0=1.348750e-02,
               pulm_R=7.252500e+06,
               pulm_C_PA=4.150000e-08,
               heart_drive_atr_D_0=4.218750e-01,
-              heart_atr_E_0=2.638750e+07));
+              heart_atr_D_A=2.638750e+07,
+              heart_drive_D_A =       1.325000e+00));
         end OlufsenTriSeg_optimized2;
 
 
@@ -38508,12 +38604,13 @@ P_hs_plus_dist"),
             syst_art_k_E=0.43125,
             heart_vntr_xi_Vw=0.965,
             heart_vntr_xi_AmRef=0.87125,
-            heart_vntr_xi_sigma_act=1.2525,
             heart_drive_D_0=0.0116125,
             pulm_R=7940000,
             pulm_C_PA=3.84375e-08,
             heart_drive_atr_D_0=0.396875,
-            heart_atr_E_0=27762500), pulmonaryComponent(r_pa(useNonlinearResistance=false,
+            heart_atr_D_A=27762500,
+            heart_drive_D_A =       1.2525),
+                                     pulmonaryComponent(r_pa(useNonlinearResistance=false,
                   useNominalParametrization=false)));
         annotation (experiment(
               StopTime=120,
@@ -38532,14 +38629,14 @@ P_hs_plus_dist"),
             syst_art_k_E = 4.165002e-01,
             heart_vntr_xi_Vw = 1.013795e+00,
             heart_vntr_xi_AmRef = 9.700000e-01,
-            heart_vntr_xi_sigma_act = 1.483175e+00,
             heart_drive_D_0 = 1.524918e-02,
             pulm_R = 1.310741e+07,
             pulm_C_PA = 2.737500e-08,
             heart_drive_atr_D_0 = 9.509065e-01,
-            heart_atr_E_0 = 1.614730e+07,
             heart_R_LA = 3.768090e+06,
-            heart_R_RA = 3.768090e+06));
+            heart_R_RA = 3.768090e+06,
+            heart_atr_D_A = 1.614730e+07,
+            heart_drive_D_A =         1.483175e+00));
 
       equation
 
@@ -38579,13 +38676,13 @@ P_hs_plus_dist"),
               syst_art_k_E=0.4226095,
               heart_vntr_xi_Vw=0.8908231,
               heart_vntr_xi_AmRef=0.9118,
-              heart_vntr_xi_sigma_act=1.5298,
               heart_drive_D_0=0.01393399,
               pulm_R=15145850,
               pulm_C_PA=3.800549e-08,
               heart_drive_atr_D_0=0.5902815,
-              heart_atr_E_0=16803550,
-              heart_R_LA=3766520));
+              heart_R_LA=3766520,
+              heart_atr_D_A=16803550,
+              heart_drive_D_A =       1.5298));
           annotation (experiment(
               StopTime=40,
               Interval=0.01,
@@ -38803,14 +38900,18 @@ P_hs_plus_dist"),
               heart_atr_Emin=settings.heart_atr_Emin,
               heart_atr_Emax=settings.heart_atr_Emax,
               heart_atr_sigma_a=settings.heart_atr_sigma_a,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+
               exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
               UseNonLinear_TissuesCompliance=settings.UseNonLinear_TissuesCompliance,
+
               tissues_UseStraighteningReaction2Phi=settings.tissues_UseStraighteningReaction2Phi,
+
               veins_gamma=settings.veins_gamma,
               veins_activation_tau=settings.veins_activation_tau,
               baro_useAbsolutePressureTerm=settings.baro_useAbsolutePressureTerm,
+
               baro_d0=settings.baro_d0,
               baro_delta0_aor=settings.baro_delta0_aor,
               baro_delta0_car=settings.baro_delta0_car,
@@ -38828,6 +38929,7 @@ P_hs_plus_dist"),
               heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
               eta_vc=settings.eta_vc,
               syst_tissues_hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -38846,11 +38948,12 @@ P_hs_plus_dist"),
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
               syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect,
+
               pulm_R=settings.pulm_R,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
-              heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act)) if
-            true
+              heart_drive_D_A=settings.heart_drive_D_A,
+              heart_drive_D_A_actMax=settings.heart_drive_D_A_actMax)) if true
             annotation (Placement(transformation(extent={{-80,40},{-60,60}})));
 
           Tilt.CVS_tiltable olufsenTriSeg_tiltable(settings(
@@ -38868,14 +38971,18 @@ P_hs_plus_dist"),
               heart_atr_Emin=settings.heart_atr_Emin,
               heart_atr_Emax=settings.heart_atr_Emax,
               heart_atr_sigma_a=settings.heart_atr_sigma_a,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+
               exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
               UseNonLinear_TissuesCompliance=settings.UseNonLinear_TissuesCompliance,
+
               tissues_UseStraighteningReaction2Phi=settings.tissues_UseStraighteningReaction2Phi,
+
               veins_gamma=settings.veins_gamma,
               veins_activation_tau=settings.veins_activation_tau,
               baro_useAbsolutePressureTerm=settings.baro_useAbsolutePressureTerm,
+
               baro_d0=settings.baro_d0,
               baro_delta0_aor=settings.baro_delta0_aor,
               baro_delta0_car=settings.baro_delta0_car,
@@ -38893,6 +39000,7 @@ P_hs_plus_dist"),
               heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
               eta_vc=settings.eta_vc,
               syst_tissues_hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -38911,11 +39019,12 @@ P_hs_plus_dist"),
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
               syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect,
+
               pulm_R=settings.pulm_R,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
-              heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act)) if
-            true
+              heart_drive_D_A=settings.heart_drive_D_A,
+              heart_drive_D_A_actMax=settings.heart_drive_D_A_actMax)) if true
             annotation (Placement(transformation(extent={{-20,40},{0,60}})));
 
           Valsalva.CVS_valsalva olufsenTriSeg_valsalva(settings(
@@ -38933,14 +39042,18 @@ P_hs_plus_dist"),
               heart_atr_Emin=settings.heart_atr_Emin,
               heart_atr_Emax=settings.heart_atr_Emax,
               heart_atr_sigma_a=settings.heart_atr_sigma_a,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+
               exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
               UseNonLinear_TissuesCompliance=settings.UseNonLinear_TissuesCompliance,
+
               tissues_UseStraighteningReaction2Phi=settings.tissues_UseStraighteningReaction2Phi,
+
               veins_gamma=settings.veins_gamma,
               veins_activation_tau=settings.veins_activation_tau,
               baro_useAbsolutePressureTerm=settings.baro_useAbsolutePressureTerm,
+
               baro_d0=settings.baro_d0,
               baro_delta0_aor=settings.baro_delta0_aor,
               baro_delta0_car=settings.baro_delta0_car,
@@ -38958,6 +39071,7 @@ P_hs_plus_dist"),
               heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
               eta_vc=settings.eta_vc,
               syst_tissues_hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -38976,11 +39090,12 @@ P_hs_plus_dist"),
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
               syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect,
+
               pulm_R=settings.pulm_R,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
-              heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act)) if
-            true
+              heart_drive_D_A=settings.heart_drive_D_A,
+              heart_drive_D_A_actMax=settings.heart_drive_D_A_actMax)) if true
             annotation (Placement(transformation(extent={{-80,-20},{-60,0}})));
 
           // used regex find '(\w+)=we' and replace with \1=settings.\1
@@ -38999,14 +39114,18 @@ P_hs_plus_dist"),
               heart_atr_Emin=settings.heart_atr_Emin,
               heart_atr_Emax=settings.heart_atr_Emax,
               heart_atr_sigma_a=settings.heart_atr_sigma_a,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+
               exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
               UseNonLinear_TissuesCompliance=settings.UseNonLinear_TissuesCompliance,
+
               tissues_UseStraighteningReaction2Phi=settings.tissues_UseStraighteningReaction2Phi,
+
               veins_gamma=settings.veins_gamma,
               veins_activation_tau=settings.veins_activation_tau,
               baro_useAbsolutePressureTerm=settings.baro_useAbsolutePressureTerm,
+
               baro_d0=settings.baro_d0,
               baro_delta0_aor=settings.baro_delta0_aor,
               baro_delta0_car=settings.baro_delta0_car,
@@ -39024,6 +39143,7 @@ P_hs_plus_dist"),
               heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
               eta_vc=settings.eta_vc,
               syst_tissues_hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -39042,11 +39162,12 @@ P_hs_plus_dist"),
               veins_chi_pump=settings.veins_chi_pump,
               tissue_chi_C=settings.tissue_chi_C,
               syst_art_UseVasoconstrictionEffect=settings.syst_art_UseVasoconstrictionEffect,
+
               pulm_R=settings.pulm_R,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
-              heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act)) if
-            true
+              heart_drive_D_A=settings.heart_drive_D_A,
+              heart_drive_D_A_actMax=settings.heart_drive_D_A_actMax)) if true
             annotation (Placement(transformation(extent={{40,40},{60,60}})));
 
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
@@ -39144,15 +39265,19 @@ P_hs_plus_dist"),
               heart_atr_sigma_a=settings.heart_atr_sigma_a,
               heart_vntr_Vw_factor=settings.heart_vntr_xi_Vw,
               heart_vntr_AmRef_factor=settings.heart_vntr_xi_AmRef,
-              heart_vntr_sigma_act_factor=settings.heart_vntr_xi_sigma_act,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
+              heart_vntr_sigma_act_factor=settings.heart_drive_D_A,
+              heart_vntr_sigma_actMaxAct_factor=settings.heart_drive_D_A_actMax,
+
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+
               thoracic_pressure_ratio=settings.syst_abd_P_th_ratio,
               hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
               TPR=settings.syst_TPR,
               TR_frac=settings.syst_TR_frac,
               k_E=settings.syst_art_k_E,
               exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
               R_vc=settings.eta_vc,
               tissues_nominal_pressure=settings.tissues_P_nom,
               tissues_nominal_zpv=settings.tissues_ZPV_nom,
@@ -39166,6 +39291,7 @@ P_hs_plus_dist"),
               exercise_factor=settings.tissues_chi_R,
               exercise_venous_pumping_factor=settings.veins_chi_pump,
               UseNonLinear_VenousCompliance=settings.UseNonLinear_VenousCompliance,
+
               veins_UsePhiEffect=settings.veins_UsePhiEffect,
               veins_gamma=settings.veins_gamma,
               veins_alpha=settings.veins_alpha,
@@ -39208,11 +39334,13 @@ P_hs_plus_dist"),
               heart_atr_Emin=settings.heart_atr_Emin,
               heart_atr_Emax=settings.heart_atr_Emax,
               heart_atr_sigma_a=settings.heart_atr_sigma_a,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
+
               exercise_factor_on_arterial_compliance=settings.exercise_factor_on_arterial_compliance,
+
               tissues_gamma=settings.tissues_gamma,
               UseNonLinear_VenousCompliance=settings.UseNonLinear_VenousCompliance,
+
               veins_UsePhiEffect=settings.veins_UsePhiEffect,
               veins_gamma=settings.veins_gamma,
               veins_alpha=settings.veins_alpha,
@@ -39234,6 +39362,7 @@ P_hs_plus_dist"),
               heart_drive_D_0_maxAct=settings.heart_drive_D_0_maxAct,
               eta_vc=settings.eta_vc,
               syst_tissues_hydrostaticLevel_correction=settings.syst_tissues_hydrostaticLevel_correction,
+
               syst_abd_P_th_ratio=settings.syst_abd_P_th_ratio,
               syst_TPR=settings.syst_TPR,
               syst_TR_frac=settings.syst_TR_frac,
@@ -39254,7 +39383,8 @@ P_hs_plus_dist"),
               pulm_R=settings.pulm_R,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
-              heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act))
+              heart_drive_D_A=settings.heart_drive_D_A,
+              heart_drive_D_A_actMax=settings.heart_drive_D_A_actMax))
             annotation (Placement(transformation(extent={{-40,80},{-20,100}})));
 
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
@@ -39289,54 +39419,53 @@ P_hs_plus_dist"),
         model CombinedModels_FMUs
           "All model variants combined for identification by importing FMU2 CS to have separate solver events"
           Components.Settings settings(
-              height=1.7132,
-              tissues_CO_nom=0.000105,
-                EvaluateFunctionalParams=true,
-              HR_max=2.907,
-              HR_nominal=1.0666666666667,
-                UseNonLinear_TissuesCompliance=true,
-                baro_f1 = 3.379000e-03,
-              baro_fsn=0.0320656,
-              baro_g=0.606258,
-              baro_tau_s=98.37,
-                baro_useAbsolutePressureTerm=false,
-                baro_xi_delta0 =              2.688000e-01,
-              chi_phi=1.185,
-              eta_vc=0.1267,
-                heart_R_LA(displayUnit="(dyn.s)/cm5") = 3766520,
-                heart_R_RA(displayUnit="(dyn.s)/cm5") = 3766520,
-              heart_atr_E_0=16803550,
-              heart_drive_D_0=0.01393399,
-              heart_drive_D_0_maxAct=0.0005765625,
-                heart_drive_TR(displayUnit="s") = 0.38,
-              heart_drive_TR_maxAct=0.095472,
-              heart_drive_TS_maxAct=0.1079,
-              heart_drive_atr_D_0=0.5902815,
-              heart_vntr_sigma_actMaxAct_factor=16.00763,
-              heart_vntr_xi_AmRef=0.9118,
-              heart_vntr_xi_Vw=0.8908231,
-              heart_vntr_xi_sigma_act=1.5298,
-              pulm_C_PA=3.819551e-08,
-              pulm_C_PV=1.968021e-07,
-              pulm_R=14388560,
-                pulm_R_exp = 9.150000e-01,
-              syst_TPR=130465900,
-              syst_TR_frac=5.21529,
-              syst_abd_P_th_ratio=0.832,
-                syst_art_UseVasoconstrictionEffect=true,
-              syst_art_k_E=0.4226095,
-              tissue_chi_C=-0.12,
-                tissues_UseStraighteningReaction2Phi=true,
-              tissues_ZPV_nom=0.00210124,
-              tissues_chi_R=29.376,
-              tissues_eta_C=0.2676726,
-              tissues_eta_Ra=3.393633,
-              tissues_gamma=0.5,
-                tissues_tau_R(displayUnit="s") = 0,
-              veins_C_phi=0.09,
-                veins_activation_tau=0)
-                annotation (Placement(transformation(extent={{-100,
-                    80},{-80,100}})));
+            height=1.7132,
+            tissues_CO_nom=0.000105,
+            EvaluateFunctionalParams=true,
+            HR_max=2.907,
+            HR_nominal=1.0666666666667,
+            UseNonLinear_TissuesCompliance=true,
+            baro_f1=3.379000e-03,
+            baro_fsn=0.0320656,
+            baro_g=0.606258,
+            baro_tau_s=98.37,
+            baro_useAbsolutePressureTerm=false,
+            baro_xi_delta0=2.688000e-01,
+            chi_phi=1.185,
+            eta_vc=0.1267,
+            heart_R_LA(displayUnit="(dyn.s)/cm5") = 3766520,
+            heart_R_RA(displayUnit="(dyn.s)/cm5") = 3766520,
+            heart_atr_D_A=16803550,
+            heart_drive_D_0=0.01393399,
+            heart_drive_D_0_maxAct=0.0005765625,
+            heart_drive_TR(displayUnit="s") = 0.38,
+            heart_drive_TR_maxAct=0.095472,
+            heart_drive_TS_maxAct=0.1079,
+            heart_drive_atr_D_0=0.5902815,
+            heart_drive_D_A_actMax=16.00763,
+            heart_vntr_xi_AmRef=0.9118,
+            heart_vntr_xi_Vw=0.8908231,
+            heart_drive_D_A=1.5298,
+            pulm_C_PA=3.819551e-08,
+            pulm_C_PV=1.968021e-07,
+            pulm_R=14388560,
+            pulm_R_exp=9.150000e-01,
+            syst_TPR=130465900,
+            syst_TR_frac=5.21529,
+            syst_abd_P_th_ratio=0.832,
+            syst_art_UseVasoconstrictionEffect=true,
+            syst_art_k_E=0.4226095,
+            tissue_chi_C=-0.12,
+            tissues_UseStraighteningReaction2Phi=true,
+            tissues_ZPV_nom=0.00210124,
+            tissues_chi_R=29.376,
+            tissues_eta_C=0.2676726,
+            tissues_eta_Ra=3.393633,
+            tissues_gamma=0.5,
+            tissues_tau_R(displayUnit="s") = 0,
+            veins_C_phi=0.09,
+            veins_activation_tau=0) annotation (Placement(transformation(extent
+                  ={{-100,80},{-80,100}})));
 
                                           /* test
    ,R_vc=0.5,
@@ -39351,8 +39480,9 @@ P_hs_plus_dist"),
 
           // Fill settings with rubbish and replace the path
           // use a regex find '(\w+)\s?=\s?[0-9e\-.]+' and replace with \1=settings.\1
-        replaceable   ADAN_0main_SystemicTree_Baseline_CVS_0baseline_fmu_black_box
-              baseline(
+          replaceable
+            ADAN_0main_SystemicTree_Baseline_CVS_0baseline_fmu_black_box
+            baseline(
             settings(
               phi0=settings.phi0,
               height=settings.height,
@@ -39372,11 +39502,11 @@ P_hs_plus_dist"),
               heart_drive_TR=settings.heart_drive_TR,
               heart_drive_TR_maxAct=settings.heart_drive_TR_maxAct,
               heart_drive_atr_D_0=settings.heart_drive_atr_D_0,
-              heart_atr_E_0=settings.heart_atr_E_0,
+              heart_atr_E_0=settings.heart_atr_D_A,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
-              heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
+              heart_vntr_xi_sigma_act=settings.heart_drive_D_A,
+              heart_vntr_sigma_actMaxAct_factor=settings.heart_drive_D_A_actMax,
 
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
 
@@ -39431,7 +39561,7 @@ P_hs_plus_dist"),
 
           replaceable
             ADAN_0main_SystemicTree_Exercise_CVS_0exercise_fmu_black_box
-              exercise(
+            exercise(
             settings(
               phi0=settings.phi0,
               height=settings.height,
@@ -39451,11 +39581,11 @@ P_hs_plus_dist"),
               heart_drive_TR=settings.heart_drive_TR,
               heart_drive_TR_maxAct=settings.heart_drive_TR_maxAct,
               heart_drive_atr_D_0=settings.heart_drive_atr_D_0,
-              heart_atr_E_0=settings.heart_atr_E_0,
+              heart_atr_E_0=settings.heart_atr_D_A,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
-              heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
+              heart_vntr_xi_sigma_act=settings.heart_drive_D_A,
+              heart_vntr_sigma_actMaxAct_factor=settings.heart_drive_D_A_actMax,
 
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
 
@@ -39508,8 +39638,7 @@ P_hs_plus_dist"),
             fmi_forceShutDownAtStopTime=true)
             annotation (Placement(transformation(extent={{38,42},{58,62}})));
 
-          replaceable
-            ADAN_0main_SystemicTree_Tilt_CVS_0tiltable_fmu_black_box
+          replaceable ADAN_0main_SystemicTree_Tilt_CVS_0tiltable_fmu_black_box
             tilt(
             settings(
               phi0=settings.phi0,
@@ -39530,11 +39659,11 @@ P_hs_plus_dist"),
               heart_drive_TR=settings.heart_drive_TR,
               heart_drive_TR_maxAct=settings.heart_drive_TR_maxAct,
               heart_drive_atr_D_0=settings.heart_drive_atr_D_0,
-              heart_atr_E_0=settings.heart_atr_E_0,
+              heart_atr_E_0=settings.heart_atr_D_A,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
-              heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
+              heart_vntr_xi_sigma_act=settings.heart_drive_D_A,
+              heart_vntr_sigma_actMaxAct_factor=settings.heart_drive_D_A_actMax,
 
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
 
@@ -39609,11 +39738,11 @@ P_hs_plus_dist"),
               heart_drive_TR=settings.heart_drive_TR,
               heart_drive_TR_maxAct=settings.heart_drive_TR_maxAct,
               heart_drive_atr_D_0=settings.heart_drive_atr_D_0,
-              heart_atr_E_0=settings.heart_atr_E_0,
+              heart_atr_E_0=settings.heart_atr_D_A,
               heart_vntr_xi_Vw=settings.heart_vntr_xi_Vw,
               heart_vntr_xi_AmRef=settings.heart_vntr_xi_AmRef,
-              heart_vntr_xi_sigma_act=settings.heart_vntr_xi_sigma_act,
-              heart_vntr_sigma_actMaxAct_factor=settings.heart_vntr_sigma_actMaxAct_factor,
+              heart_vntr_xi_sigma_act=settings.heart_drive_D_A,
+              heart_vntr_sigma_actMaxAct_factor=settings.heart_drive_D_A_actMax,
 
               heart_vntr_k_passive_factor=settings.heart_vntr_k_passive_factor,
 
@@ -41629,8 +41758,7 @@ P_hs_plus_dist"),
           end KnockOff_Chronotropy;
 
           model KnockOff_Inotropy
-            extends knockOff_base(settings(heart_vntr_sigma_actMaxAct_factor=
-                    settings.heart_vntr_xi_sigma_act));
+            extends knockOff_base(settings(heart_drive_D_A_actMax=settings.heart_drive_D_A));
           end KnockOff_Inotropy;
 
           model KnockOff_Lusitropy
