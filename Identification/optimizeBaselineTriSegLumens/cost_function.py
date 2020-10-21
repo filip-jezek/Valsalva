@@ -76,11 +76,10 @@ def getObjectives(vars_set):
     interval = fun_lib.findInterval(time[-1] - 5, time[-1]-1, time)
 
     # mitral valve flow ratio spontaneous:atrial contraction is about 2:1 
-    vla_1st_Peak_i = fun_lib.findInterval(39.8, 40, time)
-    vla_2nd_Peak_i = fun_lib.findInterval(39.2, 39.4, time)
-    vla_peak_frac = numpy.max(vars_set['q_mv'][vla_1st_Peak_i])/numpy.max(vars_set['q_mv'][vla_2nd_Peak_i])
+    # vla_1st_Peak_i = fun_lib.findInterval(39.8, 40, time)
+    # vla_2nd_Peak_i = fun_lib.findInterval(39.2, 39.4, time)
+    # vla_peak_frac = numpy.max(vars_set['q_mv'][vla_1st_Peak_i])/numpy.max(vars_set['q_mv'][vla_2nd_Peak_i])
     vla_peak_frac = fun_lib.calculateQ_MV(vars_set['q_mv'], time, interval)
-    vla_peak_target = 2
 
     # Van Bortel 2012 siggest using 80 % of carotid to femoral distance
     # distance = vars_set['speedSegmentLength'][1]*0.8
@@ -98,7 +97,7 @@ def getObjectives(vars_set):
             ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1),
             ('ESV_la', numpy.min(vars_set['V_la'][interval]), 41*ml2SI, None, .1),
             ('EDV_la', numpy.max(vars_set['V_la'][interval]), 87*ml2SI, None, .1),
-            ('Q_MV_f', vla_peak_frac, vla_peak_target, None, 1),
+            ('Q_MV_f', vla_peak_frac, 2, None, .5),
             ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, .1),
             ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, .1),            
             ('HR', numpy.mean(vars_set['HR'][interval]) , 64/60, None, 10),

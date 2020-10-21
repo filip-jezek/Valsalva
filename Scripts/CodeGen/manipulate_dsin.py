@@ -444,7 +444,6 @@ def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False
     """
    
     # generate the params_for_SA.txt parameters list, which may be further edited.
-    # uncomment if thats the first run to get all tunable parameters
     if regenerateParamsFromDsin:
         writeTunableParamsFromDsin(paramsFile)
 
@@ -462,11 +461,11 @@ def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False
 
     createDsinTemplate(init_params, dsFileOut='dsinTemplate_SA.txt')
 
-def prepareIdent(overrideFracs = False):
+def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False):
     paramsFile = 'params_for_ident.txt'
     # generate the params_for_SA.txt parameters list, which may be further edited.
-    # uncomment if thats the first run to get all tunable parameters
-    # writeTunableParamsFromDsin(paramsFile)
+    if regenerateParamsFromDsin:
+        writeTunableParamsFromDsin(paramsFile)
 
     init_params = getInitParams(dsFileIn='dsin.txt', paramsFile=paramsFile)
     
@@ -485,6 +484,6 @@ if __name__ == "__main__":
 
     # writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'params_for_SA.txt', filter = 'settings.', accept = [1, 2], types = (280, 272, 361))
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0)
-    prepareIdent(overrideFracs=False)
+    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False)
     print('Done, Johne')
 

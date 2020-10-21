@@ -6646,12 +6646,12 @@ Simple")}),                                                                  Dia
             Physiolibrary.Types.Constants.PressureConst  HR1(k(displayUnit=
                     "1/min") = 0)
               annotation (Placement(transformation(extent={{74,-32},{66,-24}})));
-            Modelica.Blocks.Sources.Ramp ramp(duration=100)
+            Modelica.Blocks.Sources.Ramp ramp(duration=20)
               annotation (Placement(transformation(extent={{-86,40},{-66,60}})));
             inner Settings settings(
               V_PV_init=0.0001,
-              heart_drive_D_0(displayUnit="1") = 0.025,
-              heart_drive_D_0_maxAct(displayUnit="1") = 5e-4,
+              heart_drive_D_0(displayUnit="1") = 2,
+              heart_drive_D_0_maxAct(displayUnit="1") = 1,
               pulm_C_PV=3.0002463033826e-07,
               pulm_P_PV_nom=1333.22387415,
               pulm_R(displayUnit="(dyn.s)/cm5") = 14388560,
@@ -6678,10 +6678,10 @@ Simple")}),                                                                  Dia
               heart_drive_TR_maxAct=0.095472,
               heart_drive_TS_maxAct=0.1079,
               heart_drive_atr_D_0=0.5902815,
-              heart_drive_D_A_actMax=16.00763,
+              heart_drive_D_A_actMax(displayUnit="Pa/m3") = 20,
               heart_vntr_xi_AmRef=0.9118,
               heart_vntr_xi_Vw=0.8908231,
-              heart_drive_D_A=1.5298,
+              heart_drive_D_A(displayUnit="Pa/m3") = 10,
               pulm_C_PA=3.819551e-08,
               pulm_R_exp=9.150000e-01,
               syst_TPR=130465900,
@@ -33814,7 +33814,6 @@ P_hs_plus_dist"),
         condHeartPhi(delayEnabled=false),
         condSystemicPhi(delayEnabled=false),
         settings(
-          V_PV_init=0.0001,
           heart_drive_D_0(displayUnit="1") = 0.025*1.5*7.5*120,
           heart_drive_D_0_maxAct(displayUnit="1") = 0,
           heart_drive_D_A(displayUnit="Pa/m3") = 1.5*7.5*120,
@@ -33881,7 +33880,7 @@ P_hs_plus_dist"),
           startTime=20)
           "Phi for when the model is not using the autonomous feedback phi from baroreflex"
           annotation (Placement(transformation(extent={{-56,74},{-36,94}})));
-        inner Components.Settings settings
+        inner Components.Settings settings(heart_R_RA=settings.heart_R_LA)
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
         Components.Signals.ConditionalConnection condHRPhi(
           disconnectedValue=settings.phi0,
@@ -38745,7 +38744,7 @@ P_hs_plus_dist"),
         end TestRun;
 
         model OptimizeBaseline
-          extends Obsolete.base_fastBaro;
+          extends CardiovascularSystem(useAutonomousPhi(y=false));
         end OptimizeBaseline;
 
         model passive_tilt "optimized passive tilt"
@@ -42468,7 +42467,8 @@ P_hs_plus_dist"),
         extends CardiovascularSystem(
           condTP_PC(disconnected=false),
           condTP_IP(disconnected=false),
-          condTP_EP1(disconnected=false));
+          condTP_EP1(disconnected=false),
+          settings(heart_drive_TR_maxAct(displayUnit="s")));
         annotation (experiment(
             StopTime=60,
             Interval=0.01,

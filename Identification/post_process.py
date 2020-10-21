@@ -160,9 +160,15 @@ def importOptions(var_set:dict, settingsFile = 'post_process_options.json'):
         "__READ_OBJECTIVES" : true,
         "__OMIT_LOADING_PARAMS" : true,
 		"__COST_FUNC_PATH" : "..\\",
-		"__SORT_COSTS_BY" : "name",
+		"__SORT_COSTS_BY" : "costs",
+		"__LOG_OBJECTIVES_PATH" : "..\\Schedules\\objectives_log%03d.txt",
+        "__LOG_OBJECTIVES_PATH_BASE" : null,
 		"__LOG_ALL_OBJECTIVES_PATH" : null,
-		"__targetValuesFilename" : "../../../data/Valsalva/targetValues_All_supine.txt"
+        "__LOG_ALL_OBJECTIVES_PATH_BASE" : null,
+		"__targetValuesFilename" : "../../../data/Valsalva/targetValues_All_supine.txt",
+		"__inputFiles" : ["dsres.mat"],
+		"__root_path" : "..\\..\\"
+
 }"""
 
     if not os.path.exists(settingsFile):
