@@ -9,7 +9,7 @@
 		"__SORT_COSTS_BY" : "costs",
 		"__LOG_OBJECTIVES_PATH" : "objectives_log.txt",
 		"__LOG_ALL_OBJECTIVES_PATH" : "combined_objectives_log.txt",
-		"__LOG_ALL_OBJECTIVES_PATH_BASE" : "combined_objectives_log_base.txt",
+		"__LOG_ALL_OBJECTIVES_PATH_BASE" : null,
 		"__targetValuesFilename" : "../../data/Valsalva/targetValues_All_supine.txt",
 		"__inputFiles" : ["CVS_baseline.mat", "baseline", "CVS_valsalva.mat", "valsalva"],
 		"__IGNORE_inputFiles_base" : ["CVS_baseline_base.mat", "baseline", "CVS_valsalva_base.mat", "valsalva"],		

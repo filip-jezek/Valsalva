@@ -1,2 +1,2 @@
-C:\Users\filip\Anaconda3\python.exe "..\post_process.py"
+C:\ProgramData\Anaconda3\python.exe "..\post_process.py"
 pause

@@ -479,11 +479,13 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False):
 
     createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt')    
     
-
-if __name__ == "__main__":
-
-    # writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'params_for_SA.txt', filter = 'settings.', accept = [1, 2], types = (280, 272, 361))
-    # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0)
-    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False)
+def run():
+    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
+    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False)
     print('Done, Johne')
+    
+# if __name__ == "__main__":
+run()
+    # writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'params_for_SA.txt', filter = 'settings.', accept = [1, 2], types = (280, 272, 361))
+    
 
