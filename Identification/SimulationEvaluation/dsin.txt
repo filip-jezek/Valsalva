@@ -10,9 +10,9 @@ double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
       60                   # StopTime     Time at which integration stops
-  2.0000000000000000E-02   # Increment    Communication step size, if > 0
+  1.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
-  9.9999999999999995E-07   # Tolerance    Relative precision of signals for
+  9.9999999999999995E-08   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
        0                   # MaxFixedStep Maximum step size of fixed step size
                            #              integrators, if > 0.0
@@ -54,7 +54,7 @@ double method(27,1)
                            #          grid = 4   runs forever (stopped by model)
        1                   # nt       Use every NT time instant, if grid = 3
        3                   # dense    1/2/3 restart/step/interpolate GRID points
-       1                   # evgrid   0/1 do not/save event points in comm. time grid
+       0                   # evgrid   0/1 do not/save event points in comm. time grid
        1                   # evu      0/1 U-discontinuity does not/trigger events
        0                   # evuord       U-discontinuity order to consider (0,1,...)
        0                   # error    0/1/2 One message/warning/error messages
@@ -63,7 +63,7 @@ double method(27,1)
        0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
        0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
        0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
-   65536                   # debug    flags for debug information (1<<0 uses pdebug) 
+    1024                   # debug    flags for debug information (1<<0 uses pdebug) 
      100                   # pdebug       priority of debug information (1...100)
        0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
        0                   # ordmax   Maximum allowed integration order, if > 0
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11627,100)
+char initialName(11628,100)
 settings.phi0
 settings.height
 settings.weight
@@ -11521,6 +11521,7 @@ condHRPhi.switch1.y
 condHRPhi.disconnected
 condHRPhi.UseAdditionalInput
 condHRPhi.disconnectedValue
+condHRPhi.myDelay.y
 condHRPhi.myDelay.delayTime
 condHRPhi.myDelay.delayEnabled
 condHRPhi.delayEnabled
@@ -11595,6 +11596,7 @@ condSystemicPhi.switch1.y
 condSystemicPhi.disconnected
 condSystemicPhi.UseAdditionalInput
 condSystemicPhi.disconnectedValue
+condSystemicPhi.myDelay.y
 condSystemicPhi.myDelay.delayTime
 condSystemicPhi.myDelay.delayEnabled
 condSystemicPhi.delayEnabled
@@ -11625,6 +11627,7 @@ condHeartPhi.switch1.y
 condHeartPhi.disconnected
 condHeartPhi.UseAdditionalInput
 condHeartPhi.disconnectedValue
+condHeartPhi.myDelay.y
 condHeartPhi.myDelay.delayTime
 condHeartPhi.myDelay.delayEnabled
 condHeartPhi.delayEnabled
@@ -11728,10 +11731,8 @@ V_la
 q_mv
 SLo_max
 SLo_min
-CPUtime
-EventCounter
 
-double initialValue(11627,6)
+double initialValue(11628,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -11750,13 +11751,13 @@ double initialValue(11627,6)
   6   256   # settings.BSA
   0       0                       0                       0                
   6   257   # settings.initByPressure
- -1       0                 -1.0000000000000000E-02 1.0000000000000000E+100
+ -1 -1.5000000000000000E-05 -1.0000000000000000E-02 1.0000000000000000E+100
   1   280   # settings.V_PV_init
  -1  1.1850000000000001E+00       0                       0                
   1   280   # settings.chi_phi
- -1  1.3332238741500000E+05       0                 1.0000000000000000E+100
+ -1  1.3498889999999999E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
- -1  3.7665200000000000E+06       0                 1.0000000000000000E+100
+ -1  3.2935000000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
  -1  3.7665200000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_RA
@@ -11766,11 +11767,11 @@ double initialValue(11627,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1  3.3750000000000007E+01       0                       0                
+ -1  2.6593750000000000E+01       0                       0                
   1   280   # settings.heart_drive_D_0
- -1       0                       0                       0                
+ -1  5.7656250000000004E-04       0                       0                
   1   280   # settings.heart_drive_D_0_maxAct
- -1    1350                       0                       0                
+ -1  1.3771869999999999E+03       0                       0                
   1   280   # settings.heart_drive_D_A
  -1   14400                       0                       0                
   1   280   # settings.heart_drive_D_A_actMax
@@ -11784,19 +11785,19 @@ double initialValue(11627,6)
   1   280   # settings.heart_drive_TR_maxAct
   0 -1.4000000000000001E-01       0                       0                
   6   256   # settings.heart_drive_atr_Tact
- -1  9.9188246993250009E+06       0                       0                
+ -1  9.7948390000000000E+06       0                       0                
   1   280   # settings.heart_drive_atr_D_0
- -1  1.6803550000000000E+07       0                       0                
+ -1  1.7958790000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_A
  -1  8.9082309999999998E-01       0                       0                
   1   280   # settings.heart_vntr_xi_Vw
- -1  9.1180000000000005E-01       0                       0                
+ -1  9.1805000000000003E-01       0                       0                
   1   280   # settings.heart_vntr_xi_AmRef
  -1       1                       0                       0                
   1   280   # settings.heart_vntr_k_passive_factor
  -1  1.8999999999999999E+00       0                       0                
   1   280   # settings.heart_vntr_Lsref
- -1  9.0700000000000003E-01       0                       0                
+ -1  9.9770000000000003E-01       0                       0                
   1   280   # settings.heart_vntr_L0
  -1  2.2500000000000000E+00       0                       0                
   1   280   # settings.heart_vntr_SLcollagen
@@ -11804,13 +11805,13 @@ double initialValue(11627,6)
   1   280   # settings.heart_vntr_SLrest
  -1  8.3199999999999996E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
- -1  1.3046590000000000E+08       0                 1.0000000000000000E+100
+ -1  1.2965050000000000E+08       0                 1.0000000000000000E+100
   1   280   # settings.syst_TPR
  -1  5.2152900000000004E+00       0                       0                
   1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
- -1  4.2260950000000003E-01       0                       0                
+ -1  4.1732680000000000E-01       0                       0                
   1   280   # settings.syst_art_k_E
   0       1                       0                       0                
   6   257   # settings.syst_art_UseVasoconstrictionEffect
@@ -11860,7 +11861,7 @@ double initialValue(11627,6)
   1   280   # settings.veins_C_phi
  -1       0                       0                       0                
   1   280   # settings.veins_ZPV_phi
- -1  5.0000000000000000E-01       0                       0                
+ -1  7.3437500000000000E-01       0                       0                
   1   280   # settings.veins_gamma
  -1       5                       0                       0                
   1   280   # settings.veins_alpha
@@ -11918,23 +11919,23 @@ double initialValue(11627,6)
   1   280   # settings.baro_delta0_car
  -1  6.0625799999999996E-01       0                       0                
   1   280   # settings.baro_g
- -1  3.2065600000000000E-02       0                       0                
+ -1  3.6875440000000002E-02       0                       0                
   1   280   # settings.baro_fsn
  -1  3.3790000000000001E-03       0                       0                
   1   280   # settings.baro_f1
  -1  8.0833333333332999E-05       0                       0                
   1   280   # settings.pulm_CO_target
- -1  3.0002463033825998E-07       0                       0                
+ -1  3.2346390000000002E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1  3.8195510000000003E-08       0                       0                
+ -1  2.5995279999999999E-08       0                       0                
   1   280   # settings.pulm_C_PA
  -1  1.3332238741500000E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
- -1  1.4388560000000000E+07       0                 1.0000000000000000E+100
+ -1  8.8321060000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.pulm_R
- -1  2.5000000000000001E-04       0                       0                
+ -1  2.7421869999999998E-04       0                       0                
   1   280   # settings.pulm_q_nom_maxq
  -1  9.1500000000000004E-01       0                       0                
   1   280   # settings.pulm_R_exp
@@ -34568,11 +34569,13 @@ double initialValue(11627,6)
   6   257   # condHRPhi.UseAdditionalInput
   0       0                       0                       0                
   6   256   # condHRPhi.disconnectedValue
+  0       0                       0                       0                
+  6   256   # condHRPhi.myDelay.y
   0       1                       0                       0                
   6   256   # condHRPhi.myDelay.delayTime
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # condHRPhi.myDelay.delayEnabled
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # condHRPhi.delayEnabled
   0       0                       0                       0                
   6   256   # condHRPhi.delayTime
@@ -34656,7 +34659,7 @@ double initialValue(11627,6)
   6   257   # condTP_PC.switch1.u2
   0       0                       0                       0                
   6   256   # condTP_PC.switch1.y
- -1       1                       0                       0                
+ -1       0                       0                       0                
   1   281   # condTP_PC.disconnected
   0       0                       0                       0                
   6   257   # condTP_PC.UseAdditionalInput
@@ -34716,11 +34719,13 @@ double initialValue(11627,6)
   6   257   # condSystemicPhi.UseAdditionalInput
  -1  2.5000000000000000E-01       0                       0                
   1   280   # condSystemicPhi.disconnectedValue
+  0       0                       0                       0                
+  6   256   # condSystemicPhi.myDelay.y
   0       1                       0                       0                
   6   256   # condSystemicPhi.myDelay.delayTime
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # condSystemicPhi.myDelay.delayEnabled
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # condSystemicPhi.delayEnabled
   0       0                       0                       0                
   6   256   # condSystemicPhi.delayTime
@@ -34756,9 +34761,9 @@ double initialValue(11627,6)
   6   256   # condSystemicPhi.const_offset
   0       0                       0                       0                
   6  1281   # condSystemicPhi.showLimiterLine
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # switch1.u2
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # useAutonomousPhi.y
   0       0                       0                       0                
   6   256   # condHeartPhi.y
@@ -34776,11 +34781,13 @@ double initialValue(11627,6)
   6   257   # condHeartPhi.UseAdditionalInput
  -1  2.5000000000000000E-01       0                       0                
   1   280   # condHeartPhi.disconnectedValue
+  0       0                       0                       0                
+  6   256   # condHeartPhi.myDelay.y
   0       1                       0                       0                
   6   256   # condHeartPhi.myDelay.delayTime
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # condHeartPhi.myDelay.delayEnabled
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # condHeartPhi.delayEnabled
   0       0                       0                       0                
   6   256   # condHeartPhi.delayTime
@@ -34824,7 +34831,7 @@ double initialValue(11627,6)
   6   257   # condTP_IP.switch1.u2
   0       0                       0                       0                
   6   256   # condTP_IP.switch1.y
- -1       1                       0                       0                
+ -1       0                       0                       0                
   1   281   # condTP_IP.disconnected
   0       0                       0                       0                
   6   257   # condTP_IP.UseAdditionalInput
@@ -34878,7 +34885,7 @@ double initialValue(11627,6)
   6   257   # condTP_EP1.switch1.u2
   0       0                       0                       0                
   6   256   # condTP_EP1.switch1.y
- -1       1                       0                       0                
+ -1       0                       0                       0                
   1   281   # condTP_EP1.disconnected
   0       0                       0                       0                
   6   257   # condTP_EP1.UseAdditionalInput
@@ -34982,10 +34989,6 @@ double initialValue(11627,6)
   4   256   # SLo_max
   0       0                       0                       0                
   4   256   # SLo_min
-  0       0                       0                       0                
-  4   256   # CPUtime
-  0       0                       0                       0                
-  4   256   # EventCounter
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -35036,7 +35039,7 @@ double initialValue(11627,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11627,232)
+char initialDescription(11628,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -35054,17 +35057,17 @@ Resistance of the right atrium [(Pa.s)/m3|(dyn.s)/cm5]
 Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
 For Smith heart - linear dependency of active elastance on phi [1|%]
 For Smith heart - linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi [1|%]
-nominal driving offset [1|1]
-Minimal driving offset at maximal activation [1|1]
-Amplitude of resting elastance [Pa/m3|Pa/m3]
+nominal driving offset [1|%]
+Minimal driving offset at maximal activation [1|%]
+Amplitude of resting elastance [Pa/m3|mmHg/ml]
 Amplitude of ventricular elastance at maximal activation [Pa/m3|Pa/m3]
 nominal systolic contraction time [s|s]
 nominal systolic contraction time at maximal activation [s|min]
 Systolic relaxation time [s|s]
-minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
+minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
 Time from start of the atrial cycle [s|s]
 nominal driving offset as a fraction of E_0 [1|1]
-Atrial elastance peak - Maximal elastance 0.05 + 0.15 mmhg/ml [Pa/m3|Pa/m3]
+Atrial elastance peak - Maximal elastance 0.05 + 0.15 mmhg/ml [Pa/m3|mmHg/ml]
 Factor affecting ventricular walls volume [1|%]
 Factor affecting ventricular diameters [1|%]
 Factor affecting diastolic compliance [1|%]
@@ -35130,17 +35133,17 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [Hz|1/min]
+rising factor of the sympathetic activation phi [Hz] [Hz|Hz]
 decrease factor of the phi
 mL/min [m3/s|ml/min]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
 Pulmonary arterial compliance, CO_target/15/_HR mL/mmHg [m3/Pa|ml/mmHg]
 Nominal pressure for pulmonary volume [Pa|mmHg]
 Initial volume of pulmonary veins, with regards to compliance and V_PV_init [m3|ml]
-Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(dyn.s)/cm5]
+Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(mmHg.min)/ml]
 Flow at which the resistance is halved [m3/s|ml/min]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp). Not used when pulm_q_nom_maxq is used
-Pulmonary veins viscoelastic resistance [(Pa.s)/m3|(dyn.s)/cm5]
+Pulmonary veins viscoelastic resistance [(Pa.s)/m3|(mmHg.min)/ml]
 Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
 A fraction of venous nominal diameter which creates ZPV for linear veins [1|%]
 A fraction of nominal C [1|%]
@@ -46455,6 +46458,7 @@ Connector of Real output signal [1]
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 Use another input [:#(type=Boolean)]
 output for disconnected = true. Use SI units! [1]
+Connector of Real output signal [1]
 Delay time of output with respect to input signal [s]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
@@ -46529,6 +46533,7 @@ Connector of Real output signal
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 Use another input [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
+Connector of Real output signal
 Delay time of output with respect to input signal [s]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
@@ -46559,6 +46564,7 @@ Connector of Real output signal
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 Use another input [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
+Connector of Real output signal
 Delay time of output with respect to input signal [s]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
@@ -46662,6 +46668,4 @@ Left atrium volume output [m3|ml]
 Flow in mitral valve [m3/s|ml/min]
 maximal Sarcomere length
 Minimal Sarcomere length
-[s]
-
 

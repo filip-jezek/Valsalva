@@ -480,8 +480,8 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False):
     createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt')    
     
 def run():
-    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
-    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False)
+    # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
+    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False)
     print('Done, Johne')
     
 # if __name__ == "__main__":
