@@ -195,6 +195,10 @@ package ADAN_main
       parameter Physiolibrary.Types.HydraulicResistance heart_R_RA=1999835.811225
       "Resistance of the right atrium"
         annotation(Dialog(tab = "Heart", group = "General"));
+
+      parameter Physiolibrary.Types.HydraulicResistance heart_R_A_vis=1999835.811225
+      "Viscoelastic resistance of the atria"
+        annotation(Dialog(tab = "Heart", group = "General"));
       parameter Physiolibrary.Types.HydraulicInertance heart_I_A = 10678 "Inertance of the atrial inflow"  annotation(Dialog(tab = "Heart", group = "General"));
       // Smith
       parameter Physiolibrary.Types.Fraction heart_alphaE(min = 0, max = 1.33) = 0 "For Smith heart - linear dependency of active elastance on phi"
@@ -7921,6 +7925,18 @@ Kalecky")}), experiment(
             TS=settings.heart_drive_TS,
             TR=settings.heart_drive_TR)
             annotation (Placement(transformation(extent={{-88,24},{-68,44}})));
+          Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
+                displayUnit="(dyn.s)/cm5") = settings.heart_R_A_vis)
+            annotation (Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=270,
+                origin={-42,38})));
+          Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
+                displayUnit="(dyn.s)/cm5") = settings.heart_R_A_vis)
+            annotation (Placement(transformation(
+                extent={{-8,-8},{8,8}},
+                rotation=270,
+                origin={50,-20})));
         equation
           volume =ra.volume + la.volume + ventricles.V_LV + ventricles.V_RV;
           connect(pulmonaryValve.q_out, pa) annotation (Line(
@@ -7959,14 +7975,6 @@ Kalecky")}), experiment(
                   {-10,0}},                    color={0,0,127}));
           connect(HR0.y, ventricles.frequency) annotation (Line(points={{-87,0},
                   {-10,0}},         color={0,0,127}));
-          connect(ra.port_a, r_SystemicVenousInflow.q_out) annotation (Line(
-              points={{-42,24},{-42,56},{-52,56}},
-              color={0,0,0},
-              thickness=1));
-          connect(la.port_a, r_PulmonaryVenousInflow.q_out) annotation (Line(
-              points={{50,-8},{50,-34},{60,-34}},
-              color={0,0,0},
-              thickness=1));
           connect(aorticValve.cardiac_cycle, ventricles.cardiac_cycle)
             annotation (Line(points={{-70,-24},{30,-24},{30,0},{10,0}},color={244,125,
                   35}));
@@ -8035,6 +8043,23 @@ Kalecky")}), experiment(
                   -60,34},{-60,16},{-52.4,16}}, color={0,140,72}));
           connect(calciumMechanics.D, la.D) annotation (Line(points={{-67,34},{
                   34,34},{34,0},{39.6,0}}, color={0,140,72}));
+          connect(ra.port_a, resistor.q_out) annotation (Line(
+              points={{-42,24},{-42,28}},
+              color={0,0,0},
+              thickness=1));
+          connect(resistor.q_in, r_SystemicVenousInflow.q_out) annotation (Line(
+              points={{-42,48},{-42,56},{-52,56}},
+              color={0,0,0},
+              thickness=1));
+          connect(la.port_a, resistor1.q_in) annotation (Line(
+              points={{50,-8},{50,-12}},
+              color={0,0,0},
+              thickness=1));
+          connect(resistor1.q_out, r_PulmonaryVenousInflow.q_out) annotation (
+              Line(
+              points={{50,-28},{50,-34},{60,-34}},
+              color={0,0,0},
+              thickness=1));
           annotation (Icon(graphics={                       Text(
                   extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
