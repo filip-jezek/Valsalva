@@ -8342,7 +8342,7 @@ Kalecky")}), experiment(
             parameter Boolean UseTiltInput=false
               "Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account."  annotation(choices(checkBox=true));
             parameter Boolean UseVasoconstrictionEffect = false annotation(choices(checkBox=true),Dialog(group = "Parameters"));
-            parameter Real sinAlpha=1   "Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input."  annotation (Dialog(tab = "General", group = "Orientations", enabled = not UseSinAlphaInput));
+            parameter Real sinAlpha=0   "Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input."  annotation (Dialog(tab = "General", group = "Orientations", enabled = not UseSinAlphaInput));
             parameter Boolean UseDistentionOutput = false "Provides relative distention fraction output, otherwise hidden and not calculated" annotation(choices(checkBox=true));
             parameter Physiolibrary.Types.Volume distentionBase = l*Modelica.Constants.pi*(r^2) annotation (enable = UseDistentionOutput);
             Physiolibrary.Types.Pressure P_hs = height*settings.blood_rho*Modelica.Constants.g_n "Hydrostatic pressure of whole vessel at actual orientation";
@@ -14721,6 +14721,7 @@ P_hs_plus_dist"),
 
         model SystemicAV "Adds volume and length calculations"
           extends ADAN_main.Components.Subsystems.Systemic.SystemicAV_base(
+            brachial_division=0.15,
             splanchnic_vein(UseOuter_thoracic_pressure=true,
                 thoracic_pressure_ratio=settings.syst_abd_P_th_ratio),
             splanchnic_tissue(UseOuter_thoracic_pressure=true,
@@ -15316,8 +15317,8 @@ P_hs_plus_dist"),
               ascending_aorta_C(sinAlpha=1),
               ascending_aorta_D(sinAlpha=1),
               aortic_arch_C2(sinAlpha=1),
-              aortic_arch_C46(sinAlpha=1),
-              aortic_arch_C64(sinAlpha=1),
+              aortic_arch_C46(sinAlpha=0),
+              aortic_arch_C64(sinAlpha=0),
               common_carotid_R6_A(sinAlpha=1),
               common_carotid_R6_B(sinAlpha=1),
               common_carotid_R6_C(sinAlpha=1),
@@ -33843,7 +33844,8 @@ P_hs_plus_dist"),
 
     model CardiovascularSystem
       extends ADAN_main.SystemicTree.Identification.Results.OptimizedValsalva( settings(
-            heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000, heart_drive_atr_Tact=-0.2),
+            heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000, heart_drive_atr_Tact=-0.2,
+          baro_fsn=0.03625),
           heartComponent(ventricles(calciumMechanics(tau_phi=3)), calciumMechanics(
               tau_phi=0)));
       annotation (__Dymola_Commands(file(ensureSimulated=true)=
@@ -41059,7 +41061,7 @@ P_hs_plus_dist"),
       end Experiments;
 
       model CVS_baseline "Just a baseline wrapper"
-        extends CardiovascularSystem(settings(baro_tau_s(displayUnit="s") = 20));
+        extends CardiovascularSystem(settings(baro_tau_s(displayUnit="s") = 30));
         annotation (experiment(
             StopTime=120,
             Interval=0.01,
@@ -41678,9 +41680,9 @@ P_hs_plus_dist"),
        SystemicComponent(UseTiltInput=true));
 
         replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
-          height=Modelica.Constants.pi/3,
+          height=Modelica.Constants.pi/2,
           startTime=0,
-          duration=5)   constrainedby Modelica.Blocks.Interfaces.SO
+          duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
       equation
         connect(Tilt_ramp.y, SystemicComponent.tilt_input) annotation (Line(
