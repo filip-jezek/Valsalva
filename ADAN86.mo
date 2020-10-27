@@ -234,9 +234,13 @@ package ADAN_main
         "minimal time for muscle relaxation at maximal activation. Guessed value"
         annotation(Dialog(tab="Heart",   group="TriSegOttesen drive"));
       // TriSeg atria
-      parameter Time heart_drive_atr_Tact(displayUnit="s")=-0.2
-                                               "Time from start of the atrial cycle"
-        annotation(Dialog(tab = "Heart", group = "Simple atria"));
+      parameter Physiolibrary.Types.Time heart_drive_Tact(displayUnit="s") =
+        0.2 "Time delay between atrial and ventricle cycles"
+        annotation(Dialog(tab="Heart",   group="Simple atria"));
+      parameter Physiolibrary.Types.Time heart_drive_Tact_maxAct(displayUnit=
+            "s") = 0.2*HR_nominal/HR_max
+        "Time from start of the atrial cycle at maximal activation";
+
       parameter Fraction heart_drive_atr_D_0=0.25 "nominal driving offset as a fraction of E_0"
         annotation(Dialog(tab="Heart",   group="Simple atria"));
       parameter Physiolibrary.Types.HydraulicElastance heart_atr_D_A=26664477.483
@@ -473,7 +477,8 @@ package ADAN_main
       parameter Modelica.SIunits.Time Td_phi_syst = 0;
       parameter Modelica.SIunits.Time Td_phi_hr = 0;
       parameter Modelica.SIunits.Time Td_phi_heart = 0;
-          annotation(Dialog(tab = "Heart", group = "TriSegOttesen drive"),
+        annotation(Dialog(tab = "Heart", group = "Simple atria"),
+                     Dialog(tab = "Heart", group = "TriSegOttesen drive"),
                    defaultComponentName =     "settings",
                  defaultComponentPrefixes = "outer",
                  missingInnerMessage =      "The Settings object is missing. Add a Settings to the top level and make it 'outer'",
@@ -3190,12 +3195,12 @@ type"),       Text(
       package Heart
         package Auxiliary
           partial model partialDriving
-            "Driving function for heart contraction. Usually outputs a fraction 0-1"
+            "Driving function for heart contraction. Usually outputs a HydraulicElastance"
             parameter Modelica.SIunits.Time t_offset = 0 "Time offset for activation at nominal"
             annotation(Dialog(enable=initializeCardiac_cycle));
             parameter Boolean usePhiInput=false    annotation(choices(checkBox=true));
-            parameter Boolean initializeCardiac_cycle = true "if true, sets cardiac cycle using t_offset. False for initialization using start value"
-            annotation(choices(checkBox=true));
+          //   parameter Boolean initializeCardiac_cycle = true "if true, sets cardiac cycle using t_offset. False for initialization using start value"
+          //   annotation(choices(checkBox=true));
 
             parameter Physiolibrary.Types.Fraction phi0 = 0.25;
             Modelica.Blocks.Interfaces.RealOutput D
@@ -3204,33 +3209,43 @@ type"),       Text(
                     extent={{100,-10},{120,10}})));
             parameter Modelica.SIunits.Time tau_phi "Integral time constant of delayed activation" annotation(Evaluate = true);
             Physiolibrary.Types.Fraction phi_inf "actual phi input, given infinite speed of transmission";
-            Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
-                  transformation(extent={{-120,-20},{-80,20}}), iconTransformation(extent=
-                     {{-110,-20},{-70,20}})));
-            Physiolibrary.Types.RealIO.FractionOutput cardiac_cycle
-              "Fraction of the cycle length"
-              annotation (Placement(transformation(extent={{100,50},{120,70}}),
-                  iconTransformation(extent={{100,50},{120,70}})));
-
+          //   Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
+          //         transformation(extent={{-120,-110},{-80,-70}}),
+          //                                                       iconTransformation(extent={{-42,-80},
+          //             {-2,-40}})));
             Physiolibrary.Types.RealIO.FractionInput phiInput=phi_inf if usePhiInput
               "Sympathetic activation"
-              annotation (Placement(transformation(extent={{-110,40},{-70,80}}),
-                  iconTransformation(extent={{-110,40},{-70,80}})));
+              annotation (Placement(transformation(extent={{-122,70},{-82,110}}),
+                  iconTransformation(extent={{-120,60},{-80,100}})));
             Physiolibrary.Types.Fraction phi_;
-          initial equation
-            if initializeCardiac_cycle and t_offset <> 0 then
-              t_offset*frequency = -cardiac_cycle;
-            end if;
+            Modelica.Blocks.Interfaces.RealInput t0 "Start time of current cardiac cycle"
+              annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+                  iconTransformation(extent={{-120,-20},{-80,20}})));
+            parameter Modelica.SIunits.Time t0_delay = 0 "Delay of contraction after SA node ";
+            parameter Modelica.SIunits.Time t0_delay_macAct = 0 "Delay of contraction after SA node ";
+            Real t0_delay_coeff;
+            Modelica.SIunits.Time t0_delay_phi = max(t0_delay + t0_delay_coeff *(phi_ - phi0), 0);
+            Modelica.SIunits.Time tm = if t0_delay_phi > 0 then time - time0 else t0;
+            // Modelica.SIunits.Time tm = if t0_delay_phi > 0 then time - time0 else t0;
+            Modelica.SIunits.Time time0 "time of the last beat";
+
+                  // initial equation
+          //   if initializeCardiac_cycle and t_offset <> 0 then
+          //     t_offset*frequency = -cardiac_cycle;
+          //   end if;
           equation
+            when t0 > t0_delay_phi then
+              time0 = time;
+            end when;
+            // if t0_delay <> 0 then
+              t0_delay_macAct = t0_delay + t0_delay_coeff *(1 - phi0);
+            // else
+            //   t0_delay_coeff = 0;
+            // end if;
+
             if not usePhiInput then
               phi_inf = phi0;
             end if;
-
-            der(cardiac_cycle) = frequency;
-
-            when cardiac_cycle > 1 then
-              reinit(cardiac_cycle, 0);
-            end when;
 
             if tau_phi == 0.0 then
               // its turned off
@@ -5376,8 +5391,7 @@ type"),       Text(
                 ADAN_main.Components.Subsystems.Heart.Auxiliary.partialDriving;
 
               parameter Modelica.SIunits.Time tauR =  0.048;
-              Modelica.SIunits.Period period = 1/frequency;
-              Real x=min(8, max(0, cardiac_cycle*period/tauR));
+              Real x=min(8, max(0, t0/tauR));
               Real Fr = 0.02*(x^3)*((8-x)^2)*exp(-x);
               parameter Physiolibrary.Types.Fraction phi_effect_Ca = 0;
               Physiolibrary.Types.Fraction phi_effect = (1 + phi_effect_Ca*(phi_ - phi0));
@@ -5426,9 +5440,9 @@ type"),       Text(
               parameter Physiolibrary.Types.Time TR_maxAct=0.15
                 "minimal time for muscle relaxation at maximal activation. Guessed value";
 
-              Physiolibrary.Types.Time tm = cardiac_cycle / frequency "time since start of cardiac cycle";
               Boolean systolicContraction=tm >= 0 and tm < TS_phi;
               Boolean systolicRelaxation=tm >= TS_phi and tm < TR_phi + TS_phi;
+              Physiolibrary.Types.Fraction D_rel = D/D_A "D relative to resting D_A to compare timings";
             equation
               // these equations for known XXX_maxAct parameters calculate the _coeff slopes at maximal activation (=1)
               TS_maxAct = TS*(1 + TS_coeff*(1 - phi0));
@@ -5999,8 +6013,8 @@ Simple")}),                                                                  Dia
               "Partial ventricles for the TriSeg model variants"
               //  extends ADAN_main.Components.Subsystems.Heart.Auxiliary.partialVentricles;
               Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
-                    transformation(extent={{-120,-20},{-80,20}}), iconTransformation(extent=
-                       {{-120,-20},{-80,20}})));
+                    transformation(extent={{-120,-60},{-80,-20}}),iconTransformation(extent={{-120,
+                        -60},{-80,-20}})));
               Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_rv annotation (
                   Placement(transformation(extent={{70,30},{90,50}}), iconTransformation(
                       extent={{70,30},{90,50}})));
@@ -6008,10 +6022,10 @@ Simple")}),                                                                  Dia
                   Placement(transformation(extent={{70,-50},{90,-30}}),
                                                                       iconTransformation(
                       extent={{70,-70},{90,-50}})));
-              Physiolibrary.Types.RealIO.FractionOutput cardiac_cycle
+              Physiolibrary.Types.RealIO.FractionInput  cardiac_cycle
                 "Time from start of the cycle" annotation (Placement(
-                    transformation(extent={{-56,14},{-36,34}}),
-                    iconTransformation(extent={{90,-10},{110,10}})));
+                    transformation(extent={{-120,-100},{-80,-60}}),
+                    iconTransformation(extent={{-120,-120},{-80,-80}})));
               Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input  annotation (Placement(
                     transformation(extent={{-20,-20},{20,20}},
                     rotation=90,
@@ -6047,7 +6061,7 @@ Simple")}),                                                                  Dia
               replaceable ADAN_main.Components.Subsystems.Heart.Auxiliary.partialDriving
                 calciumMechanics(usePhiInput=true) constrainedby
                 ADAN_main.Components.Subsystems.Heart.Auxiliary.partialDriving
-                annotation (Placement(transformation(extent={{-62,-26},{-42,-6}})));
+                annotation (Placement(transformation(extent={{-62,-10},{-42,10}})));
               parameter Physiolibrary.Types.Volume V_min=5e-06;
               Real _P_LV;
               Real _P_RV;
@@ -6066,53 +6080,72 @@ Simple")}),                                                                  Dia
              Modelica.SIunits.Work currentWork_RV;
              Physiolibrary.Types.Power power_RV;
 
+              Physiolibrary.Types.RealIO.TimeInput t0
+                "time since start of the current cardiac cycle" annotation (
+                  Placement(transformation(extent={{-120,-20},{-80,20}}),
+                    iconTransformation(extent={{-120,0},{-80,40}})));
             equation
 
               // since the flow is derivation of volume, we have already differentiated it
               der(currentWork_LV)  = -P_LV*der(V_LV);
               der(currentWork_RV)  = -P_RV*der(V_RV);
 
-              when cardiac_cycle > 1 then
-                // anywhere, jsut to reset it once a cycle
+              when t0 < 1e-3 then
+                // the t0 is zeroed once a cycle, so it would fire this event as well
                 reinit(currentWork_LV, 0);
                 reinit(currentWork_RV, 0);
-                power_LV = currentWork_LV*frequency;
-                power_RV = currentWork_RV*frequency;
+                if pre(t0) > 0.2 then
+                power_LV = currentWork_LV/pre(t0);
+                power_RV = currentWork_RV/pre(t0);
+                else
+                  power_LV = 0;
+                  power_RV = 0;
+                end if;
               end when;
 
               volumeLimiterRV = V_RV < V_min;
               volumeLimiterLV = V_LV < V_min;
 
-              connect(frequency, calciumMechanics.frequency)
-                annotation (Line(points={{-100,0},{-80,0},{-80,-16},{-61,-16}},
-                                                            color={0,0,127}));
-              connect(calciumMechanics.D, SEP_wall.D) annotation (Line(points={
-                      {-41,-16},{-20,-16},{-20,0},{-10,0}}, color={0,140,72}));
-              connect(calciumMechanics.D, LV_wall.D) annotation (Line(points={{
-                      -41,-16},{-20,-16},{-20,40},{-10,40}}, color={0,140,72}));
-              connect(calciumMechanics.D, RV_wall.D) annotation (Line(points={{
-                      -41,-16},{-20,-16},{-20,-40},{-10,-40}}, color={0,140,72}));
-              connect(SEP_wall.frequency, frequency) annotation (Line(points={{-10,10},{-80,
-                      10},{-80,0},{-100,0}}, color={0,0,127}));
-              connect(LV_wall.frequency, frequency) annotation (Line(points={{-10,50},{-32,50},
-                      {-32,10},{-80,10},{-80,0},{-100,0}}, color={0,0,127}));
-              connect(RV_wall.frequency, frequency) annotation (Line(points={{-10,-30},{-32,
-                      -30},{-32,10},{-80,10},{-80,0},{-100,0}}, color={0,0,127}));
-              connect(calciumMechanics.cardiac_cycle, cardiac_cycle)
-                annotation (Line(points={{-41,-10},{-41,24},{-46,24}},
-                    color={244,125,35}));
-              connect(calciumMechanics.cardiac_cycle, RV_wall.cardiacCycle)
-                annotation (Line(points={{-41,-10},{-26,-10},{-26,-50},{-10,-50}},
-                    color={244,125,35}));
-              connect(calciumMechanics.cardiac_cycle, LV_wall.cardiacCycle)
-                annotation (Line(points={{-41,-10},{-26,-10},{-26,30},{-10,30}},
-                    color={244,125,35}));
-              connect(calciumMechanics.cardiac_cycle, SEP_wall.cardiacCycle)
-                annotation (Line(points={{-41,-10},{-24,-10},{-24,-10},{-10,-10}},
-                    color={244,125,35}));
+              connect(calciumMechanics.D, SEP_wall.D) annotation (Line(points={{-41,0},
+                      {-10,0}},                             color={0,140,72},
+                  thickness=0.5));
+              connect(calciumMechanics.D, LV_wall.D) annotation (Line(points={{-41,0},
+                      {-20,0},{-20,40},{-10,40}},            color={0,140,72},
+                  thickness=0.5));
+              connect(calciumMechanics.D, RV_wall.D) annotation (Line(points={{-41,0},
+                      {-20,0},{-20,-40},{-10,-40}},            color={0,140,72},
+
+                  thickness=0.5));
+              connect(SEP_wall.frequency, frequency) annotation (Line(points={{-10,10},
+                      {-32,10},{-32,-40},{-100,-40}},
+                                             color={0,0,127},
+                  thickness=0.5));
+              connect(LV_wall.frequency, frequency) annotation (Line(points={{-10,50},
+                      {-32,50},{-32,-40},{-100,-40}},      color={0,0,127},
+                  thickness=0.5));
+              connect(RV_wall.frequency, frequency) annotation (Line(points={{-10,-30},
+                      {-32,-30},{-32,-40},{-100,-40}},          color={0,0,127},
+
+                  thickness=0.5));
               connect(calciumMechanics.phiInput, phi_input) annotation (Line(
-                    points={{-61,-10},{-70,-10},{-70,100},{0,100}}, color={0,0,
+                    points={{-62,8},{-70,8},{-70,100},{0,100}},     color={0,0,
                       127}));
+              connect(calciumMechanics.t0, t0) annotation (Line(points={{-62,0},
+                      {-100,0}},                 color={0,0,127}));
+              connect(LV_wall.cardiacCycle, SEP_wall.cardiacCycle) annotation (
+                  Line(
+                  points={{-10,30},{-26,30},{-26,-10},{-10,-10}},
+                  color={244,125,35},
+                  thickness=0.5));
+              connect(SEP_wall.cardiacCycle, RV_wall.cardiacCycle) annotation (
+                  Line(
+                  points={{-10,-10},{-26,-10},{-26,-50},{-10,-50}},
+                  color={244,125,35},
+                  thickness=0.5));
+              connect(RV_wall.cardiacCycle, cardiac_cycle) annotation (Line(
+                  points={{-10,-50},{-26,-50},{-26,-80},{-100,-80}},
+                  color={244,125,35},
+                  thickness=0.5));
               annotation (Icon(graphics={
                               Bitmap(extent={{100,-100},{-100,100}}, fileName=
                           "modelica://Physiolibrary/Resources/Icons/komoraSrdce.png",
@@ -6267,6 +6300,8 @@ Simple")}),                                                                  Dia
               extends Ventricles_Lumens(
                 redeclare Auxiliary.TriSegMechanics_components.Driving_Olufsen
                   calciumMechanics(
+                  t0_delay=settings.heart_drive_Tact,
+                  t0_delay_macAct=settings.heart_drive_Tact_maxAct,
                   D_A=settings.heart_drive_D_A,
                   D_A_maxAct=settings.heart_drive_D_A_actMax,
                   TR_maxAct(displayUnit="s") = settings.heart_drive_TR_maxAct,
@@ -6353,6 +6388,34 @@ Simple")}),                                                                  Dia
             end when;
 
           end Driving_Smith;
+
+          model SA_node
+            extends Physiolibrary.Icons.SinoatrialNode;
+            Modelica.Blocks.Interfaces.RealOutput t0 "time since start of cardiac cycle" annotation (Placement(transformation(
+                    rotation=0, extent={{90,-10},{110,10}}), iconTransformation(extent={{80,
+                      -20},{120,20}})));
+            Physiolibrary.Types.Time t0_last "length of the last cardiac cycle";
+            Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
+                  transformation(rotation=0, extent={{-110,-10},{-90,10}})));
+            Physiolibrary.Types.RealIO.FractionInput phiInput annotation (Placement(
+                  transformation(rotation=0, extent={{-110,50},{-90,70}})));
+
+            Physiolibrary.Types.RealIO.FractionOutput cardiac_cycle
+              "Fraction of the cycle length"
+              annotation (Placement(transformation(extent={{100,50},{120,70}}),
+                  iconTransformation(extent={{80,-100},{120,-60}})));
+            Boolean beat = cardiac_cycle > 1 "True for beat begining";
+          equation
+            t0 = cardiac_cycle / frequency;
+            der(cardiac_cycle) = frequency;
+
+            when beat then
+              reinit(cardiac_cycle, 0);
+              // t0 is zero now
+              t0_last = pre(t0);
+            end when;
+
+          end SA_node;
         end Auxiliary;
 
         package Testers
@@ -6450,16 +6513,16 @@ Simple")}),                                                                  Dia
                   points={{-62.3,-40},{-54,-40},{-54,-62},{-20,-62}}, color={0,0,127}));
             connect(heartRate2_1.HR, heartComponent.frequency_input)
               annotation (Line(points={{-4.12,-22},{-12,-22}}, color={0,0,127}));
-            connect(condHR.y, heartRate2_1.phi) annotation (Line(points={{46.6,
-                    60},{60,60},{60,-22},{8,-22}}, color={0,0,127}));
+            connect(condHR.y, heartRate2_1.phi) annotation (Line(points={{46.6,60},
+                    {60,60},{60,-22},{8,-22}},     color={0,0,127}));
             connect(pulmonaryComponent.port_a,heartComponent. pa) annotation (Line(
-                points={{-30,-52},{-48,-52},{-48,-32},{-32,-32}},
+                points={{-30,-52},{-48,-52},{-48,-16.4},{-32,-16.4}},
                 color={0,0,0},
                 thickness=1));
             connect(condHR.u, phi.y) annotation (Line(points={{32.8,60},{-24,60},
                     {-24,60},{-79,60}},color={0,0,127}));
             connect(heartComponent.sv, SystemicVeins.y) annotation (Line(
-                points={{-12,-12},{-6,-12},{-6,10},{0,10}},
+                points={{-12,-16.4},{-6,-16.4},{-6,10},{0,10}},
                 color={0,0,0},
                 thickness=1));
             connect(venousPressure.y, condHR1.u) annotation (Line(points={{-39,30},
@@ -6475,11 +6538,11 @@ Simple")}),                                                                  Dia
                 color={0,0,0},
                 thickness=1));
             connect(aorta.q_in, heartComponent.sa) annotation (Line(
-                points={{-42,-10},{-38,-10},{-38,-12},{-32,-12}},
+                points={{-42,-10},{-38,-10},{-38,-25.4},{-12,-25.4}},
                 color={0,0,0},
                 thickness=1));
             connect(pulmonaryVeins.y, heartComponent.pv) annotation (Line(
-                points={{64,-32},{-12,-32}},
+                points={{64,-32},{16,-32},{16,-25.4},{-32,-25.4}},
                 color={0,0,0},
                 thickness=1));
             connect(pulmonaryVeins.pressure, SystemicVeins.pressure)
@@ -6501,8 +6564,74 @@ Simple")}),                                                                  Dia
           end heartRig_base;
 
           model heartRig_TriSeg
-            extends heartRig_base(redeclare Heart_TriSeg heartComponent,
-                heartRate2_1(HR_nom=1.25));
+            extends heartRig_base(redeclare Heart_TriSegMechanics_Simple heartComponent(
+                  ventricles(calciumMechanics(t0_delay=0.2, t0_delay_macAct=0.2
+                        *settings.HR_nominal/settings.HR_max))),
+                heartRate2_1(HR_nom=1.25),
+              condHR1(disconnected=true, disconnectedValue=8*133),
+              condHR(disconnected=false));
+            inner Settings settings(
+              heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000,
+              heart_drive_Tact=-0.2,
+              baro_fsn(displayUnit="Hz") = 0.03625,
+              V_PV_init=6.250000e-06,
+              heart_drive_D_0_maxAct=2.953125e-04,
+              heart_drive_D_A_actMax(displayUnit="Pa/m3") = 9.585000e+03,
+              heart_drive_TS_maxAct=1.223990e-01,
+              heart_drive_TR_maxAct=1.106879e-01,
+              tissues_eta_Ra=2.545225e+00,
+              tissues_eta_C=3.421191e-01,
+              eta_vc=1.289172e-01,
+              veins_gamma=7.343750e-01,
+              heart_atr_D_A=1.795879e+07,
+              heart_drive_atr_D_0(displayUnit="1") = 9.794839e+06,
+              heart_R_vlv=1.349889e+05,
+              heart_R_LA(displayUnit="(dyn.s)/cm5") = 3.293500e+06,
+              heart_drive_D_0=2.659375e+01,
+              heart_drive_D_A=1.377187e+03,
+              heart_vntr_xi_AmRef=9.180500e-01,
+              heart_vntr_L0=9.977000e-01,
+              syst_TPR=1.296505e+08,
+              syst_TR_frac=5.215290e+00,
+              syst_art_k_E=4.173268e-01,
+              pulm_C_PV=3.234639e-07,
+              pulm_C_PA=2.599528e-08,
+              pulm_R=8.832106e+06,
+              pulm_q_nom_maxq=0.0002742187,
+              pulm_P_PV_nom=1333.22387415,
+              heart_vntr_Lsref=1.900000e+00,
+              initByPressure=false,
+              height=1.7132,
+              tissues_CO_nom=0.000105,
+              EvaluateFunctionalParams=true,
+              HR_max=2.907,
+              HR_nominal=1.0666666666667,
+              UseNonLinear_TissuesCompliance=true,
+              baro_f1=3.379000e-03,
+              baro_g=0.606258,
+              baro_tau_s=98.37,
+              baro_useAbsolutePressureTerm=false,
+              baro_xi_delta0=2.688000e-01,
+              chi_phi=1.185,
+              heart_R_RA(displayUnit="(dyn.s)/cm5") = 3766520,
+              heart_drive_TR(displayUnit="s") = 0.38,
+              heart_vntr_xi_Vw=0.8908231,
+              pulm_R_exp=9.150000e-01,
+              syst_abd_P_th_ratio=0.832,
+              syst_art_UseVasoconstrictionEffect=true,
+              tissue_chi_C=-0.12,
+              tissues_UseStraighteningReaction2Phi=true,
+              tissues_ZPV_nom=0.00210124,
+              tissues_chi_R=29.376,
+              tissues_gamma=0.5,
+              tissues_tau_R(displayUnit="s") = 0,
+              veins_C_phi=0.09,
+              veins_activation_tau=0) annotation (Placement(transformation(
+                    extent={{-100,80},{-80,100}})));
+          equation
+            connect(heartComponent.phi, heartRate2_1.phi) annotation (Line(
+                  points={{-12,-16},{-12,-6},{60,-6},{60,-22},{8,-22}}, color={
+                    0,0,127}));
           end heartRig_TriSeg;
 
           model TestCalciumMechanics
@@ -6741,27 +6870,31 @@ Simple")}),                                                                  Dia
         partial model partialHeart
           extends Physiolibrary.Icons.Heart;
 
-          parameter Boolean UseFrequencyInput = false annotation(choices(checkBox=true));
-          parameter Boolean UseThoracicPressureInput = false annotation(choices(checkBox=true));
-          parameter Boolean UsePhiInput = false annotation(choices(checkBox=true));
-          parameter Physiolibrary.Types.Frequency HR = 1 "Heart rate, when not specified externally" annotation(Dialog(enabled = not UseFrequencyInput));
+          parameter Boolean UseFrequencyInput=true    annotation(choices(checkBox=true));
+          parameter Boolean UseThoracicPressureInput=true    annotation(choices(checkBox=true));
+          parameter Boolean UsePhiInput=true    annotation(choices(checkBox=true));
+          parameter Physiolibrary.Types.Frequency HR=1   "Heart rate, when not specified externally" annotation(Dialog(enabled = not UseFrequencyInput));
 
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a sv
-            annotation (Placement(transformation(extent={{-110,46},{-90,66}})));
+            annotation (Placement(transformation(extent={{-110,50},{-90,70}}),
+                iconTransformation(extent={{-110,46},{-90,66}})));
           Physiolibrary.Types.RealIO.FrequencyInput frequency_input if UseFrequencyInput annotation (Placement(
                 transformation(extent={{-126,-20},{-86,20}}), iconTransformation(extent={{-120,
                     -20},{-80,20}})));
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a pv
-            annotation (Placement(transformation(extent={{90,-44},{110,-24}})));
+            annotation (Placement(transformation(extent={{90,-70},{110,-50}}),
+                iconTransformation(extent={{90,-44},{110,-24}})));
           Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input if UseThoracicPressureInput  annotation (Placement(
                 transformation(extent={{-20,-20},{20,20}},
                 rotation=90,
                 origin={0,-100}),                             iconTransformation(extent={{-20,
                     -120},{20,-80}})));
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b pa
-            annotation (Placement(transformation(extent={{90,46},{110,66}})));
+            annotation (Placement(transformation(extent={{90,50},{110,70}}),
+                iconTransformation(extent={{90,46},{110,66}})));
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b sa
-            annotation (Placement(transformation(extent={{-110,-44},{-90,-24}})));
+            annotation (Placement(transformation(extent={{-110,-70},{-90,-50}}),
+                iconTransformation(extent={{-110,-44},{-90,-24}})));
 
           Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit="1/min")=
                  HR) if
@@ -6773,10 +6906,10 @@ Simple")}),                                                                  Dia
                 rotation=270,
                 origin={0,-86})));
           Physiolibrary.Types.RealIO.FractionInput phi if UsePhiInput
-            annotation (Placement(transformation(extent={{-120,58},{-80,98}}),
+            annotation (Placement(transformation(extent={{-120,60},{-80,100}}),
                 iconTransformation(extent={{-120,40},{-80,80}})));
           Physiolibrary.Types.Constants.FractionConst phi0(k=settings.phi0) if not UsePhiInput
-            annotation (Placement(transformation(extent={{-90,74},{-82,82}})));
+            annotation (Placement(transformation(extent={{-90,76},{-82,84}})));
 
 
           outer Settings settings
@@ -7846,7 +7979,7 @@ Kalecky")}), experiment(
             useChatteringProtection=true,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=R_vlv)
-            annotation (Placement(transformation(extent={{-32,46},{-12,66}})));
+            annotation (Placement(transformation(extent={{-6,50},{14,70}})));
           replaceable
           Physiolibrary.Hydraulic.Components.IdealValveResistance
                                pulmonaryValve(
@@ -7860,7 +7993,7 @@ Kalecky")}), experiment(
             useChatteringProtection=true,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=R_vlv)
-            annotation (Placement(transformation(extent={{64,46},{84,66}})));
+            annotation (Placement(transformation(extent={{50,50},{70,70}})));
           replaceable
           Basic.IdealValveResistanceWithMeasurements
                                mitralValve(
@@ -7874,7 +8007,7 @@ Kalecky")}), experiment(
             useChatteringProtection=true,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=R_vlv)
-            annotation (Placement(transformation(extent={{40,-44},{20,-24}})));
+            annotation (Placement(transformation(extent={{50,-70},{30,-50}})));
           replaceable Basic.IdealValveResistanceWithMeasurements aorticValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
@@ -7886,40 +8019,55 @@ Kalecky")}), experiment(
             Physiolibrary.Hydraulic.Components.IdealValveResistance(
             useChatteringProtection=true,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
-            _Ron=R_vlv) annotation (Placement(transformation(extent={{-60,-44},{-80,-24}})));
+            _Ron=R_vlv) annotation (Placement(transformation(extent={{0,-70},{
+                    -20,-50}})));
 
           replaceable
           Physiolibrary.Hydraulic.Components.Resistor r_SystemicVenousInflow(Resistance=
                settings.heart_R_RA) constrainedby
             Physiolibrary.Hydraulic.Interfaces.OnePort
                                     "Resistance of the inflow to the atria"
-            annotation (Placement(transformation(extent={{-72,46},{-52,66}})));
+            annotation (Placement(transformation(extent={{-88,50},{-68,70}})));
           replaceable
           Physiolibrary.Hydraulic.Components.Resistor r_PulmonaryVenousInflow(
               Resistance=settings.heart_R_LA) constrainedby
             Physiolibrary.Hydraulic.Interfaces.OnePort
                                               "Resistance of the inflow to the atria"
-            annotation (Placement(transformation(extent={{80,-44},{60,-24}})));
+            annotation (Placement(transformation(extent={{90,-70},{70,-50}})));
           replaceable Auxiliary.TriSegMechanics_components.Ventricles_Calcium
             ventricles(V_LV(start=0.00015), V_RV(start=0.00015)) constrainedby
             Auxiliary.TriSegMechanics_components.partialVentricles_TS
-            annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
+            annotation (Placement(transformation(extent={{-6,-20},{14,0}})));
           Auxiliary.AtriumSimple ra(enabled=true)
-            annotation (Placement(transformation(extent={{-52,26},{-32,6}})));
+            annotation (Placement(transformation(extent={{-10,26},{-30,6}})));
           Auxiliary.AtriumSimple la(enabled=true)
-            annotation (Placement(transformation(extent={{40,-10},{60,10}})));
+            annotation (Placement(transformation(extent={{70,-38},{50,-18}})));
 
         Physiolibrary.Types.Volume volume;
           Basic.IdealValve_deactivable idealValve_deactivable annotation (
               Placement(transformation(
                 extent={{-4,4},{4,-4}},
                 rotation=270,
-                origin={12,22})));
+                origin={20,4})));
           Basic.IdealValve_deactivable idealValve_deactivable1 annotation (
               Placement(transformation(
                 extent={{-4,-4},{4,4}},
                 rotation=90,
-                origin={12,-18})));
+                origin={22,-22})));
+          Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
+                displayUnit="(dyn.s)/cm5") = settings.heart_R_A_vis)
+            annotation (Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=270,
+                origin={-20,46})));
+          Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
+                displayUnit="(dyn.s)/cm5") = settings.heart_R_A_vis)
+            annotation (Placement(transformation(
+                extent={{-8,-8},{8,8}},
+                rotation=270,
+                origin={60,-48})));
+          Auxiliary.SA_node sa_node annotation (Placement(transformation(
+                  rotation=0, extent={{-88,22},{-68,42}})));
           Auxiliary.TriSegMechanics_components.Driving_Olufsen calciumMechanics(
             D_A=settings.heart_atr_D_A,
             D_A_maxAct=settings.heart_atr_D_A,
@@ -7932,142 +8080,141 @@ Kalecky")}), experiment(
             TS_maxAct=settings.heart_drive_TS_maxAct,
             TS=settings.heart_drive_TS,
             TR=settings.heart_drive_TR)
-            annotation (Placement(transformation(extent={{-88,24},{-68,44}})));
-          Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
-                displayUnit="(dyn.s)/cm5") = settings.heart_R_A_vis)
-            annotation (Placement(transformation(
-                extent={{-10,-10},{10,10}},
-                rotation=270,
-                origin={-42,38})));
-          Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance(
-                displayUnit="(dyn.s)/cm5") = settings.heart_R_A_vis)
-            annotation (Placement(transformation(
-                extent={{-8,-8},{8,8}},
-                rotation=270,
-                origin={50,-20})));
+            annotation (Placement(transformation(extent={{-54,22},{-34,42}})));
         equation
           volume =ra.volume + la.volume + ventricles.V_LV + ventricles.V_RV;
           connect(pulmonaryValve.q_out, pa) annotation (Line(
-              points={{84,56},{92,56},{92,56},{100,56}},
+              points={{70,60},{100,60}},
               color={0,0,0},
               thickness=1));
           connect(aorticValve.q_out, sa) annotation (Line(
-              points={{-80,-34},{-100,-34}},
+              points={{-20,-60},{-100,-60}},
               color={0,0,0},
               thickness=1));
           connect(tricuspidValve.q_in, r_SystemicVenousInflow.q_out) annotation (Line(
-              points={{-32,56},{-52,56}},
+              points={{-6,60},{-68,60}},
               color={0,0,0},
               thickness=1));
           connect(r_SystemicVenousInflow.q_in, sv) annotation (Line(
-              points={{-72,56},{-86,56},{-86,56},{-100,56}},
+              points={{-88,60},{-100,60}},
               color={0,0,0},
               thickness=1));
           connect(mitralValve.q_in, r_PulmonaryVenousInflow.q_out) annotation (Line(
-              points={{40,-34},{60,-34}},
+              points={{50,-60},{70,-60}},
               color={0,0,0},
               thickness=1));
           connect(r_PulmonaryVenousInflow.q_in, pv) annotation (Line(
-              points={{80,-34},{86,-34},{86,-34},{100,-34}},
+              points={{90,-60},{100,-60}},
               color={0,0,0},
               thickness=1));
           connect(tricuspidValve.q_out, pulmonaryValve.q_in) annotation (Line(
-              points={{-12,56},{64,56}},
+              points={{14,60},{50,60}},
               color={0,0,0},
               thickness=1));
           connect(mitralValve.q_out, aorticValve.q_in) annotation (Line(
-              points={{20,-34},{-60,-34}},
+              points={{30,-60},{0,-60}},
               color={0,0,0},
               thickness=1));
-          connect(frequency_input, ventricles.frequency) annotation (Line(points={{-106,0},
-                  {-10,0}},                    color={0,0,127}));
-          connect(HR0.y, ventricles.frequency) annotation (Line(points={{-87,0},
-                  {-10,0}},         color={0,0,127}));
-          connect(aorticValve.cardiac_cycle, ventricles.cardiac_cycle)
-            annotation (Line(points={{-70,-24},{30,-24},{30,0},{10,0}},color={244,125,
-                  35}));
           connect(ventricles.thoracic_pressure_input, P0.y) annotation (Line(
-                points={{0,-10},{0,-81},{8.88178e-16,-81}}, color={162,29,33},
+                points={{4,-20},{4,-81},{8.88178e-16,-81}}, color={162,29,33},
               thickness=0.5));
           connect(ventricles.thoracic_pressure_input, thoracic_pressure_input)
-            annotation (Line(points={{0,-10},{0,-100}}, color={162,29,33},
-              thickness=0.5));
-          connect(ra.thoracic_pressure_input, thoracic_pressure_input)
-            annotation (Line(points={{-32,16},{-24,16},{-24,-56},{0,-56},{0,
-                  -100}},          color={162,29,33},
-              thickness=0.5));
-          connect(la.thoracic_pressure_input, thoracic_pressure_input)
-            annotation (Line(points={{60,0},{70,0},{70,-56},{0,-56},{0,-100}},
-                                                                        color={162,29,
-                  33},
-              thickness=0.5));
-          connect(ra.thoracic_pressure_input, P0.y) annotation (Line(points={{-32,16},
-                  {-24,16},{-24,-56},{0,-56},{0,-81},{8.88178e-16,-81}},
-                         color={162,29,33},
-              thickness=0.5));
-          connect(la.thoracic_pressure_input, P0.y) annotation (Line(points={{60,0},{70,
-                  0},{70,-56},{8.88178e-16,-56},{8.88178e-16,-81}},
-                                                  color={162,29,33},
+            annotation (Line(points={{4,-20},{4,-100},{0,-100}},
+                                                        color={162,29,33},
               thickness=0.5));
           connect(ventricles.port_rv, idealValve_deactivable.q_out) annotation (
              Line(
-              points={{8,4},{12,4},{12,18}},
+              points={{12,-6},{20,-6},{20,0}},
               color={0,0,0},
               thickness=1));
           connect(idealValve_deactivable.q_in, pulmonaryValve.q_in) annotation (
              Line(
-              points={{12,26},{12,56},{64,56}},
+              points={{20,8},{20,60},{50,60}},
               color={0,0,0},
               thickness=1));
           connect(ventricles.port_lv, idealValve_deactivable1.q_out)
             annotation (Line(
-              points={{8,-6},{12,-6},{12,-14}},
+              points={{12,-16},{22,-16},{22,-18}},
               color={0,0,0},
               thickness=1));
           connect(idealValve_deactivable1.q_in, aorticValve.q_in) annotation (
               Line(
-              points={{12,-22},{12,-34},{-60,-34}},
+              points={{22,-26},{22,-60},{0,-60}},
               color={0,0,0},
               thickness=1));
           connect(ventricles.volumeLimiterRV, idealValve_deactivable.ActivateLimiter)
-            annotation (Line(points={{4,10},{4,22},{12,22}},color={255,0,255}));
+            annotation (Line(points={{8,0},{8,4},{20,4}},   color={255,0,255}));
           connect(ventricles.volumeLimiterLV, idealValve_deactivable1.ActivateLimiter)
-            annotation (Line(points={{4,-10},{4,-18},{12,-18}},color={255,0,255}));
-          connect(ventricles.phi_input, phi0.y) annotation (Line(points={{0,10},{
-                  0,78},{-81,78}},  color={0,0,127}));
-          connect(ventricles.phi_input, phi) annotation (Line(points={{0,10},{0,
-                  78},{-100,78}}, color={0,0,127}));
-          connect(mitralValve.cardiac_cycle, ventricles.cardiac_cycle)
-            annotation (Line(points={{30,-24},{30,0},{10,0}}, color={244,125,35}));
-          connect(frequency_input, calciumMechanics.frequency) annotation (Line(points={
-                  {-106,0},{-96,0},{-96,34},{-87,34}}, color={0,0,127}));
-          connect(HR0.y, calciumMechanics.frequency) annotation (Line(points={{-87,0},{-96,
-                  0},{-96,34},{-87,34}}, color={0,0,127}));
-          connect(calciumMechanics.phiInput, phi) annotation (Line(points={{-87,40},
-                  {-92,40},{-92,78},{-100,78}},     color={0,0,127}));
-          connect(calciumMechanics.phiInput, phi0.y) annotation (Line(points={{-87,40},
-                  {-92,40},{-92,78},{-81,78}},         color={0,0,127}));
-          connect(calciumMechanics.D, ra.D) annotation (Line(points={{-67,34},{
-                  -60,34},{-60,16},{-52.4,16}}, color={0,140,72}));
-          connect(calciumMechanics.D, la.D) annotation (Line(points={{-67,34},{
-                  34,34},{34,0},{39.6,0}}, color={0,140,72}));
+            annotation (Line(points={{8,-20},{8,-22},{22,-22}},color={255,0,255}));
+          connect(ventricles.phi_input, phi0.y) annotation (Line(points={{4,0},{4,
+                  80},{-81,80}},    color={0,0,127}));
+          connect(ventricles.phi_input, phi) annotation (Line(points={{4,0},{4,
+                  80},{-100,80}}, color={0,0,127}));
+          connect(frequency_input,sa_node.frequency)           annotation (Line(points={{-106,0},
+                  {-96,0},{-96,32},{-88,32}},          color={0,0,127}));
+          connect(HR0.y,sa_node.frequency)           annotation (Line(points={{-87,0},
+                  {-96,0},{-96,32},{-88,32}},
+                                         color={0,0,127}));
+          connect(sa_node.phiInput,          phi) annotation (Line(points={{-88,38},
+                  {-96,38},{-96,80},{-100,80}},     color={0,0,127}));
+          connect(sa_node.phiInput,          phi0.y) annotation (Line(points={{-88,38},
+                  {-96,38},{-96,80},{-81,80}},         color={0,0,127}));
           connect(ra.port_a, resistor.q_out) annotation (Line(
-              points={{-42,24},{-42,28}},
+              points={{-20,24},{-20,36}},
               color={0,0,0},
               thickness=1));
           connect(resistor.q_in, r_SystemicVenousInflow.q_out) annotation (Line(
-              points={{-42,48},{-42,56},{-52,56}},
+              points={{-20,56},{-20,60},{-68,60}},
               color={0,0,0},
               thickness=1));
           connect(la.port_a, resistor1.q_in) annotation (Line(
-              points={{50,-8},{50,-12}},
+              points={{60,-36},{60,-40}},
               color={0,0,0},
               thickness=1));
           connect(resistor1.q_out, r_PulmonaryVenousInflow.q_out) annotation (
               Line(
-              points={{50,-28},{50,-34},{60,-34}},
+              points={{60,-56},{60,-60},{70,-60}},
               color={0,0,0},
               thickness=1));
+          connect(sa_node.t0, calciumMechanics.t0)
+            annotation (Line(points={{-68,32},{-54,32}}, color={0,0,127}));
+          connect(ventricles.phi_input, calciumMechanics.phiInput) annotation (
+              Line(points={{4,0},{4,80},{-54,80},{-54,40}}, color={0,0,127}));
+          connect(calciumMechanics.D, ra.D) annotation (Line(points={{-33,32},{
+                  0,32},{0,16},{-9.6,16}},    color={0,140,72},
+              thickness=0.5));
+          connect(calciumMechanics.D, la.D) annotation (Line(points={{-33,32},{
+                  78,32},{78,-28},{70.4,-28}}, color={0,140,72},
+              thickness=0.5));
+          connect(sa_node.cardiac_cycle, ventricles.cardiac_cycle) annotation (
+              Line(
+              points={{-68,24},{-66,24},{-66,-20},{-6,-20}},
+              color={244,125,35},
+              thickness=0.5));
+          connect(ventricles.thoracic_pressure_input, la.thoracic_pressure_input)
+            annotation (Line(
+              points={{4,-20},{4,-28},{50,-28}},
+              color={162,29,33},
+              thickness=0.5));
+          connect(ventricles.thoracic_pressure_input, ra.thoracic_pressure_input)
+            annotation (Line(
+              points={{4,-20},{4,-28},{-36,-28},{-36,16},{-30,16}},
+              color={162,29,33},
+              thickness=0.5));
+          connect(ventricles.frequency, sa_node.frequency) annotation (Line(
+                points={{-6,-14},{-96,-14},{-96,32},{-88,32}}, color={0,0,127}));
+          connect(ventricles.t0, calciumMechanics.t0) annotation (Line(points={
+                  {-6,-8},{-60,-8},{-60,32},{-54,32}}, color={0,0,127}));
+          connect(mitralValve.cardiac_cycle, aorticValve.cardiac_cycle)
+            annotation (Line(
+              points={{40,-50},{-10,-50}},
+              color={244,125,35},
+              thickness=0.5));
+          connect(aorticValve.cardiac_cycle, ventricles.cardiac_cycle)
+            annotation (Line(
+              points={{-10,-50},{-66,-50},{-66,-20},{-6,-20}},
+              color={244,125,35},
+              thickness=0.5));
           annotation (Icon(graphics={                       Text(
                   extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
@@ -8094,11 +8241,11 @@ Kalecky")}), experiment(
           extends Heart_TriSegMechanics(
             class_name="Lumens Simple",
             redeclare replaceable
-                      Auxiliary.TriSegMechanics_components.Ventricles_Lumens_Simple ventricles
-              constrainedby
+              Auxiliary.TriSegMechanics_components.Ventricles_Lumens_Simple
+              ventricles constrainedby
               Auxiliary.TriSegMechanics_components.partialVentricles_TS,
             calciumMechanics(
-              t_offset=settings.heart_drive_atr_Tact,
+              t_offset=settings.heart_drive_Tact,
               D_0=settings.heart_drive_atr_D_0,
               D_0_maxAct=settings.heart_drive_atr_D_0));
 
@@ -33844,8 +33991,8 @@ P_hs_plus_dist"),
 
     model CardiovascularSystem
       extends ADAN_main.SystemicTree.Identification.Results.OptimizedValsalva( settings(
-            heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000, heart_drive_atr_Tact=-0.2,
-          baro_fsn=0.03625),
+            heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000,
+          baro_fsn=0.03625,                                   heart_drive_Tact =   -0.2),
           heartComponent(ventricles(calciumMechanics(tau_phi=3)), calciumMechanics(
               tau_phi=0)));
       annotation (__Dymola_Commands(file(ensureSimulated=true)=
@@ -34111,8 +34258,8 @@ P_hs_plus_dist"),
 
         der(brachial_pressure_int) = brachial_pressure;
 
-        when heartComponent.ventricles.cardiac_cycle < 0.1 then
-          brachial_pressure_mean = brachial_pressure_int*pre(heartComponent.ventricles.calciumMechanics.frequency);
+        when heartComponent.sa_node.beat then
+          brachial_pressure_mean = brachial_pressure_int/heartComponent.sa_node.t0_last;
           reinit(brachial_pressure_int, 0);
         end when;
 
@@ -34337,11 +34484,9 @@ P_hs_plus_dist"),
                 LV_wall(ym(start = 3.4414701, fixed = true), SL(start = 2.153967, fixed = true)),
                 SEP_wall(SL(start = 2.1844857, fixed = true)),
                 RV_wall(SL(start = 2.1489136, fixed = true)),
-                calciumMechanics(cardiac_cycle(start = 0.91466665, fixed = true)), V_LV(start = 0.00012848654, fixed = true), V_RV(start = 0.00012449617, fixed = true)),
+                V_LV(start = 0.00012848654, fixed = true), V_RV(start = 0.00012449617, fixed = true)),
               ra(volume(start = 1.3404624e-05, fixed = true), currentWork(start = 0.3296081, fixed = true)),
-              la(volume(start = 5.76426e-05, fixed = true), currentWork(start = 0.08366831, fixed = true)),
-              calciumMechanics(initializeCardiac_cycle=false,
-                               cardiac_cycle(start = 0.91466665 - settings.heart_drive_atr_Tact -1, fixed = true))),
+              la(volume(start = 5.76426e-05, fixed = true), currentWork(start = 0.08366831, fixed = true))),
             pulmonaryComponent(
               c_pa(volume(start = 4.78778e-05, fixed = true)),
               c_pv(volume(start = settings.pulm_V_PV_start, fixed = true))),
@@ -40658,178 +40803,284 @@ P_hs_plus_dist"),
         end Optimized_ss_baro;
 
       model Optimized_ss_baro_init "Steady state initialization from 2020-09-14 10:44:32.920763 at time 179.92"
-        extends ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized5(
+          extends
+            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized5
+            (
             SystemicComponent(
               baroreflex_system(
-                baroreflex(phi_mean(start = 0.24930115, fixed = true), phi(start = 0.25175378, fixed = true)),
-                baroreceptor_aortic(fbr_int(start = 18.098284, fixed = true), epsilon(start = 1.5408921, fixed = true), s(start = 0.80313325, fixed = true)),
-                baroreceptor_carotid(fbr_int(start = 9.969681, fixed = true), epsilon(start = 1.1758231, fixed = true), s(start = 0.8915902, fixed = true))),
-              ascending_aorta_A(q(start = 4.7891126e-06, fixed = true), vol1(start = 7.741325e-06, fixed = true), vol2(start = 7.740929e-06, fixed = true)),
-              ascending_aorta_B(q_in(start = 9.5865125e-06, fixed = true), volume(start = 2.4455125e-05, fixed = true)),
-              ascending_aorta_C(q_in(start = 1.5405387e-05, fixed = true), volume(start = 2.2619479e-05, fixed = true)),
-              ascending_aorta_D(q_in(start = 2.3242754e-05, fixed = true), volume(start = 2.0650332e-05, fixed = true)),
-              aortic_arch_C2(q_in(start = 3.0315494e-05, fixed = true), volume(start = 1.8890645e-05, fixed = true)),
-              brachiocephalic_trunk_C4(q_in(start = -2.751741e-06, fixed = true), volume(start = 1.2878123e-05, fixed = true)),
-              aortic_arch_C46(q_in(start = 3.944277e-05, fixed = true), volume(start = 1.1193709e-05, fixed = true)),
-              aortic_arch_C64(q_in(start = 4.6177294e-05, fixed = true), volume(start = 7.684528e-06, fixed = true)),
-              aortic_arch_C94(q_in(start = 4.6339173e-05, fixed = true), volume(start = 4.21373e-05, fixed = true)),
-              thoracic_aorta_C96(q_in(start = 5.886148e-05, fixed = true), volume(start = 7.570479e-06, fixed = true)),
-              thoracic_aorta_C100(q_in(start = 6.1021252e-05, fixed = true), volume(start = 5.8224477e-06, fixed = true)),
-              thoracic_aorta_C104(q_in(start = 6.26352e-05, fixed = true), volume(start = 1.0967433e-05, fixed = true)),
-              thoracic_aorta_C108(q_in(start = 6.549362e-05, fixed = true), volume(start = 3.6027632e-06, fixed = true)),
-              thoracic_aorta_C112(q_in(start = 6.641022e-05, fixed = true), volume(start = 5.8809717e-05, fixed = true)),
-              abdominal_aorta_C114(q_in(start = 7.069e-05, fixed = true), volume(start = 1.2160663e-06, fixed = true)),
-              abdominal_aorta_C136(q_in(start = 6.039267e-05, fixed = true), volume(start = 5.10137e-06, fixed = true)),
-              abdominal_aorta_C164(q_in(start = 5.334334e-05, fixed = true), volume(start = 1.514121e-06, fixed = true)),
-              abdominal_aorta_C176(q_in(start = 4.406575e-05, fixed = true), volume(start = 4.069545e-06, fixed = true)),
-              abdominal_aorta_C188(q_in(start = 3.495255e-05, fixed = true), volume(start = 1.6246277e-05, fixed = true)),
-              abdominal_aorta_C192(q_in(start = 3.4464385e-05, fixed = true), volume(start = 1.0094919e-05, fixed = true)),
-              celiac_trunk_C116(volume(start = 0.00035894633, fixed = true)),
-              renal_L166(volume(start = 0.00032424013, fixed = true)),
-              renal_R178(volume(start = 0.0003213272, fixed = true)),
-              common_iliac_R216(q_in(start = 1.6922218e-05, fixed = true), volume(start = 8.394215e-06, fixed = true)),
-              internal_iliac_T1_R218(volume(start = 0.00017648032, fixed = true)),
-              external_iliac_R220(q_in(start = 1.0942256e-05, fixed = true), volume(start = 4.840243e-06, fixed = true)),
-              femoral_R222(q_in(start = 1.0466925e-05, fixed = true), volume(start = 1.3855271e-06, fixed = true)),
-              profundus_T2_R224(volume(start = 0.00020239198, fixed = true)),
-              femoral_R226(q_in(start = 4.5208994e-06, fixed = true), volume(start = 1.16122155e-05, fixed = true)),
-              popliteal_R228(q_in(start = 2.4283165e-06, fixed = true), volume(start = 3.5710325e-06, fixed = true)),
-              anterior_tibial_T3_R230(volume(start = 2.6648477e-05, fixed = true)),
-              popliteal_R232(q_in(start = 9.795816e-07, fixed = true), volume(start = 1.8123525e-07, fixed = true)),
-              tibiofibular_trunk_R234(q_in(start = 9.604763e-07, fixed = true), volume(start = 7.368587e-07, fixed = true)),
-              posterior_tibial_T4_R236(volume(start = 2.8990882e-05, fixed = true)),
-              common_iliac_L194(q_in(start = 1.6825268e-05, fixed = true), volume(start = 8.029576e-06, fixed = true)),
-              internal_iliac_T1_L196(volume(start = 0.0001764832, fixed = true)),
-              external_iliac_L198(q_in(start = 1.0910256e-05, fixed = true), volume(start = 4.840974e-06, fixed = true)),
-              femoral_L200(q_in(start = 1.0444083e-05, fixed = true), volume(start = 1.3857408e-06, fixed = true)),
-              profundus_T2_L202(volume(start = 0.00020239464, fixed = true)),
-              femoral_L204(q_in(start = 4.4969865e-06, fixed = true), volume(start = 1.1614383e-05, fixed = true)),
-              popliteal_L206(q_in(start = 2.4235317e-06, fixed = true), volume(start = 3.571652e-06, fixed = true)),
-              anterior_tibial_T3_L208(volume(start = 2.6648788e-05, fixed = true)),
-              popliteal_L210(q_in(start = 9.795235e-07, fixed = true), volume(start = 1.8125257e-07, fixed = true)),
-              tibiofibular_trunk_L212(q_in(start = 9.605702e-07, fixed = true), volume(start = 7.369516e-07, fixed = true)),
-              posterior_tibial_T4_L214(volume(start = 2.8991275e-05, fixed = true)),
-              subclavian_R28(q_in(start = 2.801184e-06, fixed = true), volume(start = 1.9780064e-06, fixed = true)),
-              subclavian_R30(q_in(start = 1.4107255e-06, fixed = true), volume(start = 2.6014345e-06, fixed = true)),
-              axillary_R32(q_in(start = 2.1425049e-06, fixed = true), volume(start = 2.9935559e-06, fixed = true)),
-              brachial_R34(q_in(start = 2.7424371e-06, fixed = true), volume(start = 4.371171e-06, fixed = true)),
-              ulnar_T2_R36(q_in(start = 1.7076428e-06, fixed = true), volume(start = 2.349348e-07, fixed = true)),
-              ulnar_T2_R42(volume(start = 6.0989736e-05, fixed = true)),
-              radial_T1_R44(volume(start = 5.0063023e-05, fixed = true)),
-              subclavian_L66(q_in(start = 2.3535786e-06, fixed = true), volume(start = 4.704757e-06, fixed = true)),
-              subclavian_L78(q_in(start = 1.6464196e-06, fixed = true), volume(start = 1.9308882e-06, fixed = true)),
-              axillary_L80(q_in(start = 2.116359e-06, fixed = true), volume(start = 2.9886035e-06, fixed = true)),
-              brachial_L82(q_in(start = 3.0593862e-06, fixed = true), volume(start = 8.3166725e-07, fixed = true)),
-              ulnar_T2_L84(q_in(start = 1.6932565e-06, fixed = true), volume(start = 2.3472343e-07, fixed = true)),
-              ulnar_T2_L90(volume(start = 6.096195e-05, fixed = true)),
-              radial_T1_L92(volume(start = 5.3059044e-05, fixed = true)),
-              common_carotid_R6_A(q_in(start = -1.2669333e-06, fixed = true), volume(start = 4.8281845e-06, fixed = true)),
-              common_carotid_R6_B(q_in(start = 8.2757936e-07, fixed = true), volume(start = 4.1240546e-06, fixed = true)),
-              common_carotid_R6_C(q_in(start = 2.6473351e-06, fixed = true), volume(start = 3.085043e-06, fixed = true)),
-              internal_carotid_R8_A(q_in(start = 1.8176981e-06, fixed = true), volume(start = 1.2422475e-06, fixed = true)),
-              internal_carotid_R8_B(q_in(start = 2.0452617e-06, fixed = true), volume(start = 7.8761275e-07, fixed = true)),
-              internal_carotid_R8_C(volume(start = 7.226639e-05, fixed = true)),
-              external_carotid_T2_R26(volume(start = 7.25409e-05, fixed = true)),
-              common_carotid_L48_A(q_in(start = -3.0178282e-06, fixed = true), volume(start = 5.2247765e-06, fixed = true)),
-              common_carotid_L48_B(q_in(start = -9.118605e-07, fixed = true), volume(start = 4.59612e-06, fixed = true)),
-              common_carotid_L48_C(q_in(start = 9.799176e-07, fixed = true), volume(start = 4.0847412e-06, fixed = true)),
-              common_carotid_L48_D(q_in(start = 2.678458e-06, fixed = true), volume(start = 3.3103743e-06, fixed = true)),
-              internal_carotid_L50_A(q_in(start = 1.8520627e-06, fixed = true), volume(start = 1.2431815e-06, fixed = true)),
-              internal_carotid_L50_B(q_in(start = 2.0649109e-06, fixed = true), volume(start = 7.881731e-07, fixed = true)),
-              internal_carotid_L50_C(volume(start = 7.22633e-05, fixed = true)),
-              external_carotid_T2_L62(volume(start = 7.2532275e-05, fixed = true)),
-              vertebral_L2(volume(start = 6.668325e-05, fixed = true)),
-              vertebral_R272(volume(start = 6.6695255e-05, fixed = true)),
-              superior_vena_cava_C2(volume(start = 2.1616434e-06, fixed = true)),
-              superior_vena_cava_C88(volume(start = 3.7250738e-06, fixed = true)),
-              inferior_vena_cava_C8(volume(start = 3.2420462e-06, fixed = true)),
-              hepatic_vein_T1_C10(volume(start = 1.2711224e-06, fixed = true)),
-              inferior_vena_cava_C12(volume(start = 8.796935e-06, fixed = true)),
-              inferior_vena_cava_C16(volume(start = 6.918212e-06, fixed = true)),
-              renal_vein_T1_R18(volume(start = 2.0384666e-06, fixed = true)),
-              inferior_vena_cava_C20(volume(start = 4.826637e-07, fixed = true)),
-              renal_vein_T1_L22(volume(start = 1.8011691e-06, fixed = true)),
-              inferior_vena_cava_C24(volume(start = 1.9253397e-05, fixed = true)),
-              common_iliac_vein_L56(volume(start = 4.725373e-06, fixed = true)),
-              common_iliac_vein_R26(volume(start = 4.343311e-06, fixed = true)),
-              external_iliac_vein_R28(volume(start = 6.334687e-07, fixed = true)),
-              internal_iliac_vein_T1_R30(volume(start = 2.7096576e-06, fixed = true)),
-              external_iliac_vein_R32(volume(start = 7.3500237e-06, fixed = true)),
-              femoral_vein_R34(volume(start = 3.1951808e-07, fixed = true)),
-              femoral_vein_R38(volume(start = 2.533166e-06, fixed = true)),
-              profunda_femoris_vein_T2_R40(volume(start = 7.0154774e-06, fixed = true)),
-              femoral_vein_R42(volume(start = 1.7922623e-05, fixed = true)),
-              femoral_vein_R46(volume(start = 9.870693e-07, fixed = true)),
-              popliteal_vein_R48(volume(start = 4.0179275e-06, fixed = true)),
-              anterior_tibial_vein_T4_R50(volume(start = 1.1430095e-06, fixed = true)),
-              popliteal_vein_R52(volume(start = 8.937971e-07, fixed = true)),
-              posterior_tibial_vein_T6_R54(volume(start = 1.7275721e-06, fixed = true)),
-              external_iliac_vein_L58(volume(start = 6.3426654e-07, fixed = true)),
-              internal_iliac_vein_T1_L60(volume(start = 2.7871251e-06, fixed = true)),
-              external_iliac_vein_L62(volume(start = 7.216123e-06, fixed = true)),
-              femoral_vein_L64(volume(start = 3.7354954e-07, fixed = true)),
-              femoral_vein_L68(volume(start = 2.533252e-06, fixed = true)),
-              profunda_femoris_vein_T2_L70(volume(start = 7.0156875e-06, fixed = true)),
-              femoral_vein_L72(volume(start = 1.7923236e-05, fixed = true)),
-              femoral_vein_L76(volume(start = 9.870969e-07, fixed = true)),
-              popliteal_vein_L78(volume(start = 4.0180653e-06, fixed = true)),
-              anterior_tibial_vein_T4_L80(volume(start = 1.1430578e-06, fixed = true)),
-              popliteal_vein_L82(volume(start = 8.938334e-07, fixed = true)),
-              posterior_tibial_vein_T6_L84(volume(start = 1.7276424e-06, fixed = true)),
-              brachiocephalic_vein_R90(volume(start = 4.3799923e-06, fixed = true)),
-              brachiocephalic_vein_L124(volume(start = 8.208929e-06, fixed = true)),
-              vertebral_vein_R92(volume(start = 2.75401e-06, fixed = true)),
-              brachiocephalic_vein_R94(volume(start = 9.929537e-07, fixed = true)),
-              subclavian_vein_R96(volume(start = 4.8281834e-07, fixed = true)),
-              internal_jugular_vein_R122(volume(start = 1.9084135e-05, fixed = true)),
-              external_jugular_vein_R98(volume(start = 1.3387258e-06, fixed = true)),
-              subclavian_vein_R100(volume(start = 1.9747608e-06, fixed = true)),
-              axillary_vein_R102(volume(start = 6.9405933e-06, fixed = true)),
-              brachial_vein_R104(volume(start = 1.3609908e-06, fixed = true)),
-              brachial_vein_R114(volume(start = 1.22317e-06, fixed = true)),
-              brachial_vein_R108(volume(start = 1.8800257e-07, fixed = true)),
-              ulnar_vein_T7_R110(volume(start = 1.5671646e-06, fixed = true)),
-              brachial_vein_R118(volume(start = 1.1817549e-07, fixed = true)),
-              radial_vein_T3_R120(volume(start = 9.889869e-07, fixed = true)),
-              vertebral_vein_L126(volume(start = 2.5753711e-06, fixed = true)),
-              brachiocephalic_vein_L128(volume(start = 5.018355e-07, fixed = true)),
-              subclavian_vein_L130(volume(start = 4.2939462e-07, fixed = true)),
-              internal_jugular_vein_L156(volume(start = 1.1585479e-05, fixed = true)),
-              external_jugular_vein_L132(volume(start = 1.3127751e-06, fixed = true)),
-              subclavian_vein_L134(volume(start = 1.924739e-06, fixed = true)),
-              axillary_vein_L136(volume(start = 7.0202304e-06, fixed = true)),
-              brachial_vein_L138(q_out(start = 2.2906886e-06, fixed = true), volume(start = 1.3534399e-06, fixed = true)),
-              brachial_vein_L148(volume(start = 1.2252591e-06, fixed = true)),
-              brachial_vein_L142(volume(start = 1.8700365e-07, fixed = true)),
-              ulnar_vein_T7_L144(volume(start = 1.563212e-06, fixed = true)),
-              brachial_vein_L152(volume(start = 1.1839537e-07, fixed = true)),
-              radial_vein_T3_L154(volume(start = 9.96403e-07, fixed = true)),
-              mesenteric_artery(q_in(start = 7.315994e-06, fixed = true), volume(start = 6.354152e-06, fixed = true)),
-              splanchnic_tissue(volume(start = 0.0002603238, fixed = true)),
-              splanchnic_vein(volume(start = 1.0594096e-05, fixed = true)),
-              coronary_arteries(q_in(start = 2.7237734e-06, fixed = true), volume(start = 3.6808633e-08, fixed = true)),
-              cardiac_tissue(volume(start = 0.0001177309, fixed = true)),
-              coronary_veins(volume(start = 2.386533e-08, fixed = true)),
-              brachial_L82_HeartLevel(q_in(start = 2.655711e-06, fixed = true), volume(start = 3.5419416e-06, fixed = true))),
+                baroreflex(phi_mean(start=0.24930115, fixed=true), phi(start=
+                        0.25175378, fixed=true)),
+                baroreceptor_aortic(
+                  fbr_int(start=18.098284, fixed=true),
+                  epsilon(start=1.5408921, fixed=true),
+                  s(start=0.80313325, fixed=true)),
+                baroreceptor_carotid(
+                  fbr_int(start=9.969681, fixed=true),
+                  epsilon(start=1.1758231, fixed=true),
+                  s(start=0.8915902, fixed=true))),
+              ascending_aorta_A(
+                q(start=4.7891126e-06, fixed=true),
+                vol1(start=7.741325e-06, fixed=true),
+                vol2(start=7.740929e-06, fixed=true)),
+              ascending_aorta_B(q_in(start=9.5865125e-06, fixed=true), volume(
+                    start=2.4455125e-05, fixed=true)),
+              ascending_aorta_C(q_in(start=1.5405387e-05, fixed=true), volume(
+                    start=2.2619479e-05, fixed=true)),
+              ascending_aorta_D(q_in(start=2.3242754e-05, fixed=true), volume(
+                    start=2.0650332e-05, fixed=true)),
+              aortic_arch_C2(q_in(start=3.0315494e-05, fixed=true), volume(
+                    start=1.8890645e-05, fixed=true)),
+              brachiocephalic_trunk_C4(q_in(start=-2.751741e-06, fixed=true),
+                  volume(start=1.2878123e-05, fixed=true)),
+              aortic_arch_C46(q_in(start=3.944277e-05, fixed=true), volume(
+                    start=1.1193709e-05, fixed=true)),
+              aortic_arch_C64(q_in(start=4.6177294e-05, fixed=true), volume(
+                    start=7.684528e-06, fixed=true)),
+              aortic_arch_C94(q_in(start=4.6339173e-05, fixed=true), volume(
+                    start=4.21373e-05, fixed=true)),
+              thoracic_aorta_C96(q_in(start=5.886148e-05, fixed=true), volume(
+                    start=7.570479e-06, fixed=true)),
+              thoracic_aorta_C100(q_in(start=6.1021252e-05, fixed=true), volume(
+                    start=5.8224477e-06, fixed=true)),
+              thoracic_aorta_C104(q_in(start=6.26352e-05, fixed=true), volume(
+                    start=1.0967433e-05, fixed=true)),
+              thoracic_aorta_C108(q_in(start=6.549362e-05, fixed=true), volume(
+                    start=3.6027632e-06, fixed=true)),
+              thoracic_aorta_C112(q_in(start=6.641022e-05, fixed=true), volume(
+                    start=5.8809717e-05, fixed=true)),
+              abdominal_aorta_C114(q_in(start=7.069e-05, fixed=true), volume(
+                    start=1.2160663e-06, fixed=true)),
+              abdominal_aorta_C136(q_in(start=6.039267e-05, fixed=true), volume(
+                    start=5.10137e-06, fixed=true)),
+              abdominal_aorta_C164(q_in(start=5.334334e-05, fixed=true), volume(
+                    start=1.514121e-06, fixed=true)),
+              abdominal_aorta_C176(q_in(start=4.406575e-05, fixed=true), volume(
+                    start=4.069545e-06, fixed=true)),
+              abdominal_aorta_C188(q_in(start=3.495255e-05, fixed=true), volume(
+                    start=1.6246277e-05, fixed=true)),
+              abdominal_aorta_C192(q_in(start=3.4464385e-05, fixed=true),
+                  volume(start=1.0094919e-05, fixed=true)),
+              celiac_trunk_C116(volume(start=0.00035894633, fixed=true)),
+              renal_L166(volume(start=0.00032424013, fixed=true)),
+              renal_R178(volume(start=0.0003213272, fixed=true)),
+              common_iliac_R216(q_in(start=1.6922218e-05, fixed=true), volume(
+                    start=8.394215e-06, fixed=true)),
+              internal_iliac_T1_R218(volume(start=0.00017648032, fixed=true)),
+              external_iliac_R220(q_in(start=1.0942256e-05, fixed=true), volume(
+                    start=4.840243e-06, fixed=true)),
+              femoral_R222(q_in(start=1.0466925e-05, fixed=true), volume(start=
+                      1.3855271e-06, fixed=true)),
+              profundus_T2_R224(volume(start=0.00020239198, fixed=true)),
+              femoral_R226(q_in(start=4.5208994e-06, fixed=true), volume(start=
+                      1.16122155e-05, fixed=true)),
+              popliteal_R228(q_in(start=2.4283165e-06, fixed=true), volume(
+                    start=3.5710325e-06, fixed=true)),
+              anterior_tibial_T3_R230(volume(start=2.6648477e-05, fixed=true)),
+
+              popliteal_R232(q_in(start=9.795816e-07, fixed=true), volume(start
+                    =1.8123525e-07, fixed=true)),
+              tibiofibular_trunk_R234(q_in(start=9.604763e-07, fixed=true),
+                  volume(start=7.368587e-07, fixed=true)),
+              posterior_tibial_T4_R236(volume(start=2.8990882e-05, fixed=true)),
+
+              common_iliac_L194(q_in(start=1.6825268e-05, fixed=true), volume(
+                    start=8.029576e-06, fixed=true)),
+              internal_iliac_T1_L196(volume(start=0.0001764832, fixed=true)),
+              external_iliac_L198(q_in(start=1.0910256e-05, fixed=true), volume(
+                    start=4.840974e-06, fixed=true)),
+              femoral_L200(q_in(start=1.0444083e-05, fixed=true), volume(start=
+                      1.3857408e-06, fixed=true)),
+              profundus_T2_L202(volume(start=0.00020239464, fixed=true)),
+              femoral_L204(q_in(start=4.4969865e-06, fixed=true), volume(start=
+                      1.1614383e-05, fixed=true)),
+              popliteal_L206(q_in(start=2.4235317e-06, fixed=true), volume(
+                    start=3.571652e-06, fixed=true)),
+              anterior_tibial_T3_L208(volume(start=2.6648788e-05, fixed=true)),
+
+              popliteal_L210(q_in(start=9.795235e-07, fixed=true), volume(start
+                    =1.8125257e-07, fixed=true)),
+              tibiofibular_trunk_L212(q_in(start=9.605702e-07, fixed=true),
+                  volume(start=7.369516e-07, fixed=true)),
+              posterior_tibial_T4_L214(volume(start=2.8991275e-05, fixed=true)),
+
+              subclavian_R28(q_in(start=2.801184e-06, fixed=true), volume(start
+                    =1.9780064e-06, fixed=true)),
+              subclavian_R30(q_in(start=1.4107255e-06, fixed=true), volume(
+                    start=2.6014345e-06, fixed=true)),
+              axillary_R32(q_in(start=2.1425049e-06, fixed=true), volume(start=
+                      2.9935559e-06, fixed=true)),
+              brachial_R34(q_in(start=2.7424371e-06, fixed=true), volume(start=
+                      4.371171e-06, fixed=true)),
+              ulnar_T2_R36(q_in(start=1.7076428e-06, fixed=true), volume(start=
+                      2.349348e-07, fixed=true)),
+              ulnar_T2_R42(volume(start=6.0989736e-05, fixed=true)),
+              radial_T1_R44(volume(start=5.0063023e-05, fixed=true)),
+              subclavian_L66(q_in(start=2.3535786e-06, fixed=true), volume(
+                    start=4.704757e-06, fixed=true)),
+              subclavian_L78(q_in(start=1.6464196e-06, fixed=true), volume(
+                    start=1.9308882e-06, fixed=true)),
+              axillary_L80(q_in(start=2.116359e-06, fixed=true), volume(start=
+                      2.9886035e-06, fixed=true)),
+              brachial_L82(q_in(start=3.0593862e-06, fixed=true), volume(start=
+                      8.3166725e-07, fixed=true)),
+              ulnar_T2_L84(q_in(start=1.6932565e-06, fixed=true), volume(start=
+                      2.3472343e-07, fixed=true)),
+              ulnar_T2_L90(volume(start=6.096195e-05, fixed=true)),
+              radial_T1_L92(volume(start=5.3059044e-05, fixed=true)),
+              common_carotid_R6_A(q_in(start=-1.2669333e-06, fixed=true),
+                  volume(start=4.8281845e-06, fixed=true)),
+              common_carotid_R6_B(q_in(start=8.2757936e-07, fixed=true), volume(
+                    start=4.1240546e-06, fixed=true)),
+              common_carotid_R6_C(q_in(start=2.6473351e-06, fixed=true), volume(
+                    start=3.085043e-06, fixed=true)),
+              internal_carotid_R8_A(q_in(start=1.8176981e-06, fixed=true),
+                  volume(start=1.2422475e-06, fixed=true)),
+              internal_carotid_R8_B(q_in(start=2.0452617e-06, fixed=true),
+                  volume(start=7.8761275e-07, fixed=true)),
+              internal_carotid_R8_C(volume(start=7.226639e-05, fixed=true)),
+              external_carotid_T2_R26(volume(start=7.25409e-05, fixed=true)),
+              common_carotid_L48_A(q_in(start=-3.0178282e-06, fixed=true),
+                  volume(start=5.2247765e-06, fixed=true)),
+              common_carotid_L48_B(q_in(start=-9.118605e-07, fixed=true),
+                  volume(start=4.59612e-06, fixed=true)),
+              common_carotid_L48_C(q_in(start=9.799176e-07, fixed=true), volume(
+                    start=4.0847412e-06, fixed=true)),
+              common_carotid_L48_D(q_in(start=2.678458e-06, fixed=true), volume(
+                    start=3.3103743e-06, fixed=true)),
+              internal_carotid_L50_A(q_in(start=1.8520627e-06, fixed=true),
+                  volume(start=1.2431815e-06, fixed=true)),
+              internal_carotid_L50_B(q_in(start=2.0649109e-06, fixed=true),
+                  volume(start=7.881731e-07, fixed=true)),
+              internal_carotid_L50_C(volume(start=7.22633e-05, fixed=true)),
+              external_carotid_T2_L62(volume(start=7.2532275e-05, fixed=true)),
+
+              vertebral_L2(volume(start=6.668325e-05, fixed=true)),
+              vertebral_R272(volume(start=6.6695255e-05, fixed=true)),
+              superior_vena_cava_C2(volume(start=2.1616434e-06, fixed=true)),
+              superior_vena_cava_C88(volume(start=3.7250738e-06, fixed=true)),
+              inferior_vena_cava_C8(volume(start=3.2420462e-06, fixed=true)),
+              hepatic_vein_T1_C10(volume(start=1.2711224e-06, fixed=true)),
+              inferior_vena_cava_C12(volume(start=8.796935e-06, fixed=true)),
+              inferior_vena_cava_C16(volume(start=6.918212e-06, fixed=true)),
+              renal_vein_T1_R18(volume(start=2.0384666e-06, fixed=true)),
+              inferior_vena_cava_C20(volume(start=4.826637e-07, fixed=true)),
+              renal_vein_T1_L22(volume(start=1.8011691e-06, fixed=true)),
+              inferior_vena_cava_C24(volume(start=1.9253397e-05, fixed=true)),
+              common_iliac_vein_L56(volume(start=4.725373e-06, fixed=true)),
+              common_iliac_vein_R26(volume(start=4.343311e-06, fixed=true)),
+              external_iliac_vein_R28(volume(start=6.334687e-07, fixed=true)),
+              internal_iliac_vein_T1_R30(volume(start=2.7096576e-06, fixed=true)),
+
+              external_iliac_vein_R32(volume(start=7.3500237e-06, fixed=true)),
+
+              femoral_vein_R34(volume(start=3.1951808e-07, fixed=true)),
+              femoral_vein_R38(volume(start=2.533166e-06, fixed=true)),
+              profunda_femoris_vein_T2_R40(volume(start=7.0154774e-06, fixed=
+                      true)),
+              femoral_vein_R42(volume(start=1.7922623e-05, fixed=true)),
+              femoral_vein_R46(volume(start=9.870693e-07, fixed=true)),
+              popliteal_vein_R48(volume(start=4.0179275e-06, fixed=true)),
+              anterior_tibial_vein_T4_R50(volume(start=1.1430095e-06, fixed=
+                      true)),
+              popliteal_vein_R52(volume(start=8.937971e-07, fixed=true)),
+              posterior_tibial_vein_T6_R54(volume(start=1.7275721e-06, fixed=
+                      true)),
+              external_iliac_vein_L58(volume(start=6.3426654e-07, fixed=true)),
+
+              internal_iliac_vein_T1_L60(volume(start=2.7871251e-06, fixed=true)),
+
+              external_iliac_vein_L62(volume(start=7.216123e-06, fixed=true)),
+              femoral_vein_L64(volume(start=3.7354954e-07, fixed=true)),
+              femoral_vein_L68(volume(start=2.533252e-06, fixed=true)),
+              profunda_femoris_vein_T2_L70(volume(start=7.0156875e-06, fixed=
+                      true)),
+              femoral_vein_L72(volume(start=1.7923236e-05, fixed=true)),
+              femoral_vein_L76(volume(start=9.870969e-07, fixed=true)),
+              popliteal_vein_L78(volume(start=4.0180653e-06, fixed=true)),
+              anterior_tibial_vein_T4_L80(volume(start=1.1430578e-06, fixed=
+                      true)),
+              popliteal_vein_L82(volume(start=8.938334e-07, fixed=true)),
+              posterior_tibial_vein_T6_L84(volume(start=1.7276424e-06, fixed=
+                      true)),
+              brachiocephalic_vein_R90(volume(start=4.3799923e-06, fixed=true)),
+
+              brachiocephalic_vein_L124(volume(start=8.208929e-06, fixed=true)),
+
+              vertebral_vein_R92(volume(start=2.75401e-06, fixed=true)),
+              brachiocephalic_vein_R94(volume(start=9.929537e-07, fixed=true)),
+
+              subclavian_vein_R96(volume(start=4.8281834e-07, fixed=true)),
+              internal_jugular_vein_R122(volume(start=1.9084135e-05, fixed=true)),
+
+              external_jugular_vein_R98(volume(start=1.3387258e-06, fixed=true)),
+
+              subclavian_vein_R100(volume(start=1.9747608e-06, fixed=true)),
+              axillary_vein_R102(volume(start=6.9405933e-06, fixed=true)),
+              brachial_vein_R104(volume(start=1.3609908e-06, fixed=true)),
+              brachial_vein_R114(volume(start=1.22317e-06, fixed=true)),
+              brachial_vein_R108(volume(start=1.8800257e-07, fixed=true)),
+              ulnar_vein_T7_R110(volume(start=1.5671646e-06, fixed=true)),
+              brachial_vein_R118(volume(start=1.1817549e-07, fixed=true)),
+              radial_vein_T3_R120(volume(start=9.889869e-07, fixed=true)),
+              vertebral_vein_L126(volume(start=2.5753711e-06, fixed=true)),
+              brachiocephalic_vein_L128(volume(start=5.018355e-07, fixed=true)),
+
+              subclavian_vein_L130(volume(start=4.2939462e-07, fixed=true)),
+              internal_jugular_vein_L156(volume(start=1.1585479e-05, fixed=true)),
+
+              external_jugular_vein_L132(volume(start=1.3127751e-06, fixed=true)),
+
+              subclavian_vein_L134(volume(start=1.924739e-06, fixed=true)),
+              axillary_vein_L136(volume(start=7.0202304e-06, fixed=true)),
+              brachial_vein_L138(q_out(start=2.2906886e-06, fixed=true), volume(
+                    start=1.3534399e-06, fixed=true)),
+              brachial_vein_L148(volume(start=1.2252591e-06, fixed=true)),
+              brachial_vein_L142(volume(start=1.8700365e-07, fixed=true)),
+              ulnar_vein_T7_L144(volume(start=1.563212e-06, fixed=true)),
+              brachial_vein_L152(volume(start=1.1839537e-07, fixed=true)),
+              radial_vein_T3_L154(volume(start=9.96403e-07, fixed=true)),
+              mesenteric_artery(q_in(start=7.315994e-06, fixed=true), volume(
+                    start=6.354152e-06, fixed=true)),
+              splanchnic_tissue(volume(start=0.0002603238, fixed=true)),
+              splanchnic_vein(volume(start=1.0594096e-05, fixed=true)),
+              coronary_arteries(q_in(start=2.7237734e-06, fixed=true), volume(
+                    start=3.6808633e-08, fixed=true)),
+              cardiac_tissue(volume(start=0.0001177309, fixed=true)),
+              coronary_veins(volume(start=2.386533e-08, fixed=true)),
+              brachial_L82_HeartLevel(q_in(start=2.655711e-06, fixed=true),
+                  volume(start=3.5419416e-06, fixed=true))),
             heartComponent(
-              tricuspidValve(open(start = true, fixed = true)),
-              pulmonaryValve(open(start = false, fixed = true)),
-              mitralValve(open(start = true, fixed = true), BP_max(start = 0.0, fixed = true), BP_min(start = 39996.0, fixed = true), CO_acc(start = 0.0, fixed = true)),
-              aorticValve(open(start = false, fixed = true), BP_max(start = 15132.825, fixed = true), BP_min(start = 11252.298, fixed = true), CO_acc(start = 8.998715e-05, fixed = true)),
+              tricuspidValve(open(start=true, fixed=true)),
+              pulmonaryValve(open(start=false, fixed=true)),
+              mitralValve(
+                open(start=true, fixed=true),
+                BP_max(start=0.0, fixed=true),
+                BP_min(start=39996.0, fixed=true),
+                CO_acc(start=0.0, fixed=true)),
+              aorticValve(
+                open(start=false, fixed=true),
+                BP_max(start=15132.825, fixed=true),
+                BP_min(start=11252.298, fixed=true),
+                CO_acc(start=8.998715e-05, fixed=true)),
               ventricles(
-                LV_wall(ym(start = 3.4414701, fixed = true), SL(start = 2.153967, fixed = true)),
-                SEP_wall(SL(start = 2.1844857, fixed = true)),
-                RV_wall(SL(start = 2.1489136, fixed = true)),
-                calciumMechanics(cardiac_cycle(start = 0.91466665, fixed = true)), V_LV(start = 0.00012848654, fixed = true), V_RV(start = 0.00012449617, fixed = true)),
-              ra(volume(start = 1.3404624e-05, fixed = true), currentWork(start = 0.3296081, fixed = true)),
-              la(volume(start = 5.76426e-05, fixed = true), currentWork(start = 0.08366831, fixed = true)),
-              calciumMechanics(initializeCardiac_cycle=false,
-                               cardiac_cycle(start = 0.91466665 - settings.heart_drive_atr_Tact -1, fixed = true))),
-            pulmonaryComponent(
-              c_pa(volume(start = 4.78778e-05, fixed = true)),
-              c_pv(volume(start = 0.002200931, fixed = true))),
+                LV_wall(ym(start=3.4414701, fixed=true), SL(start=2.153967,
+                      fixed=true)),
+                SEP_wall(SL(start=2.1844857, fixed=true)),
+                RV_wall(SL(start=2.1489136, fixed=true)),
+                calciumMechanics(cardiac_cycle(start=0.91466665, fixed=true)),
+                V_LV(start=0.00012848654, fixed=true),
+                V_RV(start=0.00012449617, fixed=true)),
+              ra(volume(start=1.3404624e-05, fixed=true), currentWork(start=
+                      0.3296081, fixed=true)),
+              la(volume(start=5.76426e-05, fixed=true), currentWork(start=
+                      0.08366831, fixed=true)),
+              calciumMechanics(initializeCardiac_cycle=false, cardiac_cycle(
+                    start=0.91466665 - settings.heart_drive_Tact - 1, fixed=
+                      true))),
+            pulmonaryComponent(c_pa(volume(start=4.78778e-05, fixed=true)),
+                c_pv(volume(start=0.002200931, fixed=true))),
             useAutonomousPhi(y=false),
-          settings(baro_fsn(displayUnit="Hz") = 0.03272));
+            settings(baro_fsn(displayUnit="Hz") = 0.03272));
           annotation (experiment(
               StopTime=60,
               Interval=0.005,
@@ -42538,9 +42789,14 @@ P_hs_plus_dist"),
           condTP_PC(disconnected=false),
           condTP_IP(disconnected=false),
           condTP_EP1(disconnected=false),
-          settings(heart_drive_TR_maxAct(displayUnit="s"), syst_abd_P_th_ratio=
-                0.8),
-          heartComponent(ventricles(calciumMechanics(tau_phi=0))));
+          settings(
+            V_PV_init=5e-05,
+            heart_R_vlv(displayUnit="(dyn.s)/cm5") = 500000,
+                   heart_drive_TR_maxAct(displayUnit="s"),
+            heart_drive_Tact=0.2,
+            syst_abd_P_th_ratio=0.8),
+          heartComponent(ventricles(calciumMechanics(tau_phi=0))),
+          condHeartPhi(uMin=settings.phi0));
         annotation (experiment(
             StopTime=60,
             Interval=0.01,
