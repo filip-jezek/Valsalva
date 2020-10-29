@@ -120,13 +120,13 @@ class ObjectiveVar:
         if self.costFunctionType is CostFunctionType.DistanceFromZero:
             target = "%d" % 0
         elif self.targetValue  is not None:
-            target = "%.3e" % self.targetValue
+            target = "%.3g" % self.targetValue
         elif self.limit is not None:
             if self.value < self.limit[1]:
                 # lower than upper bound - print the lower one
-                target = '>%0.3f' % self.limit[0]
+                target = '>%0.3g' % self.limit[0]
             else: # self.value >
-                target = '<%0.3f' %self.limit[1]
+                target = '<%0.3g' %self.limit[1]
                 # target = ' in limit' if self.inLimit() else 'out limit'
         else:
             target = ' ??wat?? '
@@ -134,7 +134,7 @@ class ObjectiveVar:
         return target.ljust(9)
 
     def __repr__(self):
-        return '%s,%.3e,%s' % (self.name, self.value, self.target_log())
+        return '%s,%.3g,%s' % (self.name, self.value, self.target_log())
 
     def cost_to_base_comparisson(self) -> float:
         c = self.cost()
@@ -148,7 +148,7 @@ class ObjectiveVar:
             # improbable :)
             return '-Inf'
         else:
-            return '%+0.0f' % ((self.cost() - self.base_cost)/self.base_cost*100)
+            return '%+0.0g' % ((self.cost() - self.base_cost)/self.base_cost*100)
 
 
 def getObjectiveByName(objective_iterable, name) -> ObjectiveVar:
@@ -246,11 +246,20 @@ def calculateQdot_mv(v_lv, q_mv, time, interval):
 
     # atrial kick fraction as a fractions of volumes
     atrial_kick_fraction = (EDV - V_LV_passive)/(EDV - ESV)
+    q_mv_saddle = q_mv[t_q_mv_saddle_i]
 
-    print('Atrial kick %d%%, timings: ESV %dml at %.2fs, passive %dml at %.2fs, EDV %dml at %.2fs' % 
-        (round(atrial_kick_fraction*100), round(v_lv[t_ES_i]*1e6), time[t_ES_i], round(v_lv[t_q_mv_saddle_i]*1e6), time[t_q_mv_saddle_i], round(v_lv[t_ED_i]*1e6), time[t_ED_i]))
 
-    return atrial_kick_fraction
+    print('Atrial kick %d%% from %1.2e m3/s, timings: ESV %dml at %.2fs, passive %dml at %.2fs, EDV %dml at %.2fs' % 
+        (round(atrial_kick_fraction*100), 
+        q_mv_saddle,
+        round(v_lv[t_ES_i]*1e6), 
+        time[t_ES_i], 
+        round(v_lv[t_q_mv_saddle_i]*1e6), 
+        time[t_q_mv_saddle_i], 
+        round(v_lv[t_ED_i]*1e6), 
+        time[t_ED_i]))
+
+    return (atrial_kick_fraction, q_mv_saddle)
 
 
 

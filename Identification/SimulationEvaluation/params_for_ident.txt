@@ -1,7 +1,6 @@
 # name, value, [min, max, step]
 settings.heart_R_vlv,500000.0,5000.0,1000000.0,25000.0
 settings.heart_R_LA,3293500.0,1650000.0,50000000.0,50000.0
-settings.heart_I_A,10678.0,5339.0,16017.0,533.9
 settings.heart_drive_D_0,26.59375,13.296875,39.890625,1.0
 settings.heart_drive_D_A,1377.187,688.5935,2065.7805,50.0
 settings.heart_drive_Tact,0.2,0.1,0.3,0.01
