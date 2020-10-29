@@ -49,7 +49,7 @@ class ObjectiveVar:
         self.limit = limit if limit is not None else [-math.inf, math.inf]
         self.weight = weight
         # self.costLimit = -1 # unlimited costs
-        self.k_p = k_p # multiplier for out ouf limit values
+        self.k_p = k_p # penalty multiplier for out ouf limit values
         self.costFunctionType = costFunctionType
         # standard deviation
         self.std = std
@@ -126,7 +126,7 @@ class ObjectiveVar:
                 # lower than upper bound - print the lower one
                 target = '>%0.3f' % self.limit[0]
             else: # self.value >
-                target = '<%0.3f' %self.limit[0]
+                target = '<%0.3f' %self.limit[1]
                 # target = ' in limit' if self.inLimit() else 'out limit'
         else:
             target = ' ??wat?? '
@@ -218,6 +218,42 @@ def calculateEF(volumes):
     esv = min(volumes)
     edv = max(volumes)
     return (edv - esv)/edv
+
+def calculateQdot_mv(v_lv, q_mv, time, interval):
+
+    # find the v_lv min in first half of the interval
+    half_interval = range(interval[0], int((interval[-1] - interval[0])/2 + interval[0]))
+    # end systolic time index
+    t_ES_i = numpy.argmin(v_lv[half_interval]) + half_interval[0]
+    ESV = v_lv[t_ES_i]
+
+    # difference in the flow - positive for increasing flow rate, negative for decreasing flow
+    dq_mv = numpy.diff(q_mv)
+
+    # find the index of just after first mitral flow peak - i.e. the first occurence of slowing the flow down.
+    # ignore zero, as this might mean an event
+    t_q_mv_peak1_i = next(i for  i, v in enumerate(dq_mv[t_ES_i:]) if v < 0) + t_ES_i
+
+    # from t_q_mv_peak1 find first increase in rate of flow - thats the beginning of the atrial kick
+    t_q_mv_saddle_i = next(i for  i, v in enumerate(dq_mv[t_q_mv_peak1_i:]) if v > 0) + t_q_mv_peak1_i
+
+    # and thats the pre-atrial-kick volume we are interested in
+    V_LV_passive = v_lv[t_q_mv_saddle_i]
+
+    # find EDV time index as first zero or negative mitral flow AFTER the first peak
+    t_ED_i = next(i for  i, v in enumerate(q_mv[t_q_mv_peak1_i:]) if v <= 0) + t_q_mv_peak1_i
+    EDV = v_lv[t_ED_i]
+
+    # atrial kick fraction as a fractions of volumes
+    atrial_kick_fraction = (EDV - V_LV_passive)/(EDV - ESV)
+
+    print('Atrial kick %d%%, timings: ESV %dml at %.2fs, passive %dml at %.2fs, EDV %dml at %.2fs' % 
+        (round(atrial_kick_fraction*100), round(v_lv[t_ES_i]*1e6), time[t_ES_i], round(v_lv[t_q_mv_saddle_i]*1e6), time[t_q_mv_saddle_i], round(v_lv[t_ED_i]*1e6), time[t_ED_i]))
+
+    return atrial_kick_fraction
+
+
+
 
 def calculateQ_MV(q, time, interval):
     """ Returns a fraction of passive and atrial active(second bump) heart filling rate
@@ -491,7 +527,7 @@ def writeToFile(filename, time:Iterable, signal:Iterable):
     
     print("Written to %s, mate" % filename)
 
-def logObjectives(objectivesLog_path, objectives, sortBy = 'cost', compare_to_log_path = None):
+def logObjectives(objectivesLog_path, objectives, sortBy = 'cost', compare_to_log_path = None, printToStdin=False):
     if compare_to_log_path is not None:
         with open(compare_to_log_path) as file:
             for line in file.readlines():
@@ -514,7 +550,10 @@ def logObjectives(objectivesLog_path, objectives, sortBy = 'cost', compare_to_lo
             header_names = 'Name'.ljust(max_name_len)
 
 
-            file.write('%s, value    , target   , cost     ,%% tot, [%% base costs], total = %.6e\n' % (header_names, total_cost))
+            header = '%s, value    , target   , cost     ,%% tot, [%% base costs], total = %.6e\n' % (header_names, total_cost)
+            file.write(header)
+            if printToStdin:
+                print(header)
 
             def sortedObjectives() -> Iterable[ObjectiveVar]:
                 if sortBy == 'costs':
@@ -527,3 +566,5 @@ def logObjectives(objectivesLog_path, objectives, sortBy = 'cost', compare_to_lo
             for o in sortedObjectives():
                 s = '%s,%.3e ,%s ,%.3e , %02.0f  , %s\n' % (o.name.ljust(max_name_len), o.value, o.target_log(), o.cost(), round(o.cost()/total_cost*100), o.cost_to_base_comparisson())
                 file.write(s)
+                if printToStdin:
+                    print(s)

@@ -320,7 +320,7 @@ def createDsinTemplate(keys, dsFileIn = 'dsin.txt', dsFileOut = 'dsinTemplate.tx
     template_mapping = getTemplateMapping(keys)
     
     # dicSim = {'StartTime': 0,'StopTime': 100}
-    dicSim = {}
+    dicSim = {'levent': 0}
     # dicVars = {'m_flow': 10}
 
     create_dsinORfinal(dicSim, template_mapping, dsFileIn=dsFileIn, dsFileOut=dsFileOut)
@@ -352,32 +352,34 @@ OptimizationSettings{
   MaxEqualResults = 4;
   WriteStepNumber = false;
   UnitsOfExecution = 4;
-}
-
-Algorithm{
-  Main = GPSPSOCCHJ;
-  NeighborhoodTopology = vonNeumann;
-  NeighborhoodSize = 5;
-  NumberOfParticle = 16;
-  NumberOfGeneration = 20;
-  Seed = 1;
-  CognitiveAcceleration = 2.8;
-  SocialAcceleration = 1.3;
-  MaxVelocityGainContinuous = 0.5;
-  MaxVelocityDiscrete = 4;
-  ConstrictionGain = 0.5;
-  MeshSizeDivider = 2;
-  InitialMeshSizeExponent = 0;
-  MeshSizeExponentIncrement = 1;
-  NumberOfStepReduction = 4;
-}""" )
+}\n""")
+            # file.write("""\n
 # Algorithm{
-#  Main = GPSHookeJeeves;
-#  MeshSizeDivider = 2;
-#  InitialMeshSizeExponent = 0;
-#  MeshSizeExponentIncrement = 1;
-#  NumberOfStepReduction = 6;
+#   Main = GPSPSOCCHJ;
+#   NeighborhoodTopology = vonNeumann;
+#   NeighborhoodSize = 5;
+#   NumberOfParticle = 16;
+#   NumberOfGeneration = 20;
+#   Seed = 1;
+#   CognitiveAcceleration = 2.8;
+#   SocialAcceleration = 1.3;
+#   MaxVelocityGainContinuous = 0.5;
+#   MaxVelocityDiscrete = 4;
+#   ConstrictionGain = 0.5;
+#   MeshSizeDivider = 2;
+#   InitialMeshSizeExponent = 0;
+#   MeshSizeExponentIncrement = 1;
+#   NumberOfStepReduction = 4;
 # }""" )
+
+            file.write("""\n
+ Algorithm{
+ Main = GPSHookeJeeves;
+ MeshSizeDivider = 2;
+ InitialMeshSizeExponent = 0;
+ MeshSizeExponentIncrement = 1;
+ NumberOfStepReduction = 6;
+}""" )
             # jsut to get back at proper  indent
             pass
 

@@ -59,17 +59,17 @@ def getObjectives(vars_set):
     lpm2SI = 1e-3/60
     bpm2SI = 1/60
 
-    BPs_target = 120*mmHg2SI
-    BPd_target = 80*mmHg2SI
-    BPk_target = 20*mmHg2SI
-    CO_target = 5.76*lpm2SI
-    EF_target = 0.6
-    HR_target = 60*bpm2SI
-    Ppa_target = 14*mmHg2SI # (Kovacs Eur Respir J 2009)
-    Ppv_target = 8*mmHg2SI # (Kovacs Eur Respir J 2009)
-    Ppas_target = 20.8*mmHg2SI # (Kovacs Eur Respir J 2009)
-    Ppad_target = 8.8*mmHg2SI # (Kovacs Eur Respir J 2009)
-    pwv_bounds = [5, 10]
+    # BPs_target = 120*mmHg2SI
+    # BPd_target = 80*mmHg2SI
+    # BPk_target = 20*mmHg2SI
+    # CO_target = 5.76*lpm2SI
+    # EF_target = 0.6
+    # HR_target = 60*bpm2SI
+    # Ppa_target = 14*mmHg2SI # (Kovacs Eur Respir J 2009)
+    # Ppv_target = 8*mmHg2SI # (Kovacs Eur Respir J 2009)
+    # Ppas_target = 20.8*mmHg2SI # (Kovacs Eur Respir J 2009)
+    # Ppad_target = 8.8*mmHg2SI # (Kovacs Eur Respir J 2009)
+    # pwv_bounds = [5, 10]
 
     time = vars_set['time']
 
@@ -79,7 +79,8 @@ def getObjectives(vars_set):
     # vla_1st_Peak_i = fun_lib.findInterval(39.8, 40, time)
     # vla_2nd_Peak_i = fun_lib.findInterval(39.2, 39.4, time)
     # vla_peak_frac = numpy.max(vars_set['q_mv'][vla_1st_Peak_i])/numpy.max(vars_set['q_mv'][vla_2nd_Peak_i])
-    vla_peak_frac = fun_lib.calculateQ_MV(vars_set['q_mv'], time, interval)
+    # vla_peak_frac = fun_lib.calculateQ_MV(vars_set['q_mv'], time, interval)
+    atrial_kick = fun_lib.calculateQdot_mv(vars_set['V_LV'], vars_set['q_mv'], time, interval)
 
     # Van Bortel 2012 siggest using 80 % of carotid to femoral distance
     # distance = vars_set['speedSegmentLength'][1]*0.8
@@ -91,28 +92,31 @@ def getObjectives(vars_set):
         distance)
 
     # build costs
-    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), BPs_target, None, 10),
-            ('BPd', min(vars_set['brachial_pressure'][interval]), BPd_target, None, 10),
+    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), 120*mmHg2SI, None, 10),
+            ('BPd', min(vars_set['brachial_pressure'][interval]), 80*mmHg2SI, None, 10),
             ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1),
             ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1),
             ('ESV_la', numpy.min(vars_set['V_la'][interval]), 41*ml2SI, None, .1),
             ('EDV_la', numpy.max(vars_set['V_la'][interval]), 87*ml2SI, None, .1),
-            ('Q_MV_f', vla_peak_frac, 2, None, .5),
+            # ('Q_MV_f', vla_peak_frac, 2, None, .5),
+            ('Qdot_mv', atrial_kick, None, [0.2, 0.3], 1e-3),
+            
             ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, .1),
             ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, .1),            
-            ('HR', numpy.mean(vars_set['HR'][interval]) , 64/60, None, 10),
+            ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 10),
 # set by assumption and loop closed
 #            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1), 
 # set by EDV and ESV
-            ('CO', sum(vars_set['CO'][interval]) / len(interval), CO_target, None, 10),
 #            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), EF_target, None, 1),
-            ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), BPk_target, None, 1),
-            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.8*mmHg2SI, None, .5),
-            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, .1),
-            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, .1),
-            ('PWV', pwv, None, pwv_bounds, 1)            ]
+# set by HR and EDV AND ESV, just emphasized here
+            ('CO', sum(vars_set['CO'][interval]) / len(interval), 5.76*lpm2SI, None, 10),
+            ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), 20*mmHg2SI, None, 1),
+            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 12*mmHg2SI, None, .5),
+            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 40*mmHg2SI, None, .1),
+            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, .1),
+            ('PWV', pwv, None, [5, 10], 1)            ]
 
-    objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight=o[4]), ov))
+    objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight=o[4], k_p=1e3), ov))
 
 
     # to have comparable cost function values one must have the stds ready

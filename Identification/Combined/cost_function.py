@@ -94,7 +94,9 @@ def getObjectives(vars_set:dict):
     ax = list(flat2gen(axs))
     axes_num = 0
 
+    # returns one objective per use case - i.e. per simulation or per cost function import
     cost_objectives = []
+    # returns all objectives
     all_objectives = []
 
     def buildCostObjective(name, cost_func_folder, weight):
