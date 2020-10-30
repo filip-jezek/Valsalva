@@ -79,7 +79,8 @@ def getObjectives(vars_set):
     # vla_1st_Peak_i = fun_lib.findInterval(39.8, 40, time)
     # vla_2nd_Peak_i = fun_lib.findInterval(39.2, 39.4, time)
     # vla_peak_frac = numpy.max(vars_set['q_mv'][vla_1st_Peak_i])/numpy.max(vars_set['q_mv'][vla_2nd_Peak_i])
-    # vla_peak_frac = fun_lib.calculateQ_MV(vars_set['q_mv'], time, interval)
+    (q_mv_Ppassive, q_mv_Patrial) = fun_lib.calculateQ_MV(vars_set['q_mv'], time, interval)
+    vla_peak_frac = q_mv_Ppassive/q_mv_Patrial
     (atrial_kick, q_mv_saddle) = fun_lib.calculateQdot_mv(vars_set['V_LV'], vars_set['q_mv'], time, interval)
 
     # Van Bortel 2012 siggest using 80 % of carotid to femoral distance
@@ -94,14 +95,13 @@ def getObjectives(vars_set):
     # build costs
     ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), 120*mmHg2SI, None, 10),
             ('BPd', min(vars_set['brachial_pressure'][interval]), 80*mmHg2SI, None, 10),
-            ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1),
-            ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1),
-            ('ESV_la', numpy.min(vars_set['V_la'][interval]), 41*ml2SI, None, 1),
-            ('EDV_la', numpy.max(vars_set['V_la'][interval]), 87*ml2SI, None, 1),
-            # ('Q_MV_f', vla_peak_frac, 2, None, .5),
+            ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, .1),
+            ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, .1),
+            ('ESV_la', numpy.min(vars_set['V_la'][interval]), 12*ml2SI, None, 1),
+            ('EDV_la', numpy.max(vars_set['V_la'][interval]), 41*ml2SI, None, 1),
+            ('Q_MV_f', vla_peak_frac, None, [1.5, 2], 1e-3),
             ('Qdot_mv', atrial_kick, None, [0.2, 0.3], 1e-3),
-            ('q_mv_sad', q_mv_saddle, None, [0, 4*lpm2SI], 1e-3),
-            
+            ('q_mv_sad', q_mv_saddle, None, [0, q_mv_Patrial*0.2], 10e-3),
             ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, 1),
             ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, 1),            
             ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 10),
@@ -112,8 +112,8 @@ def getObjectives(vars_set):
 # set by HR and EDV AND ESV, just emphasized here
             ('CO', sum(vars_set['CO'][interval]) / len(interval), 5.76*lpm2SI, None, 10),
             ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), 20*mmHg2SI, None, 1),
-            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 12*mmHg2SI, None, 1),
-            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 40*mmHg2SI, None, 1),
+            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, 1),
+            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, 1),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, .1),
             ('PWV', pwv, None, [5, 10], 1)            ]
 

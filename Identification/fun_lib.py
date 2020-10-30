@@ -265,12 +265,13 @@ def calculateQdot_mv(v_lv, q_mv, time, interval):
 
 
 def calculateQ_MV(q, time, interval):
-    """ Returns a fraction of passive and atrial active(second bump) heart filling rate
+    """ Returns tuple of passive and atrial kick peaks mitral flow heart filling rate
 
     q : flow signal
     time : time set
     interval : guess range interval in which to search. May overflow during search, so leave at least one beat buffer.
 
+    returns
     """
     # find the first peak in the interval
     max_index = numpy.argmax(q[interval]) + interval[0]
@@ -287,7 +288,7 @@ def calculateQ_MV(q, time, interval):
         if v <= 0.9*m:
             break
     
-    return q[max_index]/m
+    return (q[max_index], m)
     
     
 

@@ -196,7 +196,7 @@ def processDyMatFile():
         writeCost(objectives)
         writeLogHeader(objectives, var_set)
         logOutput(objectives, var_set)
-        fun_lib.logObjectives(var_set['__LOG_OBJECTIVES_PATH'], objectives, var_set['__SORT_COSTS_BY'])
+        fun_lib.logObjectives(var_set['__LOG_OBJECTIVES_PATH'], objectives, var_set['__SORT_COSTS_BY'], printToStdin=True)
 
     except FileNotFoundError as f:
         # the simulation did not evens started
