@@ -5484,31 +5484,31 @@ type"),       Text(
                       fillColor={255,255,255},
                       fillPattern=FillPattern.Solid),
                     Line(
-                      points={{-74,-16},{-64,-16},{-50,62},{-4,0},{-4,-14},{24,
-                          -14},{86,-14}},
+                      points={{-74,-16},{-64,-16},{-50,62},{-4,0},{6,-14},{24,-14},{86,-14}},
                       color={0,0,0},
                       thickness=1,
                       smooth=Smooth.Bezier),
                     Line(
                       points={{74,-44},{74,-14}},
                       color={28,108,200},
-                      arrow={Arrow.Open,Arrow.Open}),
-                    Line(points={{-46,44},{-46,-44}}, color={28,108,200}),
+                      arrow={Arrow.Filled,Arrow.Filled}),
+                    Line(points={{-46,44},{-46,-44}}, color={28,108,200},
+                      arrow={Arrow.Filled,Arrow.Filled}),
                     Line(
                       points={{-74,-34},{-46,-34}},
                       color={28,108,200},
                       arrow={Arrow.Open,Arrow.Open}),
                     Line(
-                      points={{-48,-34},{-2,-34}},
+                      points={{-48,-34},{12,-34}},
                       color={28,108,200},
                       arrow={Arrow.Open,Arrow.Open}),
-                    Line(points={{-2,-10},{-2,-44}}, color={28,108,200}),
+                    Line(points={{12,-14},{12,-44}}, color={28,108,200}),
                     Text(
                       extent={{36,-38},{76,-22}},
                       lineColor={28,108,200},
                       fillColor={255,255,255},
                       fillPattern=FillPattern.Solid,
-                      textString="D0"),
+                      textString="D_0"),
                     Text(
                       extent={{-72,-34},{-48,-18}},
                       lineColor={28,108,200},
@@ -5532,7 +5532,13 @@ type"),       Text(
                       lineColor={0,0,0},
                       fillColor={255,255,255},
                       fillPattern=FillPattern.Solid,
-                      textString="1 - cos")}));
+                      textString="1 - cos"),
+                    Text(
+                      extent={{-52,-8},{-12,8}},
+                      lineColor={28,108,200},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="D_A")}));
             end Driving_Olufsen;
 
             partial model partialVentricleWall "base class to be plug-in usable"
@@ -5982,8 +5988,9 @@ type"),       Text(
               // parameter Real k_passive_negative=50 "mN / mm^2 / micro";
 
               // Collagen force
-              Real sigma_collagen=if (SLo > SLcollagen) then PConcollagen*(exp(PExpcollagen*
-                  (SLo - SLcollagen)) - 1) else 0;
+            //   Real sigma_collagen=if (SLo > SLcollagen) then PConcollagen*(exp(PExpcollagen*
+            //       (SLo - SLcollagen)) - 1) else 0;
+              Real sigma_collagen=max(0, PConcollagen*(exp(PExpcollagen*(SLo - SLcollagen)) - 1));
 
               // Passive forces (Lumens) do not really work here atm so we are using DAB variant
               // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
