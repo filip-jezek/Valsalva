@@ -104,7 +104,7 @@ def getObjectives(vars_set):
             ('q_mv_sad', q_mv_saddle, None, [0, q_mv_Patrial*0.2], 10e-3),
             ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, 1),
             ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, 1),            
-            ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 10),
+            ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 100),
 # set by assumption and loop closed
 #            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1), 
 # set by EDV and ESV

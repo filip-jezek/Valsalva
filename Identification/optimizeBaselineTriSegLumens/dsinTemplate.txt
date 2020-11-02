@@ -9,7 +9,7 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-      30                   # StopTime     Time at which integration stops
+      60                   # StopTime     Time at which integration stops
   1.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
   9.9999999999999995E-07   # Tolerance    Relative precision of signals for
@@ -94,7 +94,7 @@ int settings(13,1)
  0                         # lw       0/1 do not/store w  (auxiliary signals)
  1                         # la       0/1 do not/store a  (alias     signals)
  0                         # lperf    0/1 do not/store performance indicators
- 0
+ 0                         # levent   0/1 do not/store event point
  1                         # lres     0/1 do not/store results on result file
  0                         # lshare   0/1 do not/store info data for shared memory on dsshare.txt
  1                         # lform    0/1 ASCII/Matlab-binary storage format of results
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11648,100)
+char initialName(11650,100)
 settings.phi0
 settings.height
 settings.weight
@@ -11751,8 +11751,10 @@ V_la
 q_mv
 SLo_max
 SLo_min
+CPUtime
+EventCounter
 
-double initialValue(11648,6)
+double initialValue(11650,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -11775,9 +11777,9 @@ double initialValue(11648,6)
   1   280   # settings.V_PV_init
  -1  1.1850000000000001E+00       0                       0                
   1   280   # settings.chi_phi
- -1 %settings.heart_R_vlv% 0.0 1e+100
+ -1  3.5000000000000000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
- -1 %settings.heart_R_LA% 0.0 1e+100
+ -1  6.0310000000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
  -1  3.7665200000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_RA
@@ -11789,11 +11791,11 @@ double initialValue(11648,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1 %settings.heart_drive_D_0% 0.0 0.0
+ -1  1.7671880000000002E+01       0                       0                
   1   280   # settings.heart_drive_D_0
  -1  2.9531250000000000E-04       0                       0                
   1   280   # settings.heart_drive_D_0_maxAct
- -1 %settings.heart_drive_D_A% 0.0 0.0
+ -1  1.8217180000000001E+03       0                       0                
   1   280   # settings.heart_drive_D_A
  -1    9585                       0                       0                
   1   280   # settings.heart_drive_D_A_actMax
@@ -11805,13 +11807,13 @@ double initialValue(11648,6)
   1   280   # settings.heart_drive_TR
  -1  1.1068790000000001E-01       0                       0                
   1   280   # settings.heart_drive_TR_maxAct
- -1 %settings.heart_drive_Tact% 0.0 0.0
+ -1  1.0000000000000001E-01       0                       0                
   1   280   # settings.heart_drive_Tact
   0       0                       0                       0                
   6   256   # settings.heart_drive_Tact_maxAct
- -1 %settings.heart_drive_atr_D_0% 0.0 0.0
+ -1  1.3115150000000000E+07       0                       0                
   1   280   # settings.heart_drive_atr_D_0
- -1 %settings.heart_atr_D_A% 0.0 0.0
+ -1  5.8625000000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_A
  -1  8.9082309999999998E-01       0                       0                
   1   280   # settings.heart_vntr_xi_Vw
@@ -11829,9 +11831,9 @@ double initialValue(11648,6)
   1   280   # settings.heart_vntr_SLrest
  -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
- -1 %settings.syst_TPR% 0.0 1e+100
+ -1  1.3037500000000000E+08       0                 1.0000000000000000E+100
   1   280   # settings.syst_TPR
- -1 %settings.syst_TR_frac% 0.0 0.0
+ -1  4.5332590000000001E+00       0                       0                
   1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
@@ -11927,7 +11929,7 @@ double initialValue(11648,6)
   6   257   # settings.baro_useAbsolutePressureTerm
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
- -1      30                       0                       0                
+ -1      15                       0                       0                
   1   280   # settings.baro_tau_s
  -1  6.5100000000000005E-02       0                       0                
   1   280   # settings.baro_a
@@ -11943,7 +11945,7 @@ double initialValue(11648,6)
   1   280   # settings.baro_delta0_car
  -1  6.0625799999999996E-01       0                       0                
   1   280   # settings.baro_g
- -1  3.6249999999999998E-02       0                       0                
+ -1  %baro_fsn%       0                       0                
   1   280   # settings.baro_fsn
  -1  3.3790000000000001E-03       0                       0                
   1   280   # settings.baro_f1
@@ -11951,15 +11953,15 @@ double initialValue(11648,6)
   1   280   # settings.pulm_CO_target
  -1  3.2346390000000002E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1 %settings.pulm_C_PA% 0.0 0.0
+ -1  3.9874999999999998E-08       0                       0                
   1   280   # settings.pulm_C_PA
  -1  1.3332238741500000E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
- -1 %settings.pulm_R% 0.0 1e+100
+ -1  6.8133560000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.pulm_R
- -1 %settings.pulm_q_nom_maxq% 0.0 0.0
+ -1  9.9160000000000003E-04       0                       0                
   1   280   # settings.pulm_q_nom_maxq
  -1  9.1500000000000004E-01       0                       0                
   1   280   # settings.pulm_R_exp
@@ -34821,9 +34823,9 @@ double initialValue(11648,6)
   6   256   # condSystemicPhi.const_offset
   0       0                       0                       0                
   6  1281   # condSystemicPhi.showLimiterLine
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # switch1.u2
-  0       0                       0                       0                
+  0       1                       0                       0                
   6   257   # useAutonomousPhi.y
   0       0                       0                       0                
   6   256   # condHeartPhi.y
@@ -35049,6 +35051,10 @@ double initialValue(11648,6)
   4   256   # SLo_max
   0       0                       0                       0                
   4   256   # SLo_min
+  0       0                       0                       0                
+  4   256   # CPUtime
+  0       0                       0                       0                
+  4   256   # EventCounter
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -35099,7 +35105,7 @@ double initialValue(11648,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11648,232)
+char initialDescription(11650,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -35139,7 +35145,7 @@ minimal length to apply collagen force [um] []
 Resting sarcomere length [um] []
 fraction of thoracic pressure in the abdominal cavity [1|%]
 Systemic total peripheral resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|%]
+Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Limit Pext in large arteries, tissues and veins, when they are already empty [:#(type=Boolean)]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
 Change compliance of large arteries by phi and exercise [:#(type=Boolean)]
@@ -46748,4 +46754,6 @@ Left atrium volume output [m3|ml]
 Flow in mitral valve [m3/s|ml/min]
 maximal Sarcomere length
 Minimal Sarcomere length
+[s]
+
 
