@@ -12,21 +12,24 @@ All rights reserved.
 _______________________________________________________________
 
 Results of GPSHookeJeeves algorithm
-Start time: Mon Nov 02 11:45:49 CET 2020
+Start time: Tue Nov 03 22:02:53 CET 2020
 
 Main Iterations
 
 
-Simulation Number	Main Iteration	Step Number	f(x)	baro_fsn
-1	1	1	0.07001627069467681	0.03625	Initial point.
-1	2	1	0.07001627069467681	0.03625	Iteration step did not reduce cost. Reduce step size to '0.5'.
-1	3	1	0.07001627069467681	0.03625	Iteration step did not reduce cost. Reduce step size to '0.25'.
-1	4	1	0.07001627069467681	0.03625	Iteration step did not reduce cost. Reduce step size to '0.125'.
-1	5	1	0.07001627069467681	0.03625	Iteration step did not reduce cost. Reduce step size to '0.0625'.
-1	6	1	0.07001627069467681	0.03625	Iteration step did not reduce cost. Reduce step size to '0.03125'.
-13	7	1	0.07000896456028562	0.036246873	Global search reduced cost.
-16	8	1	0.06992091371335006	0.03624687	Global search reduced cost.
-17	9	1	0.06990951017571549	0.036246866	Global search reduced cost.
-17	10	1	0.06990951017571549	0.036246866	Iteration step did not reduce cost. Reduce step size to '0.015625'.
-17	11	1	0.06990951017571549	0.036246866	Iteration step did not reduce cost. Maximum number of step reductions reached.
-17	11	1	0.06990951017571549	0.036246866	Minimum point.
+Simulation Number	Main Iteration	Step Number	f(x)	settings.heart_R_vlv	settings.heart_R_LA	settings.heart_drive_D_0	settings.heart_drive_D_A	settings.heart_drive_Tact	settings.heart_drive_atr_D_0	settings.heart_atr_D_A	settings.syst_TPR	settings.syst_TR_frac	settings.pulm_C_PA	settings.pulm_R	settings.V_PV_init	settings.heart_vntr_k_passive
+1	1	1	1.3002994705454618	350000.0	6031000.0	17.67188	1821.718	0.1	1.311515E7	5.8625E7	1.30375E8	4.533259	3.9875E-8	6813356.0	5.0E-5	25.0	Initial point.
+22	2	1	0.9846074998503072	300000.0	5981000.0	16.67188	1871.718	0.1	1.361515E7	6.8625E7	1.30375E8	4.533259	3.8875E-8	6813356.0	5.0E-5	24.0	Global search reduced cost.
+37	3	1	0.6711698957809158	200000.0	5881000.0	14.67188	1871.718	0.1	1.461515E7	6.8625E7	1.30375E8	4.543259	3.6875E-8	7213356.0	5.0E-5	23.0	Global search reduced cost.
+37	4	1	0.6711698957809158	200000.0	5881000.0	14.67188	1871.718	0.1	1.461515E7	6.8625E7	1.30375E8	4.543259	3.6875E-8	7213356.0	5.0E-5	23.0	Iteration step did not reduce cost. Reduce step size to '0.5'.
+37	5	1	0.6711698957809158	200000.0	5881000.0	14.67188	1871.718	0.1	1.461515E7	6.8625E7	1.30375E8	4.543259	3.6875E-8	7213356.0	5.0E-5	23.0	Iteration step did not reduce cost. Reduce step size to '0.25'.
+103	6	1	0.6706496753444687	200000.0	5881000.0	14.67188	1871.718	0.1	1.461515E7	6.8625E7	1.30375E8	4.545759	3.6875E-8	7213356.0	5.0E-5	23.0	Global search reduced cost.
+121	7	1	0.6418633435205671	187500.0	5868500.0	14.42188	1871.718	0.1	1.474015E7	6.6125E7	1.30625E8	4.548259	3.6875E-8	7213356.0	5.0E-5	23.0	Global search reduced cost.
+121	8	1	0.6418633435205671	187500.0	5868500.0	14.42188	1871.718	0.1	1.474015E7	6.6125E7	1.30625E8	4.548259	3.6875E-8	7213356.0	5.0E-5	23.0	Iteration step did not reduce cost. Reduce step size to '0.125'.
+121	9	1	0.6418633435205671	187500.0	5868500.0	14.42188	1871.718	0.1	1.474015E7	6.6125E7	1.30625E8	4.548259	3.6875E-8	7213356.0	5.0E-5	23.0	Iteration step did not reduce cost. Reduce step size to '0.0625'.
+121	10	1	0.6418633435205671	187500.0	5868500.0	14.42188	1871.718	0.1	1.474015E7	6.6125E7	1.30625E8	4.548259	3.6875E-8	7213356.0	5.0E-5	23.0	Iteration step did not reduce cost. Reduce step size to '0.03125'.
+121	11	1	0.6418633435205671	187500.0	5868500.0	14.42188	1871.718	0.1	1.474015E7	6.6125E7	1.30625E8	4.548259	3.6875E-8	7213356.0	5.0E-5	23.0	Iteration step did not reduce cost. Reduce step size to '0.015625'.
+253	12	1	0.6416696450860198	187500.0	5868500.0	14.42188	1871.718	0.1	1.474015E7	6.5968752E7	1.30625E8	4.548259	3.6875E-8	7213356.0	5.0E-5	23.0	Global search reduced cost.
+279	13	1	0.6370419169653568	186718.75	5867719.0	14.406255	1870.9368	0.0984375	1.4747962E7	6.5656256E7	1.30640624E8	4.548415	3.6859376E-8	7207106.0	5.0E-5	23.0	Global search reduced cost.
+279	14	1	0.6370419169653568	186718.75	5867719.0	14.406255	1870.9368	0.0984375	1.4747962E7	6.5656256E7	1.30640624E8	4.548415	3.6859376E-8	7207106.0	5.0E-5	23.0	Iteration step did not reduce cost. Maximum number of step reductions reached.
+279	14	1	0.6370419169653568	186718.75	5867719.0	14.406255	1870.9368	0.0984375	1.4747962E7	6.5656256E7	1.30640624E8	4.548415	3.6859376E-8	7207106.0	5.0E-5	23.0	Minimum point.
