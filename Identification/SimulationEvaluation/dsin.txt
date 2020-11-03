@@ -9,7 +9,7 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-      60                   # StopTime     Time at which integration stops
+      30                   # StopTime     Time at which integration stops
   1.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
   9.9999999999999995E-07   # Tolerance    Relative precision of signals for
@@ -63,7 +63,7 @@ double method(27,1)
        0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
        0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
        0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
-    1024                   # debug    flags for debug information (1<<0 uses pdebug) 
+   65536                   # debug    flags for debug information (1<<0 uses pdebug) 
      100                   # pdebug       priority of debug information (1...100)
        0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
        0                   # ordmax   Maximum allowed integration order, if > 0
@@ -86,13 +86,13 @@ double method(27,1)
 #    Output parameters
 int settings(13,1)
  0                         # lprec    0/1 do not/store result data in double
- 1                         # lx       0/1 do not/store x  (state variables)
- 1                         # lxd      0/1 do not/store xd (derivative of states)
- 1                         # lu       0/1 do not/store u  (input     signals)
+ 0                         # lx       0/1 do not/store x  (state variables)
+ 0                         # lxd      0/1 do not/store xd (derivative of states)
+ 0                         # lu       0/1 do not/store u  (input     signals)
  1                         # ly       0/1 do not/store y  (output    signals)
  0                         # lz       0/1 do not/store z  (indicator signals)
- 1                         # lw       0/1 do not/store w  (auxiliary signals)
- 1                         # la       0/1 do not/store a  (alias     signals)
+ 0                         # lw       0/1 do not/store w  (auxiliary signals)
+ 0                         # la       0/1 do not/store a  (alias     signals)
  0                         # lperf    0/1 do not/store performance indicators
  0                         # levent   0/1 do not/store event point
  1                         # lres     0/1 do not/store results on result file
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11648,100)
+char initialName(11650,100)
 settings.phi0
 settings.height
 settings.weight
@@ -3144,7 +3144,6 @@ SystemicComponent.external_iliac_L198._tilt
 SystemicComponent.external_iliac_L198.p_C
 SystemicComponent.external_iliac_L198.compliance
 SystemicComponent.external_iliac_L198.r_phi
-SystemicComponent.femoral_L200.port_b.pressure
 SystemicComponent.femoral_L200.port_b.q
 SystemicComponent.femoral_L200.UseInertance
 SystemicComponent.femoral_L200.UseOuter_thoracic_pressure
@@ -3187,6 +3186,7 @@ SystemicComponent.femoral_L200.R
 SystemicComponent.femoral_L200.R_vis
 SystemicComponent.femoral_L200.zpv
 SystemicComponent.femoral_L200._tilt
+SystemicComponent.femoral_L200.p_C
 SystemicComponent.femoral_L200.compliance
 SystemicComponent.femoral_L200.r_phi
 SystemicComponent.profundus_T2_L202.port_a.q
@@ -4018,7 +4018,6 @@ SystemicComponent.axillary_L80._tilt
 SystemicComponent.axillary_L80.p_C
 SystemicComponent.axillary_L80.compliance
 SystemicComponent.axillary_L80.r_phi
-SystemicComponent.brachial_L82.port_a.pressure
 SystemicComponent.brachial_L82.port_b.pressure
 SystemicComponent.brachial_L82.port_b.q
 SystemicComponent.brachial_L82.UseInertance
@@ -4699,7 +4698,6 @@ SystemicComponent.common_carotid_L48_C._tilt
 SystemicComponent.common_carotid_L48_C.p_C
 SystemicComponent.common_carotid_L48_C.compliance
 SystemicComponent.common_carotid_L48_C.r_phi
-SystemicComponent.common_carotid_L48_D.port_b.pressure
 SystemicComponent.common_carotid_L48_D.port_b.q
 SystemicComponent.common_carotid_L48_D.UseInertance
 SystemicComponent.common_carotid_L48_D.UseOuter_thoracic_pressure
@@ -4742,6 +4740,7 @@ SystemicComponent.common_carotid_L48_D.R
 SystemicComponent.common_carotid_L48_D.R_vis
 SystemicComponent.common_carotid_L48_D.zpv
 SystemicComponent.common_carotid_L48_D._tilt
+SystemicComponent.common_carotid_L48_D.p_C
 SystemicComponent.common_carotid_L48_D.compliance
 SystemicComponent.common_carotid_L48_D.r_phi
 SystemicComponent.internal_carotid_L50_A.port_b.pressure
@@ -11086,6 +11085,7 @@ SystemicComponent.brachial_L82_HeartLevel.R
 SystemicComponent.brachial_L82_HeartLevel.R_vis
 SystemicComponent.brachial_L82_HeartLevel.zpv
 SystemicComponent.brachial_L82_HeartLevel._tilt
+SystemicComponent.brachial_L82_HeartLevel.p_C
 SystemicComponent.brachial_L82_HeartLevel.compliance
 SystemicComponent.brachial_L82_HeartLevel.r_phi
 SystemicComponent.leveledPressureFlowConverter.level
@@ -11141,7 +11141,6 @@ heartComponent.pulmonaryValve.useLimitationInputs
 heartComponent.pulmonaryValve.unitPressure
 heartComponent.pulmonaryValve.unitFlow
 heartComponent.pulmonaryValve._Ron
-heartComponent.mitralValve.q_in.pressure
 heartComponent.mitralValve.q_out.pressure
 heartComponent.mitralValve.dp
 heartComponent.mitralValve.useChatteringProtection
@@ -11367,7 +11366,6 @@ heartComponent.ventricles.V_LV
 heartComponent.ventricles.der(V_LV)
 heartComponent.ventricles.V_RV
 heartComponent.ventricles.der(V_RV)
-heartComponent.ventricles.P_LV
 heartComponent.ventricles.P_RV
 heartComponent.ventricles.currentWork_LV
 heartComponent.ventricles.der(currentWork_LV)
@@ -11730,6 +11728,7 @@ renal_capillary
 CO
 carotid_pressure
 femoral_pressure
+P_LV
 V_LV
 phi_baro
 SV
@@ -11747,12 +11746,15 @@ speedSegmentLength
 aortic_length
 height
 aortic_length_calc2
+P_LA
 V_la
 q_mv
 SLo_max
 SLo_min
+CPUtime
+EventCounter
 
-double initialValue(11648,6)
+double initialValue(11650,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -11775,9 +11777,9 @@ double initialValue(11648,6)
   1   280   # settings.V_PV_init
  -1  1.1850000000000001E+00       0                       0                
   1   280   # settings.chi_phi
- -1  5.0000000000000000E+05       0                 1.0000000000000000E+100
+ -1  3.5000000000000000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
- -1  3.2935000000000000E+06       0                 1.0000000000000000E+100
+ -1  6.0310000000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
  -1  3.7665200000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_RA
@@ -11789,11 +11791,11 @@ double initialValue(11648,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1  2.6593750000000000E+01       0                       0                
+ -1  1.7671880000000002E+01       0                       0                
   1   280   # settings.heart_drive_D_0
  -1  2.9531250000000000E-04       0                       0                
   1   280   # settings.heart_drive_D_0_maxAct
- -1  1.3771869999999999E+03       0                       0                
+ -1  1.8217180000000001E+03       0                       0                
   1   280   # settings.heart_drive_D_A
  -1    9585                       0                       0                
   1   280   # settings.heart_drive_D_A_actMax
@@ -11805,13 +11807,13 @@ double initialValue(11648,6)
   1   280   # settings.heart_drive_TR
  -1  1.1068790000000001E-01       0                       0                
   1   280   # settings.heart_drive_TR_maxAct
- -1  2.0000000000000001E-01       0                       0                
+ -1  1.0000000000000001E-01       0                       0                
   1   280   # settings.heart_drive_Tact
   0       0                       0                       0                
   6   256   # settings.heart_drive_Tact_maxAct
- -1  9.7948390000000000E+06       0                       0                
+ -1  1.3115150000000000E+07       0                       0                
   1   280   # settings.heart_drive_atr_D_0
- -1  1.7958790000000000E+07       0                       0                
+ -1  5.8625000000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_A
  -1  8.9082309999999998E-01       0                       0                
   1   280   # settings.heart_vntr_xi_Vw
@@ -11821,7 +11823,7 @@ double initialValue(11648,6)
   1   280   # settings.heart_vntr_k_passive
  -1  1.8999999999999999E+00       0                       0                
   1   280   # settings.heart_vntr_Lsref
- -1  1.9954000000000001E+00       0                       0                
+ -1  1.6000000000000001E+00       0                       0                
   1   280   # settings.heart_vntr_L0
  -1  2.2500000000000000E+00       0                       0                
   1   280   # settings.heart_vntr_SLcollagen
@@ -11829,9 +11831,9 @@ double initialValue(11648,6)
   1   280   # settings.heart_vntr_SLrest
  -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
- -1  1.2965050000000000E+08       0                 1.0000000000000000E+100
+ -1  1.3037500000000000E+08       0                 1.0000000000000000E+100
   1   280   # settings.syst_TPR
- -1  5.2152900000000004E+00       0                       0                
+ -1  4.5332590000000001E+00       0                       0                
   1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
@@ -11927,7 +11929,7 @@ double initialValue(11648,6)
   6   257   # settings.baro_useAbsolutePressureTerm
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
- -1      30                       0                       0                
+ -1  9.8370000000000005E+01       0                       0                
   1   280   # settings.baro_tau_s
  -1  6.5100000000000005E-02       0                       0                
   1   280   # settings.baro_a
@@ -11943,7 +11945,7 @@ double initialValue(11648,6)
   1   280   # settings.baro_delta0_car
  -1  6.0625799999999996E-01       0                       0                
   1   280   # settings.baro_g
- -1  3.6249999999999998E-02       0                       0                
+ -1  3.2065600000000000E-02       0                       0                
   1   280   # settings.baro_fsn
  -1  3.3790000000000001E-03       0                       0                
   1   280   # settings.baro_f1
@@ -11951,15 +11953,15 @@ double initialValue(11648,6)
   1   280   # settings.pulm_CO_target
  -1  3.2346390000000002E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1  2.5995279999999999E-08       0                       0                
+ -1  3.9874999999999998E-08       0                       0                
   1   280   # settings.pulm_C_PA
  -1  1.3332238741500000E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
- -1  8.8321060000000000E+06       0                 1.0000000000000000E+100
+ -1  6.8133560000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.pulm_R
- -1  2.7421869999999998E-04       0                       0                
+ -1  9.9160000000000003E-04       0                       0                
   1   280   # settings.pulm_q_nom_maxq
  -1  9.1500000000000004E-01       0                       0                
   1   280   # settings.pulm_R_exp
@@ -17836,8 +17838,6 @@ double initialValue(11648,6)
   0       0                       0                       0                
   6   256   # SystemicComponent.external_iliac_L198.r_phi
   0       0                       0                       0                
-  6   260   # SystemicComponent.femoral_L200.port_b.pressure
-  0       0                       0                       0                
   6   388   # SystemicComponent.femoral_L200.port_b.q
   0       1                       0                       0                
   6   257   # SystemicComponent.femoral_L200.UseInertance
@@ -17921,6 +17921,8 @@ double initialValue(11648,6)
   6   256   # SystemicComponent.femoral_L200.zpv
   0       0                       0                       0                
   6  1280   # SystemicComponent.femoral_L200._tilt
+  0   10000                       0                       0                
+  6   256   # SystemicComponent.femoral_L200.p_C
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_L200.compliance
   0       0                       0                       0                
@@ -19584,8 +19586,6 @@ double initialValue(11648,6)
   0       0                       0                       0                
   6   256   # SystemicComponent.axillary_L80.r_phi
   0       0                       0                       0                
-  6   260   # SystemicComponent.brachial_L82.port_a.pressure
-  0       0                       0                       0                
   6   260   # SystemicComponent.brachial_L82.port_b.pressure
   0       0                       0                       0                
   6   388   # SystemicComponent.brachial_L82.port_b.q
@@ -20946,8 +20946,6 @@ double initialValue(11648,6)
   0       0                       0                       0                
   6   256   # SystemicComponent.common_carotid_L48_C.r_phi
   0       0                       0                       0                
-  6   260   # SystemicComponent.common_carotid_L48_D.port_b.pressure
-  0       0                       0                       0                
   6   388   # SystemicComponent.common_carotid_L48_D.port_b.q
   0       1                       0                       0                
   6   257   # SystemicComponent.common_carotid_L48_D.UseInertance
@@ -21031,6 +21029,8 @@ double initialValue(11648,6)
   6   256   # SystemicComponent.common_carotid_L48_D.zpv
   0       0                       0                       0                
   6  1280   # SystemicComponent.common_carotid_L48_D._tilt
+  0   10000                       0                       0                
+  6   256   # SystemicComponent.common_carotid_L48_D.p_C
   0       0                       0                       0                
   6   256   # SystemicComponent.common_carotid_L48_D.compliance
   0       0                       0                       0                
@@ -33719,6 +33719,8 @@ double initialValue(11648,6)
   6   256   # SystemicComponent.brachial_L82_HeartLevel.zpv
   0       0                       0                       0                
   6  1280   # SystemicComponent.brachial_L82_HeartLevel._tilt
+  0   10000                       0                       0                
+  6   256   # SystemicComponent.brachial_L82_HeartLevel.p_C
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_L82_HeartLevel.compliance
   0       0                       0                       0                
@@ -33829,8 +33831,6 @@ double initialValue(11648,6)
   6  1280   # heartComponent.pulmonaryValve.unitFlow
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.pulmonaryValve._Ron
-  0       0                       0                       0                
-  6   260   # heartComponent.mitralValve.q_in.pressure
   0       0                       0                       0                
   6   260   # heartComponent.mitralValve.q_out.pressure
   0       0                       0                       0                
@@ -34282,8 +34282,6 @@ double initialValue(11648,6)
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.der(V_RV)
   0       0                       0                       0                
-  6   256   # heartComponent.ventricles.P_LV
-  0       0                       0                       0                
   6   256   # heartComponent.ventricles.P_RV
  -1       0                       0                       0                
   2   280   # heartComponent.ventricles.currentWork_LV
@@ -34485,7 +34483,7 @@ double initialValue(11648,6)
   6   288   # pulmonaryComponent.r_pa.dp
   0       0                       0                       0                
   6   257   # pulmonaryComponent.r_pa.useConductanceInput
- -1       1                       0                       0                
+ -1       0                       0                       0                
   1   281   # pulmonaryComponent.r_pa.useNonlinearResistance
  -1       1                       0                       0                
   1   281   # pulmonaryComponent.r_pa.useNominalParametrization
@@ -34991,22 +34989,24 @@ double initialValue(11648,6)
   1   280   # condTP_EP1.const_offset
   0       0                       0                       0                
   6  1281   # condTP_EP1.showLimiterLine
-  0   10000                       0                       0                
+  0       0                       0                       0                
   4   256   # brachial_pressure
   0       0                       0                       0                
   4   328   # brachial_pressure_mean
  -1       0                       0                       0                
   2   280   # brachial_pressure_int
-  0   10000                       0                       0                
+  0       0                       0                       0                
   3   256   # der(brachial_pressure_int)
   0       0                       0                       0                
   4   256   # renal_capillary
   0       0                       0                       0                
   4   320   # CO
-  0   10000                       0                       0                
+  0       0                       0                       0                
   4   256   # carotid_pressure
-  0   10000                       0                       0                
+  0       0                       0                       0                
   4   256   # femoral_pressure
+  0       0                       0                       0                
+  4   256   # P_LV
   0  1.2848654000000001E-04       0                 1.0000000000000000E+100
   4   256   # V_LV
   0  2.5175377999999998E-01       0                       0                
@@ -35041,6 +35041,8 @@ double initialValue(11648,6)
   6   256   # height
   0       0                       0                       0                
   6   256   # aortic_length_calc2
+  0       0                       0                       0                
+  4   256   # P_LA
   0  5.7642600000000003E-05       0                 1.0000000000000000E+100
   4   256   # V_la
   0       0                       0                       0                
@@ -35049,6 +35051,10 @@ double initialValue(11648,6)
   4   256   # SLo_max
   0       0                       0                       0                
   4   256   # SLo_min
+  0       0                       0                       0                
+  4   256   # CPUtime
+  0       0                       0                       0                
+  4   256   # EventCounter
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -35099,7 +35105,7 @@ double initialValue(11648,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11648,232)
+char initialDescription(11650,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -35111,24 +35117,24 @@ Du Bois formula for body surface area [kg]
 Use nominal pressure to initialize vessel volume. False to use volume directly [:#(type=Boolean)]
 Volume adjustment [m3|ml]
 Maximal sympathetic activation during exercise [1|%]
-Open valve resistance [(Pa.s)/m3|(dyn.s)/cm5]
+Open valve resistance [(Pa.s)/m3|(mmHg.min)/ml]
 Resistance of left atrium [(Pa.s)/m3|(dyn.s)/cm5]
 Resistance of the right atrium [(Pa.s)/m3|(dyn.s)/cm5]
 Viscoelastic resistance of the atria [(Pa.s)/m3|(dyn.s)/cm5]
-Inertance of the atrial inflow [Pa.s2/m3|Pa.s2/m3]
+Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
 For Smith heart - linear dependency of active elastance on phi [1|%]
 For Smith heart - linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi [1|%]
 nominal driving offset [1|%]
 Minimal driving offset at maximal activation [1|%]
 Amplitude of resting elastance [Pa/m3|mmHg/ml]
-Amplitude of ventricular elastance at maximal activation [Pa/m3|Pa/m3]
+Amplitude of ventricular elastance at maximal activation [Pa/m3|mmHg/ml]
 nominal systolic contraction time [s|s]
 nominal systolic contraction time at maximal activation [s|min]
 Systolic relaxation time [s|s]
 minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
 Time delay between atrial and ventricle cycles [s|s]
 Time from start of the atrial cycle at maximal activation [s|s]
-nominal driving offset as a fraction of E_0 [1|1]
+nominal driving offset as a fraction of E_0 [1|%]
 Atrial elastance peak - Maximal elastance 0.05 + 0.15 mmhg/ml [Pa/m3|mmHg/ml]
 Factor affecting ventricular walls volume [1|%]
 Factor affecting ventricular diameters [1|%]
@@ -35139,7 +35145,7 @@ minimal length to apply collagen force [um] []
 Resting sarcomere length [um] []
 fraction of thoracic pressure in the abdominal cavity [1|%]
 Systemic total peripheral resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|%]
+Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Limit Pext in large arteries, tissues and veins, when they are already empty [:#(type=Boolean)]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
 Change compliance of large arteries by phi and exercise [:#(type=Boolean)]
@@ -35187,7 +35193,7 @@ Dummy parameter not bound anywhere
 Delay between phi and HR [s|min]
 Use absolute distention term instead being relative to pulse pressure only [:#(type=Boolean)]
 Relative absolute term multiplicator - not used in pure pulse-pressure- sensitive abroreflex [1]
-Time constant of baroreflex moving setpoint [s|s]
+Time constant of baroreflex moving setpoint [s|min]
 [s-1]
 [s-1]
 Base firing frequency [Hz]
@@ -35195,7 +35201,7 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [Hz|Hz]
+rising factor of the sympathetic activation phi [Hz] [Hz|1/min]
 decrease factor of the phi
 mL/min [m3/s|ml/min]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
@@ -38141,154 +38147,6 @@ Zero-pressure volume [m3|ml]
 Pressure of elastic compartment [Pa|mmHg]
 Real compliance after all effects [m3/Pa|ml/mmHg]
 Radius depends on sympathetic activation phi [1|%]
-Pressure [Pa|mmHg]
-Volume flow [m3/s|ml/min]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Input flow (measured in normal blood flow direction) [m3/s|ml/min]
-der(Input flow (measured in normal blood flow direction)) [m3/s2]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
-[:#(type=Boolean)]
-Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
-Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
-[m3|ml]
-Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
-Actual height of the vessel depends on tilt and sinAlpha [m]
-Elasticity [Pa]
-Segment length [m]
-Inner vessel radius [m]
-Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
-Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
-Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
-Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[rad|deg]
-Real compliance after all effects [m3/Pa|ml/mmHg]
-Radius depends on sympathetic activation phi [1|%]
-Volume flow [m3/s|ml/min]
-Pressure [Pa|mmHg]
-Volume flow [m3/s|ml/min]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Optional arteriole inertance [Pa.s2/m3|mmHg.min2/ml]
-Compliance or nominal compliance for non-linear PV characteristics [m3/Pa|ml/mmHg]
-Arteriole resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Elastic viscosity using Voigt model of in-series resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Optional venule intertance [Pa.s2/m3|mmHg.min2/ml]
-venule resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[Pa|mmHg]
-Inner pressure of compliant chamber (after viscoelastic resistance) [Pa|mmHg]
-middle pressure (at joint of viscous forces) [Pa|mmHg]
-Arterial side pressure including the hydrostatic pressure [Pa|mmHg]
-Venous side pressure including the hydrostatic pressure [Pa|mmHg]
-Arterioles resistance dependent on phi and exercise and adenosine [(Pa.s)/m3|(mmHg.min)/ml]
-Venules resistance dependent on phi and exercise [(Pa.s)/m3|(mmHg.min)/ml]
-For Pstras non-linear PV characteristics. For gamma = 0.0003750308 [N.kg-2.s4]
- V_n is between zpv and V_maxExponential, parameterized by gamma. 1 means its in the center. If the volume is over V_maxExponential, the PV characteristics follow the linear relation. For Pstras non-linear PV characteristics [m3|ml]
-nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization [m3|ml]
-nonlinear Un-Stressed volume [m3|ml]
-Maximal volume for nonlinear function, usually set as a fraction of V_maxExponential. [m3|ml]
-For Pstras non-linear PV characteristics [N.kg-2.s4]
-From Pstras [m3|ml]
-Linearly dependent on phi and sensitive to exercise, re [m3|ml]
-Linearly dependent on phi [m3|ml]
-[:#(type=Boolean)]
-Backcalculated nominal flow [m3/s|ml/min]
-Flow given by muscle contractions during exercise is proportional to Rv [m3/s|ml/min]
-Hydrostatic pressure of the whole tissue [Pa|mmHg]
-Hydrostatic pressure of the half of additional distance (gravity center) [Pa|mmHg]
-Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size. [m]
-Tilted additional height of the tissue mass center [m]
-height difference between connectors. Already includes Tilt information, as the distances in ports are tilted [m]
-[m]
-Pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Input flow (measured in normal blood flow direction) [m3/s|ml/min]
-der(Input flow (measured in normal blood flow direction)) [m3/s2]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
-[:#(type=Boolean)]
-Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
-Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
-[m3|ml]
-Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
-Actual height of the vessel depends on tilt and sinAlpha [m]
-Elasticity [Pa]
-Segment length [m]
-Inner vessel radius [m]
-Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
-Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
-Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
-Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[rad|deg]
-Pressure of elastic compartment [Pa|mmHg]
-Real compliance after all effects [m3/Pa|ml/mmHg]
-Radius depends on sympathetic activation phi [1|%]
-Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
@@ -38482,6 +38340,154 @@ Zero-pressure volume [m3|ml]
 Pressure of elastic compartment [Pa|mmHg]
 Real compliance after all effects [m3/Pa|ml/mmHg]
 Radius depends on sympathetic activation phi [1|%]
+Volume flow [m3/s|ml/min]
+Pressure [Pa|mmHg]
+Volume flow [m3/s|ml/min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Optional arteriole inertance [Pa.s2/m3|mmHg.min2/ml]
+Compliance or nominal compliance for non-linear PV characteristics [m3/Pa|ml/mmHg]
+Arteriole resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Elastic viscosity using Voigt model of in-series resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Optional venule intertance [Pa.s2/m3|mmHg.min2/ml]
+venule resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[Pa|mmHg]
+Inner pressure of compliant chamber (after viscoelastic resistance) [Pa|mmHg]
+middle pressure (at joint of viscous forces) [Pa|mmHg]
+Arterial side pressure including the hydrostatic pressure [Pa|mmHg]
+Venous side pressure including the hydrostatic pressure [Pa|mmHg]
+Arterioles resistance dependent on phi and exercise and adenosine [(Pa.s)/m3|(mmHg.min)/ml]
+Venules resistance dependent on phi and exercise [(Pa.s)/m3|(mmHg.min)/ml]
+For Pstras non-linear PV characteristics. For gamma = 0.0003750308 [N.kg-2.s4]
+ V_n is between zpv and V_maxExponential, parameterized by gamma. 1 means its in the center. If the volume is over V_maxExponential, the PV characteristics follow the linear relation. For Pstras non-linear PV characteristics [m3|ml]
+nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization [m3|ml]
+nonlinear Un-Stressed volume [m3|ml]
+Maximal volume for nonlinear function, usually set as a fraction of V_maxExponential. [m3|ml]
+For Pstras non-linear PV characteristics [N.kg-2.s4]
+From Pstras [m3|ml]
+Linearly dependent on phi and sensitive to exercise, re [m3|ml]
+Linearly dependent on phi [m3|ml]
+[:#(type=Boolean)]
+Backcalculated nominal flow [m3/s|ml/min]
+Flow given by muscle contractions during exercise is proportional to Rv [m3/s|ml/min]
+Hydrostatic pressure of the whole tissue [Pa|mmHg]
+Hydrostatic pressure of the half of additional distance (gravity center) [Pa|mmHg]
+Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size. [m]
+Tilted additional height of the tissue mass center [m]
+height difference between connectors. Already includes Tilt information, as the distances in ports are tilted [m]
+[m]
+Pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Input flow (measured in normal blood flow direction) [m3/s|ml/min]
+der(Input flow (measured in normal blood flow direction)) [m3/s2]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
+[:#(type=Boolean)]
+Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
+Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
+[m3|ml]
+Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
+Actual height of the vessel depends on tilt and sinAlpha [m]
+Elasticity [Pa]
+Segment length [m]
+Inner vessel radius [m]
+Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
+Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
+Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
+Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
+Real compliance after all effects [m3/Pa|ml/mmHg]
+Radius depends on sympathetic activation phi [1|%]
+Pressure [Pa|mmHg]
+Volume flow [m3/s|ml/min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Input flow (measured in normal blood flow direction) [m3/s|ml/min]
+der(Input flow (measured in normal blood flow direction)) [m3/s2]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
+[:#(type=Boolean)]
+Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
+Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
+[m3|ml]
+Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
+Actual height of the vessel depends on tilt and sinAlpha [m]
+Elasticity [Pa]
+Segment length [m]
+Inner vessel radius [m]
+Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
+Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
+Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
+Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
+Real compliance after all effects [m3/Pa|ml/mmHg]
+Radius depends on sympathetic activation phi [1|%]
 Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
 [:#(type=Boolean)]
@@ -38674,348 +38680,6 @@ Zero-pressure volume [m3|ml]
 Pressure of elastic compartment [Pa|mmHg]
 Real compliance after all effects [m3/Pa|ml/mmHg]
 Radius depends on sympathetic activation phi [1|%]
-Pressure [Pa|mmHg]
-Volume flow [m3/s|ml/min]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Input flow (measured in normal blood flow direction) [m3/s|ml/min]
-der(Input flow (measured in normal blood flow direction)) [m3/s2]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
-[:#(type=Boolean)]
-Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
-Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
-[m3|ml]
-Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
-Actual height of the vessel depends on tilt and sinAlpha [m]
-Elasticity [Pa]
-Segment length [m]
-Inner vessel radius [m]
-Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
-Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
-Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
-Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[rad|deg]
-Pressure of elastic compartment [Pa|mmHg]
-Real compliance after all effects [m3/Pa|ml/mmHg]
-Radius depends on sympathetic activation phi [1|%]
-Pressure [Pa|mmHg]
-Volume flow [m3/s|ml/min]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Input flow (measured in normal blood flow direction) [m3/s|ml/min]
-der(Input flow (measured in normal blood flow direction)) [m3/s2]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
-[:#(type=Boolean)]
-Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
-Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
-[m3|ml]
-Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
-Actual height of the vessel depends on tilt and sinAlpha [m]
-Elasticity [Pa]
-Segment length [m]
-Inner vessel radius [m]
-Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
-Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
-Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
-Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[rad|deg]
-Pressure of elastic compartment [Pa|mmHg]
-Real compliance after all effects [m3/Pa|ml/mmHg]
-Radius depends on sympathetic activation phi [1|%]
-Pressure [Pa|mmHg]
-Volume flow [m3/s|ml/min]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Optional arteriole inertance [Pa.s2/m3|mmHg.min2/ml]
-Compliance or nominal compliance for non-linear PV characteristics [m3/Pa|ml/mmHg]
-Arteriole resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Elastic viscosity using Voigt model of in-series resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Optional venule intertance [Pa.s2/m3|mmHg.min2/ml]
-venule resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[Pa|mmHg]
-Inner pressure of compliant chamber (after viscoelastic resistance) [Pa|mmHg]
-middle pressure (at joint of viscous forces) [Pa|mmHg]
-Arterial side pressure including the hydrostatic pressure [Pa|mmHg]
-Venous side pressure including the hydrostatic pressure [Pa|mmHg]
-Arterioles resistance dependent on phi and exercise and adenosine [(Pa.s)/m3|(mmHg.min)/ml]
-Venules resistance dependent on phi and exercise [(Pa.s)/m3|(mmHg.min)/ml]
-For Pstras non-linear PV characteristics. For gamma = 0.0003750308 [N.kg-2.s4]
- V_n is between zpv and V_maxExponential, parameterized by gamma. 1 means its in the center. If the volume is over V_maxExponential, the PV characteristics follow the linear relation. For Pstras non-linear PV characteristics [m3|ml]
-nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization [m3|ml]
-nonlinear Un-Stressed volume [m3|ml]
-Maximal volume for nonlinear function, usually set as a fraction of V_maxExponential. [m3|ml]
-For Pstras non-linear PV characteristics [N.kg-2.s4]
-From Pstras [m3|ml]
-Linearly dependent on phi and sensitive to exercise, re [m3|ml]
-Linearly dependent on phi [m3|ml]
-[:#(type=Boolean)]
-Backcalculated nominal flow [m3/s|ml/min]
-Flow given by muscle contractions during exercise is proportional to Rv [m3/s|ml/min]
-Hydrostatic pressure of the whole tissue [Pa|mmHg]
-Hydrostatic pressure of the half of additional distance (gravity center) [Pa|mmHg]
-Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size. [m]
-Tilted additional height of the tissue mass center [m]
-height difference between connectors. Already includes Tilt information, as the distances in ports are tilted [m]
-[m]
-Volume flow [m3/s|ml/min]
-Pressure [Pa|mmHg]
-Volume flow [m3/s|ml/min]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Optional arteriole inertance [Pa.s2/m3|mmHg.min2/ml]
-Compliance or nominal compliance for non-linear PV characteristics [m3/Pa|ml/mmHg]
-Arteriole resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Elastic viscosity using Voigt model of in-series resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Optional venule intertance [Pa.s2/m3|mmHg.min2/ml]
-venule resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[Pa|mmHg]
-Inner pressure of compliant chamber (after viscoelastic resistance) [Pa|mmHg]
-middle pressure (at joint of viscous forces) [Pa|mmHg]
-Arterial side pressure including the hydrostatic pressure [Pa|mmHg]
-Venous side pressure including the hydrostatic pressure [Pa|mmHg]
-Arterioles resistance dependent on phi and exercise and adenosine [(Pa.s)/m3|(mmHg.min)/ml]
-Venules resistance dependent on phi and exercise [(Pa.s)/m3|(mmHg.min)/ml]
-For Pstras non-linear PV characteristics. For gamma = 0.0003750308 [N.kg-2.s4]
- V_n is between zpv and V_maxExponential, parameterized by gamma. 1 means its in the center. If the volume is over V_maxExponential, the PV characteristics follow the linear relation. For Pstras non-linear PV characteristics [m3|ml]
-nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization [m3|ml]
-nonlinear Un-Stressed volume [m3|ml]
-Maximal volume for nonlinear function, usually set as a fraction of V_maxExponential. [m3|ml]
-For Pstras non-linear PV characteristics [N.kg-2.s4]
-From Pstras [m3|ml]
-Linearly dependent on phi and sensitive to exercise, re [m3|ml]
-Linearly dependent on phi [m3|ml]
-[:#(type=Boolean)]
-Backcalculated nominal flow [m3/s|ml/min]
-Flow given by muscle contractions during exercise is proportional to Rv [m3/s|ml/min]
-Hydrostatic pressure of the whole tissue [Pa|mmHg]
-Hydrostatic pressure of the half of additional distance (gravity center) [Pa|mmHg]
-Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size. [m]
-Tilted additional height of the tissue mass center [m]
-height difference between connectors. Already includes Tilt information, as the distances in ports are tilted [m]
-[m]
-Pressure [Pa|mmHg]
-Volume flow [m3/s|ml/min]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Input flow (measured in normal blood flow direction) [m3/s|ml/min]
-der(Input flow (measured in normal blood flow direction)) [m3/s2]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
-[:#(type=Boolean)]
-Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
-Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
-[m3|ml]
-Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
-Actual height of the vessel depends on tilt and sinAlpha [m]
-Elasticity [Pa]
-Segment length [m]
-Inner vessel radius [m]
-Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
-Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
-Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
-Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[rad|deg]
-Pressure of elastic compartment [Pa|mmHg]
-Real compliance after all effects [m3/Pa|ml/mmHg]
-Radius depends on sympathetic activation phi [1|%]
-Pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Input flow (measured in normal blood flow direction) [m3/s|ml/min]
-der(Input flow (measured in normal blood flow direction)) [m3/s2]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
-[:#(type=Boolean)]
-Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
-Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
-[m3|ml]
-Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
-Actual height of the vessel depends on tilt and sinAlpha [m]
-Elasticity [Pa]
-Segment length [m]
-Inner vessel radius [m]
-Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
-Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
-Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
-Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[rad|deg]
-Pressure of elastic compartment [Pa|mmHg]
-Real compliance after all effects [m3/Pa|ml/mmHg]
-Radius depends on sympathetic activation phi [1|%]
-Pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Input flow (measured in normal blood flow direction) [m3/s|ml/min]
-der(Input flow (measured in normal blood flow direction)) [m3/s2]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
-[:#(type=Boolean)]
-Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
-Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
-[m3|ml]
-Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
-Actual height of the vessel depends on tilt and sinAlpha [m]
-Elasticity [Pa]
-Segment length [m]
-Inner vessel radius [m]
-Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
-Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
-Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
-Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[rad|deg]
-Pressure of elastic compartment [Pa|mmHg]
-Real compliance after all effects [m3/Pa|ml/mmHg]
-Radius depends on sympathetic activation phi [1|%]
-Pressure [Pa|mmHg]
 Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
 [:#(type=Boolean)]
@@ -39222,6 +38886,52 @@ Tilted additional height of the tissue mass center [m]
 height difference between connectors. Already includes Tilt information, as the distances in ports are tilted [m]
 [m]
 Pressure [Pa|mmHg]
+Volume flow [m3/s|ml/min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Input flow (measured in normal blood flow direction) [m3/s|ml/min]
+der(Input flow (measured in normal blood flow direction)) [m3/s2]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
+[:#(type=Boolean)]
+Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
+Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
+[m3|ml]
+Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
+Actual height of the vessel depends on tilt and sinAlpha [m]
+Elasticity [Pa]
+Segment length [m]
+Inner vessel radius [m]
+Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
+Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
+Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
+Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
+Real compliance after all effects [m3/Pa|ml/mmHg]
+Radius depends on sympathetic activation phi [1|%]
+Pressure [Pa|mmHg]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
@@ -39313,51 +39023,6 @@ Real compliance after all effects [m3/Pa|ml/mmHg]
 Radius depends on sympathetic activation phi [1|%]
 Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-[:#(type=Boolean)]
-Inserts a one-way valve when true [:#(type=Boolean)]
-[1|%]
-Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
-externally applied pressure - either thoracic or the other one [Pa|mmHg]
-Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
-True, when this particular tissue is doing exercise [:#(type=Boolean)]
-Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
-Actual exercise fraction for this particular tissue [1|%]
-Input flow (measured in normal blood flow direction) [m3/s|ml/min]
-der(Input flow (measured in normal blood flow direction)) [m3/s2]
-Actual volume [m3|ml]
-der(Actual volume) [m3/s]
-Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
-Auxiliary variable for actual position on the ideal diode characteristic [1]
-Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
-Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
-Forward threshold pressure [Pa|mmHg]
-[:#(type=Boolean)]
-[Pa|mmHg]
-[Pa|mmHg]
-[m3/s|ml/min]
-Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
-[:#(type=Boolean)]
-Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
-Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
-[m3|ml]
-Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
-Actual height of the vessel depends on tilt and sinAlpha [m]
-Elasticity [Pa]
-Segment length [m]
-Inner vessel radius [m]
-Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
-Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
-Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
-Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
-Zero-pressure volume [m3|ml]
-[rad|deg]
-Pressure of elastic compartment [Pa|mmHg]
-Real compliance after all effects [m3/Pa|ml/mmHg]
-Radius depends on sympathetic activation phi [1|%]
-Pressure [Pa|mmHg]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
@@ -39652,6 +39317,52 @@ Pressure of elastic compartment [Pa|mmHg]
 Real compliance after all effects [m3/Pa|ml/mmHg]
 Radius depends on sympathetic activation phi [1|%]
 Pressure [Pa|mmHg]
+Volume flow [m3/s|ml/min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Input flow (measured in normal blood flow direction) [m3/s|ml/min]
+der(Input flow (measured in normal blood flow direction)) [m3/s2]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
+[:#(type=Boolean)]
+Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
+Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
+[m3|ml]
+Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
+Actual height of the vessel depends on tilt and sinAlpha [m]
+Elasticity [Pa]
+Segment length [m]
+Inner vessel radius [m]
+Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
+Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
+Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
+Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
+Real compliance after all effects [m3/Pa|ml/mmHg]
+Radius depends on sympathetic activation phi [1|%]
+Pressure [Pa|mmHg]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
@@ -39739,6 +39450,300 @@ Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
 Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
 Zero-pressure volume [m3|ml]
 [rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
+Real compliance after all effects [m3/Pa|ml/mmHg]
+Radius depends on sympathetic activation phi [1|%]
+Pressure [Pa|mmHg]
+Volume flow [m3/s|ml/min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Optional arteriole inertance [Pa.s2/m3|mmHg.min2/ml]
+Compliance or nominal compliance for non-linear PV characteristics [m3/Pa|ml/mmHg]
+Arteriole resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Elastic viscosity using Voigt model of in-series resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Optional venule intertance [Pa.s2/m3|mmHg.min2/ml]
+venule resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[Pa|mmHg]
+Inner pressure of compliant chamber (after viscoelastic resistance) [Pa|mmHg]
+middle pressure (at joint of viscous forces) [Pa|mmHg]
+Arterial side pressure including the hydrostatic pressure [Pa|mmHg]
+Venous side pressure including the hydrostatic pressure [Pa|mmHg]
+Arterioles resistance dependent on phi and exercise and adenosine [(Pa.s)/m3|(mmHg.min)/ml]
+Venules resistance dependent on phi and exercise [(Pa.s)/m3|(mmHg.min)/ml]
+For Pstras non-linear PV characteristics. For gamma = 0.0003750308 [N.kg-2.s4]
+ V_n is between zpv and V_maxExponential, parameterized by gamma. 1 means its in the center. If the volume is over V_maxExponential, the PV characteristics follow the linear relation. For Pstras non-linear PV characteristics [m3|ml]
+nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization [m3|ml]
+nonlinear Un-Stressed volume [m3|ml]
+Maximal volume for nonlinear function, usually set as a fraction of V_maxExponential. [m3|ml]
+For Pstras non-linear PV characteristics [N.kg-2.s4]
+From Pstras [m3|ml]
+Linearly dependent on phi and sensitive to exercise, re [m3|ml]
+Linearly dependent on phi [m3|ml]
+[:#(type=Boolean)]
+Backcalculated nominal flow [m3/s|ml/min]
+Flow given by muscle contractions during exercise is proportional to Rv [m3/s|ml/min]
+Hydrostatic pressure of the whole tissue [Pa|mmHg]
+Hydrostatic pressure of the half of additional distance (gravity center) [Pa|mmHg]
+Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size. [m]
+Tilted additional height of the tissue mass center [m]
+height difference between connectors. Already includes Tilt information, as the distances in ports are tilted [m]
+[m]
+Volume flow [m3/s|ml/min]
+Pressure [Pa|mmHg]
+Volume flow [m3/s|ml/min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Optional arteriole inertance [Pa.s2/m3|mmHg.min2/ml]
+Compliance or nominal compliance for non-linear PV characteristics [m3/Pa|ml/mmHg]
+Arteriole resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Elastic viscosity using Voigt model of in-series resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Optional venule intertance [Pa.s2/m3|mmHg.min2/ml]
+venule resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[Pa|mmHg]
+Inner pressure of compliant chamber (after viscoelastic resistance) [Pa|mmHg]
+middle pressure (at joint of viscous forces) [Pa|mmHg]
+Arterial side pressure including the hydrostatic pressure [Pa|mmHg]
+Venous side pressure including the hydrostatic pressure [Pa|mmHg]
+Arterioles resistance dependent on phi and exercise and adenosine [(Pa.s)/m3|(mmHg.min)/ml]
+Venules resistance dependent on phi and exercise [(Pa.s)/m3|(mmHg.min)/ml]
+For Pstras non-linear PV characteristics. For gamma = 0.0003750308 [N.kg-2.s4]
+ V_n is between zpv and V_maxExponential, parameterized by gamma. 1 means its in the center. If the volume is over V_maxExponential, the PV characteristics follow the linear relation. For Pstras non-linear PV characteristics [m3|ml]
+nominal volume calculated from the linear relationship. nominal volume for non-linear compliance parametrization [m3|ml]
+nonlinear Un-Stressed volume [m3|ml]
+Maximal volume for nonlinear function, usually set as a fraction of V_maxExponential. [m3|ml]
+For Pstras non-linear PV characteristics [N.kg-2.s4]
+From Pstras [m3|ml]
+Linearly dependent on phi and sensitive to exercise, re [m3|ml]
+Linearly dependent on phi [m3|ml]
+[:#(type=Boolean)]
+Backcalculated nominal flow [m3/s|ml/min]
+Flow given by muscle contractions during exercise is proportional to Rv [m3/s|ml/min]
+Hydrostatic pressure of the whole tissue [Pa|mmHg]
+Hydrostatic pressure of the half of additional distance (gravity center) [Pa|mmHg]
+Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size. [m]
+Tilted additional height of the tissue mass center [m]
+height difference between connectors. Already includes Tilt information, as the distances in ports are tilted [m]
+[m]
+Pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Input flow (measured in normal blood flow direction) [m3/s|ml/min]
+der(Input flow (measured in normal blood flow direction)) [m3/s2]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
+[:#(type=Boolean)]
+Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
+Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
+[m3|ml]
+Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
+Actual height of the vessel depends on tilt and sinAlpha [m]
+Elasticity [Pa]
+Segment length [m]
+Inner vessel radius [m]
+Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
+Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
+Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
+Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
+Real compliance after all effects [m3/Pa|ml/mmHg]
+Radius depends on sympathetic activation phi [1|%]
+Pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Input flow (measured in normal blood flow direction) [m3/s|ml/min]
+der(Input flow (measured in normal blood flow direction)) [m3/s2]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
+[:#(type=Boolean)]
+Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
+Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
+[m3|ml]
+Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
+Actual height of the vessel depends on tilt and sinAlpha [m]
+Elasticity [Pa]
+Segment length [m]
+Inner vessel radius [m]
+Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
+Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
+Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
+Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
+Real compliance after all effects [m3/Pa|ml/mmHg]
+Radius depends on sympathetic activation phi [1|%]
+Pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Input flow (measured in normal blood flow direction) [m3/s|ml/min]
+der(Input flow (measured in normal blood flow direction)) [m3/s2]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
+[:#(type=Boolean)]
+Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
+Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
+[m3|ml]
+Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
+Actual height of the vessel depends on tilt and sinAlpha [m]
+Elasticity [Pa]
+Segment length [m]
+Inner vessel radius [m]
+Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
+Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
+Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
+Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
+Real compliance after all effects [m3/Pa|ml/mmHg]
+Radius depends on sympathetic activation phi [1|%]
+Volume flow [m3/s|ml/min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Inserts a one-way valve when true [:#(type=Boolean)]
+[1|%]
+Optional Ratio for thoracic pressure, e.g. for abdominal cavity [1|%]
+externally applied pressure - either thoracic or the other one [Pa|mmHg]
+Internal effect of externally applied pressure. Might be lower as the vessel is close to empty. [Pa|mmHg]
+True, when this particular tissue is doing exercise [:#(type=Boolean)]
+Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
+Actual exercise fraction for this particular tissue [1|%]
+Input flow (measured in normal blood flow direction) [m3/s|ml/min]
+der(Input flow (measured in normal blood flow direction)) [m3/s2]
+Actual volume [m3|ml]
+der(Actual volume) [m3/s]
+Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve resistance) [(Pa.s)/m3|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+[:#(type=Boolean)]
+[Pa|mmHg]
+[Pa|mmHg]
+[m3/s|ml/min]
+Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account. [:#(type=Boolean)]
+[:#(type=Boolean)]
+Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input.
+Provides relative distention fraction output, otherwise hidden and not calculated [:#(type=Boolean)]
+[m3|ml]
+Hydrostatic pressure of whole vessel at actual orientation [Pa|mmHg]
+Actual height of the vessel depends on tilt and sinAlpha [m]
+Elasticity [Pa]
+Segment length [m]
+Inner vessel radius [m]
+Thickness of the vessel wall. Eq. from (Safaei 2018) [m]
+Inertance eq from (Safaei 2018) [Pa.s2/m3|mmHg.min2/ml]
+Compliance eq from (Safaei 2018) [m3/Pa|ml/mmHg]
+Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
+Zero-pressure volume [m3|ml]
+[rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
 Real compliance after all effects [m3/Pa|ml/mmHg]
 Radius depends on sympathetic activation phi [1|%]
 Pressure [Pa|mmHg]
@@ -46083,6 +46088,7 @@ Resistance eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
 Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018) [(Pa.s)/m3|(mmHg.min)/ml]
 Zero-pressure volume [m3|ml]
 [rad|deg]
+Pressure of elastic compartment [Pa|mmHg]
 Real compliance after all effects [m3/Pa|ml/mmHg]
 Radius depends on sympathetic activation phi [1|%]
 Reference level from which to start counting the position. [m|cm]
@@ -46138,7 +46144,6 @@ Forward threshold pressure [Pa|mmHg]
 [Pa|mmHg]
 [m3/s|ml/min]
 forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Pressure [Pa|mmHg]
 Pressure [Pa|mmHg]
 Pressure gradient [Pa|mmHg]
 [:#(type=Boolean)]
@@ -46365,7 +46370,6 @@ D relative to resting D_A to compare timings [1|%]
 [m3|ml]
 [m3/s]
 [Pa|mmHg]
-[Pa|mmHg]
 [J]
 [W]
 [W|kcal/min]
@@ -46478,7 +46482,7 @@ Nominal flow for maximal flow case (e.g. exercise) [m3/s|ml/min]
 Exponent of conductance base, as in dp = base*Q^Exp. Set to 1 for linear characteristics. Calculated from nominals.
 Maximal flow having constant TPR to prevent multistable simulation [m3/s|l/min]
 [(Pa.s)/m3|(mmHg.min)/ml]
-[(Pa.s)/m3|(mmHg.min)/ml]
+Indicator of actual total pulmonary resistance [(Pa.s)/m3|(mmHg.min)/ml]
 
 Volume start value [m3|ml]
 Additional volume, that generate pressure [m3|ml]
@@ -46727,6 +46731,7 @@ der(integration of pressure to find the true mean) [Pa]
 [m3/s|ml/min]
 [Pa|mmHg]
 [Pa|mmHg]
+Pressure in left ventricle [Pa|mmHg]
 [m3|ml]
 [1|%]
 [m3|ml]
@@ -46744,8 +46749,11 @@ Distance between carotid_L48 and femoral_R222 for calculating pulse wave propaga
 Length of the whole aorta for comparison to body size [m]
 Body height, estimated from aortic length calculation. Have to eb manually set to settings due to computational procedure [m]
 Rezai, Blood Press Monit 2013, for male subjects [m]
+Pressure in left atria [Pa|mmHg]
 Left atrium volume output [m3|ml]
 Flow in mitral valve [m3/s|ml/min]
 maximal Sarcomere length
 Minimal Sarcomere length
+[s]
+
 
