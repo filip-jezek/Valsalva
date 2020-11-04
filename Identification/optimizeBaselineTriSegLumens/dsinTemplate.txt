@@ -63,7 +63,7 @@ double method(27,1)
        0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
        0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
        0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
-   65536                   # debug    flags for debug information (1<<0 uses pdebug) 
+    1024                   # debug    flags for debug information (1<<0 uses pdebug) 
      100                   # pdebug       priority of debug information (1...100)
        0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
        0                   # ordmax   Maximum allowed integration order, if > 0
@@ -11815,9 +11815,9 @@ double initialValue(11650,6)
   1   280   # settings.heart_drive_atr_D_0
  -1 %settings.heart_atr_D_A% 0.0 0.0
   1   280   # settings.heart_atr_D_A
- -1  8.9082309999999998E-01       0                       0                
+ -1 %settings.heart_vntr_xi_Vw% 0.0 0.0
   1   280   # settings.heart_vntr_xi_Vw
- -1  9.1805000000000003E-01       0                       0                
+ -1 %settings.heart_vntr_xi_AmRef% 0.0 0.0
   1   280   # settings.heart_vntr_xi_AmRef
  -1 %settings.heart_vntr_k_passive% 0.0 0.0
   1   280   # settings.heart_vntr_k_passive
