@@ -2155,6 +2155,20 @@ type"),       Text(
             annotation (Placement(transformation(extent={{22,-90},{42,-70}})));
           Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump3(SolutionFlow=1e-06)
             annotation (Placement(transformation(extent={{-56,-90},{-36,-70}})));
+          Resistor_NonLinearSlow resistor_NonLinearSlow(R_nom(displayUnit=
+                  "(mmHg.min)/l"))
+            annotation (Placement(transformation(extent={{-36,54},{-16,74}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P=0)
+            annotation (Placement(transformation(extent={{30,54},{10,74}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(
+              usePressureInput=true)
+            annotation (Placement(transformation(extent={{-82,52},{-62,72}})));
+          Modelica.Blocks.Sources.Ramp ramp(
+            height=1332,
+            duration=100,
+            offset=2332,
+            startTime=10) annotation (Placement(transformation(extent={{-124,52},
+                    {-104,72}})));
         equation
           connect(unlimitedPump.q_out, elasticVesselNonLinearPstras.q_in) annotation (
               Line(
@@ -2174,6 +2188,18 @@ type"),       Text(
               points={{-36,-80},{32,-80}},
               color={0,0,0},
               thickness=1));
+          connect(unlimitedVolume1.y, resistor_NonLinearSlow.q_in) annotation (
+              Line(
+              points={{-62,62},{-50,62},{-50,64},{-36,64}},
+              color={0,0,0},
+              thickness=1));
+          connect(resistor_NonLinearSlow.q_out, unlimitedVolume.y) annotation (
+              Line(
+              points={{-16,64},{10,64}},
+              color={0,0,0},
+              thickness=1));
+          connect(unlimitedVolume1.pressure, ramp.y)
+            annotation (Line(points={{-82,62},{-103,62}}, color={0,0,127}));
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)),
             experiment(
@@ -2393,6 +2419,101 @@ type"),       Text(
                   fileName=
                     "modelica://Physiolibrary/Resources/Icons/ventilatorInertance.png")}));
       end ResistanceWithInertance;
+
+      model Resistor_NonLinearSlow
+        "Hydraulic resistor, where the pressure-flow characteristic is exponentially non-linear. Optional nominal conductance input at nominal flow. Reaction to flow integrally delayed."
+       extends Physiolibrary.Hydraulic.Interfaces.OnePort;
+       extends Physiolibrary.Icons.HydraulicResistor;
+
+       parameter Boolean useConductanceInput = false annotation(choices(checkBox=true));
+       parameter Boolean useNonlinearResistance = false annotation(choices(checkBox=true));
+       parameter Boolean useNominalParametrization = false annotation(choices(checkBox=true));
+       parameter Physiolibrary.Types.HydraulicResistance R_nom_fixed = 20000000 "Base Resistance or resistance for nominal resting flow if the useNominalParametrization is true";
+       parameter Real exp_parameter = 1 "Fixed exponent for direct parametrization if useNominalParametrization is false" annotation (Dialog(enable = not useNominalParametrization and useNonlinearResistance));
+
+       // initizalization
+        parameter Physiolibrary.Types.HydraulicResistance R_nom = 20000000
+          "Nominal resistance at nominal flow";
+        parameter Physiolibrary.Types.Pressure dp_nom=R_nom*Q_nom
+          "nominal pressure drop (use default)";
+        parameter Physiolibrary.Types.Pressure dp_high=(R_nom_fixed/2)*Q_high;
+        parameter Physiolibrary.Types.VolumeFlowRate Q_nom=0.0001 "nominal flow";
+        parameter Physiolibrary.Types.VolumeFlowRate Q_high=0.00033333333333333
+          "Nominal flow for maximal flow case (e.g. exercise)" annotation (Dialog(enable=
+                useNominalParametrization and useNonlinearResistance));
+        parameter Modelica.SIunits.Time tau = 1;
+        parameter Physiolibrary.Types.VolumeFlowRate maxLinearFlow=Q_nom
+          "Maximal flow having constant TPR to prevent multistable simulation" annotation (Dialog(enable = useNonlinearResistance));
+        Physiolibrary.Types.HydraulicResistance TPR= a*q_avg + b;
+        Physiolibrary.Types.HydraulicResistance TPR_lim = min(R_lim_max, max(R_lim_min, TPR));
+        parameter Physiolibrary.Types.HydraulicResistance R_lim_min = R_nom/2;
+        parameter Physiolibrary.Types.HydraulicResistance R_lim_max = R_nom*2;
+             Real a;
+             Real b;
+         Physiolibrary.Types.VolumeFlowRate q_avg;
+
+      initial equation
+        q_avg = Q_nom;
+      equation
+
+        dp_nom = (a*Q_nom + b)*Q_nom;
+        dp_high =(a*Q_high + b)*Q_high;
+
+        der(q_avg)*tau = q_in.q - q_avg;
+
+        dp = TPR_lim*q_in.q;
+
+       // if not useConductanceInput then
+      //    R_nom = R_nom_fixed;
+        //end if;
+
+
+
+      //   // we must allow also negative flows
+      //   // linear flow under the limit, also
+      //    if noEvent(dp >= 0 and abs(q_in.q) > maxLinearFlow) then
+      //          q_in.q = (dp/base)^(1/exp_);
+      //          linear = 1;
+      //    elseif noEvent(dp < 0 and abs(q_in.q) > maxLinearFlow) then
+      //        q_in.q = -(-dp/base)^(1/exp_);
+      //                linear = -1;
+      //    else
+      //     // linear characteristics inbetween
+      //       q_in.q = dp/TPR_limit;
+      //               linear = 0;
+      //    end if;
+
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false, extent={{
+                  -100,-100},{100,100}}),
+                         graphics={Text(
+                extent={{-220,-40},{200,-80}},
+                lineColor={0,0,255},
+                fillColor={58,117,175},
+                fillPattern=FillPattern.Solid,
+                textString="%name"), Line(
+                points={{-100,-60},{26,-26},{80,80}},
+                color={0,0,0},
+                smooth=Smooth.Bezier,
+                thickness=0.5)}),
+          Documentation(revisions="<html>
+<p><i>2020</i></p>
+<p>Filip Jezek, University of Michigan</p>
+</html>",   info="<html>
+<p>This hydraulic conductance (resistance) element contains two connector sides. No hydraulic medium volume is changing in this element during simulation. That means that sum of flow in both connector sides is zero. The flow through element is determined by an exponential relation:</p>
+<p><img src=\"modelica://Physiolibrary/Resources/Images/equations/equation-BpFHrLEf.png\" alt=\"dp = base*Q^exp_
+\"/></p>
+<p>where base and exp are parameters.</p>
+<p>To prevent infinite resistance at small flow, one can adjust linear working areas. When the flow is below maxLinearFlow, then the following linear </p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q_in.q&nbsp;=&nbsp;(dp/base)^(1/exp_);</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;<span style=\"color: #0000ff;\">elseif&nbsp;</span><span style=\"color: #ff0000;\">noEvent</span>(dp&nbsp;&lt;&nbsp;0<span style=\"font-family: Courier New; color: #0000ff;\">&nbsp;and&nbsp;</span><span style=\"color: #ff0000;\">abs</span>(q_in.q)&nbsp;&gt;&nbsp;maxLinearFlow)<span style=\"font-family: Courier New; color: #0000ff;\">&nbsp;then</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q_in.q&nbsp;=&nbsp;-(-dp/base)^(1/exp_);</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;<span style=\"color: #0000ff;\">else</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;<span style=\"color: #006400;\">//&nbsp;linear&nbsp;characteristics&nbsp;inbetween</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q_in.q&nbsp;=&nbsp;dp/TPR_limit;</span></p>
+<p><span style=\"font-family: Courier New;\">&nbsp;&nbsp;<span style=\"color: #0000ff;\">end&nbsp;if</span>;</p>
+<p><br><b>Ohm&apos;s law</b>. It is used conductance (=1/resistance) because it could be numerical zero better then infinity in resistance. </p>
+</html>"));
+      end Resistor_NonLinearSlow;
     end Basic;
 
     package Subsystems
@@ -2975,15 +3096,19 @@ type"),       Text(
                 extent={{-10,-10},{10,10}},
                 rotation=270,
                 origin={60,-20})));
+          replaceable Physiolibrary.Hydraulic.Components.Resistor R_pa_visc(
+              useConductanceInput=false, Resistance(displayUnit="(Pa.s)/m3") =
+              0.01/settings.pulm_C_PA) constrainedby
+            Physiolibrary.Hydraulic.Components.Resistor annotation (Placement(
+                transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=270,
+                origin={-60,-18})));
         equation
           volume = c_pa.volume + c_pv.volume - deadVolume;
 
           connect(port_a, r_pa.q_in) annotation (Line(
               points={{-100,0},{-10,0}},
-              color={0,0,0},
-              thickness=1));
-          connect(c_pa.q_in, r_pa.q_in) annotation (Line(
-              points={{-60,-50},{-60,0},{-10,0}},
               color={0,0,0},
               thickness=1));
           connect(r_pa.q_out, port_b) annotation (Line(
@@ -3008,6 +3133,14 @@ type"),       Text(
               thickness=1));
           connect(R_pv_visc.q_in, port_b) annotation (Line(
               points={{60,-10},{60,0},{100,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(c_pa.q_in, R_pa_visc.q_out) annotation (Line(
+              points={{-60,-50},{-60,-28}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_pa_visc.q_in, r_pa.q_in) annotation (Line(
+              points={{-60,-8},{-60,0},{-10,0}},
               color={0,0,0},
               thickness=1));
           annotation (Documentation(info="<html>
@@ -5558,11 +5691,9 @@ type"),       Text(
               parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
               parameter Real SLrest=1.51 "microns";
               // Collagen force
-              parameter Real SLcollagen=2.25;
-              // threshold for collagen activation, microns
-              parameter Real PConcollagen=0.01;
-              // contriubtion of collagen (??)
-              parameter Real PExpcollagen=70;
+              parameter Real SLcollagen=2.25 "threshold for collagen activation, microns";
+              parameter Real PConcollagen=0.01 "contriubtion of collagen (??)";
+              parameter Real PExpcollagen=70 "contriubtion of collagen (??)";
 
 
               Real Tm "Represenattive midwall tension";
