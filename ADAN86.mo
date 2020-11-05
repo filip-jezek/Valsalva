@@ -192,7 +192,7 @@ package ADAN_main
       parameter Physiolibrary.Types.HydraulicResistance heart_R_LA=1999835.811225
       "Resistance of left atrium"
         annotation(Dialog(tab = "Heart", group = "General"));
-      parameter Physiolibrary.Types.HydraulicResistance heart_R_RA=1999835.811225
+      parameter Physiolibrary.Types.HydraulicResistance heart_R_RA=heart_R_LA
       "Resistance of the right atrium"
         annotation(Dialog(tab = "Heart", group = "General"));
 
@@ -1877,7 +1877,7 @@ type"),       Text(
         Physiolibrary.Types.HydraulicResistance TPR_limit=base*(
             maxLinearFlow^exp_)/maxLinearFlow;
         Physiolibrary.Types.HydraulicResistance TPR=if noEvent(q_in.q > 0)
-             then dp/q_in.q else 0;
+             then dp/q_in.q else 0 "Indicator of actual total pulmonary resistance";
         Physiolibrary.Types.RealIO.HydraulicConductanceInput
                                                cond=1/R_nom if useConductanceInput
                                                          annotation (Placement(
@@ -5617,31 +5617,31 @@ type"),       Text(
                       fillColor={255,255,255},
                       fillPattern=FillPattern.Solid),
                     Line(
-                      points={{-74,-16},{-64,-16},{-50,62},{-4,0},{-4,-14},{24,
-                          -14},{86,-14}},
+                      points={{-74,-16},{-64,-16},{-50,62},{-4,0},{6,-14},{24,-14},{86,-14}},
                       color={0,0,0},
                       thickness=1,
                       smooth=Smooth.Bezier),
                     Line(
                       points={{74,-44},{74,-14}},
                       color={28,108,200},
-                      arrow={Arrow.Open,Arrow.Open}),
-                    Line(points={{-46,44},{-46,-44}}, color={28,108,200}),
+                      arrow={Arrow.Filled,Arrow.Filled}),
+                    Line(points={{-46,44},{-46,-44}}, color={28,108,200},
+                      arrow={Arrow.Filled,Arrow.Filled}),
                     Line(
                       points={{-74,-34},{-46,-34}},
                       color={28,108,200},
                       arrow={Arrow.Open,Arrow.Open}),
                     Line(
-                      points={{-48,-34},{-2,-34}},
+                      points={{-48,-34},{12,-34}},
                       color={28,108,200},
                       arrow={Arrow.Open,Arrow.Open}),
-                    Line(points={{-2,-10},{-2,-44}}, color={28,108,200}),
+                    Line(points={{12,-14},{12,-44}}, color={28,108,200}),
                     Text(
                       extent={{36,-38},{76,-22}},
                       lineColor={28,108,200},
                       fillColor={255,255,255},
                       fillPattern=FillPattern.Solid,
-                      textString="D0"),
+                      textString="D_0"),
                     Text(
                       extent={{-72,-34},{-48,-18}},
                       lineColor={28,108,200},
@@ -5665,7 +5665,13 @@ type"),       Text(
                       lineColor={0,0,0},
                       fillColor={255,255,255},
                       fillPattern=FillPattern.Solid,
-                      textString="1 - cos")}));
+                      textString="1 - cos"),
+                    Text(
+                      extent={{-52,-8},{-12,8}},
+                      lineColor={28,108,200},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="D_A")}));
             end Driving_Olufsen;
 
             partial model partialVentricleWall "base class to be plug-in usable"
@@ -6113,8 +6119,9 @@ type"),       Text(
               // parameter Real k_passive_negative=50 "mN / mm^2 / micro";
 
               // Collagen force
-              Real sigma_collagen=if (SLo > SLcollagen) then PConcollagen*(exp(PExpcollagen*
-                  (SLo - SLcollagen)) - 1) else 0;
+            //   Real sigma_collagen=if (SLo > SLcollagen) then PConcollagen*(exp(PExpcollagen*
+            //       (SLo - SLcollagen)) - 1) else 0;
+              Real sigma_collagen=max(0, PConcollagen*(exp(PExpcollagen*(SLo - SLcollagen)) - 1));
 
               // Passive forces (Lumens) do not really work here atm so we are using DAB variant
               // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
@@ -34327,15 +34334,16 @@ P_hs_plus_dist"),
       model partialCVS_outputs "Add additional outputs to the base model"
         extends partialCVS;
 
-      output Physiolibrary.Types.Pressure brachial_pressure=SystemicComponent.brachial_L82_HeartLevel.p_C;
+      output Physiolibrary.Types.Pressure brachial_pressure=SystemicComponent.brachial_L82_HeartLevel.p_out_hs;
 
       output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
       Real brachial_pressure_int "integration of pressure to find the true mean";
         output Physiolibrary.Types.Pressure renal_capillary=SystemicComponent.renal_L166.p_C;
       output Physiolibrary.Types.VolumeFlowRate CO = heartComponent.aorticValve.CO;
-        output Physiolibrary.Types.Pressure carotid_pressure=SystemicComponent.common_carotid_L48_D.p_C;
-        output Physiolibrary.Types.Pressure femoral_pressure=SystemicComponent.femoral_L200.p_C;
-      output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
+        output Physiolibrary.Types.Pressure carotid_pressure=SystemicComponent.common_carotid_L48_D.p_out_hs;
+        output Physiolibrary.Types.Pressure femoral_pressure=SystemicComponent.femoral_L200.p_out_hs;
+        output Physiolibrary.Types.Pressure P_LV = heartComponent.ventricles.P_LV "Pressure in left ventricle";
+        output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
         output Physiolibrary.Types.Fraction phi_baro=SystemicComponent.phi_baroreflex;
       output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
       output Physiolibrary.Types.Frequency HR = heartRate.HR;
@@ -34384,6 +34392,7 @@ P_hs_plus_dist"),
           Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*settings.age+0.5409*(height*100)+0.3476*settings.BMI) "Zemtsovskaja, HT 2019 for male subjects";
           Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*settings.age+2.5*height*100) "Rezai, Blood Press Monit 2013, for male subjects";
 
+        output Physiolibrary.Types.Pressure P_LA = heartComponent.mitralValve.q_in.pressure "Pressure in left atria";
         output Physiolibrary.Types.Volume V_la = heartComponent.la.volume "Left atrium volume output";
         output Physiolibrary.Types.VolumeFlowRate q_mv = heartComponent.mitralValve.volumeFlowRate "Flow in mitral valve";
         output Real SLo_max = max([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo]) "maximal Sarcomere length";
@@ -38854,6 +38863,21 @@ P_hs_plus_dist"),
                 Tolerance=1e-06,
                 __Dymola_Algorithm="Cvode"));
           end TriSeg_OptimizedBaseline;
+
+          model CVS_baseline "Manual tuning after optimization"
+            extends
+              ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized(
+                heartComponent(calciumMechanics(
+                  D_0=1.311515e+07,
+                  D_A(displayUnit="Pa/m3") = 58625000,
+                  TS=0.14,
+                  TR=0.38)), useAutonomousPhi(y=false));
+            annotation (experiment(
+                StopTime=60,
+                Interval=0.01,
+                Tolerance=1e-06,
+                __Dymola_Algorithm="Cvode"));
+          end CVS_baseline;
         end Experiments;
 
         model OlufsenTriSeg_optimized1
@@ -39058,31 +39082,27 @@ P_hs_plus_dist"),
                 coordinateSystem(preserveAspectRatio=false)));
         end OptimizedValsalva;
 
-        model OptimizedBaseline "Generated by PostProcess/postprocess_optim.py optimized at Oct 29 20:02:35 CET 2020
- with cost 0.639632 lowest at run 411"
 
-          extends ADAN_main.SystemicTree.Baseline.CVS_baseline(
-            settings(
-              heart_R_vlv =          1.000000e+05,
-              heart_R_LA =          4.793500e+06,
-              heart_drive_D_0 =          2.459375e+01,
-              heart_drive_D_A =          1.427187e+03,
-              heart_drive_Tact =          1.300000e-01,
-              heart_drive_atr_D_0 =          1.029484e+07,
-              heart_atr_D_A =          1.706085e+07,
-              syst_TPR =          1.316505e+08,
-              syst_TR_frac =          4.865290e+00,
-              pulm_C_PA =          3.999528e-08,
-              pulm_R =          4.832106e+06,
-              pulm_q_nom_maxq =          1.590187e-04));
-          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
-                coordinateSystem(preserveAspectRatio=false)),
-            experiment(
-              StopTime=60,
-              Interval=0.01,
-              Tolerance=1e-08,
-              __Dymola_Algorithm="Cvode"));
-        end OptimizedBaseline;
+      model OlufsenTriSeg_optimized "Generated by PostProcess/postprocess_optim.py optimized at Oct 31 12:36:27 CET 2020
+ with cost 0.068118 lowest at run 2417"
+        extends ADAN_main.SystemicTree.Baseline.CVS_baseline(
+          settings(
+              heart_R_vlv=350000,
+              heart_R_LA=6031000,
+              heart_drive_D_0=17.67188,
+              heart_drive_D_A=1821.718,
+            heart_drive_Tact = 1.000000e-01,
+            heart_drive_atr_D_0 = 1.311515e+07,
+              heart_atr_D_A=58625000,
+              syst_TPR=130375000,
+              syst_TR_frac(displayUnit="1") = 4.533259,
+              baro_tau_s=20,
+              baro_fsn=0.03655,
+              pulm_C_PA=3.9875e-08,
+              pulm_R=6813356,
+              pulm_q_nom_maxq=0.0009916), useAutonomousPhi(y=true));
+      end OlufsenTriSeg_optimized;
+
       end Results;
 
       package SingleModelRun
@@ -39258,6 +39278,55 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end CVS_fastBaro;
+
+        model optimizeBaseline6
+          extends Auxiliary.partialCVS_ss;
+        end optimizeBaseline6;
+
+        model CVS_baseline "Generated by PostProcess/postprocess_optim.py optimized at Oct 31 12:36:27 CET 2020
+ with cost 0.068118 lowest at run 2417 and merged with older optims"
+          extends Auxiliary.partialCVS_ss(
+            settings(
+                heart_R_vlv=350000,
+                heart_R_LA=6031000,
+                heart_drive_D_0=17.67188,
+                heart_drive_D_A=1821.718,
+              heart_drive_Tact = 1.000000e-01,
+              heart_drive_atr_D_0 = 1.311515e+07,
+                heart_atr_D_A=58625000,
+                syst_TPR=130375000,
+                syst_TR_frac(displayUnit="1") = 4.533259,
+                pulm_C_PA=3.9875e-08,
+                pulm_R=6813356,
+                pulm_q_nom_maxq=0.0009916,
+                syst_abd_P_th_ratio=0.8,
+              heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000,
+          V_PV_init=5e-05,
+                heart_drive_D_0_maxAct =          2.953125e-04,
+              heart_drive_D_A_actMax =          9.585000e+03,
+              heart_drive_TS_maxAct =          1.223990e-01,
+              heart_drive_TR_maxAct =          1.106879e-01,
+              tissues_eta_Ra =          2.545225e+00,
+              tissues_eta_C =          3.421191e-01,
+              eta_vc =          1.289172e-01,
+              veins_gamma =          7.343750e-01,
+           heart_vntr_L0 = 1.6,
+           syst_art_k_E = 4.173268e-01,
+              heart_vntr_xi_AmRef = 9.180500e-01,
+              pulm_C_PV = 3.234639e-07,
+              pulm_P_PV_nom=1333.22387415,
+                 heart_vntr_Lsref=1.900000e+00), useAutonomousPhi(y=false),
+            pulmonaryComponent(r_pa(useNonlinearResistance=false)));
+
+
+
+
+          annotation (experiment(
+              StopTime=30,
+              Interval=0.01,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_baseline;
       end SingleModelRun;
 
       package CombinedModel
@@ -42934,20 +43003,28 @@ P_hs_plus_dist"),
           //   settings(V_PV_init=1e-06*(-1297.5 + 200), pulm_C_PV=3.7503078792283e-07),
           // pulmonaryComponent(c_pv(volume_start=65e-6 + 2000e-6 + settings.V_PV_init +
           //         200e-6))
-        extends CardiovascularSystem(
+        extends ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
           condTP_PC(disconnected=false),
           condTP_IP(disconnected=false),
           condTP_EP1(disconnected=false),
           condHeartPhi(uMin=settings.phi0),
+          useAutonomousPhi(y=true),
+          heartComponent(
+            ra(enabled=false),
+            la(enabled=false),
+            ventricles(
+              LV_wall(L0=1.6),
+              SEP_wall(L0=1.6),
+              RV_wall(L0=1.6))),
           settings(
-            V_PV_init=0.00015,
-            heart_drive_D_0(displayUnit="1"),
-            heart_drive_D_0_maxAct(displayUnit="1") = 0,
-            heart_drive_D_A(displayUnit="Pa/m3")));
+            V_PV_init=0.00035,
+            heart_R_vlv(displayUnit="(Pa.s)/m3"),
+            heart_R_LA(displayUnit="(mmHg.min)/l") = 3199737.29796,
+            heart_vntr_L0=1.6));
         annotation (experiment(
-            StopTime=2,
+            StopTime=60,
             Interval=0.01,
-            Tolerance=1e-08,
+            Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"), Documentation(info="<html>
 <p>This model simulates Valsalva maneuver, based on the normal resting supine case</p>
 </html>"));

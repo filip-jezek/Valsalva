@@ -95,16 +95,16 @@ def getObjectives(vars_set):
     # build costs
     ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), 120*mmHg2SI, None, 10),
             ('BPd', min(vars_set['brachial_pressure'][interval]), 80*mmHg2SI, None, 10),
-            ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, .1),
-            ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, .1),
+            ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1),
+            ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1),
             ('ESV_la', numpy.min(vars_set['V_la'][interval]), 12*ml2SI, None, 1),
             ('EDV_la', numpy.max(vars_set['V_la'][interval]), 41*ml2SI, None, 1),
             ('Q_MV_f', vla_peak_frac, None, [1.5, 2], 1e-3),
             ('Qdot_mv', atrial_kick, None, [0.2, 0.3], 1e-3),
-            ('q_mv_sad', q_mv_saddle, None, [0, q_mv_Patrial*0.2], 10e-3),
-            ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, 1),
-            ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, 1),            
-            ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 10),
+            ('q_mv_sad', q_mv_saddle, None, [0, q_mv_Patrial*0.2], 1e-3),
+            ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, 0),
+            ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, 0),            
+            ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 1),
 # set by assumption and loop closed
 #            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1), 
 # set by EDV and ESV
@@ -112,8 +112,8 @@ def getObjectives(vars_set):
 # set by HR and EDV AND ESV, just emphasized here
             ('CO', sum(vars_set['CO'][interval]) / len(interval), 5.76*lpm2SI, None, 10),
             ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), 20*mmHg2SI, None, 1),
-            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, 1),
-            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, 1),
+            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, .1),
+            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, .1),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, .1),
             ('PWV', pwv, None, [5, 10], 1)            ]
 
