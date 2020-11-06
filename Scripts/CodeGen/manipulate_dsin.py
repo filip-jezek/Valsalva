@@ -483,7 +483,8 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False):
     
 def run():
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
-    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False)
+    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False)
+    writeInitStatesFromDsin()
     print('Done, Johne')
     
 # if __name__ == "__main__":

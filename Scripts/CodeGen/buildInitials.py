@@ -17,11 +17,11 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'ADAN_main.SystemicTree.Identification.SteadyState.Optimized_ss_baro'
+base_model_full_path = 'CVS_baseline_ss'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
-steadyStateAt = 179.9
+steadyStateAt = 345
 
 # get the main and path
 if '.' in base_model_full_path:
@@ -34,7 +34,7 @@ else:
 input_text = open('states.csv', 'r').read()
 # incl_vars = 'volume|V_LV|V_RV|vol1|vol2|s|epsilon|fiSN|v_in'
 incl_vars = '.+'
-match = r'([\w.]+\.(?:' + incl_vars + r');.+;)'
+match = r'([\w.]+\.(?:' + incl_vars + r'));.+;'
 m = re.findall(match, input_text)
 lines = (line for line in m if line.split(';', 1)[0].rsplit('.', 1)[-1] not in exclude_filter)
 
