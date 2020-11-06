@@ -60,24 +60,35 @@ class ObjectiveVar:
         if self.costFunctionType is CostFunctionType.Quadratic:
             if target is None:
                 return 0
-            return self.weight*(measured - target)**2/(target**2)
+            elif target == 0:
+                return self.weight*abs(measured)
+            else:
+                return self.weight*(measured - target)**2/(target**2)
 
         elif self.costFunctionType is CostFunctionType.QuadraticVariance:
             if target is None:
                 return 0            
+            elif target == 0:
+                return self.weight*abs(measured)
             if self.std is None:
                 self.std = abs(target*DEFAULT_STD_PERCENT/100)
+            
             # variance is squared standard deviation
             return self.weight*(measured - target)**2/(target*self.std)
 
         elif self.costFunctionType is CostFunctionType.Linear:
             if target is None:
                 return 0
+            elif target == 0:
+                return self.weight*abs(measured)
+            
             return self.weight*abs(measured - target)/abs(target)
 
         elif self.costFunctionType is CostFunctionType.LinearVariance:
             if target is None:
                 return 0
+            elif target == 0:
+                return self.weight*abs(measured)
             if self.std is None:
                 self.std = abs(target*DEFAULT_STD_PERCENT/100)
             # variance is squared standard deviation
@@ -225,6 +236,12 @@ def calculateQdot_mv(v_lv, q_mv, time, interval):
     half_interval = range(interval[0], int((interval[-1] - interval[0])/2 + interval[0]))
     # end systolic time index
     t_ES_i = numpy.argmin(v_lv[half_interval]) + half_interval[0]
+    
+    # security countermeasure for weird flor profiles
+    buffer = next(i for  i, v in enumerate(q_mv[t_ES_i:]) if v > 0)
+    if buffer is not None and buffer > 0 and buffer < len(half_interval):
+        t_ES_i = t_ES_i + buffer
+
     ESV = v_lv[t_ES_i]
 
     # difference in the flow - positive for increasing flow rate, negative for decreasing flow
@@ -245,7 +262,12 @@ def calculateQdot_mv(v_lv, q_mv, time, interval):
     EDV = v_lv[t_ED_i]
 
     # atrial kick fraction as a fractions of volumes
-    atrial_kick_fraction = (EDV - V_LV_passive)/(EDV - ESV)
+    SV = (EDV - ESV)
+    if SV == 0:
+        atrial_kick_fraction = 0
+    else:
+        atrial_kick_fraction = (EDV - V_LV_passive)/SV
+
     q_mv_saddle = q_mv[t_q_mv_saddle_i]
 
 
@@ -479,6 +501,9 @@ def plotObjectiveTarget(pack:tuple, objective_name:str, unitFactor:float, fmt = 
     (objectives, time, ax, interval) = pack
     # get the bounds from the target value
     objective = next((o for o in objectives if o.name == objective_name))
+    if objective.targetValue is None:
+        # defensive programming: it might be none
+        return
     targetVal = objective.targetValue*unitFactor
     val = objective.value*unitFactor
     ax.plot((time[interval[0]], time[interval[-1]]), [targetVal]*2, fmt)
