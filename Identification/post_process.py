@@ -163,11 +163,11 @@ def importOptions(var_set:dict, settingsFile = 'post_process_options.json'):
 		"__SORT_COSTS_BY" : "costs",
 		"__LOG_OBJECTIVES_PATH" : "..\\Schedules\\objectives_log%03d.txt",
         "__LOG_OBJECTIVES_PATH_BASE" : null,
-		"__LOG_ALL_OBJECTIVES_PATH" : null,
+		"__LOG_ALL_OBJECTIVES_PATH" : "..\\Schedules\\objectivesAll_log%03d.txt",
         "__LOG_ALL_OBJECTIVES_PATH_BASE" : null,
 		"__targetValuesFilename" : "../../../data/Valsalva/targetValues_All_supine.txt",
-		"__inputFiles" : ["dsres.mat"],
-		"__root_path" : "..\\..\\"
+		"__inputFiles" : ["dsres.mat", "baseline", "dsres.mat", "valsalva"],
+		"__root_path" : "..\\..\\..\\"
 
 }"""
 

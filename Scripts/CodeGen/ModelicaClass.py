@@ -38,7 +38,7 @@ class ModelicaClass:
     def buildChildTree(self, inps):
         # ill = inp.split('\n')
         for line in inps:
-            l = line.split(';', 1)
+            l = line.split(',', 1)
             self.__attach(l[0], self)
 
     def printObjectTree(self, indent_level = 0) -> str:

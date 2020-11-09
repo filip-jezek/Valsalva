@@ -45,7 +45,7 @@ def plotObjectives(vars_set, interval, objectives):
 def getObjectives(vars_set):
 
     
-    fun_lib.checkSimulationLength(vars_set['time'][-1],10)
+    fun_lib.checkSimulationLength(vars_set['time'][-1],90)
 
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
@@ -73,7 +73,9 @@ def getObjectives(vars_set):
 
     time = vars_set['time']
 
-    interval = fun_lib.findInterval(time[-1] - 5, time[-1]-1, time)
+    interval = fun_lib.findInterval(time[0] + 43, time[0] + 48, time)
+    # to observe how much the baseline fluctuates
+    steady_interval = fun_lib.findInterval(time[0] + 10, time[0] + 50, time)
 
     # mitral valve flow ratio spontaneous:atrial contraction is about 2:1 
     # vla_1st_Peak_i = fun_lib.findInterval(39.8, 40, time)
@@ -115,7 +117,8 @@ def getObjectives(vars_set):
             ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, .1),
             ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, .1),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, .1),
-            ('EDP', numpy.min(vars_set['P_LV'][interval]), None, [6*mmHg2SI, 12*mmHg2SI], 1e-2),
+            ('EDP', numpy.min(vars_set['P_LV'][interval]), None, [6*mmHg2SI, 12*mmHg2SI], 1e-6),
+            ('BPMeanStd', numpy.std(vars_set['brachial_pressure_mean'][steady_interval]), None, [0, 4*mmHg2SI], 1e-2),
             ('PWV', pwv, None, [5, 10], 1)            ]
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight=o[4], k_p=1e3), ov))

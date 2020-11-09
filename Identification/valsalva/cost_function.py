@@ -240,8 +240,8 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
                     (HR     , phase4, (0, 3) , numpy.argmin, 't_ph4_hr_drop' , COUNT)    ]
 
     # Get pulse pressures
-    pp_values = [('pp_ph2_mean_min', 't_ph2_mean_min', phase2, 1, COUNT),
-                 ('pp_ph2_max'     , 't_ph2_max'     , phase4, 1, COUNT), # realtive to phase 4
+    pp_values = [('pp_ph2_mean_min', 't_ph2_mean_min', phase2, 100, COUNT),
+                 ('pp_ph2_max'     , 't_ph2_max'     , phase4, 100, COUNT), # realtive to phase 4
                  ('pp_ph4_drop'    , 't_ph4_drop'    , phase4, 1, COUNT)]
 
     sv_values = [(phase2, (2, -1), 'SV_min_valsalva', [25, 150], COUNT),
