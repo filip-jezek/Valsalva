@@ -39376,6 +39376,11 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end CVS_baseline;
+
+        model CVS_valsalva_optim
+          "Prolonged steady state to optim baseline and valsalva at once"
+          extends Valsalva.CVS_valsalva(thoracic_pressure_ramp(final startTime=50));
+        end CVS_valsalva_optim;
       end SingleModelRun;
 
       package CombinedModel
@@ -43230,8 +43235,7 @@ P_hs_plus_dist"),
             condTP_PC(disconnected=false),
             condTP_IP(disconnected=false),
             condTP_EP1(disconnected=false),
-            condHeartPhi(uMin=settings.phi0),
-            settings(baro_tau_s(displayUnit="s") = 10));
+            condHeartPhi(uMin=settings.phi0));
 
         // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
         //     useAutonomousPhi(y=true),
