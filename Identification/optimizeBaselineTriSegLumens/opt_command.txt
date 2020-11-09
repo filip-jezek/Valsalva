@@ -33,7 +33,7 @@ Algorithm{
   NeighborhoodSize = 5;
   NumberOfParticle = 16;
   NumberOfGeneration = 20;
-  Seed = 1;
+  Seed = 3;
   CognitiveAcceleration = 2.8;
   SocialAcceleration = 1.3;
   MaxVelocityGainContinuous = 0.5;

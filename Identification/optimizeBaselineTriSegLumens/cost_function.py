@@ -115,6 +115,7 @@ def getObjectives(vars_set):
             ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, .1),
             ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, .1),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, .1),
+            ('EDP', numpy.min(vars_set['P_LV'][interval]), None, [6*mmHg2SI, 12*mmHg2SI], 1e-2),
             ('PWV', pwv, None, [5, 10], 1)            ]
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight=o[4], k_p=1e3), ov))
