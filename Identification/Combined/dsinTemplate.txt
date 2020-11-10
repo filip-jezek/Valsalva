@@ -10,7 +10,7 @@ double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
       90                   # StopTime     Time at which integration stops
-  2.0000000000000000E-02   # Increment    Communication step size, if > 0
+  1.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
   9.9999999999999995E-07   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
@@ -63,7 +63,7 @@ double method(27,1)
        0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
        0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
        0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
-    1024                   # debug    flags for debug information (1<<0 uses pdebug) 
+   65536                   # debug    flags for debug information (1<<0 uses pdebug) 
      100                   # pdebug       priority of debug information (1...100)
        0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
        0                   # ordmax   Maximum allowed integration order, if > 0
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11655,100)
+char initialName(11663,100)
 settings.phi0
 settings.height
 settings.weight
@@ -11419,13 +11419,17 @@ heartComponent.idealValve_deactivable1.useLimitationInputs
 heartComponent.idealValve_deactivable1.unitPressure
 heartComponent.idealValve_deactivable1.unitFlow
 heartComponent.resistor.dp
+heartComponent.resistor.enable
 heartComponent.resistor.useConductanceInput
 heartComponent.resistor.Conductance
 heartComponent.resistor.Resistance
+heartComponent.resistor.conditionalConductance
 heartComponent.resistor1.dp
+heartComponent.resistor1.enable
 heartComponent.resistor1.useConductanceInput
 heartComponent.resistor1.Conductance
 heartComponent.resistor1.Resistance
+heartComponent.resistor1.conditionalConductance
 heartComponent.sa_node.t0
 heartComponent.sa_node.t0_last
 heartComponent.sa_node.cardiac_cycle
@@ -11515,13 +11519,17 @@ pulmonaryComponent.phi_factor.phi0
 pulmonaryComponent.phi_factor.eta
 pulmonaryComponent.fraction.k
 pulmonaryComponent.R_pv_visc.dp
+pulmonaryComponent.R_pv_visc.enable
 pulmonaryComponent.R_pv_visc.useConductanceInput
 pulmonaryComponent.R_pv_visc.Conductance
 pulmonaryComponent.R_pv_visc.Resistance
+pulmonaryComponent.R_pv_visc.conditionalConductance
 pulmonaryComponent.R_pa_visc.dp
+pulmonaryComponent.R_pa_visc.enable
 pulmonaryComponent.R_pa_visc.useConductanceInput
 pulmonaryComponent.R_pa_visc.Conductance
 pulmonaryComponent.R_pa_visc.Resistance
+pulmonaryComponent.R_pa_visc.conditionalConductance
 phi_fixed.amplitude
 phi_fixed.rising
 phi_fixed.width
@@ -11759,7 +11767,7 @@ SLo_min
 CPUtime
 EventCounter
 
-double initialValue(11655,6)
+double initialValue(11663,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -11782,12 +11790,12 @@ double initialValue(11655,6)
   1   280   # settings.V_PV_init
  -1  1.1850000000000001E+00       0                       0                
   1   280   # settings.chi_phi
- -1    6250                       0                 1.0000000000000000E+100
+ -1 %settings.heart_R_vlv% 0.0 1e+100
   1   280   # settings.heart_R_vlv
- -1  4.8560000000000000E+06       0                 1.0000000000000000E+100
+ -1 %settings.heart_R_LA% 0.0 1e+100
   1   280   # settings.heart_R_LA
- -1  3.7665200000000000E+06       0                 1.0000000000000000E+100
-  1   280   # settings.heart_R_RA
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # settings.heart_R_RA
  -1   50000                       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_A_vis
  -1   10678                       0                       0                
@@ -11796,35 +11804,35 @@ double initialValue(11655,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1  1.3546880000000000E+01       0                       0                
+ -1 %settings.heart_drive_D_0% 0.0 0.0
   1   280   # settings.heart_drive_D_0
  -1  2.9531250000000000E-04       0                       0                
   1   280   # settings.heart_drive_D_0_maxAct
- -1  2.7092179999999998E+03       0                       0                
+ -1 %settings.heart_drive_D_A% 0.0 0.0
   1   280   # settings.heart_drive_D_A
  -1 %settings.heart_drive_D_A_actMax% 0.0 0.0
   1   280   # settings.heart_drive_D_A_actMax
- -1  1.4000000000000001E-01       0                       0                
+ -1 %settings.heart_drive_TS% 0.0 0.0
   1   280   # settings.heart_drive_TS
  -1  1.2239899999999999E-01       0                       0                
   1   280   # settings.heart_drive_TS_maxAct
- -1  3.8000000000000000E-01       0                       0                
+ -1 %settings.heart_drive_TR% 0.0 0.0
   1   280   # settings.heart_drive_TR
  -1 %settings.heart_drive_TR_maxAct% 0.0 0.0
   1   280   # settings.heart_drive_TR_maxAct
- -1  7.4999999999999997E-02       0                       0                
+ -1  1.4999999999999999E-01       0                       0                
   1   280   # settings.heart_drive_Tact
   0       0                       0                       0                
   6   256   # settings.heart_drive_Tact_maxAct
- -1  1.1240150000000000E+07       0                       0                
+ -1 %settings.heart_drive_atr_D_0% 0.0 0.0
   1   280   # settings.heart_drive_atr_D_0
- -1  5.1125000000000000E+07       0                       0                
+ -1 %settings.heart_atr_D_A% 0.0 0.0
   1   280   # settings.heart_atr_D_A
- -1  8.0332309999999996E-01       0                       0                
+ -1 %settings.heart_vntr_xi_Vw% 0.0 0.0
   1   280   # settings.heart_vntr_xi_Vw
- -1  1.0843000000000000E+00       0                       0                
+ -1 %settings.heart_vntr_xi_AmRef% 0.0 0.0
   1   280   # settings.heart_vntr_xi_AmRef
- -1  1.7750000000000000E+01       0                       0                
+ -1 %settings.heart_vntr_k_passive% 0.0 0.0
   1   280   # settings.heart_vntr_k_passive
  -1  1.8999999999999999E+00       0                       0                
   1   280   # settings.heart_vntr_Lsref
@@ -11866,8 +11874,8 @@ double initialValue(11655,6)
   1   280   # settings.tissues_eta_Ra
   0       0                       0                       0                
   6   256   # settings.tissues_tau_R
-  0       0                       0                       0                
-  6   256   # settings.tissues_eta_Rv
+ -1       0                       0                       0                
+  1   280   # settings.tissues_eta_Rv
   0       1                       0                       0                
   6   257   # settings.UseNonLinear_TissuesCompliance
   0       1                       0                       0                
@@ -11964,7 +11972,7 @@ double initialValue(11655,6)
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
- -1  9.6133560000000000E+06       0                 1.0000000000000000E+100
+ -1 %settings.pulm_R% 0.0 1e+100
   1   280   # settings.pulm_R
  -1  9.9160000000000003E-04       0                       0                
   1   280   # settings.pulm_q_nom_maxq
@@ -34392,20 +34400,28 @@ double initialValue(11655,6)
   6  1280   # heartComponent.idealValve_deactivable1.unitFlow
   0       0                       0                       0                
   6   256   # heartComponent.resistor.dp
+  0       1                       0                       0                
+  6   769   # heartComponent.resistor.enable
   0       0                       0                       0                
   6   769   # heartComponent.resistor.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.resistor.Conductance
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.resistor.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # heartComponent.resistor.conditionalConductance
   0       0                       0                       0                
   6   256   # heartComponent.resistor1.dp
+  0       1                       0                       0                
+  6   769   # heartComponent.resistor1.enable
   0       0                       0                       0                
   6   769   # heartComponent.resistor1.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.resistor1.Conductance
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.resistor1.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # heartComponent.resistor1.conditionalConductance
   0       0                       0                       0                
   6   256   # heartComponent.sa_node.t0
   0       0                       0                       0                
@@ -34569,7 +34585,7 @@ double initialValue(11655,6)
  -1  3.0508605000000000E-04       0                 1.0000000000000000E+100
   2   280   # pulmonaryComponent.c_pv.volume
   0       0                       0                       0                
-  3   256   # pulmonaryComponent.c_pv.der(volume)
+  3   288   # pulmonaryComponent.c_pv.der(volume)
   0       0                       0                       0                
   6  1280   # pulmonaryComponent.c_pv.a
   0       0                       0                 1.0000000000000000E+100
@@ -34584,20 +34600,28 @@ double initialValue(11655,6)
   1   280   # pulmonaryComponent.fraction.k
   0       0                       0                       0                
   6   256   # pulmonaryComponent.R_pv_visc.dp
+  0       1                       0                       0                
+  6   769   # pulmonaryComponent.R_pv_visc.enable
   0       0                       0                       0                
   6   769   # pulmonaryComponent.R_pv_visc.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
   6   256   # pulmonaryComponent.R_pv_visc.Conductance
   0       0                       0                 1.0000000000000000E+100
   6   256   # pulmonaryComponent.R_pv_visc.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # pulmonaryComponent.R_pv_visc.conditionalConductance
   0       0                       0                       0                
   6   256   # pulmonaryComponent.R_pa_visc.dp
+  0       1                       0                       0                
+  6   769   # pulmonaryComponent.R_pa_visc.enable
   0       0                       0                       0                
   6   769   # pulmonaryComponent.R_pa_visc.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
   6   256   # pulmonaryComponent.R_pa_visc.Conductance
   0       0                       0                 1.0000000000000000E+100
   6   256   # pulmonaryComponent.R_pa_visc.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # pulmonaryComponent.R_pa_visc.conditionalConductance
  -1  7.5000000000000000E-01       0                       0                
   1   280   # phi_fixed.amplitude
  -1       2                       0                 1.0000000000000000E+100
@@ -35120,7 +35144,7 @@ double initialValue(11655,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11655,232)
+char initialDescription(11663,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -35144,9 +35168,9 @@ Minimal driving offset at maximal activation [1|%]
 Amplitude of resting elastance [Pa/m3|mmHg/ml]
 Amplitude of ventricular elastance at maximal activation [Pa/m3|mmHg/ml]
 nominal systolic contraction time [s|s]
-nominal systolic contraction time at maximal activation [s|min]
+nominal systolic contraction time at maximal activation [s|s]
 Systolic relaxation time [s|s]
-minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
+minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
 Time delay between atrial and ventricle cycles [s|s]
 Time from start of the atrial cycle at maximal activation [s|s]
 nominal driving offset as a fraction of E_0 [1|%]
@@ -46437,13 +46461,17 @@ Forward threshold pressure [Pa|mmHg]
 [Pa|mmHg]
 [m3/s|ml/min]
 Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(dyn.s)/cm5]
+[m3/(Pa.s)|ml/(mmHg.min)]
 Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(dyn.s)/cm5]
+[m3/(Pa.s)|ml/(mmHg.min)]
 time since start of cardiac cycle [s]
 length of the last cardiac cycle [s|min]
 Fraction of the cycle length [1|%]
@@ -46533,13 +46561,17 @@ Constant HydraulicConductance output value [m3/(Pa.s)|ml/(mmHg.min)]
 Factor to multiply the relative phi [1|%]
 Constant Fraction output value [1|%]
 Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
+[m3/(Pa.s)|ml/(mmHg.min)]
 Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
+[m3/(Pa.s)|ml/(mmHg.min)]
 Amplitude of trapezoid [1]
 Rising duration of trapezoid [s]
 Width duration of trapezoid [s]

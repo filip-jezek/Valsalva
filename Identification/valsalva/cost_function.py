@@ -214,39 +214,39 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         return fun_lib.ObjectiveVar(name, value=value, weight=weight, costFunctionType=include_in_cost)
 
     def buildSVObjective(svo):
-        (phase, phase_offset, name, limit, include_in_cost) = svo
+        (phase, phase_offset, name, limit, weight, include_in_cost) = svo
         phase_interval, _ = getInterval(phase, phase_offset)
         sv_val_valsalva = numpy.min(SV[phase_interval])
-        return fun_lib.ObjectiveVar(name, sv_val_valsalva, limit=limit, std = limit[0]*0.1, k_p=1, costFunctionType=include_in_cost)
+        return fun_lib.ObjectiveVar(name, sv_val_valsalva, limit=limit, std = limit[0]*0.1, k_p=1, weight = weight, costFunctionType=include_in_cost)
 
-    phase_values = [(bp_mean, phase1, (-1, 0), numpy.max  , baseline_bp, 'ph1_peak'    , COUNT),
-                    (bp_mean, phase2, (2, -2), numpy.min  , baseline_bp, 'ph2_mean_min', COUNT),
-                    (bp_mean, phase4,(-7, -7), numpy.max  , baseline_bp, 'ph2_max'     , COUNT),
-                    (bp_mean, phase4,(-2, -3), numpy.min  , baseline_bp, 'ph4_drop'    , COUNT),
-                    (bp_mean, phase4, (2, 5) , numpy.max  , baseline_bp, 'ph4_ovrshoot', COUNT),
-                    (bp_mean, phase5, 0      , numpy.mean , baseline_bp, 'ph5_recovery', COUNT),
+    phase_values = [(bp_mean, phase1, (-1, 0), numpy.max  , baseline_bp, 'ph1_peak'    , IGNORE),
+                    (bp_mean, phase2, (2, -2), numpy.min  , baseline_bp, 'ph2_mean_min', IGNORE),
+                    (bp_mean, phase4,(-7, -7), numpy.max  , baseline_bp, 'ph2_max'     , IGNORE),
+                    (bp_mean, phase4,(-2, -3), numpy.min  , baseline_bp, 'ph4_drop'    , IGNORE),
+                    (bp_mean, phase4, (2, 5) , numpy.max  , baseline_bp, 'ph4_ovrshoot', IGNORE),
+                    (bp_mean, phase5, 0      , numpy.mean , baseline_bp, 'ph5_recovery', IGNORE),
                     (HR     , phase1, 0      , numpy.min  , baseline_hr, 'ph1_hr_min' , COUNT),
                     (HR     , phase4, (0, 0) , numpy.max  , baseline_hr, 'ph4_hr_max' , COUNT),
                     (HR     , phase4, (0, 3) , numpy.min  , baseline_hr, 'ph4_hr_drop', COUNT),
                     (HR     , phase5, 0      , numpy.mean , baseline_hr, 'ph5_hr_recovery', COUNT)]
 
     time_values = [ (bp_mean, phase1, (-1, 0), numpy.argmax, 't_ph1_peak'    , IGNORE),
-                    (bp_mean, phase2, (2, -2), numpy.argmin, 't_ph2_mean_min', COUNT),
-                    (bp_mean, phase4,(-7, -7), numpy.argmax, 't_ph2_max'     , COUNT),# relative to phase 4 !!!
-                    (bp_mean, phase4, (-2, -3), numpy.argmin, 't_ph4_drop'   , COUNT),
-                    (bp_mean, phase4, (2, 5) , numpy.argmax, 't_ph4_ovrshoot', COUNT),
+                    (bp_mean, phase2, (2, -2), numpy.argmin, 't_ph2_mean_min', IGNORE),
+                    (bp_mean, phase4,(-7, -7), numpy.argmax, 't_ph2_max'     , IGNORE),# relative to phase 4 !!!
+                    (bp_mean, phase4, (-2, -3), numpy.argmin, 't_ph4_drop'   , IGNORE),
+                    (bp_mean, phase4, (2, 5) , numpy.argmax, 't_ph4_ovrshoot', IGNORE),
                     (HR     , phase1, 0      , numpy.argmin, 't_ph1_hr_min'  , IGNORE),
                     (HR     , phase4, (0, 0) , numpy.argmax, 't_ph4_hr_max'  , COUNT),
                     (HR     , phase4, (0, 3) , numpy.argmin, 't_ph4_hr_drop' , COUNT)    ]
 
     # Get pulse pressures
-    pp_values = [('pp_ph2_mean_min', 't_ph2_mean_min', phase2, 100, COUNT),
-                 ('pp_ph2_max'     , 't_ph2_max'     , phase4, 100, COUNT), # realtive to phase 4
-                 ('pp_ph4_drop'    , 't_ph4_drop'    , phase4, 1, COUNT)]
+    pp_values = [('pp_ph2_mean_min', 't_ph2_mean_min', phase2, 1, COUNT),
+                 ('pp_ph2_max'     , 't_ph2_max'     , phase4, 1, COUNT), # realtive to phase 4
+                 ('pp_ph4_drop'    , 't_ph4_drop'    , phase4, 1, IGNORE)]
 
-    sv_values = [(phase2, (2, -1), 'SV_min_valsalva', [25, 150], COUNT),
-                 (phase1, (0,  0), 'SV_min_midValsalva', [60, 150], COUNT),
-                 (phase4, (3, 4), 'SV_min_recovery', [60, 200], COUNT),                ]
+    sv_values = [(phase2, (2, -1), 'SV_min_valsalva', [25, 150], 1, COUNT),
+                 (phase1, (0,  5), 'SV_min_midValsalva', [45, 150], 1, COUNT),
+                 (phase4, (3, 4), 'SV_min_recovery', [60, 200], 1, COUNT),                ]
 
     # map the inputs to ObjectiveVar
     objectives.extend(map(buildValueObjective, phase_values))
