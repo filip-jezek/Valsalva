@@ -5700,6 +5700,7 @@ type"),       Text(
               parameter Real SLcollagen=2.25 "threshold for collagen activation, microns";
               parameter Real PConcollagen=0.01 "contriubtion of collagen (??)";
               parameter Real PExpcollagen=70 "contriubtion of collagen (??)";
+              parameter Physiolibrary.Types.Fraction functionFraction = 1;
 
 
               Real Tm "Represenattive midwall tension";
@@ -6127,7 +6128,7 @@ type"),       Text(
               // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
               Real sigmapas=max(0, k_passive*(SLo - L0)) + min(0, k_passive_negative*(SLo - L0)) + sigma_collagen;
               // Active forces could not go negative
-              Real sigmaact=max(0, D*(SL - SLrest)*(SLo - SL)/LSEiso);
+              Real sigmaact=max(0, functionFraction*D*(SL - SLrest)*(SLo - SL)/LSEiso);
               Real debug_SL = (SL - SLrest);
               Real debug_SLo = (SLo - SL);
               // Total forces
@@ -7013,6 +7014,51 @@ Simple")}),                                                                  Dia
                 __Dymola_Algorithm="Dassl"));
           end offsets;
 
+          model ADANVR
+            Heart_ADAN_VR heart_ADAN_VR(
+              UseFrequencyInput=false,
+              UseThoracicPressureInput=false,
+              UsePhiInput=false)
+              annotation (Placement(transformation(extent={{-10,-8},{10,12}})));
+            outer Settings settings(
+              heart_R_vlv(displayUnit="(dyn.s)/cm5"),
+              heart_R_LA(displayUnit="(mmHg.s)/ml") = 3333059.685375,
+              syst_TPR(displayUnit="(dyn.s)/cm5")) annotation (Placement(
+                  transformation(extent={{-76,50},{-56,70}})));
+            Pulmonary.Pulmonary_ADAN_VR pulmonary_ADAN_VR(
+                UseThoracic_PressureInput=false, pulmonary(u_pvn(start=
+                      2666.4477483, displayUnit="mmHg")))
+              annotation (Placement(transformation(extent={{28,-6},{48,14}})));
+            Systemic.Systemic_TriSeg systemic_TriSeg annotation (Placement(
+                  transformation(extent={{-96,-38},{-20,-8}})));
+          equation
+            connect(pulmonary_ADAN_VR.port_b, heart_ADAN_VR.pv) annotation (
+                Line(
+                points={{48,4},{52,4},{52,-1.4},{10,-1.4}},
+                color={0,0,0},
+                thickness=1));
+            connect(heart_ADAN_VR.pa, pulmonary_ADAN_VR.port_a) annotation (
+                Line(
+                points={{10,7.6},{24,7.6},{24,4},{28,4}},
+                color={0,0,0},
+                thickness=1));
+            connect(heart_ADAN_VR.sa, systemic_TriSeg.port_a) annotation (Line(
+                points={{-10,-1.4},{-54,-1.4},{-54,0},{-96,0},{-96,-28}},
+                color={0,0,0},
+                thickness=1));
+            connect(systemic_TriSeg.port_b, heart_ADAN_VR.sv) annotation (Line(
+                points={{-20,-28},{-20,7.6},{-10,7.6}},
+                color={0,0,0},
+                thickness=1));
+            annotation (
+              Icon(coordinateSystem(preserveAspectRatio=false)),
+              Diagram(coordinateSystem(preserveAspectRatio=false)),
+              experiment(
+                StopTime=100,
+                Interval=0.01,
+                Tolerance=1e-07,
+                __Dymola_Algorithm="Cvode"));
+          end ADANVR;
         end Testers;
 
         partial model partialHeart
@@ -7201,19 +7247,19 @@ Simple")}),                                                                  Dia
           t = time;
 
           connect(systemic_arteries.port_a, sa) annotation (Line(
-              points={{80,30},{90,30},{90,100},{100,100}},
+              points={{80,30},{90,30},{90,-60},{-100,-60}},
               color={0,0,0},
               thickness=1));
           connect(pulmonary_arteries.port_a, pa) annotation (Line(
-              points={{80,-30},{90,-30},{90,-100},{100,-100}},
+              points={{80,-30},{90,-30},{90,60},{100,60}},
               color={0,0,0},
               thickness=1));
           connect(pulmonary_veins.port_a, pv) annotation (Line(
-              points={{-80,-30},{-90,-30},{-90,-100},{-100,-100}},
+              points={{-80,-30},{-90,-30},{-90,-60},{100,-60}},
               color={0,0,0},
               thickness=1));
           connect(systemic_veins.port_a, sv) annotation (Line(
-              points={{-80,30},{-90,30},{-90,100},{-100,100}},
+              points={{-80,30},{-90,30},{-90,60},{-100,60}},
               color={0,0,0},
               thickness=1));
           connect(Heart1.frequency, frequency_input)
@@ -7846,19 +7892,19 @@ Simple")}),                                                                  Dia
               thickness=1,
               smooth=Smooth.None));
           connect(sa, aorticValve.q_out) annotation (Line(
-              points={{100,100},{100,-60},{-96,-60},{-96,-20},{-88,-20}},
+              points={{-100,-60},{-100,-60},{-96,-60},{-96,-20},{-88,-20}},
               color={0,0,0},
               thickness=1));
           connect(Lmt.q_in, pv) annotation (Line(
-              points={{80,-20},{80,-82},{-100,-82},{-100,-100}},
+              points={{80,-20},{80,-82},{100,-82},{100,-60}},
               color={0,0,0},
               thickness=1));
           connect(sv, Ltc.q_in) annotation (Line(
-              points={{-100,100},{-100,34},{-88,34}},
+              points={{-100,60},{-100,34},{-88,34}},
               color={0,0,0},
               thickness=1));
           connect(pulmonaryValve.q_out, pa) annotation (Line(
-              points={{82,34},{92,34},{92,-100},{100,-100}},
+              points={{82,34},{92,34},{92,60},{100,60}},
               color={0,0,0},
               thickness=1));
           connect(tricuspidValve.q_out, smithOttesen_VentricularInteraction_flat_.rvflow)
@@ -7888,9 +7934,9 @@ Simple")}),                                                                  Dia
                   -44.5},{0,-44.5},{0,-100}},
                                      color={0,0,127}));
           connect(phi, smithOttesen_VentricularInteraction_flat_.phi) annotation (Line(
-                points={{-100,70},{-56,70},{-56,24.2},{-11,24.2}}, color={0,0,127}));
+                points={{-100,80},{-56,80},{-56,24.2},{-11,24.2}}, color={0,0,127}));
           connect(phi0.y, smithOttesen_VentricularInteraction_flat_.phi) annotation (
-              Line(points={{-81,70},{-20,70},{-20,24.2},{-11,24.2}}, color={0,0,127}));
+              Line(points={{-81,80},{-20,80},{-20,24.2},{-11,24.2}}, color={0,0,127}));
           connect(smithOttesen_VentricularInteraction_flat_.Pth, P0.y) annotation (Line(
                 points={{13.3,9},{13.3,-44.5},{-8,-44.5},{-8,-74},{-4,-74},{-4,
                   -81},{9.4369e-16,-81}},
@@ -8043,7 +8089,7 @@ Mynard")}));
             annotation (Placement(transformation(extent={{-60,-60},{-40,-40}})));
         equation
           connect(sv, vSV.q_in) annotation (Line(
-              points={{-100,56},{-52,56},{-52,68}},
+              points={{-100,60},{-52,60},{-52,68}},
               color={0,0,0},
               thickness=1));
           connect(vRAV.q_out, ventricles.cRV) annotation (Line(
@@ -8060,7 +8106,7 @@ Mynard")}));
               color={0,0,0},
               thickness=1));
           connect(vSA.q_out, sa) annotation (Line(
-              points={{16,2},{16,-34},{-100,-34}},
+              points={{16,2},{16,-60},{-100,-60}},
               color={0,0,0},
               thickness=1));
           connect(vSV.q_out, RA.c) annotation (Line(
@@ -8076,11 +8122,11 @@ Mynard")}));
               color={0,0,0},
               thickness=1));
           connect(vPA.q_out, pa) annotation (Line(
-              points={{-4,2},{-4,6},{100,6},{100,56}},
+              points={{-4,2},{-4,6},{100,6},{100,60}},
               color={0,0,0},
               thickness=1));
           connect(vPV.q_in, pv) annotation (Line(
-              points={{62,68.9296},{62,72},{100,72},{100,-34}},
+              points={{62,68.9296},{62,72},{100,72},{100,-60}},
               color={0,0,0},
               thickness=1));
           connect(LA.c, vLAV.q_in) annotation (Line(
@@ -38880,6 +38926,14 @@ P_hs_plus_dist"),
                 Tolerance=1e-06,
                 __Dymola_Algorithm="Cvode"));
           end CVS_baseline;
+
+          model CHF
+            extends CVS_valsalva_optimPP(
+              condTP_EP1(disconnected=true),
+              condTP_PC(disconnected=true),
+              condTP_IP(disconnected=true),
+              heartComponent(ventricles(LV_wall(functionFraction=0.5))));
+          end CHF;
         end Experiments;
 
         model OlufsenTriSeg_optimized1
@@ -39170,6 +39224,36 @@ P_hs_plus_dist"),
                 coordinateSystem(preserveAspectRatio=false)));
 
         end CVS_valsalva_optim;
+
+        model CVS_valsalva_optimPP "Optimized for baseline and valsalva simplified objectives to pulse pressure and HR. Generated by PostProcess/postprocess_optim.py optimized at Nov 10 23:08:47 CET 2020
+ with cost 0.891728 lowest at run 972"
+          extends
+            ADAN_main.SystemicTree.Identification.SingleModelRun.CVS_valsalva_optim(settings(
+                  V_PV_init =          1.505469e-22,
+              heart_R_vlv =          8.183594e+03,
+              heart_R_LA =          5.538875e+06,
+              heart_drive_D_0 =          1.422422e+01,
+              heart_drive_D_A =          3.090203e+03,
+              heart_drive_D_A_actMax =          1.422773e+04,
+              heart_drive_TS =          1.190000e-01,
+              heart_drive_TR =          3.990000e-01,
+              heart_drive_TR_maxAct =          1.082666e-01,
+              heart_drive_atr_D_0 =          1.124015e+07,
+              heart_atr_D_A =          4.537345e+07,
+              heart_vntr_xi_Vw =          6.426586e-01,
+              heart_vntr_xi_AmRef =          1.094465e+00,
+              heart_vntr_k_passive =          1.975000e+01,
+              eta_vc =          1.055510e-01,
+              tissues_eta_Ra =          2.445225e+00,
+              tissues_eta_C =          4.421191e-01,
+              veins_gamma =          3.843750e-01,
+              pulm_C_PV =          2.759552e-07,
+              pulm_C_PA =          4.147500e-08,
+              pulm_R =          9.613356e+06), thoracic_pressure_ramp(offset=50));
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                coordinateSystem(preserveAspectRatio=false)));
+
+        end CVS_valsalva_optimPP;
       end Results;
 
       package SingleModelRun
@@ -42667,7 +42751,7 @@ P_hs_plus_dist"),
       end Experiments;
 
       model CVS_exercise "Simplified heart model"
-        extends CardiovascularSystem(
+        extends ADAN_main.SystemicTree.Identification.Results.CVS_valsalva_optimPP(
           SystemicComponent(
             ulnar_T2_L90(UseExercise=false),
             radial_T1_L92(UseExercise=false),
