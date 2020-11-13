@@ -18,7 +18,7 @@ with open(initparams_path) as file:
         params_def[cols[0]] = cols[1]
 
 
-with open('OutputListingMain.txt') as file:
+with open('OutputListingMain_SA.txt') as file:
     lines = file.readlines()
 
 
@@ -89,7 +89,7 @@ with open('sa_runs.csv', 'w') as file:
 
 # sort by costs
 sensitivity_list.sort(key = lambda x: x[1])
-num_to_plot = 30
+num_to_plot = 50
 plotlist = sensitivity_list[:num_to_plot]
 plotlist.reverse()
 heights = list((x[1] for x in plotlist))

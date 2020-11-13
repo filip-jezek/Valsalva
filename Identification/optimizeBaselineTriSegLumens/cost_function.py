@@ -97,8 +97,8 @@ def getObjectives(vars_set):
     # build costs
     ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), 120*mmHg2SI, None, 10),
             ('BPd', min(vars_set['brachial_pressure'][interval]), 80*mmHg2SI, None, 10),
-            ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1e-2),
-            ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1e-2),
+            ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1e-1),
+            ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1e-1),
             ('ESV_la', numpy.min(vars_set['V_la'][interval]), 12*ml2SI, None, 1e-2),
             ('EDV_la', numpy.max(vars_set['V_la'][interval]), 41*ml2SI, None, 1e-2),
             ('Q_MV_f', vla_peak_frac, None, [1.5, 2], 1e-3),
@@ -117,6 +117,7 @@ def getObjectives(vars_set):
             ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, .1),
             ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, .1),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, .1),
+            ('EDP', numpy.min(vars_set['P_LV'][interval]), None, [6*mmHg2SI, 12*mmHg2SI], 1e-3),
             ('BPMeanStd', numpy.std(vars_set['brachial_pressure_mean'][steady_interval]), None, [0, 4*mmHg2SI], 1e-2),
             ('PWV', pwv, None, [5, 10], 1)            ]
 

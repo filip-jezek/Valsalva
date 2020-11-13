@@ -353,33 +353,33 @@ OptimizationSettings{
   WriteStepNumber = false;
   UnitsOfExecution = 4;
 }\n""")
-            # file.write("""\n
-# Algorithm{
-#   Main = GPSPSOCCHJ;
-#   NeighborhoodTopology = vonNeumann;
-#   NeighborhoodSize = 5;
-#   NumberOfParticle = 16;
-#   NumberOfGeneration = 20;
-#   Seed = 1;
-#   CognitiveAcceleration = 2.8;
-#   SocialAcceleration = 1.3;
-#   MaxVelocityGainContinuous = 0.5;
-#   MaxVelocityDiscrete = 4;
-#   ConstrictionGain = 0.5;
-#   MeshSizeDivider = 2;
-#   InitialMeshSizeExponent = 0;
-#   MeshSizeExponentIncrement = 1;
-#   NumberOfStepReduction = 4;
-# }""" )
-
             file.write("""\n
- Algorithm{
- Main = GPSHookeJeeves;
- MeshSizeDivider = 2;
- InitialMeshSizeExponent = 0;
- MeshSizeExponentIncrement = 1;
- NumberOfStepReduction = 6;
+Algorithm{
+  Main = GPSPSOCCHJ;
+  NeighborhoodTopology = vonNeumann;
+  NeighborhoodSize = 5;
+  NumberOfParticle = 16;
+  NumberOfGeneration = 20;
+  Seed = 1;
+  CognitiveAcceleration = 2.8;
+  SocialAcceleration = 1.3;
+  MaxVelocityGainContinuous = 0.5;
+  MaxVelocityDiscrete = 4;
+  ConstrictionGain = 0.5;
+  MeshSizeDivider = 2;
+  InitialMeshSizeExponent = 0;
+  MeshSizeExponentIncrement = 1;
+  NumberOfStepReduction = 4;
 }""" )
+
+#             file.write("""\n
+#  Algorithm{
+#  Main = GPSHookeJeeves;
+#  MeshSizeDivider = 2;
+#  InitialMeshSizeExponent = 0;
+#  MeshSizeExponentIncrement = 1;
+#  NumberOfStepReduction = 6;
+# }""" )
             # jsut to get back at proper  indent
             pass
 
