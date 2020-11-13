@@ -244,8 +244,8 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
                  ('pp_ph2_max'     , 't_ph2_max'     , phase4, 1, COUNT), # realtive to phase 4
                  ('pp_ph4_drop'    , 't_ph4_drop'    , phase4, 1, IGNORE)]
 
-    sv_values = [(phase2, (2, -1), 'SV_min_valsalva', [25, 150], 1, COUNT),
-                 (phase1, (0,  5), 'SV_min_midValsalva', [45, 150], 1, COUNT),
+    sv_values = [(phase2, (2, -1), 'SV_min_valsalva', [25, 40], 1, COUNT),
+                 (phase1, (0,  5), 'SV_min_midValsalva', [60, 150], 10, COUNT),
                  (phase4, (3, 4), 'SV_min_recovery', [60, 200], 1, COUNT),                ]
 
     # map the inputs to ObjectiveVar

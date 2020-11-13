@@ -1,5 +1,0 @@
-Name             , value    , target   , cost     ,% tot, [% base costs], total = 8.917283e-01
-baseline         ,5.351e-02 ,0         ,5.351e-01 , 60  , 
-valsalva         ,3.566e-01 ,0         ,3.566e-01 , 40  , 
-IGNORING tilt    ,0.000e+00 ,0         ,0.000e+00 , 00  , 
-IGNORING exercise,0.000e+00 ,0         ,0.000e+00 , 00  , 
