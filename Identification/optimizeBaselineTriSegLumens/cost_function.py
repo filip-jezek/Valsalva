@@ -73,9 +73,10 @@ def getObjectives(vars_set):
 
     time = vars_set['time']
 
-    interval = fun_lib.findInterval(time[0] + 43, time[0] + 48, time)
+    # interval = fun_lib.findInterval(time[0] + 43, time[0] + 48, time)
+    interval = fun_lib.findInterval(time[-1] - 8, time[-1] - 3, time)
     # to observe how much the baseline fluctuates
-    steady_interval = fun_lib.findInterval(time[0] + 10, time[0] + 50, time)
+    steady_interval = fun_lib.findInterval(time[-1] - 30, time[-1] -5, time)
 
     # mitral valve flow ratio spontaneous:atrial contraction is about 2:1 
     # vla_1st_Peak_i = fun_lib.findInterval(39.8, 40, time)

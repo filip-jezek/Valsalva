@@ -166,7 +166,8 @@ def importOptions(var_set:dict, settingsFile = 'post_process_options.json'):
 		"__LOG_ALL_OBJECTIVES_PATH" : "..\\Schedules\\objectivesAll_log%03d.txt",
         "__LOG_ALL_OBJECTIVES_PATH_BASE" : null,
 		"__targetValuesFilename" : "../../../data/Valsalva/targetValues_All_supine.txt",
-		"__inputFiles" : ["dsres.mat", "baseline", "dsres.mat", "valsalva"],
+		"__inputFiles" : ["dsres.mat"],
+        "__inputFiles_IGNRE" : ["dsres.mat", "baseline", "dsres.mat", "valsalva"],
 		"__root_path" : "..\\..\\..\\"
 
 }"""
