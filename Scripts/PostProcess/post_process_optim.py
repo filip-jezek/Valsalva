@@ -90,7 +90,7 @@ def generateModel(modelName, pack):
 
 
 if __name__ is '__main__':
-    pack = readOutputListing('OutputListingMain.txt')
+    pack = readOutputListing('..\\OutputListingMain.txt')
     generateModel('OlufsenTriSeg', pack)
     print("Done, JOne!")
     
