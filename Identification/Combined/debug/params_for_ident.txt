@@ -1,21 +1,6 @@
 # name, value, [min, max, step]
-settings.syst_tissues_hydrostaticLevel_correction,1.0,0.8,1.2,0.05
-settings.HR_max,2.907,2,3.2,0.05
-settings.V_PV_init,0.0001375,-1500e-6,1500e-6,50e-6
-settings.heart_R_LA,6540425.0,3270212.5,9810637.5,327021.25
-settings.heart_R_vlv,3427.735,1000,5141.6025,200
-settings.heart_atr_D_A,46012500.0,23006250.0,69018750.0,2300625.0
-settings.heart_drive_D_0,10.7105,5.35525,16.06575,0.535525
-settings.heart_drive_D_A,2125.043,1062.5215,3187.5645000000004,106.25215000000001
-settings.heart_drive_TR,0.38,0.3,0.5,0.01
-settings.heart_drive_TS,0.112,0.05,0.2,0.01
-settings.heart_drive_atr_D_0,15174210.0,7587105.0,22761315.0,758710.5
-settings.heart_vntr_k_passive,24.75,12.375,40.125,2
-settings.heart_vntr_xi_Vw,0.9639875,0.8,1.2,0.05
-settings.pulm_R,8652020.0,4326010.0,12978030.0,232601.0
-settings.syst_TPR,130750000.0,65375000.0,196125000.0,2537500.0
-settings.syst_art_k_E,0.4173268,0.3086634,0.6259901999999999,0.02
-settings.tissues_eta_C,0.4421191,0.22105955,2,0.022105955
-settings.tissues_eta_Ra,2.445225,1.2226125,4,0.12226125000000002
-settings.veins_gamma,0.315625,0.1578125,0.9,0.05
-settings.tissues_SV_nom,0.000795,0.0003975,0.0011925,50e-06
+settings.chi_phi,1.185,0.45,1.35,0.045000000000000005
+settings.pulm_R,7256414.0,3628207.0,10884621.0,362820.7
+settings.pulm_q_nom_maxq,0.0009916,0.0004958,0.0014874,4.958e-05
+settings.tissues_chi_R,29.376,14.688,44.064,1.4688
+settings.tissue_chi_C,-0.12,-0.18,-0.06,-0.006

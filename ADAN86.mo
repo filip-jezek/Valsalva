@@ -34179,7 +34179,8 @@ P_hs_plus_dist"),
   package SystemicTree
 
     model CardiovascularSystem
-      extends Identification.SteadyState.CVS_optimized_BVT_init;
+      extends Identification.SteadyState.CVS_optimized_BVT_init(
+          pulmonaryComponent(r_pa(useNonlinearResistance=true)));
     //   OptimizedValsalva( settings(
     //       V_PV_init=5e-05,
     //       heart_R_vlv(displayUnit="(dyn.s)/cm5") = 500000,
@@ -34285,7 +34286,6 @@ P_hs_plus_dist"),
                   15.5556},{44,25.5556}})));
         Modelica.Blocks.Logical.Switch switch1
           annotation (Placement(transformation(extent={{16.25,87.75},{35.75,68.25}})));
-        replaceable
         Modelica.Blocks.Sources.BooleanExpression useAutonomousPhi(y=true)
           annotation (Placement(transformation(extent={{-26,68},{-6,88}})));
         Components.Signals.ConditionalConnection condHeartPhi(
@@ -40701,6 +40701,35 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end CombinedModels_FMUs_BaselineValsalvaTilt;
+
+        model CombinedModels_FMUs_BaselineValsalvaTilt_BaselineExercise
+          extends CombinedModels_FMUs_BaselineValsalvaTilt(exercise(
+                fmi_StartTime=0, fmi_StopTime=60), baseline(fmi_StartTime=0,
+                fmi_StopTime=60),
+        settings(
+                heart_drive_D_A_actMax(displayUnit="Pa/m3") = 7000,
+              syst_tissues_hydrostaticLevel_correction=0.8,
+              HR_max=2.707,
+              V_PV_init=3.75e-05,
+              heart_R_LA=6213404,
+              heart_R_vlv=1627.735,
+              heart_atr_D_A=36810000,
+              heart_drive_D_0=11.78155,
+              heart_drive_D_A=1487.53,
+              heart_drive_TR =          4.100000e-01,
+              heart_drive_TS =          8.200000e-02,
+              heart_drive_atr_D_0=18209050,
+              heart_vntr_k_passive =          3.475000e+01,
+              heart_vntr_xi_Vw=0.9639875,
+              baro_tau_s=10,
+              pulm_R=7256414,
+              syst_TPR=128212500,
+              syst_art_k_E=0.3973268,
+              tissues_eta_C=0.3758013,
+              tissues_eta_Ra=2.445225,
+              veins_gamma=0.365625,
+              tissues_SV_nom=0.000695));
+        end CombinedModels_FMUs_BaselineValsalvaTilt_BaselineExercise;
       end CombinedModel;
 
       package SteadyState "Contains steady state initialization"
@@ -43189,24 +43218,23 @@ P_hs_plus_dist"),
           phi_fixed(
             amplitude=settings.chi_phi-settings.phi0,
             rising(displayUnit="s") = 1,
-            width(displayUnit="s") = 50,
+            width(displayUnit="s") = 100,
             falling(displayUnit="s") = 0,
             period(displayUnit="s") = 60,
             nperiod=-1,
             offset=settings.phi0,
-            startTime=30),
+            startTime=10),
           condHeartPhi(disconnected=false),
           condTP_EP1(disconnected=true),
           condTP_PC(disconnected=true),
           condTP_IP(disconnected=true),
           settings(chi_phi=0.9),
-          redeclare Modelica.Blocks.Sources.BooleanStep useAutonomousPhi(
-              startTime=30, startValue=true));
+          useAutonomousPhi(y=false));
         //CardiovascularSystem(
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           offset=0,
-          startTime=30,
+          startTime=10,
           height=1,
           duration=1) constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
@@ -43216,9 +43244,9 @@ P_hs_plus_dist"),
         connect(Exercise.y, SystemicComponent.exercise_input) annotation (Line(
               points={{-79,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
         annotation (experiment(
-            StopTime=60,
+            StopTime=90,
             Interval=0.005,
-            Tolerance=1e-07,
+            Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end CVS_exercise;
 

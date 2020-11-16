@@ -41,7 +41,7 @@ def plotObjectives(vars_set, interval, objectives):
 
 def getObjectives(vars_set):
 
-    fun_lib.checkSimulationLength(vars_set['time'][-1],110)
+    fun_lib.checkSimulationLength(vars_set['time'][-1],40)
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
     # Pa = vars_set['Pa']
@@ -63,17 +63,18 @@ def getObjectives(vars_set):
     interval = fun_lib.findInterval(t-5, t, vars_set['time'])
 
     # build costs
-    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), BPs_target, None, 1),
+    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), BPs_target, None, 10),
             # ('EDV', max(vars_set['V_LV'][interval]), EDV_target, None, 1),
-            ('ESV', min(vars_set['V_LV'][interval]), ESV_target, None, 1),
-            ('CO', numpy.mean(vars_set['CO'][interval]), None, [CO_min, 40*lpm2SI], 10e-3),
-            ('Ts', max(vars_set['TEjection'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
-            ('Td', max(vars_set['TFilling'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
-            # ('Ppa', numpy.mean(vars_set['P_pa'][interval]), Ppa_target, None, .1),
+            ('ESV', min(vars_set['V_LV'][interval]), ESV_target, None, 1e-3),
+            ('CO', numpy.mean(vars_set['CO'][interval]), None, [CO_min, 40*lpm2SI], 100e-3),
+            # ('Ts', max(vars_set['TEjection'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
+            # ('Td', max(vars_set['TFilling'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
+            ('HR', numpy.mean(vars_set['HR'][interval]), 154*(1/60), None, 1),
+            # ('Ppa', numpy.mean(vars_set['P_pa'][interval]), Ppa_targ)et, None, .1),
             # ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, .1),
             ('Ppa_s', numpy.max(vars_set['P_pa'][interval]), Ppas_target, None, 0.1),
             ('Ppa_d', numpy.min(vars_set['P_pa'][interval]), Ppad_target, None, 0.1),
-            ('Ppv', numpy.min(vars_set['P_pv'][interval]), Ppad_target, None, 0.1),
+            ('Ppv', numpy.min(vars_set['P_pv'][interval]), Ppad_target, None, 1),
         ]
     
     # make it a dict?

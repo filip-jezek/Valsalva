@@ -9,7 +9,7 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-     120                   # StopTime     Time at which integration stops
+      50                   # StopTime     Time at which integration stops
   1.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
   9.9999999999999995E-07   # Tolerance    Relative precision of signals for
@@ -54,7 +54,7 @@ double method(27,1)
                            #          grid = 4   runs forever (stopped by model)
        1                   # nt       Use every NT time instant, if grid = 3
        3                   # dense    1/2/3 restart/step/interpolate GRID points
-       0                   # evgrid   0/1 do not/save event points in comm. time grid
+       1                   # evgrid   0/1 do not/save event points in comm. time grid
        1                   # evu      0/1 U-discontinuity does not/trigger events
        0                   # evuord       U-discontinuity order to consider (0,1,...)
        0                   # error    0/1/2 One message/warning/error messages
@@ -63,7 +63,7 @@ double method(27,1)
        0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
        0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
        0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
-   65536                   # debug    flags for debug information (1<<0 uses pdebug) 
+    1024                   # debug    flags for debug information (1<<0 uses pdebug) 
      100                   # pdebug       priority of debug information (1...100)
        0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
        0                   # ordmax   Maximum allowed integration order, if > 0
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(10176,109)
+char initialName(10179,109)
 settings.phi0
 settings.height
 settings.weight
@@ -2644,6 +2644,7 @@ baseline.condSystemicPhi.add3_1.k2
 baseline.condHeartPhi.disconnected
 baseline.condHeartPhi.disconnectedValue
 baseline.condHeartPhi.uMax
+baseline.condHeartPhi.uMin
 baseline.condHeartPhi.phi_gain
 baseline.condHeartPhi.add3_1.k1
 baseline.condHeartPhi.add3_1.k2
@@ -5155,6 +5156,7 @@ exercise.condSystemicPhi.add3_1.k2
 exercise.condHeartPhi.disconnected
 exercise.condHeartPhi.disconnectedValue
 exercise.condHeartPhi.uMax
+exercise.condHeartPhi.uMin
 exercise.condHeartPhi.phi_gain
 exercise.condHeartPhi.add3_1.k1
 exercise.condHeartPhi.add3_1.k2
@@ -7672,6 +7674,7 @@ tilt.condSystemicPhi.add3_1.k2
 tilt.condHeartPhi.disconnected
 tilt.condHeartPhi.disconnectedValue
 tilt.condHeartPhi.uMax
+tilt.condHeartPhi.uMin
 tilt.condHeartPhi.phi_gain
 tilt.condHeartPhi.add3_1.k1
 tilt.condHeartPhi.add3_1.k2
@@ -10280,7 +10283,7 @@ stepInterval
 CPUtime
 EventCounter
 
-double initialValue(10176,6)
+double initialValue(10179,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -10291,7 +10294,7 @@ double initialValue(10176,6)
   1   280   # settings.age
  -1  1.0666666666667000E+00       0                       0                
   1   280   # settings.HR_nominal
- -1 %settings.HR_max% 0.0 0.0
+ -1  2.7069999999999999E+00       0                       0                
   1   280   # settings.HR_max
  -1      24                       0                       0                
   1   280   # settings.BMI
@@ -10299,13 +10302,13 @@ double initialValue(10176,6)
   6   256   # settings.BSA
  -1       1                       0                       0                
   1   281   # settings.initByPressure
- -1 %settings.V_PV_init% -0.01 1e+100
+ -1  3.7499999999999997E-05 -1.0000000000000000E-02 1.0000000000000000E+100
   1   280   # settings.V_PV_init
- -1  1.1850000000000001E+00       0                       0                
+ -1 %settings.chi_phi% 0.0 0.0
   1   280   # settings.chi_phi
- -1 %settings.heart_R_vlv% 0.0 1e+100
+ -1  1.6277349999999999E+03       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
- -1 %settings.heart_R_LA% 0.0 1e+100
+ -1  6.2134040000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.heart_R_RA
@@ -10317,19 +10320,19 @@ double initialValue(10176,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1 %settings.heart_drive_D_0% 0.0 0.0
+ -1  1.1781549999999999E+01       0                       0                
   1   280   # settings.heart_drive_D_0
  -1  2.9531250000000000E-04       0                       0                
   1   280   # settings.heart_drive_D_0_maxAct
- -1 %settings.heart_drive_D_A% 0.0 0.0
+ -1  1.4875300000000000E+03       0                       0                
   1   280   # settings.heart_drive_D_A
  -1    7000                       0                       0                
   1   280   # settings.heart_drive_D_A_actMax
- -1 %settings.heart_drive_TS% 0.0 0.0
+ -1  8.2000000000000003E-02       0                       0                
   1   280   # settings.heart_drive_TS
   0       0                       0                       0                
   6   256   # settings.heart_drive_TS_maxAct
- -1 %settings.heart_drive_TR% 0.0 0.0
+ -1  4.0999999999999998E-01       0                       0                
   1   280   # settings.heart_drive_TR
   0       0                       0                       0                
   6   256   # settings.heart_drive_TR_maxAct
@@ -10337,15 +10340,15 @@ double initialValue(10176,6)
   1   280   # settings.heart_drive_Tact
   0       0                       0                       0                
   6   256   # settings.heart_drive_Tact_maxAct
- -1 %settings.heart_drive_atr_D_0% 0.0 0.0
+ -1  1.8209050000000000E+07       0                       0                
   1   280   # settings.heart_drive_atr_D_0
- -1 %settings.heart_atr_D_A% 0.0 0.0
+ -1  3.6810000000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_A
- -1 %settings.heart_vntr_xi_Vw% 0.0 0.0
+ -1  9.6398750000000000E-01       0                       0                
   1   280   # settings.heart_vntr_xi_Vw
  -1  1.0334730000000001E+00       0                       0                
   1   280   # settings.heart_vntr_xi_AmRef
- -1 %settings.heart_vntr_k_passive% 0.0 0.0
+ -1  3.4750000000000000E+01       0                       0                
   1   280   # settings.heart_vntr_k_passive
  -1  1.8999999999999999E+00       0                       0                
   1   280   # settings.heart_vntr_Lsref
@@ -10357,19 +10360,19 @@ double initialValue(10176,6)
   1   280   # settings.heart_vntr_SLrest
  -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
- -1 %settings.syst_TPR% 0.0 1e+100
+ -1  1.2821250000000000E+08       0                 1.0000000000000000E+100
   1   280   # settings.syst_TPR
  -1  4.6957589999999998E+00       0                       0                
   1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
- -1 %settings.syst_art_k_E% 0.0 0.0
+ -1  3.9732679999999998E-01       0                       0                
   1   280   # settings.syst_art_k_E
  -1       1                       0                       0                
   1   281   # settings.syst_art_UseVasoconstrictionEffect
  -1  1.4744910000000000E-01       0                       0                
   1   280   # settings.eta_vc
- -1 %settings.syst_tissues_hydrostaticLevel_correction% 0.0 0.0
+ -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_tissues_hydrostaticLevel_correction
   0       0                       0                       0                
   6   256   # settings.tissues_Pa_nom
@@ -10379,11 +10382,11 @@ double initialValue(10176,6)
   6   256   # settings.tissues_Pv_nom
  -1  2.1012399999999999E-03       0                 1.0000000000000000E+100
   1   280   # settings.tissues_ZPV_nom
- -1 %settings.tissues_SV_nom% 0.0 1e+100
+ -1  6.9499999999999998E-04       0                 1.0000000000000000E+100
   1   280   # settings.tissues_SV_nom
  -1  1.0500000000000000E-04       0                       0                
   1   280   # settings.tissues_CO_nom
- -1 %settings.tissues_eta_Ra% 0.0 0.0
+ -1  2.4452250000000002E+00       0                       0                
   1   280   # settings.tissues_eta_Ra
  -1       0                       0                       0                
   1   280   # settings.tissues_tau_R
@@ -10395,13 +10398,13 @@ double initialValue(10176,6)
   1   281   # settings.tissues_UseStraighteningReaction2Phi
  -1  9.9999999999999995E-07       0                       0                
   1   280   # settings.tissues_V_max_breakPoint_Frac
- -1 %settings.tissues_eta_C% 0.0 0.0
+ -1  3.7580130000000000E-01       0                       0                
   1   280   # settings.tissues_eta_C
  -1  5.0000000000000000E-01       0                       0                
   1   280   # settings.tissues_gamma
- -1  2.9376000000000001E+01       0                       0                
+ -1 %settings.tissues_chi_R% 0.0 0.0
   1   280   # settings.tissues_chi_R
- -1 -1.2000000000000000E-01       0                       0                
+ -1 %settings.tissue_chi_C% 0.0 0.0
   1   280   # settings.tissue_chi_C
  -1       0                       0                       0                
   1   280   # settings.veins_chi_pump
@@ -10413,7 +10416,7 @@ double initialValue(10176,6)
   1   280   # settings.veins_C_phi
  -1       0                       0                       0                
   1   280   # settings.veins_ZPV_phi
- -1 %settings.veins_gamma% 0.0 0.0
+ -1  3.6562499999999998E-01       0                       0                
   1   280   # settings.veins_gamma
  -1       5                       0                       0                
   1   280   # settings.veins_alpha
@@ -10455,7 +10458,7 @@ double initialValue(10176,6)
   1   281   # settings.baro_useAbsolutePressureTerm
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
- -1  9.8370000000000005E+01       0                       0                
+ -1      10                       0                       0                
   1   280   # settings.baro_tau_s
  -1  6.5100000000000005E-02       0                       0                
   1   280   # settings.baro_a
@@ -10487,7 +10490,7 @@ double initialValue(10176,6)
   6   256   # settings.pulm_V_PV_start
  -1 %settings.pulm_R% 0.0 1e+100
   1   280   # settings.pulm_R
- -1  9.9160000000000003E-04       0                       0                
+ -1 %settings.pulm_q_nom_maxq% 0.0 0.0
   1   280   # settings.pulm_q_nom_maxq
  -1  9.1500000000000004E-01       0                       0                
   1   280   # settings.pulm_R_exp
@@ -15259,7 +15262,7 @@ double initialValue(10176,6)
   1   280   # baseline.heartComponent.calciumMechanics.t0_delay_maxAct
  -1       0                       0                 1.0000000000000000E+100
   1   280   # baseline.pulmonaryComponent.deadVolume
- -1       0                       0                       0                
+ -1       1                       0                       0                
   1   281   # baseline.pulmonaryComponent.r_pa.useNonlinearResistance
  -1       1                       0                       0                
   1   281   # baseline.pulmonaryComponent.r_pa.useNominalParametrization
@@ -15363,6 +15366,8 @@ double initialValue(10176,6)
   1   280   # baseline.condHeartPhi.disconnectedValue
  -1  9.9999999999999995E+59       0                       0                
   1   280   # baseline.condHeartPhi.uMax
+ -1  2.0000000000000001E-01       0                       0                
+  1   280   # baseline.condHeartPhi.uMin
  -1       1                       0                       0                
   1   280   # baseline.condHeartPhi.phi_gain
  -1       1                       0                       0                
@@ -15455,9 +15460,9 @@ double initialValue(10176,6)
   6   320   # baseline.EventCounter
  -1       0                       0                       0                
   1   281   # baseline.fmi_loggingOn
- -1      60                       0                       0                
+ -1       0                       0                       0                
   1   280   # baseline.fmi_StartTime
- -1     120                       0                       0                
+ -1      60                       0                       0                
   1   280   # baseline.fmi_StopTime
   0       0                       0                       0                
   6   256   # baseline.fmi_NumberOfSteps
@@ -20285,7 +20290,7 @@ double initialValue(10176,6)
   1   280   # exercise.heartComponent.calciumMechanics.t0_delay_maxAct
  -1       0                       0                 1.0000000000000000E+100
   1   280   # exercise.pulmonaryComponent.deadVolume
- -1       0                       0                       0                
+ -1       1                       0                       0                
   1   281   # exercise.pulmonaryComponent.r_pa.useNonlinearResistance
  -1       1                       0                       0                
   1   281   # exercise.pulmonaryComponent.r_pa.useNominalParametrization
@@ -20313,9 +20318,9 @@ double initialValue(10176,6)
   1   280   # exercise.pulmonaryComponent.phi_factor.eta
  -1       0                       0                       0                
   1   280   # exercise.pulmonaryComponent.fraction.k
- -1       5                       0                 1.0000000000000000E+100
+ -1       1                       0                 1.0000000000000000E+100
   1   280   # exercise.phi_fixed.rising
- -1      50                       0                 1.0000000000000000E+100
+ -1     100                       0                 1.0000000000000000E+100
   1   280   # exercise.phi_fixed.width
  -1       0                       0                 1.0000000000000000E+100
   1   280   # exercise.phi_fixed.falling
@@ -20323,7 +20328,7 @@ double initialValue(10176,6)
   1   280   # exercise.phi_fixed.period
  -1      -1                       0                       0                
   1   282   # exercise.phi_fixed.nperiod
- -1       5                       0                       0                
+ -1      10                       0                       0                
   1   280   # exercise.phi_fixed.startTime
  -1       0                       0                       0                
   1   281   # exercise.condHRPhi.disconnected
@@ -20385,6 +20390,8 @@ double initialValue(10176,6)
   1   280   # exercise.condHeartPhi.disconnectedValue
  -1  9.9999999999999995E+59       0                       0                
   1   280   # exercise.condHeartPhi.uMax
+ -1  2.0000000000000001E-01       0                       0                
+  1   280   # exercise.condHeartPhi.uMin
  -1       1                       0                       0                
   1   280   # exercise.condHeartPhi.phi_gain
  -1       1                       0                       0                
@@ -20427,11 +20434,11 @@ double initialValue(10176,6)
   1   280   # exercise.condTP_EP1.add3_1.k2
  -1       1                       0                       0                
   1   280   # exercise.Exercise.height
- -1       5                       0                 1.0000000000000000E+100
+ -1       1                       0                 1.0000000000000000E+100
   1   280   # exercise.Exercise.duration
  -1       0                       0                       0                
   1   280   # exercise.Exercise.offset
- -1       5                       0                       0                
+ -1      10                       0                       0                
   1   280   # exercise.Exercise.startTime
   0       0                       0                       0                
   6   320   # exercise.brachial_pressure
@@ -20485,9 +20492,9 @@ double initialValue(10176,6)
   6   320   # exercise.EventCounter
  -1       0                       0                       0                
   1   281   # exercise.fmi_loggingOn
- -1     200                       0                       0                
+ -1       0                       0                       0                
   1   280   # exercise.fmi_StartTime
- -1     320                       0                       0                
+ -1      60                       0                       0                
   1   280   # exercise.fmi_StopTime
   0       0                       0                       0                
   6   256   # exercise.fmi_NumberOfSteps
@@ -25315,7 +25322,7 @@ double initialValue(10176,6)
   1   280   # tilt.heartComponent.calciumMechanics.t0_delay_maxAct
  -1       0                       0                 1.0000000000000000E+100
   1   280   # tilt.pulmonaryComponent.deadVolume
- -1       0                       0                       0                
+ -1       1                       0                       0                
   1   281   # tilt.pulmonaryComponent.r_pa.useNonlinearResistance
  -1       1                       0                       0                
   1   281   # tilt.pulmonaryComponent.r_pa.useNominalParametrization
@@ -25419,6 +25426,8 @@ double initialValue(10176,6)
   1   280   # tilt.condHeartPhi.disconnectedValue
  -1  9.9999999999999995E+59       0                       0                
   1   280   # tilt.condHeartPhi.uMax
+ -1  2.0000000000000001E-01       0                       0                
+  1   280   # tilt.condHeartPhi.uMin
  -1       1                       0                       0                
   1   280   # tilt.condHeartPhi.phi_gain
  -1       1                       0                       0                
@@ -30349,7 +30358,7 @@ double initialValue(10176,6)
   1   280   # valsalva.heartComponent.calciumMechanics.t0_delay_maxAct
  -1       0                       0                 1.0000000000000000E+100
   1   280   # valsalva.pulmonaryComponent.deadVolume
- -1       0                       0                       0                
+ -1       1                       0                       0                
   1   281   # valsalva.pulmonaryComponent.r_pa.useNonlinearResistance
  -1       1                       0                       0                
   1   281   # valsalva.pulmonaryComponent.r_pa.useNominalParametrization
@@ -30683,7 +30692,7 @@ double initialValue(10176,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(10176,186)
+char initialDescription(10179,186)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -33225,6 +33234,7 @@ Gain of input signal 2
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Upper limits of input signals
+Lower limits of input signals
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -33327,7 +33337,7 @@ For Smith heart - linear dependency of passive elastances (given by nominal pres
 nominal driving offset [1|%]
 Minimal driving offset at maximal activation [1|%]
 Amplitude of resting elastance [Pa/m3|mmHg/ml]
-Amplitude of ventricular elastance at maximal activation [Pa/m3|mmHg/ml]
+Amplitude of ventricular elastance at maximal activation [Pa/m3|Pa/m3]
 nominal systolic contraction time [s|s]
 nominal systolic contraction time at maximal activation [s|s]
 Systolic relaxation time [s|s]
@@ -35736,6 +35746,7 @@ Gain of input signal 2
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Upper limits of input signals
+Lower limits of input signals
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
@@ -38253,6 +38264,7 @@ Gain of input signal 2
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
 output for disconnected = true. Use SI units!
 Upper limits of input signals
+Lower limits of input signals
 Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2

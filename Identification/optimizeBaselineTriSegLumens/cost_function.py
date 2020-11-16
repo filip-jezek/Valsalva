@@ -45,7 +45,7 @@ def plotObjectives(vars_set, interval, objectives):
 def getObjectives(vars_set):
 
     
-    fun_lib.checkSimulationLength(vars_set['time'][-1],90)
+    fun_lib.checkSimulationLength(vars_set['time'][-1],40)
 
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
@@ -100,8 +100,8 @@ def getObjectives(vars_set):
             ('BPd', min(vars_set['brachial_pressure'][interval]), 80*mmHg2SI, None, 10),
             ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1e-1),
             ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1e-1),
-            ('ESV_la', numpy.min(vars_set['V_la'][interval]), 12*ml2SI, None, 1e-2),
-            ('EDV_la', numpy.max(vars_set['V_la'][interval]), 41*ml2SI, None, 1e-2),
+            ('ESV_la', numpy.min(vars_set['V_la'][interval]), 20*ml2SI, None, 1e-2),
+            ('EDV_la', numpy.max(vars_set['V_la'][interval]), 58*ml2SI, None, 1e-2),
             ('Q_MV_f', vla_peak_frac, None, [1.5, 2], 1e-3),
             ('Qdot_mv', atrial_kick, None, [0.2, 0.3], 1e-3),
             ('q_mv_sad', q_mv_saddle, None, [0, q_mv_Patrial*0.2], 1e-3),
@@ -113,12 +113,12 @@ def getObjectives(vars_set):
 # set by EDV and ESV
 #            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), EF_target, None, 1),
 # set by HR and EDV AND ESV, just emphasized here
-            ('CO', sum(vars_set['CO'][interval]) / len(interval), 5.76*lpm2SI, None, 10),
+            ('CO', sum(vars_set['CO'][interval]) / len(interval), 95.2e-6, None, 10),
             ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), 20*mmHg2SI, None, .1),
-            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, .1),
-            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, .1),
-            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, .1),
-            ('EDP', numpy.min(vars_set['P_LV'][interval]), None, [6*mmHg2SI, 12*mmHg2SI], 1e-3),
+            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, 1),
+            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, 1),
+            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 1421, None, .1),
+            ('EDP', numpy.min(vars_set['P_LV'][interval]), None, [671, 12*mmHg2SI], 1e-3),
             ('BPMeanStd', numpy.std(vars_set['brachial_pressure_mean'][steady_interval]), None, [0, 4*mmHg2SI], 1e-2),
             ('PWV', pwv, None, [5, 10], 1)            ]
 

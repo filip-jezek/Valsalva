@@ -499,8 +499,14 @@ def plotObjectiveTarget(pack:tuple, objective_name:str, unitFactor:float, fmt = 
     pack = (objectives:list, ax:plt.axes, interval:range)
     """
     (objectives, time, ax, interval) = pack
-    # get the bounds from the target value
-    objective = next((o for o in objectives if o.name == objective_name))
+
+    try:
+        # get the bounds from the target value
+        objective = next((o for o in objectives if o.name == objective_name))
+    except StopIteration:
+        # defensive programming - not all objectives are actrive rn
+        return
+
     if objective.targetValue is None:
         # defensive programming: it might be none
         return
