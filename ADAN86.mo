@@ -39398,7 +39398,6 @@ P_hs_plus_dist"),
               heart_drive_atr_D_0=18209050,
               heart_vntr_k_passive =          3.475000e+01,
               heart_vntr_xi_Vw=0.9639875,
-              baro_tau_s=10,
               pulm_R=7256414,
               syst_TPR=128212500,
               syst_art_k_E=0.3973268,
@@ -41924,9 +41923,9 @@ P_hs_plus_dist"),
 
         end CVS_baseline_ss_init;
 
-        model CVS_optimized_BVT_init "Steady state initialization from 2020-11-16 10:09:22.041229 at time 345.0"
+        model CVS_optimized_BVT_init "Steady state initialization from 2020-11-16 10:09:22.041229 at time 345.0. Resets the V_PV_init"
           extends
-            Results.CVS_optimized_BVT(
+            Results.CVS_optimized_BVT(settings(V_PV_init = 0),
               SystemicComponent(
                 baroreflex_system(
                   baroreflex(phi(start = 0.25141633, fixed = true)),
@@ -42093,7 +42092,7 @@ P_hs_plus_dist"),
                 sa_node(cardiac_cycle(start = 0.97716993, fixed = true))),
               pulmonaryComponent(
                 c_pa(volume(start = 9.330388e-05, fixed = true)),
-                c_pv(volume(start = 0.00045163467, fixed = true))));
+                c_pv(volume(start = 0.00045163467 + settings.V_PV_init,  fixed = true))));
         end CVS_optimized_BVT_init;
       end SteadyState;
     end Identification;
@@ -42942,7 +42941,7 @@ P_hs_plus_dist"),
 
         replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
           height=Modelica.Constants.pi/3,
-          startTime=0,
+          startTime=20,
           duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
       equation
@@ -43857,7 +43856,7 @@ P_hs_plus_dist"),
           condTP_IP(disconnected=false),
           condTP_EP1(disconnected=false),
           condHeartPhi(uMin=settings.phi0),
-          settings(tissues_eta_Rv=0));
+          settings(tissues_eta_Rv=0, baro_tau_s=93));
 
       // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
       //     useAutonomousPhi(y=true),
@@ -44331,7 +44330,7 @@ P_hs_plus_dist"),
     package Experiments
       model Hemorrhage "A simple bleeding experiment"
         extends
-          Identification.SteadyState.OlufsenTriSeg_optimized_steadyState_init;
+          CardiovascularSystem;
         Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=false,
             SolutionFlow=1.6666666666667e-05)
           annotation (Placement(transformation(extent={{40,-80},{60,-60}})));
@@ -44344,7 +44343,7 @@ P_hs_plus_dist"),
             color={0,0,0},
             thickness=1));
         connect(pump.q_in, heartComponent.sv) annotation (Line(
-            points={{40,-70},{24,-70},{24,-12},{-16,-12}},
+            points={{40,-70},{24,-70},{24,-16.4},{-16,-16.4}},
             color={0,0,0},
             thickness=1));
       end Hemorrhage;
@@ -44353,6 +44352,41 @@ P_hs_plus_dist"),
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)));
       end SimplestHeart;
+
+      model HFpEF
+        "HFpEF phenotype: increase stiffness. Show PV loop, q_mv, HR, SV"
+        extends CardiovascularSystem(heartComponent(ventricles(LV_wall(k_passive
+                  =k_passive_LV), SEP_wall(k_passive=k_passive_LV))),
+                                                             settings(
+              baro_tau_s=10));
+        parameter Real k_passive_LV=150 "mN / mm^2 / micro";
+      end HFpEF;
+
+      model HFrEF
+        extends CardiovascularSystem(
+          condTP_EP1(disconnected=true),
+          condTP_PC(disconnected=true),
+          condTP_IP(disconnected=true),
+          heartComponent(ventricles(LV_wall(functionFraction=0.5), SEP_wall(
+                  functionFraction=0.5))),
+          settings(
+            heart_drive_D_A(displayUnit="Pa/m3"),
+            heart_drive_D_A_actMax(displayUnit="Pa/m3") = 3500,
+            baro_tau_s=10));
+        annotation (experiment(
+            StopTime=40,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end HFrEF;
+
+      model LHF_Vw
+        extends Identification.Results.CVS_valsalva_PP2(heartComponent(ventricles(
+                LV_wall(Vw=heartComponent.ventricles.settings.heart_vntr_xi_Vw*89*distensionFraction),
+                SEP_wall(Vw=heartComponent.ventricles.settings.heart_vntr_xi_Vw*34*distensionFraction))),
+            settings(baro_tau_s=10));
+                parameter Physiolibrary.Types.Fraction distensionFraction = 0.2;
+      end LHF_Vw;
     end Experiments;
 
     package ModelVariants
