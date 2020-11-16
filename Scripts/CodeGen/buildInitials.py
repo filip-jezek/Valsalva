@@ -17,7 +17,7 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'CVS_baseline_ss'
+base_model_full_path = 'CVS_optimized_BVT'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 

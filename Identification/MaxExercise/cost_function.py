@@ -66,7 +66,7 @@ def getObjectives(vars_set):
     ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), BPs_target, None, 1),
             # ('EDV', max(vars_set['V_LV'][interval]), EDV_target, None, 1),
             ('ESV', min(vars_set['V_LV'][interval]), ESV_target, None, 1),
-            ('CO', numpy.mean(vars_set['CO'][interval]), None, [CO_min, 40*lpm2SI], 1e-3),
+            ('CO', numpy.mean(vars_set['CO'][interval]), None, [CO_min, 40*lpm2SI], 10e-3),
             ('Ts', max(vars_set['TEjection'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
             ('Td', max(vars_set['TFilling'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
             # ('Ppa', numpy.mean(vars_set['P_pa'][interval]), Ppa_target, None, .1),

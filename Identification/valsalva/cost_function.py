@@ -236,8 +236,8 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
                     (bp_mean, phase4, (-2, -3), numpy.argmin, 't_ph4_drop'   , IGNORE),
                     (bp_mean, phase4, (2, 5) , numpy.argmax, 't_ph4_ovrshoot', IGNORE),
                     (HR     , phase1, 0      , numpy.argmin, 't_ph1_hr_min'  , IGNORE),
-                    (HR     , phase4, (0, 0) , numpy.argmax, 't_ph4_hr_max'  , COUNT),
-                    (HR     , phase4, (0, 3) , numpy.argmin, 't_ph4_hr_drop' , COUNT)    ]
+                    (HR     , phase4, (0, 0) , numpy.argmax, 't_ph4_hr_max'  , IGNORE),
+                    (HR     , phase4, (0, 3) , numpy.argmin, 't_ph4_hr_drop' , IGNORE)    ]
 
     # Get pulse pressures
     pp_values = [('pp_ph2_mean_min', 't_ph2_mean_min', phase2, 1, COUNT),
@@ -245,7 +245,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
                  ('pp_ph4_drop'    , 't_ph4_drop'    , phase4, 1, IGNORE)]
 
     sv_values = [(phase2, (2, -1), 'SV_min_valsalva', [25, 40], 1, COUNT),
-                 (phase1, (0,  5), 'SV_min_midValsalva', [60, 150], 10, COUNT),
+                 (phase1, (0,  5), 'SV_min_midValsalva', [55, 150], 10, COUNT),
                  (phase4, (3, 4), 'SV_min_recovery', [60, 200], 1, COUNT),                ]
 
     # map the inputs to ObjectiveVar
