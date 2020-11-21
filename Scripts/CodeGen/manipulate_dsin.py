@@ -316,11 +316,18 @@ def getTemplateMapping(keys: dict) ->dict:
     """
     return {key:'%%%s%%' % key for key in keys.keys()}
 
-def createDsinTemplate(keys, dsFileIn = 'dsin.txt', dsFileOut = 'dsinTemplate.txt'):
+def createDsinTemplate(keys, dsFileIn = 'dsin.txt', dsFileOut = 'dsinTemplate.txt', outputsOnly = False):
     template_mapping = getTemplateMapping(keys)
     
     # dicSim = {'StartTime': 0,'StopTime': 100}
-    dicSim = {'levent': 0}
+    dicSim = {'levent': 0, 'evgrid' : 0}
+    if outputsOnly:
+        dicSim['lx'] = 0
+        dicSim['lxd'] = 0
+        dicSim['lxu'] = 0
+        dicSim['lz'] = 0
+        dicSim['lw'] = 0
+        dicSim['la'] = 0
     # dicVars = {'m_flow': 10}
 
     create_dsinORfinal(dicSim, template_mapping, dsFileIn=dsFileIn, dsFileOut=dsFileOut)
@@ -463,7 +470,7 @@ def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False
 
     createDsinTemplate(init_params, dsFileOut='dsinTemplate_SA.txt')
 
-def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False):
+def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeOnlyOutputs = False):
     paramsFile = 'params_for_ident.txt'
     # generate the params_for_SA.txt parameters list, which may be further edited.
     if regenerateParamsFromDsin:
@@ -479,11 +486,11 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False):
 
     build_opt_command_file('opt_command.txt', init_params, run_type='identification')
 
-    createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt')    
+    createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt', outputsOnly=storeOnlyOutputs)    
     
 def run():
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
-    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False)
+    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = True)
     # writeInitStatesFromDsin()
     print('Done, Johne')
     

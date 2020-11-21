@@ -1,4 +1,5 @@
 # name, value, [min, max, step]
+settings.V_PV_init,0.0,-500e-6,500e-6,100e-6
 settings.heart_R_vlv,1627.735,813.8675,20441.6025,100
 settings.heart_R_LA,6213404.0,310670.0,19320106.0,100000
 settings.heart_drive_D_0,11.78155,0,500,1
