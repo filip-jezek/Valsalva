@@ -245,8 +245,12 @@ package ADAN_main
       parameter Fraction heart_drive_atr_D_0=0.25 "nominal driving offset as a fraction of E_0"
         annotation(Dialog(tab="Heart",   group="Simple atria"));
       parameter Physiolibrary.Types.HydraulicElastance heart_atr_D_A=26664477.483
-        "Atrial elastance peak - Maximal elastance 0.05 + 0.15 mmhg/ml"                                                     annotation(Dialog(tab="Heart",   group=
-              "Simple atria"));
+        "Atrial elastance peak - Maximal elastance 0.05 + 0.15 mmhg/ml"
+        annotation(Dialog(tab="Heart",   group="Simple atria"));
+      parameter Time heart_atr_drive_TS(displayUnit="s")=0.14 "nominal atrial contraction time"
+          annotation(Dialog(tab="Heart",   group="Simple atria"));
+      parameter Time heart_atr_drive_TR(displayUnit="s")=0.14 "nominal atrial relaxation time"
+          annotation(Dialog(tab="Heart",   group="Simple atria"));
 
       // TriSeg ventricles
       parameter Physiolibrary.Types.Fraction heart_vntr_xi_Vw=1
@@ -34227,7 +34231,14 @@ P_hs_plus_dist"),
   package SystemicTree
 
     model CardiovascularSystem
-      extends Identification.Results.CVS_optimized_exercise;
+      extends Identification.Results.CVS_optimized_exercise(heartComponent(
+            pericardium(
+            enabled=true,
+            V0=0.0008,
+            s=10)), settings(
+          heart_drive_TR=4.100000e-01,
+          heart_atr_drive_TS=8.200000e-02,
+          heart_atr_drive_TR=4.100000e-01));
     //   OptimizedValsalva( settings(
     //       V_PV_init=5e-05,
     //       heart_R_vlv(displayUnit="(dyn.s)/cm5") = 500000,
@@ -34494,7 +34505,19 @@ P_hs_plus_dist"),
         output Physiolibrary.Types.VolumeFlowRate q_mv = heartComponent.mitralValve.volumeFlowRate "Flow in mitral valve";
         output Real SLo_max = max([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo]) "maximal Sarcomere length";
         output Real SLo_min = min([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo]) "Minimal Sarcomere length";
+        output Physiolibrary.Types.Pressure P_MV_o "Opening pressure of the mitral valve";
+        output Physiolibrary.Types.Pressure P_MV_c "Closing pressure of the mitral valve";
+
       equation
+
+        when heartComponent.mitralValve.open then
+          P_MV_o = heartComponent.mitralValve.q_in.pressure;
+        end when;
+
+        when not heartComponent.mitralValve.open then
+          P_MV_c = heartComponent.mitralValve.q_in.pressure;
+        end when;
+
         assert(abs(height - settings.height) < 0.01, "Please manually tune the height in settings so its in accordance with the one calculated from the aortic vessel length to a preceision of 1cm", AssertionLevel.warning);
       //   settings.BMI = weight/(height^2);
         // by putting these two "known" variables in equal, modelica can determine the appropriate height
@@ -39765,6 +39788,21 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end CVS_valsalva_optim;
+
+        model AdjustPVloop "Ventricular PV loop adjustement test"
+          extends Baseline.CVS_baseline(useAutonomousPhi(y=false),
+              heartComponent(calciumMechanics(
+                usePhiInput=false,
+                TS=settings.heart_atr_drive_TS,
+                TS_maxAct=settings.heart_atr_drive_TS,
+                TR=settings.heart_atr_drive_TR,
+                TR_maxAct=settings.heart_atr_drive_TR)));
+          annotation (experiment(
+              StopTime=30,
+              Interval=0.01,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end AdjustPVloop;
       end SingleModelRun;
 
       package CombinedModel
@@ -42433,21 +42471,23 @@ P_hs_plus_dist"),
                     vol1(start=8.6253085e-06, fixed=false),
                     vol2(start=8.624841e-06, fixed=true))));
             Physiolibrary.Hydraulic.Sources.UnlimitedVolume constantArteries(P=
-                  14665.46261565)
+                  13332.2387415)
               annotation (Placement(transformation(extent={{-100,18},{-80,38}})));
-            Physiolibrary.Hydraulic.Sources.UnlimitedVolume constantVeins(P=666.611937075)
+            Physiolibrary.Hydraulic.Sources.UnlimitedVolume constantVeins(P=
+                  5332.8954966)
               annotation (Placement(transformation(extent={{48,18},{28,38}})));
           equation
-            connect(constantArteries.y, SystemicComponent.port_a) annotation (Line(
-                points={{-80,28},{-58,28}},
-                color={0,0,0},
-                thickness=1));
             connect(constantVeins.y, SystemicComponent.port_b) annotation (Line(
                 points={{28,28},{18,28}},
                 color={0,0,0},
                 thickness=1));
+            connect(constantArteries.y, SystemicComponent.port_a) annotation (
+                Line(
+                points={{-80,28},{-58,28}},
+                color={0,0,0},
+                thickness=1));
             annotation (experiment(
-                StopTime=60,
+                StopTime=30,
                 Interval=0.01,
                 Tolerance=1e-07,
                 __Dymola_Algorithm="Cvode"));
