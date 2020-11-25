@@ -34763,7 +34763,7 @@ P_hs_plus_dist"),
       output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
       Real brachial_pressure_int "integration of pressure to find the true mean";
         output Physiolibrary.Types.Pressure renal_capillary=SystemicComponent.renal_L166.p_C;
-      output Physiolibrary.Types.VolumeFlowRate CO = heartComponent.aorticValve.CO;
+        output Physiolibrary.Types.VolumeFlowRate CO(displayUnit = "l/min") = heartComponent.aorticValve.CO;
         output Physiolibrary.Types.Pressure carotid_pressure=SystemicComponent.common_carotid_L48_D.p_out_hs;
         output Physiolibrary.Types.Pressure femoral_pressure=SystemicComponent.femoral_L200.p_out_hs;
         output Physiolibrary.Types.Pressure P_LV = heartComponent.ventricles.P_LV "Pressure in left ventricle";
@@ -44071,6 +44071,11 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end CVS_SemiRecumberent;
+
+      model CVS_upsideDown "A headdown experiment - not optimized for though"
+        extends CVS_tiltable(Tilt_ramp(height=-Modelica.Constants.pi/2,
+              startTime=0), settings(baro_tau_s=10));
+      end CVS_upsideDown;
     end Tilt;
 
     package Exercise
@@ -45401,21 +45406,29 @@ P_hs_plus_dist"),
     package Experiments
       model Hemorrhage "A simple bleeding experiment"
         extends CardiovascularSystem;
-        Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=false,
-            SolutionFlow=1.6666666666667e-05)
-          annotation (Placement(transformation(extent={{40,-80},{60,-60}})));
+        Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
+            SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
+          annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
         Physiolibrary.Hydraulic.Components.ElasticVessel volume_bleeded
           "A cut vein reservoir"
-          annotation (Placement(transformation(extent={{72,-80},{92,-60}})));
+          annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
+        replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
+          height=-50e-6,
+          offset=50e-6,
+          startTime=10,
+          duration=0)   constrainedby Modelica.Blocks.Sources.Ramp
+          annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
       equation
         connect(volume_bleeded.q_in, pump.q_out) annotation (Line(
-            points={{82,-70},{60,-70}},
+            points={{90,-88},{68,-88}},
             color={0,0,0},
             thickness=1));
         connect(pump.q_in, heartComponent.sv) annotation (Line(
-            points={{40,-70},{24,-70},{24,-16.4},{-16,-16.4}},
+            points={{48,-88},{24,-88},{24,-16.4},{-16,-16.4}},
             color={0,0,0},
             thickness=1));
+        connect(Tilt_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
+                -60},{58,-60},{58,-81}}, color={0,0,127}));
       end Hemorrhage;
 
       model SimplestHeart
@@ -45457,11 +45470,11 @@ P_hs_plus_dist"),
                 parameter Physiolibrary.Types.Fraction distensionFraction = 0.2;
       end LHF_Vw;
 
-      model HFrEF_noBaro
+      model HFrEF_noBaroHyperVol
         extends HFrEF(
           useAutonomousPhi(y=false),
           settings(V_PV_init=0.0036));
-      end HFrEF_noBaro;
+      end HFrEF_noBaroHyperVol;
 
       model LHF_AMref
         extends Identification.Results.CVS_valsalva_PP2(heartComponent(ventricles(
@@ -45481,7 +45494,7 @@ P_hs_plus_dist"),
       end LHF_AMref;
 
       model HFrEF_noBaro_PC "pericardium"
-        extends HFrEF_noBaro(
+        extends HFrEF_noBaroHyperVol(
         heartComponent(pericardium(enabled=true, V0=0.0005)));
         annotation (experiment(
             StopTime=30,
@@ -45501,7 +45514,8 @@ P_hs_plus_dist"),
       end HFrEF_Baro_PC;
 
       model HFrEF_noBaro_AC "atrial collagen"
-        extends HFrEF_noBaro(heartComponent(ra(
+        extends HFrEF_noBaroHyperVol(
+                             heartComponent(ra(
               enableCollagen=true,
               V0_col=8e-05,
               s=50), la(

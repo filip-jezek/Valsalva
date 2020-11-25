@@ -9,8 +9,8 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-      30                   # StopTime     Time at which integration stops
-  1.0000000000000000E-02   # Increment    Communication step size, if > 0
+      60                   # StopTime     Time at which integration stops
+  2.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
   9.9999999999999995E-07   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(11685,100)
+char initialName(11682,100)
 settings.phi0
 settings.height
 settings.weight
@@ -121,20 +121,20 @@ settings.heart_R_A_vis
 settings.heart_I_A
 settings.heart_alphaE
 settings.heart_gammaE
-settings.heart_drive_D_0
-settings.heart_drive_D_0_maxAct
-settings.heart_drive_D_A
-settings.heart_drive_D_A_actMax
-settings.heart_drive_TS
-settings.heart_drive_TS_maxAct
-settings.heart_drive_TR
-settings.heart_drive_TR_maxAct
-settings.heart_drive_Tact
-settings.heart_drive_Tact_maxAct
-settings.heart_drive_atr_D_0
+settings.heart_vntr_D_0
+settings.heart_vntr_D_0_maxAct
+settings.heart_vntr_D_A
+settings.heart_vntr_D_A_actMax
+settings.heart_vntr_TS
+settings.heart_vntr_TS_maxAct
+settings.heart_vntr_TR
+settings.heart_vntr_TR_maxAct
+settings.heart_vntr_Tact
+settings.heart_vntr_Tact_maxAct
+settings.heart_atr_D_0
 settings.heart_atr_D_A
-settings.heart_atr_drive_TS
-settings.heart_atr_drive_TR
+settings.heart_atr_TS
+settings.heart_atr_TR
 settings.heart_vntr_xi_Vw
 settings.heart_vntr_xi_AmRef
 settings.heart_vntr_k_passive
@@ -224,6 +224,7 @@ SystemicComponent.phi
 SystemicComponent.Exercise
 SystemicComponent.adenosine
 SystemicComponent.port_a.pressure
+SystemicComponent.port_b.q
 SystemicComponent.UseBaroreflexOutput
 SystemicComponent.UseThoracic_PressureInput
 SystemicComponent.UseOuter_PressureInput
@@ -9659,6 +9660,7 @@ SystemicComponent.axillary_vein_L136.compliant_vessel.p_n
 SystemicComponent.axillary_vein_L136.p_vol
 SystemicComponent.brachial_vein_L138.port_a.pressure
 SystemicComponent.brachial_vein_L138.port_a.q
+SystemicComponent.brachial_vein_L138.port_b.q
 SystemicComponent.brachial_vein_L138.UseInertance
 SystemicComponent.brachial_vein_L138.UseOuter_thoracic_pressure
 SystemicComponent.brachial_vein_L138.UseOuter_external_pressure
@@ -9670,8 +9672,6 @@ SystemicComponent.brachial_vein_L138.external_pressure_inside
 SystemicComponent.brachial_vein_L138.UseExercise
 SystemicComponent.brachial_vein_L138.exercise_ratio
 SystemicComponent.brachial_vein_L138.exercise
-SystemicComponent.brachial_vein_L138.q_out
-SystemicComponent.brachial_vein_L138.der(q_out)
 SystemicComponent.brachial_vein_L138.volume
 SystemicComponent.brachial_vein_L138.der(volume)
 SystemicComponent.brachial_vein_L138.V_min
@@ -11116,6 +11116,7 @@ heartComponent.UseFrequencyInput
 heartComponent.UseThoracicPressureInput
 heartComponent.UsePhiInput
 heartComponent.HR
+heartComponent.pv.q
 heartComponent.pa.q
 heartComponent.tricuspidValve.q_in.pressure
 heartComponent.tricuspidValve.q_in.q
@@ -11211,20 +11212,18 @@ heartComponent.aorticValve.T0_cycle
 heartComponent.aorticValve.CO_acc
 heartComponent.aorticValve.der(CO_acc)
 heartComponent.aorticValve.CO
-heartComponent.r_SystemicVenousInflow.q_in.q
-heartComponent.r_SystemicVenousInflow.q_in.der(q)
 heartComponent.r_SystemicVenousInflow.dp
-heartComponent.r_SystemicVenousInflow.resistance
-heartComponent.r_SystemicVenousInflow.inertance
-heartComponent.r_SystemicVenousInflow.dp_resistive
-heartComponent.r_SystemicVenousInflow.dp_inertive
-heartComponent.r_PulmonaryVenousInflow.q_in.q
-heartComponent.r_PulmonaryVenousInflow.q_in.der(q)
+heartComponent.r_SystemicVenousInflow.enable
+heartComponent.r_SystemicVenousInflow.useConductanceInput
+heartComponent.r_SystemicVenousInflow.Conductance
+heartComponent.r_SystemicVenousInflow.Resistance
+heartComponent.r_SystemicVenousInflow.conditionalConductance
 heartComponent.r_PulmonaryVenousInflow.dp
-heartComponent.r_PulmonaryVenousInflow.resistance
-heartComponent.r_PulmonaryVenousInflow.inertance
-heartComponent.r_PulmonaryVenousInflow.dp_resistive
-heartComponent.r_PulmonaryVenousInflow.dp_inertive
+heartComponent.r_PulmonaryVenousInflow.enable
+heartComponent.r_PulmonaryVenousInflow.useConductanceInput
+heartComponent.r_PulmonaryVenousInflow.Conductance
+heartComponent.r_PulmonaryVenousInflow.Resistance
+heartComponent.r_PulmonaryVenousInflow.conditionalConductance
 heartComponent.ventricles.port_rv.pressure
 heartComponent.ventricles.port_lv.pressure
 heartComponent.ventricles.thoracic_pressure_input
@@ -11340,7 +11339,6 @@ heartComponent.ventricles.RV_wall.debug_SLo
 heartComponent.ventricles.RV_wall.sigmaM
 heartComponent.ventricles.calciumMechanics.usePhiInput
 heartComponent.ventricles.calciumMechanics.phi0
-heartComponent.ventricles.calciumMechanics.tau_phi
 heartComponent.ventricles.calciumMechanics.t0_delay
 heartComponent.ventricles.calciumMechanics.t0_delay_maxAct
 heartComponent.ventricles.calciumMechanics.t0_delay_coeff
@@ -11455,7 +11453,6 @@ heartComponent.sa_node.beat
 heartComponent.sa_node.beats
 heartComponent.calciumMechanics.usePhiInput
 heartComponent.calciumMechanics.phi0
-heartComponent.calciumMechanics.tau_phi
 heartComponent.calciumMechanics.t0_delay
 heartComponent.calciumMechanics.t0_delay_maxAct
 heartComponent.calciumMechanics.t0_delay_coeff
@@ -11789,7 +11786,7 @@ P_MV_c
 CPUtime
 EventCounter
 
-double initialValue(11685,6)
+double initialValue(11682,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -11826,41 +11823,41 @@ double initialValue(11685,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1 %settings.heart_drive_D_0% 0.0 0.0
-  1   280   # settings.heart_drive_D_0
+ -1 %settings.heart_vntr_D_0% 0.0 0.0
+  1   280   # settings.heart_vntr_D_0
  -1  2.9531250000000000E-04       0                       0                
-  1   280   # settings.heart_drive_D_0_maxAct
- -1 %settings.heart_drive_D_A% 0.0 0.0
-  1   280   # settings.heart_drive_D_A
- -1    7000                       0                       0                
-  1   280   # settings.heart_drive_D_A_actMax
- -1 %settings.heart_drive_TS% 0.0 0.0
-  1   280   # settings.heart_drive_TS
+  1   280   # settings.heart_vntr_D_0_maxAct
+ -1 %settings.heart_vntr_D_A% 0.0 0.0
+  1   280   # settings.heart_vntr_D_A
+ -1    3500                       0                       0                
+  1   280   # settings.heart_vntr_D_A_actMax
+ -1 %settings.heart_vntr_TS% 0.0 0.0
+  1   280   # settings.heart_vntr_TS
   0       0                       0                       0                
-  6   256   # settings.heart_drive_TS_maxAct
- -1 %settings.heart_drive_TR% 0.0 0.0
-  1   280   # settings.heart_drive_TR
+  6   256   # settings.heart_vntr_TS_maxAct
+ -1 %settings.heart_vntr_TR% 0.0 0.0
+  1   280   # settings.heart_vntr_TR
   0       0                       0                       0                
-  6   256   # settings.heart_drive_TR_maxAct
- -1 %settings.heart_drive_Tact% 0.0 0.0
-  1   280   # settings.heart_drive_Tact
+  6   256   # settings.heart_vntr_TR_maxAct
+ -1 %settings.heart_vntr_Tact% 0.0 0.0
+  1   280   # settings.heart_vntr_Tact
   0       0                       0                       0                
-  6   256   # settings.heart_drive_Tact_maxAct
- -1 %settings.heart_drive_atr_D_0% 0.0 0.0
-  1   280   # settings.heart_drive_atr_D_0
+  6   256   # settings.heart_vntr_Tact_maxAct
+ -1 %settings.heart_atr_D_0% 0.0 0.0
+  1   280   # settings.heart_atr_D_0
  -1 %settings.heart_atr_D_A% 0.0 0.0
   1   280   # settings.heart_atr_D_A
- -1 %settings.heart_atr_drive_TS% 0.0 0.0
-  1   280   # settings.heart_atr_drive_TS
- -1 %settings.heart_atr_drive_TR% 0.0 0.0
-  1   280   # settings.heart_atr_drive_TR
+ -1 %settings.heart_atr_TS% 0.0 0.0
+  1   280   # settings.heart_atr_TS
+ -1 %settings.heart_atr_TR% 0.0 0.0
+  1   280   # settings.heart_atr_TR
  -1 %settings.heart_vntr_xi_Vw% 0.0 0.0
   1   280   # settings.heart_vntr_xi_Vw
  -1 %settings.heart_vntr_xi_AmRef% 0.0 0.0
   1   280   # settings.heart_vntr_xi_AmRef
  -1 %settings.heart_vntr_k_passive% 0.0 0.0
   1   280   # settings.heart_vntr_k_passive
- -1 %settings.heart_vntr_Lsref% 0.0 0.0
+ -1  1.8999999999999999E+00       0                       0                
   1   280   # settings.heart_vntr_Lsref
  -1  1.6000000000000001E+00       0                       0                
   1   280   # settings.heart_vntr_L0
@@ -11968,7 +11965,7 @@ double initialValue(11685,6)
   6   257   # settings.baro_useAbsolutePressureTerm
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
- -1      93                       0                       0                
+ -1      10                       0                       0                
   1   280   # settings.baro_tau_s
  -1  6.5100000000000005E-02       0                       0                
   1   280   # settings.baro_a
@@ -11984,7 +11981,7 @@ double initialValue(11685,6)
   1   280   # settings.baro_delta0_car
  -1  6.0625799999999996E-01       0                       0                
   1   280   # settings.baro_g
- -1  3.6999999999999998E-02       0                       0                
+ -1  3.8300000000000001E-02       0                       0                
   1   280   # settings.baro_fsn
  -1  3.3790000000000001E-03       0                       0                
   1   280   # settings.baro_f1
@@ -12032,6 +12029,8 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.adenosine
   0       0                       0                       0                
   6   260   # SystemicComponent.port_a.pressure
+  0       0                       0                       0                
+  6   388   # SystemicComponent.port_b.q
   0       1                       0                       0                
   6   257   # SystemicComponent.UseBaroreflexOutput
   0       1                       0                       0                
@@ -12062,7 +12061,7 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.baroreflex_system.baroreflex.fbr_car_contrib
  -1      10                       0                       0                
   1   280   # SystemicComponent.baroreflex_system.baroreflex.tau_mean
- -1  2.5141633000000002E-01       0                       0                
+ -1  2.4962138000000000E-01       0                       0                
   2   280   # SystemicComponent.baroreflex_system.baroreflex.phi
   0       0                       0                       0                
   3   256   # SystemicComponent.baroreflex_system.baroreflex.der(phi)
@@ -12074,7 +12073,7 @@ double initialValue(11685,6)
   2   280   # SystemicComponent.baroreflex_system.baroreceptor_aortic.fbr_int
   0       0                       0                       0                
   3   256   # SystemicComponent.baroreflex_system.baroreceptor_aortic.der(fbr_int)
- -1  1.5771632000000000E+00       0                       0                
+ -1  1.5598048000000000E+00       0                       0                
   2   280   # SystemicComponent.baroreflex_system.baroreceptor_aortic.epsilon
   0       0                       0                       0                
   3   256   # SystemicComponent.baroreflex_system.baroreceptor_aortic.der(epsilon)
@@ -12090,7 +12089,7 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.baroreflex_system.baroreceptor_aortic.delta0
   0       0                       0                       0                
   6   256   # SystemicComponent.baroreflex_system.baroreceptor_aortic.xi_delta0
- -1  7.9908144000000003E-01       0                       0                
+ -1  7.9566499999999996E-01       0                       0                
   2   280   # SystemicComponent.baroreflex_system.baroreceptor_aortic.s
   0       0                       0                       0                
   3   256   # SystemicComponent.baroreflex_system.baroreceptor_aortic.der(s)
@@ -12110,7 +12109,7 @@ double initialValue(11685,6)
   2   280   # SystemicComponent.baroreflex_system.baroreceptor_carotid.fbr_int
   0       0                       0                       0                
   3   256   # SystemicComponent.baroreflex_system.baroreceptor_carotid.der(fbr_int)
- -1  1.1890944999999999E+00       0                       0                
+ -1  1.1826321000000000E+00       0                       0                
   2   280   # SystemicComponent.baroreflex_system.baroreceptor_carotid.epsilon
   0       0                       0                       0                
   3   256   # SystemicComponent.baroreflex_system.baroreceptor_carotid.der(epsilon)
@@ -12126,7 +12125,7 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.baroreflex_system.baroreceptor_carotid.delta0
   0       0                       0                       0                
   6   256   # SystemicComponent.baroreflex_system.baroreceptor_carotid.xi_delta0
- -1  8.8252940000000002E-01       0                       0                
+ -1  8.7110040000000000E-01       0                       0                
   2   280   # SystemicComponent.baroreflex_system.baroreceptor_carotid.s
   0       0                       0                       0                
   3   256   # SystemicComponent.baroreflex_system.baroreceptor_carotid.der(s)
@@ -14400,7 +14399,7 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.ascending_aorta_A.zpv
   0       0                       0                       0                
   6  1280   # SystemicComponent.ascending_aorta_A._tilt
- -1  2.0773977999999999E-06       0                       0                
+ -1  5.0963829999999998E-07       0                       0                
   2   280   # SystemicComponent.ascending_aorta_A.q
   0       0                       0                       0                
   3   256   # SystemicComponent.ascending_aorta_A.der(q)
@@ -14408,11 +14407,11 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.ascending_aorta_A.p1
   0       0                       0                       0                
   6   256   # SystemicComponent.ascending_aorta_A.p2
- -1  8.6253085000000002E-06       0                 1.0000000000000000E+100
+ -1  8.3702025000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ascending_aorta_A.vol1
   0       0                       0                       0                
   3   256   # SystemicComponent.ascending_aorta_A.der(vol1)
- -1  8.6248409999999996E-06       0                 1.0000000000000000E+100
+ -1  8.3702490000000006E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ascending_aorta_A.vol2
   0       0                       0                       0                
   3   256   # SystemicComponent.ascending_aorta_A.der(vol2)
@@ -14442,11 +14441,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.ascending_aorta_B.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.ascending_aorta_B.exercise
- -1  4.1758743999999996E-06       0                       0                
+ -1  1.0427162000000001E-06       0                       0                
   2   280   # SystemicComponent.ascending_aorta_B.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.ascending_aorta_B.der(q_in)
- -1  2.6023381000000000E-05       0                 1.0000000000000000E+100
+ -1  2.5582556000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ascending_aorta_B.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.ascending_aorta_B.der(volume)
@@ -14532,11 +14531,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.ascending_aorta_C.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.ascending_aorta_C.exercise
- -1  5.2697609999999999E-06       0                       0                
+ -1 -6.7039996999999997E-07       0                       0                
   2   280   # SystemicComponent.ascending_aorta_C.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.ascending_aorta_C.der(q_in)
- -1  2.4065620000000000E-05       0                 1.0000000000000000E+100
+ -1  2.3662586000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ascending_aorta_C.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.ascending_aorta_C.der(volume)
@@ -14622,11 +14621,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.ascending_aorta_D.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.ascending_aorta_D.exercise
- -1  8.9455049999999997E-06       0                       0                
+ -1  4.5745120000000002E-07       0                       0                
   2   280   # SystemicComponent.ascending_aorta_D.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.ascending_aorta_D.der(q_in)
- -1  2.1965858000000001E-05       0                 1.0000000000000000E+100
+ -1  2.1604135000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ascending_aorta_D.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.ascending_aorta_D.der(volume)
@@ -14714,11 +14713,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.aortic_arch_C2.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.aortic_arch_C2.exercise
- -1  1.2348741000000000E-05       0                       0                
+ -1  1.5700347000000001E-06       0                       0                
   2   280   # SystemicComponent.aortic_arch_C2.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.aortic_arch_C2.der(q_in)
- -1  2.0089737999999999E-05       0                 1.0000000000000000E+100
+ -1  1.9766223000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.aortic_arch_C2.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.aortic_arch_C2.der(volume)
@@ -14806,11 +14805,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachiocephalic_trunk_C4.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachiocephalic_trunk_C4.exercise
- -1  4.2466309999999999E-06       0                       0                
+ -1  1.3447491000000000E-05       0                       0                
   2   280   # SystemicComponent.brachiocephalic_trunk_C4.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.brachiocephalic_trunk_C4.der(q_in)
- -1  1.3650782000000001E-05       0                 1.0000000000000000E+100
+ -1  1.3398852999999999E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachiocephalic_trunk_C4.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachiocephalic_trunk_C4.der(volume)
@@ -14898,11 +14897,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.aortic_arch_C46.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.aortic_arch_C46.exercise
- -1  1.1278529000000000E-05       0                       0                
+ -1 -1.0752923000000000E-05       0                       0                
   2   280   # SystemicComponent.aortic_arch_C46.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.aortic_arch_C46.der(q_in)
- -1  1.1901002000000001E-05       0                 1.0000000000000000E+100
+ -1  1.1715289500000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.aortic_arch_C46.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.aortic_arch_C46.der(volume)
@@ -14990,11 +14989,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.aortic_arch_C64.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.aortic_arch_C64.exercise
- -1  1.0646503000000000E-05       0                       0                
+ -1 -1.4183497000000001E-05       0                       0                
   2   280   # SystemicComponent.aortic_arch_C64.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.aortic_arch_C64.der(q_in)
- -1  8.1687184999999992E-06       0                 1.0000000000000000E+100
+ -1  8.0450330000000003E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.aortic_arch_C64.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.aortic_arch_C64.der(volume)
@@ -15080,11 +15079,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.aortic_arch_C94.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.aortic_arch_C94.exercise
- -1  8.7459890000000005E-06       0                       0                
+ -1 -1.6687964000000002E-05       0                       0                
   2   280   # SystemicComponent.aortic_arch_C94.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.aortic_arch_C94.der(q_in)
- -1  4.4768087000000000E-05       0                 1.0000000000000000E+100
+ -1  4.4231372000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.aortic_arch_C94.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.aortic_arch_C94.der(volume)
@@ -15170,11 +15169,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.thoracic_aorta_C96.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.thoracic_aorta_C96.exercise
- -1  1.7310622000000000E-05       0                       0                
+ -1 -1.0259821000000000E-05       0                       0                
   2   280   # SystemicComponent.thoracic_aorta_C96.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C96.der(q_in)
- -1  8.0382420000000003E-06       0                 1.0000000000000000E+100
+ -1  7.9503310000000006E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.thoracic_aorta_C96.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C96.der(volume)
@@ -15260,11 +15259,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.thoracic_aorta_C100.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.thoracic_aorta_C100.exercise
- -1  1.8906583000000000E-05       0                       0                
+ -1 -8.9556230000000007E-06       0                       0                
   2   280   # SystemicComponent.thoracic_aorta_C100.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C100.der(q_in)
- -1  6.1813024999999998E-06       0                 1.0000000000000000E+100
+ -1  6.1186619999999998E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.thoracic_aorta_C100.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C100.der(volume)
@@ -15350,11 +15349,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.thoracic_aorta_C104.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.thoracic_aorta_C104.exercise
- -1  2.0177972999999998E-05       0                       0                
+ -1 -7.8528330000000007E-06       0                       0                
   2   280   # SystemicComponent.thoracic_aorta_C104.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C104.der(q_in)
- -1  1.1640515000000001E-05       0                 1.0000000000000000E+100
+ -1  1.1541785000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.thoracic_aorta_C104.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C104.der(volume)
@@ -15440,11 +15439,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.thoracic_aorta_C108.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.thoracic_aorta_C108.exercise
- -1  2.2747180999999999E-05       0                       0                
+ -1 -5.3873704999999996E-06       0                       0                
   2   280   # SystemicComponent.thoracic_aorta_C108.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C108.der(q_in)
- -1  3.8233100000000002E-06       0                 1.0000000000000000E+100
+ -1  3.7931586000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.thoracic_aorta_C108.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C108.der(volume)
@@ -15530,11 +15529,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.thoracic_aorta_C112.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.thoracic_aorta_C112.exercise
- -1  2.3610834000000001E-05       0                       0                
+ -1 -4.5334490000000004E-06       0                       0                
   2   280   # SystemicComponent.thoracic_aorta_C112.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C112.der(q_in)
- -1  6.2268219999999996E-05       0                 1.0000000000000000E+100
+ -1  6.2910380000000005E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.thoracic_aorta_C112.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.thoracic_aorta_C112.der(volume)
@@ -15622,11 +15621,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.abdominal_aorta_C114.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.abdominal_aorta_C114.exercise
- -1  4.8263617000000003E-05       0                       0                
+ -1  3.1991196000000002E-05       0                       0                
   2   280   # SystemicComponent.abdominal_aorta_C114.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C114.der(q_in)
- -1  1.2865324000000001E-06       0                 1.0000000000000000E+100
+ -1  1.3000217000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.abdominal_aorta_C114.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C114.der(volume)
@@ -15714,11 +15713,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.abdominal_aorta_C136.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.abdominal_aorta_C136.exercise
- -1  3.8094170000000003E-05       0                       0                
+ -1  2.1336230999999999E-05       0                       0                
   2   280   # SystemicComponent.abdominal_aorta_C136.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C136.der(q_in)
- -1  5.3952443999999997E-06       0                 1.0000000000000000E+100
+ -1  5.4587945000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.abdominal_aorta_C136.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C136.der(volume)
@@ -15806,11 +15805,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.abdominal_aorta_C164.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.abdominal_aorta_C164.exercise
- -1  3.3990316000000003E-05       0                       0                
+ -1  1.8389239000000000E-05       0                       0                
   2   280   # SystemicComponent.abdominal_aorta_C164.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C164.der(q_in)
- -1  1.6009941999999999E-06       0                 1.0000000000000000E+100
+ -1  1.6203643000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.abdominal_aorta_C164.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C164.der(volume)
@@ -15898,11 +15897,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.abdominal_aorta_C176.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.abdominal_aorta_C176.exercise
- -1  2.5041747000000000E-05       0                       0                
+ -1  9.0793639999999997E-06       0                       0                
   2   280   # SystemicComponent.abdominal_aorta_C176.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C176.der(q_in)
- -1  4.3013750000000000E-06       0                 1.0000000000000000E+100
+ -1  4.3573536000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.abdominal_aorta_C176.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C176.der(volume)
@@ -15988,11 +15987,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.abdominal_aorta_C188.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.abdominal_aorta_C188.exercise
- -1  1.7331999000000000E-05       0                       0                
+ -1  1.6070140000000000E-06       0                       0                
   2   280   # SystemicComponent.abdominal_aorta_C188.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C188.der(q_in)
- -1  1.7137598000000001E-05       0                 1.0000000000000000E+100
+ -1  1.7429804000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.abdominal_aorta_C188.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C188.der(volume)
@@ -16080,11 +16079,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.abdominal_aorta_C192.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.abdominal_aorta_C192.exercise
- -1  2.4898783999999999E-05       0                       0                
+ -1  1.3854350000000001E-05       0                       0                
   2   280   # SystemicComponent.abdominal_aorta_C192.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C192.der(q_in)
- -1  1.0624145000000000E-05       0                 1.0000000000000000E+100
+ -1  1.0817526000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.abdominal_aorta_C192.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.abdominal_aorta_C192.der(volume)
@@ -16174,7 +16173,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.celiac_trunk_C116.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.celiac_trunk_C116.exercise
- -1  3.5964359999999997E-04       0                 1.0000000000000000E+100
+ -1  3.4958709999999998E-04       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.celiac_trunk_C116.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.celiac_trunk_C116.der(volume)
@@ -16288,7 +16287,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.renal_L166.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.renal_L166.exercise
- -1  3.2486073999999997E-04       0                 1.0000000000000000E+100
+ -1  3.1578560000000000E-04       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.renal_L166.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.renal_L166.der(volume)
@@ -16400,7 +16399,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.renal_R178.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.renal_R178.exercise
- -1  3.2195093999999998E-04       0                 1.0000000000000000E+100
+ -1  3.1295480000000000E-04       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.renal_R178.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.renal_R178.der(volume)
@@ -16512,11 +16511,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.common_iliac_R216.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.common_iliac_R216.exercise
- -1  1.4696609000000000E-05       0                       0                
+ -1  1.0661293999999999E-05       0                       0                
   2   280   # SystemicComponent.common_iliac_R216.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.common_iliac_R216.der(q_in)
- -1  8.7815370000000001E-06       0                 1.0000000000000000E+100
+ -1  8.9285194999999993E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_iliac_R216.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_iliac_R216.der(volume)
@@ -16606,7 +16605,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_iliac_T1_R218.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_iliac_T1_R218.exercise
- -1  1.7686631999999999E-04       0                 1.0000000000000000E+100
+ -1  1.7185590000000001E-04       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_iliac_T1_R218.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_iliac_T1_R218.der(volume)
@@ -16716,11 +16715,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_iliac_R220.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_iliac_R220.exercise
- -1  1.3104036000000000E-05       0                       0                
+ -1  1.1180778000000000E-05       0                       0                
   2   280   # SystemicComponent.external_iliac_R220.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.external_iliac_R220.der(q_in)
- -1  4.9519720000000003E-06       0                 1.0000000000000000E+100
+ -1  4.9644219999999996E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_iliac_R220.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_iliac_R220.der(volume)
@@ -16808,11 +16807,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_R222.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_R222.exercise
- -1  1.3779109000000000E-05       0                       0                
+ -1  1.2625635000000001E-05       0                       0                
   2   280   # SystemicComponent.femoral_R222.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_R222.der(q_in)
- -1  1.4151602000000001E-06       0                 1.0000000000000000E+100
+ -1  1.4143120000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_R222.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_R222.der(volume)
@@ -16902,7 +16901,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.profundus_T2_R224.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.profundus_T2_R224.exercise
- -1  2.0285575999999999E-04       0                 1.0000000000000000E+100
+ -1  1.9708108000000000E-04       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.profundus_T2_R224.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.profundus_T2_R224.der(volume)
@@ -17012,11 +17011,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_R226.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_R226.exercise
- -1  8.1916389999999997E-06       0                       0                
+ -1  7.0103490000000003E-06       0                       0                
   2   280   # SystemicComponent.femoral_R226.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_R226.der(q_in)
- -1  1.1640187000000000E-05       0                 1.0000000000000000E+100
+ -1  1.1184123999999999E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_R226.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_R226.der(volume)
@@ -17104,11 +17103,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.popliteal_R228.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.popliteal_R228.exercise
- -1  3.4194416000000000E-06       0                       0                
+ -1  2.9054332999999998E-06       0                       0                
   2   280   # SystemicComponent.popliteal_R228.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_R228.der(q_in)
- -1  3.5682272000000000E-06       0                 1.0000000000000000E+100
+ -1  3.4152145000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.popliteal_R228.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_R228.der(volume)
@@ -17198,7 +17197,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.anterior_tibial_T3_R230.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.anterior_tibial_T3_R230.exercise
- -1  2.6456110000000000E-05       0                 1.0000000000000000E+100
+ -1  2.5842240000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.anterior_tibial_T3_R230.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.anterior_tibial_T3_R230.der(volume)
@@ -17308,11 +17307,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.popliteal_R232.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.popliteal_R232.exercise
- -1  1.0447119000000001E-06       0                       0                
+ -1  8.7022180000000004E-07       0                       0                
   2   280   # SystemicComponent.popliteal_R232.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_R232.der(q_in)
- -1  1.8115170000000000E-07       0                 1.0000000000000000E+100
+ -1  1.7680614999999999E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.popliteal_R232.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_R232.der(volume)
@@ -17400,11 +17399,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.tibiofibular_trunk_R234.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.tibiofibular_trunk_R234.exercise
- -1  9.9728240000000007E-07       0                       0                
+ -1  8.2883746999999998E-07       0                       0                
   2   280   # SystemicComponent.tibiofibular_trunk_R234.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.tibiofibular_trunk_R234.der(q_in)
- -1  7.3646237000000004E-07       0                 1.0000000000000000E+100
+ -1  7.1877525000000001E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.tibiofibular_trunk_R234.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.tibiofibular_trunk_R234.der(volume)
@@ -17492,7 +17491,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.posterior_tibial_T4_R236.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.posterior_tibial_T4_R236.exercise
- -1  2.9017469999999999E-05       0                 1.0000000000000000E+100
+ -1  2.8210985000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.posterior_tibial_T4_R236.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.posterior_tibial_T4_R236.der(volume)
@@ -17604,11 +17603,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.common_iliac_L194.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.common_iliac_L194.exercise
- -1  1.4874460000000000E-05       0                       0                
+ -1  1.0999283000000000E-05       0                       0                
   2   280   # SystemicComponent.common_iliac_L194.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.common_iliac_L194.der(q_in)
- -1  8.3999599999999998E-06       0                 1.0000000000000000E+100
+ -1  8.5372770000000008E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_iliac_L194.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_iliac_L194.der(volume)
@@ -17698,7 +17697,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_iliac_T1_L196.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_iliac_T1_L196.exercise
- -1  1.7686785999999999E-04       0                 1.0000000000000000E+100
+ -1  1.7185641999999999E-04       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_iliac_T1_L196.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_iliac_T1_L196.der(volume)
@@ -17808,11 +17807,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_iliac_L198.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_iliac_L198.exercise
- -1  1.3098375000000000E-05       0                       0                
+ -1  1.1203093000000000E-05       0                       0                
   2   280   # SystemicComponent.external_iliac_L198.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.external_iliac_L198.der(q_in)
- -1  4.9529234999999997E-06       0                 1.0000000000000000E+100
+ -1  4.9641590000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_iliac_L198.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_iliac_L198.der(volume)
@@ -17898,11 +17897,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_L200.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_L200.exercise
- -1  1.3764339000000000E-05       0                       0                
+ -1  1.2632557000000001E-05       0                       0                
   2   280   # SystemicComponent.femoral_L200.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_L200.der(q_in)
- -1  1.4154380000000000E-06       0                 1.0000000000000000E+100
+ -1  1.4142721000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_L200.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_L200.der(volume)
@@ -17992,7 +17991,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.profundus_T2_L202.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.profundus_T2_L202.exercise
- -1  2.0285710000000001E-04       0                 1.0000000000000000E+100
+ -1  1.9708106000000000E-04       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.profundus_T2_L202.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.profundus_T2_L202.der(volume)
@@ -18102,11 +18101,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_L204.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_L204.exercise
- -1  8.1688220000000006E-06       0                       0                
+ -1  7.0133337000000001E-06       0                       0                
   2   280   # SystemicComponent.femoral_L204.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_L204.der(q_in)
- -1  1.1643351000000000E-05       0                 1.0000000000000000E+100
+ -1  1.1188111000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_L204.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_L204.der(volume)
@@ -18194,11 +18193,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.popliteal_L206.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.popliteal_L206.exercise
- -1  3.4131745000000000E-06       0                       0                
+ -1  2.9078677999999998E-06       0                       0                
   2   280   # SystemicComponent.popliteal_L206.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_L206.der(q_in)
- -1  3.5691619999999999E-06       0                 1.0000000000000000E+100
+ -1  3.4166113999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.popliteal_L206.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_L206.der(volume)
@@ -18288,7 +18287,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.anterior_tibial_T3_L208.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.anterior_tibial_T3_L208.exercise
- -1  2.6456266000000000E-05       0                 1.0000000000000000E+100
+ -1  2.5842208000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.anterior_tibial_T3_L208.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.anterior_tibial_T3_L208.der(volume)
@@ -18398,11 +18397,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.popliteal_L210.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.popliteal_L210.exercise
- -1  1.0447103000000000E-06       0                       0                
+ -1  8.7182109999999995E-07       0                       0                
   2   280   # SystemicComponent.popliteal_L210.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_L210.der(q_in)
- -1  1.8117797999999999E-07       0                 1.0000000000000000E+100
+ -1  1.7684558999999999E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.popliteal_L210.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_L210.der(volume)
@@ -18490,11 +18489,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.tibiofibular_trunk_L212.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.tibiofibular_trunk_L212.exercise
- -1  9.9748549999999990E-07       0                       0                
+ -1  8.3045534999999995E-07       0                       0                
   2   280   # SystemicComponent.tibiofibular_trunk_L212.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.tibiofibular_trunk_L212.der(q_in)
- -1  7.3659162999999999E-07       0                 1.0000000000000000E+100
+ -1  7.1895800000000002E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.tibiofibular_trunk_L212.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.tibiofibular_trunk_L212.der(volume)
@@ -18582,7 +18581,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.posterior_tibial_T4_L214.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.posterior_tibial_T4_L214.exercise
- -1  2.9017674000000001E-05       0                 1.0000000000000000E+100
+ -1  2.8210948999999999E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.posterior_tibial_T4_L214.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.posterior_tibial_T4_L214.der(volume)
@@ -18694,11 +18693,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.subclavian_R28.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.subclavian_R28.exercise
- -1  3.7512302000000000E-06       0                       0                
+ -1  4.2718969999999998E-06       0                       0                
   2   280   # SystemicComponent.subclavian_R28.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_R28.der(q_in)
- -1  2.0885692999999998E-06       0                 1.0000000000000000E+100
+ -1  2.0520185000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.subclavian_R28.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_R28.der(volume)
@@ -18784,11 +18783,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.subclavian_R30.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.subclavian_R30.exercise
- -1  1.9169483000000001E-06       0                       0                
+ -1  2.0205034000000000E-06       0                       0                
   2   280   # SystemicComponent.subclavian_R30.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_R30.der(q_in)
- -1  2.7346468000000000E-06       0                 1.0000000000000000E+100
+ -1  2.6888699999999998E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.subclavian_R30.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_R30.der(volume)
@@ -18874,11 +18873,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.axillary_R32.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.axillary_R32.exercise
- -1  2.2287489999999998E-06       0                       0                
+ -1  1.8288373999999999E-06       0                       0                
   2   280   # SystemicComponent.axillary_R32.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.axillary_R32.der(q_in)
- -1  3.1214146999999998E-06       0                 1.0000000000000000E+100
+ -1  3.0770301999999998E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.axillary_R32.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.axillary_R32.der(volume)
@@ -18966,11 +18965,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_R34.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_R34.exercise
- -1  2.5179644999999998E-06       0                       0                
+ -1  1.8092686999999999E-06       0                       0                
   2   280   # SystemicComponent.brachial_R34.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_R34.der(q_in)
- -1  4.5284572999999996E-06       0                 1.0000000000000000E+100
+ -1  4.5185766000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_R34.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_R34.der(volume)
@@ -19058,11 +19057,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.ulnar_T2_R36.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.ulnar_T2_R36.exercise
- -1  1.7290812000000001E-06       0                       0                
+ -1  1.7689975000000000E-06       0                       0                
   2   280   # SystemicComponent.ulnar_T2_R36.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.ulnar_T2_R36.der(q_in)
- -1  2.3957432000000002E-07       0                 1.0000000000000000E+100
+ -1  2.3929367999999998E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ulnar_T2_R36.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.ulnar_T2_R36.der(volume)
@@ -19150,7 +19149,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.ulnar_T2_R42.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.ulnar_T2_R42.exercise
- -1  6.0967965999999997E-05       0                 1.0000000000000000E+100
+ -1  5.9250335000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ulnar_T2_R42.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.ulnar_T2_R42.der(volume)
@@ -19264,7 +19263,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.radial_T1_R44.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.radial_T1_R44.exercise
- -1  4.9787774000000000E-05       0                 1.0000000000000000E+100
+ -1  4.8539438000000002E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.radial_T1_R44.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.radial_T1_R44.der(volume)
@@ -19376,11 +19375,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.subclavian_L66.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.subclavian_L66.exercise
- -1  3.2440903000000000E-06       0                       0                
+ -1  3.1296383000000001E-06       0                       0                
   2   280   # SystemicComponent.subclavian_L66.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_L66.der(q_in)
- -1  4.9522605000000003E-06       0                 1.0000000000000000E+100
+ -1  4.8883619999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.subclavian_L66.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_L66.der(volume)
@@ -19466,11 +19465,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.subclavian_L78.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.subclavian_L78.exercise
- -1  1.8198926000000000E-06       0                       0                
+ -1  1.3889597000000001E-06       0                       0                
   2   280   # SystemicComponent.subclavian_L78.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_L78.der(q_in)
- -1  2.0224758999999999E-06       0                 1.0000000000000000E+100
+ -1  1.9995466000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.subclavian_L78.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_L78.der(volume)
@@ -19556,11 +19555,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.axillary_L80.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.axillary_L80.exercise
- -1  2.0663758000000001E-06       0                       0                
+ -1  1.5670606000000000E-06       0                       0                
   2   280   # SystemicComponent.axillary_L80.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.axillary_L80.der(q_in)
- -1  3.1106185000000001E-06       0                 1.0000000000000000E+100
+ -1  3.0887784000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.axillary_L80.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.axillary_L80.der(volume)
@@ -19648,11 +19647,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_L82.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_L82.exercise
- -1  2.9521847999999998E-06       0                       0                
+ -1  2.9050000000000001E-06       0                       0                
   2   280   # SystemicComponent.brachial_L82.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_L82.der(q_in)
- -1  1.5066267000000000E-06       0                 1.0000000000000000E+100
+ -1  1.5039618000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_L82.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_L82.der(volume)
@@ -19740,11 +19739,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.ulnar_T2_L84.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.ulnar_T2_L84.exercise
- -1  1.7206509000000001E-06       0                       0                
+ -1  1.7754467999999999E-06       0                       0                
   2   280   # SystemicComponent.ulnar_T2_L84.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.ulnar_T2_L84.der(q_in)
- -1  2.3950136000000000E-07       0                 1.0000000000000000E+100
+ -1  2.3926040000000001E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ulnar_T2_L84.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.ulnar_T2_L84.der(volume)
@@ -19832,7 +19831,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.ulnar_T2_L90.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.ulnar_T2_L90.exercise
- -1  6.0950452999999997E-05       0                 1.0000000000000000E+100
+ -1  5.9239585000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ulnar_T2_L90.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.ulnar_T2_L90.der(volume)
@@ -19946,7 +19945,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.radial_T1_L92.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.radial_T1_L92.exercise
- -1  5.2746349999999997E-05       0                 1.0000000000000000E+100
+ -1  5.1443665000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.radial_T1_L92.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.radial_T1_L92.der(volume)
@@ -20056,11 +20055,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.common_carotid_R6_A.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.common_carotid_R6_A.exercise
- -1  2.3935929999999999E-06       0                       0                
+ -1  8.2832579999999992E-06       0                       0                
   2   280   # SystemicComponent.common_carotid_R6_A.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_R6_A.der(q_in)
- -1  5.1959996000000001E-06       0                 1.0000000000000000E+100
+ -1  5.0611096999999997E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_carotid_R6_A.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_R6_A.der(volume)
@@ -20146,11 +20145,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.common_carotid_R6_B.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.common_carotid_R6_B.exercise
- -1  3.2582202000000000E-06       0                       0                
+ -1  7.2725124000000003E-06       0                       0                
   2   280   # SystemicComponent.common_carotid_R6_B.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_R6_B.der(q_in)
- -1  4.4380226000000004E-06       0                 1.0000000000000000E+100
+ -1  4.3128100000000003E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_carotid_R6_B.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_R6_B.der(volume)
@@ -20238,11 +20237,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.common_carotid_R6_C.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.common_carotid_R6_C.exercise
- -1  3.9708040000000003E-06       0                       0                
+ -1  6.0208325999999997E-06       0                       0                
   2   280   # SystemicComponent.common_carotid_R6_C.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_R6_C.der(q_in)
- -1  3.3161166000000000E-06       0                 1.0000000000000000E+100
+ -1  3.2186450000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_carotid_R6_C.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_R6_C.der(volume)
@@ -20328,11 +20327,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_carotid_R8_A.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_carotid_R8_A.exercise
- -1  2.1756264000000000E-06       0                       0                
+ -1  2.6182512999999999E-06       0                       0                
   2   280   # SystemicComponent.internal_carotid_R8_A.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_R8_A.der(q_in)
- -1  1.2808837000000000E-06       0                 1.0000000000000000E+100
+ -1  1.2636761999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_carotid_R8_A.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_R8_A.der(volume)
@@ -20420,11 +20419,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_carotid_R8_B.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_carotid_R8_B.exercise
- -1  2.2560943999999999E-06       0                       0                
+ -1  2.4083082999999999E-06       0                       0                
   2   280   # SystemicComponent.internal_carotid_R8_B.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_R8_B.der(q_in)
- -1  8.1019032999999996E-07       0                 1.0000000000000000E+100
+ -1  7.9966156000000005E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_carotid_R8_B.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_R8_B.der(volume)
@@ -20512,7 +20511,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_carotid_R8_C.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_carotid_R8_C.exercise
- -1  7.2425719999999995E-05       0                 1.0000000000000000E+100
+ -1  7.0329630000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_carotid_R8_C.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_R8_C.der(volume)
@@ -20626,7 +20625,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_carotid_T2_R26.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_carotid_T2_R26.exercise
- -1  7.2600706000000001E-05       0                 1.0000000000000000E+100
+ -1  7.0562059999999997E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_carotid_T2_R26.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_carotid_T2_R26.der(volume)
@@ -20736,11 +20735,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.common_carotid_L48_A.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.common_carotid_L48_A.exercise
- -1  2.5487693000000001E-06       0                       0                
+ -1  4.2274913999999999E-06       0                       0                
   2   280   # SystemicComponent.common_carotid_L48_A.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_L48_A.der(q_in)
- -1  5.6051375999999999E-06       0                 1.0000000000000000E+100
+ -1  5.4877987000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_carotid_L48_A.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_L48_A.der(volume)
@@ -20826,11 +20825,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.common_carotid_L48_B.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.common_carotid_L48_B.exercise
- -1  3.3738513000000000E-06       0                       0                
+ -1  4.4817080000000000E-06       0                       0                
   2   280   # SystemicComponent.common_carotid_L48_B.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_L48_B.der(q_in)
- -1  4.9238923999999999E-06       0                 1.0000000000000000E+100
+ -1  4.8091240000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_carotid_L48_B.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_L48_B.der(volume)
@@ -20916,11 +20915,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.common_carotid_L48_C.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.common_carotid_L48_C.exercise
- -1  3.9238816000000000E-06       0                       0                
+ -1  4.5754299999999998E-06       0                       0                
   2   280   # SystemicComponent.common_carotid_L48_C.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_L48_C.der(q_in)
- -1  4.3706223000000001E-06       0                 1.0000000000000000E+100
+ -1  4.2611249999999998E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_carotid_L48_C.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_L48_C.der(volume)
@@ -21006,11 +21005,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.common_carotid_L48_D.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.common_carotid_L48_D.exercise
- -1  4.2924456999999999E-06       0                       0                
+ -1  4.5778600000000004E-06       0                       0                
   2   280   # SystemicComponent.common_carotid_L48_D.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_L48_D.der(q_in)
- -1  3.5364594000000000E-06       0                 1.0000000000000000E+100
+ -1  3.4449262999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_carotid_L48_D.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_carotid_L48_D.der(volume)
@@ -21096,11 +21095,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_carotid_L50_A.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_carotid_L50_A.exercise
- -1  2.2370116000000001E-06       0                       0                
+ -1  2.2705023999999999E-06       0                       0                
   2   280   # SystemicComponent.internal_carotid_L50_A.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_L50_A.der(q_in)
- -1  1.2782309999999999E-06       0                 1.0000000000000000E+100
+ -1  1.2634984999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_carotid_L50_A.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_L50_A.der(volume)
@@ -21188,11 +21187,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_carotid_L50_B.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_carotid_L50_B.exercise
- -1  2.2663032000000000E-06       0                       0                
+ -1  2.2633103000000001E-06       0                       0                
   2   280   # SystemicComponent.internal_carotid_L50_B.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_L50_B.der(q_in)
- -1  8.0851560000000002E-07       0                 1.0000000000000000E+100
+ -1  7.9972250000000003E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_carotid_L50_B.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_L50_B.der(volume)
@@ -21280,7 +21279,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_carotid_L50_C.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_carotid_L50_C.exercise
- -1  7.2423649999999999E-05       0                 1.0000000000000000E+100
+ -1  7.0344950000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_carotid_L50_C.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_carotid_L50_C.der(volume)
@@ -21394,7 +21393,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_carotid_T2_L62.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_carotid_T2_L62.exercise
- -1  7.2595219999999994E-05       0                 1.0000000000000000E+100
+ -1  7.0572016000000005E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_carotid_T2_L62.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_carotid_T2_L62.der(volume)
@@ -21508,7 +21507,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.vertebral_L2.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.vertebral_L2.exercise
- -1  6.6760780000000005E-05       0                 1.0000000000000000E+100
+ -1  6.4890779999999997E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.vertebral_L2.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.vertebral_L2.der(volume)
@@ -21622,7 +21621,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.vertebral_R272.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.vertebral_R272.exercise
- -1  6.6767789999999994E-05       0                 1.0000000000000000E+100
+ -1  6.4885390000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.vertebral_R272.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.vertebral_R272.der(volume)
@@ -21734,7 +21733,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.superior_vena_cava_C2.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.superior_vena_cava_C2.exercise
- -1  1.7612157000000000E-06       0                 1.0000000000000000E+100
+ -1  1.5285261000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.superior_vena_cava_C2.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.superior_vena_cava_C2.der(volume)
@@ -21894,7 +21893,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.superior_vena_cava_C88.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.superior_vena_cava_C88.exercise
- -1  3.0350627000000002E-06       0                 1.0000000000000000E+100
+ -1  2.6340488000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.superior_vena_cava_C88.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.superior_vena_cava_C88.der(volume)
@@ -22054,7 +22053,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.inferior_vena_cava_C8.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.inferior_vena_cava_C8.exercise
- -1  2.6415153000000001E-06       0                 1.0000000000000000E+100
+ -1  2.2924942000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.inferior_vena_cava_C8.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.inferior_vena_cava_C8.der(volume)
@@ -22212,7 +22211,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.hepatic_vein_T1_C10.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.hepatic_vein_T1_C10.exercise
- -1  1.0356758000000000E-06       0                 1.0000000000000000E+100
+ -1  8.9882739999999995E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.hepatic_vein_T1_C10.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.hepatic_vein_T1_C10.der(volume)
@@ -22374,7 +22373,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.inferior_vena_cava_C12.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.inferior_vena_cava_C12.exercise
- -1  7.1677936999999998E-06       0                 1.0000000000000000E+100
+ -1  6.2204394000000004E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.inferior_vena_cava_C12.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.inferior_vena_cava_C12.der(volume)
@@ -22536,7 +22535,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.inferior_vena_cava_C16.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.inferior_vena_cava_C16.exercise
- -1  5.6372260000000003E-06       0                 1.0000000000000000E+100
+ -1  4.8919739999999996E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.inferior_vena_cava_C16.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.inferior_vena_cava_C16.der(volume)
@@ -22694,7 +22693,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.renal_vein_T1_R18.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.renal_vein_T1_R18.exercise
- -1  1.6610562999999999E-06       0                 1.0000000000000000E+100
+ -1  1.4414305999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.renal_vein_T1_R18.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.renal_vein_T1_R18.der(volume)
@@ -22856,7 +22855,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.inferior_vena_cava_C20.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.inferior_vena_cava_C20.exercise
- -1  3.9329400000000000E-07       0                 1.0000000000000000E+100
+ -1  3.4129896999999999E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.inferior_vena_cava_C20.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.inferior_vena_cava_C20.der(volume)
@@ -23014,7 +23013,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.renal_vein_T1_L22.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.renal_vein_T1_L22.exercise
- -1  1.4677117000000000E-06       0                 1.0000000000000000E+100
+ -1  1.2736336000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.renal_vein_T1_L22.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.renal_vein_T1_L22.der(volume)
@@ -23176,7 +23175,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.inferior_vena_cava_C24.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.inferior_vena_cava_C24.exercise
- -1  1.5689764000000002E-05       0                 1.0000000000000000E+100
+ -1  1.3614427000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.inferior_vena_cava_C24.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.inferior_vena_cava_C24.der(volume)
@@ -23340,7 +23339,7 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.common_iliac_vein_L56.exercise
   0       0                       0                       0                
   6   256   # SystemicComponent.common_iliac_vein_L56.p_out
- -1  3.8511544000000003E-06       0                 1.0000000000000000E+100
+ -1  3.3414104999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_iliac_vein_L56.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_iliac_vein_L56.der(volume)
@@ -23502,7 +23501,7 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.common_iliac_vein_R26.exercise
   0       0                       0                       0                
   6   256   # SystemicComponent.common_iliac_vein_R26.p_out
- -1  3.5397442999999999E-06       0                 1.0000000000000000E+100
+ -1  3.0712456000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.common_iliac_vein_R26.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.common_iliac_vein_R26.der(volume)
@@ -23660,7 +23659,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_iliac_vein_R28.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_iliac_vein_R28.exercise
- -1  5.1627609999999995E-07       0                 1.0000000000000000E+100
+ -1  4.4793909999999999E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_iliac_vein_R28.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_iliac_vein_R28.der(volume)
@@ -23816,7 +23815,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_iliac_vein_T1_R30.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_iliac_vein_T1_R30.exercise
- -1  2.2084917000000001E-06       0                 1.0000000000000000E+100
+ -1  1.9160544999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_iliac_vein_T1_R30.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_iliac_vein_T1_R30.der(volume)
@@ -23976,7 +23975,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_iliac_vein_R32.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_iliac_vein_R32.exercise
- -1  5.9909885000000001E-06       0                 1.0000000000000000E+100
+ -1  5.1973869999999998E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_iliac_vein_R32.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_iliac_vein_R32.der(volume)
@@ -24134,7 +24133,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_vein_R34.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_vein_R34.exercise
- -1  2.6044080000000001E-07       0                 1.0000000000000000E+100
+ -1  2.2593936999999999E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_vein_R34.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_vein_R34.der(volume)
@@ -24292,7 +24291,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_vein_R38.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_vein_R38.exercise
- -1  2.0649386000000002E-06       0                 1.0000000000000000E+100
+ -1  1.7912709999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_vein_R38.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_vein_R38.der(volume)
@@ -24448,7 +24447,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.profunda_femoris_vein_T2_R40.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.profunda_femoris_vein_T2_R40.exercise
- -1  5.7226150000000003E-06       0                 1.0000000000000000E+100
+ -1  4.9608250000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.profunda_femoris_vein_T2_R40.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.profunda_femoris_vein_T2_R40.der(volume)
@@ -24608,7 +24607,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_vein_R42.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_vein_R42.exercise
- -1  1.4613575000000000E-05       0                 1.0000000000000000E+100
+ -1  1.2673798000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_vein_R42.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_vein_R42.der(volume)
@@ -24766,7 +24765,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_vein_R46.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_vein_R46.exercise
- -1  8.0483176000000002E-07       0                 1.0000000000000000E+100
+ -1  6.9799609999999996E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_vein_R46.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_vein_R46.der(volume)
@@ -24924,7 +24923,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.popliteal_vein_R48.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.popliteal_vein_R48.exercise
- -1  3.2768993999999999E-06       0                 1.0000000000000000E+100
+ -1  2.8412620000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.popliteal_vein_R48.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_vein_R48.der(volume)
@@ -25080,7 +25079,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.anterior_tibial_vein_T4_R50.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.anterior_tibial_vein_T4_R50.exercise
- -1  9.5455739999999998E-07       0                 1.0000000000000000E+100
+ -1  8.0918807000000005E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.anterior_tibial_vein_T4_R50.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.anterior_tibial_vein_T4_R50.der(volume)
@@ -25240,7 +25239,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.popliteal_vein_R52.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.popliteal_vein_R52.exercise
- -1  7.2896990000000000E-07       0                 1.0000000000000000E+100
+ -1  6.3204469999999999E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.popliteal_vein_R52.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_vein_R52.der(volume)
@@ -25394,7 +25393,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.posterior_tibial_vein_T6_R54.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.posterior_tibial_vein_T6_R54.exercise
- -1  1.4154313000000001E-06       0                 1.0000000000000000E+100
+ -1  1.2212781000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.posterior_tibial_vein_T6_R54.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.posterior_tibial_vein_T6_R54.der(volume)
@@ -25552,7 +25551,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_iliac_vein_L58.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_iliac_vein_L58.exercise
- -1  5.1693090000000005E-07       0                 1.0000000000000000E+100
+ -1  4.4850338999999999E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_iliac_vein_L58.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_iliac_vein_L58.der(volume)
@@ -25708,7 +25707,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_iliac_vein_T1_L60.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_iliac_vein_T1_L60.exercise
- -1  2.2716558000000000E-06       0                 1.0000000000000000E+100
+ -1  1.9708339999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_iliac_vein_T1_L60.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_iliac_vein_T1_L60.der(volume)
@@ -25868,7 +25867,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_iliac_vein_L62.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_iliac_vein_L62.exercise
- -1  5.8818850000000002E-06       0                 1.0000000000000000E+100
+ -1  5.1027030000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_iliac_vein_L62.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_iliac_vein_L62.der(volume)
@@ -26026,7 +26025,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_vein_L64.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_vein_L64.exercise
- -1  3.0448456000000001E-07       0                 1.0000000000000000E+100
+ -1  2.6414644999999998E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_vein_L64.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_vein_L64.der(volume)
@@ -26184,7 +26183,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_vein_L68.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_vein_L68.exercise
- -1  2.0650252000000001E-06       0                 1.0000000000000000E+100
+ -1  1.7913321000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_vein_L68.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_vein_L68.der(volume)
@@ -26340,7 +26339,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.profunda_femoris_vein_T2_L70.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.profunda_femoris_vein_T2_L70.exercise
- -1  5.7228312000000002E-06       0                 1.0000000000000000E+100
+ -1  4.9609725000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.profunda_femoris_vein_T2_L70.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.profunda_femoris_vein_T2_L70.der(volume)
@@ -26500,7 +26499,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_vein_L72.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_vein_L72.exercise
- -1  1.4614191000000000E-05       0                 1.0000000000000000E+100
+ -1  1.2674232000000001E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_vein_L72.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_vein_L72.der(volume)
@@ -26658,7 +26657,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.femoral_vein_L76.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.femoral_vein_L76.exercise
- -1  8.0486063000000003E-07       0                 1.0000000000000000E+100
+ -1  6.9801559999999997E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.femoral_vein_L76.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.femoral_vein_L76.der(volume)
@@ -26816,7 +26815,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.popliteal_vein_L78.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.popliteal_vein_L78.exercise
- -1  3.2770379000000000E-06       0                 1.0000000000000000E+100
+ -1  2.8413591999999998E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.popliteal_vein_L78.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_vein_L78.der(volume)
@@ -26972,7 +26971,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.anterior_tibial_vein_T4_L80.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.anterior_tibial_vein_T4_L80.exercise
- -1  9.5460519999999995E-07       0                 1.0000000000000000E+100
+ -1  8.0921469999999998E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.anterior_tibial_vein_T4_L80.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.anterior_tibial_vein_T4_L80.der(volume)
@@ -27132,7 +27131,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.popliteal_vein_L82.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.popliteal_vein_L82.exercise
- -1  7.2900520000000005E-07       0                 1.0000000000000000E+100
+ -1  6.3207019999999995E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.popliteal_vein_L82.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.popliteal_vein_L82.der(volume)
@@ -27286,7 +27285,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.posterior_tibial_vein_T6_L84.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.posterior_tibial_vein_T6_L84.exercise
- -1  1.4154994999999999E-06       0                 1.0000000000000000E+100
+ -1  1.2213247000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.posterior_tibial_vein_T6_L84.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.posterior_tibial_vein_T6_L84.der(volume)
@@ -27448,7 +27447,7 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.brachiocephalic_vein_R90.exercise
   0       0                       0                       0                
   6   256   # SystemicComponent.brachiocephalic_vein_R90.p_out
- -1  3.5687346999999999E-06       0                 1.0000000000000000E+100
+ -1  3.0971520000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachiocephalic_vein_R90.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachiocephalic_vein_R90.der(volume)
@@ -27610,7 +27609,7 @@ double initialValue(11685,6)
   6   256   # SystemicComponent.brachiocephalic_vein_L124.exercise
   0       0                       0                       0                
   6   256   # SystemicComponent.brachiocephalic_vein_L124.p_out
- -1  6.6886914000000002E-06       0                 1.0000000000000000E+100
+ -1  5.8046420000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachiocephalic_vein_L124.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachiocephalic_vein_L124.der(volume)
@@ -27766,7 +27765,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.vertebral_vein_R92.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.vertebral_vein_R92.exercise
- -1  2.2461004000000002E-06       0                 1.0000000000000000E+100
+ -1  1.9473711999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.vertebral_vein_R92.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.vertebral_vein_R92.der(volume)
@@ -27926,7 +27925,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachiocephalic_vein_R94.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachiocephalic_vein_R94.exercise
- -1  8.0904265999999996E-07       0                 1.0000000000000000E+100
+ -1  7.0213115999999997E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachiocephalic_vein_R94.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachiocephalic_vein_R94.der(volume)
@@ -28086,7 +28085,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.subclavian_vein_R96.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.subclavian_vein_R96.exercise
- -1  3.9339559999999999E-07       0                 1.0000000000000000E+100
+ -1  3.4140748999999999E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.subclavian_vein_R96.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_vein_R96.der(volume)
@@ -28242,7 +28241,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_jugular_vein_R122.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_jugular_vein_R122.exercise
- -1  1.5550131000000000E-05       0                 1.0000000000000000E+100
+ -1  1.3494696000000000E-05       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_jugular_vein_R122.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_jugular_vein_R122.der(volume)
@@ -28398,7 +28397,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_jugular_vein_R98.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_jugular_vein_R98.exercise
- -1  1.0921629999999999E-06       0                 1.0000000000000000E+100
+ -1  9.4658355000000001E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_jugular_vein_R98.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_jugular_vein_R98.der(volume)
@@ -28558,7 +28557,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.subclavian_vein_R100.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.subclavian_vein_R100.exercise
- -1  1.6090522000000000E-06       0                 1.0000000000000000E+100
+ -1  1.3963810000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.subclavian_vein_R100.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_vein_R100.der(volume)
@@ -28716,7 +28715,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.axillary_vein_R102.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.axillary_vein_R102.exercise
- -1  5.6556681999999998E-06       0                 1.0000000000000000E+100
+ -1  4.9077916999999998E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.axillary_vein_R102.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.axillary_vein_R102.der(volume)
@@ -28876,7 +28875,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_vein_R104.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_vein_R104.exercise
- -1  1.1136142000000001E-06       0                 1.0000000000000000E+100
+ -1  9.6211250000000010E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_vein_R104.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_vein_R104.der(volume)
@@ -29036,7 +29035,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_vein_R114.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_vein_R114.exercise
- -1  1.0016098000000000E-06       0                 1.0000000000000000E+100
+ -1  8.6467434999999998E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_vein_R114.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_vein_R114.der(volume)
@@ -29194,7 +29193,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_vein_R108.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_vein_R108.exercise
- -1  1.5390940000000000E-07       0                 1.0000000000000000E+100
+ -1  1.3289709000000001E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_vein_R108.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_vein_R108.der(volume)
@@ -29348,7 +29347,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.ulnar_vein_T7_R110.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.ulnar_vein_T7_R110.exercise
- -1  1.2925922000000000E-06       0                 1.0000000000000000E+100
+ -1  1.1070294000000001E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ulnar_vein_T7_R110.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.ulnar_vein_T7_R110.der(volume)
@@ -29506,7 +29505,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_vein_R118.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_vein_R118.exercise
- -1  9.6810274999999996E-08       0                 1.0000000000000000E+100
+ -1  8.3536899999999997E-08       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_vein_R118.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_vein_R118.der(volume)
@@ -29660,7 +29659,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.radial_vein_T3_R120.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.radial_vein_T3_R120.exercise
- -1  8.2492939999999996E-07       0                 1.0000000000000000E+100
+ -1  6.9788629999999998E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.radial_vein_T3_R120.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.radial_vein_T3_R120.der(volume)
@@ -29816,7 +29815,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.vertebral_vein_L126.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.vertebral_vein_L126.exercise
- -1  2.1003025000000002E-06       0                 1.0000000000000000E+100
+ -1  1.8210663000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.vertebral_vein_L126.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.vertebral_vein_L126.der(volume)
@@ -29976,7 +29975,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachiocephalic_vein_L128.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachiocephalic_vein_L128.exercise
- -1  4.0889991999999999E-07       0                 1.0000000000000000E+100
+ -1  3.5485447999999998E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachiocephalic_vein_L128.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachiocephalic_vein_L128.der(volume)
@@ -30136,7 +30135,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.subclavian_vein_L130.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.subclavian_vein_L130.exercise
- -1  3.4987704000000002E-07       0                 1.0000000000000000E+100
+ -1  3.0363046000000000E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.subclavian_vein_L130.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_vein_L130.der(volume)
@@ -30292,7 +30291,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.internal_jugular_vein_L156.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.internal_jugular_vein_L156.exercise
- -1  9.4406250000000008E-06       0                 1.0000000000000000E+100
+ -1  8.1922779999999993E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.internal_jugular_vein_L156.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.internal_jugular_vein_L156.der(volume)
@@ -30448,7 +30447,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.external_jugular_vein_L132.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.external_jugular_vein_L132.exercise
- -1  1.0709930000000000E-06       0                 1.0000000000000000E+100
+ -1  9.2824450000000002E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.external_jugular_vein_L132.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.external_jugular_vein_L132.der(volume)
@@ -30608,7 +30607,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.subclavian_vein_L134.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.subclavian_vein_L134.exercise
- -1  1.5683447000000000E-06       0                 1.0000000000000000E+100
+ -1  1.3610052000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.subclavian_vein_L134.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.subclavian_vein_L134.der(volume)
@@ -30766,7 +30765,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.axillary_vein_L136.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.axillary_vein_L136.exercise
- -1  5.7208093999999997E-06       0                 1.0000000000000000E+100
+ -1  4.9640479999999999E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.axillary_vein_L136.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.axillary_vein_L136.der(volume)
@@ -30902,7 +30901,9 @@ double initialValue(11685,6)
   6   260   # SystemicComponent.brachial_vein_L138.port_a.pressure
   0       0                       0                       0                
   6   388   # SystemicComponent.brachial_vein_L138.port_a.q
-  0       1                       0                       0                
+  0       0                       0                       0                
+  6   388   # SystemicComponent.brachial_vein_L138.port_b.q
+  0       0                       0                       0                
   6   257   # SystemicComponent.brachial_vein_L138.UseInertance
   0       0                       0                       0                
   6   257   # SystemicComponent.brachial_vein_L138.UseOuter_thoracic_pressure
@@ -30924,11 +30925,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_vein_L138.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_vein_L138.exercise
- -1  2.4863045000000000E-06       0                       0                
-  2   280   # SystemicComponent.brachial_vein_L138.q_out
-  0       0                       0                       0                
-  3   256   # SystemicComponent.brachial_vein_L138.der(q_out)
- -1  1.1129905000000000E-06       0                 1.0000000000000000E+100
+ -1  9.3930600000000001E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_vein_L138.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_vein_L138.der(volume)
@@ -31088,7 +31085,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_vein_L148.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_vein_L148.exercise
- -1  1.0035685000000001E-06       0                 1.0000000000000000E+100
+ -1  8.6616654000000003E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_vein_L148.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_vein_L148.der(volume)
@@ -31246,7 +31243,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_vein_L142.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_vein_L142.exercise
- -1  1.5387603000000000E-07       0                 1.0000000000000000E+100
+ -1  1.2977138000000001E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_vein_L142.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_vein_L142.der(volume)
@@ -31400,7 +31397,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.ulnar_vein_T7_L144.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.ulnar_vein_T7_L144.exercise
- -1  1.2978113999999999E-06       0                 1.0000000000000000E+100
+ -1  1.0835757000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.ulnar_vein_T7_L144.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.ulnar_vein_T7_L144.der(volume)
@@ -31558,7 +31555,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_vein_L152.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_vein_L152.exercise
- -1  9.7016659999999999E-08       0                 1.0000000000000000E+100
+ -1  8.3693919999999996E-08       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_vein_L152.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_vein_L152.der(volume)
@@ -31712,7 +31709,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.radial_vein_T3_L154.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.radial_vein_T3_L154.exercise
- -1  8.3250653999999998E-07       0                 1.0000000000000000E+100
+ -1  7.0311210000000005E-07       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.radial_vein_T3_L154.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.radial_vein_T3_L154.der(volume)
@@ -32621,7 +32618,7 @@ double initialValue(11685,6)
   0  2.0305599999999999E+04       0                       0                
   6   256   # SystemicComponent.venousParameters.E_radial_vein_T3_L154
   0       0                       0                       0                
-  6   256   # SystemicComponent.v_sup_venacava
+  6   288   # SystemicComponent.v_sup_venacava
   0       0                       0                       0                
   6   256   # SystemicComponent.v_inf_venacava
   0  2.6664477483000001E+03       0                       0                
@@ -32984,11 +32981,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.mesenteric_artery.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.mesenteric_artery.exercise
- -1  6.2869970000000002E-06       0                       0                
+ -1  6.2375115999999997E-06       0                       0                
   2   280   # SystemicComponent.mesenteric_artery.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.mesenteric_artery.der(q_in)
- -1  6.4310550000000004E-06       0                 1.0000000000000000E+100
+ -1  6.4770484000000002E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.mesenteric_artery.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.mesenteric_artery.der(volume)
@@ -33076,7 +33073,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.splanchnic_tissue.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.splanchnic_tissue.exercise
- -1  2.6090080000000000E-04       0                 1.0000000000000000E+100
+ -1  2.5355857000000003E-04       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.splanchnic_tissue.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.splanchnic_tissue.der(volume)
@@ -33186,7 +33183,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.splanchnic_vein.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.splanchnic_vein.exercise
- -1  8.6324069999999997E-06       0                 1.0000000000000000E+100
+ -1  7.4912426999999998E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.splanchnic_vein.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.splanchnic_vein.der(volume)
@@ -33346,11 +33343,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.coronary_arteries.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.coronary_arteries.exercise
- -1  2.8464564999999999E-06       0                       0                
+ -1  2.8705824000000002E-06       0                       0                
   2   280   # SystemicComponent.coronary_arteries.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.coronary_arteries.der(q_in)
- -1  3.7086824000000003E-08       0                 1.0000000000000000E+100
+ -1  3.6894679999999998E-08       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.coronary_arteries.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.coronary_arteries.der(volume)
@@ -33438,7 +33435,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.cardiac_tissue.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.cardiac_tissue.exercise
- -1  1.1691564599999999E-04       0                 1.0000000000000000E+100
+ -1  1.1395401000000000E-04       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.cardiac_tissue.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.cardiac_tissue.der(volume)
@@ -33548,7 +33545,7 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.coronary_veins.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.coronary_veins.exercise
- -1  2.0417211000000001E-08       0                 1.0000000000000000E+100
+ -1  1.6779332000000001E-08       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.coronary_veins.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.coronary_veins.der(volume)
@@ -33704,11 +33701,11 @@ double initialValue(11685,6)
   1   280   # SystemicComponent.brachial_L82_HeartLevel.exercise_ratio
   0       0                       0                       0                
   6   256   # SystemicComponent.brachial_L82_HeartLevel.exercise
- -1  2.4621267999999999E-06       0                       0                
+ -1  2.1089854000000000E-06       0                       0                
   2   280   # SystemicComponent.brachial_L82_HeartLevel.q_in
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_L82_HeartLevel.der(q_in)
- -1  3.0345360000000001E-06       0                 1.0000000000000000E+100
+ -1  3.0267345000000000E-06       0                 1.0000000000000000E+100
   2   280   # SystemicComponent.brachial_L82_HeartLevel.volume
   0       0                       0                       0                
   3   256   # SystemicComponent.brachial_L82_HeartLevel.der(volume)
@@ -33817,6 +33814,8 @@ double initialValue(11685,6)
  -1       1                       0                       0                
   1   280   # heartComponent.HR
   0       0                       0                       0                
+  6   388   # heartComponent.pv.q
+  0       0                       0                       0                
   6   388   # heartComponent.pa.q
   0       0                       0                       0                
   6   260   # heartComponent.tricuspidValve.q_in.pressure
@@ -33889,7 +33888,7 @@ double initialValue(11685,6)
   0       1                       0                       0                
   6   361   # heartComponent.mitralValve.open
   0       0                       0                       0                
-  6   256   # heartComponent.mitralValve.passableVariable
+  6   288   # heartComponent.mitralValve.passableVariable
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.mitralValve._Gon
  -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
@@ -33953,7 +33952,7 @@ double initialValue(11685,6)
   0       0                       0                       0                
   6   361   # heartComponent.aorticValve.open
   0       0                       0                       0                
-  6   256   # heartComponent.aorticValve.passableVariable
+  6   288   # heartComponent.aorticValve.passableVariable
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.aorticValve._Gon
  -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
@@ -34006,34 +34005,30 @@ double initialValue(11685,6)
   3   256   # heartComponent.aorticValve.der(CO_acc)
   0       0                       0                       0                
   6   328   # heartComponent.aorticValve.CO
- -1       0                       0                       0                
-  2   412   # heartComponent.r_SystemicVenousInflow.q_in.q
-  0       0                       0                       0                
-  3   260   # heartComponent.r_SystemicVenousInflow.q_in.der(q)
   0       0                       0                       0                
   6   256   # heartComponent.r_SystemicVenousInflow.dp
+  0       1                       0                       0                
+  6   769   # heartComponent.r_SystemicVenousInflow.enable
+  0       0                       0                       0                
+  6   769   # heartComponent.r_SystemicVenousInflow.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
-  6   256   # heartComponent.r_SystemicVenousInflow.resistance
-  0       0                       0                       0                
-  6   256   # heartComponent.r_SystemicVenousInflow.inertance
-  0       0                       0                       0                
-  6   256   # heartComponent.r_SystemicVenousInflow.dp_resistive
-  0       0                       0                       0                
-  6   256   # heartComponent.r_SystemicVenousInflow.dp_inertive
- -1       0                       0                       0                
-  2   412   # heartComponent.r_PulmonaryVenousInflow.q_in.q
-  0       0                       0                       0                
-  3   260   # heartComponent.r_PulmonaryVenousInflow.q_in.der(q)
+  6   256   # heartComponent.r_SystemicVenousInflow.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.r_SystemicVenousInflow.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # heartComponent.r_SystemicVenousInflow.conditionalConductance
   0       0                       0                       0                
   6   256   # heartComponent.r_PulmonaryVenousInflow.dp
+  0       1                       0                       0                
+  6   769   # heartComponent.r_PulmonaryVenousInflow.enable
+  0       0                       0                       0                
+  6   769   # heartComponent.r_PulmonaryVenousInflow.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
-  6   256   # heartComponent.r_PulmonaryVenousInflow.resistance
-  0       0                       0                       0                
-  6   256   # heartComponent.r_PulmonaryVenousInflow.inertance
-  0       0                       0                       0                
-  6   256   # heartComponent.r_PulmonaryVenousInflow.dp_resistive
-  0       0                       0                       0                
-  6   256   # heartComponent.r_PulmonaryVenousInflow.dp_inertive
+  6   256   # heartComponent.r_PulmonaryVenousInflow.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.r_PulmonaryVenousInflow.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # heartComponent.r_PulmonaryVenousInflow.conditionalConductance
   0       0                       0                       0                
   6   260   # heartComponent.ventricles.port_rv.pressure
   0       0                       0                       0                
@@ -34044,7 +34039,7 @@ double initialValue(11685,6)
   6   321   # heartComponent.ventricles.volumeLimiterLV
   0       1                       0                       0                
   6   321   # heartComponent.ventricles.volumeLimiterRV
- -1  3.5156689000000001E+00       0                       0                
+ -1  3.3109133000000002E+00       0                       0                
   2   280   # heartComponent.ventricles.LV_wall.ym
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.LV_wall.der(ym)
@@ -34078,7 +34073,7 @@ double initialValue(11685,6)
   1   280   # heartComponent.ventricles.LV_wall.PConcollagen
  -1      70                       0                       0                
   1   280   # heartComponent.ventricles.LV_wall.PExpcollagen
- -1       1                       0                       0                
+ -1  5.0000000000000000E-01       0                       0                
   1   280   # heartComponent.ventricles.LV_wall.functionFraction
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.Tm
@@ -34098,7 +34093,7 @@ double initialValue(11685,6)
   6   256   # heartComponent.ventricles.LV_wall.epsf
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.SLo
- -1  2.0658916999999999E+00       0                       0                
+ -1  1.8709707000000000E+00       0                       0                
   2   280   # heartComponent.ventricles.LV_wall.SL
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.LV_wall.der(SL)
@@ -34148,7 +34143,7 @@ double initialValue(11685,6)
   1   280   # heartComponent.ventricles.SEP_wall.PConcollagen
  -1      70                       0                       0                
   1   280   # heartComponent.ventricles.SEP_wall.PExpcollagen
- -1       1                       0                       0                
+ -1  5.0000000000000000E-01       0                       0                
   1   280   # heartComponent.ventricles.SEP_wall.functionFraction
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.Tm
@@ -34168,7 +34163,7 @@ double initialValue(11685,6)
   6   256   # heartComponent.ventricles.SEP_wall.epsf
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.SLo
- -1  2.0986855000000002E+00       0                       0                
+ -1  1.8909374000000001E+00       0                       0                
   2   280   # heartComponent.ventricles.SEP_wall.SL
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.SEP_wall.der(SL)
@@ -34238,7 +34233,7 @@ double initialValue(11685,6)
   6   256   # heartComponent.ventricles.RV_wall.epsf
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.SLo
- -1  2.0593423999999998E+00       0                       0                
+ -1  1.8759250999999999E+00       0                       0                
   2   280   # heartComponent.ventricles.RV_wall.SL
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.RV_wall.der(SL)
@@ -34264,8 +34259,6 @@ double initialValue(11685,6)
   6   257   # heartComponent.ventricles.calciumMechanics.usePhiInput
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.calciumMechanics.phi0
-  0       0                       0                       0                
-  6   256   # heartComponent.ventricles.calciumMechanics.tau_phi
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.calciumMechanics.t0_delay
   0       0                       0                       0                
@@ -34326,11 +34319,11 @@ double initialValue(11685,6)
   6   256   # heartComponent.ventricles._V_LV
   0       0                       0                       0                
   6   256   # heartComponent.ventricles._V_RV
- -1  1.3542685999999999E-04       0                 1.0000000000000000E+100
+ -1  1.0694267000000000E-04       0                 1.0000000000000000E+100
   2   280   # heartComponent.ventricles.V_LV
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.der(V_LV)
- -1  1.3149776000000000E-04       0                 1.0000000000000000E+100
+ -1  1.1006005000000000E-04       0                 1.0000000000000000E+100
   2   280   # heartComponent.ventricles.V_RV
   0       0                       0                       0                
   3   256   # heartComponent.ventricles.der(V_RV)
@@ -34368,7 +34361,7 @@ double initialValue(11685,6)
   6   256   # heartComponent.ra.D
   0       1                       0                       0                
   6   257   # heartComponent.ra.enabled
- -1  8.5194679999999995E-06       0                 1.0000000000000000E+100
+ -1  9.6154120000000006E-06       0                 1.0000000000000000E+100
   2   280   # heartComponent.ra.volume
   0       0                       0                       0                
   3   256   # heartComponent.ra.der(volume)
@@ -34376,7 +34369,7 @@ double initialValue(11685,6)
   1   280   # heartComponent.ra.volume_min
   0       0                       0                       0                
   6   256   # heartComponent.ra.thoracic_pressure_inside
- -1  3.2960810000000001E-01       0                       0                
+ -1       0                       0                       0                
   2   280   # heartComponent.ra.currentWork
   0       0                       0                       0                
   3   256   # heartComponent.ra.der(currentWork)
@@ -34394,15 +34387,15 @@ double initialValue(11685,6)
   6   260   # heartComponent.la.port_a.pressure
   0       1                       0                       0                
   6   257   # heartComponent.la.enabled
- -1  3.8869372999999997E-05       0                 1.0000000000000000E+100
+ -1  4.2960392999999997E-05       0                 1.0000000000000000E+100
   2   280   # heartComponent.la.volume
   0       0                       0                       0                
-  3   256   # heartComponent.la.der(volume)
+  3   288   # heartComponent.la.der(volume)
  -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
   1   280   # heartComponent.la.volume_min
   0       0                       0                       0                
   6   256   # heartComponent.la.thoracic_pressure_inside
- -1  8.3668309999999996E-02       0                       0                
+ -1       0                       0                       0                
   2   280   # heartComponent.la.currentWork
   0       0                       0                       0                
   3   256   # heartComponent.la.der(currentWork)
@@ -34441,7 +34434,7 @@ double initialValue(11685,6)
   0       1                       0                       0                
   6   353   # heartComponent.idealValve_deactivable1.open
   0       0                       0                       0                
-  6   256   # heartComponent.idealValve_deactivable1.passableVariable
+  6   288   # heartComponent.idealValve_deactivable1.passableVariable
  -1  1.2501026264094000E-02       0                 1.0000000000000000E+100
   1   280   # heartComponent.idealValve_deactivable1._Gon
  -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
@@ -34482,7 +34475,7 @@ double initialValue(11685,6)
   6   256   # heartComponent.sa_node.t0
   0       0                       0                       0                
   6   328   # heartComponent.sa_node.t0_last
- -1  9.7716992999999996E-01       0                       0                
+ -1  8.1212664000000001E-01       0                       0                
   2   280   # heartComponent.sa_node.cardiac_cycle
   0       0                       0                       0                
   3   256   # heartComponent.sa_node.der(cardiac_cycle)
@@ -34494,8 +34487,6 @@ double initialValue(11685,6)
   6   257   # heartComponent.calciumMechanics.usePhiInput
   0       0                       0                       0                
   6   256   # heartComponent.calciumMechanics.phi0
-  0       0                       0                       0                
-  6   256   # heartComponent.calciumMechanics.tau_phi
  -1       0                       0                       0                
   1   280   # heartComponent.calciumMechanics.t0_delay
  -1       0                       0                       0                
@@ -34614,7 +34605,7 @@ double initialValue(11685,6)
   1   280   # pulmonaryComponent.c_pa.ExternalPressure
  -1 -1.0132500000000000E+05       0                       0                
   1   280   # pulmonaryComponent.c_pa.MinimalCollapsingPressure
- -1  9.3303880000000005E-05       0                 1.0000000000000000E+100
+ -1  5.8381265000000000E-05       0                 1.0000000000000000E+100
   2   280   # pulmonaryComponent.c_pa.volume
   0       0                       0                       0                
   3   256   # pulmonaryComponent.c_pa.der(volume)
@@ -35106,9 +35097,9 @@ double initialValue(11685,6)
   4   256   # femoral_pressure
   0       0                       0                       0                
   4   256   # P_LV
-  0  1.3542685999999999E-04       0                 1.0000000000000000E+100
+  0  1.0694267000000000E-04       0                 1.0000000000000000E+100
   4   256   # V_LV
-  0  2.5141633000000002E-01       0                       0                
+  0  2.4962138000000000E-01       0                       0                
   4   256   # phi_baro
   0       0                       0                 1.0000000000000000E+100
   4   256   # SV
@@ -35144,7 +35135,7 @@ double initialValue(11685,6)
   6   256   # aortic_length_calc2
   0       0                       0                       0                
   4   256   # P_LA
-  0  3.8869372999999997E-05       0                 1.0000000000000000E+100
+  0  4.2960392999999997E-05       0                 1.0000000000000000E+100
   4   256   # V_la
   0       0                       0                       0                
   4   256   # q_mv
@@ -35210,7 +35201,7 @@ double initialValue(11685,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(11685,232)
+char initialDescription(11682,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -35332,6 +35323,7 @@ a systemic acitvation fraction, 1 being maximal possible. Normal resting is beli
 [1|%]
 [1|%]
 Pressure [Pa|mmHg]
+Volume flow [m3/s|ml/min]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
@@ -44767,6 +44759,7 @@ Tension function on circumferential wall length [1]
 [Pa|mmHg]
 Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
+Volume flow [m3/s|ml/min]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
@@ -44778,8 +44771,6 @@ Internal effect of externally applied pressure. Might be lower as the vessel is 
 True, when this particular tissue is doing exercise [:#(type=Boolean)]
 Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated [1|%]
 Actual exercise fraction for this particular tissue [1|%]
-Output flow (positive in normal blood flow direction). [m3/s|ml/min]
-der(Output flow (positive in normal blood flow direction).) [m3/s2]
 Actual volume [m3|ml]
 der(Actual volume) [m3/s]
 Minimal volume for limiting effects (e.g. collapsing, external pressure..) [m3|ml]
@@ -46225,6 +46216,7 @@ Rezai, Blood Press Monit 2013, for male subjects [m]
 [:#(type=Boolean)]
 Heart rate, when not specified externally [Hz|1/min]
 Volume flow [m3/s|ml/min]
+Volume flow [m3/s|ml/min]
 Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
 Pressure [Pa|mmHg]
@@ -46319,20 +46311,18 @@ Time of beggining of current cardiac cycle. May be same as T0, when the cardiacC
 Accumulated volume since valve closing [m3|ml]
 der(Accumulated volume since valve closing) [m3/s]
 [m3/s|ml/min]
-Volume flow [m3/s|ml/min]
-der(Volume flow) [m3/s2]
 Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
-Inertance [Pa.s2/m3|mmHg.s2/ml]
-[Pa|mmHg]
-[Pa|mmHg]
-Volume flow [m3/s|ml/min]
-der(Volume flow) [m3/s2]
+[m3/(Pa.s)|ml/(mmHg.min)]
 Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
-Inertance [Pa.s2/m3|mmHg.s2/ml]
-[Pa|mmHg]
-[Pa|mmHg]
+[m3/(Pa.s)|ml/(mmHg.min)]
 Pressure [Pa|mmHg]
 Pressure [Pa|mmHg]
 [Pa|mmHg]
@@ -46448,7 +46438,6 @@ Sarcomere shortening velocity with zero load micron/sec
 
 [:#(type=Boolean)]
 [1|%]
-Integral time constant of delayed activation [s]
 Delay of contraction after SA node  [s]
 Delay of contraction after SA node  [s]
 delay activation slope coefficient
@@ -46563,7 +46552,6 @@ True for beat begining [:#(type=Boolean)]
 [:#(type=Integer)]
 [:#(type=Boolean)]
 [1|%]
-Integral time constant of delayed activation [s]
 Delay of contraction after SA node  [s]
 Delay of contraction after SA node  [s]
 delay activation slope coefficient
@@ -46580,7 +46568,7 @@ nominal systolic contraction at maximal activation [s]
 
 Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication [s]
 Lusitropic relaxation slope dependent on phi linearly. Given by k_tr_min
-minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
+minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
 [:#(type=Boolean)]
 [:#(type=Boolean)]
 D relative to resting D_A to compare timings [1|%]
@@ -46865,7 +46853,7 @@ Gain of input signal 2
 integration of pressure to find the true mean [Pa.s]
 der(integration of pressure to find the true mean) [Pa]
 [Pa|mmHg]
-[m3/s|ml/min]
+[m3/s|l/min]
 [Pa|mmHg]
 [Pa|mmHg]
 Pressure in left ventricle [Pa|mmHg]

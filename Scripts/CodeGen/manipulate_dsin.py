@@ -492,6 +492,8 @@ def run():
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
     prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = True)
     # writeInitStatesFromDsin()
+    # writeTunableParamsFromDsin('params_all.txt', filter='')
+    # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')
     print('Done, Johne')
     
 # if __name__ == "__main__":
