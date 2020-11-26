@@ -4,10 +4,11 @@ class ModelicaClass:
 
 
     
-    def __init__(self, name = 'Empty', start_val = None, path = None, isRoot = False):
+    def __init__(self, name = 'Empty', start_val = None, path = None, isRoot = False, properties = None):
         self.name = name
         self.children = dict()
         self.start_val = start_val
+        self.properties = properties
         if path is None:
             self.full_path = name 
         else: 
@@ -38,12 +39,26 @@ class ModelicaClass:
     def buildChildTree(self, inps):
         # ill = inp.split('\n')
         for line in inps:
-            l = line.split(',', 1)
-            self.__attach(l[0], self)
+            # l = line.split(',', 1)
+            if len(line) > 1:
+                p = line[1]
+            else:
+                p = None
+
+            self.__attach(line[0], self, properties = p)
 
     def printObjectTree(self, indent_level = 0) -> str:
         if self.isValueType:
-            return self.name + '(start = ' + str(self.start_val) + ', fixed = true)'
+            fixed = 'true'
+            val = str(self.start_val)
+            
+            if self.properties is not None:
+                if 'guess' in self.properties: 
+                    fixed = 'false'
+                if 'bool' in self.properties:
+                    val = 'true' if self.start_val == 1 else 'false'
+
+            return '%s(start = %s, fixed = %s)' % (self.name, val, fixed)
         else :
             return '\n' + (' ' * indent_level) + self.name + '(' + self.printChildren(indent_level = indent_level+2) + ')'
 
@@ -53,7 +68,7 @@ class ModelicaClass:
 
 
     @staticmethod
-    def __attach(branch, trunk):
+    def __attach(branch, trunk, properties = None):
         '''
         Insert a branch of objects on its trunk.
         Thanks to https://stackoverflow.com/questions/8484943/construct-a-tree-from-list-os-file-paths-python-performance-dependent
@@ -61,7 +76,7 @@ class ModelicaClass:
         parts = branch.split('.', 1)
         if len(parts) == 1:  # branch is a file
             # add value type
-            mc = ModelicaClass(parts[0], start_val=0, path=trunk.full_path)
+            mc = ModelicaClass(parts[0], start_val=0, path=trunk.full_path, properties = properties)
             trunk.children[parts[0]] = mc
         else:
             node, others = parts
@@ -69,7 +84,7 @@ class ModelicaClass:
                 # insert a non-value node
                 mc = ModelicaClass(node, path=trunk.full_path)
                 trunk.children[node] = mc
-            ModelicaClass.__attach(others, trunk.children[node])
+            ModelicaClass.__attach(others, trunk.children[node], properties=properties)
 
     @staticmethod
     def BuildObjectTree(lines, root = 'Root'):

@@ -17,11 +17,11 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'CardiovascularSystem'
+base_model_full_path = 'CVS_baseline_fastBaro'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
-steadyStateAt = 600
+steadyStateAt = 599.88
 
 # get the main and path
 if '.' in base_model_full_path:
@@ -34,9 +34,9 @@ else:
 input_text = open('states.csv', 'r').read()
 # incl_vars = 'volume|V_LV|V_RV|vol1|vol2|s|epsilon|fiSN|v_in'
 incl_vars = '.+'
-match = r'([\w.]+\.(?:' + incl_vars + r'));.+;'
+match = r'([\w.]+\.(?:' + incl_vars + r'));.*;(.*)'
 m = re.findall(match, input_text)
-lines = (line for line in m if line.split(';', 1)[0].rsplit('.', 1)[-1] not in exclude_filter)
+lines = (line for line in m if line[0].rsplit('.', 1)[-1] not in exclude_filter)
 
 # Build modelica Object Tree
 mc_tree = mc.ModelicaClass.BuildObjectTree(lines, root=base_model)
