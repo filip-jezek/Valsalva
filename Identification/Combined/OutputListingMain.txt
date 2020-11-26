@@ -12,30 +12,11 @@ All rights reserved.
 _______________________________________________________________
 
 Results of GPSHookeJeeves algorithm
-Start time: Mon Nov 16 12:35:32 CET 2020
+Start time: Thu Nov 26 23:10:19 CET 2020
 
 Main Iterations
 
 
-Simulation Number	Main Iteration	Step Number	f(x)	settings.chi_phi	settings.pulm_R	settings.pulm_q_nom_maxq	settings.tissues_chi_R	settings.tissue_chi_C
-1	1	1	0.9027411886449213	0.9	7256414.0	9.916E-4	29.376	-0.12	Initial point.
-10	2	1	0.6602532917407936	0.945	6893593.5	9.4202E-4	27.9072	-0.114	Global search reduced cost.
-17	3	1	0.3941844350332077	1.035	6167952.5	8.4286E-4	24.9696	-0.114	Global search reduced cost.
-25	4	1	0.36342459540585614	1.08	5079491.0	6.9412E-4	23.5008	-0.12	Global search reduced cost.
-31	5	1	0.32388871341828024	1.08	3628208.8	4.958E-4	23.5008	-0.132	Global search reduced cost.
-37	6	1	0.26861100532019405	1.035	3628208.8	4.958E-4	22.032	-0.138	Local search reduced cost.
-44	7	1	0.2167149734175683	0.99	3628208.8	4.958E-4	19.0944	-0.15	Global search reduced cost.
-52	8	1	0.16695255495473155	0.945	3628208.8	4.958E-4	16.1568	-0.168	Global search reduced cost.
-58	9	1	0.1599072657346759	0.945	3628208.8	4.958E-4	14.688	-0.174	Local search reduced cost.
-59	10	1	0.15450627197884367	0.945	3628208.8	4.958E-4	14.688	-0.18	Global search reduced cost.
-60	11	1	0.15196503783249793	0.9	3628208.8	4.958E-4	14.688	-0.18	Local search reduced cost.
-60	12	1	0.15196503783249793	0.9	3628208.8	4.958E-4	14.688	-0.18	Iteration step did not reduce cost. Reduce step size to '0.5'.
-67	13	1	0.14387755299383054	0.9225	3628208.8	4.958E-4	14.688	-0.18	Global search reduced cost.
-67	14	1	0.14387755299383054	0.9225	3628208.8	4.958E-4	14.688	-0.18	Iteration step did not reduce cost. Reduce step size to '0.25'.
-67	15	1	0.14387755299383054	0.9225	3628208.8	4.958E-4	14.688	-0.18	Iteration step did not reduce cost. Reduce step size to '0.125'.
-67	16	1	0.14387755299383054	0.9225	3628208.8	4.958E-4	14.688	-0.18	Iteration step did not reduce cost. Reduce step size to '0.0625'.
-67	17	1	0.14387755299383054	0.9225	3628208.8	4.958E-4	14.688	-0.18	Iteration step did not reduce cost. Reduce step size to '0.03125'.
-91	18	1	0.1438619021770007	0.92109376	3628208.8	4.958E-4	14.688	-0.18	Global search reduced cost.
-91	19	1	0.1438619021770007	0.92109376	3628208.8	4.958E-4	14.688	-0.18	Iteration step did not reduce cost. Reduce step size to '0.015625'.
-91	20	1	0.1438619021770007	0.92109376	3628208.8	4.958E-4	14.688	-0.18	Iteration step did not reduce cost. Maximum number of step reductions reached.
-91	20	1	0.1438619021770007	0.92109376	3628208.8	4.958E-4	14.688	-0.18	Minimum point.
+Simulation Number	Main Iteration	Step Number	f(x)	settings.chi_phi	settings.heart_vntr_D_A_maxAct	settings.heart_vntr_D_0_maxAct	settings.heart_vntr_TS_maxAct	settings.heart_vntr_TR_maxAct	settings.eta_vc	settings.tissues_eta_Ra	settings.tissues_eta_C	settings.tissues_chi_R	settings.tissue_chi_C
+1	1	1	1.9678725857857824	0.9210938	7000.0	2.953125E-4	0.034774043	0.11722694	0.1474491	2.445225	0.3758013	14.688	-0.18	Initial point.
+1	1	1	1.9678725857857824	0.9210938	7000.0	2.953125E-4	0.034774043	0.11722694	0.1474491	2.445225	0.3758013	14.688	-0.18	Current lowest point.

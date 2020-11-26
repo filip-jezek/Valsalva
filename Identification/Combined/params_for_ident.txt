@@ -1,0 +1,11 @@
+# name, value, [min, max, step]
+settings.chi_phi,0.9210938,0.4605469,1.0,0.05
+settings.heart_vntr_D_A_maxAct,7000.0,3500.0,12000.0,200.0
+settings.heart_vntr_D_0_maxAct,0.0002953125,1e-5,0.00044296875,1e-05
+settings.heart_vntr_TS_maxAct,0.034774043,0.01,0.08,0.01
+settings.heart_vntr_TR_maxAct,0.11722694,0.01,0.5,0.01
+settings.eta_vc,0.1474491,0.07372455,0.22117365,0.005
+settings.tissues_eta_Ra,2.445225,0.1,4,0.1
+settings.tissues_eta_C,0.3758013,0.01,1,0.01
+settings.tissues_chi_R,14.688,5,30,0.5
+settings.tissue_chi_C,-0.18,-1,-0.01,0.01
