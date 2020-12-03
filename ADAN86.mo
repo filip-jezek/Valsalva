@@ -23998,6 +23998,50 @@ P_hs_plus_dist"),
                 Diagram(coordinateSystem(preserveAspectRatio=false)));
           end TestSystemicArterial;
         end Testers;
+
+        model Systemic_CutOff "A cut-off circulation with no throughput"
+          extends partialSystemic;
+          Physiolibrary.Types.Constants.FractionConst fraction(k=0) annotation
+            (Placement(transformation(extent={{-276,144},{-268,152}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(
+              SolutionFlow=0)
+            annotation (Placement(transformation(extent={{34,70},{14,90}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump1(
+              SolutionFlow=0)
+            annotation (Placement(transformation(extent={{72,70},{92,90}})));
+        equation
+          connect(fraction.y, baroreflex_system.carotid_distention) annotation
+            (Line(points={{-267,148},{-252.5,148},{-252.5,158.667},{-238.667,
+                  158.667}}, color={0,0,127}));
+          connect(fraction.y, baroreflex_system.aortic_distention) annotation (
+              Line(points={{-267,148},{-252,148},{-252,145.333},{-238.667,
+                  145.333}}, color={0,0,127}));
+          connect(port_a, unlimitedPump.q_out) annotation (Line(
+              points={{-320,80},{14,80}},
+              color={0,0,0},
+              thickness=1));
+          connect(port_b, unlimitedPump1.q_out) annotation (Line(
+              points={{460,80},{92,80}},
+              color={0,0,0},
+              thickness=1));
+          annotation (Icon(graphics={
+                Line(
+                  points={{-192,-54},{88,180}},
+                  color={0,0,0},
+                  thickness=0.5),
+                Line(
+                  points={{-4,-62},{276,172}},
+                  color={0,0,0},
+                  thickness=0.5),
+                Line(
+                  points={{-296,0},{-142,0}},
+                  color={0,0,0},
+                  thickness=0.5),
+                Line(
+                  points={{100,0},{420,0}},
+                  color={0,0,0},
+                  thickness=0.5)}));
+        end Systemic_CutOff;
       end Systemic;
     end Subsystems;
 
@@ -30471,10 +30515,10 @@ P_hs_plus_dist"),
     end Tisues_PVchars;
 
     model HR2Phi
-      Components.Subsystems.Baroreflex.partialHeartRate heartRate
-        annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
-      Components.Subsystems.Baroreflex.HeartRate_HRMinMax heartRate2_1(phi0(
-            displayUnit="1") = 0.25, HR_max=3.1666666666667)
+      Components.Subsystems.Baroreflex.HeartRate_HRMinMax heartRate2_1(
+        phi0=settings.phi0,
+        HR_max=settings.HR_max,
+        HR_nom=settings.HR_nominal)
         annotation (Placement(transformation(extent={{-60,40},{-40,60}})));
       replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
         height=0.75,
@@ -30483,22 +30527,96 @@ P_hs_plus_dist"),
         duration=1)   constrainedby Modelica.Blocks.Sources.Ramp
         annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
       Components.Subsystems.Baroreflex.HeartRate_HRMinMax HR_BC(
-        phi0(displayUnit="%") = 0.25,
-        HR_max=3.1666666666667,
-        HR_nom=1.15)
+        phi0=settings.phi0,
+        HR_max=settings.HR_max,
+        HR_nom=settings.HR_nominal)
         annotation (Placement(transformation(extent={{12,-38},{32,-18}})));
       Modelica.Blocks.Math.InverseBlockConstraints inverseBlockConstraints
         annotation (Placement(transformation(extent={{50,-44},{-4,-12}})));
-      Physiolibrary.Types.Constants.FrequencyConst frequency(k=1.4833333333333)
+      Physiolibrary.Types.Constants.FrequencyConst frequency(k=2.5666666666667)
         annotation (Placement(transformation(extent={{72,-32},{64,-24}})));
-      Components.Subsystems.Baroreflex.HeartRate_HRMinMax HR_MyBase(phi0=0.25,
-          HR_max=3.1666666666667)
+      Components.Subsystems.Baroreflex.HeartRate_HRMinMax HR_MyBase(
+        phi0=settings.phi0,
+        HR_max=settings.HR_max,
+        HR_nom=settings.HR_nominal)
         annotation (Placement(transformation(extent={{-40,-40},{-60,-20}})));
+
+    Physiolibrary.Types.Fraction chi_phi "Get the exercise level for current heart rate";
+    Real phi0 = 0.25;
+
+            Components.Settings settings(
+        initByPressure=false,
+        heart_R_vlv(displayUnit="(Pa.s)/m3") = 133322.387415,
+        heart_R_LA(displayUnit="(mmHg.s)/ml") = 3333059.685375,
+        heart_vntr_TS_maxAct(displayUnit="s") = 0.034774043,
+        heart_vntr_TR_maxAct(displayUnit="s") = 0.11722694,
+        heart_vntr_Tact_maxAct=8.000000e-02,
+        chi_phi=0.8835938,
+        heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 1.082188e+04,
+        heart_vntr_D_0_maxAct=0.0004215625,
+        eta_vc=0.2201054,
+        tissues_eta_Ra=1.245225,
+        tissues_eta_C=0.5058013,
+        tissues_chi_R=14.60206,
+        tissue_chi_C=-0.32625,
+        V_PV_init=0,
+        heart_atr_D_A=55215000,
+        heart_vntr_xi_Vw=0.9014874,
+        heart_vntr_xi_AmRef=1.111598,
+        heart_vntr_k_passive=3.725000e+01,
+        heart_vntr_Lsref=1.900000e+00,
+        heart_atr_D_0=14055120,
+        heart_atr_TS=1.882500e-01,
+        heart_atr_TR=2.631250e-01,
+        heart_vntr_D_0=18.15655,
+        heart_vntr_D_A=2846.905,
+        heart_vntr_TS=8.825000e-02,
+        heart_vntr_TR(displayUnit="s") = 2.975000e-01,
+        heart_vntr_Tact=8.000000e-02,
+        baro_fsn(displayUnit="Hz") = 0.0383,
+        pulm_R=3628209,
+        pulm_q_nom_maxq=0.0004958,
+        syst_tissues_hydrostaticLevel_correction=1,
+        HR_max(displayUnit="1/min") = 2.7333333333333,
+        syst_TPR=128212500,
+        syst_art_k_E=0.3973268,
+        veins_gamma=0.365625,
+        tissues_SV_nom=0.000695,
+        pulm_C_PV=3.194206e-07,
+        pulm_C_PA=5.3325e-08,
+        heart_R_RA(displayUnit="(dyn.s)/cm5") = settings.heart_R_LA,
+        tissues_eta_Rv=0,
+        baro_tau_s(displayUnit="s") = 93,
+        syst_TR_frac(displayUnit="1") = 4.695759e+00,
+        syst_abd_P_th_ratio=0.8,
+        heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000,
+        heart_vntr_L0=1.6,
+        pulm_P_PV_nom=1333.22387415,
+        height=1.7132,
+        tissues_CO_nom=0.000105,
+        EvaluateFunctionalParams=true,
+        HR_nominal=1.0666666666667,
+        UseNonLinear_TissuesCompliance=true,
+        baro_f1=3.379000e-03,
+        baro_g=0.606258,
+        baro_useAbsolutePressureTerm=false,
+        baro_xi_delta0=2.688000e-01,
+        pulm_R_exp=9.150000e-01,
+        syst_art_UseVasoconstrictionEffect=true,
+        tissues_UseStraighteningReaction2Phi=true,
+        tissues_ZPV_nom=0.00210124,
+        tissues_gamma=0.5,
+        tissues_tau_R(displayUnit="s") = 0,
+        veins_C_phi=0.09,
+        veins_activation_tau=0)
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
     equation
+
+
+      chi_phi*(1 - phi0) + phi0 = HR_BC.phi;
+
       connect(heartRate2_1.phi, Tilt_ramp.y) annotation (Line(points={{-60,50},
               {-70,50},{-70,30},{-79,30}}, color={0,0,127}));
-      connect(heartRate.phi, Tilt_ramp.y) annotation (Line(points={{-60,10},{
-              -70,10},{-70,30},{-79,30}}, color={0,0,127}));
       connect(inverseBlockConstraints.y2, HR_BC.phi)
         annotation (Line(points={{0.05,-28},{12,-28}},    color={0,0,127}));
       connect(HR_BC.HR, inverseBlockConstraints.u2)
@@ -34582,6 +34700,7 @@ P_hs_plus_dist"),
 
     model CardiovascularSystem
       extends Auxiliary.partialCVS_optimized_ss;
+      extends Auxiliary.partialCVS_outputs;
     //   OptimizedValsalva( settings(
     //       V_PV_init=5e-05,
     //       heart_R_vlv(displayUnit="(dyn.s)/cm5") = 500000,
@@ -34598,7 +34717,8 @@ P_hs_plus_dist"),
         replaceable Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt
           SystemicComponent(
           UseThoracic_PressureInput=true,
-          UsePhi_Input=true)
+          UsePhi_Input=true) constrainedby
+          Components.Subsystems.Systemic.partialSystemic
                      annotation (
             __Dymola_choicesAllMatching=true, Placement(transformation(extent={{-58,18},
                   {18,48}})));
@@ -34693,8 +34813,7 @@ P_hs_plus_dist"),
           disconnectedValue=0,
           disconnected=true,
           phi_gain=settings.pulm_tp_pleural_frac,
-          const_offset=0)
-          "Thoracic pressure effect on extra-pleural circulatory"
+          const_offset=0) "Thoracic pressure effect on extra-pleural circulatory"
           annotation (Placement(transformation(extent={{-69,-43.3333},{-55,
                   -31.3333}})));
       //   parameter Real heart_vntr_Lsref=1.9 " Resting SL, micron ";
@@ -34766,169 +34885,9 @@ P_hs_plus_dist"),
             __Dymola_Algorithm="Cvode"));
       end partialCVS;
 
-      model partialCVS_outputs "Add additional outputs to the base model"
-        extends partialCVS;
-
-      output Physiolibrary.Types.Pressure brachial_pressure=SystemicComponent.brachial_L82_HeartLevel.p_out_hs;
-
-      output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
-      Real brachial_pressure_int "integration of pressure to find the true mean";
-        output Physiolibrary.Types.Pressure renal_capillary=SystemicComponent.renal_L166.p_C;
-        output Physiolibrary.Types.VolumeFlowRate CO(displayUnit = "l/min") = heartComponent.aorticValve.CO;
-        output Physiolibrary.Types.Pressure carotid_pressure=SystemicComponent.common_carotid_L48_D.p_out_hs;
-        output Physiolibrary.Types.Pressure femoral_pressure=SystemicComponent.femoral_L200.p_out_hs;
-        output Physiolibrary.Types.Pressure P_LV = heartComponent.ventricles.P_LV
-          "Pressure in left ventricle";
-        output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
-        output Physiolibrary.Types.Fraction phi_baro=SystemicComponent.phi_baroreflex;
-      output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
-      output Physiolibrary.Types.Frequency HR = heartRate.HR;
-
-      Real CI = CO*1000*60/settings.BSA "Cardiac index l/min/m2";
-      Physiolibrary.Types.Power CardiacPowerBrachial = brachial_pressure_mean*CO;
-      Physiolibrary.Types.PowerPerMass CardiacPowerIndex = brachial_pressure_mean*CO/settings.BSA;
-        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
-        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
-        output Physiolibrary.Types.Pressure thoracic_pressure=SystemicComponent.P_th;
-        output Physiolibrary.Types.Pressure P_pa = pulmonaryComponent.r_pa.q_in.pressure
-          "Pressure in pulmonary arteries";
-        output Physiolibrary.Types.Pressure P_pv = pulmonaryComponent.r_pa.q_out.pressure
-          "Pressure in pulmonary veins";
-        output Physiolibrary.Types.Pressure P_sv = SystemicComponent.port_b.pressure
-          "Pressure in systemic vena cava";
-
-        Physiolibrary.Types.Volume totalVolume=SystemicComponent.total_volume +
-            heartComponent.volume + pulmonaryComponent.volume
-          "For debug purposes, should be constant (up to numerical precision)";
-
-
-        output Modelica.SIunits.Length speedSegmentLength=
-            SystemicComponent.common_carotid_L48_A.l + SystemicComponent.common_carotid_L48_B.l
-             + SystemicComponent.common_carotid_L48_C.l + SystemicComponent.common_carotid_L48_D.l
-             + SystemicComponent.aortic_arch_C64.l + SystemicComponent.aortic_arch_C94.l
-             + SystemicComponent.thoracic_aorta_C96.l + SystemicComponent.thoracic_aorta_C100.l
-             + SystemicComponent.thoracic_aorta_C104.l + SystemicComponent.thoracic_aorta_C108.l
-             + SystemicComponent.thoracic_aorta_C112.l + SystemicComponent.abdominal_aorta_C114.l
-             + SystemicComponent.abdominal_aorta_C136.l + SystemicComponent.abdominal_aorta_C164.l
-             + SystemicComponent.abdominal_aorta_C176.l + SystemicComponent.abdominal_aorta_C188.l
-             + SystemicComponent.abdominal_aorta_C192.l + SystemicComponent.common_iliac_R216.l
-             + SystemicComponent.external_iliac_R220.l + SystemicComponent.femoral_R222.l
-          "Distance between carotid_L48 and femoral_R222 for calculating pulse wave propagation speed";
-
-        Modelica.SIunits.Length aortic_length=SystemicComponent.ascending_aorta_A.l
-             + SystemicComponent.ascending_aorta_B.l + SystemicComponent.ascending_aorta_C.l
-             + SystemicComponent.ascending_aorta_D.l + SystemicComponent.aortic_arch_C2.l
-             + SystemicComponent.aortic_arch_C46.l + SystemicComponent.aortic_arch_C64.l
-             + SystemicComponent.aortic_arch_C94.l + SystemicComponent.thoracic_aorta_C96.l
-             + SystemicComponent.thoracic_aorta_C100.l + SystemicComponent.thoracic_aorta_C104.l
-             + SystemicComponent.thoracic_aorta_C108.l + SystemicComponent.thoracic_aorta_C112.l
-             + SystemicComponent.abdominal_aorta_C114.l + SystemicComponent.abdominal_aorta_C136.l
-             + SystemicComponent.abdominal_aorta_C164.l + SystemicComponent.abdominal_aorta_C176.l
-             + SystemicComponent.abdominal_aorta_C188.l + SystemicComponent.abdominal_aorta_C192.l
-          "Length of the whole aorta for comparison to body size";
-
-
-      //     Modelica.SIunits.Weight weight(start = 70) "Body weight estimated from height and BMI";
-          Modelica.SIunits.Height height(start = 1.7)
-          "Body height, estimated from aortic length calculation. Have to eb manually set to settings due to computational procedure";
-          Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*settings.age+0.5409*(height*100)+0.3476*settings.BMI)
-          "Zemtsovskaja, HT 2019 for male subjects";
-          Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*settings.age+2.5*height*100)
-          "Rezai, Blood Press Monit 2013, for male subjects";
-
-        output Physiolibrary.Types.Pressure P_LA = heartComponent.mitralValve.q_in.pressure
-          "Pressure in left atria";
-        output Physiolibrary.Types.Volume V_la = heartComponent.la.volume
-          "Left atrium volume output";
-        output Physiolibrary.Types.VolumeFlowRate q_mv(displayUnit = "l/min") = heartComponent.mitralValve.volumeFlowRate
-          "Flow in mitral valve";
-        output Real SLo_max = max([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo])
-          "maximal Sarcomere length";
-        output Real SLo_min = min([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo])
-          "Minimal Sarcomere length";
-        output Physiolibrary.Types.Pressure P_MV_o
-          "Opening pressure of the mitral valve";
-        output Physiolibrary.Types.Pressure P_MV_c
-          "Closing pressure of the mitral valve";
-
-      // Get pressures and volumes of all tissues to check the characteristics
-      //   Physiolibrary.Types.Pressure tissuePressures[:] = {
-      //     SystemicComponent.celiac_trunk_C116.p,
-      //     SystemicComponent.renal_L166.p,
-      //     SystemicComponent.renal_R178.p,
-      //     SystemicComponent.internal_iliac_T1_R218.p,
-      //     SystemicComponent.profundus_T2_R224.p,
-      //     SystemicComponent.anterior_tibial_T3_R230.p,
-      //     SystemicComponent.posterior_tibial_T4_R236.p,
-      //     SystemicComponent.internal_iliac_T1_L196.p,
-      //     SystemicComponent.profundus_T2_L202.p,
-      //     SystemicComponent.anterior_tibial_T3_L208.p,
-      //     SystemicComponent.posterior_tibial_T4_L214.p,
-      //     SystemicComponent.ulnar_T2_R42.p,
-      //     SystemicComponent.radial_T1_R44.p,
-      //     SystemicComponent.ulnar_T2_L90.p,
-      //     SystemicComponent.radial_T1_L92.p,
-      //     SystemicComponent.internal_carotid_R8_C.p,
-      //     SystemicComponent.external_carotid_T2_R26.p,
-      //     SystemicComponent.internal_carotid_L50_C.p,
-      //     SystemicComponent.external_carotid_T2_L62.p,
-      //     SystemicComponent.vertebral_L2.p,
-      //     SystemicComponent.vertebral_R272.p,
-      //     SystemicComponent.splanchnic_tissue.p,
-      //     SystemicComponent.cardiac_tissue.p};
-      //
-      //     Physiolibrary.Types.Fraction tissue_relVol[:] = {
-      //     SystemicComponent.celiac_trunk_C116.volume/SystemicComponent.celiac_trunk_C116.V_n,
-      //     SystemicComponent.renal_L166.volume/SystemicComponent.renal_L166.V_n,
-      //     SystemicComponent.renal_R178.volume/SystemicComponent.renal_R178.V_n,
-      //     SystemicComponent.internal_iliac_T1_R218.volume/SystemicComponent.internal_iliac_T1_R218.V_n,
-      //     SystemicComponent.profundus_T2_R224.volume/SystemicComponent.profundus_T2_R224.V_n,
-      //     SystemicComponent.anterior_tibial_T3_R230.volume/SystemicComponent.anterior_tibial_T3_R230.V_n,
-      //     SystemicComponent.posterior_tibial_T4_R236.volume/SystemicComponent.posterior_tibial_T4_R236.V_n,
-      //     SystemicComponent.internal_iliac_T1_L196.volume/SystemicComponent.internal_iliac_T1_L196.V_n,
-      //     SystemicComponent.profundus_T2_L202.volume/SystemicComponent.profundus_T2_L202.V_n,
-      //     SystemicComponent.anterior_tibial_T3_L208.volume/SystemicComponent.anterior_tibial_T3_L208.V_n,
-      //     SystemicComponent.posterior_tibial_T4_L214.volume/SystemicComponent.posterior_tibial_T4_L214.V_n,
-      //     SystemicComponent.ulnar_T2_R42.volume/SystemicComponent.ulnar_T2_R42.V_n,
-      //     SystemicComponent.radial_T1_R44.volume/SystemicComponent.radial_T1_R44.V_n,
-      //     SystemicComponent.ulnar_T2_L90.volume/SystemicComponent.ulnar_T2_L90.V_n,
-      //     SystemicComponent.radial_T1_L92.volume/SystemicComponent.radial_T1_L92.V_n,
-      //     SystemicComponent.internal_carotid_R8_C.volume/SystemicComponent.internal_carotid_R8_C.V_n,
-      //     SystemicComponent.external_carotid_T2_R26.volume/SystemicComponent.external_carotid_T2_R26.V_n,
-      //     SystemicComponent.internal_carotid_L50_C.volume/SystemicComponent.internal_carotid_L50_C.V_n,
-      //     SystemicComponent.external_carotid_T2_L62.volume/SystemicComponent.external_carotid_T2_L62.V_n,
-      //     SystemicComponent.vertebral_L2.volume/SystemicComponent.vertebral_L2.V_n,
-      //     SystemicComponent.vertebral_R272.volume/SystemicComponent.vertebral_R272.V_n,
-      //     SystemicComponent.splanchnic_tissue.volume/SystemicComponent.splanchnic_tissue.V_n,
-      //     SystemicComponent.cardiac_tissue.volume/SystemicComponent.cardiac_tissue.V_n};
-
-      equation
-
-        when heartComponent.mitralValve.open then
-          P_MV_o = heartComponent.mitralValve.q_in.pressure;
-        end when;
-
-        when not heartComponent.mitralValve.open then
-          P_MV_c = heartComponent.mitralValve.q_in.pressure;
-        end when;
-
-        assert(abs(height - settings.height) < 0.01, "Please manually tune the height in settings so its in accordance with the one calculated from the aortic vessel length to a preceision of 1cm", AssertionLevel.warning);
-      //   settings.BMI = weight/(height^2);
-        // by putting these two "known" variables in equal, modelica can determine the appropriate height
-        aortic_length = aortic_length_calc;
-
-        der(brachial_pressure_int) = brachial_pressure;
-
-        when heartComponent.sa_node.beat then
-          brachial_pressure_mean = brachial_pressure_int/heartComponent.sa_node.t0_last;
-          reinit(brachial_pressure_int, 0);
-        end when;
-
-      end partialCVS_outputs;
-
       model partialCVS_optimized
         "Hopefully final parametrization, merged from the inheritance tree"
-        extends partialCVS_outputs(
+        extends partialCVS(
       settings(
             heart_R_vlv(displayUnit="(Pa.s)/m3") = 133322.387415,
             heart_R_LA(displayUnit="(mmHg.s)/ml") = 3333059.685375,
@@ -35251,6 +35210,179 @@ P_hs_plus_dist"),
 
 
       end partialCVS_optimized_ss;
+
+      model partialCVS_outputs "Add additional outputs to the base model. Avoid any modification to prevent conflicts during diamond inheritance."
+        extends partialCVS_optimized;
+
+      output Physiolibrary.Types.Pressure brachial_pressure=SystemicComponent.brachial_L82_HeartLevel.p_out_hs;
+
+      output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
+      output Physiolibrary.Types.Pressure brachial_pressure_systolic(start = 0);
+      Physiolibrary.Types.Pressure brachial_pressure_systolic_i(start = 0);
+      output Physiolibrary.Types.Pressure brachial_pressure_diastolic(start = 0);
+      Physiolibrary.Types.Pressure brachial_pressure_diastolic_i(start = 0);
+
+      Real brachial_pressure_int "integration of pressure to find the true mean";
+        output Physiolibrary.Types.Pressure renal_capillary=SystemicComponent.renal_L166.p_C;
+        output Physiolibrary.Types.VolumeFlowRate CO(displayUnit = "l/min") = heartComponent.aorticValve.CO;
+        output Physiolibrary.Types.Pressure carotid_pressure=SystemicComponent.common_carotid_L48_D.p_out_hs;
+        output Physiolibrary.Types.Pressure femoral_pressure=SystemicComponent.femoral_L200.p_out_hs;
+        output Physiolibrary.Types.Pressure P_LV = heartComponent.ventricles.P_LV
+          "Pressure in left ventricle";
+        output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
+        output Physiolibrary.Types.Fraction phi_baro=SystemicComponent.phi_baroreflex;
+      output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
+      output Physiolibrary.Types.Frequency HR = heartRate.HR;
+
+      Real CI = CO*1000*60/settings.BSA "Cardiac index l/min/m2";
+      Physiolibrary.Types.Power CardiacPowerBrachial = brachial_pressure_mean*CO;
+      Physiolibrary.Types.PowerPerMass CardiacPowerIndex = brachial_pressure_mean*CO/settings.BSA;
+        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
+        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        output Physiolibrary.Types.Pressure thoracic_pressure=SystemicComponent.P_th;
+        output Physiolibrary.Types.Pressure P_pa = pulmonaryComponent.r_pa.q_in.pressure
+          "Pressure in pulmonary arteries";
+        output Physiolibrary.Types.Pressure P_pv = pulmonaryComponent.r_pa.q_out.pressure
+          "Pressure in pulmonary veins";
+        output Physiolibrary.Types.Pressure P_sv = SystemicComponent.port_b.pressure
+          "Pressure in systemic vena cava";
+
+        Physiolibrary.Types.Volume totalVolume=SystemicComponent.total_volume +
+            heartComponent.volume + pulmonaryComponent.volume
+          "For debug purposes, should be constant (up to numerical precision)";
+
+
+        output Modelica.SIunits.Length speedSegmentLength=
+            SystemicComponent.common_carotid_L48_A.l + SystemicComponent.common_carotid_L48_B.l
+             + SystemicComponent.common_carotid_L48_C.l + SystemicComponent.common_carotid_L48_D.l
+             + SystemicComponent.aortic_arch_C64.l + SystemicComponent.aortic_arch_C94.l
+             + SystemicComponent.thoracic_aorta_C96.l + SystemicComponent.thoracic_aorta_C100.l
+             + SystemicComponent.thoracic_aorta_C104.l + SystemicComponent.thoracic_aorta_C108.l
+             + SystemicComponent.thoracic_aorta_C112.l + SystemicComponent.abdominal_aorta_C114.l
+             + SystemicComponent.abdominal_aorta_C136.l + SystemicComponent.abdominal_aorta_C164.l
+             + SystemicComponent.abdominal_aorta_C176.l + SystemicComponent.abdominal_aorta_C188.l
+             + SystemicComponent.abdominal_aorta_C192.l + SystemicComponent.common_iliac_R216.l
+             + SystemicComponent.external_iliac_R220.l + SystemicComponent.femoral_R222.l
+          "Distance between carotid_L48 and femoral_R222 for calculating pulse wave propagation speed";
+
+        Modelica.SIunits.Length aortic_length=SystemicComponent.ascending_aorta_A.l
+             + SystemicComponent.ascending_aorta_B.l + SystemicComponent.ascending_aorta_C.l
+             + SystemicComponent.ascending_aorta_D.l + SystemicComponent.aortic_arch_C2.l
+             + SystemicComponent.aortic_arch_C46.l + SystemicComponent.aortic_arch_C64.l
+             + SystemicComponent.aortic_arch_C94.l + SystemicComponent.thoracic_aorta_C96.l
+             + SystemicComponent.thoracic_aorta_C100.l + SystemicComponent.thoracic_aorta_C104.l
+             + SystemicComponent.thoracic_aorta_C108.l + SystemicComponent.thoracic_aorta_C112.l
+             + SystemicComponent.abdominal_aorta_C114.l + SystemicComponent.abdominal_aorta_C136.l
+             + SystemicComponent.abdominal_aorta_C164.l + SystemicComponent.abdominal_aorta_C176.l
+             + SystemicComponent.abdominal_aorta_C188.l + SystemicComponent.abdominal_aorta_C192.l
+          "Length of the whole aorta for comparison to body size";
+
+
+      //     Modelica.SIunits.Weight weight(start = 70) "Body weight estimated from height and BMI";
+          Modelica.SIunits.Height height(start = 1.7)
+          "Body height, estimated from aortic length calculation. Have to eb manually set to settings due to computational procedure";
+          Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*settings.age+0.5409*(height*100)+0.3476*settings.BMI)
+          "Zemtsovskaja, HT 2019 for male subjects";
+          Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*settings.age+2.5*height*100)
+          "Rezai, Blood Press Monit 2013, for male subjects";
+
+        output Physiolibrary.Types.Pressure P_LA = heartComponent.mitralValve.q_in.pressure
+          "Pressure in left atria";
+        output Physiolibrary.Types.Volume V_la = heartComponent.la.volume
+          "Left atrium volume output";
+        output Physiolibrary.Types.VolumeFlowRate q_mv(displayUnit = "l/min") = heartComponent.mitralValve.volumeFlowRate
+          "Flow in mitral valve";
+        output Real SLo_max = max([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo])
+          "maximal Sarcomere length";
+        output Real SLo_min = min([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo])
+          "Minimal Sarcomere length";
+        output Physiolibrary.Types.Pressure P_MV_o
+          "Opening pressure of the mitral valve";
+        output Physiolibrary.Types.Pressure P_MV_c
+          "Closing pressure of the mitral valve";
+
+      // Get pressures and volumes of all tissues to check the characteristics
+      //   Physiolibrary.Types.Pressure tissuePressures[:] = {
+      //     SystemicComponent.celiac_trunk_C116.p,
+      //     SystemicComponent.renal_L166.p,
+      //     SystemicComponent.renal_R178.p,
+      //     SystemicComponent.internal_iliac_T1_R218.p,
+      //     SystemicComponent.profundus_T2_R224.p,
+      //     SystemicComponent.anterior_tibial_T3_R230.p,
+      //     SystemicComponent.posterior_tibial_T4_R236.p,
+      //     SystemicComponent.internal_iliac_T1_L196.p,
+      //     SystemicComponent.profundus_T2_L202.p,
+      //     SystemicComponent.anterior_tibial_T3_L208.p,
+      //     SystemicComponent.posterior_tibial_T4_L214.p,
+      //     SystemicComponent.ulnar_T2_R42.p,
+      //     SystemicComponent.radial_T1_R44.p,
+      //     SystemicComponent.ulnar_T2_L90.p,
+      //     SystemicComponent.radial_T1_L92.p,
+      //     SystemicComponent.internal_carotid_R8_C.p,
+      //     SystemicComponent.external_carotid_T2_R26.p,
+      //     SystemicComponent.internal_carotid_L50_C.p,
+      //     SystemicComponent.external_carotid_T2_L62.p,
+      //     SystemicComponent.vertebral_L2.p,
+      //     SystemicComponent.vertebral_R272.p,
+      //     SystemicComponent.splanchnic_tissue.p,
+      //     SystemicComponent.cardiac_tissue.p};
+      //
+      //     Physiolibrary.Types.Fraction tissue_relVol[:] = {
+      //     SystemicComponent.celiac_trunk_C116.volume/SystemicComponent.celiac_trunk_C116.V_n,
+      //     SystemicComponent.renal_L166.volume/SystemicComponent.renal_L166.V_n,
+      //     SystemicComponent.renal_R178.volume/SystemicComponent.renal_R178.V_n,
+      //     SystemicComponent.internal_iliac_T1_R218.volume/SystemicComponent.internal_iliac_T1_R218.V_n,
+      //     SystemicComponent.profundus_T2_R224.volume/SystemicComponent.profundus_T2_R224.V_n,
+      //     SystemicComponent.anterior_tibial_T3_R230.volume/SystemicComponent.anterior_tibial_T3_R230.V_n,
+      //     SystemicComponent.posterior_tibial_T4_R236.volume/SystemicComponent.posterior_tibial_T4_R236.V_n,
+      //     SystemicComponent.internal_iliac_T1_L196.volume/SystemicComponent.internal_iliac_T1_L196.V_n,
+      //     SystemicComponent.profundus_T2_L202.volume/SystemicComponent.profundus_T2_L202.V_n,
+      //     SystemicComponent.anterior_tibial_T3_L208.volume/SystemicComponent.anterior_tibial_T3_L208.V_n,
+      //     SystemicComponent.posterior_tibial_T4_L214.volume/SystemicComponent.posterior_tibial_T4_L214.V_n,
+      //     SystemicComponent.ulnar_T2_R42.volume/SystemicComponent.ulnar_T2_R42.V_n,
+      //     SystemicComponent.radial_T1_R44.volume/SystemicComponent.radial_T1_R44.V_n,
+      //     SystemicComponent.ulnar_T2_L90.volume/SystemicComponent.ulnar_T2_L90.V_n,
+      //     SystemicComponent.radial_T1_L92.volume/SystemicComponent.radial_T1_L92.V_n,
+      //     SystemicComponent.internal_carotid_R8_C.volume/SystemicComponent.internal_carotid_R8_C.V_n,
+      //     SystemicComponent.external_carotid_T2_R26.volume/SystemicComponent.external_carotid_T2_R26.V_n,
+      //     SystemicComponent.internal_carotid_L50_C.volume/SystemicComponent.internal_carotid_L50_C.V_n,
+      //     SystemicComponent.external_carotid_T2_L62.volume/SystemicComponent.external_carotid_T2_L62.V_n,
+      //     SystemicComponent.vertebral_L2.volume/SystemicComponent.vertebral_L2.V_n,
+      //     SystemicComponent.vertebral_R272.volume/SystemicComponent.vertebral_R272.V_n,
+      //     SystemicComponent.splanchnic_tissue.volume/SystemicComponent.splanchnic_tissue.V_n,
+      //     SystemicComponent.cardiac_tissue.volume/SystemicComponent.cardiac_tissue.V_n};
+        parameter Physiolibrary.Types.Time tau = 1e-3 "Integration costant for min-max calculations";
+
+      equation
+        der(brachial_pressure_systolic_i)*tau = max(brachial_pressure  - brachial_pressure_systolic_i, 0);
+        der(brachial_pressure_diastolic_i)*tau = min(brachial_pressure  - brachial_pressure_diastolic_i, 0);
+
+        when heartComponent.mitralValve.open then
+          P_MV_o = heartComponent.mitralValve.q_in.pressure;
+        end when;
+
+        when not heartComponent.mitralValve.open then
+          P_MV_c = heartComponent.mitralValve.q_in.pressure;
+        end when;
+
+        assert(abs(height - settings.height) < 0.01, "Please manually tune the height in settings so its in accordance with the one calculated from the aortic vessel length to a preceision of 1cm", AssertionLevel.warning);
+      //   settings.BMI = weight/(height^2);
+        // by putting these two "known" variables in equal, modelica can determine the appropriate height
+        aortic_length = aortic_length_calc;
+
+        der(brachial_pressure_int) = brachial_pressure;
+
+        when heartComponent.sa_node.beat then
+          brachial_pressure_mean = brachial_pressure_int/heartComponent.sa_node.t0_last;
+          reinit(brachial_pressure_int, 0);
+          brachial_pressure_systolic = (brachial_pressure_systolic_i);
+          brachial_pressure_diastolic = (brachial_pressure_diastolic_i);
+          reinit(brachial_pressure_systolic_i, brachial_pressure_mean);
+          reinit(brachial_pressure_diastolic_i,brachial_pressure_mean);
+        end when;
+
+      end partialCVS_outputs;
+
     end Auxiliary;
 
     package Obsolete
@@ -44608,26 +44740,27 @@ P_hs_plus_dist"),
             internal_iliac_T1_L196(UseExercise=true)),
           condHRPhi(disconnected=false),
           phi_fixed(
-            amplitude=settings.chi_phi-settings.phi0,
+            amplitude=settings.chi_phi*(1 - settings.phi0),
             rising(displayUnit="s") = 1,
             width(displayUnit="s") = 100,
             falling(displayUnit="s") = 0,
             period(displayUnit="s") = 160,
             nperiod=-1,
             offset=settings.phi0,
-            startTime=10),
+            startTime=5),
           condHeartPhi(disconnected=false),
           condTP_EP1(disconnected=true),
           condTP_PC(disconnected=true),
           condTP_IP(disconnected=true),
           useAutonomousPhi(y=false),
-          heartComponent(calciumMechanics(TR_maxAct(displayUnit="s"))));
+          heartComponent(calciumMechanics(TR_maxAct(displayUnit="s"))),
+          settings(HR_max=2.7333333333333, chi_phi=0.9));
         //CardiovascularSystem(
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           offset=0,
-          startTime=10,
-          height=1,
+          startTime=5,
+          height=settings.chi_phi,
           duration=1) constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
@@ -45824,6 +45957,208 @@ P_hs_plus_dist"),
               V0_col=8e-05,
               s=50)));
       end HFrEF_noBaro_AC;
+
+      model StarlingExperiment
+        extends Auxiliary.partialCVS_optimized(redeclare
+            Components.Subsystems.Systemic.Systemic_CutOff SystemicComponent(
+              UseBaroreflexOutput=true), useAutonomousPhi(y=false));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume postSystemicSetPressure(P=1333.22387415)
+          annotation (Placement(transformation(extent={{-100,50},{-80,70}})));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume venousSetPressure(P=1333.22387415)
+          annotation (Placement(transformation(extent={{80,-100},{60,-80}})));
+        Physiolibrary.Hydraulic.Components.Resistor outflowResistance(Resistance(
+              displayUnit="(mmHg.min)/l")=71994100.0)      annotation (Placement(
+              transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=90,
+              origin={-80,18})));
+        Physiolibrary.Hydraulic.Components.Resistor inflowResistance1(
+            Resistance(displayUnit="(mmHg.min)/l") = 799934.32449)
+                                                          annotation (Placement(
+              transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=270,
+              origin={24,-70})));
+        Physiolibrary.Hydraulic.Components.ElasticVessel elasticVessel(
+            Compliance=7.50062E-09)
+          annotation (Placement(transformation(extent={{-90,-28},{-70,-8}})));
+        Physiolibrary.Hydraulic.Sensors.PressureMeasure p_arterial
+          annotation (Placement(transformation(extent={{-86,-22},{-106,-2}})));
+        Physiolibrary.Hydraulic.Sensors.PressureMeasure p_venous
+          annotation (Placement(transformation(extent={{30,-60},{50,-40}})));
+
+
+      output Physiolibrary.Types.Pressure brachial_pressure=p_arterial.pressure;
+
+      output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
+
+      Real brachial_pressure_int "integration of pressure to find the true mean";
+        output Physiolibrary.Types.Pressure venous_pressure=p_venous.pressure;
+        output Physiolibrary.Types.VolumeFlowRate CO(displayUnit = "l/min") = heartComponent.aorticValve.CO;
+        output Physiolibrary.Types.Pressure P_LV = heartComponent.ventricles.P_LV
+          "Pressure in left ventricle";
+        output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
+      output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
+      output Physiolibrary.Types.Frequency HR = heartRate.HR;
+
+      Real CI = CO*1000*60/settings.BSA "Cardiac index l/min/m2";
+      Physiolibrary.Types.Power CardiacPowerBrachial = brachial_pressure_mean*CO;
+      Physiolibrary.Types.PowerPerMass CardiacPowerIndex = brachial_pressure_mean*CO/settings.BSA;
+        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
+        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        output Physiolibrary.Types.Pressure P_pa = pulmonaryComponent.r_pa.q_in.pressure
+          "Pressure in pulmonary arteries";
+        output Physiolibrary.Types.Pressure P_pv = pulmonaryComponent.r_pa.q_out.pressure
+          "Pressure in pulmonary veins";
+        output Physiolibrary.Types.Pressure P_sv = SystemicComponent.port_b.pressure
+          "Pressure in systemic vena cava";
+
+        Physiolibrary.Types.Volume heartPulmonaryVolume=
+            heartComponent.volume + pulmonaryComponent.volume;
+
+
+        output Physiolibrary.Types.Pressure P_LA = heartComponent.mitralValve.q_in.pressure
+          "Pressure in left atria";
+        output Physiolibrary.Types.Volume V_la = heartComponent.la.volume
+          "Left atrium volume output";
+        output Physiolibrary.Types.VolumeFlowRate q_mv(displayUnit = "l/min") = heartComponent.mitralValve.volumeFlowRate
+          "Flow in mitral valve";
+        output Real SLo_max = max([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo])
+          "maximal Sarcomere length";
+        output Real SLo_min = min([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo])
+          "Minimal Sarcomere length";
+        output Physiolibrary.Types.Pressure P_MV_o
+          "Opening pressure of the mitral valve";
+        output Physiolibrary.Types.Pressure P_MV_c
+          "Closing pressure of the mitral valve";
+
+      equation
+
+        when heartComponent.mitralValve.open then
+          P_MV_o = heartComponent.mitralValve.q_in.pressure;
+        end when;
+
+        when not heartComponent.mitralValve.open then
+          P_MV_c = heartComponent.mitralValve.q_in.pressure;
+        end when;
+
+        der(brachial_pressure_int) = brachial_pressure;
+
+        when heartComponent.sa_node.beat then
+          brachial_pressure_mean = brachial_pressure_int/heartComponent.sa_node.t0_last;
+          reinit(brachial_pressure_int, 0);
+        end when;
+
+
+        connect(inflowResistance1.q_out, venousSetPressure.y) annotation (Line(
+            points={{24,-80},{24,-90},{60,-90}},
+            color={0,0,0},
+            thickness=1));
+        connect(inflowResistance1.q_in, heartComponent.sv) annotation (Line(
+            points={{24,-60},{24,-16},{22,-16},{22,-16.4},{-16,-16.4}},
+            color={0,0,0},
+            thickness=1));
+        connect(elasticVessel.q_in, SystemicComponent.port_a) annotation (Line(
+            points={{-80,-18},{-64,-18},{-64,28},{-58,28}},
+            color={0,0,0},
+            thickness=1));
+        connect(outflowResistance.q_in, elasticVessel.q_in) annotation (Line(
+            points={{-80,8},{-80,-18}},
+            color={0,0,0},
+            thickness=1));
+        connect(postSystemicSetPressure.y, outflowResistance.q_out) annotation (Line(
+            points={{-80,60},{-80,28}},
+            color={0,0,0},
+            thickness=1));
+        connect(p_arterial.q_in, elasticVessel.q_in) annotation (Line(
+            points={{-92,-18},{-80,-18}},
+            color={0,0,0},
+            thickness=1));
+        connect(p_venous.q_in, heartComponent.sv) annotation (Line(
+            points={{36,-56},{24,-56},{24,-16},{22,-16},{22,-16.4},{-16,-16.4}},
+            color={0,0,0},
+            thickness=1));
+      end StarlingExperiment;
+
+      model StarlingExperiment_regulatedPA
+        "Starling experiment with regulated mean arterial pressure"
+        extends StarlingExperiment(outflowResistance(useConductanceInput=true),
+            venousSetPressure(P(displayUnit="Pa") = 133.22));
+        Modelica.Blocks.Continuous.LimPID PID(
+          controllerType=Modelica.Blocks.Types.SimpleController.PI,
+          k=100.0,
+          Ti=0.1,
+          yMax=1199410000,
+          yMin=1e-3,
+          initType=Modelica.Blocks.Types.Init.InitialOutput,
+          y_start=71994100)
+          annotation (Placement(transformation(extent={{-142,8},{-122,28}})));
+        Physiolibrary.Types.Constants.PressureConst pressure(k=11999.01486735)
+          annotation (Placement(transformation(extent={{-162,14},{-154,22}})));
+        Modelica.Blocks.Continuous.LowpassButterworth lowpassButterworth(
+          f=0.1,
+          initType=Modelica.Blocks.Types.Init.InitialOutput,
+          y_start=133.32*90)
+          annotation (Placement(transformation(extent={{-110,-26},{-130,-6}})));
+        Modelica.Blocks.Math.ContinuousMean continuousMean annotation (
+            Placement(transformation(extent={{-112,-64},{-132,-44}})));
+        Physiolibrary.Blocks.Math.Reciprocal rec
+          annotation (Placement(transformation(extent={{-112,8},{-92,28}})));
+      equation
+        connect(pressure.y, PID.u_s)
+          annotation (Line(points={{-153,18},{-144,18}}, color={0,0,127}));
+        connect(lowpassButterworth.u, p_arterial.pressure)
+          annotation (Line(points={{-108,-16},{-102,-16}}, color={0,0,127}));
+        connect(lowpassButterworth.y, PID.u_m) annotation (Line(points={{-131,
+                -16},{-146,-16},{-146,6},{-132,6}}, color={0,0,127}));
+        connect(continuousMean.u, p_arterial.pressure) annotation (Line(points=
+                {{-110,-54},{-106,-54},{-106,-34},{-102,-34},{-102,-16}}, color
+              ={0,0,127}));
+        connect(outflowResistance.cond, rec.y)
+          annotation (Line(points={{-86,18},{-91,18}}, color={0,0,127}));
+        connect(PID.y, rec.u)
+          annotation (Line(points={{-121,18},{-114,18}}, color={0,0,127}));
+      end StarlingExperiment_regulatedPA;
+
+      model SarnoffExperiment
+        extends CardiovascularSystem(useAutonomousPhi(y=false), settings(
+              baro_tau_s=10));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume venousSetPressure(P(
+              displayUnit="mmHg") = 2666.4477483)
+          annotation (Placement(transformation(extent={{80,-98},{60,-78}})));
+        Physiolibrary.Hydraulic.Components.Resistor inflowResistance1(
+            Resistance(displayUnit="(mmHg.min)/l") = 799934.32449)
+                                                          annotation (Placement(
+              transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=270,
+              origin={24,-68})));
+      equation
+        connect(inflowResistance1.q_out,venousSetPressure. y) annotation (Line(
+            points={{24,-78},{24,-88},{60,-88}},
+            color={0,0,0},
+            thickness=1));
+        connect(inflowResistance1.q_in, heartComponent.sv) annotation (Line(
+            points={{24,-58},{24,-16.4},{-16,-16.4}},
+            color={0,0,0},
+            thickness=1));
+        annotation (experiment(
+            StopTime=300,
+            Interval=0.01,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end SarnoffExperiment;
+
+      model SarnoffExperiment_HFrEF
+        extends SarnoffExperiment(
+        heartComponent(ventricles(LV_wall(functionFraction=0.5), SEP_wall(
+                  functionFraction=0.5))),
+          settings(
+            baro_tau_s=10,
+            heart_vntr_D_A_maxAct( displayUnit="Pa/m3") = 5000),
+          useAutonomousPhi(y=true));
+
+      end SarnoffExperiment_HFrEF;
     end Experiments;
 
     package ModelVariants
