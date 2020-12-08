@@ -1376,6 +1376,49 @@ type"),       Text(
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)));
       end Phi_factor;
+
+      block Stepping "Constant steps up"
+        extends Modelica.Blocks.Interfaces.SignalSource(y(start = offset));
+
+
+        parameter Modelica.SIunits.Time startTime = 0;
+        parameter Modelica.SIunits.Time interval = 1;
+
+        parameter Real offset = 0;
+        parameter Real increment = 1;
+        parameter Real maxVal = 10;
+
+        Modelica.SIunits.Time t0(start = -interval);
+      equation
+
+        when time > startTime and time > pre(t0) + interval then
+          y = min(pre(y) + increment, maxVal);
+          t0 = if y < maxVal then time else pre(t0);
+        end when;
+
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={Line(
+                  points={{-100,-72},{-26,-72},{-26,-26},{34,-26},{34,22},{100,22}},
+                  color={28,108,200})}),                               Diagram(
+              coordinateSystem(preserveAspectRatio=false), graphics={
+              Line(points={{-100,-74},{-26,-74},{-26,-28},{34,-28},{34,20},{100,20}},
+                  color={28,108,200}),
+              Text(
+                extent={{-26,-82},{24,-66}},
+                lineColor={28,108,200},
+                textString="offset"),
+              Text(
+                extent={{-18,-46},{32,-30}},
+                lineColor={28,108,200},
+                textString="interval"),
+              Text(
+                extent={{-86,-54},{-36,-38}},
+                lineColor={28,108,200},
+                textString="increment"),
+              Text(
+                extent={{48,24},{98,40}},
+                lineColor={28,108,200},
+                textString="maxVal")}));
+      end Stepping;
     end Signals;
 
     package Basic
@@ -8645,13 +8688,14 @@ Kalecky")}), experiment(
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=R_vlv)
             annotation (Placement(transformation(extent={{-6,50},{14,70}})));
-          replaceable Physiolibrary.Hydraulic.Components.IdealValveResistance
+          replaceable Basic.IdealValveResistanceWithMeasurements
             pulmonaryValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
             useChatteringProtection=true,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
-            _Ron=settings.heart_R_vlv) constrainedby
+            _Ron=settings.heart_R_vlv,
+            useCycleInput=true)        constrainedby
             Physiolibrary.Hydraulic.Components.IdealValveResistance(
             useChatteringProtection=true,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
@@ -8890,6 +8934,11 @@ Kalecky")}), experiment(
           connect(ventricles.phi_input, calciumMechanics.phiInput) annotation (
               Line(points={{10,0},{10,80},{-60,80},{-60,40},{-54,40}}, color={0,
                   0,127}));
+          connect(mitralValve.cardiac_cycle, pulmonaryValve.cardiac_cycle)
+            annotation (Line(
+              points={{40,-50},{40,70},{60,70}},
+              color={244,125,35},
+              thickness=0.5));
           annotation (Icon(graphics={Text(
                   extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
@@ -10411,7 +10460,7 @@ P_hs/2")}));
                 settings.phi0)*settings.tissues_eta_Rv)/(1 + exercise*settings.tissues_chi_R)
               "Venules resistance dependent on phi and exercise";
 
-          parameter Real k=C/(V_maxExponential - V_n)
+          parameter Real k=C/max(V_maxExponential - V_n, C)
             "For Pstras non-linear PV characteristics. For gamma = 0.0003750308";
           parameter Physiolibrary.Types.Volume V_maxExponential(nominal=1e-9) = V_n + (
             V_n - zpv)*settings.tissues_gamma
@@ -10460,7 +10509,17 @@ P_hs/2")}));
           outer Physiolibrary.Types.Fraction adenosine "adenosine dose fraction";
           Physiolibrary.Types.Pressure collapsingPressure "the vessel PV lower limb";
           parameter Real k_collapse = (V_maxExponential - V_n)/(C);
+
+          parameter Modelica.SIunits.Time tau_Pcap = 10;
+          Physiolibrary.Types.Pressure PCap_m;
         equation
+
+          if tau_Pcap > 0 then
+            der(PCap_m)*tau_Pcap = p_C - PCap_m;
+          else
+            PCap_m = p_C;
+          end if;
+
           assert(Rv_phi > 0, "The exercise_factor too high, driving the venous resistance negative!");
 
           der(volume) = (q_in -q_out);
@@ -10754,10 +10813,120 @@ P_hs_plus_dist"),
 </html>"));
         end Vein;
 
+        model Vein_linear
+          "Model of systemic vein element. Has resistance and one volume compartment with linear characteristics. It is the VP type in the Bond graph nomenclature."
+
+          extends Auxiliary.PartialSystemicVessel(
+            UseOuter_thoracic_pressure=false,
+            UseInertance=false,
+            zpv=l*Modelica.Constants.pi*((r*settings.veins_diameter_correction)^2)*
+                settings.experimental_zpv_factor,
+            R=8*settings.blood_mu*l/(Modelica.Constants.pi*((r*settings.veins_diameter_correction)
+                ^4)),
+            I=settings.blood_rho*l/(Modelica.Constants.pi*(r*settings.veins_diameter_correction)
+                ^2),
+            V_min=compliant_vessel.V_min,
+            volume(start=compliant_vessel.V0, fixed=true));
+
+        //   final parameter Boolean dynamicResistance = false "True for the resistance depends on actual radius based on actual volume";
+
+          parameter Boolean disableVenoconstriction=false   "Disable the phi effect on compliance on this particular element" annotation(choices(checkBox=true),Dialog(group = "Parameters"));
+
+          parameter Physiolibrary.Types.Pressure p_nom=settings.tissues_Pv_nom
+            "nominal venous pressure";
+
+          Physiolibrary.Types.Pressure p = compliant_vessel.p;
+
+        //   Physiolibrary.Types.HydraulicResistance R_dynamic=if not dynamicResistance
+        //        then R else 8*settings.blood_mu*l/(Modelica.Constants.pi*((
+        //       compliant_vessel.r^2/r*settings.veins_diameter_correction)^4))
+        //     "Resistance optionally dependent on actual vessel diameter";
+
+          Auxiliary.Compliances.compliance_linear compliant_vessel(
+            C=l*Modelica.Constants.pi*((r*settings.veins_diameter_correction)
+                    ^2)/settings.tissues_Pv_nom,
+            zpv=l*Modelica.Constants.pi*((
+                    r*settings.veins_diameter_correction)^2),
+            l=l,
+            p0=p_nom,
+            V=volume,
+            disableVenoconstriction=disableVenoconstriction,
+            phi = phi)
+            annotation (Placement(transformation(extent={{-50,32},{-30,52}})));
+
+        Physiolibrary.Types.Pressure p_vol = R_vis*q_diff;
+        Physiolibrary.Types.VolumeFlowRate q_diff = (q_in - q_out);
+        equation
+
+          if E == 0 or not UseInertance then
+        //       (p_in_hs -p_out_hs)/R_dynamic =q_out;
+              (p_in_hs -p_out_hs)/R =q_out;
+          else
+            // der(q_out) = (p_in_hs -p_out_hs-R_dynamic *q_out)/I;
+            der(q_out) = (p_in_hs -p_out_hs-R *q_out)/I;
+          end if;
+
+          der(volume) = q_diff;
+
+          if not settings.veins_ignoreViscosityResistance then
+              p_in_hs =p + p_vol + external_pressure_inside;
+            else
+              p_in_hs = p + external_pressure_inside;
+          end if;
+
+            annotation (Icon(graphics={ Rectangle(
+                  extent={{-110,32},{112,-30}},
+                  lineColor={0,0,0},
+                  lineThickness=0.5,
+                  visible=DynamicSelect(true, disableVenoconstriction)),
+                                       Line(
+                    points={{-78,0},{82,0}},
+                    color={28,108,200},
+                    arrow={Arrow.None,Arrow.Filled},
+                    thickness=1)}),                                        Diagram(
+                graphics={
+                Line(
+                  points={{-14,-1.91119e-16},{18,-1.22462e-15}},
+                  color={28,108,200},
+                  origin={-40,14},
+                  rotation=90),
+                Line(points={{-80,0},{80,0}}, color={28,108,200}),
+                Rectangle(
+                  extent={{16,6},{44,-6}},
+                  lineColor={28,108,200},
+                  fillColor={255,255,255},
+                  fillPattern=FillPattern.Solid),
+                Text(
+                  extent={{14,-6},{42,6}},
+                  lineColor={28,108,200},
+        textString= DynamicSelect("R&I", if settings.veins_ignoreViscosityResistance then "R" else "R&I")),
+                Text(
+                  extent={{-36,36},{-8,48}},
+                  lineColor={28,108,200},
+                  textString="C"),
+                Rectangle(
+                  extent={{-14,6},{14,-6}},
+                  lineColor={28,108,200},
+                  origin={-40,16},
+                  rotation=90,
+                  fillColor={255,255,255},
+                  fillPattern=FillPattern.Solid,
+                  visible = DynamicSelect(true, not settings.veins_ignoreViscosityResistance)),
+                Text(
+                  extent={{-14,-6},{14,6}},
+                  lineColor={28,108,200},
+                  origin={-40,16},
+                  rotation=90,
+                  textString="R_vis",
+                  visible = DynamicSelect(true, not settings.veins_ignoreViscosityResistance))}),
+            Documentation(info="<html>
+<p>Uses general attribute <span style=\"font-family: Courier New;\">veins_ignoreViscosityResistance </span>from settings whether to ignore viscosity resistance R_vis or to apply it. Our results so far suggests the viscoelastic properties of veins do not affect overall results.</p>
+</html>"));
+        end Vein_linear;
+
         model vp_vein_linear "Vein with linear PV characteristics"
             extends
-              ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Vein(
-                redeclare Auxiliary.Compliances.compliance_linear
+        Vein(   redeclare Auxiliary.Compliances.compliance_linear
                 compliant_vessel(C=l*Modelica.Constants.pi*((r*settings.veins_diameter_correction)
                     ^2)/settings.tissues_Pv_nom, zpv=l*Modelica.Constants.pi*((
                     r*settings.veins_diameter_correction)^2)));
@@ -14037,7 +14206,7 @@ P_hs_plus_dist"),
                 "Position calculation"));
           replaceable model Systemic_vein =
               ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Vein                          constrainedby
-            ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Vein;
+            ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Auxiliary.PartialSystemicVessel;
 
           replaceable model Systemic_tissue =
               ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Systemic_tissue
@@ -14057,6 +14226,9 @@ P_hs_plus_dist"),
           Parametrization.Parameters_Systemic_tunable systemicParameters(k_E=
                 settings.syst_art_k_E, height_actual=settings.height)
             annotation (Placement(transformation(extent={{0,-100},{20,-80}})));
+
+          parameter Boolean useCapillaryPressureOutputs = false;
+
           replaceable
             ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Ascending_aorta
             ascending_aorta_A constrainedby
@@ -14908,6 +15080,32 @@ P_hs_plus_dist"),
             annotation (Placement(transformation(extent={{-300,70},{-280,90}})));
           Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter1
             annotation (Placement(transformation(extent={{480,70},{500,90}})));
+          Physiolibrary.Types.RealIO.FractionOutput capillaryPressures[:] = {
+            celiac_trunk_C116.pCap_m,
+            renal_L166.pCap_m,
+            renal_R178.pCap_m,
+            internal_iliac_T1_R218.pCap_m,
+            profundus_T2_R224.pCap_m,
+            anterior_tibial_T3_R230.pCap_m,
+            posterior_tibial_T4_R236.pCap_m,
+            internal_iliac_T1_L196.pCap_m,
+            profundus_T2_L202.pCap_m,
+            anterior_tibial_T3_L208.pCap_m,
+            posterior_tibial_T4_L214.pCap_m,
+            ulnar_T2_R42.pCap_m,
+            radial_T1_R44.pCap_m,
+            ulnar_T2_L90.pCap_m,
+            radial_T1_L92.pCap_m,
+            internal_carotid_R8_C.pCap_m,
+            external_carotid_T2_R26.pCap_m,
+            internal_carotid_L50_C.pCap_m,
+            external_carotid_T2_L62.pCap_m,
+            vertebral_L2.pCap_m,
+            vertebral_R272.pCap_m,
+            splanchnic_tissue.pCap_m,
+            cardiac_tissue.pCap_m} if
+            useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
+                    336,202}}), iconTransformation(extent={{148,166},{168,186}})));
         equation
 
           connect(internal_iliac_T1_R218.port_b,internal_iliac_vein_T1_R30.port_a) annotation (Line(points={{55,29.5},
@@ -24001,8 +24199,8 @@ P_hs_plus_dist"),
 
         model Systemic_CutOff "A cut-off circulation with no throughput"
           extends partialSystemic;
-          Physiolibrary.Types.Constants.FractionConst fraction(k=0) annotation
-            (Placement(transformation(extent={{-276,144},{-268,152}})));
+          Physiolibrary.Types.Constants.FractionConst fraction(k=0) annotation (
+             Placement(transformation(extent={{-276,144},{-268,152}})));
           Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(
               SolutionFlow=0)
             annotation (Placement(transformation(extent={{34,70},{14,90}})));
@@ -24010,8 +24208,8 @@ P_hs_plus_dist"),
               SolutionFlow=0)
             annotation (Placement(transformation(extent={{72,70},{92,90}})));
         equation
-          connect(fraction.y, baroreflex_system.carotid_distention) annotation
-            (Line(points={{-267,148},{-252.5,148},{-252.5,158.667},{-238.667,
+          connect(fraction.y, baroreflex_system.carotid_distention) annotation (
+             Line(points={{-267,148},{-252.5,148},{-252.5,158.667},{-238.667,
                   158.667}}, color={0,0,127}));
           connect(fraction.y, baroreflex_system.aortic_distention) annotation (
               Line(points={{-267,148},{-252,148},{-252,145.333},{-238.667,
@@ -34900,7 +35098,7 @@ P_hs_plus_dist"),
             eta_vc=0.2201054,
             tissues_eta_Ra=1.245225,
             tissues_eta_C=0.5058013,
-            tissues_chi_R=20.72706,
+            tissues_chi_R=16.578623,
             tissue_chi_C=-0.37421876,
             V_PV_init=0,
             heart_atr_D_A=55215000,
@@ -35230,7 +35428,7 @@ P_hs_plus_dist"),
         output Physiolibrary.Types.Pressure P_LV = heartComponent.ventricles.P_LV
           "Pressure in left ventricle";
         output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
-        output Physiolibrary.Types.Fraction phi_baro=SystemicComponent.phi_baroreflex;
+        output Physiolibrary.Types.Fraction phi_baro= switch1.u1;
       output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
       output Physiolibrary.Types.Frequency HR = heartRate.HR;
 
@@ -44747,7 +44945,8 @@ P_hs_plus_dist"),
             nperiod=-1,
             offset=settings.phi0,
             startTime=5),
-          useAutonomousPhi(y=false));
+          useAutonomousPhi(y=false),
+          settings(chi_phi=1, tissues_chi_R(displayUnit="1") = 20));
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           offset=0,
@@ -44762,8 +44961,8 @@ P_hs_plus_dist"),
               points={{-79,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
         annotation (experiment(
             StopTime=90,
-            Interval=0.005,
-            Tolerance=1e-06,
+            Interval=0.01,
+            Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
       end CVS_exercise;
 
@@ -44823,9 +45022,45 @@ P_hs_plus_dist"),
           startTime=30,
           startValue=true)
           annotation (Placement(transformation(extent={{-56,-28},{-36,-8}})));
+                    Components.Signals.Stepping  Exercise(
+          startTime=40,
+          interval=40,
+          increment=0.1,
+          maxVal=1)
+          annotation (Placement(transformation(extent={{-56,0},{-36,20}})));
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)));
       end test;
+
+      model CVS_Exdercise_stepping
+        extends CVS_exercise(
+          SystemicComponent(UseBaroreflexOutput=false),
+          redeclare Components.Signals.Stepping Exercise(
+            startTime=40,
+            interval=40,
+            increment=0.1,
+            maxVal=0.9),
+          useAutonomousPhi(y=true),
+          phi_fixed(nperiod=0));
+        Modelica.Blocks.Math.Add add
+          annotation (Placement(transformation(extent={{-18,38},{2,58}})));
+        Modelica.Blocks.Math.Gain gain(k=0.75)
+          annotation (Placement(transformation(extent={{-66,32},{-46,52}})));
+      equation
+        connect(phi_fixed.y, add.u1) annotation (Line(points={{-35,84},{-32,84},
+                {-32,54},{-20,54}}, color={0,0,127}));
+        connect(add.y, switch1.u1) annotation (Line(points={{3,48},{10,48},{10,
+                70.2},{14.3,70.2}}, color={0,0,127}));
+        connect(Exercise.y, gain.u) annotation (Line(points={{-79,62},{-76,62},
+                {-76,42},{-68,42}}, color={0,0,127}));
+        connect(gain.y, add.u2)
+          annotation (Line(points={{-45,42},{-20,42}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=500,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end CVS_Exdercise_stepping;
     end Exercise;
 
     package Valsalva
@@ -45506,19 +45741,14 @@ P_hs_plus_dist"),
         end UseCase_valsalva;
 
         model UseCase_tiltable_linearVeins
-          extends UseCase_base(redeclare
-              Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt
-              SystemicComponent(
-              UseThoracic_PressureInput=true,
-              UsePhi_Input=true,
-              UseTiltInput=true,
-              UseExerciseInput=false,
-              redeclare model Systemic_vein =
-                  Components.Subsystems.Systemic.Vessel_modules.Obsolete.vp_vein_linear_leveled));
+          extends Auxiliary.partialCVS_optimized_ss(
+              SystemicComponent(UseTiltInput=true, redeclare model
+                Systemic_vein =
+                  ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Vein_linear));
 
           replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
             height=Modelica.Constants.pi/3,
-            startTime=10,
+            startTime=1000,
             duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
             annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
         equation
@@ -45534,7 +45764,7 @@ P_hs_plus_dist"),
 
       model UseCase_base
         "Base class for model use cases. Choose any version to extend from here to affect all use cases. Built for testing model variants for all use cases."
-        extends base;
+        extends CardiovascularSystem;
         // extends BreathingSignal;
         //  extends NoVenousValves;
         //  extends MaxVenousValves;
@@ -46104,8 +46334,8 @@ P_hs_plus_dist"),
         connect(lowpassButterworth.y, PID.u_m) annotation (Line(points={{-131,
                 -16},{-146,-16},{-146,6},{-132,6}}, color={0,0,127}));
         connect(continuousMean.u, p_arterial.pressure) annotation (Line(points=
-                {{-110,-54},{-106,-54},{-106,-34},{-102,-34},{-102,-16}}, color
-              ={0,0,127}));
+                {{-110,-54},{-106,-54},{-106,-34},{-102,-34},{-102,-16}}, color=
+               {0,0,127}));
         connect(outflowResistance.cond, rec.y)
           annotation (Line(points={{-86,18},{-91,18}}, color={0,0,127}));
         connect(PID.y, rec.u)
@@ -46113,9 +46343,10 @@ P_hs_plus_dist"),
       end StarlingExperiment_regulatedPA;
 
       model SarnoffExperiment
-        extends CardiovascularSystem(useAutonomousPhi(y=false), settings(
-              baro_tau_s=10));
-        Physiolibrary.Hydraulic.Sources.UnlimitedVolume venousSetPressure(P(
+        extends CardiovascularSystem(useAutonomousPhi(y=false), heartComponent(
+              pulmonaryValve(calculateAdditionalMetrics=true)));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume venousSetPressure(
+            usePressureInput=true,                                        P(
               displayUnit="mmHg") = 2666.4477483)
           annotation (Placement(transformation(extent={{80,-98},{60,-78}})));
         Physiolibrary.Hydraulic.Components.Resistor inflowResistance1(
@@ -46125,6 +46356,15 @@ P_hs_plus_dist"),
               extent={{-10,-10},{10,10}},
               rotation=270,
               origin={24,-68})));
+        Components.Signals.Stepping stepping(
+          offset=6*98,
+          startTime=30,
+          interval=30,
+          increment=6*98,
+          maxVal=35.9*98)
+          annotation (Placement(transformation(extent={{60,-70},{80,-50}})));
+
+         //    output Real leftWorkGmm =
       equation
         connect(inflowResistance1.q_out,venousSetPressure. y) annotation (Line(
             points={{24,-78},{24,-88},{60,-88}},
@@ -46134,6 +46374,8 @@ P_hs_plus_dist"),
             points={{24,-58},{24,-16.4},{-16,-16.4}},
             color={0,0,0},
             thickness=1));
+        connect(stepping.y, venousSetPressure.pressure) annotation (Line(points=
+               {{81,-60},{94,-60},{94,-88},{80,-88}}, color={0,0,127}));
         annotation (experiment(
             StopTime=300,
             Interval=0.01,
@@ -46144,13 +46386,26 @@ P_hs_plus_dist"),
       model SarnoffExperiment_HFrEF
         extends SarnoffExperiment(
         heartComponent(ventricles(LV_wall(functionFraction=0.5), SEP_wall(
-                  functionFraction=0.5))),
+                  functionFraction=0.75))),
           settings(
             baro_tau_s=10,
             heart_vntr_D_A_maxAct( displayUnit="Pa/m3") = 5000),
           useAutonomousPhi(y=true));
 
       end SarnoffExperiment_HFrEF;
+
+      model SarnoffExperiment_stepping
+        extends SarnoffExperiment(useAutonomousPhi(y=true));
+      end SarnoffExperiment_stepping;
+
+      model SarnoffExperiment_openPericardium
+        extends SarnoffExperiment(heartComponent(pericardium(enabled=false)),
+            stepping(
+            startTime=10,
+            interval=10,
+            increment=2*98,
+            maxVal=16*98));
+      end SarnoffExperiment_openPericardium;
     end Experiments;
 
     package ModelVariants
@@ -46167,6 +46422,11 @@ P_hs_plus_dist"),
                   9e-5)),
           aorticValve(useChatteringProtection=false, passableVariable(start=-1.2e4))));
     end CVS_OM;
+
+    model Water_flow
+      extends CardiovascularSystem(SystemicComponent(
+            useCapillaryPressureOutputs=true));
+    end Water_flow;
   annotation(preferredView="info",
   versionBuild=1,
   versionDate="2015-09-15",

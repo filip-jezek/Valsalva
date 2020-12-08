@@ -490,7 +490,7 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
     
 def run():
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
-    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
+    prepareIdent(overrideFracs=True, regenerateParamsFromDsin=False, storeOnlyOutputs = True)
     # writeInitStatesFromDsin()
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')
