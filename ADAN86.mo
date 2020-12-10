@@ -34941,16 +34941,6 @@ P_hs_plus_dist"),
     model CardiovascularSystem
       extends Auxiliary.partialCVS_optimized_ss(SystemicComponent(
             useCapillaryPressureOutputs=true));
-      extends Auxiliary.partialCVS_outputs(SystemicComponent(
-            useCapillaryPressureOutputs=true));
-    //   OptimizedValsalva( settings(
-    //       V_PV_init=5e-05,
-    //       heart_R_vlv(displayUnit="(dyn.s)/cm5") = 500000,
-    //       heart_drive_Tact=0.2,
-    //       heart_vntr_L0=1.9954,
-    //       syst_abd_P_th_ratio=0.8,
-    //       heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000,
-    //       baro_fsn=0.03625));
       Components.Subsystems.Lymphatic.SimplestLymphatic simplestLymphatic(nc=23)
         annotation (Placement(transformation(extent={{48,48},{68,68}})));
       Physiolibrary.Hydraulic.Sensors.PressureMeasure pressureMeasure
@@ -35213,7 +35203,7 @@ P_hs_plus_dist"),
       end partialCVS_optimized;
 
       model partialCVS_optimized_ss "Steady state initialization"
-        extends partialCVS_optimized(
+        extends partialCVS_outputs(
           heartComponent(
             tricuspidValve(open(start=true, fixed=true)),
             pulmonaryValve(open(start=false, fixed=true)),
