@@ -10443,7 +10443,7 @@ P_hs/2")}));
             fixed=settings.initByPressure)
             "Inner pressure of compliant chamber (after viscoelastic resistance)";
 
-          Physiolibrary.Types.Pressure p(nominal=1000) "middle pressure (at joint of viscous forces)";
+          Physiolibrary.Types.Pressure p(nominal=1000) "Transmural pressure (at joint of the viscous forces)";
 
           Physiolibrary.Types.Pressure p_in_hs=p_in   - P_hs/2 - P_hs_plus_dist
             "Arterial side pressure including the hydrostatic pressure";
@@ -10460,7 +10460,7 @@ P_hs/2")}));
                 settings.phi0)*settings.tissues_eta_Rv)/(1 + exercise*settings.tissues_chi_R)
               "Venules resistance dependent on phi and exercise";
 
-          parameter Real k=C/max(V_maxExponential - V_n, C)
+          parameter Real k=C/(V_maxExponential - V_n)
             "For Pstras non-linear PV characteristics. For gamma = 0.0003750308";
           parameter Physiolibrary.Types.Volume V_maxExponential(nominal=1e-9) = V_n + (
             V_n - zpv)*settings.tissues_gamma
@@ -10510,16 +10510,7 @@ P_hs/2")}));
           Physiolibrary.Types.Pressure collapsingPressure "the vessel PV lower limb";
           parameter Real k_collapse = (V_maxExponential - V_n)/(C);
 
-          parameter Modelica.SIunits.Time tau_Pcap = 10;
-          Physiolibrary.Types.Pressure PCap_m;
         equation
-
-          if tau_Pcap > 0 then
-            der(PCap_m)*tau_Pcap = p_C - PCap_m;
-          else
-            PCap_m = p_C;
-          end if;
-
           assert(Rv_phi > 0, "The exercise_factor too high, driving the venous resistance negative!");
 
           der(volume) = (q_in -q_out);
@@ -10531,15 +10522,15 @@ P_hs/2")}));
           end if;
 
           if UseInertance then
-            der(q_in) = (p_in_hs -p  - Ra_phi*q_in)/I;
+            der(q_in) = (p_in_hs -(p+ external_pressure_inside)  - Ra_phi*q_in)/I;
             der(q_out) = (p -p_out_hs  - Rv_phi*(q_out - q_mc))/I_e;
           else
-            0 =p_in_hs  -p  - Ra_phi*(q_in - q_mc);
+            0 =p_in_hs  -(p + external_pressure_inside)  - Ra_phi*(q_in - q_mc);
             // jsut a different form of (u - u_out_hs)/Rv + q_mc = v_out;
             0 = (p -p_out_hs  - Rv_phi*(q_out - q_mc));
           end if;
 
-          p =p_C + R_vis*(q_in - q_out) + external_pressure_inside;
+          p =p_C + R_vis*(q_in - q_out);
 
           collapsingPressure = k_collapse *log(volume/V_us);
 
@@ -15080,30 +15071,30 @@ P_hs_plus_dist"),
             annotation (Placement(transformation(extent={{-300,70},{-280,90}})));
           Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter1
             annotation (Placement(transformation(extent={{480,70},{500,90}})));
-          Physiolibrary.Types.RealIO.FractionOutput capillaryPressures[:] = {
-            celiac_trunk_C116.pCap_m,
-            renal_L166.pCap_m,
-            renal_R178.pCap_m,
-            internal_iliac_T1_R218.pCap_m,
-            profundus_T2_R224.pCap_m,
-            anterior_tibial_T3_R230.pCap_m,
-            posterior_tibial_T4_R236.pCap_m,
-            internal_iliac_T1_L196.pCap_m,
-            profundus_T2_L202.pCap_m,
-            anterior_tibial_T3_L208.pCap_m,
-            posterior_tibial_T4_L214.pCap_m,
-            ulnar_T2_R42.pCap_m,
-            radial_T1_R44.pCap_m,
-            ulnar_T2_L90.pCap_m,
-            radial_T1_L92.pCap_m,
-            internal_carotid_R8_C.pCap_m,
-            external_carotid_T2_R26.pCap_m,
-            internal_carotid_L50_C.pCap_m,
-            external_carotid_T2_L62.pCap_m,
-            vertebral_L2.pCap_m,
-            vertebral_R272.pCap_m,
-            splanchnic_tissue.pCap_m,
-            cardiac_tissue.pCap_m} if
+          Physiolibrary.Types.RealIO.PressureOutput capillaryPressures[:] = {
+            celiac_trunk_C116.p,
+            renal_L166.p,
+            renal_R178.p,
+            internal_iliac_T1_R218.p,
+            profundus_T2_R224.p,
+            anterior_tibial_T3_R230.p,
+            posterior_tibial_T4_R236.p,
+            internal_iliac_T1_L196.p,
+            profundus_T2_L202.p,
+            anterior_tibial_T3_L208.p,
+            posterior_tibial_T4_L214.p,
+            ulnar_T2_R42.p,
+            radial_T1_R44.p,
+            ulnar_T2_L90.p,
+            radial_T1_L92.p,
+            internal_carotid_R8_C.p,
+            external_carotid_T2_R26.p,
+            internal_carotid_L50_C.p,
+            external_carotid_T2_L62.p,
+            vertebral_L2.p,
+            vertebral_R272.p,
+            splanchnic_tissue.p,
+            cardiac_tissue.p} if
             useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
                     336,202}}), iconTransformation(extent={{148,166},{168,186}})));
         equation
@@ -24241,6 +24232,57 @@ P_hs_plus_dist"),
                   thickness=0.5)}));
         end Systemic_CutOff;
       end Systemic;
+
+      package Lymphatic
+        model SimplestLymphatic
+          parameter Integer nc = 0 "number of capillaries";
+           // annotation(Dialog(connectorSizing = true));
+           Physiolibrary.Types.RealIO.PressureInput capillaryPressures[nc] annotation (Placement(transformation(extent={{-102,
+                     -10},{-82,10}}),
+                                 iconTransformation(extent={{-100,-10},{-80,10}})));
+
+        //   Real capillaryPressures[:] = {1412, 12412};
+          Physiolibrary.Types.Pressure capillaryPressures_mean[nc](each start = 2664);
+          Physiolibrary.Types.VolumeFlowRate J1[nc];
+          Physiolibrary.Types.VolumeFlowRate J2 = k2*(p_int -  p_lymph);
+          Physiolibrary.Types.VolumeFlowRate J3 = k3*(p_lymph -  p_vc_mean);
+
+          parameter Modelica.SIunits.Time tau = 10;
+          parameter Physiolibrary.Types.Pressure deltaPi=1066.57909932;
+
+          Physiolibrary.Types.HydraulicConductance k1;
+          Physiolibrary.Types.HydraulicConductance k2;
+          Physiolibrary.Types.HydraulicConductance k3;
+
+          parameter Physiolibrary.Types.Pressure p_int(displayUnit="mmHg")=1333.22387415;
+          parameter Physiolibrary.Types.Pressure p_lymph(displayUnit="mmHg")=799.93432449;
+          Physiolibrary.Types.Pressure p_vc_mean( start = 666);
+
+          Physiolibrary.Types.RealIO.PressureInput p_vc annotation (Placement(transformation(extent={{-102,
+                    -92},{-82,-72}}),
+                                iconTransformation(extent={{-100,-100},{-80,-80}})));
+
+          parameter Physiolibrary.Types.VolumeFlowRate lymph_flow=5.787037037037e-08
+                                                                      "normal Lymphatic flow per day";
+        equation
+          sum(J1) = J2;
+          J2 = J3;
+
+          lymph_flow = J3;
+
+          for i in 1:nc loop
+            k1*(capillaryPressures_mean[i] - deltaPi - p_int) = J1[i];
+          der(capillaryPressures_mean[i])*tau = capillaryPressures[i] -
+            capillaryPressures_mean[i];
+          end for;
+
+
+          der(p_vc_mean)*tau = p_vc - p_vc_mean;
+
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                coordinateSystem(preserveAspectRatio=false)));
+        end SimplestLymphatic;
+      end Lymphatic;
     end Subsystems;
 
     package Icons
@@ -34897,8 +34939,10 @@ P_hs_plus_dist"),
   package SystemicTree
 
     model CardiovascularSystem
-      extends Auxiliary.partialCVS_optimized_ss;
-      extends Auxiliary.partialCVS_outputs;
+      extends Auxiliary.partialCVS_optimized_ss(SystemicComponent(
+            useCapillaryPressureOutputs=true));
+      extends Auxiliary.partialCVS_outputs(SystemicComponent(
+            useCapillaryPressureOutputs=true));
     //   OptimizedValsalva( settings(
     //       V_PV_init=5e-05,
     //       heart_R_vlv(displayUnit="(dyn.s)/cm5") = 500000,
@@ -34907,6 +34951,19 @@ P_hs_plus_dist"),
     //       syst_abd_P_th_ratio=0.8,
     //       heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000,
     //       baro_fsn=0.03625));
+      Components.Subsystems.Lymphatic.SimplestLymphatic simplestLymphatic(nc=23)
+        annotation (Placement(transformation(extent={{48,48},{68,68}})));
+      Physiolibrary.Hydraulic.Sensors.PressureMeasure pressureMeasure
+        annotation (Placement(transformation(extent={{16,34},{36,54}})));
+    equation
+      connect(SystemicComponent.capillaryPressures, simplestLymphatic.capillaryPressures)
+        annotation (Line(points={{-10.2,45.6},{-10.2,58},{49,58}}, color={0,0,127}));
+      connect(pressureMeasure.q_in, SystemicComponent.port_b) annotation (Line(
+          points={{22,38},{18,38},{18,28}},
+          color={0,0,0},
+          thickness=1));
+      connect(pressureMeasure.pressure, simplestLymphatic.p_vc) annotation (Line(
+            points={{32,40},{38,40},{38,49},{49,49}}, color={0,0,127}));
     end CardiovascularSystem;
 
     package Auxiliary
@@ -44945,8 +45002,7 @@ P_hs_plus_dist"),
             nperiod=-1,
             offset=settings.phi0,
             startTime=5),
-          useAutonomousPhi(y=false),
-          settings(chi_phi=1, tissues_chi_R(displayUnit="1") = 20));
+          useAutonomousPhi(y=false));
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           offset=0,
@@ -46342,7 +46398,7 @@ P_hs_plus_dist"),
           annotation (Line(points={{-121,18},{-114,18}}, color={0,0,127}));
       end StarlingExperiment_regulatedPA;
 
-      model SarnoffExperiment
+      model SarnoffExperiment_RH
         extends CardiovascularSystem(useAutonomousPhi(y=false), heartComponent(
               pulmonaryValve(calculateAdditionalMetrics=true)));
         Physiolibrary.Hydraulic.Sources.UnlimitedVolume venousSetPressure(
@@ -46381,10 +46437,10 @@ P_hs_plus_dist"),
             Interval=0.01,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
-      end SarnoffExperiment;
+      end SarnoffExperiment_RH;
 
       model SarnoffExperiment_HFrEF
-        extends SarnoffExperiment(
+        extends SarnoffExperiment_RH(
         heartComponent(ventricles(LV_wall(functionFraction=0.5), SEP_wall(
                   functionFraction=0.75))),
           settings(
@@ -46395,17 +46451,68 @@ P_hs_plus_dist"),
       end SarnoffExperiment_HFrEF;
 
       model SarnoffExperiment_stepping
-        extends SarnoffExperiment(useAutonomousPhi(y=true));
+        extends SarnoffExperiment_RH(
+                                  useAutonomousPhi(y=true));
       end SarnoffExperiment_stepping;
 
       model SarnoffExperiment_openPericardium
-        extends SarnoffExperiment(heartComponent(pericardium(enabled=false)),
+        extends SarnoffExperiment_RH(
+                                  heartComponent(pericardium(enabled=false)),
             stepping(
             startTime=10,
             interval=10,
             increment=2*98,
             maxVal=16*98));
       end SarnoffExperiment_openPericardium;
+
+      model SarnoffExperiment_LH
+        extends CardiovascularSystem(useAutonomousPhi(y=false), heartComponent(
+              pulmonaryValve(calculateAdditionalMetrics=true), pericardium(enabled=false)));
+        Physiolibrary.Hydraulic.Sources.UnlimitedVolume venousSetPressure(
+            usePressureInput=false, P(displayUnit="mmHg") = 266.64477483)
+          annotation (Placement(transformation(extent={{80,-98},{60,-78}})));
+        Physiolibrary.Hydraulic.Components.Resistor inflowResistance1(
+            Resistance(displayUnit="(mmHg.min)/l") = 799934.32449)
+                                                          annotation (Placement(
+              transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=270,
+              origin={24,-68})));
+        Components.Signals.Stepping stepping(
+          offset=6*98,
+          startTime=30,
+          interval=30,
+          increment=6*98,
+          maxVal=35.9*98)
+          annotation (Placement(transformation(extent={{60,-70},{80,-50}})));
+
+         //    output Real leftWorkGmm =
+
+        Physiolibrary.Types.Pressure p_la_avg;
+        Physiolibrary.Types.Pressure p_ra_avg;
+
+        parameter Real P_avg_tau = 5;
+      equation
+
+        der(p_la_avg)*P_avg_tau = heartComponent.la.port_a.pressure - p_la_avg;
+        der(p_ra_avg)*P_avg_tau = heartComponent.ra.port_a.pressure - p_ra_avg;
+
+        connect(inflowResistance1.q_out,venousSetPressure. y) annotation (Line(
+            points={{24,-78},{24,-88},{60,-88}},
+            color={0,0,0},
+            thickness=1));
+        connect(inflowResistance1.q_in, heartComponent.sv) annotation (Line(
+            points={{24,-58},{24,-16.4},{-16,-16.4}},
+            color={0,0,0},
+            thickness=1));
+        connect(stepping.y, venousSetPressure.pressure) annotation (Line(points=
+               {{81,-60},{94,-60},{94,-88},{80,-88}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=40,
+            Interval=0.01,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end SarnoffExperiment_LH;
     end Experiments;
 
     package ModelVariants
