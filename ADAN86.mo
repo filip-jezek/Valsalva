@@ -10523,11 +10523,11 @@ P_hs/2")}));
 
           if UseInertance then
             der(q_in) = (p_in_hs -(p+ external_pressure_inside)  - Ra_phi*q_in)/I;
-            der(q_out) = (p -p_out_hs  - Rv_phi*(q_out - q_mc))/I_e;
+            der(q_out) = (p+ external_pressure_inside -p_out_hs  - Rv_phi*(q_out - q_mc))/I_e;
           else
             0 =p_in_hs  -(p + external_pressure_inside)  - Ra_phi*(q_in - q_mc);
             // jsut a different form of (u - u_out_hs)/Rv + q_mc = v_out;
-            0 = (p -p_out_hs  - Rv_phi*(q_out - q_mc));
+            0 = (p+ external_pressure_inside -p_out_hs  - Rv_phi*(q_out - q_mc));
           end if;
 
           p =p_C + R_vis*(q_in - q_out);
@@ -46503,6 +46503,19 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end SarnoffExperiment_LH;
+
+      model ArterialStiffening_fastBaro
+        extends CardiovascularSystem(settings(syst_art_k_E=0.8, baro_tau_s=10));
+      end ArterialStiffening_fastBaro;
+
+      model ArterialStiffening_NoBaro
+        extends ArterialStiffening_fastBaro(useAutonomousPhi(y=false));
+        annotation (experiment(
+            StopTime=20,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end ArterialStiffening_NoBaro;
     end Experiments;
 
     package ModelVariants

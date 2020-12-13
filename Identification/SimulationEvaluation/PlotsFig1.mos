@@ -35,7 +35,7 @@ ExportPlotAsImage("figC2.svg", id=6)
 
 // FIG D: valsalva
 createPlot(id=7, position={100, 100, 600, 433}, y={"brachial_pressure", "brachial_pressure_mean", "HR", "SV", "brachial_pressure_systolic", "brachial_pressure_diastolic"}, range={0.0, 60.0, 30.0, 150.0}, erase=false, autoscale=false, grid=false, filename="CVS_valsalva.mat", legendLocation=5, legendHorizontal=false, legends={"BP [mmHg]", "BP mean [mmHg]", "", "", "", ""}, colors={{28,108,200}, {238,46,47}, {0,140,72}, {217,67,180}, {0,0,0}, {162,29,33}}, displayUnits={"mmHg", "mmHg", "1/min", "ml", "mmHg", "mmHg"});
-ExportPlotAsImage("figD.svg", id=6)
+ExportPlotAsImage("figD.svg", id=7)
  
 // FIG E: hemorhage
 createPlot(id=8, position={100, 100, 600, 433}, y={"brachial_pressure", "brachial_pressure_systolic", "brachial_pressure_diastolic",
