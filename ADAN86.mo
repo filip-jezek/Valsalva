@@ -48165,72 +48165,687 @@ P_hs_plus_dist"),
       end BreathingSignal;
 
       package Impairments
-        model imp_base
-          extends CardiovascularSystem;
-        end imp_base;
 
-        model imp_noVc
-          extends imp_base(settings(veins_UsePhiEffect=false));
-        end imp_noVc;
+          package Normal
+            model imp_base
+                extends CVS_Normal;
+            end imp_base;
 
-        model imp_noVcTc
-          extends imp_base(settings(
-              syst_art_UseVasoconstrictionEffect=true,
-              tissues_eta_Ra=0,
-              tissues_eta_C=0,
-              veins_UsePhiEffect=false));
-        end imp_noVcTc;
+            model imp_noVc
+                extends imp_base(settings(veins_UsePhiEffect=false));
+            end imp_noVc;
 
-        model imp_noBaro
-          extends imp_base(useAutonomousPhi(y=false));
-        end imp_noBaro;
+            model imp_noVcLin
+                extends imp_base(settings(veins_UseNonLinearVeins=false,
+                                          veins_UsePhiEffect=false));
+            end imp_noVcLin;
 
-      model imp_noBaroLinV
-        extends imp_noBaro(
-            settings(veins_UseNonLinearVeins=false));
-      end imp_noBaroLinV;
+            model imp_noVcTc
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTc;
 
-      model imp_noBaro_linVT
-        extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
-      end imp_noBaro_linVT;
+            model imp_noVcTcLin
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTcLin;
 
-      model imp_noValves
-        extends imp_base(SystemicComponent(
-              brachiocephalic_vein_R90(LimitBackflow=false),
-              brachiocephalic_vein_L124(LimitBackflow=false),
-              common_iliac_vein_R26(LimitBackflow=false),
-              common_iliac_vein_L56(LimitBackflow=false)));
-      end imp_noValves;
+            model imp_noBaro
+                extends imp_base(useAutonomousPhi(y=false));
+            end imp_noBaro;
 
-      model imp_arSt
-        extends imp_base(settings(syst_art_k_E=0.8));
-      end imp_arSt;
+            model imp_noBaroLinV
+              extends imp_noBaro(
+                  settings(veins_UseNonLinearVeins=false));
+            end imp_noBaroLinV;
 
-      model imp_avRe
-        extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
-      end imp_avRe;
+            model imp_noBaro_linVT
+              extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
+            end imp_noBaro_linVT;
 
-      model imp_avSt
-        extends imp_base(heartComponent(aorticValve(_Ron(
-                  displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
-              baro_tau_s=10));
+            model imp_noValves
+              extends imp_base(SystemicComponent(
+                    brachiocephalic_vein_R90(LimitBackflow=false),
+                    brachiocephalic_vein_L124(LimitBackflow=false),
+                    common_iliac_vein_R26(LimitBackflow=false),
+                    common_iliac_vein_L56(LimitBackflow=false)));
+            end imp_noValves;
 
-      Physiolibrary.Types.Pressure p_in(start = 13e3);
-      Physiolibrary.Types.Pressure p_out(start = 13e3);
-      Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-      parameter Modelica.SIunits.Time tau_avg = 10;
-      equation
-          // integrate only during open valve
-          if heartComponent.aorticValve.open then
-          der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
-          der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
-          else
-            der(p_in) = 0;
-            der(p_out) = 0;
-          end if;
-      end imp_avSt;
+            model imp_arSt
+              extends imp_base(settings(syst_art_k_E=0.8));
+            end imp_arSt;
 
+            model imp_avRe
+              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
+            end imp_avRe;
 
+            model imp_avSt
+              extends imp_base(heartComponent(aorticValve(_Ron(
+                        displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
+                    baro_tau_s=10));
+
+            Physiolibrary.Types.Pressure p_in(start = 13e3);
+            Physiolibrary.Types.Pressure p_out(start = 13e3);
+            Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
+            parameter Modelica.SIunits.Time tau_avg = 10;
+            equation
+                // integrate only during open valve
+                if heartComponent.aorticValve.open then
+                der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
+                der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
+                else
+                  der(p_in) = 0;
+                  der(p_out) = 0;
+                end if;
+            end imp_avSt;
+
+          end Normal;
+
+          package NormalNoBaro
+            model imp_base
+                extends CVS_Normal;
+            end imp_base;
+
+            model imp_noVc
+                extends imp_base(settings(veins_UsePhiEffect=false));
+            end imp_noVc;
+
+            model imp_noVcLin
+                extends imp_base(settings(veins_UseNonLinearVeins=false,
+                                          veins_UsePhiEffect=false));
+            end imp_noVcLin;
+
+            model imp_noVcTc
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTc;
+
+            model imp_noVcTcLin
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTcLin;
+
+            model imp_noBaro
+                extends imp_base(useAutonomousPhi(y=false));
+            end imp_noBaro;
+
+            model imp_noBaroLinV
+              extends imp_noBaro(
+                  settings(veins_UseNonLinearVeins=false));
+            end imp_noBaroLinV;
+
+            model imp_noBaro_linVT
+              extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
+            end imp_noBaro_linVT;
+
+            model imp_noValves
+              extends imp_base(SystemicComponent(
+                    brachiocephalic_vein_R90(LimitBackflow=false),
+                    brachiocephalic_vein_L124(LimitBackflow=false),
+                    common_iliac_vein_R26(LimitBackflow=false),
+                    common_iliac_vein_L56(LimitBackflow=false)));
+            end imp_noValves;
+
+            model imp_arSt
+              extends imp_base(settings(syst_art_k_E=0.8));
+            end imp_arSt;
+
+            model imp_avRe
+              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
+            end imp_avRe;
+
+            model imp_avSt
+              extends imp_base(heartComponent(aorticValve(_Ron(
+                        displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
+                    baro_tau_s=10));
+
+            Physiolibrary.Types.Pressure p_in(start = 13e3);
+            Physiolibrary.Types.Pressure p_out(start = 13e3);
+            Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
+            parameter Modelica.SIunits.Time tau_avg = 10;
+            equation
+                // integrate only during open valve
+                if heartComponent.aorticValve.open then
+                der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
+                der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
+                else
+                  der(p_in) = 0;
+                  der(p_out) = 0;
+                end if;
+            end imp_avSt;
+
+          end NormalNoBaro;
+
+          package TiltAuto
+            model imp_base
+                extends CVS_Normal;
+            end imp_base;
+
+            model imp_noVc
+                extends imp_base(settings(veins_UsePhiEffect=false));
+            end imp_noVc;
+
+            model imp_noVcLin
+                extends imp_base(settings(veins_UseNonLinearVeins=false,
+                                          veins_UsePhiEffect=false));
+            end imp_noVcLin;
+
+            model imp_noVcTc
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTc;
+
+            model imp_noVcTcLin
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTcLin;
+
+            model imp_noBaro
+                extends imp_base(useAutonomousPhi(y=false));
+            end imp_noBaro;
+
+            model imp_noBaroLinV
+              extends imp_noBaro(
+                  settings(veins_UseNonLinearVeins=false));
+            end imp_noBaroLinV;
+
+            model imp_noBaro_linVT
+              extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
+            end imp_noBaro_linVT;
+
+            model imp_noValves
+              extends imp_base(SystemicComponent(
+                    brachiocephalic_vein_R90(LimitBackflow=false),
+                    brachiocephalic_vein_L124(LimitBackflow=false),
+                    common_iliac_vein_R26(LimitBackflow=false),
+                    common_iliac_vein_L56(LimitBackflow=false)));
+            end imp_noValves;
+
+            model imp_arSt
+              extends imp_base(settings(syst_art_k_E=0.8));
+            end imp_arSt;
+
+            model imp_avRe
+              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
+            end imp_avRe;
+
+            model imp_avSt
+              extends imp_base(heartComponent(aorticValve(_Ron(
+                        displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
+                    baro_tau_s=10));
+
+            Physiolibrary.Types.Pressure p_in(start = 13e3);
+            Physiolibrary.Types.Pressure p_out(start = 13e3);
+            Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
+            parameter Modelica.SIunits.Time tau_avg = 10;
+            equation
+                // integrate only during open valve
+                if heartComponent.aorticValve.open then
+                der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
+                der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
+                else
+                  der(p_in) = 0;
+                  der(p_out) = 0;
+                end if;
+            end imp_avSt;
+
+          end TiltAuto;
+
+          package TiltNoBaro
+            model imp_base
+                extends CVS_Normal;
+            end imp_base;
+
+            model imp_noVc
+                extends imp_base(settings(veins_UsePhiEffect=false));
+            end imp_noVc;
+
+            model imp_noVcLin
+                extends imp_base(settings(veins_UseNonLinearVeins=false,
+                                          veins_UsePhiEffect=false));
+            end imp_noVcLin;
+
+            model imp_noVcTc
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTc;
+
+            model imp_noVcTcLin
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTcLin;
+
+            model imp_noBaro
+                extends imp_base(useAutonomousPhi(y=false));
+            end imp_noBaro;
+
+            model imp_noBaroLinV
+              extends imp_noBaro(
+                  settings(veins_UseNonLinearVeins=false));
+            end imp_noBaroLinV;
+
+            model imp_noBaro_linVT
+              extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
+            end imp_noBaro_linVT;
+
+            model imp_noValves
+              extends imp_base(SystemicComponent(
+                    brachiocephalic_vein_R90(LimitBackflow=false),
+                    brachiocephalic_vein_L124(LimitBackflow=false),
+                    common_iliac_vein_R26(LimitBackflow=false),
+                    common_iliac_vein_L56(LimitBackflow=false)));
+            end imp_noValves;
+
+            model imp_arSt
+              extends imp_base(settings(syst_art_k_E=0.8));
+            end imp_arSt;
+
+            model imp_avRe
+              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
+            end imp_avRe;
+
+            model imp_avSt
+              extends imp_base(heartComponent(aorticValve(_Ron(
+                        displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
+                    baro_tau_s=10));
+
+            Physiolibrary.Types.Pressure p_in(start = 13e3);
+            Physiolibrary.Types.Pressure p_out(start = 13e3);
+            Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
+            parameter Modelica.SIunits.Time tau_avg = 10;
+            equation
+                // integrate only during open valve
+                if heartComponent.aorticValve.open then
+                der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
+                der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
+                else
+                  der(p_in) = 0;
+                  der(p_out) = 0;
+                end if;
+            end imp_avSt;
+
+          end TiltNoBaro;
+
+          package VMAuto
+            model imp_base
+                extends CVS_Normal;
+            end imp_base;
+
+            model imp_noVc
+                extends imp_base(settings(veins_UsePhiEffect=false));
+            end imp_noVc;
+
+            model imp_noVcLin
+                extends imp_base(settings(veins_UseNonLinearVeins=false,
+                                          veins_UsePhiEffect=false));
+            end imp_noVcLin;
+
+            model imp_noVcTc
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTc;
+
+            model imp_noVcTcLin
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTcLin;
+
+            model imp_noBaro
+                extends imp_base(useAutonomousPhi(y=false));
+            end imp_noBaro;
+
+            model imp_noBaroLinV
+              extends imp_noBaro(
+                  settings(veins_UseNonLinearVeins=false));
+            end imp_noBaroLinV;
+
+            model imp_noBaro_linVT
+              extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
+            end imp_noBaro_linVT;
+
+            model imp_noValves
+              extends imp_base(SystemicComponent(
+                    brachiocephalic_vein_R90(LimitBackflow=false),
+                    brachiocephalic_vein_L124(LimitBackflow=false),
+                    common_iliac_vein_R26(LimitBackflow=false),
+                    common_iliac_vein_L56(LimitBackflow=false)));
+            end imp_noValves;
+
+            model imp_arSt
+              extends imp_base(settings(syst_art_k_E=0.8));
+            end imp_arSt;
+
+            model imp_avRe
+              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
+            end imp_avRe;
+
+            model imp_avSt
+              extends imp_base(heartComponent(aorticValve(_Ron(
+                        displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
+                    baro_tau_s=10));
+
+            Physiolibrary.Types.Pressure p_in(start = 13e3);
+            Physiolibrary.Types.Pressure p_out(start = 13e3);
+            Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
+            parameter Modelica.SIunits.Time tau_avg = 10;
+            equation
+                // integrate only during open valve
+                if heartComponent.aorticValve.open then
+                der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
+                der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
+                else
+                  der(p_in) = 0;
+                  der(p_out) = 0;
+                end if;
+            end imp_avSt;
+
+          end VMAuto;
+
+          package VMNoBaro
+            model imp_base
+                extends CVS_Normal;
+            end imp_base;
+
+            model imp_noVc
+                extends imp_base(settings(veins_UsePhiEffect=false));
+            end imp_noVc;
+
+            model imp_noVcLin
+                extends imp_base(settings(veins_UseNonLinearVeins=false,
+                                          veins_UsePhiEffect=false));
+            end imp_noVcLin;
+
+            model imp_noVcTc
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTc;
+
+            model imp_noVcTcLin
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTcLin;
+
+            model imp_noBaro
+                extends imp_base(useAutonomousPhi(y=false));
+            end imp_noBaro;
+
+            model imp_noBaroLinV
+              extends imp_noBaro(
+                  settings(veins_UseNonLinearVeins=false));
+            end imp_noBaroLinV;
+
+            model imp_noBaro_linVT
+              extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
+            end imp_noBaro_linVT;
+
+            model imp_noValves
+              extends imp_base(SystemicComponent(
+                    brachiocephalic_vein_R90(LimitBackflow=false),
+                    brachiocephalic_vein_L124(LimitBackflow=false),
+                    common_iliac_vein_R26(LimitBackflow=false),
+                    common_iliac_vein_L56(LimitBackflow=false)));
+            end imp_noValves;
+
+            model imp_arSt
+              extends imp_base(settings(syst_art_k_E=0.8));
+            end imp_arSt;
+
+            model imp_avRe
+              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
+            end imp_avRe;
+
+            model imp_avSt
+              extends imp_base(heartComponent(aorticValve(_Ron(
+                        displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
+                    baro_tau_s=10));
+
+            Physiolibrary.Types.Pressure p_in(start = 13e3);
+            Physiolibrary.Types.Pressure p_out(start = 13e3);
+            Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
+            parameter Modelica.SIunits.Time tau_avg = 10;
+            equation
+                // integrate only during open valve
+                if heartComponent.aorticValve.open then
+                der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
+                der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
+                else
+                  der(p_in) = 0;
+                  der(p_out) = 0;
+                end if;
+            end imp_avSt;
+
+          end VMNoBaro;
+
+          package Ex30
+            model imp_base
+                extends CVS_Normal;
+            end imp_base;
+
+            model imp_noVc
+                extends imp_base(settings(veins_UsePhiEffect=false));
+            end imp_noVc;
+
+            model imp_noVcLin
+                extends imp_base(settings(veins_UseNonLinearVeins=false,
+                                          veins_UsePhiEffect=false));
+            end imp_noVcLin;
+
+            model imp_noVcTc
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTc;
+
+            model imp_noVcTcLin
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTcLin;
+
+            model imp_noBaro
+                extends imp_base(useAutonomousPhi(y=false));
+            end imp_noBaro;
+
+            model imp_noBaroLinV
+              extends imp_noBaro(
+                  settings(veins_UseNonLinearVeins=false));
+            end imp_noBaroLinV;
+
+            model imp_noBaro_linVT
+              extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
+            end imp_noBaro_linVT;
+
+            model imp_noValves
+              extends imp_base(SystemicComponent(
+                    brachiocephalic_vein_R90(LimitBackflow=false),
+                    brachiocephalic_vein_L124(LimitBackflow=false),
+                    common_iliac_vein_R26(LimitBackflow=false),
+                    common_iliac_vein_L56(LimitBackflow=false)));
+            end imp_noValves;
+
+            model imp_arSt
+              extends imp_base(settings(syst_art_k_E=0.8));
+            end imp_arSt;
+
+            model imp_avRe
+              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
+            end imp_avRe;
+
+            model imp_avSt
+              extends imp_base(heartComponent(aorticValve(_Ron(
+                        displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
+                    baro_tau_s=10));
+
+            Physiolibrary.Types.Pressure p_in(start = 13e3);
+            Physiolibrary.Types.Pressure p_out(start = 13e3);
+            Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
+            parameter Modelica.SIunits.Time tau_avg = 10;
+            equation
+                // integrate only during open valve
+                if heartComponent.aorticValve.open then
+                der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
+                der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
+                else
+                  der(p_in) = 0;
+                  der(p_out) = 0;
+                end if;
+            end imp_avSt;
+
+          end Ex30;
+
+          package Ex90
+            model imp_base
+                extends CVS_Normal;
+            end imp_base;
+
+            model imp_noVc
+                extends imp_base(settings(veins_UsePhiEffect=false));
+            end imp_noVc;
+
+            model imp_noVcLin
+                extends imp_base(settings(veins_UseNonLinearVeins=false,
+                                          veins_UsePhiEffect=false));
+            end imp_noVcLin;
+
+            model imp_noVcTc
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTc;
+
+            model imp_noVcTcLin
+                extends imp_base(settings(
+                    syst_art_UseVasoconstrictionEffect=true,
+                    tissues_eta_Ra=0,
+                    tissues_eta_C=0,
+                    veins_UsePhiEffect=false));
+            end imp_noVcTcLin;
+
+            model imp_noBaro
+                extends imp_base(useAutonomousPhi(y=false));
+            end imp_noBaro;
+
+            model imp_noBaroLinV
+              extends imp_noBaro(
+                  settings(veins_UseNonLinearVeins=false));
+            end imp_noBaroLinV;
+
+            model imp_noBaro_linVT
+              extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
+            end imp_noBaro_linVT;
+
+            model imp_noValves
+              extends imp_base(SystemicComponent(
+                    brachiocephalic_vein_R90(LimitBackflow=false),
+                    brachiocephalic_vein_L124(LimitBackflow=false),
+                    common_iliac_vein_R26(LimitBackflow=false),
+                    common_iliac_vein_L56(LimitBackflow=false)));
+            end imp_noValves;
+
+            model imp_arSt
+              extends imp_base(settings(syst_art_k_E=0.8));
+            end imp_arSt;
+
+            model imp_avRe
+              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
+            end imp_avRe;
+
+            model imp_avSt
+              extends imp_base(heartComponent(aorticValve(_Ron(
+                        displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
+                    baro_tau_s=10));
+
+            Physiolibrary.Types.Pressure p_in(start = 13e3);
+            Physiolibrary.Types.Pressure p_out(start = 13e3);
+            Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
+            parameter Modelica.SIunits.Time tau_avg = 10;
+            equation
+                // integrate only during open valve
+                if heartComponent.aorticValve.open then
+                der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
+                der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
+                else
+                  der(p_in) = 0;
+                  der(p_out) = 0;
+                end if;
+            end imp_avSt;
+
+          end Ex90;
+
+        model CVS_Normal "Base class for Normal package"
+            extends CardiovascularSystem;
+        end CVS_Normal;
+
+        model CVS_NormalNoBaro "Base class for Normal package"
+            extends CardiovascularSystem(useAutonomousPhi(y=false));
+        end CVS_NormalNoBaro;
+
+        model CVS_TiltAuto "Base class for Normal package"
+            extends Tilt.CVS_tiltable;
+        end CVS_TiltAuto;
+
+        model CVS_TiltNoBaro "Base class for Normal package"
+            extends Tilt.CVS_tiltable(useAutonomousPhi(y=false), phi_fixed(
+                offset=0.356));
+        end CVS_TiltNoBaro;
+
+        model CVS_VMAuto "Base class for Normal package"
+            extends Valsalva.CVS_valsalva;
+        end CVS_VMAuto;
+
+        model CVS_VMNoBaro "Base class for Normal package"
+            extends CardiovascularSystem(useAutonomousPhi(y=false));
+        end CVS_VMNoBaro;
+
+        model CVS_Ex30 "Base class for Normal package"
+            extends Exercise.CVS_exercise(settings(chi_phi=0.3));
+        end CVS_Ex30;
+
+        model CVS_Ex90 "Base class for Normal package"
+            extends Exercise.CVS_exercise(settings(chi_phi=0.9));
+        end CVS_Ex90;
       end Impairments;
 
       model Water_flow
