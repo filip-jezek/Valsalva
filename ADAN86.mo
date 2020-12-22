@@ -355,8 +355,8 @@ package ADAN_main
       parameter Physiolibrary.Types.Fraction tissues_chi_R=13.625
         "Exercise effect factor on tissue resistance"
         annotation (Dialog(tab="Systemic",   group="Tissues"));
-      parameter Physiolibrary.Types.Fraction tissue_chi_C=0
-        "Effect of venoconstriction on tissue compliance"
+      parameter Physiolibrary.Types.Fraction tissue_chi_C=0.09
+        "Effect of exercise induced relaxation on tissue compliance"
         annotation(Dialog(tab="Systemic",   group="Tissues",   enable=
               arteries_UseVasoconstrictionEffect));
       parameter Physiolibrary.Types.Fraction veins_chi_pump=0
@@ -9482,9 +9482,9 @@ P_hs/2")}));
               Physiolibrary.Types.Pressure p_nl "nonlinear presssure";
               Physiolibrary.Types.Pressure p_lin "linear pressure";
 
-              Physiolibrary.Types.HydraulicElastance E_lin=der(p)/der(V) "Calculate linear parameters from nonlinear counterparts";
-              Real E_lin_rel(unit = "Pa")=E_lin*V_0 "Linear elastsicity parameter";
-              Real v0_lin_rel(unit = "1") "linear v0 parameter";
+            //    Physiolibrary.Types.HydraulicElastance E_lin= der(p)/der(V) "Calculate linear parameters from nonlinear counterparts";
+            //    Real E_lin_rel(unit = "Pa")=E_lin*V_0 "Linear elastsicity parameter";
+            //    Real v0_lin_rel(unit = "1") "linear v0 parameter";
 
               // ASSUMPTIONS used for parameter identification
               //  parameter Tension T_n  =  p0 * r_n "Tension at nominal pressure of p0";
@@ -9527,15 +9527,15 @@ P_hs/2")}));
               //  Real helper2  =  f(L_dm)/f(L_n);
 
             equation
-              V =p/(E_lin_rel)*V_0 + v0_lin_rel*V_0;
+            //  V =p/(E_lin_rel)*V_0 + v0_lin_rel*V_0;
               p_nl * r  =  T;
               V = p_lin/settings.veins_linearE_rel*V_0 + settings.veins_linearV0_rel*V_0;
 
-              if settings.veins_UseNonLinearVeins then
+               if settings.veins_UseNonLinearVeins then
                 p = p_nl;
-              else
-                p = p_lin;
-              end if;
+               else
+                 p = p_lin;
+               end if;
 
               if tau == 0 then
                 phi_ = A;
@@ -10504,9 +10504,8 @@ P_hs/2")}));
             "For Pstras non-linear PV characteristics";
           Physiolibrary.Types.Volume V_maxExponential_phi=V_maxExponential - (V_us -
               V_us_phi) "From Pstras";
-            Physiolibrary.Types.Volume V_n_phi=min(volume_linearBreakpoint, V_n*(1 + exercise*settings.tissue_chi_C)/(1 + settings.tissues_eta_C*
-                (phi - settings.phi0)))
-              "Linearly dependent on phi and sensitive to exercise, re";
+            Physiolibrary.Types.Volume V_n_phi
+              "Linearly dependent on phi and sensitive to exercise";
           Physiolibrary.Types.Volume V_us_phi=V_us/(1 + settings.tissues_eta_C*(phi -
               settings.phi0)) "Linearly dependent on phi";
 
@@ -10536,12 +10535,25 @@ P_hs/2")}));
         //   Physiolibrary.Types.Pressure collapsingPressure "the vessel PV lower limb";
 
           Physiolibrary.Types.Fraction V_r = volume/V_n;
-        //   Physiolibrary.Types.Volume V_wp=V_n "relative working point volume";
-        //   //   Real k_collapse = (V_maxExponential - V_n_phi)/(C);
-        //   Physiolibrary.Types.Pressure p_lin;
-        //   Physiolibrary.Types.Pressure p_lin2;
+        //   Real k_collapse = (V_maxExponential - V_n_phi)/(C);
 
+        // Real phi_exercise = 0.25 + exercise*0.75;
+        // parameter Real tissue_chi_C = 0.09;
+        // Real tissue_chi_C_max;
         equation
+
+          if exercise > 0 then
+        //     V_n_phi =V_n*(1 + exercise*settings.tissue_chi_C)/(1 + settings.tissues_eta_C*
+        //         (phi_exercise - settings.phi0));
+            V_n_phi =V_n*(1 + exercise*settings.tissue_chi_C);
+        //     V_maxExponential = V_n*(1 + 1*tissue_chi_C_max);
+          else
+            V_n_phi =V_n*(1 + exercise*settings.tissue_chi_C)/(1 + settings.tissues_eta_C*
+                (phi - settings.phi0));
+        //         0 = tissue_chi_C_max;
+        //     0 = tissue_chi_C;
+          end if;
+
           assert(Rv_phi > 0, "The exercise_factor too high, driving the venous resistance negative!");
           assert(V_maxExponential > V_n_phi, "The V_n is higher than V_max!");
 
@@ -11146,12 +11158,12 @@ P_hs_plus_dist"),
             Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter1
               annotation (Placement(transformation(extent={{44,-4},{36,4}})));
             Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(
-                usePressureInput=true,  P(displayUnit="Pa") = 6666.11937075)
+                  usePressureInput=true, P(displayUnit="mmHg") = 1333.22387415)
               annotation (Placement(transformation(extent={{-80,-10},{-60,10}})));
             Modelica.Blocks.Sources.Ramp pressure_ramp(
                 height=33332,
               duration=1000,
-              offset=-6666,
+                offset=-6666,
               startTime=0)
               annotation (Placement(transformation(extent={{-60,40},{-80,60}})));
             Systemic_tissue renal_R178(
@@ -11255,13 +11267,13 @@ P_hs_plus_dist"),
                 height=0,
                 duration=10,
                 offset=0.25,
-                startTime=10)
+                startTime=0)
               annotation (Placement(transformation(extent={{-18,74},{-38,94}})));
             Modelica.Blocks.Sources.Ramp exercise_ramp(
                 height=0,
-                duration=10,
+                duration=900,
                 offset=0,
-                startTime=1)
+                startTime=100)
                            annotation (Placement(transformation(extent={{20,74},{0,94}})));
           equation
             connect(leveledPressureFlowConverter.port_a, unlimitedVolume.y) annotation (
@@ -11407,9 +11419,9 @@ P_hs_plus_dist"),
               veins_activation_tau=0)
               annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
             Modelica.Blocks.Sources.Ramp phi_ramp(
-                height=0,
+                height=-1,
                 duration=10,
-                offset=0.25,
+                offset=1,
                 startTime=10)
               annotation (Placement(transformation(extent={{-18,74},{-38,94}})));
             Modelica.Blocks.Sources.Ramp exercise_ramp(
@@ -11425,16 +11437,14 @@ P_hs_plus_dist"),
               l=venousParameters.l_inferior_vena_cava_C24,
               E=venousParameters.E_inferior_vena_cava_C24,
               r=venousParameters.r_inferior_vena_cava_C24,
-              volume(fixed=false),
-              compliant_vessel(x=x, y=y))
+              volume(fixed=false))
               annotation (Placement(transformation(extent={{-12,-15},{8,-10}})));
             Vein          popliteal_vein_R52(
               sinAlpha=1,
               l=venousParameters.l_popliteal_vein_R52,
               E=venousParameters.E_popliteal_vein_R52,
               r=venousParameters.r_popliteal_vein_R52,
-              volume(fixed=false),
-              compliant_vessel(x=x, y=y))
+              volume(fixed=false))
               annotation (Placement(transformation(extent={{-11,7},{9,12}})));
             Parametrization.Parameters_Venous venousParameters(height_actual=settings.height)
               annotation (Placement(transformation(extent={{-40,22},{-20,42}})));
@@ -36935,7 +36945,8 @@ P_hs_plus_dist"),
 
     model CardiovascularSystem
       extends Auxiliary.partialCVS_optimized_ss(SystemicComponent(
-            useCapillaryPressureOutputs=true));
+            useCapillaryPressureOutputs=true), condSystemicPhi(delayEnabled=
+              true));
       Components.Subsystems.Lymphatic.SimplestLymphatic simplestLymphatic(nc=23)
         annotation (Placement(transformation(extent={{48,48},{68,68}})));
       Physiolibrary.Hydraulic.Sensors.PressureMeasure pressureMeasure
@@ -48176,32 +48187,47 @@ P_hs_plus_dist"),
 
       model imp_noBaroLinV
         extends imp_noBaro(
-            condTP_EP1(disconnected=false),
-            condTP_PC(disconnected=false),
-            condTP_IP(disconnected=false),
-            thoracic_pressure_ramp(startTime=5),
-            condSystemicPhi(delayEnabled=false),
             settings(veins_UseNonLinearVeins=false));
       end imp_noBaroLinV;
 
       model imp_noBaro_linVT
-        extends imp_noBaroLinV;
+        extends imp_noBaroLinV(settings(UseNonLinear_TissuesCompliance=false));
       end imp_noBaro_linVT;
 
       model imp_noValves
-        extends imp_base;
+        extends imp_base(SystemicComponent(
+              brachiocephalic_vein_R90(LimitBackflow=false),
+              brachiocephalic_vein_L124(LimitBackflow=false),
+              common_iliac_vein_R26(LimitBackflow=false),
+              common_iliac_vein_L56(LimitBackflow=false)));
       end imp_noValves;
 
       model imp_arSt
-        extends imp_base;
+        extends imp_base(settings(syst_art_k_E=0.8));
       end imp_arSt;
 
       model imp_avRe
-        extends imp_base;
+        extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
       end imp_avRe;
 
       model imp_avSt
-        extends imp_base;
+        extends imp_base(heartComponent(aorticValve(_Ron(
+                  displayUnit="(mmHg.min)/l") = 10879106.813064)), settings(
+              baro_tau_s=10));
+
+      Physiolibrary.Types.Pressure p_in(start = 13e3);
+      Physiolibrary.Types.Pressure p_out(start = 13e3);
+      Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
+      parameter Modelica.SIunits.Time tau_avg = 10;
+      equation
+          // integrate only during open valve
+          if heartComponent.aorticValve.open then
+          der(p_in)*tau_avg = heartComponent.aorticValve.q_in.pressure - p_in;
+          der(p_out)*tau_avg = heartComponent.aorticValve.q_out.pressure - p_out;
+          else
+            der(p_in) = 0;
+            der(p_out) = 0;
+          end if;
       end imp_avSt;
 
 
@@ -48895,10 +48921,7 @@ P_hs_plus_dist"),
       end CVS_tilt_BaroImpaired;
 
       model CVS_aorticRegurgitation
-        extends ADAN_main.SystemicTree.Exercise.CVS_exercise(heartComponent(aorticValve(_Goff=3E-08)),
-            settings(baro_tau_s=10),
-          phi_fixed(startTime=10),
-          Exercise(startTime=10));
+        extends ADAN_main.SystemicTree.Exercise.CVS_exercise(heartComponent(aorticValve(_Goff=3E-08)));
 
       Physiolibrary.Types.Volume CO_backflow_acc;
       Physiolibrary.Types.Volume CO_backflow;
