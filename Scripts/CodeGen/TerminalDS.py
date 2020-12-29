@@ -86,7 +86,7 @@ def findLowestIndex(time, timeArr, returnLast = True):
                     return j-1
             # it was already last one
             return i
-    raise IndexError("The requested steady state time " + time + "s is bigger than the simulation stop time of " + str(timeArr[-1])+ "s")
+    raise IndexError("The requested steady state time " + str(time) + "s is bigger than the simulation stop time of " + str(timeArr[-1])+ "s")
 
 
 def createTerminatorsDS(lines):

@@ -17,11 +17,11 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'CVS_baseline_fastBaro'
+base_model_full_path = 'imp_avSt'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
-steadyStateAt = 599.88
+steadyStateAt = 299.8
 
 # get the main and path
 if '.' in base_model_full_path:
