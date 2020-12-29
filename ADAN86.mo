@@ -386,6 +386,8 @@ package ADAN_main
 
       parameter Fraction veins_gamma=0.5    "Fraction of minimal collapsing diameter to nominal diameter"    annotation(Dialog(tab = "Systemic", group = "Veins"));
       parameter Fraction veins_alpha=5   "ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter"    annotation(Dialog(tab = "Systemic", group = "Veins"));
+      parameter Real veins_phi_no =  0.2 "Offset of nonlinear phi adjustment, i.e. largest phi, that produces zero activation";
+
       parameter Time veins_activation_tau(displayUnit="s")=0.1
                                                 "Integration delay for venous tone activation"    annotation(Dialog(tab = "Systemic", group = "Veins"));
       parameter Physiolibrary.Types.Fraction veins_diameter_correction=1.5
@@ -9466,8 +9468,11 @@ P_hs/2")}));
               parameter Physiolibrary.Types.Volume V_n =   V0 "nominal aka initial volume";
 
               // ACTIVE REGULATION
-              Physiolibrary.Types.Fraction A(start=A_n) "Activation fraction";
-              parameter Physiolibrary.Types.Fraction A_n=phi0 "nominal activation fraction";
+              Physiolibrary.Types.Fraction A "Activation fraction";
+
+              Physiolibrary.Types.Fraction A_n =     min(max(0.01, (phi0 - settings.veins_phi_no)*phi_ns), 1) "nominal activation fraction";
+              parameter Real phi_ns = 1/((1 - settings.veins_phi_no)) "slope of nonlinear phi adjustment. Default is symmetric around the center";
+            //  parameter Real phi_no =  0.2 "Offset of nonlinear phi adjustment";
               parameter Modelica.SIunits.Time tau = settings.veins_activation_tau;
 
               // INITIALIZATION - calculations of the nominal tensions and pressures
@@ -9482,9 +9487,9 @@ P_hs/2")}));
               Physiolibrary.Types.Pressure p_nl "nonlinear presssure";
               Physiolibrary.Types.Pressure p_lin "linear pressure";
 
-            //    Physiolibrary.Types.HydraulicElastance E_lin= der(p)/der(V) "Calculate linear parameters from nonlinear counterparts";
-            //    Real E_lin_rel(unit = "Pa")=E_lin*V_0 "Linear elastsicity parameter";
-            //    Real v0_lin_rel(unit = "1") "linear v0 parameter";
+            //      Physiolibrary.Types.HydraulicElastance E_lin= der(p)/der(V) "Calculate linear parameters from nonlinear counterparts";
+            //      Real E_lin_rel(unit = "Pa")=E_lin*V_0 "Linear elastsicity parameter";
+            //      Real v0_lin_rel(unit = "1") "linear v0 parameter";
 
               // ASSUMPTIONS used for parameter identification
               //  parameter Tension T_n  =  p0 * r_n "Tension at nominal pressure of p0";
@@ -9525,9 +9530,16 @@ P_hs/2")}));
               //   Real d = T_n*(alpha - 1)/(h(L_n, L_0)*(1 + A_nominal*(alpha - 1)));
               //  Real helper  =  T_n/(1+ A_nominal*(alpha -1));
               //  Real helper2  =  f(L_dm)/f(L_n);
-
+            initial equation
+                if tau > 0 then
+                  // comment out when initializing for given state already
+                  A = A_n;
+                end if;
             equation
-            //  V =p/(E_lin_rel)*V_0 + v0_lin_rel*V_0;
+
+
+              // V =p/max(1e-6, E_lin_rel)*V_0 + v0_lin_rel*V_0;
+
               p_nl * r  =  T;
               V = p_lin/settings.veins_linearE_rel*V_0 + settings.veins_linearV0_rel*V_0;
 
@@ -9538,9 +9550,9 @@ P_hs/2")}));
                end if;
 
               if tau == 0 then
-                phi_ = A;
+                min(max(0.01, (phi_ - settings.veins_phi_no)*phi_ns), 1) = A;
               else
-                der(A)*tau  =  phi_ - A;
+                der(A)*tau  =  min(max(0.01, (phi_ - settings.veins_phi_no)*phi_ns), 1) - A;
               end if;
 
               // VOLUME equation - already contained in base class
@@ -11335,9 +11347,9 @@ P_hs_plus_dist"),
                 usePressureInput=true,  P(displayUnit="Pa") = 6666.11937075)
               annotation (Placement(transformation(extent={{-80,-10},{-60,10}})));
             Modelica.Blocks.Sources.Ramp pressure_ramp(
-                height=5333.2,
+                height=23333.2,
               duration=1000,
-              offset=-666.6,
+                offset=-6666.6,
               startTime=0)
               annotation (Placement(transformation(extent={{-60,40},{-80,60}})));
             replaceable Parametrization.SystemicTissueParameters_Calculated
@@ -11419,9 +11431,9 @@ P_hs_plus_dist"),
               veins_activation_tau=0)
               annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
             Modelica.Blocks.Sources.Ramp phi_ramp(
-                height=-1,
+                height=0,
                 duration=10,
-                offset=1,
+                offset=0.25,
                 startTime=10)
               annotation (Placement(transformation(extent={{-18,74},{-38,94}})));
             Modelica.Blocks.Sources.Ramp exercise_ramp(
@@ -11499,6 +11511,195 @@ P_hs_plus_dist"),
                   Tolerance=1e-07,
                   __Dymola_Algorithm="Cvode"));
           end TestVeinPV;
+
+          model TestVeinPV_volumes
+
+            inner Modelica.SIunits.Angle Tilt = 0;
+            inner Physiolibrary.Types.Pressure P_th = 0
+              "Thoracic pressure, developed by the airway pressure. Might affect also abdominal cavity.";
+            inner Physiolibrary.Types.Pressure outer_pressure = 0;
+            inner Physiolibrary.Types.Fraction phi = phi_ramp.y "a systemic acitvation fraction, 1 being maximal possible. Normal resting is believed to be 1/4 of the maximum (0.25)";
+            inner Physiolibrary.Types.Fraction Exercise = exercise_ramp.y;
+            inner Physiolibrary.Types.Fraction adenosine = 0;
+
+            Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter(useLevel=
+                  false)
+              annotation (Placement(transformation(extent={{-44,-4},{-36,4}})));
+            Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter1
+              annotation (Placement(transformation(extent={{44,-4},{36,4}})));
+            Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(
+                  usePressureInput=false, P(displayUnit="Pa") = 666.11937075)
+              annotation (Placement(transformation(extent={{-80,-10},{-60,10}})));
+            Modelica.Blocks.Sources.Ramp pressure_ramp(
+              height=23333.2,
+              duration=1000,
+              offset=-6666.6,
+              startTime=0)
+              annotation (Placement(transformation(extent={{-60,40},{-80,60}})));
+            replaceable Parametrization.SystemicTissueParameters_Calculated
+              tissueParameters(
+              tissue_pressure=settings.tissues_P_nom,
+              arterioles_pressure=settings.tissues_Pa_nom,
+              venules_pressure=settings.tissues_Pv_nom,
+              total_zpv=settings.tissues_ZPV_nom,
+              stressed_volume=settings.tissues_SV_nom,
+              cardiac_output=settings.tissues_CO_nom) constrainedby
+                Parametrization.SystemicTissueParameters_Calculated
+                                                       annotation (Placement(
+                  transformation(extent={{-10,-100},{10,-80}})),
+                __Dymola_choicesAllMatching=true);
+            inner Settings            settings(
+              initByPressure=false,
+              heart_R_vlv(displayUnit="(Pa.s)/m3") = 133322.387415,
+              heart_R_LA(displayUnit="(mmHg.s)/ml") = 3333059.685375,
+              heart_vntr_TS_maxAct(displayUnit="s") = 0.034774043,
+              heart_vntr_TR_maxAct(displayUnit="s") = 0.11722694,
+              heart_vntr_Tact_maxAct=8.000000e-02,
+              chi_phi=0.9,
+              heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 1.082188e+04,
+              heart_vntr_D_0_maxAct=0.0004215625,
+              eta_vc=0.2201054,
+              tissues_eta_Ra=1.245225,
+              tissues_eta_C=0.5058013,
+              tissues_chi_R=16.578623,
+                tissue_chi_C(displayUnit="1") = 0.5,
+              V_PV_init=0,
+              heart_atr_D_A=55215000,
+              heart_vntr_xi_Vw=0.9014874,
+              heart_vntr_xi_AmRef=1.111598,
+              heart_vntr_k_passive=3.725000e+01,
+              heart_vntr_Lsref=1.900000e+00,
+              heart_atr_D_0=14055120,
+              heart_atr_TS=1.882500e-01,
+              heart_atr_TR=2.631250e-01,
+              heart_vntr_D_0=18.15655,
+              heart_vntr_D_A=2846.905,
+              heart_vntr_TS=8.825000e-02,
+              heart_vntr_TR(displayUnit="s") = 2.975000e-01,
+              heart_vntr_Tact=8.000000e-02,
+              baro_fsn(displayUnit="Hz") = 0.0383,
+              pulm_R=3628209,
+              pulm_q_nom_maxq=0.0004958,
+              syst_tissues_hydrostaticLevel_correction=1,
+              HR_max=2.7333333333333,
+              syst_TPR=128212500,
+              syst_art_k_E=0.3973268,
+              veins_gamma=0.5,
+              tissues_SV_nom=0.000695,
+              pulm_C_PV=3.194206e-07,
+              pulm_C_PA=5.3325e-08,
+              heart_R_RA(displayUnit="(dyn.s)/cm5") = settings.heart_R_LA,
+              tissues_eta_Rv=0,
+              baro_tau_s(displayUnit="s") = 93,
+              syst_TR_frac(displayUnit="1") = 4.695759e+00,
+              syst_abd_P_th_ratio=0.8,
+              heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000,
+              heart_vntr_L0=1.6,
+              pulm_P_PV_nom=1333.22387415,
+              height=1.7132,
+              tissues_CO_nom=0.000105,
+              EvaluateFunctionalParams=true,
+              HR_nominal=1.0666666666667,
+              UseNonLinear_TissuesCompliance=true,
+              baro_f1=3.379000e-03,
+              baro_g=0.606258,
+              baro_useAbsolutePressureTerm=false,
+              baro_xi_delta0=2.688000e-01,
+              pulm_R_exp=9.150000e-01,
+              syst_art_UseVasoconstrictionEffect=true,
+              tissues_UseStraighteningReaction2Phi=true,
+              tissues_ZPV_nom=0.00210124,
+              tissues_gamma=0.5,
+              tissues_tau_R(displayUnit="s") = 0,
+              veins_C_phi=0.09,
+              veins_activation_tau=0)
+              annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+            Modelica.Blocks.Sources.Ramp phi_ramp(
+                height=1,
+                duration=10,
+                offset=0,
+                startTime=10)
+              annotation (Placement(transformation(extent={{-18,74},{-38,94}})));
+            Modelica.Blocks.Sources.Ramp exercise_ramp(
+                height=0,
+                duration=10,
+                offset=0,
+                startTime=1)
+                           annotation (Placement(transformation(extent={{20,74},{0,94}})));
+            Vein          inferior_vena_cava_C24(
+              sinAlpha=1,
+              UseOuter_thoracic_pressure=true,
+              thoracic_pressure_ratio=0,
+              l(displayUnit="cm") = 0.003179,
+              E=1,
+              r(displayUnit="cm") = 0.01,
+              volume(fixed=false),
+              compliant_vessel(phi_no=phi_no))
+              annotation (Placement(transformation(extent={{-12,-15},{8,-10}})));
+            Vein          popliteal_vein_R52(
+              thoracic_pressure_ratio=0,
+              sinAlpha=1,
+              l(displayUnit="cm") = 0.01,
+              E=1,
+              r(displayUnit="cm") = 0.005638,
+              volume(fixed=false),
+              compliant_vessel(phi_no=phi_no))
+              annotation (Placement(transformation(extent={{-11,7},{9,12}})));
+            Parametrization.Parameters_Venous venousParameters(height_actual=settings.height)
+              annotation (Placement(transformation(extent={{-40,22},{-20,42}})));
+            Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter2(useLevel=
+                  false)
+              annotation (Placement(transformation(extent={{-44,-18},{-36,-10}})));
+            parameter Real x=4000 annotation(Evaluate = false);
+            parameter Real y=0.95
+                                annotation(Evaluate = false);
+            parameter Real phi_ns=1 "slope of nonlinear phi adjustment";
+            parameter Real phi_no=0 "Offset of nonlinear phi adjustment";
+          equation
+            connect(leveledPressureFlowConverter.port_a, unlimitedVolume.y) annotation (
+                Line(
+                points={{-44,0},{-60,0}},
+                color={0,0,0},
+                thickness=1));
+            connect(unlimitedVolume.y, leveledPressureFlowConverter1.port_a) annotation (
+                Line(
+                points={{-60,0},{-52,0},{-52,20},{60,20},{60,0},{44,0}},
+                color={0,0,0},
+                thickness=1));
+            connect(pressure_ramp.y, unlimitedVolume.pressure) annotation (Line(points={{-81,
+                    50},{-92,50},{-92,0},{-80,0}}, color={0,0,127}));
+            connect(leveledPressureFlowConverter.leveledPort_b, popliteal_vein_R52.port_a)
+              annotation (Line(
+                points={{-36,0},{-26,0},{-26,10},{-12,10},{-12,9.5},{-11,9.5}},
+                color={162,29,33},
+                thickness=0.5));
+            connect(leveledPressureFlowConverter1.leveledPort_b, popliteal_vein_R52.port_b)
+              annotation (Line(
+                points={{36,0},{8,0},{8,6},{9,6},{9,9.5}},
+                color={162,29,33},
+                thickness=0.5));
+            connect(leveledPressureFlowConverter1.leveledPort_b, inferior_vena_cava_C24.port_b)
+              annotation (Line(
+                points={{36,0},{14,0},{14,-12.5},{8,-12.5}},
+                color={162,29,33},
+                thickness=0.5));
+            connect(leveledPressureFlowConverter2.port_a, unlimitedVolume.y) annotation (
+                Line(
+                points={{-44,-14},{-52,-14},{-52,0},{-60,0}},
+                color={0,0,0},
+                thickness=1));
+            connect(inferior_vena_cava_C24.port_a, leveledPressureFlowConverter2.leveledPort_b)
+              annotation (Line(
+                points={{-12,-12.5},{-30,-12.5},{-30,-14},{-36,-14}},
+                color={162,29,33},
+                thickness=0.5));
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)),
+              experiment(
+                  StopTime=1000,
+                  Tolerance=1e-07,
+                  __Dymola_Algorithm="Cvode"));
+          end TestVeinPV_volumes;
         end tests;
       end Vessel_modules;
 
@@ -36946,7 +37147,13 @@ P_hs_plus_dist"),
     model CardiovascularSystem
       extends Auxiliary.partialCVS_optimized_ss(SystemicComponent(
             useCapillaryPressureOutputs=true), condSystemicPhi(delayEnabled=
-              true));
+              false),
+        settings(
+          V_PV_init=3.6e-05,
+          veins_UseNonLinearVeins=true,
+          veins_linearE_rel=765,
+          veins_linearV0_rel=0.793),
+        useAutonomousPhi(y=false));
       Components.Subsystems.Lymphatic.SimplestLymphatic simplestLymphatic(nc=23)
         annotation (Placement(transformation(extent={{48,48},{68,68}})));
       Physiolibrary.Hydraulic.Sensors.PressureMeasure pressureMeasure
@@ -37456,7 +37663,7 @@ P_hs_plus_dist"),
                   start=2.9423397e-06, fixed=true))),
           pulmonaryComponent(
             c_pa(volume(start=5.708838e-05, fixed=true)),
-            c_pv(volume(start=0.00032910754, fixed=true))),
+            c_pv(volume(start=0.00032910754 + settings.V_PV_init, fixed=true))),
           settings(initByPressure=false),
           condSystemicPhi(delayEnabled=false));
 
@@ -47062,7 +47269,7 @@ P_hs_plus_dist"),
             offset=settings.phi0,
             startTime=5),
           useAutonomousPhi(y=false),
-          settings(tissues_chi_R(displayUnit="1") = 20, tissue_chi_C=0.5));
+          settings(tissues_chi_R(displayUnit="1") = 20, tissue_chi_C=0.09));
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           offset=0,
@@ -47713,7 +47920,13 @@ P_hs_plus_dist"),
           condTP_PC(disconnected=false),
           condTP_IP(disconnected=false),
           condTP_EP1(disconnected=false),
-          condHeartPhi(uMin=0.24));
+          condHeartPhi(uMin=0.24),
+          settings(
+            V_PV_init=0.00018,
+            veins_UseNonLinearVeins=true,
+            veins_UsePhiEffect=false,
+            veins_gamma=0.5),
+          useAutonomousPhi(y=true));
 
       // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
       //     useAutonomousPhi(y=true),
@@ -48245,11 +48458,37 @@ P_hs_plus_dist"),
                 end if;
             end imp_avSt;
 
+            model imp_hemr "A simple bleeding experiment"
+              extends imp_base;
+              Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
+                  SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
+                annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
+              Physiolibrary.Hydraulic.Components.ElasticVessel volume_bleeded
+                "A cut vein reservoir"
+                annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
+              replaceable Modelica.Blocks.Sources.Ramp bleeding_ramp(
+              height=-50e-6,
+              offset=50e-6,
+              startTime=10,
+              duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+              annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
+            equation
+              connect(volume_bleeded.q_in, pump.q_out) annotation (Line(
+                  points={{90,-88},{68,-88}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(pump.q_in, heartComponent.sv) annotation (Line(
+                  points={{48,-88},{24,-88},{24,-16.4},{-16,-16.4}},
+                  color={0,0,0},
+                  thickness=1));
+            connect(bleeding_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
+                    -60},{58,-60},{58,-81}}, color={0,0,127}));
+            end imp_hemr;
           end Normal;
 
           package NormalNoBaro
             model imp_base
-                extends CVS_Normal;
+                extends CVS_NormalNoBaro;
             end imp_base;
 
             model imp_noVc
@@ -48326,11 +48565,37 @@ P_hs_plus_dist"),
                 end if;
             end imp_avSt;
 
+            model imp_hemr "A simple bleeding experiment"
+              extends imp_base;
+              Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
+                  SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
+                annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
+              Physiolibrary.Hydraulic.Components.ElasticVessel volume_bleeded
+                "A cut vein reservoir"
+                annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
+              replaceable Modelica.Blocks.Sources.Ramp bleeding_ramp(
+              height=-50e-6,
+              offset=50e-6,
+              startTime=10,
+              duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+              annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
+            equation
+              connect(volume_bleeded.q_in, pump.q_out) annotation (Line(
+                  points={{90,-88},{68,-88}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(pump.q_in, heartComponent.sv) annotation (Line(
+                  points={{48,-88},{24,-88},{24,-16.4},{-16,-16.4}},
+                  color={0,0,0},
+                  thickness=1));
+            connect(bleeding_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
+                    -60},{58,-60},{58,-81}}, color={0,0,127}));
+            end imp_hemr;
           end NormalNoBaro;
 
           package TiltAuto
             model imp_base
-                extends CVS_Normal;
+                extends CVS_TiltAuto;
             end imp_base;
 
             model imp_noVc
@@ -48407,11 +48672,37 @@ P_hs_plus_dist"),
                 end if;
             end imp_avSt;
 
+            model imp_hemr "A simple bleeding experiment"
+              extends imp_base;
+              Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
+                  SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
+                annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
+              Physiolibrary.Hydraulic.Components.ElasticVessel volume_bleeded
+                "A cut vein reservoir"
+                annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
+              replaceable Modelica.Blocks.Sources.Ramp bleeding_ramp(
+              height=-50e-6,
+              offset=50e-6,
+              startTime=10,
+              duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+              annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
+            equation
+              connect(volume_bleeded.q_in, pump.q_out) annotation (Line(
+                  points={{90,-88},{68,-88}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(pump.q_in, heartComponent.sv) annotation (Line(
+                  points={{48,-88},{24,-88},{24,-16.4},{-16,-16.4}},
+                  color={0,0,0},
+                  thickness=1));
+            connect(bleeding_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
+                    -60},{58,-60},{58,-81}}, color={0,0,127}));
+            end imp_hemr;
           end TiltAuto;
 
           package TiltNoBaro
             model imp_base
-                extends CVS_Normal;
+                extends CVS_TiltNoBaro;
             end imp_base;
 
             model imp_noVc
@@ -48488,11 +48779,37 @@ P_hs_plus_dist"),
                 end if;
             end imp_avSt;
 
+            model imp_hemr "A simple bleeding experiment"
+              extends imp_base;
+              Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
+                  SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
+                annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
+              Physiolibrary.Hydraulic.Components.ElasticVessel volume_bleeded
+                "A cut vein reservoir"
+                annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
+              replaceable Modelica.Blocks.Sources.Ramp bleeding_ramp(
+              height=-50e-6,
+              offset=50e-6,
+              startTime=10,
+              duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+              annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
+            equation
+              connect(volume_bleeded.q_in, pump.q_out) annotation (Line(
+                  points={{90,-88},{68,-88}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(pump.q_in, heartComponent.sv) annotation (Line(
+                  points={{48,-88},{24,-88},{24,-16.4},{-16,-16.4}},
+                  color={0,0,0},
+                  thickness=1));
+            connect(bleeding_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
+                    -60},{58,-60},{58,-81}}, color={0,0,127}));
+            end imp_hemr;
           end TiltNoBaro;
 
           package VMAuto
             model imp_base
-                extends CVS_Normal;
+                extends CVS_VMAuto;
             end imp_base;
 
             model imp_noVc
@@ -48569,11 +48886,37 @@ P_hs_plus_dist"),
                 end if;
             end imp_avSt;
 
+            model imp_hemr "A simple bleeding experiment"
+              extends imp_base;
+              Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
+                  SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
+                annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
+              Physiolibrary.Hydraulic.Components.ElasticVessel volume_bleeded
+                "A cut vein reservoir"
+                annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
+              replaceable Modelica.Blocks.Sources.Ramp bleeding_ramp(
+              height=-50e-6,
+              offset=50e-6,
+              startTime=10,
+              duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+              annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
+            equation
+              connect(volume_bleeded.q_in, pump.q_out) annotation (Line(
+                  points={{90,-88},{68,-88}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(pump.q_in, heartComponent.sv) annotation (Line(
+                  points={{48,-88},{24,-88},{24,-16.4},{-16,-16.4}},
+                  color={0,0,0},
+                  thickness=1));
+            connect(bleeding_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
+                    -60},{58,-60},{58,-81}}, color={0,0,127}));
+            end imp_hemr;
           end VMAuto;
 
           package VMNoBaro
             model imp_base
-                extends CVS_Normal;
+                extends CVS_VMNoBaro;
             end imp_base;
 
             model imp_noVc
@@ -48650,11 +48993,37 @@ P_hs_plus_dist"),
                 end if;
             end imp_avSt;
 
+            model imp_hemr "A simple bleeding experiment"
+              extends imp_base;
+              Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
+                  SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
+                annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
+              Physiolibrary.Hydraulic.Components.ElasticVessel volume_bleeded
+                "A cut vein reservoir"
+                annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
+              replaceable Modelica.Blocks.Sources.Ramp bleeding_ramp(
+              height=-50e-6,
+              offset=50e-6,
+              startTime=10,
+              duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+              annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
+            equation
+              connect(volume_bleeded.q_in, pump.q_out) annotation (Line(
+                  points={{90,-88},{68,-88}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(pump.q_in, heartComponent.sv) annotation (Line(
+                  points={{48,-88},{24,-88},{24,-16.4},{-16,-16.4}},
+                  color={0,0,0},
+                  thickness=1));
+            connect(bleeding_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
+                    -60},{58,-60},{58,-81}}, color={0,0,127}));
+            end imp_hemr;
           end VMNoBaro;
 
           package Ex30
             model imp_base
-                extends CVS_Normal;
+                extends CVS_Ex30;
             end imp_base;
 
             model imp_noVc
@@ -48731,11 +49100,37 @@ P_hs_plus_dist"),
                 end if;
             end imp_avSt;
 
+            model imp_hemr "A simple bleeding experiment"
+              extends imp_base(phi_fixed(startTime=20));
+              Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
+                  SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
+                annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
+              Physiolibrary.Hydraulic.Components.ElasticVessel volume_bleeded
+                "A cut vein reservoir"
+                annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
+              replaceable Modelica.Blocks.Sources.Ramp bleeding_ramp(
+              height=-50e-6,
+              offset=50e-6,
+              startTime=10,
+              duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+              annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
+            equation
+              connect(volume_bleeded.q_in, pump.q_out) annotation (Line(
+                  points={{90,-88},{68,-88}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(pump.q_in, heartComponent.sv) annotation (Line(
+                  points={{48,-88},{24,-88},{24,-16.4},{-16,-16.4}},
+                  color={0,0,0},
+                  thickness=1));
+            connect(bleeding_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
+                    -60},{58,-60},{58,-81}}, color={0,0,127}));
+            end imp_hemr;
           end Ex30;
 
           package Ex90
             model imp_base
-                extends CVS_Normal;
+                extends CVS_Ex90;
             end imp_base;
 
             model imp_noVc
@@ -48812,6 +49207,32 @@ P_hs_plus_dist"),
                 end if;
             end imp_avSt;
 
+            model imp_hemr "A simple bleeding experiment"
+              extends imp_base(phi_fixed(startTime=20));
+              Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
+                  SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
+                annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
+              Physiolibrary.Hydraulic.Components.ElasticVessel volume_bleeded
+                "A cut vein reservoir"
+                annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
+              replaceable Modelica.Blocks.Sources.Ramp bleeding_ramp(
+              height=-50e-6,
+              offset=50e-6,
+              startTime=10,
+              duration=0) constrainedby Modelica.Blocks.Sources.Ramp
+              annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
+            equation
+              connect(volume_bleeded.q_in, pump.q_out) annotation (Line(
+                  points={{90,-88},{68,-88}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(pump.q_in, heartComponent.sv) annotation (Line(
+                  points={{48,-88},{24,-88},{24,-16.4},{-16,-16.4}},
+                  color={0,0,0},
+                  thickness=1));
+            connect(bleeding_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
+                    -60},{58,-60},{58,-81}}, color={0,0,127}));
+            end imp_hemr;
           end Ex90;
 
         model CVS_Normal "Base class for Normal package"
@@ -48827,8 +49248,7 @@ P_hs_plus_dist"),
         end CVS_TiltAuto;
 
         model CVS_TiltNoBaro "Base class for Normal package"
-            extends Tilt.CVS_tiltable(useAutonomousPhi(y=false), phi_fixed(
-                offset=0.356));
+            extends Tilt.CVS_tiltable(useAutonomousPhi(y=false), phi_fixed(offset=0.356));
         end CVS_TiltNoBaro;
 
         model CVS_VMAuto "Base class for Normal package"
@@ -48836,15 +49256,19 @@ P_hs_plus_dist"),
         end CVS_VMAuto;
 
         model CVS_VMNoBaro "Base class for Normal package"
-            extends CardiovascularSystem(useAutonomousPhi(y=false));
+            extends Valsalva.CVS_valsalva( useAutonomousPhi(y=false));
         end CVS_VMNoBaro;
 
         model CVS_Ex30 "Base class for Normal package"
-            extends Exercise.CVS_exercise(settings(chi_phi=0.3));
+            extends Exercise.CVS_exercise(settings(chi_phi=0.3),
+            Exercise(startTime=20),
+            phi_fixed(startTime=20));
         end CVS_Ex30;
 
         model CVS_Ex90 "Base class for Normal package"
-            extends Exercise.CVS_exercise(settings(chi_phi=0.9));
+            extends Exercise.CVS_exercise(settings(chi_phi=0.9),
+            Exercise(startTime=20),
+            phi_fixed(startTime=20));
         end CVS_Ex90;
       end Impairments;
 

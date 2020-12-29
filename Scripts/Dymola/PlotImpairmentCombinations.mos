@@ -1,146 +1,261 @@
 ﻿// normal
-createPlot(id=1, position={0, 0, 600, 400}, y={"brachial_pressure", "brachial_pressure_mean", "CO", "HR", "SV"}, range={0.0, 60.0, 0.0, 160.0}, autoscale = false, erase=true, grid=false, legend=false, colors={{28,108,200}, {238,46,47}, {0,140,72}, {217,67,180}, {0,0,0}}, displayUnits={"mmHg", "mmHg", "l/min", "1/min", "ml"});
+createPlot(id=1, position={0, 0, 600, 400}, y={"brachial_pressure", "brachial_pressure_mean", "CO", "HR", "SV"}, heading="Ex90", range={0.0, 32.0, 40.0, 180.0}, erase=false, autoscale=false, legend=false, filename="CVS_exercise.mat", colors={{28,108,200}, {28,108,200}, {217,67,180}, {238,46,47}, {217,67,180}}, patterns={LinePattern.Solid, LinePattern.Solid, LinePattern.Dash, LinePattern.Solid, 
+LinePattern.Solid}, thicknesses={0.25, 0.5, 1.0, 0.25, 0.25}, range2={0.0, 30.0}, axes={1, 1, 2, 1, 1}, displayUnits={"mmHg", "mmHg", "l/min", "1/min", "ml"});
+
+// plotText(extent={{5,160},{20,165}},textString="PlotTitle", horizontalAlignment = TextAlignment.Left)
 
 // normal
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
-ExportPlotAsImage("GF_normal_noVc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
-ExportPlotAsImage("GF_normal_noVcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp__noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
-ExportPlotAsImage("GF_normal_noVcTc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp__noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
-ExportPlotAsImage("GF_normal_noVcTcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp__noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
-ExportPlotAsImage("GF_normal_noValves.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp__arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("normal_normal", id=1)
+// ExportPlotAsImage("GF_normal_normal.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// plotHeading("normal_noVc", id=1)
+// ExportPlotAsImage("GF_normal_noVc.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// plotHeading("normal_noVcLin", id=1)
+// ExportPlotAsImage("GF_normal_noVcLin.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// plotHeading("normal_noVcTc", id=1)
+// ExportPlotAsImage("GF_normal_noVcTc.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// plotHeading("normal_noVcTcLin", id=1)
+// ExportPlotAsImage("GF_normal_noVcTcLin.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+// plotHeading("normal_noValves", id=1)
+// ExportPlotAsImage("GF_normal_noValves.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("normal_arSt", id=1)
 ExportPlotAsImage("GF_normal_arSt.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp__avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("normal_avRe", id=1)
 ExportPlotAsImage("GF_normal_avRe.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp__avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("normal_avSt", id=1)
 ExportPlotAsImage("GF_normal_avSt.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_hemr", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("normal_hemr", id=1)
+ExportPlotAsImage("GF_normal_hemr.png", id=1)
 
-// normalNoBaro
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
-ExportPlotAsImage("GF_NormalNoBaro_noVc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
-ExportPlotAsImage("GF_NormalNoBaro_noVcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp__noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
-ExportPlotAsImage("GF_NormalNoBaro_noVcTc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp__noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
-ExportPlotAsImage("GF_NormalNoBaro_noVcTcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp__noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
-ExportPlotAsImage("GF_NormalNoBaro_noValves.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp__arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// NormalNoBaro
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// plotHeading("NormalNoBaro_normal", id=1)
+// ExportPlotAsImage("GF_normal_NormalNoBaro.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// plotHeading("NormalNoBaro_noVc", id=1)
+// ExportPlotAsImage("GF_NormalNoBaro_noVc.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// plotHeading("NormalNoBaro_noVcLin", id=1)
+// ExportPlotAsImage("GF_NormalNoBaro_noVcLin.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// plotHeading("NormalNoBaro_noVcTc", id=1)
+// ExportPlotAsImage("GF_NormalNoBaro_noVcTc.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+// plotHeading("NormalNoBaro_noVcTcLin", id=1)
+// ExportPlotAsImage("GF_NormalNoBaro_noVcTcLin.png", id=1)
+// simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+// plotHeading("NormalNoBaro_noValves", id=1)
+// ExportPlotAsImage("GF_NormalNoBaro_noValves.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("NormalNoBaro_arSt", id=1)
 ExportPlotAsImage("GF_NormalNoBaro_arSt.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp__avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("NormalNoBaro_avRe", id=1)
 ExportPlotAsImage("GF_NormalNoBaro_avRe.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp__avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("NormalNoBaro_avSt", id=1)
 ExportPlotAsImage("GF_NormalNoBaro_avSt.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.NormalNoBaro.imp_hemr", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("NormalNoBaro_hemr", id=1)
+ExportPlotAsImage("GF_NormalNoBaro_hemr.png", id=1)
 
 //tiltAuto
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltAuto_normal", id=1)
+ExportPlotAsImage("GF_TiltAuto_normal.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltAuto_noVc", id=1)
 ExportPlotAsImage("GF_TiltAuto_noVc.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltAuto_noVcLin", id=1)
 ExportPlotAsImage("GF_TiltAuto_noVcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp__noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltAuto_noVcTc", id=1)
 ExportPlotAsImage("GF_TiltAuto_noVcTc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp__noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltAuto_noVcTcLin", id=1)
 ExportPlotAsImage("GF_TiltAuto_noVcTcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp__noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+plotHeading("TiltAuto_noValves", id=1)
 ExportPlotAsImage("GF_TiltAuto_noValves.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp__arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltAuto_arSt", id=1)
 ExportPlotAsImage("GF_TiltAuto_arSt.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp__avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltAuto_avRe", id=1)
 ExportPlotAsImage("GF_TiltAuto_avRe.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp__avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltAuto_avSt", id=1)
 ExportPlotAsImage("GF_TiltAuto_avSt.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_hemr", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltAuto_hemr", id=1)
+ExportPlotAsImage("GF_TiltAuto_hemr.png", id=1)
 
-//tiltNoBaro
+//TiltNoBaro
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltNoBaro_normal", id=1)
+ExportPlotAsImage("GF_TiltNoBaro_normal.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltNoBaro_noVc", id=1)
 ExportPlotAsImage("GF_TiltNoBaro_noVc.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltNoBaro_noVcLin", id=1)
 ExportPlotAsImage("GF_TiltNoBaro_noVcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp__noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltNoBaro_noVcTc", id=1)
 ExportPlotAsImage("GF_TiltNoBaro_noVcTc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp__noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltNoBaro_noVcTcLin", id=1)
 ExportPlotAsImage("GF_TiltNoBaro_noVcTcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp__noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+plotHeading("TiltNoBaro_noValves", id=1)
 ExportPlotAsImage("GF_TiltNoBaro_noValves.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp__arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltNoBaro_arSt", id=1)
 ExportPlotAsImage("GF_TiltNoBaro_arSt.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp__avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltNoBaro_avRe", id=1)
 ExportPlotAsImage("GF_TiltNoBaro_avRe.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp__avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltNoBaro_avSt", id=1)
 ExportPlotAsImage("GF_TiltNoBaro_avSt.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_hemr", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("TiltNoBaro_hemr", id=1)
+ExportPlotAsImage("GF_TiltNoBaro_hemr.png", id=1)
 
-//tiltNoBaro
+//VMAuto
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMAuto_normal", id=1)
+ExportPlotAsImage("GF_VMAuto_normal.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMAuto_noVc", id=1)
 ExportPlotAsImage("GF_VMAuto_noVc.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMAuto_noVcLin", id=1)
 ExportPlotAsImage("GF_VMAuto_noVcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp__noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMAuto_noVcTc", id=1)
 ExportPlotAsImage("GF_VMAuto_noVcTc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp__noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMAuto_noVcTcLin", id=1)
 ExportPlotAsImage("GF_VMAuto_noVcTcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp__noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+plotHeading("VMAuto_noValves", id=1)
 ExportPlotAsImage("GF_VMAuto_noValves.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp__arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMAuto_arSt", id=1)
 ExportPlotAsImage("GF_VMAuto_arSt.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp__avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMAuto_avRe", id=1)
 ExportPlotAsImage("GF_VMAuto_avRe.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp__avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMAuto_avSt", id=1)
 ExportPlotAsImage("GF_VMAuto_avSt.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMAuto.imp_hemr", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMAuto_hemr", id=1)
+ExportPlotAsImage("GF_VMAuto_hemr.png", id=1)
 
-//tiltNoBaro
+//VMNoBaro
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMNoBaro_normal", id=1)
+ExportPlotAsImage("GF_VMNoBaro_normal.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMNoBaro_noVc", id=1)
 ExportPlotAsImage("GF_VMNoBaro_noVc.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMNoBaro_noVcLin", id=1)
 ExportPlotAsImage("GF_VMNoBaro_noVcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp__noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMNoBaro_noVcTc", id=1)
 ExportPlotAsImage("GF_VMNoBaro_noVcTc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp__noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMNoBaro_noVcTcLin", id=1)
 ExportPlotAsImage("GF_VMNoBaro_noVcTcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp__noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+plotHeading("VMNoBaro_noValves", id=1)
 ExportPlotAsImage("GF_VMNoBaro_noValves.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp__arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMNoBaro_arSt", id=1)
 ExportPlotAsImage("GF_VMNoBaro_arSt.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp__avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMNoBaro_avRe", id=1)
 ExportPlotAsImage("GF_VMNoBaro_avRe.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp__avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMNoBaro_avSt", id=1)
 ExportPlotAsImage("GF_VMNoBaro_avSt.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.VMNoBaro.imp_hemr", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("VMNoBaro_hemr", id=1)
+ExportPlotAsImage("GF_VMNoBaro_hemr.png", id=1)
 
 //Ex30
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex30_normal", id=1)
+ExportPlotAsImage("GF_Ex30_normal.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex30_noVc", id=1)
 ExportPlotAsImage("GF_Ex30_noVc.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex30_noVcLin", id=1)
 ExportPlotAsImage("GF_Ex30_noVcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp__noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp_noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex30_noVcTc", id=1)
 ExportPlotAsImage("GF_Ex30_noVcTc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp__noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp_noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex30_noVcTcLin", id=1)
 ExportPlotAsImage("GF_Ex30_noVcTcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp__noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp_noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+plotHeading("Ex30_noValves", id=1)
 ExportPlotAsImage("GF_Ex30_noValves.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp__arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp_arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex30_arSt", id=1)
 ExportPlotAsImage("GF_Ex30_arSt.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp__avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp_avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex30_avRe", id=1)
 ExportPlotAsImage("GF_Ex30_avRe.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp__avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex30.imp_avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex30_avSt", id=1)
 ExportPlotAsImage("GF_Ex30_avSt.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_hemr", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex30_hemr", id=1)
+ExportPlotAsImage("GF_Ex30_hemr.png", id=1)
 
-//Ex30
+//Ex90
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_base", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex90_normal", id=1)
+ExportPlotAsImage("GF_Ex90_normal.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_noVc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex90_noVc", id=1)
 ExportPlotAsImage("GF_Ex90_noVc.png", id=1)
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_noVcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex90_noVcLin", id=1)
 ExportPlotAsImage("GF_Ex90_noVcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp__noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_noVcTc", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex90_noVcTc", id=1)
 ExportPlotAsImage("GF_Ex90_noVcTc.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp__noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_noVcTcLin", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex90_noVcTcLin", id=1)
 ExportPlotAsImage("GF_Ex90_noVcTcLin.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp__noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_noValves", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="im");
+plotHeading("Ex90_noValves", id=1)
 ExportPlotAsImage("GF_Ex90_noValves.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp__arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_arSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex90_arSt", id=1)
 ExportPlotAsImage("GF_Ex90_arSt.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp__avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_avRe", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex90_avRe", id=1)
 ExportPlotAsImage("GF_Ex90_avRe.png", id=1)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp__avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_avSt", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex90_avSt", id=1)
 ExportPlotAsImage("GF_Ex90_avSt.png", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Ex90.imp_hemr", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp");
+plotHeading("Ex90_hemr", id=1)
+ExportPlotAsImage("GF_Ex90_hemr.png", id=1)
