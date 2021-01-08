@@ -18,6 +18,7 @@ dsfinal.txt
 failure
 status
 success
+.DS_Store
 	
 /mult*.csv
 /*.txt

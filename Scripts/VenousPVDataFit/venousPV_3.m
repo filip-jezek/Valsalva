@@ -1,5 +1,6 @@
 
 clear all
+plotAll = true;
 
 %% Data
 %{
@@ -9,39 +10,45 @@ Load and plot the data
 load Moreno70_data.mat 
 load Vanhoutte69_data.mat 
 
-%{
-% Moreno
-figure(1) 
-clf
-hold on 
-plot([min(Pd_Moreno) max(Pd_Moreno)],zeros(2,1),'k')
-plot(zeros(2,1),[min(Vd_sca_Moreno) max(Vd_sca_Moreno)],'k')
-plot(Pd_Moreno,Vd_sca_Moreno,'mo','MarkerSize',5,'linewidth',2)
-xlabel('Pressure (mmHg)')
-ylabel('Relative volume')
-set(gca,'FontSize',15)
-title('Moreno data - original')
+if plotAll
+    % Moreno
+    figure(1) 
+    clf
+    hold on 
+    plot([min(Pd_Moreno) max(Pd_Moreno)],zeros(2,1),'k')
+    plot(zeros(2,1),[min(Vd_sca_Moreno) max(Vd_sca_Moreno)],'k')
+    plot(Pd_Moreno,Vd_sca_Moreno,'mo','MarkerSize',5,'linewidth',2)
+    xlabel('Pressure (mmHg)')
+    ylabel('Relative volume')
+    set(gca,'FontSize',15)
+    title('Moreno data - original')
 
-% Vanhoutte
-figure(2)
-clf
-hold on 
-plot([min(Vd_pass_Vanh) max(Vd_pass_Vanh)],zeros(2,1),'k')
-plot(zeros(2,1),[min(Pd_pass_Vanh) max(Pd_maxact_Vanh)],'k')
-plot(Vd_pass_Vanh,Pd_pass_Vanh,'bo','MarkerSize',5,'linewidth',2)
-plot(Vd_maxact_Vanh,Pd_maxact_Vanh,'ko','color',[.5 0 .5],'MarkerSize',5,'linewidth',2)
-plot(Vd_pass_Vanh,Pd_maxact_Vanh - Pd_pass_Vanh,'ro','MarkerSize',5,'linewidth',2)
-xlabel('Volume (mL)')
-ylabel('Pressure (mmHg)')
-set(gca,'FontSize',15)
-title('Vanhoutte data - original')
-%}
+    % Vanhoutte
+    figure(2)
+    clf
+    hold on 
+    plot([min(Vd_pass_Vanh) max(Vd_pass_Vanh)],zeros(2,1),'k')
+    plot(zeros(2,1),[min(Pd_pass_Vanh) max(Pd_maxact_Vanh)],'k')
+    plot(Vd_pass_Vanh,Pd_pass_Vanh,'bo','MarkerSize',5,'linewidth',2)
+    plot(Vd_maxact_Vanh,Pd_maxact_Vanh,'ko','color',[.5 0 .5],'MarkerSize',5,'linewidth',2)
+    plot(Vd_pass_Vanh,Pd_maxact_Vanh - Pd_pass_Vanh,'ro','MarkerSize',5,'linewidth',2)
+    xlabel('Volume (mL)')
+    ylabel('Pressure (mmHg)')
+    set(gca,'FontSize',15)
+    title('Vanhoutte data - original')
+end
 
 %% Parameters and target values
 
 phibar = 0.25; % normal autonomic outflow 
 
-P_n = (max(Pd_Moreno) - min(Pd_Moreno)) * phibar;    % mmHg
+% phi to activation conversion
+veins_phi_no = 0.2;
+phi_ns = 1/((1 - veins_phi_no));
+A = min(max(0.001, (phibar - veins_phi_no)*phi_ns), 1)
+
+
+P_n = (max(Pd_Moreno) - min(Pd_Moreno)) * A;    % mmHg
 V_n = 50;   % mL - From Filip's simulations' approximations 
 l   = 20;   % cm - From Cell ML model 
 
@@ -52,21 +59,21 @@ V_0 = gamma * V_n; % mL
 
 Vd_Moreno = V_0 * Vd_sca_Moreno + V_0; % rescale data based on prescribed V_0 (m^3)
 
-%{
-figure(3) 
-clf
-hold on 
-plot([min(Pd_Moreno) max(Pd_Moreno)],zeros(2,1),'k')
-plot([min(Pd_Moreno) max(Pd_Moreno)],V_0 * ones(2,1),'k:')
-plot([min(Pd_Moreno) max(Pd_Moreno)],V_n * ones(2,1),'k:')
-plot(zeros(2,1),[min(Vd_Moreno) max(Vd_Moreno)],'k')
-plot(P_n * ones(2,1),[min(Vd_Moreno) max(Vd_Moreno)],'k:')
-plot(Pd_Moreno,Vd_Moreno,'mo','MarkerSize',5,'linewidth',2)
-xlabel('Pressure (mmHg)')
-ylabel('Volume (mL)')
-set(gca,'FontSize',15)
-title('Moreno data - volume scaled')
-%}
+if plotAll
+    figure(3) 
+    clf
+    hold on 
+    plot([min(Pd_Moreno) max(Pd_Moreno)],zeros(2,1),'k')
+    plot([min(Pd_Moreno) max(Pd_Moreno)],V_0 * ones(2,1),'k:')
+    plot([min(Pd_Moreno) max(Pd_Moreno)],V_n * ones(2,1),'k:')
+    plot(zeros(2,1),[min(Vd_Moreno) max(Vd_Moreno)],'k')
+    plot(P_n * ones(2,1),[min(Vd_Moreno) max(Vd_Moreno)],'k:')
+    plot(Pd_Moreno,Vd_Moreno,'mo','MarkerSize',5,'linewidth',2)
+    xlabel('Pressure (mmHg)')
+    ylabel('Volume (mL)')
+    set(gca,'FontSize',15)
+    title('Moreno data - volume scaled')
+end
 
 %% Transform Vanhoutte volume data to be on the same scale as the transformed Moreno data
 
@@ -79,39 +86,39 @@ Vd_pass_sca = Amp_Moreno/Amp_Vanh * Vd_pass_Vanh + V_0;
 Vd_maxact_sca = Amp_Moreno/Amp_Vanh * Vd_maxact_Vanh + V_0; 
 Vd_act_sca = Vd_pass_sca; 
 
-%{
+if plotAll,
+    figure(4)
+    clf
+    hold on 
+    plot([min(Pd_Moreno) max(Pd_Moreno)],zeros(2,1),'k')
+    plot(zeros(2,1),[min(Vd_Moreno) max(Vd_Moreno)],'k')
+    plot(Pd_Moreno,Vd_Moreno,'mo','MarkerSize',5,'linewidth',2)
+    plot(Pd_pass_Vanh,Vd_pass_sca,'bo','MarkerSize',5,'linewidth',2)
+    title('Scaled Moreno data and scaled passive Vanhoutte data')
+    set(gca,'FontSize',15)
+    xlabel('Volume (mL)')
+    ylabel('Pressure (mmHg)')
 
-figure(4)
-clf
-hold on 
-plot([min(Pd_Moreno) max(Pd_Moreno)],zeros(2,1),'k')
-plot(zeros(2,1),[min(Vd_Moreno) max(Vd_Moreno)],'k')
-plot(Pd_Moreno,Vd_Moreno,'mo','MarkerSize',5,'linewidth',2)
-plot(Pd_pass_Vanh,Vd_pass_sca,'bo','MarkerSize',5,'linewidth',2)
-title('Scaled Moreno data and scaled passive Vanhoutte data')
-set(gca,'FontSize',15)
-xlabel('Volume (mL)')
-ylabel('Pressure (mmHg)')
+    figure(5)
+    clf
+    hold on 
+    plot([min(Vd_pass_sca) max(Vd_pass_sca)],zeros(2,1),'k')
+    plot(zeros(2,1),[min(Pd_pass_Vanh) max(Pd_maxact_Vanh)],'k')
+    plot(Vd_pass_sca,Pd_pass_Vanh,'bo','MarkerSize',5,'linewidth',2)
+    plot(Vd_maxact_sca,Pd_maxact_Vanh,'ko','color',[.5 0 .5],'MarkerSize',5,'linewidth',2)
+    plot(Vd_pass_sca,Pd_act_Vanh,'ro','MarkerSize',5,'linewidth',2)
+    xlabel('Volume (mL)')
+    ylabel('Pressure (mmHg)')
+    set(gca,'FontSize',15)
+    title('Vanhoutte data - volume scaled') 
+end
 
-figure(5)
-clf
-hold on 
-plot([min(Vd_pass_sca) max(Vd_pass_sca)],zeros(2,1),'k')
-plot(zeros(2,1),[min(Pd_pass_Vanh) max(Pd_maxact_Vanh)],'k')
-plot(Vd_pass_sca,Pd_pass_Vanh,'bo','MarkerSize',5,'linewidth',2)
-plot(Vd_maxact_sca,Pd_maxact_Vanh,'ko','color',[.5 0 .5],'MarkerSize',5,'linewidth',2)
-plot(Vd_pass_sca,Pd_act_Vanh,'ro','MarkerSize',5,'linewidth',2)
-xlabel('Volume (mL)')
-ylabel('Pressure (mmHg)')
-set(gca,'FontSize',15)
-title('Vanhoutte data - volume scaled') 
-
-%}
 
 %% Convert scaled Moreno data to length-tension 
 
 % convert pressure from mmHg to Pa
-Pd_Moreno = Pd_Moreno * 133;
+mmHg2SI = 133.322;
+Pd_Moreno = Pd_Moreno * mmHg2SI;
 
 % convert V_0 from mL to m^3
 V_0 = V_0 * 1e-6;
@@ -144,9 +151,9 @@ d = 11.5;
 %% Convert scaled Vanhoutte data to length-tension 
 
 % convert pressure from mmHg to Pa 
-Pd_pass_Vanh = Pd_pass_Vanh * 133; 
-Pd_maxact_Vanh = Pd_maxact_Vanh * 133; 
-Pd_act_Vanh = Pd_act_Vanh * 133; 
+Pd_pass_Vanh = Pd_pass_Vanh * mmHg2SI ; 
+Pd_maxact_Vanh = Pd_maxact_Vanh * mmHg2SI; 
+Pd_act_Vanh = Pd_act_Vanh * mmHg2SI; 
 
 % convert volumes from mL to m^3 
 Vd_pass_sca = Vd_pass_sca * 1e-6; 
@@ -192,7 +199,7 @@ L = 0:.001:Ld_pass_Vanh(end);
 
 T_n = P_n * L_n / (2 * pi);  
 
-P_M = max(Pd_maxact_Vanh/133); 
+P_M = max(Pd_maxact_Vanh/ mmHg2SI ); 
 V_M = 4 * V_0; 
 L_M = 2 * pi * sqrt(V_M / (l * pi)); 
 T_M = P_M * L_M / (2 * pi); 
@@ -207,20 +214,25 @@ fhat = f(L_M)/f(L_n);
 ghat = g(L_M)/g(L_n); 
 hhat = h(L_M)/h(L_n);   
 
-a = (- T_M + T_n / (1 + phibar * (alpha - 1)) * (ghat + (alpha - 1) * hhat)) ...
+a_mmHg = (- T_M + T_n / (1 + A * (alpha - 1)) * (ghat + (alpha - 1) * hhat)) ...
     / (f(L_n) * (ghat - fhat));
-b = (T_M - T_n / (1 + phibar * (alpha - 1)) * (fhat + (alpha - 1) * hhat)) ... 
+b_mmHg = (T_M - T_n / (1 + A * (alpha - 1)) * (fhat + (alpha - 1) * hhat)) ... 
     / (g(L_n) * (ghat - fhat));
-c = T_n / (1 + phibar * (alpha - 1)) * (alpha - 1) / h(L_n);
+c_mmHg = T_n / (1 + A * (alpha - 1)) * (alpha - 1) / h(L_n);
+
 
 % convert from mmHg to kPa 
-a = a * 133;
-b = b * 133;
-c = c * 133; 
+a = a_mmHg * mmHg2SI;
+b = b_mmHg * mmHg2SI;
+c = c_mmHg * mmHg2SI; 
 
+sprintf("a %d, b %d, c %d", a_mmHg, b_mmHg, c_mmHg)
+
+%%
 T_P  = @(L) a * f(L) + b * g(L); 
 T_A  = @(L) c * h(L); 
 
+% build the characteristics
 for i = 1:length(L)
     if L(i) < L_0 
         Tpas(i) = T_P(L(i));  
@@ -230,7 +242,7 @@ for i = 1:length(L)
     else 
         Tpas(i) = T_P(L(i)) + 0 * T_A(L(i)); 
         Tact(i) = T_A(L(i));  
-        Tbar(i) = T_P(L(i)) + phibar * T_A(L(i)); 
+        Tbar(i) = T_P(L(i)) + A * T_A(L(i)); 
         Tmax(i) = T_P(L(i)) + 1 * T_A(L(i)); 
     end 
 end 
@@ -250,50 +262,50 @@ Pmax = 2 * pi * Tmax ./ L;
 Pact = 2 * pi * Tact ./ L;
 
 
-% convert back to mmHg and mL 
-V = V * 1e6; 
+%% convert back to mmHg and mL 
+V_mmHg = V * 1e6; 
 
-Ppas = Ppas / 133; 
-Pbar = Pbar / 133; 
-Pmax = Pmax / 133; 
-Pact = Pact / 133; 
+Ppas_mmHg = Ppas / mmHg2SI; 
+Pbar_mmHg = Pbar / mmHg2SI; 
+Pmax_mmHg = Pmax / mmHg2SI; 
+Pact_mmHg = Pact / mmHg2SI; 
 
-Pd_Moreno = Pd_Moreno / 133; 
-Vd_Moreno = Vd_Moreno * 1e6; 
+Pd_Moreno_mmHg = Pd_Moreno / mmHg2SI; 
+Vd_Moreno_mmHg = Vd_Moreno * 1e6; 
 
-Pd_pass_Vanh   = Pd_pass_Vanh / 133; 
-Pd_maxact_Vanh = Pd_maxact_Vanh / 133; 
-Pd_act_Vanh    = Pd_act_Vanh / 133; 
+Pd_pass_Vanh_mmHg   = Pd_pass_Vanh / mmHg2SI; 
+Pd_maxact_Vanh_mmHg = Pd_maxact_Vanh / mmHg2SI; 
+Pd_act_Vanh_mmHg    = Pd_act_Vanh / mmHg2SI; 
 
-Vd_pass_sca   = Vd_pass_sca * 1e6; 
-Vd_maxact_sca = Vd_maxact_sca * 1e6; 
+Vd_pass_sca_mmHg   = Vd_pass_sca * 1e6; 
+Vd_maxact_sca_mmHg = Vd_maxact_sca * 1e6; 
 
-V_0 = V_0 * 1e6; 
-V_M = V_M * 1e6; 
+V_0_mmHg = V_0 * 1e6; 
+V_M_mmHg = V_M * 1e6; 
 
 figure(7) 
 clf 
 hold on 
-plot([0 V_M+1],zeros(2,1),'k')
-plot([0 V_M+1],P_n * ones(2,1),'k:')
-plot([0 V_M+1],P_M * ones(2,1),'k:')
+plot([0 V_M_mmHg+1],zeros(2,1),'k')
+plot([0 V_M_mmHg+1],P_n * ones(2,1),'k:')
+plot([0 V_M_mmHg+1],P_M * ones(2,1),'k:')
 plot(zeros(2,1),[-20 50],'k')
-plot(V_0 * ones(2,1),[-20 50],'k:')
+plot(V_0_mmHg * ones(2,1),[-20 50],'k:')
 plot(V_n * ones(2,1),[-20 50],'k:')
-plot(V_M * ones(2,1),[-20 50],'k:')
-l1 = plot(Vd_Moreno,Pd_Moreno,'mo','MarkerSize',5,'linewidth',2);
-l2 = plot(Vd_pass_sca,Pd_pass_Vanh,'bo','MarkerSize',5,'linewidth',2);
-l3 = plot(Vd_maxact_sca,Pd_maxact_Vanh,'ko','color',[.5 0 .5],'MarkerSize',5,'linewidth',2);
-l4 = plot(Vd_pass_sca,Pd_act_Vanh,'ro','MarkerSize',5,'linewidth',2);
-plot(V,Ppas,'b','linewidth',2)
-plot(V,Pbar,'g','linewidth',2)
-plot(V,Pmax,'k','color',[.5 0 .5],'linewidth',2)
-plot(V,Pact,'r','linewidth',2)
+plot(V_M_mmHg * ones(2,1),[-20 50],'k:')
+l1 = plot(Vd_Moreno_mmHg,Pd_Moreno_mmHg,'mo','MarkerSize',5,'linewidth',2);
+l2 = plot(Vd_pass_sca_mmHg,Pd_pass_Vanh_mmHg,'bo','MarkerSize',5,'linewidth',2);
+l3 = plot(Vd_maxact_sca_mmHg,Pd_maxact_Vanh_mmHg,'ko','color',[.5 0 .5],'MarkerSize',5,'linewidth',2);
+l4 = plot(Vd_pass_sca_mmHg,Pd_act_Vanh_mmHg,'ro','MarkerSize',5,'linewidth',2);
+plot(V_mmHg,Ppas_mmHg,'b','linewidth',2)
+plot(V_mmHg,Pbar_mmHg,'g','linewidth',2)
+plot(V_mmHg,Pmax_mmHg,'k','color',[.5 0 .5],'linewidth',2)
+plot(V_mmHg,Pact_mmHg,'r','linewidth',2)
 ylabel('Pressure (mmHg)')
 xlabel('Volume (mL)')
 set(gca,'FontSize',15)
 legend([l1 l2 l3 l4],'Moreno data','Vanh pass','Vanh maxact','Vanh act','location','northwest')
-xlim([0 V_M+1])
+xlim([0 V_M_mmHg+1])
 ylim([-20 50])
 
 
