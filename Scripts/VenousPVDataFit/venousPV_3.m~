@@ -52,7 +52,7 @@ V_n = 50;   % mL - From Filip's simulations' approximations
 l   = 20;   % cm - From Cell ML model 
 
 gamma = 0.5;  % scaling factor
-V_0   = gamma * V_n; % mL
+V_0 = gamma * V_n; % mL
 
 %% Transform Moreno data using V_0
 
@@ -145,7 +145,7 @@ set(gca,'FontSize',15)
 Used cftool on Ld_Moreno and Td_Moreno to fit parameter d = 15
 (dimensionless) 
 %}
-d = 11.5; 
+d = 5; 
 
 %% Convert scaled Vanhoutte data to length-tension 
 
@@ -250,6 +250,7 @@ Ppas = 2 * pi * Tpas ./ L;
 Pbar = 2 * pi * Tbar ./ L; 
 Pmax = 2 * pi * Tmax ./ L; 
 Pact = 2 * pi * Tact ./ L;
+
 
 %% convert back to mmHg and mL 
 V_mL = V * 1e6; 
