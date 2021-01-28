@@ -1,0 +1,25 @@
+﻿createPlot(id=1, position={0, 0, 600, 400}, y={"brachial_pressure_mean", "brachial_pressure_diastolic", "brachial_pressure_systolic",
+ "brachial_pressure", "HR", "CO"}, range={0.0, 120.0, 20.0, 140.0}, autoscale=false, grid=true, filename="imp.mat", colors={{28,108,200}, {28,108,200}, {28,108,200}, {28,108,200}, {238,46,47}, 
+{217,67,180}}, patterns={LinePattern.Solid, LinePattern.Solid, LinePattern.Solid, LinePattern.Solid, 
+LinePattern.Solid, LinePattern.Dash}, thicknesses={0.25, 0.25, 0.25, 0.25, 0.25, 1.0}, range2={0.0, 10.0}, axes={1, 1, 1, 1, 1, 2}, displayUnits={"mmHg", "mmHg", "mmHg", "mmHg", "1/min", "l/min"});
+
+// tilt
+plotHeading("60deg HUT normal", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_base", stopTime=120, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_tiltBase");
+ExportPlotAsImage("fig5Tilt_normal.png", id=1)
+ExportPlotAsImage("fig5Tilt_normal.svg", id=1)
+
+plotHeading("60deg HUT no venoconstriction, linear veins", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_noVcLin", stopTime=120, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_noVcLin");
+ExportPlotAsImage("fig5Tilt_noVCLin.png", id=1)
+ExportPlotAsImage("fig5Tilt_noVCLin.svg", id=1)
+
+plotHeading("60deg HUT no baroreflex", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_noBaro", stopTime=120, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_noBaro");
+ExportPlotAsImage("fig5Tilt_noBaro.png", id=1)
+ExportPlotAsImage("fig5Tilt_noBaro.svg", id=1)
+
+plotHeading("60deg HUT no baroreflex, lin veins", id=1)
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltAuto.imp_noBaroLinV", stopTime=120, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_noBaroLinV");
+ExportPlotAsImage("fig5Tilt_noBaroNoVCLin.png", id=1)
+ExportPlotAsImage("fig5Tilt_noBaroNoVCLin.svg", id=1)
