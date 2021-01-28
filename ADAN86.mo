@@ -1400,12 +1400,13 @@ type"),       Text(
         parameter Modelica.SIunits.Time startTime = 0;
         parameter Modelica.SIunits.Time interval = 1;
 
-        parameter Real offset = 0;
-        parameter Real increment = 1;
-        parameter Real maxVal = 10;
+        parameter Physiolibrary.Types.Fraction offset = 0;
+        parameter Physiolibrary.Types.Fraction increment = 1;
+        parameter Physiolibrary.Types.Fraction maxVal = 10;
 
         Modelica.SIunits.Time t0(start = -interval);
-        Real y_(start = offset) "non dealayed val";
+        Physiolibrary.Types.Fraction y_(start = offset) "non dealayed val";
+        Physiolibrary.Types.Fraction plot_Step "Use as X axis for exercise stepping. Plots the state just before the next step increase";
         parameter Real tau = 1;
       equation
 
@@ -1414,6 +1415,11 @@ type"),       Text(
         when time > startTime and time > pre(t0) + interval then
           y_ = min(pre(y) + increment, maxVal);
           t0 = if y < maxVal then time else pre(t0);
+        end when;
+
+
+        when time > startTime - interval/2 and time > pre(t0) + interval/2 then
+          plot_Step = y_ + increment/2;
         end when;
 
         annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={Line(
@@ -34372,6 +34378,19 @@ P_hs_plus_dist"),
           Tolerance=1e-06,
           __Dymola_Algorithm="Cvode"));
     end simpleVenuosTest;
+
+    model testStepping
+                  Components.Signals.Stepping  Exercise(
+        startTime=40,
+        interval=40,
+        increment=0.1,
+        maxVal=1)
+        annotation (Placement(transformation(extent={{-86,42},{-66,62}})));
+
+    Real s = time;
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)));
+    end testStepping;
   end tests;
 
   package SimpleValsalva "Simplest valsalva, reimplemented from Dan Beard's Matlab code "

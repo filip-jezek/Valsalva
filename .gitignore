@@ -19,7 +19,9 @@ failure
 status
 success
 .DS_Store
-	
+buildlog.txt
+errorLog.txt
+debug/
 /mult*.csv
 /*.txt
 /modelDescription.xml
