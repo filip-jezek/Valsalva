@@ -6687,6 +6687,7 @@ type"),       Text(
                     rotation=0, extent={{90,-10},{110,10}}), iconTransformation(extent={{80,60},
                       {120,100}})));
             Physiolibrary.Types.Time t0_last "length of the last cardiac cycle";
+            Physiolibrary.Types.Frequency HR_true(start = 1) "Heart rate calculated from true systolic intervals";
             Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
                   transformation(rotation=0, extent={{-110,-10},{-90,10}})));
             Physiolibrary.Types.RealIO.FractionInput phiInput annotation (Placement(
@@ -6701,6 +6702,7 @@ type"),       Text(
                   iconTransformation(extent={{80,-100},{120,-60}})));
             Integer beats(start = 0);
           equation
+
             t0 = cardiac_cycle / frequency;
             der(cardiac_cycle) = frequency;
 
@@ -6708,6 +6710,7 @@ type"),       Text(
               reinit(cardiac_cycle, 0);
               // t0 is zero now
               t0_last = pre(t0);
+              HR_true = 1/max(1e-3, t0_last);
               beats = pre(beats) + 1;
             end when;
 
@@ -9472,11 +9475,11 @@ P_hs/2")}));
               parameter Physiolibrary.Types.Volume V_n =   V0 "nominal aka initial volume";
 
               // ACTIVE REGULATION
-              outer Physiolibrary.Types.Fraction A(start = A_n) "Activation fraction";
-            //  Physiolibrary.Types.Fraction A_inf = min(max(0.01, (phi_ - settings.veins_phi_no)*phi_ns), 1) "Instantenaous activation fraction";
+              Physiolibrary.Types.Fraction A(start = A_n) "Activation fraction";
+              Physiolibrary.Types.Fraction A_inf = min(max(0.01, (phi_ - settings.veins_phi_no)*phi_ns), 1) "Instantenaous activation fraction";
 
-              outer parameter Physiolibrary.Types.Fraction A_n;// = min(max(0.001, (phi0 - settings.veins_phi_no)*phi_ns), 1) "nominal activation fraction";
-              //parameter Real phi_ns = 1/((1 - settings.veins_phi_no)) "slope of nonlinear phi adjustment. Default is symmetric around the center";
+              parameter Physiolibrary.Types.Fraction A_n = min(max(0.001, (phi0 - settings.veins_phi_no)*phi_ns), 1) "nominal activation fraction";
+              parameter Real phi_ns = 1/((1 - settings.veins_phi_no)) "slope of nonlinear phi adjustment. Default is symmetric around the center";
             //  parameter Real phi_no =  0.2 "Offset of nonlinear phi adjustment";
               // parameter Modelica.SIunits.Time tau = settings.veins_activation_tau;
 
@@ -9562,19 +9565,19 @@ P_hs/2")}));
 
                end if;
 
-            //   if settings.veins_delayed_activation then
-            //
-            //     if A_inf >= A then
-            //       // constricting
-            //       der(A)*settings.veins_activation_tau  = A_inf  - A;
-            //     else
-            //       // relaxing
-            //       der(A)*settings.veins_relaxation_tau  = A_inf  - A;
-            //     end if;
-            //
-            //   else
-            //     A_inf = A;
-            //   end if;
+              if settings.veins_delayed_activation then
+
+                if A_inf >= A then
+                  // constricting
+                  der(A)*settings.veins_activation_tau  = A_inf  - A;
+                else
+                  // relaxing
+                  der(A)*settings.veins_relaxation_tau  = A_inf  - A;
+                end if;
+
+              else
+                A_inf = A;
+              end if;
 
               // VOLUME equation - already contained in base class
               // Modelica.Constants.pi*r^2*l  =  V;
@@ -14739,11 +14742,6 @@ P_hs_plus_dist"),
           inner Physiolibrary.Types.Fraction Exercise;
           inner Physiolibrary.Types.Fraction adenosine;
 
-          inner Physiolibrary.Types.Fraction A(start = A_n) "Activation fraction";
-          Physiolibrary.Types.Fraction A_inf = min(max(0.01, (phi - settings.veins_phi_no)*phi_ns), 1) "Instantenaous activation fraction";
-          inner parameter Physiolibrary.Types.Fraction A_n = min(max(0.001, (settings.phi0 - settings.veins_phi_no)*phi_ns), 1) "nominal activation fraction";
-          parameter Real phi_ns = 1/((1 - settings.veins_phi_no)) "slope of nonlinear phi adjustment. Default is symmetric around the center";
-
           parameter Boolean UseBaroreflexOutput = false annotation(choices(checkBox=true));
           parameter Boolean UseThoracic_PressureInput = false annotation(choices(checkBox=true));
           parameter Boolean UseOuter_PressureInput = false annotation(choices(checkBox=true));
@@ -14813,23 +14811,6 @@ P_hs_plus_dist"),
           if not UseAdenosineInput then
             adenosine = 0;
           end if;
-
-          if settings.veins_UsePhiEffect and settings.veins_delayed_activation then
-
-            if A_inf >= A then
-              // constricting
-              der(A)*settings.veins_activation_tau  = A_inf  - A;
-            else
-              // relaxing
-              der(A)*settings.veins_relaxation_tau  = A_inf  - A;
-            end if;
-
-          elseif settings.veins_UsePhiEffect then
-            A_inf = A;
-          else
-            A = A_n;
-          end if;
-
           connect(baroreflex_system.phiOutput, phi_baroreflex) annotation (Line(
                 points={{-222,152},{-190,152},{-190,148},{-182,148}}, color={0,
                   0,127}));
@@ -26816,13 +26797,13 @@ P_hs_plus_dist"),
           parameter Modelica.SIunits.Time tau = 10;
           parameter Physiolibrary.Types.Pressure deltaPi=1066.57909932;
 
-          parameter Physiolibrary.Types.HydraulicConductance k1 = 7.35e-12;
-          parameter Physiolibrary.Types.HydraulicConductance k2 = 1.085e-10;
-          parameter Physiolibrary.Types.HydraulicConductance k3 = 2.4e-10;
+          parameter Physiolibrary.Types.HydraulicConductance k1=7.35e-12;
+          parameter Physiolibrary.Types.HydraulicConductance k2=1.085e-10;
+          parameter Physiolibrary.Types.HydraulicConductance k3=2.4e-10;
 
           Physiolibrary.Types.Pressure p_int(displayUnit="mmHg"); // =1333.22387415;
-          Physiolibrary.Types.Volume v_int;
-          parameter Real c_int = 1;
+        //  Physiolibrary.Types.Volume v_int;
+         // parameter Real c_int = 1;
           Physiolibrary.Types.Pressure p_lymph(displayUnit="mmHg"); //=799.93432449;
           Physiolibrary.Types.Pressure p_vc_mean( start = 666);
 
@@ -26831,13 +26812,28 @@ P_hs_plus_dist"),
                                 iconTransformation(extent={{-100,-100},{-80,-80}})));
 
           Physiolibrary.Types.VolumeFlowRate lymph_flow               "normal Lymphatic flow per day is 5.787037037037e-08";
+
+
+        parameter Real p1 =   6.443e-09;
+        parameter Real p2 =   4.159e-05;
+        parameter Real p3 =       1.045;
+        parameter Real a =        1.06;
+        parameter Real b =  -5.451e-05;
+        parameter Real c =     -0.7703;
+        parameter Real d =  -0.0007743;
+        parameter Physiolibrary.Types.Pressure p_int_diff(displayUnit="mmHg")=1866.51342381;
+        Physiolibrary.Types.Pressure x = p_int - p_int_diff;
+        Physiolibrary.Types.Fraction Vr = max(0, p1*x.^2 + p2*x + p3) + max(0,a*exp(b*x) + c*exp(d*x));
+        parameter Physiolibrary.Types.Volume V_normal(displayUnit="l")=0.07;
+        Physiolibrary.Types.Volume V_int = V_excess + V_normal*0.7;
+        Physiolibrary.Types.Volume V_excess(min = -V_normal) = V_normal*(Vr -1);
         equation
           sum(J1) = J2;
           J2 = J3;
 
           lymph_flow = J3;
 
-          v_int = p_int*c_int;
+        //  v_int = p_int*c_int;
 
           for i in 1:nc loop
             k1*(capillaryPressures_mean[i] - deltaPi - p_int) = J1[i];
@@ -26851,6 +26847,26 @@ P_hs_plus_dist"),
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end SimplestLymphatic;
+
+        package Testers
+            extends Modelica.Icons.ExamplesPackage;
+          model LymphaticTest
+            SimplestLymphatic simplestLymphatic(nc=1, p_int_diff=2666.4477483)
+              annotation (Placement(transformation(extent={{-20,0},{0,20}})));
+            Modelica.Blocks.Sources.Ramp Pcap(height=0, offset=2666)
+              annotation (Placement(transformation(extent={{-80,20},{-60,40}})));
+            Modelica.Blocks.Sources.Ramp Pv(height=0, offset=533) annotation (
+                Placement(transformation(extent={{-80,-40},{-60,-20}})));
+          equation
+            connect(Pcap.y, simplestLymphatic.capillaryPressures[1])
+              annotation (Line(points={{-59,30},{-40,30},{-40,10},{-19,10}},
+                  color={0,0,127}));
+            connect(simplestLymphatic.p_vc, Pv.y) annotation (Line(points={{-19,
+                    1},{-40,1},{-40,-30},{-59,-30}}, color={0,0,127}));
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)),
+                Diagram(coordinateSystem(preserveAspectRatio=false)));
+          end LymphaticTest;
+        end Testers;
       end Lymphatic;
     end Subsystems;
 
@@ -37515,22 +37531,10 @@ P_hs_plus_dist"),
           veins_UseNonLinearVeins=true,
           veins_linearE_rel=765,
           veins_linearV0_rel=0.793,
+          veins_delayed_activation=true,
           veins_activation_tau=1,
           baro_fsn=0.038),
         useAutonomousPhi(y=true));
-      Components.Subsystems.Lymphatic.SimplestLymphatic simplestLymphatic(nc=23)
-        annotation (Placement(transformation(extent={{48,48},{68,68}})));
-      Physiolibrary.Hydraulic.Sensors.PressureMeasure pressureMeasure
-        annotation (Placement(transformation(extent={{16,34},{36,54}})));
-    equation
-      connect(SystemicComponent.capillaryPressures, simplestLymphatic.capillaryPressures)
-        annotation (Line(points={{-10.2,45.6},{-10.2,58},{49,58}}, color={0,0,127}));
-      connect(pressureMeasure.q_in, SystemicComponent.port_b) annotation (Line(
-          points={{22,38},{18,38},{18,28}},
-          color={0,0,0},
-          thickness=1));
-      connect(pressureMeasure.pressure, simplestLymphatic.p_vc) annotation (Line(
-            points={{32,40},{38,40},{38,49},{49,49}}, color={0,0,127}));
     end CardiovascularSystem;
 
     package Auxiliary
@@ -37974,7 +37978,7 @@ P_hs_plus_dist"),
         output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
         output Physiolibrary.Types.Fraction phi_baro= switch1.u1;
       output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
-      output Physiolibrary.Types.Frequency HR = heartRate.HR;
+      output Physiolibrary.Types.Frequency HR = heartComponent.sa_node.HR_true;
 
       Real CI = CO*1000*60/settings.BSA "Cardiac index l/min/m2";
       Physiolibrary.Types.Power CardiacPowerBrachial = brachial_pressure_mean*CO;
@@ -47316,11 +47320,6 @@ P_hs_plus_dist"),
 
       model CVS_tiltable_noBaro
         extends CVS_tiltable(useAutonomousPhi(y=false));
-        annotation (experiment(
-            StopTime=120,
-            Interval=0.02,
-            Tolerance=1e-06,
-            __Dymola_Algorithm="Cvode"));
       end CVS_tiltable_noBaro;
     end Tilt;
 
@@ -47571,7 +47570,11 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
         output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
         output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        Physiolibrary.Types.VolumeFlowRate q_exercised_avg;
+        Physiolibrary.Types.VolumeFlowRate q_exercised=
+          SystemicComponent.internal_iliac_T1_R218.port_a.q + SystemicComponent.profundus_T2_R224.port_a.q + SystemicComponent.anterior_tibial_T3_R230.port_a.q + SystemicComponent.posterior_tibial_T4_R236.port_a.q + SystemicComponent.posterior_tibial_T4_L214.port_a.q + SystemicComponent.anterior_tibial_T3_L208.port_a.q + SystemicComponent.profundus_T2_L202.port_a.q + SystemicComponent.internal_iliac_T1_L196.port_a.q;
       equation
+        der(q_exercised_avg)*5 = q_exercised - q_exercised_avg;
         connect(Exercise.y, SystemicComponent.exercise_input) annotation (Line(
               points={{-79,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
         annotation (experiment(
@@ -48728,7 +48731,7 @@ P_hs_plus_dist"),
             end imp_noValves;
 
             model imp_arSt
-              extends imp_base(settings(syst_art_k_E=0.8));
+              extends imp_base(settings(syst_art_k_E=0.8, baro_tau_s=10));
             end imp_arSt;
 
             model imp_arSt_ss
@@ -52099,6 +52102,60 @@ P_hs_plus_dist"),
             connect(bleeding_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
                     -60},{58,-60},{58,-81}}, color={0,0,127}));
             end imp_hemr;
+
+            model imp_chronotropy
+            extends imp_base(condHRPhi(disconnected=true));
+            end imp_chronotropy;
+
+            model imp_inotropy
+            extends imp_base(settings(
+                heart_vntr_D_0_maxAct=settings.heart_vntr_D_0,
+                heart_vntr_D_A_maxAct(displayUnit="mmHg/ml") = settings.heart_vntr_D_A,
+                heart_atr_D_0(displayUnit="1")));
+
+            end imp_inotropy;
+
+            model imp_noAR "Impaired atonomous tissue relaxation during exercise"
+              extends imp_base(settings(tissues_chi_R=0));
+            end imp_noAR;
+
+            model imp_noComp "No exercise related changes in tissue compliance"
+            extends imp_base(settings(tissue_chi_C=0));
+            end imp_noComp;
+
+            model Tilted60
+              extends imp_base(SystemicComponent(UseTiltInput=true));
+              replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
+                height=Modelica.Constants.pi/3,
+              startTime=0,
+                duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
+                annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
+            equation
+              connect(Tilt_ramp.y, SystemicComponent.tilt_input) annotation (Line(
+                    points={{-79,32},{-22,32},{-22,20}}, color={0,0,127}));
+
+            end Tilted60;
+
+            model Tilted_90
+            extends Tilted60(Tilt_ramp(height=Modelica.Constants.pi/2));
+            end Tilted_90;
+
+            model Tilted60_noVC
+            extends Tilted60(settings(veins_UsePhiEffect=false));
+            end Tilted60_noVC;
+
+            model Tilted60_noVCLin
+            extends Tilted60(settings(veins_UseNonLinearVeins=false,
+                  veins_UsePhiEffect=false));
+            end Tilted60_noVCLin;
+
+            model Tilted_90_noVC
+              extends Tilted_90(settings(veins_UsePhiEffect=false));
+            end Tilted_90_noVC;
+
+            model Tilted_90_noVCLin
+              extends Tilted_90(settings(veins_UseNonLinearVeins=false, veins_UsePhiEffect=false));
+            end Tilted_90_noVCLin;
           end ExStepping;
 
         model CVS_Normal "Base class for Normal package"
@@ -52113,9 +52170,13 @@ P_hs_plus_dist"),
             extends Tilt.CVS_tiltable;
         end CVS_TiltAuto;
 
-        model CVS_TiltNoBaro "Base class for Normal package"
+        model CVS_TiltNoBaro "Tilt with elevated baroreflex to match the tilted one"
             extends Tilt.CVS_tiltable(useAutonomousPhi(y=false), phi_fixed(offset=0.356));
         end CVS_TiltNoBaro;
+
+        model CVS_TiltRestingBaro "Tilt with clamped resting baro"
+          extends Tilt.CVS_tiltable(useAutonomousPhi(y=false), phi_fixed(offset=0.25));
+        end CVS_TiltRestingBaro;
 
         model CVS_VMAuto "Base class for Normal package"
             extends Valsalva.CVS_valsalva;
@@ -52138,7 +52199,8 @@ P_hs_plus_dist"),
         end CVS_Ex90;
 
         model CVS_ExStepping "Gradually increased exercise"
-          extends Exercise.CVS_Exercise_stepping;
+          extends Exercise.CVS_Exercise_stepping(settings(
+                veins_delayed_activation=false));
         end CVS_ExStepping;
       end Impairments;
 
@@ -52407,8 +52469,24 @@ P_hs_plus_dist"),
            Real eGFR_m "Mean total GFR scaled to BSA";
            parameter Real tau_gfr = 3;
 
+          Components.Subsystems.Lymphatic.SimplestLymphatic simplestLymphatic(
+            nc=23,
+            tau=0.01,
+            p_int_diff(displayUnit="Pa") = 2700)
+            annotation (Placement(transformation(extent={{40,50},{60,70}})));
+          Physiolibrary.Hydraulic.Sensors.PressureMeasure pressureMeasure
+            annotation (Placement(transformation(extent={{10,34},{30,54}})));
         equation
           der(eGFR_m)*tau_gfr = eGFR - eGFR_m;
+          connect(SystemicComponent.capillaryPressures,simplestLymphatic. capillaryPressures)
+            annotation (Line(points={{-10.2,45.6},{-10.2,60},{41,60}}, color={0,0,127}));
+          connect(pressureMeasure.pressure,simplestLymphatic. p_vc) annotation (Line(
+                points={{26,40},{34,40},{34,51},{41,51}}, color={0,0,127}));
+          connect(SystemicComponent.port_b, pressureMeasure.q_in) annotation (
+              Line(
+              points={{18,28},{18,38},{16,38}},
+              color={0,0,0},
+              thickness=1));
         end CardiovascularSystem_Renals;
 
         model CardiovascularSystem_RenalsPInt
@@ -52507,6 +52585,25 @@ P_hs_plus_dist"),
             annotation (Line(points={{-112,-25},{-112,1}}, color={0,0,127}));
         end CVS_renalRegulation;
 
+        model Renals_CHF_VolumeCongestion
+          extends Renals_CHF(settings(V_PV_init=0));
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(
+              useSolutionFlowInput=true, SolutionFlow(displayUnit="m3/s"))
+            annotation (Placement(transformation(extent={{60,-104},{40,-84}})));
+          Modelica.Blocks.Sources.Step step(
+            height=1e-05,
+            offset=0,
+            startTime=100)
+            annotation (Placement(transformation(extent={{94,-82},{74,-62}})));
+        equation
+          connect(step.y, unlimitedPump.solutionFlow) annotation (Line(points={
+                  {73,-72},{50,-72},{50,-87}}, color={0,0,127}));
+          connect(unlimitedPump.q_out, heartComponent.sv) annotation (Line(
+              points={{40,-94},{24,-94},{24,-16},{16,-16},{16,-16.4},{-16,-16.4}},
+              color={0,0,0},
+              thickness=1));
+
+        end Renals_CHF_VolumeCongestion;
       end Renals;
     end Variations;
 

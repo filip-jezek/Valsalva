@@ -1,0 +1,12 @@
+﻿simulateModel("ADAN_main.SystemicTree.Baseline.CVS_baseline", stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_baseline");
+simulateModel("ADAN_main.SystemicTree.Valsalva.CVS_valsalva", stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_valsalva");
+simulateModel("ADAN_main.SystemicTree.Exercise.CVS_exercise", stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_exercise");
+simulateModel("ADAN_main.SystemicTree.Tilt.CVS_tiltable", stopTime=120, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_tilt");
+
+
+// experiments
+simulateModel("ADAN_main.SystemicTree.Tilt.CVS_upsideDown", stopTime=240, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_upsideDown");
+simulateModel("ADAN_main.SystemicTree.Experiments.Hemorrhage", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="Hemorrhage");
+simulateModel("ADAN_main.SystemicTree.Experiments.HFpEF", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="HFpEF");
+simulateModel("ADAN_main.SystemicTree.Experiments.HFrEF", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="HFrEF");
+simulateModel("ADAN_main.SystemicTree.Experiments.HFrEF_noBaroHyperVol", stopTime=60, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="HFrEF_noBaroHyperVol");

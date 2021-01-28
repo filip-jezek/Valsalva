@@ -1,6 +1,6 @@
 
 clear all
-plotAll = true;
+plotAll = false;
 
 %% Data
 %{
@@ -47,7 +47,7 @@ veins_phi_no = 0.2;
 phi_ns = 1/((1 - veins_phi_no));
 A = min(max(0.001, (phibar - veins_phi_no)*phi_ns), 1)
 
-P_n = 4; %(max(Pd_Moreno) - min(Pd_Moreno)) * A;    % mmHg
+P_n = 4.4; %(max(Pd_Moreno) - min(Pd_Moreno)) * A;    % mmHg
 V_n = 50;   % mL - From Filip's simulations' approximations 
 l   = 20;   % cm - From Cell ML model 
 

@@ -56,6 +56,8 @@ def plotTargetValues(ax, objectives, valsalva_start, valsalva_end, time):
 
     costs_legend = []
     def plotMetric(t_val, t_offset, val, baseline, color, showYerr = True, showXerr = True):
+        if fun_lib.getObjectiveByName(objectives, val).costFunctionType == fun_lib.CostFunctionType.Ignore:
+            return
         val_mean = getTrgtVal(val)*baseline
         val_std = getTrgtVar(val)*baseline if showYerr else None
         t_mean = getTrgtVal(t_val) + t_offset
@@ -198,7 +200,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         (sig, phase, phase_offset, fun, baseline, name, include_in_cost) = o
         interval, _ = getInterval(phase, phase_offset)
         value = fun(sig[interval])/baseline
-        return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost)
+        return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost, base = baseline)
 
     def buildTimeObjective(to):
         (sig, phase, phase_offset, fun, name, include_in_cost) = to
@@ -211,7 +213,7 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         o = fun_lib.getObjectiveByName(objectives, timeObjName).value + phase[0]
         i = fun_lib.findLowestIndex(o, time)
         value = ppulse[i]/baseline_pp
-        return fun_lib.ObjectiveVar(name, value=value, weight=weight, costFunctionType=include_in_cost)
+        return fun_lib.ObjectiveVar(name, value=value, weight=weight, costFunctionType=include_in_cost, base=baseline_pp)
 
     def buildSVObjective(svo):
         (phase, phase_offset, name, limit, weight, include_in_cost) = svo
@@ -316,6 +318,8 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
 
         # get objective by name shortcuts
         def getObj(name):
+            if fun_lib.getObjectiveByName(objectives, name).costFunctionType == fun_lib.CostFunctionType.Ignore:
+                return -100
             return fun_lib.getObjectiveByName(objectives, name).value
         
         # ax.plot(phase0, [baseline_bp]*2, 'k')

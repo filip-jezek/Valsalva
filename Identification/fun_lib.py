@@ -42,6 +42,7 @@ class ObjectiveVar:
                 weight=1, 
                 k_p=1e3, 
                 std = None,
+                base = 1,
                 costFunctionType=CostFunctionType.Quadratic):
         self.name = name
         self.targetValue = targetValue
@@ -54,6 +55,7 @@ class ObjectiveVar:
         # standard deviation
         self.std = std
         self.base_cost = None
+        self.base = base
 
     def __cost_function(self, measured, target):
         # calculate costs. Could go negative or NaN for negative or zero measured values!
@@ -127,17 +129,22 @@ class ObjectiveVar:
         else:
             return True
 
-    def target_log(self):
+    def target_log(self, normalizeToBase = False):
+        if normalizeToBase:
+            base = self.base
+        else:
+            base = 1.0
+
         if self.costFunctionType is CostFunctionType.DistanceFromZero:
             target = "%d" % 0
-        elif self.targetValue  is not None:
-            target = "%.3g" % self.targetValue
+        elif self.targetValue is not None:
+            target = "%.3g" % (self.targetValue*base)
         elif self.limit is not None:
             if self.value < self.limit[1]:
                 # lower than upper bound - print the lower one
-                target = '>%0.3g' % self.limit[0]
+                target = '>%0.3g' % (self.limit[0]*base)
             else: # self.value >
-                target = '<%0.3g' %self.limit[1]
+                target = '<%0.3g' % (self.limit[1]*base)
                 # target = ' in limit' if self.inLimit() else 'out limit'
         else:
             target = ' ??wat?? '
@@ -605,7 +612,7 @@ def logObjectives(objectivesLog_path, objectives, sortBy = 'cost', compare_to_lo
                     return sorted(objectives, key = lambda o: o.name, reverse=False)
             
             for o in sortedObjectives():
-                s = '%s,%.3e ,%s ,%.3e , %02.0f  , %s\n' % (o.name.ljust(max_name_len), o.value, o.target_log(), o.cost(), round(o.cost()/total_cost*100), o.cost_to_base_comparisson())
+                s = '%s,%.3e ,%s ,%.3e , %02.0f  , %g, %s, %s\n' % (o.name.ljust(max_name_len), o.value, o.target_log(), o.cost(), round(o.cost()/total_cost*100), o.value*o.base, o.target_log(normalizeToBase=True), o.cost_to_base_comparisson())
                 file.write(s)
                 if printToStdin:
                     print(s)

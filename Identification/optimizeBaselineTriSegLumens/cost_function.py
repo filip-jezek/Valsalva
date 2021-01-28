@@ -96,35 +96,35 @@ def getObjectives(vars_set):
         distance)
 
     # build costs
-    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), 120*mmHg2SI, None, 0),
-            ('BPd', min(vars_set['brachial_pressure'][interval]), 80*mmHg2SI, None, 0),
-            ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1e-1),
-            ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1e-1),
-            ('ESV_la', numpy.min(vars_set['V_la'][interval]), 12*ml2SI, None, 1e-2),
-            ('EDV_la', numpy.max(vars_set['V_la'][interval]), 41*ml2SI, None, 1e-2),
-            ('Q_MV_f', vla_peak_frac, None, [1.5, 2], 1e-3),
-            ('Qdot_mv', atrial_kick, None, [0.2, 0.3], 1e-3),
-            ('q_mv_sad', q_mv_saddle, None, [0, q_mv_Patrial*0.2], 1e-3),
-            ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, 1),
-            ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, 0),            
-            ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 1), 
+    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), 120*mmHg2SI, None, 0, 1/mmHg2SI),
+            ('BPd', min(vars_set['brachial_pressure'][interval]), 80*mmHg2SI, None, 0, 1/mmHg2SI),
+            ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1e-1, 1/ml2SI),
+            ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1e-1, 1/ml2SI),
+            ('ESV_la', numpy.min(vars_set['V_la'][interval]), 12*ml2SI, None, 1e-2, 1/ml2SI),
+            ('EDV_la', numpy.max(vars_set['V_la'][interval]), 41*ml2SI, None, 1e-2, 1/ml2SI),
+            ('Q_MV_f', vla_peak_frac, None, [1.5, 2], 1e-3, 100),
+            ('Qdot_mv', atrial_kick, None, [0.2, 0.3], 1e-3, 100),
+            ('q_mv_sad', q_mv_saddle, None, [0, q_mv_Patrial*0.2], 1e-3, 1),
+            ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, 1, 1),
+            ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, 0, 1),            
+            ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 1, 1/bpm2SI), 
 # set by assumption and loop closed
 #            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1), 
 # set by EDV and ESV
 #            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), EF_target, None, 1),
 # set by HR and EDV AND ESV, just emphasized here
-            ('CO', sum(vars_set['CO'][interval]) / len(interval), 5.76*lpm2SI, None, 10),
-            ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), 20*mmHg2SI, None, 0),
-            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, 0),
-            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, 0),
-            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, 1),
+            ('CO', sum(vars_set['CO'][interval]) / len(interval), 5.76*lpm2SI, None, 10, 1/lpm2SI),
+            ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), 20*mmHg2SI, None, 0, 1/mmHg2SI),
+            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, 0, 1/mmHg2SI),
+            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, 0, 1/mmHg2SI),
+            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, 1, 1/mmHg2SI),
             # ('EDP', numpy.min(vars_set['P_LV'][interval]), None, [6*mmHg2SI, 12*mmHg2SI], 1e-3),
-            ('P_MV_o', numpy.mean(vars_set['P_MV_o'][interval]), 4.5*mmHg2SI, None, 1),
-            ('P_MV_c', numpy.mean(vars_set['P_MV_c'][interval]), 6*mmHg2SI, None, 1),
-            ('BPMeanStd', numpy.std(vars_set['brachial_pressure_mean'][steady_interval]), None, [0, 4*mmHg2SI], 0),
-            ('PWV', pwv, None, [5, 10], 1)            ]
+            ('P_MV_o', numpy.mean(vars_set['P_MV_o'][interval]), 4.5*mmHg2SI, None, 1, 1/mmHg2SI),
+            ('P_MV_c', numpy.mean(vars_set['P_MV_c'][interval]), 6*mmHg2SI, None, 1, 1/mmHg2SI),
+            # ('BPMeanStd', numpy.std(vars_set['brachial_pressure_mean'][steady_interval]), None, [0, 4*mmHg2SI], 0, 1/mmHg2SI),
+            ('PWV', pwv, None, [5, 10], 1, 1)            ]
 
-    objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight=o[4], k_p=1e3), ov))
+    objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight=o[4], base = o[5], k_p=1e3), ov))
 
 
     # to have comparable cost function values one must have the stds ready
