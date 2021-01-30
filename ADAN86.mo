@@ -50281,7 +50281,8 @@ P_hs_plus_dist"),
             end imp_noVcTcLin;
 
             model imp_noBaro
-                extends imp_base(useAutonomousPhi(y=false));
+                extends imp_base(useAutonomousPhi(y=false), phi_fixed(offset=
+                    0.25));
             end imp_noBaro;
 
             model imp_noBaroLinV
