@@ -1,48 +1,15 @@
-createPlot(id=6, position={0, 0, 612, 434}, x="Exercise.y_", y={"brachial_pressure_systolic", "brachial_pressure_diastolic", "brachial_pressure_mean", "CO", "q_exercised_avg"}, erase=true, autoscale=false, grid=true, legend=false, leftTitleType=2, leftTitle="Brachial pressure [mmHg]", bottomTitleType=2, bottomTitle="Exercise intensity [% of max]", colors={{28,108,200}, {28,108,200}, {28,108,200}, {217,67,180}, {217,67,180}}, patterns={LinePattern.Solid, LinePattern.Solid, LinePattern.Solid, LinePattern.Dash, LinePattern.Dash}, thicknesses={0.25, 0.25, 0.5, 1.0, 0.25}, range2={0.0, 30.0}, rightTitleType=2, rightTitle="Flow [L/min]", axes={1, 1, 1, 2, 2}, timeUnit="%", displayUnits={"mmHg", "mmHg", "mmHg", "l/min", "l/min"}, range={0.0, 100.0, 0.0, 300.0}); 
-
-
-plotHeading("imp_StepEx_normal", id=6)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.imp_base", stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_StepEx_normal");
-ExportPlotAsImage("imp_StepEx_normal.png", id=6)
-ExportPlotAsImage("imp_StepEx_normal.svg", id=6)
-
-
-plotHeading("imp_StepEx_chrono", id=6)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.imp_chronotropy", stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_StepEx_chrono");
-ExportPlotAsImage("imp_StepEx_chrono.png", id=6)
-ExportPlotAsImage("imp_StepEx_chrono.svg", id=6)
-
-
-plotHeading("imp_StepEx_ino", id=6)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.imp_inotropy", stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_StepEx_ino");
-ExportPlotAsImage("imp_StepEx_ino.png", id=6)
-ExportPlotAsImage("imp_StepEx_ino.svg", id=6)
-
-
-plotHeading("imp_StepEx_noAR", id=6)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.imp_noAR", stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_StepEx_noAR");
-ExportPlotAsImage("imp_StepEx_noAR.png", id=6)
-ExportPlotAsImage("imp_StepEx_noAR.svg", id=6)
-
-plotHeading("imp_StepEx_noVc", id=6)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.imp_noVc", stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_StepEx_noVc");
-ExportPlotAsImage("imp_StepEx_noVc.png", id=6)
-ExportPlotAsImage("imp_StepEx_noVc.svg", id=6)
-
-
-plotHeading("imp_StepEx_tilt60", id=6)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.Tilted60", stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_StepEx_tilt60");
-ExportPlotAsImage("imp_StepEx_tilt60.png", id=6)
-ExportPlotAsImage("imp_StepEx_tilt60.svg", id=6)
-
-
-plotHeading("imp_StepEx_tilt60_noVc", id=6)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.Tilted60_noVC", stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_StepEx_tilt60_noVc");
-ExportPlotAsImage("imp_StepEx_tilt60_noVc.png", id=6)
-ExportPlotAsImage("imp_StepEx_tilt60_noVc.svg", id=6)
-
-
-plotHeading("imp_StepEx_tilt60_noVcLin", id=6)
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.Tilted60_noVCLin", stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_StepEx_tilt60_noVcLin");
-ExportPlotAsImage("imp_StepEx_tilt60_noVcLin.png", id=6)
-ExportPlotAsImage("imp_StepEx_tilt60_noVcLin.svg", id=6)
+﻿translateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF");
+LVfunctionFraction = 0.50;
+simulateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF", stopTime=12000, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_CHF_50");
+LVfunctionFraction = 0.45;
+simulateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF", stopTime=12000, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_CHF_45");
+LVfunctionFraction = 0.4;
+simulateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF", stopTime=12000, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_CHF_40");
+LVfunctionFraction = 0.35;
+simulateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF", stopTime=12000, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_CHF_35");
+LVfunctionFraction = 0.3;
+simulateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF", stopTime=12000, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_CHF_3");
+LVfunctionFraction = 0.25;
+simulateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF", stopTime=12000, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_CHF_25");
+LVfunctionFraction = 0.2;
+simulateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF", stopTime=12000, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_CHF_2");

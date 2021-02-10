@@ -26634,7 +26634,8 @@ P_hs_plus_dist"),
             Pressure P_CKIDNEY=V_VKIDNEY/C_VKIDNEY;
             VolumeFlowRate F_K1=(p_in - P_AKIDNEY)/R_AKIDNEY;
             VolumeFlowRate F_K2=(P_AKIDNEY - P_CKIDNEY)/(R_K_afferent + R_K_efferent);
-            VolumeFlowRate F_K3=F_K2 - Q_urine;
+            // VolumeFlowRate F_K3=F_K2 - Q_urine;
+            VolumeFlowRate F_K3=F_K2;
             VolumeFlowRate F_K4=(P_CKIDNEY - p_out)/R_VKIDNEY;
             Pressure P_GLOMER=P_AKIDNEY - F_K2*R_K_afferent;
 
@@ -42796,6 +42797,24 @@ P_hs_plus_dist"),
                 volume(start=0.0003305495, fixed=true))));
 
       end CardiovascularSystem___;
+
+      model CardiovascularSystem_RenalsPInt
+        "Using interstitial pressure from simple lymfatics"
+        extends CardiovascularSystem(
+        SystemicComponent(
+         redeclare ADAN_main.Components.Subsystems.Systemic.Organs.Renal.Renal_P_Int_i renal_L166(
+         P_int = simplestLymphatic.p_int,
+         volume(start = 0.00001, fixed = true))));
+
+         //    redeclare ADAN_main.Components.Subsystems.Systemic.Organs.Renal.Renal renal_R178(volume(start = 0.00001, fixed = true))
+
+         Real eGFR = SystemicComponent.renal_L166.GFR_surf*2;
+         Real eGFR_m "Mean total GFR scaled to BSA";
+         parameter Real tau_gfr = 3;
+
+      equation
+        der(eGFR_m)*tau_gfr = eGFR - eGFR_m;
+      end CardiovascularSystem_RenalsPInt;
     end Obsolete;
 
     package Identification "Pacakge contains models prepared for identification runs, model parametriyed to identification results and steadz state initialization"
@@ -52508,24 +52527,6 @@ P_hs_plus_dist"),
               thickness=1));
         end CardiovascularSystem_Renals;
 
-        model CardiovascularSystem_RenalsPInt
-          "Using interstitial pressure from simple lymfatics"
-          extends CardiovascularSystem(
-          SystemicComponent(
-           redeclare ADAN_main.Components.Subsystems.Systemic.Organs.Renal.Renal_P_Int_i renal_L166(
-           P_int = simplestLymphatic.p_int,
-           volume(start = 0.00001, fixed = true))));
-
-           //    redeclare ADAN_main.Components.Subsystems.Systemic.Organs.Renal.Renal renal_R178(volume(start = 0.00001, fixed = true))
-
-           Real eGFR = SystemicComponent.renal_L166.GFR_surf*2;
-           Real eGFR_m "Mean total GFR scaled to BSA";
-           parameter Real tau_gfr = 3;
-
-        equation
-          der(eGFR_m)*tau_gfr = eGFR - eGFR_m;
-        end CardiovascularSystem_RenalsPInt;
-
         model Renals_CHF "Renals with congestive heart failure"
           extends CardiovascularSystem_Renals(
           heartComponent(ventricles(
@@ -52538,15 +52539,15 @@ P_hs_plus_dist"),
         end Renals_CHF;
 
         model CVS_renalRegulation
-          extends CardiovascularSystem_Renals;
+          extends CardiovascularSystem_Renals(useAutonomousPhi(y=false));
           Physiolibrary.Hydraulic.Sensors.PressureMeasure p_arterial
             annotation (Placement(transformation(extent={{-64,24},{-84,44}})));
           Modelica.Blocks.Continuous.LimPID PID(
             controllerType=Modelica.Blocks.Types.SimpleController.PI,
             k=1e-6,
-            Ti=10,
-            yMax=1e-6,
-            yMin=-1e-6,
+            Ti=15,
+            yMax=1e-7,
+            yMin=-1e-7,
             initType=Modelica.Blocks.Types.Init.InitialOutput,
             y_start=0)
             annotation (Placement(transformation(extent={{-138,54},{-118,74}})));
@@ -52554,15 +52555,15 @@ P_hs_plus_dist"),
                   "Pa") = 13000)
             annotation (Placement(transformation(extent={{-160,58},{-152,66}})));
           Modelica.Blocks.Continuous.LowpassButterworth lowpassButterworth(
-            f=0.6,
+            f=0.1,
             initType=Modelica.Blocks.Types.Init.InitialOutput,
             y_start=13000)
             annotation (Placement(transformation(extent={{-84,42},{-104,62}})));
           Physiolibrary.Hydraulic.Sources.UnlimitedPump
                                                   unlimitedPump(
-              useSolutionFlowInput=true, SolutionFlow(displayUnit="m3/s")=
-              1.6666666666667e-05)
-            annotation (Placement(transformation(extent={{-122,-16},{-102,4}})));
+              useSolutionFlowInput=true, SolutionFlow(displayUnit="ml/min") =
+              1e-06)
+            annotation (Placement(transformation(extent={{-122,-18},{-102,2}})));
           Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump1(
               useSolutionFlowInput=true) annotation (Placement(transformation(
                   extent={{-122,-42},{-102,-22}})));
@@ -52573,13 +52574,14 @@ P_hs_plus_dist"),
                 extent={{-10,-10},{10,10}},
                 rotation=270,
                 origin={-112,26})));
+          Physiolibrary.Hydraulic.Sensors.FlowMeasure flowMeasure
+            annotation (Placement(transformation(extent={{-94,2},{-74,-18}})));
         equation
           connect(pressure.y,PID. u_s)
             annotation (Line(points={{-151,62},{-142,62},{-142,64},{-140,64}},
                                                            color={0,0,127}));
           connect(lowpassButterworth.u,p_arterial. pressure)
-            annotation (Line(points={{-82,52},{-64,52},{-64,48},{-62,48},{-62,
-                  22},{-66,22},{-66,20},{-88,20},{-88,30},{-80,30}},
+            annotation (Line(points={{-82,52},{-88,52},{-88,30},{-80,30}},
                                                              color={0,0,127}));
           connect(lowpassButterworth.y,PID. u_m) annotation (Line(points={{-105,52},
                   {-128,52}},                         color={0,0,127}));
@@ -52587,21 +52589,25 @@ P_hs_plus_dist"),
               points={{-70,28},{-58,28}},
               color={0,0,0},
               thickness=1));
-          connect(unlimitedPump.q_out, heartComponent.sv) annotation (Line(
-              points={{-102,-6},{-8,-6},{-8,-16.4},{-16,-16.4}},
-              color={0,0,0},
-              thickness=1));
           connect(elasticVessel.q_in, unlimitedPump1.q_out) annotation (Line(
-              points={{-88,-32},{-88,-16},{-100,-16},{-100,-28},{-98,-28},{-98,
-                  -32},{-102,-32}},
+              points={{-88,-32},{-102,-32}},
               color={0,0,0},
               thickness=1));
           connect(PID.y, gain.u) annotation (Line(points={{-117,64},{-112,64},{
                   -112,38}}, color={0,0,127}));
+          connect(unlimitedPump.q_out, flowMeasure.q_in) annotation (Line(
+              points={{-102,-8},{-94,-8}},
+              color={0,0,0},
+              thickness=1));
+          connect(flowMeasure.volumeFlow, unlimitedPump1.solutionFlow)
+            annotation (Line(points={{-84,-20},{-112,-20},{-112,-25}}, color={0,
+                  0,127}));
           connect(gain.y, unlimitedPump.solutionFlow)
-            annotation (Line(points={{-112,15},{-112,1}}, color={0,0,127}));
-          connect(unlimitedPump1.solutionFlow, unlimitedPump.solutionFlow)
-            annotation (Line(points={{-112,-25},{-112,1}}, color={0,0,127}));
+            annotation (Line(points={{-112,15},{-112,-1}}, color={0,0,127}));
+          connect(flowMeasure.q_out, heartComponent.sv) annotation (Line(
+              points={{-74,-8},{24,-8},{24,-16.4},{-16,-16.4}},
+              color={0,0,0},
+              thickness=1));
         end CVS_renalRegulation;
 
         model Renals_CHF_VolumeCongestion
@@ -52623,12 +52629,37 @@ P_hs_plus_dist"),
               thickness=1));
 
         end Renals_CHF_VolumeCongestion;
+
+        model CVS_renalRegulation_CHF
+          extends CVS_renalRegulation(
+            heartComponent(ventricles(
+                LV_wall(functionFraction=LVfunctionFraction),
+                RV_wall(functionFraction=RVfunctionFraction),
+                SEP_wall(functionFraction=(LVfunctionFraction + RVfunctionFraction)/2))),
+            pressure(k=12532),
+            lowpassButterworth(f=0.01, y_start=12532),
+            PID(
+              k=1e-9,
+              Ti=30,
+              yMax=50e-6,
+              yMin=-50e-6),
+            gain(k=0.05),
+            unlimitedPump(useSolutionFlowInput=true));
+
+          parameter Physiolibrary.Types.Fraction LVfunctionFraction=0.4;
+          parameter Physiolibrary.Types.Fraction RVfunctionFraction=1;
+          annotation (experiment(
+              StopTime=6000,
+              Interval=0.02,
+              Tolerance=1e-07,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_renalRegulation_CHF;
       end Renals;
     end Variations;
 
     package Experiments
       model Hemorrhage "A simple bleeding experiment"
-        extends CardiovascularSystem;
+        extends CardiovascularSystem(useAutonomousPhi(y=true));
         Physiolibrary.Hydraulic.Components.Pump pump(useSolutionFlowInput=true,
             SolutionFlow(displayUnit="m3/s") = 1.6666666666667e-05)
           annotation (Placement(transformation(extent={{48,-98},{68,-78}})));
@@ -52636,9 +52667,9 @@ P_hs_plus_dist"),
           "A cut vein reservoir"
           annotation (Placement(transformation(extent={{80,-98},{100,-78}})));
         replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
-          height=-50e-6,
-          offset=50e-6,
-          startTime=10,
+          height=-2.08e-6,
+          offset=2.08e-6,
+          startTime=240,
           duration=0)   constrainedby Modelica.Blocks.Sources.Ramp
           annotation (Placement(transformation(extent={{32,-68},{48,-52}})));
       equation
@@ -52652,6 +52683,11 @@ P_hs_plus_dist"),
             thickness=1));
         connect(Tilt_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
                 -60},{58,-60},{58,-81}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=600,
+            Interval=0.04,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
       end Hemorrhage;
 
       model SimplestHeart
@@ -53127,6 +53163,15 @@ P_hs_plus_dist"),
               __Dymola_Algorithm="Cvode"));
         end OlufsenTriSeg_valsalva_KosinskiBaro_longTs_Stimulation;
       end BaroreceptorStimulation;
+
+      model Hemorrhage_noBaro
+        extends Hemorrhage(useAutonomousPhi(y=false));
+        annotation (experiment(
+            StopTime=600,
+            Interval=0.04,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end Hemorrhage_noBaro;
     end Experiments;
 
     model CVS_OM
