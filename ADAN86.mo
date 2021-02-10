@@ -48926,7 +48926,26 @@ P_hs_plus_dist"),
             end imp_arSt_ss;
 
             model imp_avRe
-              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)));
+              extends imp_base(heartComponent(aorticValve(_Goff=3E-08)),
+                settings(baro_tau_s=10));
+
+              Physiolibrary.Types.Volume CO_backflow_acc;
+            Physiolibrary.Types.Volume CO_backflow;
+            Physiolibrary.Types.Fraction regurgitation_frac = min(1, CO_backflow/max(CO + CO_backflow, 1e-6));
+            equation
+                // integrate only negative backflow
+                der(CO_backflow_acc) = max(heartComponent.aorticValve.q_out.q, 0);
+
+              when heartComponent.aorticValve.cc < heartComponent.aorticValve.epsTime then
+                reinit(CO_backflow_acc, 0);
+                CO_backflow = CO_backflow_acc;
+              end when;
+
+            annotation (experiment(
+                StopTime=600,
+                Interval=0.01,
+                Tolerance=1e-08,
+                __Dymola_Algorithm="Cvode"));
             end imp_avRe;
 
             model imp_avRe_ss
@@ -52625,6 +52644,29 @@ P_hs_plus_dist"),
 
         end Renals_CHF_VolumeCongestion;
       end Renals;
+
+      package Figures
+        model CVS_TiltNoBaro
+          extends Impairments.TiltNoBaro.imp_noBaro;
+          annotation (experiment(
+              StopTime=120,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_TiltNoBaro;
+
+        model CVS_VMNoBaro
+          extends Impairments.VMNoBaro.imp_base;
+        end CVS_VMNoBaro;
+
+        model CVS_NoBaroVLin
+          extends Impairments.TiltNoBaro.imp_noVcLin;
+        end CVS_NoBaroVLin;
+
+        model CVS_NoVcVlin
+          extends Impairments.Normal.imp_noVcLin;
+        end CVS_NoVcVlin;
+      end Figures;
     end Variations;
 
     package Experiments
