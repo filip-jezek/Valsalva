@@ -35,6 +35,9 @@ dbg
 dsmodel.c
 *.png
 *.h
+*.svg
+*.asv
+*.sdf
 /Scripts/Dymola/stop
 /ADAN_0main_SystemicTree_Baseline_OlufsenTriSeg_0base_fmu_black_box.mo
 /ADAN_0main_SystemicTree_Exercise_OlufsenTriseg_0Exercise_fmu_black_box.mo
