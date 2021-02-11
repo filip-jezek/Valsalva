@@ -1,0 +1,40 @@
+﻿cd D:\data\
+Advanced.SparseActivate = true;
+Advanced.NumberOfCores = 4;
+
+// translateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF");
+
+totalTime = 0;
+for i in 50:-5:10 loop
+  // LVfunctionFraction = Real(i/100);
+  // LVfunctionFraction = 10;  
+  stopTimeAdj = (10 + (100 - i)*1)*60;
+  // Total maximal volume increase
+  "Max vol " + String((stopTimeAdj - 60)*1/1000) + "L";
+  totalTime = totalTime + stopTimeAdj;
+
+simulateExtendedModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF", 
+stopTime=stopTimeAdj, 
+numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_CHF_" + String(i),
+initialNames = {"LVfunctionFraction"},
+initialValues = {i/100}, autoLoad=true);
+end for;
+
+"NoBaro time spent: " + String(totalTime/3600) + "h";
+
+for i in 90:-10:10 loop
+  // LVfunctionFraction = Real(i/100);
+  // LVfunctionFraction = 10;  
+  stopTimeAdj = (10 + (100 - i)*1)*60;
+  // Total maximal volume increase
+  // (stopTimeAdj - 120)*0.25/1000;
+  totalTime = totalTime + stopTimeAdj;
+  "Simulation time " + String(stopTimeAdj/60) + " min at max vol " + String((stopTimeAdj - 120)*1/1000) + " L";  
+
+simulateExtendedModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF_baro", 
+stopTime=stopTimeAdj, 
+numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_CHF_baro_" + String(i),
+initialNames = {"LVfunctionFraction"},
+initialValues = {i/100}, autoLoad=true);
+end for;
+"Total time spent: " + String(totalTime/3600) + "h";

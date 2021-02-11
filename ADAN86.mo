@@ -52581,7 +52581,7 @@ P_hs_plus_dist"),
             annotation (Placement(transformation(extent={{-84,42},{-104,62}})));
           Physiolibrary.Hydraulic.Sources.UnlimitedPump
                                                   unlimitedPump(
-              useSolutionFlowInput=true, SolutionFlow(displayUnit="ml/min") =
+              useSolutionFlowInput=true, SolutionFlow(displayUnit="ml/min")=
               1e-06)
             annotation (Placement(transformation(extent={{-122,-18},{-102,2}})));
           Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump1(
@@ -52630,6 +52630,47 @@ P_hs_plus_dist"),
               thickness=1));
         end CVS_renalRegulation;
 
+        model Renals_VolumeLoad
+          extends CardiovascularSystem_Renals(useAutonomousPhi(y=false));
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump
+                                                  unlimitedPump(
+              useSolutionFlowInput=true, SolutionFlow(displayUnit="ml/min")=
+              1e-06)
+            annotation (Placement(transformation(extent={{-122,-6},{-102,14}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump1(
+              useSolutionFlowInput=true) annotation (Placement(transformation(
+                  extent={{-122,-30},{-102,-10}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel addedVolume
+            annotation (Placement(transformation(extent={{-98,-30},{-78,-10}})));
+          Physiolibrary.Hydraulic.Sensors.FlowMeasure flowMeasure
+            annotation (Placement(transformation(extent={{-94,14},{-74,-6}})));
+        Modelica.Blocks.Sources.Ramp volumeInfusionRamp(
+            height=1e-6,
+            duration=0,
+            offset=0,
+            startTime=30)
+            "Phi for when the model is not using the autonomous feedback phi from baroreflex"
+            annotation (Placement(transformation(extent={{-142,14},{-122,34}})));
+        equation
+          connect(addedVolume.q_in, unlimitedPump1.q_out) annotation (Line(
+              points={{-88,-20},{-102,-20}},
+              color={0,0,0},
+              thickness=1));
+          connect(unlimitedPump.q_out,flowMeasure. q_in) annotation (Line(
+              points={{-102,4},{-94,4}},
+              color={0,0,0},
+              thickness=1));
+          connect(flowMeasure.volumeFlow,unlimitedPump1. solutionFlow)
+            annotation (Line(points={{-84,-8},{-112,-8},{-112,-13}},   color={0,
+                  0,127}));
+          connect(flowMeasure.q_out, heartComponent.sv) annotation (Line(
+              points={{-74,4},{24,4},{24,-16.4},{-16,-16.4}},
+              color={0,0,0},
+              thickness=1));
+          connect(volumeInfusionRamp.y, unlimitedPump.solutionFlow) annotation (
+             Line(points={{-121,24},{-112,24},{-112,11}}, color={0,0,127}));
+        end Renals_VolumeLoad;
+
         model Renals_CHF_VolumeCongestion
           extends Renals_CHF(settings(V_PV_init=0));
           Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(
@@ -52651,29 +52692,38 @@ P_hs_plus_dist"),
         end Renals_CHF_VolumeCongestion;
 
         model CVS_renalRegulation_CHF
-          extends CVS_renalRegulation(
+          extends Renals_VolumeLoad(
             heartComponent(ventricles(
                 LV_wall(functionFraction=LVfunctionFraction),
                 RV_wall(functionFraction=RVfunctionFraction),
                 SEP_wall(functionFraction=(LVfunctionFraction + RVfunctionFraction)/2))),
-            pressure(k=12532),
-            lowpassButterworth(f=0.01, y_start=12532),
-            PID(
-              k=1e-9,
-              Ti=30,
-              yMax=50e-6,
-              yMin=-50e-6),
-            gain(k=0.05),
-            unlimitedPump(useSolutionFlowInput=true));
+            unlimitedPump(useSolutionFlowInput=true),
+            volumeInfusionRamp(height=1e-6, startTime=60),
+            settings(baro_tau_s=10));
 
           parameter Physiolibrary.Types.Fraction LVfunctionFraction=0.4;
           parameter Physiolibrary.Types.Fraction RVfunctionFraction=1;
+
+        parameter Physiolibrary.Types.Pressure BPM_cutOff=13332.2387415;
+        equation
+         if time > 100 and brachial_pressure_mean > BPM_cutOff then
+           terminate("Pressure is already too high");
+         end if;
           annotation (experiment(
               StopTime=6000,
               Interval=0.02,
               Tolerance=1e-07,
               __Dymola_Algorithm="Cvode"));
         end CVS_renalRegulation_CHF;
+
+        model CVS_renalRegulation_CHF_baro
+          extends CVS_renalRegulation_CHF(useAutonomousPhi(y=true),
+              volumeInfusionRamp(startTime=120));
+          annotation (experiment(
+              Interval=0.02,
+              Tolerance=1e-07,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_renalRegulation_CHF_baro;
       end Renals;
 
       package Figures
