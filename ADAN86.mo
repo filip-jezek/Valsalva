@@ -52699,12 +52699,16 @@ P_hs_plus_dist"),
                 SEP_wall(functionFraction=(LVfunctionFraction + RVfunctionFraction)/2))),
             unlimitedPump(useSolutionFlowInput=true),
             volumeInfusionRamp(height=1e-6, startTime=60),
-            settings(baro_tau_s=10));
+            settings(V_PV_init=initVol,
+                     baro_tau_s=10),
+            addedVolume(volume_start=initVol));
 
           parameter Physiolibrary.Types.Fraction LVfunctionFraction=0.4;
           parameter Physiolibrary.Types.Fraction RVfunctionFraction=1;
 
         parameter Physiolibrary.Types.Pressure BPM_cutOff=13332.2387415;
+          parameter Physiolibrary.Types.Volume initVol=0.002
+            "Volume adjustment";
         equation
          if time > 100 and brachial_pressure_mean > BPM_cutOff then
            terminate("Pressure is already too high");
@@ -52717,7 +52721,8 @@ P_hs_plus_dist"),
         end CVS_renalRegulation_CHF;
 
         model CVS_renalRegulation_CHF_baro
-          extends CVS_renalRegulation_CHF(useAutonomousPhi(y=true),
+          extends CVS_renalRegulation_CHF(
+            initVol=0,                    useAutonomousPhi(y=true),
               volumeInfusionRamp(startTime=120));
           annotation (experiment(
               Interval=0.02,
