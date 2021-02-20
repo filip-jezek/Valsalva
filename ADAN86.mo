@@ -10582,6 +10582,7 @@ P_hs/2")}));
         // Real phi_exercise = 0.25 + exercise*0.75;
         // parameter Real tissue_chi_C = 0.09;
         // Real tissue_chi_C_max;
+        Physiolibrary.Types.Volume linearOverflow;
         equation
 
           if exercise > 0 then
@@ -10630,15 +10631,18 @@ P_hs/2")}));
         //       k_phi/(V_maxExponential - V_wp)*(volume - (V_maxExponential -
         //       V_maxExponential + V_wp));
            volume = (p_C)*C + zpv;
+           linearOverflow = 0;
           else
             //elseif settings.tissues_UseStraighteningReaction2Phi then
             // my expression based on straightening
             if noEvent(volume < V_us) then
               // p_C = collapsingPressure;
               p_C = 1/k_phi *log(volume/V_us);
+                 linearOverflow = 0;
             elseif noEvent(volume < volume_linearBreakpoint) then
               p_C =1/k_phi*log((V_maxExponential - V_us)/(V_maxExponential - volume))
                 "equation from Pstras 2017, 10.1093/imammb/dqw008, allegedly taken from Hardy & Collins 1982";
+                   linearOverflow = 0;
             else
               // linear steepness after volume too close to maximal volume
               // linearized by derivation of original equation, slope = 1/k_phi/(1e-6), V_max - volume = 1e-6:, u_C at point: 1/k_phi*log((V_max - V_us)/(1e-6))
@@ -10646,6 +10650,7 @@ P_hs/2")}));
                 volume_linearBreakpoint)) = 1/k_phi/(V_maxExponential -
                 volume_linearBreakpoint)*(volume - (V_maxExponential - V_maxExponential +
                 volume_linearBreakpoint));
+                   linearOverflow = volume - volume_linearBreakpoint;
             end if;
         //   else
         //     // Using the variant from Pstras
@@ -38181,6 +38186,17 @@ P_hs_plus_dist"),
       SystemicComponent.ulnar_T2_L90.q_in +
       SystemicComponent.radial_T1_L92.q_in) / max(totalBF, 1e-6);
 
+      Physiolibrary.Types.Volume volMaxOVerflow = SystemicComponent.celiac_trunk_C116.linearOverflow
+             + SystemicComponent.renal_L166.linearOverflow + SystemicComponent.renal_R178.linearOverflow + SystemicComponent.internal_iliac_T1_R218.linearOverflow
+             + SystemicComponent.profundus_T2_R224.linearOverflow + SystemicComponent.anterior_tibial_T3_R230.linearOverflow
+          + SystemicComponent.posterior_tibial_T4_R236.linearOverflow + SystemicComponent.internal_iliac_T1_L196.linearOverflow
+             + SystemicComponent.profundus_T2_L202.linearOverflow + SystemicComponent.anterior_tibial_T3_L208.linearOverflow
+          + SystemicComponent.posterior_tibial_T4_L214.linearOverflow + SystemicComponent.ulnar_T2_R42.linearOverflow
+          + SystemicComponent.radial_T1_R44.linearOverflow + SystemicComponent.ulnar_T2_L90.linearOverflow + SystemicComponent.radial_T1_L92.linearOverflow
+             + SystemicComponent.internal_carotid_R8_C.linearOverflow + SystemicComponent.external_carotid_T2_R26.linearOverflow
+             + SystemicComponent.internal_carotid_L50_C.linearOverflow + SystemicComponent.external_carotid_T2_L62.linearOverflow
+             + SystemicComponent.vertebral_L2.linearOverflow + SystemicComponent.vertebral_R272.linearOverflow + SystemicComponent.cardiac_tissue.linearOverflow
+             + SystemicComponent.splanchnic_tissue.linearOverflow "Numerical imprecision";
       equation
         der(brachial_pressure_systolic_i)*tau = max(brachial_pressure  - brachial_pressure_systolic_i, 0);
         der(brachial_pressure_diastolic_i)*tau = min(brachial_pressure  - brachial_pressure_diastolic_i, 0);
@@ -47820,7 +47836,7 @@ P_hs_plus_dist"),
             annotation (Placement(transformation(extent={{-100,-20},{-80,0}})));
         equation
           connect(thoracic_pressure_ramp1.y,condTP_PC.u1)  annotation (Line(
-                points={{-79,-10},{-76,-10},{-76,-34},{-70.54,-34}}, color={0,0,
+                points={{-79,-10},{-76,-10},{-76,-50},{-70.54,-50}}, color={0,0,
                   127}));
         end OlufsenTriSeg_valsalva_exhale;
 
