@@ -52519,7 +52519,7 @@ P_hs_plus_dist"),
           SystemicComponent(
            redeclare ADAN_main.Components.Subsystems.Systemic.Organs.Renal.Renal_P_Int_i renal_L166(
            P_int = simplestLymphatic.p_int,
-           volume(start = 0.00001, fixed = true))));
+           volume(start = 0.00001, fixed = true))), settings(baro_tau_s=10));
 
            //    redeclare ADAN_main.Components.Subsystems.Systemic.Organs.Renal.Renal renal_R178(volume(start = 0.00001, fixed = true))
 
@@ -52558,77 +52558,25 @@ P_hs_plus_dist"),
               V_PV_init=0.002));
         end Renals_CHF;
 
-        model CVS_renalRegulation
-          extends CardiovascularSystem_Renals(useAutonomousPhi(y=false));
-          Physiolibrary.Hydraulic.Sensors.PressureMeasure p_arterial
-            annotation (Placement(transformation(extent={{-64,24},{-84,44}})));
-          Modelica.Blocks.Continuous.LimPID PID(
-            controllerType=Modelica.Blocks.Types.SimpleController.PI,
-            k=1e-6,
-            Ti=15,
-            yMax=1e-7,
-            yMin=-1e-7,
-            initType=Modelica.Blocks.Types.Init.InitialOutput,
-            y_start=0)
-            annotation (Placement(transformation(extent={{-138,54},{-118,74}})));
-          Physiolibrary.Types.Constants.PressureConst pressure(k(displayUnit=
-                  "Pa") = 13000)
-            annotation (Placement(transformation(extent={{-160,58},{-152,66}})));
-          Modelica.Blocks.Continuous.LowpassButterworth lowpassButterworth(
-            f=0.1,
-            initType=Modelica.Blocks.Types.Init.InitialOutput,
-            y_start=13000)
-            annotation (Placement(transformation(extent={{-84,42},{-104,62}})));
-          Physiolibrary.Hydraulic.Sources.UnlimitedPump
-                                                  unlimitedPump(
-              useSolutionFlowInput=true, SolutionFlow(displayUnit="ml/min")=
-              1e-06)
-            annotation (Placement(transformation(extent={{-122,-18},{-102,2}})));
-          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump1(
-              useSolutionFlowInput=true) annotation (Placement(transformation(
-                  extent={{-122,-42},{-102,-22}})));
-          Physiolibrary.Hydraulic.Components.ElasticVessel elasticVessel
-            annotation (Placement(transformation(extent={{-98,-42},{-78,-22}})));
-          Modelica.Blocks.Math.Gain gain(k=1) annotation (Placement(
-                transformation(
-                extent={{-10,-10},{10,10}},
-                rotation=270,
-                origin={-112,26})));
-          Physiolibrary.Hydraulic.Sensors.FlowMeasure flowMeasure
-            annotation (Placement(transformation(extent={{-94,2},{-74,-18}})));
+        model Renals_CHF_VolumeCongestion
+          extends Renals_CHF(settings(V_PV_init=0));
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(
+              useSolutionFlowInput=true, SolutionFlow(displayUnit="m3/s"))
+            annotation (Placement(transformation(extent={{60,-104},{40,-84}})));
+          Modelica.Blocks.Sources.Step step(
+            height=1e-05,
+            offset=0,
+            startTime=100)
+            annotation (Placement(transformation(extent={{94,-82},{74,-62}})));
         equation
-          connect(pressure.y,PID. u_s)
-            annotation (Line(points={{-151,62},{-142,62},{-142,64},{-140,64}},
-                                                           color={0,0,127}));
-          connect(lowpassButterworth.u,p_arterial. pressure)
-            annotation (Line(points={{-82,52},{-88,52},{-88,30},{-80,30}},
-                                                             color={0,0,127}));
-          connect(lowpassButterworth.y,PID. u_m) annotation (Line(points={{-105,52},
-                  {-128,52}},                         color={0,0,127}));
-          connect(p_arterial.q_in, SystemicComponent.port_a) annotation (Line(
-              points={{-70,28},{-58,28}},
+          connect(step.y, unlimitedPump.solutionFlow) annotation (Line(points={
+                  {73,-72},{50,-72},{50,-87}}, color={0,0,127}));
+          connect(unlimitedPump.q_out, heartComponent.sv) annotation (Line(
+              points={{40,-94},{24,-94},{24,-16},{16,-16},{16,-16.4},{-16,-16.4}},
               color={0,0,0},
               thickness=1));
-          connect(elasticVessel.q_in, unlimitedPump1.q_out) annotation (Line(
-              points={{-88,-32},{-102,-32}},
-              color={0,0,0},
-              thickness=1));
-          connect(PID.y, gain.u) annotation (Line(points={{-117,64},{-112,64},{
-                  -112,38}}, color={0,0,127}));
-          connect(unlimitedPump.q_out, flowMeasure.q_in) annotation (Line(
-              points={{-102,-8},{-94,-8}},
-              color={0,0,0},
-              thickness=1));
-          connect(flowMeasure.volumeFlow, unlimitedPump1.solutionFlow)
-            annotation (Line(points={{-84,-20},{-112,-20},{-112,-25}}, color={0,
-                  0,127}));
-          connect(gain.y, unlimitedPump.solutionFlow)
-            annotation (Line(points={{-112,15},{-112,-1}}, color={0,0,127}));
-          connect(flowMeasure.q_out, heartComponent.sv) annotation (Line(
-              points={{-74,-8},{24,-8},{24,-16.4},{-16,-16.4}},
-              color={0,0,0},
-              thickness=1));
-        end CVS_renalRegulation;
+
+        end Renals_CHF_VolumeCongestion;
 
         model Renals_VolumeLoad
           extends CardiovascularSystem_Renals(useAutonomousPhi(y=false));
@@ -52671,26 +52619,6 @@ P_hs_plus_dist"),
              Line(points={{-121,24},{-112,24},{-112,11}}, color={0,0,127}));
         end Renals_VolumeLoad;
 
-        model Renals_CHF_VolumeCongestion
-          extends Renals_CHF(settings(V_PV_init=0));
-          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(
-              useSolutionFlowInput=true, SolutionFlow(displayUnit="m3/s"))
-            annotation (Placement(transformation(extent={{60,-104},{40,-84}})));
-          Modelica.Blocks.Sources.Step step(
-            height=1e-05,
-            offset=0,
-            startTime=100)
-            annotation (Placement(transformation(extent={{94,-82},{74,-62}})));
-        equation
-          connect(step.y, unlimitedPump.solutionFlow) annotation (Line(points={
-                  {73,-72},{50,-72},{50,-87}}, color={0,0,127}));
-          connect(unlimitedPump.q_out, heartComponent.sv) annotation (Line(
-              points={{40,-94},{24,-94},{24,-16},{16,-16},{16,-16.4},{-16,-16.4}},
-              color={0,0,0},
-              thickness=1));
-
-        end Renals_CHF_VolumeCongestion;
-
         model CVS_renalRegulation_CHF
           extends Renals_VolumeLoad(
             heartComponent(ventricles(
@@ -52729,6 +52657,80 @@ P_hs_plus_dist"),
               Tolerance=1e-07,
               __Dymola_Algorithm="Cvode"));
         end CVS_renalRegulation_CHF_baro;
+
+        package Obsolete
+          model CVS_renalRegulation
+            extends CardiovascularSystem_Renals(useAutonomousPhi(y=false));
+            Physiolibrary.Hydraulic.Sensors.PressureMeasure p_arterial
+              annotation (Placement(transformation(extent={{-64,24},{-84,44}})));
+            Modelica.Blocks.Continuous.LimPID PID(
+              controllerType=Modelica.Blocks.Types.SimpleController.PI,
+              k=1e-6,
+              Ti=15,
+              yMax=1e-7,
+              yMin=-1e-7,
+              initType=Modelica.Blocks.Types.Init.InitialOutput,
+              y_start=0)
+              annotation (Placement(transformation(extent={{-138,54},{-118,74}})));
+            Physiolibrary.Types.Constants.PressureConst pressure(k(displayUnit=
+                    "Pa") = 13000)
+              annotation (Placement(transformation(extent={{-160,58},{-152,66}})));
+            Modelica.Blocks.Continuous.LowpassButterworth lowpassButterworth(
+              f=0.1,
+              initType=Modelica.Blocks.Types.Init.InitialOutput,
+              y_start=13000)
+              annotation (Placement(transformation(extent={{-84,42},{-104,62}})));
+            Physiolibrary.Hydraulic.Sources.UnlimitedPump
+                                                    unlimitedPump(
+                useSolutionFlowInput=true, SolutionFlow(displayUnit="ml/min")=
+                1e-06)
+              annotation (Placement(transformation(extent={{-122,-18},{-102,2}})));
+            Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump1(
+                useSolutionFlowInput=true) annotation (Placement(transformation(
+                    extent={{-122,-42},{-102,-22}})));
+            Physiolibrary.Hydraulic.Components.ElasticVessel elasticVessel
+              annotation (Placement(transformation(extent={{-98,-42},{-78,-22}})));
+            Modelica.Blocks.Math.Gain gain(k=1) annotation (Placement(
+                  transformation(
+                  extent={{-10,-10},{10,10}},
+                  rotation=270,
+                  origin={-112,26})));
+            Physiolibrary.Hydraulic.Sensors.FlowMeasure flowMeasure
+              annotation (Placement(transformation(extent={{-94,2},{-74,-18}})));
+          equation
+            connect(pressure.y,PID. u_s)
+              annotation (Line(points={{-151,62},{-142,62},{-142,64},{-140,64}},
+                                                             color={0,0,127}));
+            connect(lowpassButterworth.u,p_arterial. pressure)
+              annotation (Line(points={{-82,52},{-88,52},{-88,30},{-80,30}},
+                                                               color={0,0,127}));
+            connect(lowpassButterworth.y,PID. u_m) annotation (Line(points={{-105,52},
+                    {-128,52}},                         color={0,0,127}));
+            connect(p_arterial.q_in, SystemicComponent.port_a) annotation (Line(
+                points={{-70,28},{-58,28}},
+                color={0,0,0},
+                thickness=1));
+            connect(elasticVessel.q_in, unlimitedPump1.q_out) annotation (Line(
+                points={{-88,-32},{-102,-32}},
+                color={0,0,0},
+                thickness=1));
+            connect(PID.y, gain.u) annotation (Line(points={{-117,64},{-112,64},{
+                    -112,38}}, color={0,0,127}));
+            connect(unlimitedPump.q_out, flowMeasure.q_in) annotation (Line(
+                points={{-102,-8},{-94,-8}},
+                color={0,0,0},
+                thickness=1));
+            connect(flowMeasure.volumeFlow, unlimitedPump1.solutionFlow)
+              annotation (Line(points={{-84,-20},{-112,-20},{-112,-25}}, color={0,
+                    0,127}));
+            connect(gain.y, unlimitedPump.solutionFlow)
+              annotation (Line(points={{-112,15},{-112,-1}}, color={0,0,127}));
+            connect(flowMeasure.q_out, heartComponent.sv) annotation (Line(
+                points={{-74,-8},{24,-8},{24,-16.4},{-16,-16.4}},
+                color={0,0,0},
+                thickness=1));
+          end CVS_renalRegulation;
+        end Obsolete;
       end Renals;
 
       package Figures
@@ -52782,8 +52784,7 @@ P_hs_plus_dist"),
         connect(Tilt_ramp.y, pump.solutionFlow) annotation (Line(points={{48.8,
                 -60},{58,-60},{58,-81}}, color={0,0,127}));
         annotation (experiment(
-            StopTime=600,
-            Interval=0.04,
+            StopTime=3600,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end Hemorrhage;
