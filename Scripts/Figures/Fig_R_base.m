@@ -41,9 +41,9 @@ s_a1 = subplot(4, 2, 1);
 hold on;
 % title('A: Left ventricular pressures and volumes', 'HorizontalAlignment', 'left', 'VerticalAlignment', 'top');
 title('A: Left ventricular pressures and volumes');
-plot(t(i_int), plv(i_int), 'b');
-plot(t(i_int), psa(i_int), 'r');
-plot(t(i_int), pla(i_int), 'm');
+plot(t(i_int), plv(i_int), 'b', 'LineWidth', 1);
+plot(t(i_int), psa(i_int), 'r', 'LineWidth', 1);
+plot(t(i_int), pla(i_int), 'm', 'LineWidth', 1);
 plot(t(i_int), pb(i_int));
 set(gca,'xtick',[])
 leg = legend('P LV', 'P Asc Aor', 'P brach art', 'P LA', 'Location', 'SouthWest')
@@ -71,9 +71,9 @@ ylabel('Volume (ml)')
 s_b1 = subplot(4, 2, 2);cla;
 hold on;
 title('B: Right ventricular pressures and volumes');
-plot(t(i_int), prv(i_int), 'b');
-plot(t(i_int), ppa(i_int), 'r');
-plot(t(i_int), pra(i_int), 'm');
+plot(t(i_int), prv(i_int), 'b', 'LineWidth', 1);
+plot(t(i_int), ppa(i_int), 'r', 'LineWidth', 1);
+plot(t(i_int), pra(i_int), 'm', 'LineWidth', 1);
 % set(gca,'xtick',[], 'ytick', [])
 set(gca,'xtick',[])
 leg = legend('P RV', 'P Pulm Ar', 'P RA')
@@ -82,12 +82,13 @@ leg.ItemTokenSize = [10, 2];
 xlim([0 td])
 % volumes
 s_b2 = subplot(4, 2, 4);hold on;
-plot(t(i_int), vrv(i_int), 'b');
-plot(t(i_int), vra(i_int), 'r');
+plot(t(i_int), vrv(i_int), 'b', 'LineWidth', 1);
+plot(t(i_int), vra(i_int), 'r', 'LineWidth', 1);
 set(gca,'xtickMode', 'auto', 'ytick', [])
 ylim([0, 150]);
 xlim([0 td])
-legend('V LV', 'V LA')
+leg = legend('V LV', 'V LA');
+leg.ItemTokenSize = [10, 2];
 xlabel('t (s)');
 % pos = get(s1, 'Position');
 % set(s1, 'Position', [0.05, 0.5, 0.9,0.4])
@@ -123,9 +124,9 @@ s_d = subplot(2, 2, 4);cla;hold on;
 title('D: Ventricular PV loop')
 % plot(vra(i_int), pra(i_int));
 % plot(vla(i_int), pla(i_int));
-plot(vrv(i_int), prv(i_int), 'r');
-plot(vlv(i_int), plv(i_int), 'b');
-xlabel('Volume [ml]');
+plot(vrv(i_int), prv(i_int), 'r', 'LineWidth', 1);
+plot(vlv(i_int), plv(i_int), 'b', 'LineWidth', 1);
+xlabel('Volume (ml)');
 ylabel('Pressure (mmHg)');
 
 %% align the axis
@@ -164,6 +165,6 @@ th = 17;
 set(gcf, 'Units', 'Centimeters', 'Position', [0, 0, tw, th], 'PaperUnits', 'Centimeters', 'PaperSize', [tw, th])
 %%
 exportgraphics(gcf,'fig_R_base.png','Resolution',300)
-exportgraphics(gcf,'fig_R_base.svg')
-print(gcf,'fig_R_base_300.png', '-dpng', '-r300')
+exportgraphics(gcf,'fig_R_base.pdf', 'ContentType','vector')
+% print(gcf,'fig_R_base_300.png', '-dpng', '-r300')
 % saveas(gcf,'fig1.svg')
