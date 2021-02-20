@@ -2,6 +2,7 @@ import DyMat
 import numpy as np
 import time as timer
 import os
+import fun_lib
 
 
 filePattern = R"D:\Data\CVS_renalRegulation_CHF_baro_%0d.mat"
@@ -10,15 +11,15 @@ filePattern = R"D:\Data\CVS_renalRegulation_CHF_baro_%0d.mat"
 
 mmHg2SI = 133.322
 ml2SI = 1e-6
-bpm_base = 94*mmHg2SI
+bpm_base = 98*mmHg2SI
 startTime = 60
 
 
-s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {BPM}, {comp}\n'
+s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {EF}, {BPM}, {comp}\n'
 result_set = []
 
 with open('CHF_VolumeLoading_baro.csv', 'w') as file:
-    file.write(s.format(f_LV = 'f_LV', vol = 'vol', time = 'time', eGFR = 'eGFR', p_int = 'p_int', BPM = 'maxBP', comp = 'compensated'))
+    file.write(s.format(f_LV = 'f_LV', vol = 'vol', time = 'time', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO', EF = 'EF', CVP = 'CVP', BPM = 'maxBP', comp = 'compensated'))
 
     for i in range(100, 0,-5):
         filename = filePattern % i
@@ -61,15 +62,18 @@ with open('CHF_VolumeLoading_baro.csv', 'w') as file:
 
         vol = datafile.data('addedVolume.volume')[i_0]/ml2SI
         gfr_m = np.mean(datafile.data('eGFR_m')[i_0 - i_dt:i_0])
-        p_int_m = np.mean(datafile.data('simplestLymphatic.p_int')[i_0 - i_dt:i_0])
+        p_int_m = np.mean(datafile.data('simplestLymphatic.p_int')[i_0 - i_dt:i_0])/mmHg2SI
         lymph_q = np.mean(datafile.data('simplestLymphatic.lymph_flow')[i_0 - i_dt:i_0])
+        ef = fun_lib.calculateEF(datafile.data('V_LV')[i_0 - i_dt:i_0])
+        co = datafile.data('simplestLymphatic.p_int')[i_0]
+        cvp = np.mean(datafile.data('P_sv')[i_0 - i_dt:i_0])
         # vol = datafile.data('totalVolume')[i_0]*1000
         t = time[i_0]
 
         result = (i, vol, t, bpm[i_bpm], comp)
         result_set.append(result)
 
-        ws = s.format(f_LV = i, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, BPM = bpm[i_bpm], comp = comp)
+        ws = s.format(f_LV = i, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR}, CO = co, CVP = cvp, EF = ef, BPM = bpm[i_bpm], comp = comp)
 
         file.write(ws)
         print("Ok.")
