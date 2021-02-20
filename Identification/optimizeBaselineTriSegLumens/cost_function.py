@@ -89,7 +89,7 @@ def getObjectives(vars_set):
     # Van Bortel 2012 siggest using 80 % of carotid to femoral distance
     # distance = vars_set['speedSegmentLength'][1]*0.8
     distance = 0.677*0.8
-    pwv = fun_lib.calculatePWV2(
+    pwv = fun_lib.calculatePWV(
         vars_set['time'],
         vars_set['carotid_pressure'],
         vars_set['femoral_pressure'],

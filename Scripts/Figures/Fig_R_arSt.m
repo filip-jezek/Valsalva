@@ -44,24 +44,25 @@ set(gcf, 'DefaultAxesFontSize', 10);
 
 % s_a1 = subplot(2, 2, 1);
 hold on;
-title('BP and HR of arterial stiffening');
-plot(t_n(i_int_n), plv(i_int_n), 'g:', 'LineWidth', 1);
-plot(t_arst(i_int_arst), plv_arst(i_int_arst), 'g', 'LineWidth', 0.5);
+title('Arterial stiffening');
+plot(t_n(i_int_n), plv(i_int_n), 'k:', 'LineWidth', 1);
+plot(t_arst(i_int_arst), plv_arst(i_int_arst), 'k', 'LineWidth', 1);
 
 
 plot(t_n(i_int_n), pb(i_int_n), 'b:', 'LineWidth', 1);
 plot(t_arst(i_int_arst), pb_arst(i_int_arst), 'b', 'LineWidth', 0.5);
 
-plot(t_n(i_int_n), pbm(i_int_n), 'b:', 'LineWidth', 1.5);
-plot(t_arst(i_int_arst), pbm_arst(i_int_arst), 'b--', 'LineWidth', 1.5);
+% plot(t_n(i_int_n), pbm(i_int_n), 'b:', 'LineWidth', 1.5);
+% plot(t_arst(i_int_arst), pbm_arst(i_int_arst), 'b--', 'LineWidth', 1.5);
 
-plot(t_n(i_int_n), hr(i_int_n), 'r:', 'LineWidth', 1);
-plot(t_arst(i_int_arst), hr_arst(i_int_arst), 'r', 'LineWidth', 0.5);
+% plot(t_n(i_int_n), hr(i_int_n), 'r:', 'LineWidth', 1);
+% plot(t_arst(i_int_arst), hr_arst(i_int_arst), 'r', 'LineWidth', 0.5);
 
 
 leg = legend('PLV N', 'PLV ArSt', 'BP N', 'BP ArSt', 'BPm N', 'BPm ArSt', 'HR N', 'HR ArSt', 'Location', 'SouthEast')
 leg.ItemTokenSize = [15, 10];
-xlabel('Time')
+ylabel('Pressure [mmHg]')
+xlabel('t (s)')
 xlim([0, d]);
 
 disp("HR change:" + num2str(mean(hr(i_int_n)) - mean(hr_arst(i_int_arst))) + " BPM");
@@ -73,6 +74,7 @@ th = 7;
 set(gcf, 'Units', 'Centimeters', 'Position', [0, 0, tw, th], 'PaperUnits', 'Centimeters', 'PaperSize', [tw, th])
 %%
 exportgraphics(gcf,'fig_R_ArSt.png','Resolution',300)
+exportgraphics(gcf,'fig_R_ArSt.pdf', 'ContentType','vector')
 % print(gcf,'fig_R_base_300.png', '-dpng', '-r300')
 % saveas(gcf,'fig1.svg')
 

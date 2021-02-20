@@ -1,7 +1,7 @@
 %% plots the Exercise results
 % import the dymload util
 addpath('c:\Program Files\Dymola 2021\Mfiles\dymtools\')
-convert
+
 datafile = '../../Results2/imp_stepEx_normal.sdf';
 hi = h5info(datafile)
 %%
@@ -149,29 +149,31 @@ set(gcf, 'DefaultAxesFontSize', 10);
 
 s_a1 = subplot(4, 2, 1);
 hold on;
-title('A: LV pressures and volumes');
-plot(t(i_int90), plv(i_int90), 'b');
-plot(t(i_int90), psa(i_int90), 'r');
-plot(t(i_int90), pla(i_int90), 'm');
-plot(t(i_int90), pb(i_int90));
+title('A: Systemic pressures and volumes');
+plot(t(i_int90), plv(i_int90), 'k', 'LineWidth', 1);
+plot(t(i_int90), psa(i_int90), 'r', 'LineWidth', 1);
+plot(t(i_int90), pb(i_int90), 'b', 'LineWidth', 1);
+plot(t(i_int90), pla(i_int90), 'm', 'LineWidth', 1);
 set(gca,'xtick',[])
-leg = legend('P LV', 'P Asc Aor', 'P brach art', 'P LA', 'Location', 'SouthEast')
+leg = legend('P LV', 'P Asc Aor', 'PA (brach art)', 'P LA', 'Location', 'SouthEast')
 leg.ItemTokenSize = [10, 150];
 % legend('boxoff')
 ylim([0, 220]);
-ylabel('Pressure [mmHg]')
+ylabel('Pressure (mmHg)')
 s_a1.Clipping = 'off';
 xlim([0 td])
     
 % volumes
 s_a2 = subplot(4, 2, 3);hold on;
-plot(t(i_int90), vlv(i_int90), 'b');
-plot(t(i_int90), vla(i_int90), 'r');
+plot(t(i_int90), vlv(i_int90), 'b', 'LineWidth', 1);
+plot(t(i_int90), vla(i_int90), 'r', 'LineWidth', 1);
+leg = legend('V LV', 'V LA');
+leg.ItemTokenSize = [10, 2];
 set(gca,'xtickMode', 'auto')
 ylim([0, 250]);
 xlim([0 td])
-xlabel('Time [s]');
-ylabel('Volume [ml]')
+xlabel('t (s)');
+ylabel('Volume (ml)')
 s_a1.Clipping = 'off';
 % pos = get(s1, 'Position');
 % set(s1, 'Position', [0.05, 0.5, 0.9,0.4])
@@ -180,16 +182,15 @@ s_a1.Clipping = 'off';
 % B - venous plots
 s_b1 = subplot(4, 2, 2);cla;
 hold on;
-title('B: Pressures at normal and at exercise');
-plot(t(i_int90), psv(i_int90), 'b');
-plot(t(i_int90), ppv(i_int90), 'r');
-plot(t_n(i_int_n), psv_n(i_int_n), 'b:');
-plot(t_n(i_int_n), ppv_n(i_int_n), 'r:');
+title('B: Pulmonary and venous pressures');
+plot(t(i_int90), psv(i_int90), 'b', 'LineWidth', 1);
+plot(t(i_int90), ppv(i_int90), 'r', 'LineWidth', 1);
+plot(t_n(i_int_n), psv_n(i_int_n), 'b:', 'LineWidth', 1);
+plot(t_n(i_int_n), ppv_n(i_int_n), 'r:', 'LineWidth', 1);
 s_b1.Clipping = 'off';
-
 % set(gca,'xtick',[], 'ytick', [])
 set(gca,'xtick',[], 'ytick', [5, 10, 15])
-leg = legend('SV E', 'PV E', 'SV N', 'PV N')
+leg = legend('P SV E', 'P PV E', 'P SV N', 'P PV N')
 leg.ItemTokenSize = [10, 2];
 ylim([0, 20])
 ylabel('Pressure [mmHg]')
@@ -197,15 +198,15 @@ xlim([0 td])
 
 % Pulmonary arterial pressures
 s_b2 = subplot(4, 2, 4);hold on;
-plot(t(i_int90), ppa(i_int90), 'b');
-plot(t_n(i_int_n), ppa_n(i_int_n), 'b:');
+plot(t(i_int90), ppa(i_int90), 'b', 'LineWidth', 1);
+plot(t_n(i_int_n), ppa_n(i_int_n), 'b:', 'LineWidth', 1);
 % set(gca,'xtickMode', 'auto', 'ytick', [])
 ylim([0, 30]);
 ylabel('Pressure [mmHg]')
 xlim([0 td])
 leg = legend('PPA E', 'PPA N')
 leg.ItemTokenSize = [10, 2];
-xlabel('Time [s]');
+xlabel('t (s)');
 
 % pos = get(s1, 'Position');
 % set(s1, 'Position', [0.05, 0.5, 0.9,0.4])
@@ -214,8 +215,8 @@ xlabel('Time [s]');
 % C
 s_c = subplot(2, 2, 3);cla;hold on;
 title('C: Ventricle power during step-up exercise')
-plot([0:10:100], pow_rvs, 'r*-')
-plot([0:10:100], pow_lvs, 'b*-')
+plot([0:10:100], pow_rvs, 'r*-', 'LineWidth', 1)
+plot([0:10:100], pow_lvs, 'b*-', 'LineWidth', 1)
 legend('LV', 'RV', 'Location', 'NorthWest')
 xlabel('Exercise [% of max]');
 ylabel('Power [W]');
@@ -225,11 +226,11 @@ s_d = subplot(2, 2, 4);cla;hold on;
 title('D: Cardiac output during step-up exercise')
 % plot(vra(i_int), pra(i_int));
 % plot(vla(i_int), pla(i_int));
-plot([0:10:100], co_s, 'b*-')
-plot([0:10:100], q_ex_s, 'r*-')
-xlabel('Exercise [% of max]');
-ylabel('Blood flow [L/min]');
-leg = legend('Cardiac output', 'Flow through \newlineexercised tissues', 'Location', 'SouthEast')
+plot([0:10:100], co_s, 'b*-', 'LineWidth', 1)
+plot([0:10:100], q_ex_s, 'r*-', 'LineWidth', 1)
+xlabel('Exercise (% of max)');
+ylabel('Blood flow (L/min)');
+leg = legend('Cardiac output', 'Flow through exercising tissues', 'Location', 'SouthEast')
 leg.ItemTokenSize = [20, 150];
 drawnow()
 
@@ -251,16 +252,17 @@ set(s_b2, 'Units', 'normalized', 'Position', [0.5 + hm, 0.5, 0.5-1.2*hm,0.25 - v
 set(s_c, 'Units', 'normalized', 'Position', [hm, 1*vm, 0.5-1.2*hm,0.5 - 2.5*vm])
 set(s_d, 'Units', 'normalized', 'Position', [0.5 + hm, 1*vm, 0.5-1.2*hm,0.5 - 2.5*vm])
 
-%% Draw boxes
-annotation(fig1,'rectangle', [0 0.5 0.5 0.5]);
-annotation(fig1,'rectangle', [0.5 0.5 0.5 0.5]);
+% %% Draw boxes
+% annotation(fig1,'rectangle', [0 0.5 0.5 0.5]);
+% annotation(fig1,'rectangle', [0.5 0.5 0.5 0.5]);
 
 
 %% save figure
 exportgraphics(gcf,'fig_R_Exer.png','Resolution',200)
-tw = 17;
-th = 10;
-set(gcf, 'Units', 'Centimeters', 'Position', [0, 0, tw, th], 'PaperUnits', 'Centimeters', 'PaperSize', [tw, th])
-print(gcf,'fig_R_Exer_200.png', '-dpng', '-r200')
+exportgraphics(gcf,'fig_R_Exer.pdf', 'ContentType','vector')
+% tw = 17;
+% th = 10;
+% set(gcf, 'Units', 'Centimeters', 'Position', [0, 0, tw, th], 'PaperUnits', 'Centimeters', 'PaperSize', [tw, th])
+% print(gcf,'fig_R_Exer_200.png', '-dpng', '-r200')
 
 % saveas(gcf,'fig1.svg')

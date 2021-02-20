@@ -2,6 +2,7 @@ import DyMat
 import numpy as np
 import time as timer
 import os
+import fun_lib
 
 
 
