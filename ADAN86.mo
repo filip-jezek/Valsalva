@@ -37443,6 +37443,10 @@ P_hs_plus_dist"),
           veins_activation_tau=1,
           baro_fsn=0.038),
         useAutonomousPhi(y=true));
+
+      annotation (
+        experiment(StopTime = 20, Interval = 0.01, Tolerance = 1e-06, __Dymola_Algorithm = "Cvode"),
+        __OpenModelica_simulationFlags(lv = "LOG_STATS", s = "cvode"));
     end CardiovascularSystem;
 
     package Auxiliary
@@ -46628,7 +46632,8 @@ P_hs_plus_dist"),
             StopTime=60,
             Interval=0.01,
             Tolerance=1e-06,
-            __Dymola_Algorithm="Cvode"));
+            __Dymola_Algorithm="Cvode"),
+          __OpenModelica_simulationFlags(lv = "LOG_STATS", s = "cvode"));
       end CVS_baseline;
 
       model CVS_baseline_fastBaro
@@ -47268,7 +47273,8 @@ P_hs_plus_dist"),
             StopTime=120,
             Interval=0.01,
             Tolerance=1e-06,
-            __Dymola_Algorithm="Cvode"));
+            __Dymola_Algorithm="Cvode"),
+          __OpenModelica_simulationFlags(lv = "LOG_STATS", s = "cvode"));
       end CVS_tiltable;
 
       model CVS_SemiRecumberent "Semi-recumberent position with leg raise"
@@ -47299,7 +47305,8 @@ P_hs_plus_dist"),
             StopTime=130,
             Interval=0.02,
             Tolerance=1e-06,
-            __Dymola_Algorithm="Cvode"));
+            __Dymola_Algorithm="Cvode"),
+          __OpenModelica_simulationFlags(lv = "LOG_STATS", s = "cvode"));
       end CVS_SemiRecumberent;
 
       model CVS_upsideDown "A headdown experiment - not optimized for though"
@@ -47570,7 +47577,8 @@ P_hs_plus_dist"),
             StopTime=90,
             Interval=0.01,
             Tolerance=1e-07,
-            __Dymola_Algorithm="Cvode"));
+            __Dymola_Algorithm="Cvode"),
+          __OpenModelica_simulationFlags(lv = "LOG_STATS", s = "cvode"));
       end CVS_exercise;
 
       model CVS_tiltable_exercise
@@ -47666,7 +47674,8 @@ P_hs_plus_dist"),
             StopTime=450,
             Interval=0.02,
             Tolerance=1e-06,
-            __Dymola_Algorithm="Cvode"));
+            __Dymola_Algorithm="Cvode"),
+          __OpenModelica_simulationFlags(lv = "LOG_STATS", s = "cvode"));
       end CVS_Exercise_stepping;
 
       model CVS_exercise_noVenousConstriction
@@ -48235,7 +48244,8 @@ P_hs_plus_dist"),
             StopTime=60,
             Interval=0.01,
             Tolerance=1e-07,
-            __Dymola_Algorithm="Cvode"), Documentation(info="<html>
+            __Dymola_Algorithm="Cvode",
+          __OpenModelica_simulationFlags(lv = "LOG_STATS", s = "cvode")), Documentation(info="<html>
 <p>This model simulates Valsalva maneuver, based on the normal resting supine case</p>
 </html>"));
       end CVS_valsalva;
@@ -53223,17 +53233,6 @@ P_hs_plus_dist"),
             __Dymola_Algorithm="Cvode"));
       end Hemorrhage_noBaro;
     end Experiments;
-
-    model CVS_OM
-      extends CardiovascularSystem(heartComponent(
-          tricuspidValve(useChatteringProtection=false, passableVariable(start=
-                  1e-4)),
-          pulmonaryValve(useChatteringProtection=false, passableVariable(start=
-                  -956)),
-          mitralValve(useChatteringProtection=false, passableVariable(start=
-                  9e-5)),
-          aorticValve(useChatteringProtection=false, passableVariable(start=-1.2e4))));
-    end CVS_OM;
 
   annotation(preferredView="info",
   versionBuild=1,
