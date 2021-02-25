@@ -27,4 +27,5 @@ To simulate the following main use-cases, run:
 - Exercise (Stepping from 0 -- 100%) - ADAN_main.SystemicTree.Exercise.CVS_Exercise_stepping
 - Base model for extensions - ADAN_main.SystemicTree.CardiovascularSystem
 
+In OpenModelica, make sure the CVODE algorithm is used. Model seems unstable using other integrators.
 
