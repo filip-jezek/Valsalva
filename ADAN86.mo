@@ -532,7 +532,7 @@ package ADAN_main
           annotation (Placement(transformation(extent={{90,-10},{110,10}}),
               iconTransformation(extent={{90,-10},{110,10}})));
         input Physiolibrary.Types.Pressure u;
-        Physiolibrary.Types.VolumeFlowRate v = port_a.q;
+        Physiolibrary.Types.VolumeFlowRate v=port_a.q;
       equation
         u = port_a.pressure;
         annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
@@ -573,7 +573,7 @@ type"),       Text(
         Physiolibrary.Types.Pressure u = port_a.pressure;
         input Physiolibrary.Types.VolumeFlowRate v;
       equation
-        v = port_a.q;
+        v =port_a.q;
         annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
                 Rectangle(
                 extent={{-100,100},{-20,-100}},
@@ -635,7 +635,7 @@ type"),       Text(
          Physiolibrary.Types.Pressure dp "Pressure gradient";
          Physiolibrary.Types.Volume volume "Total volume";
       equation
-        volumeFlowRate = q_in.q;
+        volumeFlowRate =q_in.q;
         dp = q_in.pressure - q_out.pressure;
       end OnePort;
 
@@ -1658,7 +1658,7 @@ type"),       Text(
         //However this collapsing is limited with numerical precission, which is reached relatively soon.
 
         state = volume; // der(volume) =  q_in.q;
-        change = q_in.q;
+        change =q_in.q;
        // assert(volume>=-Modelica.Constants.eps,"Collapsing of vessels are not supported!");
        annotation (
           Icon(coordinateSystem(preserveAspectRatio=false,extent={{-100,-100},{
@@ -2065,7 +2065,7 @@ type"),       Text(
           ep=ExternalPressure;
         end if;
 
-        der(volume)   = q_in.q;
+        der(volume)   =q_in.q;
         q_in.pressure = compliant_vessel.p;
 
        annotation (
@@ -2151,7 +2151,7 @@ type"),       Text(
         end if;
 
 
-        der(volume) = q_in.q;
+        der(volume) =q_in.q;
         q_in.pressure = p + ep;
 
 
@@ -2449,7 +2449,7 @@ type"),       Text(
         //Collapsing state: the max function prevents the zero or negative input to logarithm, the logarithm brings more negative pressure for smaller volume
         //However this collapsing is limited with numerical precission, which is reached relatively soon.
 
-        der(volume) =  q_in.q;
+        der(volume) =q_in.q;
 
        // assert(volume>=-Modelica.Constants.eps,"Collapsing of vessels are not supported!");
        annotation (
@@ -3066,7 +3066,7 @@ type"),       Text(
           volume = pulmonary.total_stressed_volume;
 
             port_a.pressure =pulmonary.u_pas;
-            port_b.q =-pulmonary.v_pvn;
+          port_b.q = -pulmonary.v_pvn;
 
           annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
                   Text(
@@ -3192,7 +3192,7 @@ type"),       Text(
                 rotation=270,
                 origin={-60,-18})));
         equation
-          volume = c_pa.volume + c_pv.volume - deadVolume;
+          volume =c_pa.volume + c_pv.volume - deadVolume;
 
           connect(port_a, r_pa.q_in) annotation (Line(
               points={{-100,0},{-10,0}},
@@ -3553,7 +3553,7 @@ type"),       Text(
 
 
             // since the flow is derivation of volume, we have already differentiated it
-            der(currentWork) = port_a.pressure*port_a.q;
+            der(currentWork) =port_a.pressure*port_a.q;
 
             when D > 1 then
               // anywhere, jsut to reset it once a cycle
@@ -3562,7 +3562,7 @@ type"),       Text(
             end when;
 
             if enabled then
-              der(volume) = port_a.q;
+              der(volume) =port_a.q;
               port_a.pressure =E*volume + P_c +
                 thoracic_pressure_inside;
             else
@@ -3622,7 +3622,7 @@ type"),       Text(
           equation
 
             // since the flow is derivation of volume, we have already differentiated it
-            der(currentWork) = port_a.pressure*port_a.q;
+            der(currentWork) =port_a.pressure*port_a.q;
 
             when cardiac_cycle > 1 then
               // anywhere, jsut to reset it once a cycle
@@ -3632,7 +3632,7 @@ type"),       Text(
 
             if enabled then
 
-              der(volume) = port_a.q;
+              der(volume) =port_a.q;
               port_a.pressure =E*volume + thoracic_pressure_inside;
             else
               der(volume) = 0;
@@ -3861,11 +3861,11 @@ type"),       Text(
             // rightventricle
             rvflow.pressure - Pperi = (Vrv + Vsept)*driving*Esrv +
               (1 - driving)*Pi0rv*(exp(PhiEffect_passEl*lambdarv*(Vrv + Vsept)) - 1);
-            der(Vrv) = rvflow.q;
+            der(Vrv) =rvflow.q;
             //leftventricle
             lvflow.pressure - Pperi = (Vlv - Vsept)*driving*Eslv +
               Plv_passive;
-            der(Vlv) = lvflow.q;
+            der(Vlv) =lvflow.q;
             //pericardium
             Vperi = Vrv + Vlv;
             Pperi = Pth + Pi0peri*(exp(lambdaperi*(Vperi - V0peri)) - 1);
@@ -4029,11 +4029,11 @@ type"),       Text(
             // rightventricle
             rvflow.pressure - Pperi = (Vrv + Vsept)*driving*Esrv +
               (1 - driving)*Pi0rv*(exp(PhiEffect_passEl*lambdarv*(Vrv + Vsept)) - 1);
-            der(Vrv) = rvflow.q;
+            der(Vrv) =rvflow.q;
             //leftventricle
             lvflow.pressure - Pperi = (Vlv - Vsept)*driving*Eslv +
               Plv_passive;
-            der(Vlv) = lvflow.q;
+            der(Vlv) =lvflow.q;
             //pericardium
             Vperi = Vrv + Vlv;
             Pperi = Pth + Pi0peri*(exp(lambdaperi*(Vperi - V0peri)) - 1);
@@ -4148,10 +4148,10 @@ type"),       Text(
             // rightventricle
             rvflow.pressure - Pperi =(V_RV + Vsept)*D*Esrv + (1 - D)*Pi0rv*(exp(
               PhiEffect_passEl*lambdarv*(V_RV + Vsept)) - 1);
-            der(V_RV) = rvflow.q;
+            der(V_RV) =rvflow.q;
             //leftventricle
             lvflow.pressure - Pperi =(V_LV - Vsept)*D*Eslv + Plv_passive;
-            der(V_LV) = lvflow.q;
+            der(V_LV) =lvflow.q;
             //pericardium
             Vperi =V_RV + V_LV;
             Pperi = Pth + Pi0peri*(exp(lambdaperi*(Vperi - V0peri)) - 1);
@@ -6354,8 +6354,8 @@ type"),       Text(
               Real Tysq=-1/ym;
             equation
               // ports are already in SI units
-              der(V_LV) = port_lv.q;
-              der(V_RV) = port_rv.q;
+              der(V_LV) =port_lv.q;
+              der(V_RV) =port_rv.q;
               _P_LV = -ptrans_LV;
               _P_RV = +ptrans_RV;
 
@@ -7948,7 +7948,7 @@ type"),       Text(
              Physiolibrary.Types.Volume EDV_LV;
              parameter Physiolibrary.Types.Time tau = 1e-3 "integration time for claculation ESV and EDV" annotation (HideResult= not settings.EvaluateFunctionalParams);
         equation
-          der(CO_beat) = - sa.q;
+          der(CO_beat) =-sa.q;
            if settings.EvaluateFunctionalParams and smithOttesen_VentricularInteraction_flat_.Vlv > EDV_LV_m then
              der(EDV_LV_m)*tau = smithOttesen_VentricularInteraction_flat_.Vlv - EDV_LV_m;
            else
@@ -8345,7 +8345,7 @@ Kalecky")}), experiment(
                                tricuspidValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
-            useChatteringProtection=true,
+            useChatteringProtection=false,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=settings.heart_R_vlv)
                         constrainedby
@@ -8359,7 +8359,7 @@ Kalecky")}), experiment(
                                pulmonaryValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
-            useChatteringProtection=true,
+            useChatteringProtection=false,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=settings.heart_R_vlv)
                         constrainedby
@@ -8373,7 +8373,7 @@ Kalecky")}), experiment(
                                mitralValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
-            useChatteringProtection=true,
+            useChatteringProtection=false,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=settings.heart_R_vlv,
             useCycleInput=true) constrainedby
@@ -8386,7 +8386,7 @@ Kalecky")}), experiment(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
             useCycleInput=true,
-            useChatteringProtection=true,
+            useChatteringProtection=false,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=settings.heart_R_vlv)
                         constrainedby
@@ -8709,7 +8709,7 @@ Kalecky")}), experiment(
             tricuspidValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
-            useChatteringProtection=true,
+            useChatteringProtection=false,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=settings.heart_R_vlv) constrainedby
             Physiolibrary.Hydraulic.Components.IdealValveResistance(
@@ -8721,7 +8721,7 @@ Kalecky")}), experiment(
             pulmonaryValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
-            useChatteringProtection=true,
+            useChatteringProtection=false,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=settings.heart_R_vlv,
             useCycleInput=true)        constrainedby
@@ -8733,7 +8733,7 @@ Kalecky")}), experiment(
           replaceable Basic.IdealValveResistanceWithMeasurements mitralValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
-            useChatteringProtection=true,
+            useChatteringProtection=false,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=settings.heart_R_vlv,
             useCycleInput=true) constrainedby
@@ -8746,7 +8746,7 @@ Kalecky")}), experiment(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
             useCycleInput=true,
-            useChatteringProtection=true,
+            useChatteringProtection=false,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=settings.heart_R_vlv) constrainedby
             Physiolibrary.Hydraulic.Components.IdealValveResistance(
@@ -9023,8 +9023,8 @@ Kalecky")}), experiment(
 
             Physiolibrary.Types.Pressure p_in=port_a.pressure
               "Input pressure";
-            Physiolibrary.Types.VolumeFlowRate q_in=port_a.q
-              "Input flow (measured in normal blood flow direction)";
+              Physiolibrary.Types.VolumeFlowRate q_in=port_a.q
+                "Input flow (measured in normal blood flow direction)";
 
             Physiolibrary.Types.Pressure p_out_valved= port_b.pressure
               "Output pressure, able to be shut by a checkvalve.";
@@ -9033,8 +9033,8 @@ Kalecky")}), experiment(
 
             Physiolibrary.Types.Pressure p_out
               "Output pressure (measured in normal blood flow direction)";
-            Physiolibrary.Types.VolumeFlowRate q_out = - port_b.q
-              "Output flow (positive in normal blood flow direction).";
+              Physiolibrary.Types.VolumeFlowRate q_out=-port_b.q
+                "Output flow (positive in normal blood flow direction).";
 
             Physiolibrary.Types.Volume volume(nominal = 1e-9) "Actual volume";
             parameter Physiolibrary.Types.Volume V_min = 1e-6 "Minimal volume for limiting effects (e.g. collapsing, external pressure..)";
@@ -9639,7 +9639,7 @@ P_hs/2")}));
             Interfaces.HydraulicPort_a_leveled port_a
               annotation (Placement(transformation(extent={{-110,-10},{-90,10}})));
               Physiolibrary.Types.Volume volume;
-              Physiolibrary.Types.VolumeFlowRate q_in = port_a.q;
+              Physiolibrary.Types.VolumeFlowRate q_in=port_a.q;
               Physiolibrary.Types.Pressure p_in = port_a.pressure;
           equation
             volume = u_C/C + u_C_T/C_T;
@@ -9991,7 +9991,7 @@ P_hs/2")}));
                                                                 annotation (Placement(
                   transformation(rotation=0, extent={{-14,54},{-6,62}})));
           equation
-            volume = elasticVessel_C.volume + elasticVessel_CT.volume;
+            volume =elasticVessel_C.volume + elasticVessel_CT.volume;
 
           //       pq_terminator_p.u = u_out;
           //       pq_terminator_p.v = v_out;
@@ -15733,7 +15733,7 @@ P_hs_plus_dist"),
             annotation (Placement(transformation(extent={{-26,97},{-6,102}})));
 
           Real u_ra(unit = "Pa") = port_b.pressure;
-          Real v_aov(unit = "m3.s-1") = port_a.q;
+          Real v_aov(unit="m3.s-1") = port_a.q;
 
           Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter
             annotation (Placement(transformation(extent={{-300,70},{-280,90}})));
@@ -17103,7 +17103,7 @@ P_hs_plus_dist"),
             annotation (Placement(transformation(extent={{-26,97},{-6,102}})));
 
           Real u_ra(unit = "Pa") = port_b.pressure;
-          Real v_aov(unit = "m3.s-1") = port_a.q;
+          Real v_aov(unit="m3.s-1") = port_a.q;
 
           Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter
             annotation (Placement(transformation(extent={{-300,70},{-280,90}})));
@@ -18226,7 +18226,7 @@ P_hs_plus_dist"),
 
         Physiolibrary.Types.Volume volume;
         equation
-          volume = c_ao.volume + c_sa.volume + c_sv.volume;
+          volume =c_ao.volume + c_sa.volume + c_sv.volume;
 
           connect(port_a, r_ao.q_in) annotation (Line(
               points={{-320,80},{-280,80}},
@@ -26665,8 +26665,8 @@ P_hs_plus_dist"),
           equation
             port_a.pressure =p_in;
             port_b.pressure =p_out;
-            port_a.q = F_K1;
-            port_b.q = -F_K4;
+              port_a.q = F_K1;
+              port_b.q = -F_K4;
 
             der(V_AKIDNEY) = F_K1 - F_K2;
             der(V_VKIDNEY) = F_K3 - F_K4;
@@ -26775,8 +26775,8 @@ P_hs_plus_dist"),
           equation
             port_a.pressure =p_in;
             port_b.pressure =p_out;
-            port_a.q = F_K1;
-            port_b.q = -F_K4;
+              port_a.q = F_K1;
+              port_b.q = -F_K4;
 
             der(V_AKIDNEY) = F_K1 - F_K2;
             der(V_VKIDNEY) = F_K3 - F_K4;
@@ -26863,11 +26863,18 @@ P_hs_plus_dist"),
         package Testers
             extends Modelica.Icons.ExamplesPackage;
           model LymphaticTest
-            SimplestLymphatic simplestLymphatic(nc=1, p_int_diff=2666.4477483)
+            SimplestLymphatic simplestLymphatic(nc=1,
+              tau=1,
+              p_int_diff=2666.4477483)
               annotation (Placement(transformation(extent={{-20,0},{0,20}})));
-            Modelica.Blocks.Sources.Ramp Pcap(height=0, offset=2666)
+            Modelica.Blocks.Sources.Ramp Pcap(height=0, offset=30.80421015*
+                  133.32)
               annotation (Placement(transformation(extent={{-80,20},{-60,40}})));
-            Modelica.Blocks.Sources.Ramp Pv(height=0, offset=533) annotation (
+            Modelica.Blocks.Sources.Ramp Pv(
+              height=20*133.322,
+              duration=100,
+              offset=20.69055792*133.32,
+              startTime=100)                                      annotation (
                 Placement(transformation(extent={{-80,-40},{-60,-20}})));
           equation
             connect(Pcap.y, simplestLymphatic.capillaryPressures[1])
@@ -28339,7 +28346,7 @@ P_hs_plus_dist"),
                 extent={{90,-10},{110,10}})));
         Real u_out(unit = "Pa") = port_b.pressure;
 
-        Real v_out(unit = "m3.s-1") = -port_b.q "same as v_T";
+        Real v_out(unit="m3.s-1") = -port_b.q "same as v_T";
         input Real R_T(unit = "J.s.m-6");
         input Real C_T(unit = "m6.J-1");
 
@@ -31419,133 +31426,9 @@ P_hs_plus_dist"),
       end VentricleWallCalciumRat;
     end Obsolete;
 
-    record settings_variant "An inner record for the Settings class"
-      parameter Real a = 1;
-      parameter Boolean b = true;
-      final parameter Real c = a + 10;
-      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
-            coordinateSystem(preserveAspectRatio=false)));
-    end settings_variant;
   end Components;
 
   package tests
-    model bleeding
-      import ADAN_main;
-      import ADAN_main;
-
-      Modelica.Blocks.Sources.Trapezoid Valsalva(
-        amplitude=0,
-        rising=1,
-        width=30,
-        falling=1,
-        period=60,
-        nperiod=1,
-        offset=0,
-        startTime=50)
-        annotation (Placement(transformation(extent={{-80,6},{-60,26}})));
-      ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Artery pv_type(
-        p_in=0,
-        q_out=0,
-        l=systemic.Parameters_Systemic1.l_ascending_aorta_B,
-        E=systemic.Parameters_Systemic1.E_ascending_aorta_B,
-        r=systemic.Parameters_Systemic1.r_ascending_aorta_B,
-        t=0) annotation (Placement(transformation(extent={{-20,80},{0,100}})));
-      ADAN_main.Components.Subsystems.Systemic.Vessel_modules.arterialTree.pp_BC_type
-        pp_BC_type(
-        p_out=0,
-        t=0,
-        p_in=0,
-        l=systemic.Parameters_Systemic1.l_posterior_intercostal_T1_R98,
-        E=systemic.Parameters_Systemic1.E_posterior_intercostal_T1_R98,
-        R_T=systemic.Parameters_Systemic1.R_T_posterior_intercostal_T1_R98,
-        C_T=systemic.Parameters_Systemic1.C_T_posterior_intercostal_T1_R98,
-        r=systemic.Parameters_Systemic1.r_posterior_intercostal_T1_R98)
-        annotation (Placement(transformation(extent={{-20,40},{0,60}})));
-            Physiolibrary.Types.Volume v;
-    equation
-      der(v) = systemic.v_sup_venacava + systemic.v_inf_venacava;
-      connect(systemic.thoracic_pressure, Valsalva.y)
-        annotation (Line(points={{-10,16},{-59,16}}, color={0,0,127}));
-      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
-            coordinateSystem(preserveAspectRatio=false)));
-    end bleeding;
-
-    model TestADAN
-      Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(SolutionFlow=
-            8.3333333333333e-5)
-        annotation (Placement(transformation(extent={{-80,20},{-60,40}})));
-      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(P(
-            displayUnit="mmHg") = 1066.58)
-        annotation (Placement(transformation(extent={{80,20},{60,40}})));
-      Components.Subsystems.Systemic.ADAN86ArterialTree.arteries_ADAN86
-        arteries_ADAN86_1
-        annotation (Placement(transformation(extent={{-20,20},{0,40}})));
-      Modelica.Blocks.Sources.Constant const(k=0)
-        annotation (Placement(transformation(extent={{-100,0},{-80,20}})));
-      Components.Subsystems.Pulmonary.Pulmonary_ADAN86 pulmonary_circulation
-        annotation (Placement(transformation(extent={{-20,-40},{0,-20}})));
-      Components.Subsystems.Systemic.ADAN86ArterialTree.arteries_ADAN86_dv
-        arteries_ADAN86_dv
-        annotation (Placement(transformation(extent={{-20,60},{0,80}})));
-      Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P(
-            displayUnit="mmHg") = 1066.58)
-        annotation (Placement(transformation(extent={{80,58},{60,78}})));
-      main_ADAN_86_Heart_cellml_converted.Parameters_cellml.Parameters_Systemic
-        Parameters_Systemic1
-        annotation (Placement(transformation(extent={{-100,78},{-80,98}})));
-    equation
-      connect(unlimitedPump.q_out, arteries_ADAN86_1.port_a) annotation (Line(
-          points={{-60,30},{-20,30}},
-          color={0,0,0},
-          thickness=1));
-      connect(arteries_ADAN86_1.port_b, unlimitedVolume.y) annotation (Line(
-          points={{0,30},{60,30}},
-          color={0,0,0},
-          thickness=1));
-      connect(arteries_ADAN86_1.thoracic_pressure, const.y) annotation (Line(
-            points={{-20.4,20},{-30,20},{-30,10},{-79,10}},   color={0,0,127}));
-      connect(unlimitedPump.q_out, arteries_ADAN86_dv.port_a) annotation (Line(
-          points={{-60,30},{-54,30},{-54,72},{-14.2105,72},{-14.2105,66.6667}},
-          color={0,0,0},
-          thickness=1));
-      connect(unlimitedVolume1.y, arteries_ADAN86_dv.port_b_superior)
-        annotation (Line(
-          points={{60,68},{30,68},{30,73.3333},{-8.94737,73.3333}},
-          color={0,0,0},
-          thickness=1));
-      connect(arteries_ADAN86_dv.port_b_inferior, unlimitedVolume.y)
-        annotation (Line(
-          points={{-8.94737,60},{30,60},{30,30},{60,30}},
-          color={0,0,0},
-          thickness=1));
-      connect(unlimitedPump.q_out, pulmonary_circulation.port_a) annotation (
-          Line(
-          points={{-60,30},{-28,30},{-28,-30},{-20,-30}},
-          color={0,0,0},
-          thickness=1));
-      connect(pulmonary_circulation.port_b, unlimitedVolume.y) annotation (Line(
-          points={{0,-30},{30,-30},{30,30},{60,30}},
-          color={0,0,0},
-          thickness=1));
-      connect(const.y, pulmonary_circulation.thoracic_pressure) annotation (
-          Line(points={{-79,10},{-58,10},{-58,-44},{-10,-44},{-10,-40}}, color=
-              {0,0,127}));
-      connect(const.y, arteries_ADAN86_dv.thoracic_pressure) annotation (Line(
-            points={{-79,10},{-30,10},{-30,60},{-20,60}}, color={0,0,127}));
-      connect(unlimitedPump.q_out, veinSuperior.port_a) annotation (Line(
-          points={{-60,30},{-28,30},{-28,-70},{-20,-70}},
-          color={0,0,0},
-          thickness=1));
-      connect(unlimitedVolume.y, veinSuperior.port_b) annotation (Line(
-          points={{60,30},{30,30},{30,-70},{0,-70}},
-          color={0,0,0},
-          thickness=1));
-      connect(veinSuperior.thoracic_pressure, pulmonary_circulation.thoracic_pressure)
-        annotation (Line(points={{-20.4,-80},{-58,-80},{-58,-44},{-10,-44},{-10,
-              -40}}, color={0,0,127}));
-      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
-            coordinateSystem(preserveAspectRatio=false)));
-    end TestADAN;
 
     model ADAN_test
       import ADAN_main;
@@ -46681,6 +46564,58 @@ P_hs_plus_dist"),
                 __Dymola_Algorithm="Cvode"));
           end Starling_base;
         end HeartChars;
+
+        model StiffeningBaroreceptors "Only baroreceptors are stiffened"
+          extends CVS_baseline_fastBaro(SystemicComponent(
+              systemicParameters(
+                  E_aortic_arch_C46=0.4e+6*settings.syst_art_k_E*stiffeningCoeff,
+                  E_internal_carotid_R8_A=0.8e+6*settings.syst_art_k_E*stiffeningCoeff)));
+
+        parameter Physiolibrary.Types.Fraction stiffeningCoeff = 2;
+
+          annotation (experiment(
+              StopTime=360,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end StiffeningBaroreceptors;
+
+        model StiffeningDistalA "Only some of the distal arteries are stiffened - only leaves one, directly connected to tissues"
+          extends CVS_baseline_fastBaro(SystemicComponent(
+              internal_carotid_R8_B(                  E=SystemicComponent.systemicParameters.E_internal_carotid_R8_B*stiffeningCoeff),
+              coronary_arteries(                  E=4e5*stiffeningCoeff),
+              mesenteric_artery(                  E=4.00E+05*stiffeningCoeff),
+              tibiofibular_trunk_R234(                  E=SystemicComponent.systemicParameters.E_tibiofibular_trunk_R234*stiffeningCoeff),
+              tibiofibular_trunk_L212(                  E=SystemicComponent.systemicParameters.E_tibiofibular_trunk_L212*stiffeningCoeff)));
+
+              parameter Physiolibrary.Types.Fraction stiffeningCoeff = 2;
+          annotation (experiment(
+              StopTime=360,
+              Interval=0.08,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end StiffeningDistalA;
+
+        model StiffeningArteriesButBaroreceptors
+          "All arteries are are stiffened, except for baroreceptors"
+          extends CVS_baseline_fastBaro(SystemicComponent(
+              systemicParameters(
+                  E_aortic_arch_C46=0.4e+6*settings.syst_art_k_E*stiffeningCoeff,
+                  E_internal_carotid_R8_A=0.8e+6*settings.syst_art_k_E*stiffeningCoeff)),
+              settings(syst_art_k_E=0.8));
+
+        parameter Physiolibrary.Types.Fraction stiffeningCoeff = 0.5;
+
+          annotation (experiment(
+              StopTime=360,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end StiffeningArteriesButBaroreceptors;
+
+        model StiffeningArteriesButBaroreceptors_noBaro "Just to check isolated effect of the stiffening, to make sure the stiffening just didnt squeeze the volume more, creating hypertension"
+          extends StiffeningArteriesButBaroreceptors(useAutonomousPhi(y=false));
+        end StiffeningArteriesButBaroreceptors_noBaro;
       end Experiments;
 
       model CVS_baseline "Just a baseline wrapper"
@@ -46699,8 +46634,8 @@ P_hs_plus_dist"),
       model CVS_baseline_fastBaro
         extends CVS_baseline(settings(baro_tau_s=10));
         annotation (experiment(
-            StopTime=600,
-            Interval=0.01,
+            StopTime=360,
+            Interval=0.08,
             Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
       end CVS_baseline_fastBaro;
@@ -52745,6 +52680,18 @@ P_hs_plus_dist"),
               Tolerance=1e-07,
               __Dymola_Algorithm="Cvode"));
         end CVS_renalRegulation_CHF_baro;
+
+        package Tests
+          model TestISF
+            Components.Subsystems.Lymphatic.SimplestLymphatic simplestLymphatic(
+              nc=23,
+              tau=0.01,
+              p_int_diff(displayUnit="Pa") = 2700)
+              annotation (Placement(transformation(extent={{-14,10},{6,30}})));
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)),
+                Diagram(coordinateSystem(preserveAspectRatio=false)));
+          end TestISF;
+        end Tests;
       end Renals;
 
       package Figures
