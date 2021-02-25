@@ -591,6 +591,9 @@ def logObjectives(objectivesLog_path, objectives, sortBy = 'cost', compare_to_lo
 
         with open(objectivesLog_path, 'w') as file:
             total_cost = countTotalSumCost(objectives)
+            if total_cost == 0:
+                # fix for division by zero
+                total_cost = 1
 
             max_name_len = max(len(o.name) for o in objectives)
 

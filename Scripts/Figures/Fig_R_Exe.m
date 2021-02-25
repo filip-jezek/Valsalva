@@ -215,8 +215,8 @@ xlabel('t (s)');
 % C
 s_c = subplot(2, 2, 3);cla;hold on;
 title('C: Ventricle power during step-up exercise')
-plot([0:10:100], pow_rvs, 'r*-', 'LineWidth', 1)
 plot([0:10:100], pow_lvs, 'b*-', 'LineWidth', 1)
+plot([0:10:100], pow_rvs, 'r*-', 'LineWidth', 1)
 legend('LV', 'RV', 'Location', 'NorthWest')
 xlabel('Exercise [% of max]');
 ylabel('Power [W]');
@@ -238,8 +238,8 @@ drawnow()
 drawnow()
 pos = get(s_a2, 'Position');
 tw = 17;
-th = 10;
-set(fig, 'Units', 'Centimeters', 'Position', [2, 4, tw, th])
+th = 14;
+set(fig1, 'Units', 'Centimeters', 'Position', [2, 4, tw, th])
 
 hm = 0.075;
 vm = 0.08;
