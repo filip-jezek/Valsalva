@@ -5805,7 +5805,7 @@ type"),       Text(
               parameter Real SLcollagen=2.25 "threshold for collagen activation, microns";
               parameter Real PConcollagen=0.01 "contriubtion of collagen (??)";
               parameter Real PExpcollagen=70 "contriubtion of collagen (??)";
-              parameter Physiolibrary.Types.Fraction functionFraction = 1;
+              parameter Physiolibrary.Types.Fraction contractilityFraction=1;
 
 
               Real Tm "Represenattive midwall tension";
@@ -6232,7 +6232,8 @@ type"),       Text(
               // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
               Real sigmapas=max(0, k_passive*(SLo - L0)) + min(0, k_passive_negative*(SLo - L0)) + sigma_collagen;
               // Active forces could not go negative
-              Real sigmaact=max(0, functionFraction*D*(SL - SLrest)*(SLo - SL)/LSEiso);
+              Real sigmaact=max(0, contractilityFraction*D*(SL - SLrest)*(SLo
+                   - SL)/LSEiso);
               // (SL - SLrest)
               Real debug_SL = (SL - SLrest);
               Real debug_SLo = (SLo - SL);
@@ -38186,17 +38187,17 @@ P_hs_plus_dist"),
       SystemicComponent.ulnar_T2_L90.q_in +
       SystemicComponent.radial_T1_L92.q_in) / max(totalBF, 1e-6);
 
-      Physiolibrary.Types.Volume volMaxOVerflow = SystemicComponent.celiac_trunk_C116.linearOverflow
-             + SystemicComponent.renal_L166.linearOverflow + SystemicComponent.renal_R178.linearOverflow + SystemicComponent.internal_iliac_T1_R218.linearOverflow
-             + SystemicComponent.profundus_T2_R224.linearOverflow + SystemicComponent.anterior_tibial_T3_R230.linearOverflow
-          + SystemicComponent.posterior_tibial_T4_R236.linearOverflow + SystemicComponent.internal_iliac_T1_L196.linearOverflow
-             + SystemicComponent.profundus_T2_L202.linearOverflow + SystemicComponent.anterior_tibial_T3_L208.linearOverflow
-          + SystemicComponent.posterior_tibial_T4_L214.linearOverflow + SystemicComponent.ulnar_T2_R42.linearOverflow
-          + SystemicComponent.radial_T1_R44.linearOverflow + SystemicComponent.ulnar_T2_L90.linearOverflow + SystemicComponent.radial_T1_L92.linearOverflow
-             + SystemicComponent.internal_carotid_R8_C.linearOverflow + SystemicComponent.external_carotid_T2_R26.linearOverflow
-             + SystemicComponent.internal_carotid_L50_C.linearOverflow + SystemicComponent.external_carotid_T2_L62.linearOverflow
-             + SystemicComponent.vertebral_L2.linearOverflow + SystemicComponent.vertebral_R272.linearOverflow + SystemicComponent.cardiac_tissue.linearOverflow
-             + SystemicComponent.splanchnic_tissue.linearOverflow "Numerical imprecision";
+      // Physiolibrary.Types.Volume volMaxOVerflow = SystemicComponent.celiac_trunk_C116.linearOverflow
+      //        + SystemicComponent.renal_L166.linearOverflow + SystemicComponent.renal_R178.linearOverflow + SystemicComponent.internal_iliac_T1_R218.linearOverflow
+      //        + SystemicComponent.profundus_T2_R224.linearOverflow + SystemicComponent.anterior_tibial_T3_R230.linearOverflow
+      //     + SystemicComponent.posterior_tibial_T4_R236.linearOverflow + SystemicComponent.internal_iliac_T1_L196.linearOverflow
+      //        + SystemicComponent.profundus_T2_L202.linearOverflow + SystemicComponent.anterior_tibial_T3_L208.linearOverflow
+      //     + SystemicComponent.posterior_tibial_T4_L214.linearOverflow + SystemicComponent.ulnar_T2_R42.linearOverflow
+      //     + SystemicComponent.radial_T1_R44.linearOverflow + SystemicComponent.ulnar_T2_L90.linearOverflow + SystemicComponent.radial_T1_L92.linearOverflow
+      //        + SystemicComponent.internal_carotid_R8_C.linearOverflow + SystemicComponent.external_carotid_T2_R26.linearOverflow
+      //        + SystemicComponent.internal_carotid_L50_C.linearOverflow + SystemicComponent.external_carotid_T2_L62.linearOverflow
+      //        + SystemicComponent.vertebral_L2.linearOverflow + SystemicComponent.vertebral_R272.linearOverflow + SystemicComponent.cardiac_tissue.linearOverflow
+      //        + SystemicComponent.splanchnic_tissue.linearOverflow "Numerical imprecision";
       equation
         der(brachial_pressure_systolic_i)*tau = max(brachial_pressure  - brachial_pressure_systolic_i, 0);
         der(brachial_pressure_diastolic_i)*tau = min(brachial_pressure  - brachial_pressure_diastolic_i, 0);
@@ -42916,12 +42917,12 @@ P_hs_plus_dist"),
               condTP_EP1(disconnected=true),
               condTP_PC(disconnected=true),
               condTP_IP(disconnected=true),
-              heartComponent(ventricles(LV_wall(functionFraction=0.5), SEP_wall(
-                      functionFraction=0.5))),
+              heartComponent(ventricles(LV_wall(contractilityFraction=0.5),
+                    SEP_wall(contractilityFraction=0.5))),
               settings(
                 V_PV_init=0,
-                heart_vntr_D_A( displayUnit="Pa/m3"),
-                heart_vntr_D_A_maxAct( displayUnit="Pa/m3") = 6000));
+                heart_vntr_D_A(displayUnit="Pa/m3"),
+                heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 6000));
             annotation (experiment(
                 StopTime=40,
                 Interval=0.02,
@@ -42941,12 +42942,12 @@ P_hs_plus_dist"),
               condTP_EP1(disconnected=true),
               condTP_PC(disconnected=true),
               condTP_IP(disconnected=true),
-              heartComponent(ventricles(RV_wall(functionFraction=0.5), SEP_wall(
-                      functionFraction=0.5))),
+              heartComponent(ventricles(RV_wall(contractilityFraction=0.5),
+                    SEP_wall(contractilityFraction=0.5))),
               settings(
                 V_PV_init=0,
-                heart_vntr_D_A( displayUnit="Pa/m3"),
-                heart_vntr_D_A_maxAct( displayUnit="Pa/m3") = 6000));
+                heart_vntr_D_A(displayUnit="Pa/m3"),
+                heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 6000));
             annotation (experiment(
                 StopTime=40,
                 Interval=0.02,
@@ -42995,7 +42996,7 @@ P_hs_plus_dist"),
 
           model HF
             extends CVS_valsalva_PP2(heartComponent(ventricles(LV_wall(
-                      k_passive=50, functionFraction=0.1))));
+                      k_passive=50, contractilityFraction=0.1))));
           end HF;
         end Experiments;
 
@@ -52564,14 +52565,10 @@ P_hs_plus_dist"),
         end CardiovascularSystem_Renals;
 
         model Renals_CHF "Renals with congestive heart failure"
-          extends CardiovascularSystem_Renals(
-          heartComponent(ventricles(
-            LV_wall(functionFraction=0.4),
-            SEP_wall(functionFraction=(0.4 + 1)/2))),
-            settings(
-              baro_tau_s=10,
-              heart_vntr_D_A_maxAct( displayUnit="Pa/m3") = 3500,
-              V_PV_init=0.002));
+          extends CardiovascularSystem_Renals(heartComponent(ventricles(LV_wall(
+                    contractilityFraction=0.4), SEP_wall(contractilityFraction=
+                      (0.4 + 1)/2))), settings(baro_tau_s=10,
+                heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 3500));
         end Renals_CHF;
 
         model Renals_CHF_VolumeCongestion
@@ -52638,13 +52635,13 @@ P_hs_plus_dist"),
         model CVS_renalRegulation_CHF
           extends Renals_VolumeLoad(
             heartComponent(ventricles(
-                LV_wall(functionFraction=LVfunctionFraction),
-                RV_wall(functionFraction=RVfunctionFraction),
-                SEP_wall(functionFraction=(LVfunctionFraction + RVfunctionFraction)/2))),
+                LV_wall(contractilityFraction=LVfunctionFraction),
+                RV_wall(contractilityFraction=RVfunctionFraction),
+                SEP_wall(contractilityFraction=(LVfunctionFraction +
+                      RVfunctionFraction)/2))),
             unlimitedPump(useSolutionFlowInput=true),
             volumeInfusionRamp(height=1e-6, startTime=60),
-            settings(V_PV_init=initVol,
-                     baro_tau_s=10),
+            settings(V_PV_init=initVol, baro_tau_s=10),
             addedVolume(volume_start=initVol));
 
           parameter Physiolibrary.Types.Fraction LVfunctionFraction=0.4;
@@ -52747,6 +52744,60 @@ P_hs_plus_dist"),
                 thickness=1));
           end CVS_renalRegulation;
         end Obsolete;
+
+        model Renals_HFpEF "Renals with pEF heart failure"
+          extends CardiovascularSystem_Renals(
+            heartComponent(
+              ventricles(
+                LV_wall(k_passive=stiffeningFactor*settings.heart_vntr_k_passive),
+                SEP_wall(k_passive=(stiffeningFactor + 1)/2*settings.heart_vntr_k_passive))),
+              settings(
+                baro_tau_s=10),
+            useAutonomousPhi(y=false));
+          parameter Physiolibrary.Types.Fraction  stiffeningFactor=1
+            "Stiffening factor of ventricular wall";
+        end Renals_HFpEF;
+
+        model CVS_renalRegulation_HFpEF
+          extends Renals_VolumeLoad(
+                heartComponent(
+              ventricles(
+                LV_wall(k_passive=stiffeningFactor*settings.heart_vntr_k_passive),
+                SEP_wall(k_passive=(stiffeningFactor + 1)/2*settings.heart_vntr_k_passive))),
+            unlimitedPump(useSolutionFlowInput=true),
+            volumeInfusionRamp(height=1e-6, startTime=60),
+            settings(V_PV_init=initVol, baro_tau_s=10),
+            addedVolume(volume_start=initVol));
+
+          parameter Physiolibrary.Types.Fraction LVfunctionFraction=0.4;
+          parameter Physiolibrary.Types.Fraction RVfunctionFraction=1;
+
+        parameter Physiolibrary.Types.Pressure BPM_cutOff=13332.2387415;
+          parameter Physiolibrary.Types.Volume initVol=0
+            "Volume adjustment";
+          parameter Physiolibrary.Types.Fraction  stiffeningFactor=1
+            "Stiffening factor of ventricular wall";
+
+        equation
+         if time > 100 and brachial_pressure_mean > BPM_cutOff then
+           terminate("Pressure is already too high");
+         end if;
+          annotation (experiment(
+              StopTime=6000,
+              Interval=0.02,
+              Tolerance=1e-07,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_renalRegulation_HFpEF;
+
+        model CVS_renalRegulation_HFpEF_1700_LVOnly
+          extends CVS_renalRegulation_HFpEF(stiffeningFactor=17, heartComponent(
+                ventricles(SEP_wall(k_passive=settings.heart_vntr_k_passive))));
+          annotation (experiment(
+              StopTime=36000,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_renalRegulation_HFpEF_1700_LVOnly;
       end Renals;
 
       package Figures
@@ -52824,11 +52875,10 @@ P_hs_plus_dist"),
           condTP_EP1(disconnected=true),
           condTP_PC(disconnected=true),
           condTP_IP(disconnected=true),
-          heartComponent(ventricles(LV_wall(functionFraction=0.5), SEP_wall(
-                  functionFraction=0.5))),
-          settings(
-            baro_tau_s=10,
-            heart_vntr_D_A_maxAct( displayUnit="Pa/m3") = 3500));
+          heartComponent(ventricles(LV_wall(contractilityFraction=0.5),
+                SEP_wall(contractilityFraction=0.5))),
+          settings(baro_tau_s=10, heart_vntr_D_A_maxAct(displayUnit="Pa/m3")=
+              3500));
         annotation (experiment(
             StopTime=40,
             Interval=0.02,
@@ -53103,11 +53153,10 @@ P_hs_plus_dist"),
 
       model SarnoffExperiment_HFrEF
         extends SarnoffExperiment_RH(
-        heartComponent(ventricles(LV_wall(functionFraction=0.5), SEP_wall(
-                  functionFraction=0.75))),
-          settings(
-            baro_tau_s=10,
-            heart_vntr_D_A_maxAct( displayUnit="Pa/m3") = 5000),
+          heartComponent(ventricles(LV_wall(contractilityFraction=0.5),
+                SEP_wall(contractilityFraction=0.75))),
+          settings(baro_tau_s=10, heart_vntr_D_A_maxAct(displayUnit="Pa/m3")=
+              5000),
           useAutonomousPhi(y=true));
 
       end SarnoffExperiment_HFrEF;
