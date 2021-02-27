@@ -50,7 +50,7 @@ plot(t_arst(i_int_arst), plv_arst(i_int_arst), 'k', 'LineWidth', 1);
 
 
 plot(t_n(i_int_n), pb(i_int_n), 'b:', 'LineWidth', 1);
-plot(t_arst(i_int_arst), pb_arst(i_int_arst), 'b', 'LineWidth', 0.5);
+plot(t_arst(i_int_arst), pb_arst(i_int_arst), 'b', 'LineWidth', 1);
 
 % plot(t_n(i_int_n), pbm(i_int_n), 'b:', 'LineWidth', 1.5);
 % plot(t_arst(i_int_arst), pbm_arst(i_int_arst), 'b--', 'LineWidth', 1.5);

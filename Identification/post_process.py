@@ -59,6 +59,9 @@ def logOutput(objectives, var_set):
         tail = "  ,%03d,%s, %.6e" % (run, t, total_cost)
         
         tc = fun_lib.countTotalSumCost(objectives)
+        if tc == 0:
+            # dvision by zero fix
+            tc = 1
         string_seq = map(lambda o: logLine(o, tc), objectives)
 
         file.write(',  '.join(string_seq) + tail + '\n')

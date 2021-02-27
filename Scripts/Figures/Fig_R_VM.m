@@ -20,7 +20,7 @@ pb = dymget(dl, 'brachial_pressure')/mmHg2SI;
 pbm = dymget(dl, 'brachial_pressure_mean')/mmHg2SI;
 hr = dymget(dl, 'HR')/bpm2SI;
 lsv = dymget(dl, 'SV')/ml2SI;
-rsv = dymget(dl, 'heartComponent.pulmonaryValve.SV')/ml2SI;
+rsv = dymget(dl, 'heartComponent.pulmonaryValve.CO')./dymget(dl, 'HR')/ml2SI;
 
 tp = dymget(dl, 'thoracic_pressure')/mmHg2SI;
 pdv = dymget(dl, 'SystemicComponent.femoral_vein_R34.port_a.pressure')/mmHg2SI;
@@ -30,15 +30,16 @@ ppv = dymget(dl, 'P_pv')/mmHg2SI - tp;
 %% 
 fig = figure(2);clf;
 fs = 8;
-
+%%
 s1 = subplot(2, 1, 1); hold on;
 set(gca, 'FontSize', fs);
 title('Valsalva maneuver', 'FontSize', fs + 2)
 pbp = plot(t, pb, 'b');
 pbpm = plot(t(i_int), pbm(i_int), 'b', 'LineWidth', 2);
 phr = plot(t, hr, 'r', 'LineWidth', 1);
-leg = legend([pbp, phr], 'P BA [mmHg]', 'HR [BPM]', 'Location', 'NorthWest');
+leg = legend([pbp, phr], 'PA [mmHg]', 'HR [BPM]', 'Location', 'NorthWest');
 leg.ItemTokenSize = [10, 10];
+ylim([45, 160])
 set(gca,'xtick',[])
 s1.Clipping = 'off';
 
@@ -46,10 +47,10 @@ s2 = subplot(4, 1, 3); hold on;
 set(gca, 'FontSize', fs);
 plot(t(i_int), lsv(i_int), 'b', 'LineWidth', 1)
 plot(t(i_int), rsv(i_int), 'r', 'LineWidth', 1)
-set(gca,'xtick',[], 'ytick', [50, 100, 150])
+set(gca,'xtick',[], 'ytick', [50, 100, 150, 200])
 leg = legend('LV SV', 'RV SV', 'Location', 'NorthWest');
 leg.ItemTokenSize = [10, 10];
-ylim([0, 200])
+ylim([0, 250])
 ylabel('Volume (ml)')
 s2.Clipping = 'off';
 

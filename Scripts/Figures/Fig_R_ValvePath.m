@@ -38,7 +38,7 @@ vlv_avst = h5read(dl_avst, '/heartComponent/ventricles/V_LV')/ml2SI;
 pow_lv_avst = h5read(dl_avst, '/heartComponent/ventricles/power_LV');
 
 time_avre = h5read(dl_avre, '/Time');
-t_interval_avre = [298.16, 298.16 + d]; % interval in seconds
+t_interval_avre = [297.97, 297.97 + d]; % interval in seconds
 i_int_avre = (time_avre >= t_interval_avre(1) & time_avre <= t_interval_avre(2));
 t_avre = time_avre - t_interval_avre(1);
 
@@ -84,7 +84,7 @@ plot(t_avst(i_int_avst), pbm_avst(i_int_avst), 'r--', 'LineWidth', 0.5);
 % plot(t_n(i_int_n), hr(i_int_n), 'b:', 'LineWidth', 1.5);
 % plot(t_avst(i_int_avst), hr_avst(i_int_avst), 'r:', 'LineWidth', 1.5);
 % leg = legend('BP N', 'BPm N', 'BP AvSt', 'BPm AvSt', 'HR, N', 'HR AvSt', 'Location', 'SouthWest')
-leg = legend('BP N', 'BPm N', 'BP AvSt', 'BPm AvSt', 'Location', 'SouthWest')
+leg = legend('PA N', 'PA mean N', 'PA AvSt', 'PA mean AvSt', 'Location', 'SouthWest')
 leg.ItemTokenSize = [10, 10];
 xlabel('t (s)')
 xlim([0, d]);
@@ -107,7 +107,7 @@ xlabel('Volume (ml)')
 % plot([50, 250], pow_lv_n(find(time_n > t_interval_n(1), 2)), 'b--', 'LineWidth', 2);
 % plot([50, 250], pow_lv_avre(find(time_avre > t_interval_avre(1), 2)), 'r--', 'LineWidth', 2);
 % leg = legend('LV N', 'LV AvSt', 'LV power N', 'LV power AvSt', 'Location', 'NorthEast')
-leg = legend('LV N', 'LV AvSt', 'Location', 'NorthEast')
+leg = legend('LV N', 'LV AvIns', 'Location', 'NorthEast')
 leg.ItemTokenSize = [10, 10];
 
 s_a4 = subplot(2, 2, 4); 
@@ -121,7 +121,7 @@ plot(t_avre(i_int_avre), pbm_avre(i_int_avre), 'r--', 'LineWidth', 0.5);
 
 % plot(t_n(i_int_n), hr(i_int_n), 'b:', 'LineWidth', 1.5);
 % plot(t_avre(i_int_avre), hr_avre(i_int_avre), 'r:', 'LineWidth', 1.5);
-leg = legend('BP N', 'BPm N', 'BP AvSt', 'BPm AvSt', 'HR, N', 'HR AvSt', 'Location', 'SouthWest')
+leg = legend('PA N', 'PA mean N', 'PA AvIns', 'PA mean AvIns', 'HR N', 'HR AvIns', 'Location', 'SouthWest')
 leg.ItemTokenSize = [10, 10];
 xlabel('t (s)')
 xlim([0, d]);
