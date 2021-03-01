@@ -26814,17 +26814,17 @@ P_hs_plus_dist"),
           parameter Physiolibrary.Types.HydraulicConductance k2=1.085e-10;
           parameter Physiolibrary.Types.HydraulicConductance k3=2.4e-10;
 
-          Physiolibrary.Types.Pressure p_int(displayUnit="mmHg"); // =1333.22387415;
+          output Physiolibrary.Types.Pressure p_int(displayUnit="mmHg"); // =1333.22387415;
         //  Physiolibrary.Types.Volume v_int;
          // parameter Real c_int = 1;
-          Physiolibrary.Types.Pressure p_lymph(displayUnit="mmHg"); //=799.93432449;
+          output Physiolibrary.Types.Pressure p_lymph(displayUnit="mmHg"); //=799.93432449;
           Physiolibrary.Types.Pressure p_vc_mean( start = 666);
 
           Physiolibrary.Types.RealIO.PressureInput p_vc annotation (Placement(transformation(extent={{-102,
                     -92},{-82,-72}}),
                                 iconTransformation(extent={{-100,-100},{-80,-80}})));
 
-          Physiolibrary.Types.VolumeFlowRate lymph_flow               "normal Lymphatic flow per day is 5.787037037037e-08";
+          output Physiolibrary.Types.VolumeFlowRate lymph_flow               "normal Lymphatic flow per day is 5.787037037037e-08";
 
 
         parameter Real p1 =   6.443e-09;
@@ -26836,10 +26836,10 @@ P_hs_plus_dist"),
         parameter Real d =  -0.0007743;
         parameter Physiolibrary.Types.Pressure p_int_diff(displayUnit="mmHg")=1866.51342381;
         Physiolibrary.Types.Pressure x = p_int - p_int_diff;
-        Physiolibrary.Types.Fraction Vr = max(0, p1*x.^2 + p2*x + p3) + max(0,a*exp(b*x) + c*exp(d*x));
+        output Physiolibrary.Types.Fraction Vr = max(0, p1*x.^2 + p2*x + p3) + max(0,a*exp(b*x) + c*exp(d*x));
         parameter Physiolibrary.Types.Volume V_normal(displayUnit="l")=0.07;
-        Physiolibrary.Types.Volume V_int = V_excess + V_normal*0.7;
-        Physiolibrary.Types.Volume V_excess(min = -V_normal) = V_normal*(Vr -1);
+        Physiolibrary.Types.Volume V_int = V_excess + V_normal;
+        output Physiolibrary.Types.Volume V_excess(min = -V_normal) = V_normal*(Vr -1);
         equation
           sum(J1) = J2;
           J2 = J3;
@@ -37889,6 +37889,8 @@ P_hs_plus_dist"),
         output Physiolibrary.Types.Pressure P_LV = heartComponent.ventricles.P_LV
           "Pressure in left ventricle";
         output Physiolibrary.Types.Volume V_LV = heartComponent.ventricles.V_LV;
+        output Physiolibrary.Types.Volume EDV;
+        output Physiolibrary.Types.Volume ESV;
         output Physiolibrary.Types.Fraction phi_baro= switch1.u1;
       output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
       output Physiolibrary.Types.Frequency HR = heartComponent.sa_node.HR_true;
@@ -37956,9 +37958,9 @@ P_hs_plus_dist"),
         output Real SLo_min = min([heartComponent.ventricles.LV_wall.SLo, heartComponent.ventricles.RV_wall.SLo, heartComponent.ventricles.SEP_wall.SLo])
           "Minimal Sarcomere length";
         output Physiolibrary.Types.Pressure P_MV_o
-          "Opening pressure of the mitral valve";
+          "Opening pressure of the mitral valve - end systolic pressure";
         output Physiolibrary.Types.Pressure P_MV_c
-          "Closing pressure of the mitral valve";
+          "Closing pressure of the mitral valve - end diastolic pressure";
 
       // Get pressures and volumes of all tissues to check the characteristics
       //   Physiolibrary.Types.Pressure tissuePressures[:] = {
@@ -38091,10 +38093,12 @@ P_hs_plus_dist"),
 
         when heartComponent.mitralValve.open then
           P_MV_o = heartComponent.mitralValve.q_in.pressure;
+          ESV = V_LV;
         end when;
 
         when not heartComponent.mitralValve.open then
           P_MV_c = heartComponent.mitralValve.q_in.pressure;
+          EDV = V_LV;
         end when;
 
         assert(abs(height - settings.height) < 0.01, "Please manually tune the height in settings so its in accordance with the one calculated from the aortic vessel length to a preceision of 1cm", AssertionLevel.warning);
@@ -52743,6 +52747,38 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end CVS_renalRegulation_HFpEF_1700_LVOnly;
+
+        model CVS_renalRegulation_HFpEF_Baro
+          extends Renals_VolumeLoad(
+                heartComponent(
+              ventricles(
+                LV_wall(k_passive=stiffeningFactor*settings.heart_vntr_k_passive),
+                SEP_wall(k_passive=(stiffeningFactor + 1)/2*settings.heart_vntr_k_passive))),
+            unlimitedPump(useSolutionFlowInput=true),
+            volumeInfusionRamp(height=1e-6, startTime=60),
+            settings(V_PV_init=initVol, baro_tau_s=10),
+            addedVolume(volume_start=initVol),
+            useAutonomousPhi(y=true));
+
+          parameter Physiolibrary.Types.Fraction LVfunctionFraction=0.4;
+          parameter Physiolibrary.Types.Fraction RVfunctionFraction=1;
+
+        parameter Physiolibrary.Types.Pressure BPM_cutOff=13332.2387415;
+          parameter Physiolibrary.Types.Volume initVol=0
+            "Volume adjustment";
+          parameter Physiolibrary.Types.Fraction  stiffeningFactor=1
+            "Stiffening factor of ventricular wall";
+
+        equation
+         if time > 100 and brachial_pressure_mean > BPM_cutOff then
+           terminate("Pressure is already too high");
+         end if;
+          annotation (experiment(
+              StopTime=6000,
+              Interval=0.02,
+              Tolerance=1e-07,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_renalRegulation_HFpEF_Baro;
       end Renals;
 
       package Figures
