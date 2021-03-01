@@ -3,9 +3,16 @@ import numpy as np
 import time as timer
 import os
 
+# experiment_type = 'CHF_baro'
+# exp_range = range(100, 0,-5)
+# imp_coeff = 1
+
+experiment_type = 'HFpEF'
+exp_range = range(100, 5000,100)
+imp_coeff = 1/100
 
 
-filePattern = R"D:\Data\CVS_renalRegulation_CHF_baro_%0d.mat"
+filePattern = R"D:\Data\CVS_renalRegulation_%s_%0d.mat"
 # filePattern = R"D:\Data\CVS_renalRegulation_CHF_%0d.mat"
 # filename = R"c:\home\UMICH\Valsalva\Results2\CardiovascularSystem.mat"
 
@@ -18,16 +25,16 @@ bpm_base = 95*mmHg2SI
 startTime = 60
 
 
-s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {EF}, {BPM}, {Qlymph}, {Vint_r},{Vint_excess}, {comp}\n'
+s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {EDV}, {BPM}, {Qlymph}, {Vint_r},{Vint_excess}, {comp}\n'
 result_set = []
 
-
-with open('CHF_VolumeLoading_baro.csv', 'w') as file:
+outputFile = 'VolumeLoading_%s.csv' % experiment_type
+with open(outputFile, 'w') as file:
 # with open('CHF_VolumeLoading.csv', 'w') as file:    
-    file.write(s.format(f_LV = 'f_LV', vol = 'vol [L]', time = 'time [s]', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO [L/min]', EF = 'EF', CVP = 'CVP', BPM = 'maxBP', Qlymph = 'Qlymph [L/day]', Vint_r= 'Relative change to interstitial volume', Vint_excess = 'Excess interstitial volume [L]', comp = 'compensated'))
+    file.write(s.format(f_LV = 'f_LV', vol = 'vol [L]', time = 'time [s]', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO [L/min]', EF = 'EF', EDV = 'EDV ml', CVP = 'CVP', PCWP = 'PCWP (mmHg)', BPM = 'maxBP', Qlymph = 'Qlymph [L/day]', Vint_r= 'Relative change to interstitial volume', Vint_excess = 'Excess interstitial volume [L]', comp = 'compensated'))
 
-    for i in range(100, 0,-5):
-        filename = filePattern % i
+    for i in exp_range:
+        filename = filePattern % (experiment_type, i)
         # filename = R"c:\home\UMICH\Valsalva\Results2\CardiovascularSystem.mat"
 
         try:
@@ -44,7 +51,6 @@ with open('CHF_VolumeLoading_baro.csv', 'w') as file:
             # os.system("c:\\Program Files\\Dymola 2021\\bin\\dsres2dsf %s %s" % (filename, filename.replace('.mat', '.sdf'))
 
             continue
-
 
 
         time = datafile.abscissa(2)[0]
@@ -73,6 +79,14 @@ with open('CHF_VolumeLoading_baro.csv', 'w') as file:
         vi_r =  np.mean(datafile.data('simplestLymphatic.Vr')[mean_rng])
         vi_e = np.mean(datafile.data('simplestLymphatic.V_excess')[mean_rng])/L2SI
         lymph_q = np.mean(datafile.data('simplestLymphatic.lymph_flow')[mean_rng])/LpD2SI
+        pcwp = np.mean(datafile.data('P_pv')[mean_rng])/mmHg2SI
+
+        try:
+            edv = np.mean(datafile.data('EDV')[mean_rng])/L2SI*1000
+            esv = np.mean(datafile.data('ESV')[mean_rng])/L2SI*1000
+        except KeyError:
+            edv = 'NA'
+            esv = 'NA'
 
         # aus funlib
         def calculateEF(volumes):
@@ -89,8 +103,9 @@ with open('CHF_VolumeLoading_baro.csv', 'w') as file:
         result = (i, vol, t, bpm[i_bpm], comp)
         result_set.append(result)
 
-        ws = s.format(f_LV = i, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR = hr, CO = co, CVP = cvp, EF = ef, BPM = bpm[i_bpm]/mmHg2SI, Qlymph = lymph_q, Vint_r=vi_r, Vint_excess = vi_e,  comp = comp)
+        ws = s.format(f_LV = i*imp_coeff, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR = hr, CO = co, CVP = cvp, PCWP = pcwp, EF = ef, EDV = edv, BPM = bpm[i_bpm]/mmHg2SI, Qlymph = lymph_q, Vint_r=vi_r, Vint_excess = vi_e,  comp = comp)
 
         file.write(ws)
+        file.flush()
         print("Ok.")
         pass
