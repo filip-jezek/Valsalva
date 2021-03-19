@@ -38563,8 +38563,7 @@ P_hs_plus_dist"),
           veins_linearV0_rel=0.793,
           veins_delayed_activation=true,
           veins_activation_tau=1,
-          baro_fsn=0.038),
-        useAutonomousPhi(y=false));
+          baro_fsn=0.038));
 
       annotation (
         experiment(StopTime = 20, Interval = 0.01, Tolerance = 1e-06, __Dymola_Algorithm = "Cvode"),
@@ -44949,6 +44948,24 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end AdjustPVloop;
+
+        model ReoptimizeBaseline4
+          extends CardiovascularSystem(settings(
+              V_PV_init=a,
+              heart_R_LA=a,
+              heart_vntr_D_0=a,
+              heart_vntr_D_A=a,
+              heart_atr_D_0=a,
+              heart_atr_D_A=a,
+              heart_vntr_xi_Vw=1,
+              heart_vntr_xi_AmRef=1,
+              heart_vntr_k_passive=0,
+              heart_vntr_SLcollagen=0,
+              syst_TPR=a,
+              syst_TR_frac=a,
+              pulm_C_PA=a,
+              pulm_R=a), useAutonomousPhi(y=false));
+        end ReoptimizeBaseline4;
       end SingleModelRun;
 
       package CombinedModel
