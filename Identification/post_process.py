@@ -210,7 +210,7 @@ def processDyMatFile():
         # logOutput(objectives)
     except fun_lib.SimulationResultIncompleteError as e:
         # most probably the simulation crashed mid-simulation. Lets provide a penalty for that
-        objectives = [fun_lib.ObjectiveVar('Simulation failed', value = 10, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)]
+        objectives = [fun_lib.ObjectiveVar('Simulation failed', value = e.penalty, costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)]
 
         # comment out if you want to halt the optim
         writeCost(objectives)

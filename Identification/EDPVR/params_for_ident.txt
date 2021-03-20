@@ -1,0 +1,5 @@
+# name, value, [min, max, step]
+k_passive,22.0,10,500,5
+SLcollagen,1.6,0.1,10,0.1
+PConcollagen,6.0,0.001,1,0.001
+PExpcollagen,5.0,1.0,200.0,1

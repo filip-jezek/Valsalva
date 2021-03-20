@@ -16,9 +16,10 @@ import inspect
 DEFAULT_STD_PERCENT = 10
 
 class SimulationResultIncompleteError(ValueError):
-    def __init__(self, length:float, minimalLength:float, owner:str):
+    def __init__(self, length:float, minimalLength:float, owner:str, penalty):
         m = 'Incomplete simulation output, the simulation probably crashed at %.2f s (%.1f s required). At %s' % (length, minimalLength, owner)
         super().__init__(m)
+        self.penalty = penalty
 
 class CostFunctionType(enum.Enum):
     Ignore = 0
@@ -555,7 +556,7 @@ def importCostFunction(dir = '..\\'):
     spec.loader.exec_module(cf)
     return cf
 
-def checkSimulationLength(simulationTime, minimalSimulationTime):
+def checkSimulationLength(simulationTime, minimalSimulationTime, penalty = 1e3):
 
     if simulationTime < minimalSimulationTime:
         try:
@@ -565,7 +566,7 @@ def checkSimulationLength(simulationTime, minimalSimulationTime):
         except:
             filename = 'Unknwon'
 
-        raise SimulationResultIncompleteError(simulationTime, minimalSimulationTime, filename)
+        raise SimulationResultIncompleteError(simulationTime, minimalSimulationTime, filename, penalty)
         
 def writeToFile(filename, time:Iterable, signal:Iterable):
     with open(filename, 'w') as file:
