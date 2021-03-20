@@ -7,8 +7,8 @@ import os
 # exp_range = range(100, 0,-5)
 # imp_coeff = 1
 
-experiment_type = 'HFpEF'
-exp_range = range(100, 5000,100)
+experiment_type = 'HFpEF_baro'
+exp_range = range(100, 2501,100)
 imp_coeff = 1/100
 
 
@@ -82,8 +82,8 @@ with open(outputFile, 'w') as file:
         pcwp = np.mean(datafile.data('P_pv')[mean_rng])/mmHg2SI
 
         try:
-            edv = np.mean(datafile.data('EDV')[mean_rng])/L2SI*1000
-            esv = np.mean(datafile.data('ESV')[mean_rng])/L2SI*1000
+            edv = np.max(datafile.data('EDV')[mean_rng])/L2SI*1000
+            esv = np.min(datafile.data('ESV')[mean_rng])/L2SI*1000
         except KeyError:
             edv = 'NA'
             esv = 'NA'

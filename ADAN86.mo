@@ -8975,6 +8975,21 @@ Kalecky")}), experiment(
                   textString="TriSeg
 %class_name")}));
         end Heart_TriSegMechanicsSimple;
+
+        model Heart_TriSegMechanicsSimple_incrRes "Simple mechanics TriSeg with variable LA conductance"
+          extends Heart_TriSegMechanicsSimple(r_SystemicVenousInflow(
+                useConductanceInput=false), r_PulmonaryVenousInflow(useConductanceInput=
+                 true));
+          Physiolibrary.Types.RealIO.HydraulicConductanceInput
+                                                    hydraulicconductance                 annotation (Placement(
+                transformation(extent={{20,-20},{-20,20}},
+                rotation=0,
+                origin={120,-30}),                            iconTransformation(extent={{140,
+                    -100},{100,-60}})));
+        equation
+          connect(r_PulmonaryVenousInflow.cond, hydraulicconductance)
+            annotation (Line(points={{80,-54},{80,-30},{120,-30}}, color={0,0,127}));
+        end Heart_TriSegMechanicsSimple_incrRes;
       end Heart;
 
       package Systemic
@@ -26750,7 +26765,7 @@ P_hs_plus_dist"),
             Pressure P_CKIDNEY=V_VKIDNEY/C_VKIDNEY;
             VolumeFlowRate F_K1=(p_in - P_AKIDNEY)/R_AKIDNEY;
             VolumeFlowRate F_K2=(P_AKIDNEY - P_CKIDNEY)/(R_K_afferent + R_K_efferent);
-            VolumeFlowRate F_K3=F_K2 - Q_urine;
+            VolumeFlowRate F_K3=F_K2;
             VolumeFlowRate F_K4=(P_CKIDNEY - p_out)/R_VKIDNEY;
             Pressure P_GLOMER=P_AKIDNEY - F_K2*R_K_afferent;
 
@@ -48912,7 +48927,8 @@ P_hs_plus_dist"),
 
             model imp_avRe
               extends imp_base(heartComponent(aorticValve(_Goff=3E-08)),
-                settings(baro_tau_s=10));
+                settings(baro_tau_s=10),
+              useAutonomousPhi(y=true));
 
               Physiolibrary.Types.Volume CO_backflow_acc;
             Physiolibrary.Types.Volume CO_backflow;
@@ -52593,11 +52609,11 @@ P_hs_plus_dist"),
             settings(V_PV_init=initVol, baro_tau_s=10),
             addedVolume(volume_start=initVol));
 
-          parameter Physiolibrary.Types.Fraction LVfunctionFraction=0.4;
+          parameter Physiolibrary.Types.Fraction LVfunctionFraction=0.6;
           parameter Physiolibrary.Types.Fraction RVfunctionFraction=1;
 
         parameter Physiolibrary.Types.Pressure BPM_cutOff=13332.2387415;
-          parameter Physiolibrary.Types.Volume initVol=0.002
+          parameter Physiolibrary.Types.Volume initVol=7e-05
             "Volume adjustment";
         equation
          if time > 100 and brachial_pressure_mean > BPM_cutOff then
@@ -52748,7 +52764,7 @@ P_hs_plus_dist"),
               __Dymola_Algorithm="Cvode"));
         end CVS_renalRegulation_HFpEF_1700_LVOnly;
 
-        model CVS_renalRegulation_HFpEF_Baro
+        model CVS_renalRegulation_HFpEF_baro
           extends Renals_VolumeLoad(
                 heartComponent(
               ventricles(
@@ -52778,7 +52794,7 @@ P_hs_plus_dist"),
               Interval=0.02,
               Tolerance=1e-07,
               __Dymola_Algorithm="Cvode"));
-        end CVS_renalRegulation_HFpEF_Baro;
+        end CVS_renalRegulation_HFpEF_baro;
       end Renals;
 
       package Figures
@@ -53317,6 +53333,24 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end Hemorrhage_noBaro;
+
+      model CardiovascularSystem_incrConduct
+        extends CardiovascularSystem(redeclare
+            Components.Subsystems.Heart.Heart_TriSegMechanicsSimple_incrRes
+            heartComponent(aorticValve(useChatteringProtection=true)),
+            useAutonomousPhi(y=false));
+      Modelica.Blocks.Sources.Ramp LA_Cond(
+          height=20/3333059.685375,
+          duration=60,
+          offset=1/3333059.685375,
+          startTime=20)
+          "Phi for when the model is not using the autonomous feedback phi from baroreflex"
+          annotation (Placement(transformation(extent={{-100,-20},{-80,0}})));
+      equation
+        connect(LA_Cond.y, heartComponent.hydraulicconductance) annotation (
+            Line(points={{-79,-10},{-48,-10},{-48,-30},{-38,-30}}, color={0,0,
+                127}));
+      end CardiovascularSystem_incrConduct;
     end Experiments;
 
   annotation(preferredView="info",
