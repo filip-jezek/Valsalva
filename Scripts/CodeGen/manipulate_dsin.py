@@ -10,7 +10,68 @@ import re
 from datetime import datetime
 from typing import Iterable, Text
 
-overwriteOptParam = True
+def readOutputListing(filename, runNumber = -1):
+    """Reads the outputLIsting from GenOpt and returns params at lowest cost (or given run)
+
+    Duplicated from from PostProcess/post_process_optim.py
+    
+    Returns:
+        (params, run, cost, datetime) 
+    """
+
+    with open(filename) as file:
+        lines = file.readlines()
+
+    param_names = {}
+    run = -1
+    cost = 1e300
+    data_begin = False
+    optim_date = 'generated at ' + str(datetime.now())
+
+    # line = []
+    for line in lines:
+        
+        if line.startswith('Start time:'):
+            optim_date = 'optimized at ' + line[len('Start time: Thu '):]
+
+        # prepare the header
+        if not data_begin and line.startswith('Simulation Number'):
+            # Simulation Number	Main Iteration	Step Number	f(x)	settings.phi0	settings.height	settings...
+            cols = line.rstrip('\n').split('\t')
+            for i in range(len(cols)):
+                param_names[i] = cols[i]
+            data_begin = True
+            continue
+        elif not data_begin:
+            # we are not yet there
+            continue
+
+        # find the parameters than are varied
+        cols = line.rstrip('\n').split('\t')
+        cur_cost = float(cols[3])
+
+        if cur_cost > cost and run != runNumber:
+            continue
+        #else:
+
+        # save this
+        run = int(cols[0])
+        
+        cost = cur_cost
+        # list of ('name', value) tuples
+        params = []
+
+        # first 4 cols are runs and f(x) and last one is comment
+        for col_num in range(4, len(cols)-1):
+            param_name = param_names[col_num]
+            # param_short_name = param_name[9:] if param_name.startswith('settings.') else param_name
+            param_cur_val = float(cols[col_num])
+            params.append((param_name, param_cur_val))
+        
+        if run == runNumber:
+            return (params, run, cost)
+    
+    return (params, run, cost, optim_date)
 
 def getKeysfromDsin(lines):
     """ Reads initial parameter names from dymola dsin file or from any text file providing one param per line
@@ -103,16 +164,17 @@ class OptimParam:
         # return self.value*0.01 if self._step is None and self.value is not None else self._step
         return 0 if self._step is None else self._step
 
-def getInitParams(dsFileIn='dsin.txt', paramsFile='dsin.txt') -> dict: 
+def getInitParams(dsFileIn='dsin.txt', OptOutputFileIn = 'OutputListingMain.txt', paramsFile='dsin.txt') -> dict: 
     """ Gets dictionary of input parameters and its values
 
     returns dict of OptimParams
     """
-    with open(dsFileIn) as fil:
-        lines_all = fil.readlines()
     
     ops = {}
     if dsFileIn == paramsFile:
+        with open(dsFileIn) as fil:
+            lines_all = fil.readlines()
+
         lines_params = lines_all
         keys = getKeysfromDsin(lines_params)
         params = getValsFromDsin(lines_all, keys)    
@@ -134,11 +196,22 @@ def getInitParams(dsFileIn='dsin.txt', paramsFile='dsin.txt') -> dict:
                 elif len(s) >= 1:
                     op = OptimParam(s[0])
                 ops[s[0]] = op
+        
+        if dsFileIn is not None:
+            with open(dsFileIn) as fil:
+                lines_all = fil.readlines()
+                params = getValsFromDsin(lines_all, ops.keys())
+                for k, v in params.items():
+                    ops[k].value = v[0]
 
-        params = getValsFromDsin(lines_all, ops.keys())
-
-        for k, v in params.items():
-            ops[k].value = v[0]
+        
+        if OptOutputFileIn is not None:
+            (params, _, _, _) = readOutputListing(OptOutputFileIn)
+            for par in params:
+                if par[0] not in ops:
+                    print('WARINGN: ADDING PARAM %s!!' % par[0])
+                    op = OptimParam(s[0])
+                ops[par[0]].value = par[1]
 
     return ops
 
@@ -489,7 +562,7 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
     if regenerateParamsFromDsin:
         writeTunableParamsFromDsin(paramsFile)
 
-    init_params = getInitParams(dsFileIn='dsin.txt', paramsFile=paramsFile)
+    init_params = getInitParams(dsFileIn=DSFILEIN, OptOutputFileIn=OPTOUTPUTFILEIN, paramsFile=paramsFile)
     
     # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
     if overrideFracs:
@@ -497,11 +570,18 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
     else:
         writeInitParams(init_params, paramsFile=paramsFile)
 
-    if overwriteOptParam:
+    if overwriteOptParamFile:
         build_opt_command_file('opt_command.txt', init_params, run_type='identification')
 
     createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt', outputsOnly=storeOnlyOutputs)    
     
+
+overwriteOptParamFile = True
+# DSFILEIN = 'dsin.txt'
+DSFILEIN = None
+OPTOUTPUTFILEIN = 'OutputListingMain.txt'
+# OPTOUTPUTFILEIN = None
+
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)

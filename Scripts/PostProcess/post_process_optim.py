@@ -86,7 +86,7 @@ def generateModel(modelName, pack):
 
         file.write(header)
         file.writelines(lines)
-        file.write(footer)
+        file.write(footer)        
 
 
 if __name__ is '__main__':
