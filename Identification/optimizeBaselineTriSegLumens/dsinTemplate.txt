@@ -63,7 +63,7 @@ double method(27,1)
        0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
        0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
        0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
-   65536                   # debug    flags for debug information (1<<0 uses pdebug) 
+       0                   # debug    flags for debug information (1<<0 uses pdebug) 
      100                   # pdebug       priority of debug information (1...100)
        0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
        0                   # ordmax   Maximum allowed integration order, if > 0
@@ -142,6 +142,8 @@ settings.heart_vntr_Lsref
 settings.heart_vntr_L0
 settings.heart_vntr_SLcollagen
 settings.heart_vntr_SLrest
+settings.heart_vntr_PConcollagen
+settings.heart_vntr_PExpcollagen
 settings.syst_abd_P_th_ratio
 settings.syst_TPR
 settings.syst_TR_frac
@@ -12065,8 +12067,6 @@ qf_Digestive
 qf_kidneys
 qf_heart
 qf_Others
-CPUtime
-EventCounter
 
 double initialValue(11964,6)
  -1  2.5000000000000000E-01       0                       0                
@@ -12137,16 +12137,20 @@ double initialValue(11964,6)
   1   280   # settings.heart_vntr_xi_Vw
  -1       1                       0                       0                
   1   280   # settings.heart_vntr_xi_AmRef
- -1       0                       0                       0                
+ -1      10                       0                       0                
   1   280   # settings.heart_vntr_k_passive
  -1  1.8999999999999999E+00       0                       0                
   1   280   # settings.heart_vntr_Lsref
  -1  1.6000000000000001E+00       0                       0                
   1   280   # settings.heart_vntr_L0
- -1       0                       0                       0                
+ -1  2.1000000000000001E+00       0                       0                
   1   280   # settings.heart_vntr_SLcollagen
  -1  1.5100000000000000E+00       0                       0                
   1   280   # settings.heart_vntr_SLrest
+ -1      20                       0                       0                
+  1   280   # settings.heart_vntr_PConcollagen
+ -1  2.8999999999999999E+00       0                       0                
+  1   280   # settings.heart_vntr_PExpcollagen
  -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
  -1 %settings.syst_TPR% 0.0 1e+100
@@ -34861,9 +34865,9 @@ double initialValue(11964,6)
   6   256   # heartComponent.ventricles.LV_wall.Lsref
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.L0
-  0  2.1899999999999999E+01       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.k_passive
-  0  2.1899999999999999E+01       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.k_passive_negative
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.phi0
@@ -34871,11 +34875,11 @@ double initialValue(11964,6)
   1   280   # heartComponent.ventricles.LV_wall.LSEiso
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.SLrest
-  0  1.9399999999999999E+00       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.SLcollagen
-  0      19                       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.PConcollagen
-  0  2.9300000000000002E+00       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.PExpcollagen
  -1       1                       0                       0                
   1   280   # heartComponent.ventricles.LV_wall.contractilityFraction
@@ -34931,9 +34935,9 @@ double initialValue(11964,6)
   6   256   # heartComponent.ventricles.SEP_wall.Lsref
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.L0
-  0  2.1899999999999999E+01       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.k_passive
-  0  2.1899999999999999E+01       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.k_passive_negative
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.phi0
@@ -34941,11 +34945,11 @@ double initialValue(11964,6)
   1   280   # heartComponent.ventricles.SEP_wall.LSEiso
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.SLrest
-  0  1.9399999999999999E+00       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.SLcollagen
-  0      19                       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.PConcollagen
-  0  2.9300000000000002E+00       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.PExpcollagen
  -1       1                       0                       0                
   1   280   # heartComponent.ventricles.SEP_wall.contractilityFraction
@@ -35001,9 +35005,9 @@ double initialValue(11964,6)
   6   256   # heartComponent.ventricles.RV_wall.Lsref
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.L0
-  0  2.1899999999999999E+01       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.k_passive
-  0  2.1899999999999999E+01       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.k_passive_negative
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.phi0
@@ -35011,11 +35015,11 @@ double initialValue(11964,6)
   1   280   # heartComponent.ventricles.RV_wall.LSEiso
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.SLrest
-  0  1.9399999999999999E+00       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.SLcollagen
-  0      19                       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.PConcollagen
-  0  2.9300000000000002E+00       0                       0                
+  0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.PExpcollagen
  -1       1                       0                       0                
   1   280   # heartComponent.ventricles.RV_wall.contractilityFraction
@@ -35993,10 +35997,6 @@ double initialValue(11964,6)
   6   256   # qf_heart
   0       0                       0                       0                
   6   256   # qf_Others
-  0       0                       0                       0                
-  4   256   # CPUtime
-  0       0                       0                       0                
-  4   256   # EventCounter
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -36087,6 +36087,8 @@ Reference SL, [um] []
 zero tension sarcomere length [um] []
 minimal length to apply collagen force [um] []
 Resting sarcomere length [um] []
+
+
 fraction of thoracic pressure in the abdominal cavity [1|%]
 Systemic total peripheral resistance [(Pa.s)/m3|(mmHg.min)/ml]
 Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
@@ -48010,6 +48012,4 @@ Integration costant for min-max calculations [s|min]
 [1|%]
 [1|%]
 [1|%]
-[s]
-
 

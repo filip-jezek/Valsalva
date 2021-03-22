@@ -39,13 +39,15 @@ class ModelicaClass:
     def buildChildTree(self, inps):
         # ill = inp.split('\n')
         for line in inps:
-            # l = line.split(',', 1)
+            # line = line.split(',', 1)
             if len(line) > 1:
+                l = line[0]
                 p = line[1]
             else:
+                l = line
                 p = None
 
-            self.__attach(line[0], self, properties = p)
+            self.__attach(l, self, properties = p)
 
     def printObjectTree(self, indent_level = 0) -> str:
         if self.isValueType:

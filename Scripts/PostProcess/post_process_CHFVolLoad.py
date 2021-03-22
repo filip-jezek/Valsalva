@@ -25,13 +25,13 @@ bpm_base = 95*mmHg2SI
 startTime = 60
 
 
-s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {EDV}, {BPM}, {Qlymph}, {Vint_r},{Vint_excess}, {comp}\n'
+s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {EDV}, {BPM}, {Qlymph}, {Vint_r},{Vint_excess}, {ESP}, {EDP}, {comp}\n'
 result_set = []
 
 outputFile = 'VolumeLoading_%s.csv' % experiment_type
 with open(outputFile, 'w') as file:
 # with open('CHF_VolumeLoading.csv', 'w') as file:    
-    file.write(s.format(f_LV = 'f_LV', vol = 'vol [L]', time = 'time [s]', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO [L/min]', EF = 'EF', EDV = 'EDV ml', CVP = 'CVP', PCWP = 'PCWP (mmHg)', BPM = 'maxBP', Qlymph = 'Qlymph [L/day]', Vint_r= 'Relative change to interstitial volume', Vint_excess = 'Excess interstitial volume [L]', comp = 'compensated'))
+    file.write(s.format(f_LV = 'f_LV', vol = 'vol [L]', time = 'time [s]', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO [L/min]', EF = 'EF', EDV = 'EDV ml', CVP = 'CVP', PCWP = 'PCWP (mmHg)', BPM = 'maxBP', Qlymph = 'Qlymph [L/day]', Vint_r= 'Relative change to interstitial volume', Vint_excess = 'Excess interstitial volume [L]', ESP = 'ESP', EDP = 'EDP', comp = 'compensated'))
 
     for i in exp_range:
         filename = filePattern % (experiment_type, i)
@@ -80,6 +80,7 @@ with open(outputFile, 'w') as file:
         vi_e = np.mean(datafile.data('simplestLymphatic.V_excess')[mean_rng])/L2SI
         lymph_q = np.mean(datafile.data('simplestLymphatic.lymph_flow')[mean_rng])/LpD2SI
         pcwp = np.mean(datafile.data('P_pv')[mean_rng])/mmHg2SI
+        # edp = np.max()
 
         try:
             edv = np.max(datafile.data('EDV')[mean_rng])/L2SI*1000

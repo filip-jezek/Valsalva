@@ -10,6 +10,8 @@ import re
 from datetime import datetime
 from typing import Iterable, Text
 
+overwriteOptParam = True
+
 def getKeysfromDsin(lines):
     """ Reads initial parameter names from dymola dsin file or from any text file providing one param per line
     """
@@ -37,7 +39,7 @@ def getKeysfromDsin(lines):
     return keys
 
 def getValsFromDsin(lines:Iterable[Text], keys: Iterable[Text]):
-    """ Reads parameter initial value for all input parameters provided
+    """ Reads parameter initial value for all input parameters provided and returns a dict of (value, type)
     """
 
     params = {}
@@ -51,7 +53,16 @@ def getValsFromDsin(lines:Iterable[Text], keys: Iterable[Text]):
                 isFound = True
                 value_line = lines[x-1]
                 values = list(map(float, value_line.split()))
-                params[key] = values[1]
+                value_type_code = lin.split()[1]
+                if value_type_code == '280':
+                    value_type = 'stateInit'
+                elif value_type_code == '361':
+                    value_type = 'bool'
+                elif value_type_code == '288':
+                    value_type = 'guess'
+                else:
+                    value_type = value_type_code
+                params[key] = (values[1], value_type)
                 break
         if not isFound:
             raise ValueError('%s not found.' % key)
@@ -107,7 +118,7 @@ def getInitParams(dsFileIn='dsin.txt', paramsFile='dsin.txt') -> dict:
         params = getValsFromDsin(lines_all, keys)    
 
         for k, p in (keys, params):
-            ops[k] = OptimParam(k, p)
+            ops[k] = OptimParam(k, p[0])
 
     else:
         with open(paramsFile) as fil:
@@ -127,7 +138,7 @@ def getInitParams(dsFileIn='dsin.txt', paramsFile='dsin.txt') -> dict:
         params = getValsFromDsin(lines_all, ops.keys())
 
         for k, v in params.items():
-            ops[k].value = v
+            ops[k].value = v[0]
 
     return ops
 
@@ -297,7 +308,7 @@ def writeInitStatesFromDsin(dsFileIn = 'dsin.txt', filter = '', outputFile = 'st
         lines = file.readlines()
 
     initStatesVals = getValsFromDsin(lines, initStates)
-    initStatesLines = list('%s,%.3e\n' % (k, v) for (k, v) in initStatesVals.items())
+    initStatesLines = list('%s,%.3e,%s\n' % (k, v[0], v[1]) for (k, v) in initStatesVals.items())
 
     with open(outputFile, 'w') as file:
         file.write('# State variable;end value;\n')
@@ -482,11 +493,12 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
     
     # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
     if overrideFracs:
-        writeInitParams(init_params, paramsFile=paramsFile, step_frac_override=0.05, ident_frac_override=0.5)
+        writeInitParams(init_params, paramsFile=paramsFile, step_frac_override=0.1, ident_frac_override=0.5)
     else:
         writeInitParams(init_params, paramsFile=paramsFile)
 
-    build_opt_command_file('opt_command.txt', init_params, run_type='identification')
+    if overwriteOptParam:
+        build_opt_command_file('opt_command.txt', init_params, run_type='identification')
 
     createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt', outputsOnly=storeOnlyOutputs)    
     
@@ -494,7 +506,7 @@ def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
     prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
-    # writeInitStatesFromDsin()
+    # writeInitStatesFromDsin(dsFileIn="IABP/dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')
     print('Done, Johne')
