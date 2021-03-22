@@ -38941,7 +38941,7 @@ P_hs_plus_dist"),
       model partialCVS_optimized
         extends partialCVS_EDPVR(
           settings(
-            V_PV_init=6.1875e-05,
+            V_PV_init=0,
             heart_R_LA(displayUnit="(mmHg.s)/ml") = 4139729,
             heart_vntr_D_0=12.91385,
             heart_vntr_D_A=1571.971,
