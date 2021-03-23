@@ -577,10 +577,10 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
     
 
 overwriteOptParamFile = True
-# DSFILEIN = 'dsin.txt'
-DSFILEIN = None
-OPTOUTPUTFILEIN = 'OutputListingMain.txt'
-# OPTOUTPUTFILEIN = None
+DSFILEIN = 'dsin.txt'
+# DSFILEIN = None
+# OPTOUTPUTFILEIN = 'OutputListingMain.txt'
+OPTOUTPUTFILEIN = None
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
