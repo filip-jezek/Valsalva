@@ -12,11 +12,9 @@ All rights reserved.
 _______________________________________________________________
 
 Results of GPSHookeJeeves algorithm
-Start time: Thu Nov 26 23:10:19 CET 2020
+Start time: Tue Mar 23 19:50:02 CET 2021
 
 All Iterations
 
 
-Simulation Number	Main Iteration	Sub Iteration	Step Number	f(x)	settings.chi_phi	settings.heart_vntr_D_A_maxAct	settings.heart_vntr_D_0_maxAct	settings.heart_vntr_TS_maxAct	settings.heart_vntr_TR_maxAct	settings.eta_vc	settings.tissues_eta_Ra	settings.tissues_eta_C	settings.tissues_chi_R	settings.tissue_chi_C
-1	1	1	1	1.9678725857857824	0.9210938	7000.0	2.953125E-4	0.034774043	0.11722694	0.1474491	2.445225	0.3758013	14.688	-0.18	Initial point.
-1	1	2	1	1.9678725857857824	0.9210938	7000.0	2.953125E-4	0.034774043	0.11722694	0.1474491	2.445225	0.3758013	14.688	-0.18	Current lowest point.
+Simulation Number	Main Iteration	Sub Iteration	Step Number	f(x)	settings.heart_vntr_D_A_maxAct	settings.heart_vntr_D_0_maxAct	settings.heart_vntr_TS_maxAct	settings.heart_vntr_TR_maxAct	settings.eta_vc	settings.tissues_eta_Ra	settings.tissues_eta_C	settings.tissues_chi_R	settings.tissue_chi_C

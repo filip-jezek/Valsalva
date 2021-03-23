@@ -50,17 +50,21 @@ def getObjectives(vars_set):
 
     # HR is system input (change in phi) from 70 to 89
 
+    t = vars_set['time'][-1]
+    interval = fun_lib.findInterval(t-5, t, vars_set['time'])
+
     BPs_target = 194.4*mmHg2SI
     EDV_target = 133*ml2SI
     ESV_target = 30*ml2SI
     CO_min = 17.5*lpm2SI
     # Ppa_target = 34*mmHg2SI # (Kovacs Eur Respir J 2009)
     Ppv_target = 12*mmHg2SI # (Kovacs Eur Respir J 2009)
+    Ppv_target = numpy.mean(vars_set['CO'][interval])*60*1e3*1.2*mmHg2SI # Eisman 2018 (PMID 29695381) shows a relation CO to PCWP of 1.2 mmHg/(L/min) in healthy control
     Ppas_target = 34*mmHg2SI # (Kovacs Eur Respir J 2009)
+    
     Ppad_target = 15*mmHg2SI # (Kovacs Eur Respir J 2009)
 
-    t = vars_set['time'][-1]
-    interval = fun_lib.findInterval(t-5, t, vars_set['time'])
+    
 
     # build costs
     ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), BPs_target, None, 10, 1/mmHg2SI),
@@ -69,13 +73,13 @@ def getObjectives(vars_set):
             ('CO', numpy.mean(vars_set['CO'][interval]), None, [CO_min, 60*lpm2SI], 100e-3, 1/lpm2SI),
             # ('Ts', max(vars_set['TEjection'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
             # ('Td', max(vars_set['TFilling'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
-            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), 0.8, None, 1, 100),
+            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), 0.8, [0.8, 0.9], 1e-3, 100),
             ('HR', numpy.mean(vars_set['HR'][interval]), 154*(1/60), None, 0, 60),
             # ('Ppa', numpy.mean(vars_set['P_pa'][interval]), Ppa_targ)et, None, .1),
             # ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, .1),
-            ('Ppa_s', numpy.max(vars_set['P_pa'][interval]), Ppas_target, None, 0.1, 1/mmHg2SI),
-            ('Ppa_d', numpy.min(vars_set['P_pa'][interval]), Ppad_target, None, 0.1, 1/mmHg2SI),
-            ('Ppv', numpy.min(vars_set['P_pv'][interval]), Ppv_target, None, 1, 1/mmHg2SI),
+            # ('Ppa_s', numpy.max(vars_set['P_pa'][interval]), Ppas_target, None, 0.1, 1/mmHg2SI),
+            # ('Ppa_d', numpy.min(vars_set['P_pa'][interval]), Ppad_target, None, 0.1, 1/mmHg2SI),
+            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, 1, 1/mmHg2SI),
         ]
     
     # make it a dict?
