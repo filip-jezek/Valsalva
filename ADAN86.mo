@@ -49000,11 +49000,11 @@ P_hs_plus_dist"),
           phi_fixed(
             amplitude=settings.chi_phi*(1 - settings.phi0),
             rising(displayUnit="s") = 1,
-            width(displayUnit="s") = 100,
+            width(displayUnit="s") = 120,
             falling(displayUnit="s") = 0,
             period(displayUnit="s") = 160,
-            nperiod=-1,
-            offset=settings.phi0,
+            nperiod=0,
+            offset=settings.chi_phi*(1 - settings.phi0),
             startTime=5),
           useAutonomousPhi(y=false),
           settings(tissues_chi_R(displayUnit="1") = 20, tissue_chi_C=0.09));
@@ -49674,7 +49674,8 @@ P_hs_plus_dist"),
           condTP_PC(disconnected=false),
           condTP_IP(disconnected=false),
           condTP_EP1(disconnected=false),
-          useAutonomousPhi(y=true));
+          useAutonomousPhi(y=true),
+          thoracic_pressure_ramp(nperiod=-1));
 
       // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
       //     useAutonomousPhi(y=true),
