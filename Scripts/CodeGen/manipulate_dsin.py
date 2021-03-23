@@ -573,14 +573,16 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
     if overwriteOptParamFile:
         build_opt_command_file('opt_command.txt', init_params, run_type='identification')
 
-    createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt', outputsOnly=storeOnlyOutputs)    
+    if overWriteDsinTemplate:
+        createDsinTemplate(init_params, dsFileOut='dsinTemplate.txt', outputsOnly=storeOnlyOutputs)    
     
 
 overwriteOptParamFile = True
-DSFILEIN = 'dsin.txt'
-# DSFILEIN = None
-# OPTOUTPUTFILEIN = 'OutputListingMain.txt'
-OPTOUTPUTFILEIN = None
+overWriteDsinTemplate = False
+# DSFILEIN = 'dsin.txt'
+DSFILEIN = None
+OPTOUTPUTFILEIN = 'OutputListingMain.txt'
+# OPTOUTPUTFILEIN = None
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')

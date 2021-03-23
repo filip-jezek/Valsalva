@@ -27987,6 +27987,7 @@ P_hs_plus_dist"),
         parameter Physiolibrary.Types.Volume V_normal(displayUnit="l")=0.07;
         Physiolibrary.Types.Volume V_int = V_excess + V_normal;
         output Physiolibrary.Types.Volume V_excess(min = -V_normal) = V_normal*(Vr -1);
+        output Physiolibrary.Types.Volume V_excess_mean;
         equation
           sum(J1) = J2;
           J2 = J3;
@@ -28003,6 +28004,7 @@ P_hs_plus_dist"),
 
 
           der(p_vc_mean)*tau = p_vc - p_vc_mean;
+          der(V_excess_mean)*tau = V_excess - V_excess_mean;
 
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
