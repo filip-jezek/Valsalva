@@ -7,12 +7,23 @@ import os
 # exp_range = range(100, 0,-5)
 # imp_coeff = 1
 
+experiment_type = 'CHF_baro'
+exp_range = range(15, 100,10)
+imp_coeff = 1
+
+experiment_type = 'HFpEFDilated_baro'
+exp_range = range(100, 190,10)
+imp_coeff = 1
+
 experiment_type = 'HFpEF_baro'
-exp_range = range(100, 2501,100)
+exp_range = range(4700, 5000,100)
 imp_coeff = 1/100
 
+# experiment_type = 'HFpEF_baroInitVol1000'
+# exp_range = range(2600, 2700,100)
+# imp_coeff = 1/100
 
-filePattern = R"D:\Data\CVS_renalRegulation_%s_%0d.mat"
+filePattern = R"E:\Data\CVS_renalRegulation_%s_%0d.mat"
 # filePattern = R"D:\Data\CVS_renalRegulation_CHF_%0d.mat"
 # filename = R"c:\home\UMICH\Valsalva\Results2\CardiovascularSystem.mat"
 
@@ -29,7 +40,7 @@ s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {E
 result_set = []
 
 outputFile = 'VolumeLoading_%s.csv' % experiment_type
-with open(outputFile, 'w') as file:
+with open(outputFile, 'a') as file:
 # with open('CHF_VolumeLoading.csv', 'w') as file:    
     file.write(s.format(f_LV = 'f_LV', vol = 'vol [L]', time = 'time [s]', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO [L/min]', EF = 'EF', EDV = 'EDV ml', CVP = 'CVP', PCWP = 'PCWP (mmHg)', BPM = 'maxBP', Qlymph = 'Qlymph [L/day]', Vint_r= 'Relative change to interstitial volume', Vint_excess = 'Excess interstitial volume [L]', ESP = 'ESP', EDP = 'EDP', comp = 'compensated'))
 
@@ -88,6 +99,13 @@ with open(outputFile, 'w') as file:
         except KeyError:
             edv = 'NA'
             esv = 'NA'
+        
+        try:
+            edp = np.max(datafile.data('P_MV_c')[mean_rng])/mmHg2SI
+            esp = np.min(datafile.data('P_MV_o')[mean_rng])/mmHg2SI
+        except KeyError:
+            edp = 'NA'
+            esp = 'NA'
 
         # aus funlib
         def calculateEF(volumes):
@@ -104,7 +122,7 @@ with open(outputFile, 'w') as file:
         result = (i, vol, t, bpm[i_bpm], comp)
         result_set.append(result)
 
-        ws = s.format(f_LV = i*imp_coeff, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR = hr, CO = co, CVP = cvp, PCWP = pcwp, EF = ef, EDV = edv, BPM = bpm[i_bpm]/mmHg2SI, Qlymph = lymph_q, Vint_r=vi_r, Vint_excess = vi_e,  comp = comp)
+        ws = s.format(f_LV = i*imp_coeff, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR = hr, CO = co, CVP = cvp, PCWP = pcwp, EF = ef, EDV = edv, BPM = bpm[i_bpm]/mmHg2SI, Qlymph = lymph_q, Vint_r=vi_r, Vint_excess = vi_e,  ESP = esp, EDP = edp, comp = comp)
 
         file.write(ws)
         file.flush()
