@@ -365,8 +365,8 @@ def getInputParams(dsFileIn='dsin.txt', filter = '', types = (280, 272), accept 
     with open(dsFileIn) as file:
         lines = file.readlines()
         for line in lines:
-            # seraches for pattern e.g. 'blbelbe 280   # settings.heart_R_LA'
-            res = re.search(r'(\d+)[ ]+(\d+)[ ]+# (%s[\w\.]+)' % filter, line)
+            # seraches for pattern e.g. 'blbelbe 280   # settings.heart_R_LA[1]'
+            res = re.search(r'(\d+)[ ]+(\d+)[ ]+# (%s[\w\.\[\]\d]+)' % filter, line)
             if res is not None:
                 
                 if int(res.groups()[1]) in types and int(res.groups()[0]) in accept:
@@ -587,8 +587,8 @@ OPTOUTPUTFILEIN = 'OutputListingMain.txt'
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
-    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
-    # writeInitStatesFromDsin(dsFileIn="IABP/dsin.txt")
+    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
+    writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')
     print('Done, Johne')

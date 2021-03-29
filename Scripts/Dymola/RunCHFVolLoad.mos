@@ -1,30 +1,13 @@
 ﻿// Runs a volume loading scenario to find volume compensating given heart failure
 // be careful about too large files, the simulation output processing is limited to 2GB
 
-cd D:\data\
+cd E:\data\
 Advanced.SparseActivate = true;
 Advanced.NumberOfCores = 4;
 
-// translateModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF");
+experimentSetupOutput(events=false,equidistant=true);
 
 totalTime = 0;
-for i in 35:-5:5 loop
-  // LVfunctionFraction = Real(i/100);
-  // LVfunctionFraction = 10;  
-  stopTimeAdj = min((10 + (100 - i)*1), 60)*60;
-  // Total maximal volume increase
-  "Max vol " + String((stopTimeAdj - 60)*1/1000) + "L";
-  totalTime = totalTime + stopTimeAdj;
-
-simulateExtendedModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF", 
-stopTime=stopTimeAdj, 
-numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_CHF_" + String(i),
-initialNames = {"LVfunctionFraction"},
-initialValues = {i/100}, autoLoad=false);
-end for;
-
-"NoBaro time spent: " + String(totalTime/3600) + "h";
-
 for i in 95:-10:10 loop
   // LVfunctionFraction = Real(i/100);
   // LVfunctionFraction = 10;  
@@ -36,8 +19,29 @@ for i in 95:-10:10 loop
 
 simulateExtendedModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF_baro", 
 stopTime=stopTimeAdj, 
-numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_CHF_baro_" + String(i),
+numberOfIntervals=0, outputInterval=0.04, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_CHF_baro_" + String(i),
 initialNames = {"LVfunctionFraction"},
 initialValues = {i/100}, autoLoad=false);
 end for;
-"Total time spent: " + String(totalTime/3600) + "h";
+
+for i in 100:10:200 loop
+  stopTimeAdj = min((10 + (i)*1), 120)*60;
+  // Total maximal volu
+  
+simulateExtendedModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_HFdilated_baro", 
+stopTime=stopTimeAdj, 
+numberOfIntervals=0, outputInterval=0.1, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFpEFDilated_baro_" + String(i),
+initialNames = {"AmRefFactor", "initVol"},
+initialValues = {i/100, 0.0}, autoLoad=false);
+end for;
+
+for i in 2700:200:5000 loop
+  stopTimeAdj = min((10 + (i)*1), 120)*60;
+  // Total maximal volu
+  
+simulateExtendedModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_HFpEF_baro", 
+stopTime=stopTimeAdj, 
+numberOfIntervals=0, outputInterval=0.1, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFpEF_baro_" + String(i),
+initialNames = {"stiffeningFactor", "initVol"},
+initialValues = {i/100, 1e-3}, autoLoad=false);
+end for;
