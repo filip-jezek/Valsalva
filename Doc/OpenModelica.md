@@ -24,6 +24,8 @@ IMPORTANT!! The modelica source file formatting is overwritten just by loading i
 - To adjust a parameter, find it in Variables browser and modify it. Click the Re-simulate button. The simulation will rerun with updated parameter value. Note, tha this change is not saved in the model.
 - To return to the modeling mode, select the Modeling tab in bottom right part
 
+<img src="OM_f1.png" width="80%" />
+
 ![OpenModelica setup](OM_f1.png){:width="100px"}
 
 ![OpenModelica plotting](OM_f2.png){:width="100px"}
@@ -40,6 +42,16 @@ IMPORTANT!! The modelica source file formatting is overwritten just by loading i
   - Effect of impairments on step-up exercise: All in ADAN_main.SystemicTree.Variations.Impairments.ExStepping
 
 ## Exploring the model
-- Switch to text view
-- add components
+- Switch to the Text view and explore the code.
+  - Everything is explorable through the text, no external dependencies are loaded
+  - add equations and adjust parameters in the text view. Note, that all parameters here are in their base unit (i.e. SI unit)!
+- Switch to the diagram view to add new components or reparametrize them
+  - e.g. to simulate hemorrhage, add Physiolibrary.Hydraulic.Sources.UnlimitedOutflowPump, connect it to the pulmonary connector and double click to parametrize the outflow.
+  - double-click useAutonomousPhi and set y to *false* to prevent baroreflex control
+
+## Using Modelica
+Explore additional resources about Modelica and how to use it.
+ - video
+ - tiller university
+ - fritzson..?
 
