@@ -39104,7 +39104,7 @@ P_hs_plus_dist"),
             tissues_tau_R(displayUnit="s") = 0,
             veins_C_phi=0.09,
                     heart_vntr_PConcollagen=20.0,
-                    heart_vntr_PExpcollagen=2.9,
+            heart_vntr_PExpcollagen=3.25,
                     heart_vntr_SLcollagen=2.1,
                     heart_vntr_k_passive=10.0),
           condTP_EP1(disconnected=true),
@@ -47906,14 +47906,21 @@ P_hs_plus_dist"),
             heartComponent(ventricles(
                 LV_wall(contractilityFraction=LVcontractilityFraction),
                 RV_wall(contractilityFraction=RVcontractilityFraction),
-                SEP_wall(contractilityFraction=(LVcontractilityFraction +
-                      RVcontractilityFraction)/2))));
+                SEP_wall(contractilityFraction=SEPcontractilityFraction))));
           parameter Physiolibrary.Types.Fraction LVcontractilityFraction=1;
           parameter Physiolibrary.Types.Fraction RVcontractilityFraction=1;
+          parameter Physiolibrary.Types.Fraction SEPcontractilityFraction=(LVcontractilityFraction +
+                      RVcontractilityFraction)/2;
         end CVS_IncrHR;
 
         model CVS_impLV
-          extends CVS_IncrHR(LVcontractilityFraction=0.2);
+          extends CVS_IncrHR(SEPcontractilityFraction=LVcontractilityFraction,
+              LVcontractilityFraction=1);
+          annotation (experiment(
+              StopTime=30,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
         end CVS_impLV;
       end AdditionalOutputs;
     end Identification;
@@ -54687,8 +54694,8 @@ P_hs_plus_dist"),
 
         package Experiments
           model CVS_TestBaroConvergence
-            extends CardiovascularSystem_Renals_ss(SystemicComponent(renal_R178
-                  (tau_R_K_afferent=6), renal_L166(tau_R_K_afferent=6)),
+            extends CardiovascularSystem_Renals_ss(SystemicComponent(renal_R178(
+                   tau_R_K_afferent=6), renal_L166(tau_R_K_afferent=6)),
                 settings(baro_fsn=0.036));
           end CVS_TestBaroConvergence;
         end Experiments;
