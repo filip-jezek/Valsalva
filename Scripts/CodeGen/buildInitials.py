@@ -17,11 +17,11 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'OlufsenTriSeg_optimized'
+base_model_full_path = 'renals_init'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
-steadyStateAt = 360
+steadyStateAt = 240
 
 # get the main and path
 if '.' in base_model_full_path:
