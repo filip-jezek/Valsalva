@@ -11,8 +11,9 @@ Implemented in Modelica language. Requires:
 The model has not been upgraded to MSL 4.0 just to support OpenModelica. Developed in Dymola 2021, tested in OpenModelica 1.18-dev66.
 
 # Installation
-- Install a Modelica tool, e.g. a latest version (>= v1.18-dev66) of the OpenModelica (e.g. https://build.openmodelica.org/omc/builds/windows/nightly-builds/64bit/OpenModelica-latest.exe) 
-  - The MSL (Modelica Standard Library) 3.2.3 should be already loaded
+- Install a Modelica tool, e.g. a latest version (>= v1.18-dev66) of the OpenModelica (e.g. https://build.openmodelica.org/omc/builds/windows/nightly-builds/64bit/OpenModelica-latest.exe)
+  - The MSL (Modelica Standard Library) 3.2.3 should be already loaded or load it manually
+  - Current version is NOT compatible with MSL 4.0
 - Download Physiolibrary from https://github.com/filip-jezek/Physiolibrary/releases/tag/v2.4
 - Load the Physiolibrary into the Modelica tool
 - Load the ADAN-86.mo model into the Modelica tool
