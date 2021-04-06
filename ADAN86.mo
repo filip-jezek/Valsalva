@@ -28131,6 +28131,444 @@ P_hs_plus_dist"),
           end LymphaticTest;
         end Testers;
       end Lymphatic;
+
+      package Coronary
+        model CoronaryCirculation
+          extends Physiolibrary.Icons.PerfusionOD;
+
+          CoronaryLayer coronaryLayer_Endo(
+            cf_l=0.55*cf,
+            rf_l=1.28*rf,
+            pf_l=0.167*pf)
+            annotation (Placement(transformation(extent={{6,30},{26,50}})));
+          CoronaryLayer coronaryLayer_Mid(
+            cf_l=0.68*cf,
+            rf_l=1.12*rf,
+            pf_l=0.500*pf)
+            annotation (Placement(transformation(extent={{6,-10},{26,10}})));
+          CoronaryLayer coronaryLayer_epi(
+            cf_l=1*cf,
+            rf_l=1*rf,
+            pf_l=0.833*pf)
+            annotation (Placement(transformation(extent={{6,-50},{26,-30}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel PA(Compliance(displayUnit="m3/Pa")=
+                 7.500615758456563e-09*(0.0013/3*cf))
+            "Penetrating artery compliance"
+            annotation (Placement(transformation(extent={{-30,-10},{-10,10}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel PV(Compliance(displayUnit="m3/Pa")=
+                 7.500615758456563e-09*(0.0254/3*cf))
+                             "Penetrating vein compliance"
+            annotation (Placement(transformation(extent={{40,-10},{60,10}})));
+          Physiolibrary.Types.RealIO.PressureInput
+                                     externalPressure      annotation (Placement(transformation(
+                  extent={{20,-20},{-20,20}},
+                rotation=270,
+                origin={20,-100})));
+          Physiolibrary.Hydraulic.Components.Inertia inertia(I(displayUnit="mmHg.s2/ml")=
+                 266644774.83)
+            annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
+          Physiolibrary.Hydraulic.Components.Resistor R_PA(Resistance(displayUnit="(Pa.s)/m3")=
+                 133322387.415*(4*rf))
+            annotation (Placement(transformation(extent={{-90,-10},{-70,10}})));
+          Physiolibrary.Hydraulic.Components.Resistor R_PV(Resistance(displayUnit="(Pa.s)/m3")=
+                 133322387.415*(2*rf))
+            annotation (Placement(transformation(extent={{70,-10},{90,10}})));
+          Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_a
+            annotation (Placement(transformation(extent={{-110,-10},{-90,10}})));
+          Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b port_b
+            annotation (Placement(transformation(extent={{90,-10},{110,10}})));
+          parameter Physiolibrary.Types.Fraction rf=1
+            "Resistance multiplier for whole coronary circulation";
+          parameter Physiolibrary.Types.Fraction cf=1/rf
+            "compliance multiplier for each elastic compartment";
+          parameter Real pf=1.2 "Left ventricular pressure multiplier";
+
+          Physiolibrary.Types.VolumeFlowRate q_avg(start = target_q) "averaged flow";
+          parameter Physiolibrary.Types.VolumeFlowRate target_q "Target coronary flow";
+        equation
+
+          der(q_avg)*3 = port_a.q - q_avg;
+
+
+          connect(coronaryLayer_Endo.port_a, coronaryLayer_Mid.port_a) annotation (Line(
+              points={{6,40},{0,40},{0,0},{6,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(coronaryLayer_epi.port_a, coronaryLayer_Mid.port_a) annotation (Line(
+              points={{6,-40},{0,-40},{0,0},{6,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(coronaryLayer_Endo.port_b, coronaryLayer_Mid.port_b) annotation (Line(
+              points={{26,40},{32,40},{32,0},{26,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(coronaryLayer_epi.port_b, coronaryLayer_Mid.port_b) annotation (Line(
+              points={{26,-40},{32,-40},{32,0},{26,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(coronaryLayer_epi.externalPressure, externalPressure)
+            annotation (Line(points={{16,-50},{16,-100},{20,-100}},
+                                                          color={0,0,127}));
+          connect(coronaryLayer_Mid.externalPressure, externalPressure)
+            annotation (Line(points={{16,-10},{16,-100},{20,-100}},
+                                                          color={0,0,127}));
+          connect(coronaryLayer_Endo.externalPressure, externalPressure)
+            annotation (Line(points={{16,30},{16,-100},{20,-100}},
+                                                         color={0,0,127}));
+          connect(PA.q_in, coronaryLayer_Mid.port_a) annotation (Line(
+              points={{-20,0},{6,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(PV.q_in, coronaryLayer_Mid.port_b) annotation (Line(
+              points={{50,0},{26,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(PV.q_in, R_PV.q_in) annotation (Line(
+              points={{50,0},{70,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_PA.q_out, inertia.q_in) annotation (Line(
+              points={{-70,0},{-60,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(inertia.q_out, PA.q_in) annotation (Line(
+              points={{-40,0},{-20,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_PV.q_out, port_b) annotation (Line(
+              points={{90,0},{100,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(R_PA.q_in, port_a) annotation (Line(
+              points={{-90,0},{-100,0}},
+              color={0,0,0},
+              thickness=1));
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
+                Ellipse(
+                  extent={{-20,0},{8,26}},
+                  fillColor={238,46,47},
+                  fillPattern=FillPattern.Solid,
+                  pattern=LinePattern.None),
+                Ellipse(
+                  extent={{0,0},{28,26}},
+                  fillColor={238,46,47},
+                  fillPattern=FillPattern.Solid,
+                  pattern=LinePattern.None),
+                Polygon(
+                  points={{-20,14},{28,14},{28,4},{6,-26},{-20,4},{-20,14}},
+                  fillColor={238,46,47},
+                  fillPattern=FillPattern.Solid,
+                  pattern=LinePattern.None)}),                           Diagram(
+                coordinateSystem(preserveAspectRatio=false)));
+        end CoronaryCirculation;
+
+        model CoronaryLayer
+          "Used for Epi-endo and mid cardiac perfusion layers"
+          extends Physiolibrary.Icons.CollapsingVessel;
+
+          Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_a
+            annotation (Placement(transformation(extent={{-110,-10},{-90,10}})));
+          Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b port_b
+            annotation (Placement(transformation(extent={{90,-10},{110,10}})));
+          PhysiolibraryExtensions.ElasticVesselVolFractionOutput C1(
+            volume_start=C1_v0*cf_l,
+            ZeroPressureVolume=C1_v0*cf_l,
+            Compliance=C1_c*cf_l,
+            useExternalPressureInput=true,
+            cf=cf_l)
+            annotation (Placement(transformation(extent={{-50,10},{-30,-10}})));
+          PhysiolibraryExtensions.ElasticVesselVolFractionOutput C2(
+            volume_start=C2_v0*cf_l,
+            ZeroPressureVolume=C2_v0*cf_l,
+            Compliance=C2_c*cf_l,
+            useExternalPressureInput=true,
+            cf=cf_l)
+            annotation (Placement(transformation(extent={{30,10},{50,-10}})));
+          PhysiolibraryExtensions.ResistorFractionInput rm(R0(displayUnit=
+                  "(mmHg.s)/ml") = r0m*rf_l, resistor(useConductanceInput=true))
+            annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
+          PhysiolibraryExtensions.ResistorFractionInput R1(R0(displayUnit=
+                  "(mmHg.s)/ml") = r0m*1.2*rf_l)
+            annotation (Placement(transformation(extent={{-80,-10},{-60,10}})));
+          PhysiolibraryExtensions.ResistorFractionInput R2(R0(displayUnit=
+                  "(mmHg.s)/ml") = r0m*0.5*rf_l)
+            annotation (Placement(transformation(extent={{60,-10},{80,10}})));
+          PhysiolibraryExtensions.RmCalc rmCalc annotation (Placement(
+                transformation(rotation=0, extent={{-18,20},{2,40}})));
+          parameter Physiolibrary.Types.HydraulicCompliance C1_c=7.500615758456563e-09*(
+              0.013/9)
+            "Volume1 compliance";
+          parameter Physiolibrary.Types.HydraulicCompliance C2_c=7.500615758456563e-09*(
+              0.254/9)
+            "Volume2 compliance";
+          parameter Physiolibrary.Types.Volume C1_v0=1e-06*(2.5/9)
+            "Volume1 zero pressure volume";
+          parameter Physiolibrary.Types.Volume C2_v0=1e-06*(8/9)
+            "Volume2 zero pressure volume";
+          parameter Physiolibrary.Types.Fraction cf_l(displayUnit="1")
+            "compliance factor of the cardiac layer";
+          parameter Physiolibrary.Types.Fraction rf_l(displayUnit="1")
+            "Resistance factor of the subcardial layer";
+          parameter Physiolibrary.Types.Fraction pf_l(displayUnit="1")
+            "LV Pressure factor";
+          Physiolibrary.Types.RealIO.PressureInput
+                                     externalPressure      annotation (Placement(transformation(
+                  extent={{20,-20},{-20,20}},
+                rotation=270,
+                origin={0,-100})));
+          Modelica.Blocks.Math.Gain gain(k=pf_l) annotation (Placement(
+                transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=90,
+                origin={0,-52})));
+          parameter Physiolibrary.Types.HydraulicResistance r0m(displayUnit="(Pa.s)/m3")=
+               133322387.415*(44) "Basal Hydraulic resistance artery";
+        equation
+          connect(rmCalc.rMod, rm.ResistanceModifier)
+            annotation (Line(points={{-8,20},{-8,6}},               color={0,0,127}));
+          connect(C1.VolFracSq, rmCalc.f_vol1) annotation (Line(points={{-30,4},{-26,4},
+                  {-26,30},{-18,30}}, color={0,0,127}));
+          connect(rmCalc.f_vol2, C2.VolFracSq)
+            annotation (Line(points={{2,30},{50,30},{50,4}},   color={0,0,127}));
+          connect(C2.VolFracSq, R2.ResistanceModifier)
+            annotation (Line(points={{50,4},{50,30},{62,30},{62,6}},
+                                                             color={0,0,127}));
+          connect(C1.VolFracSq, R1.ResistanceModifier) annotation (Line(points={{-30,4},
+                  {-26,4},{-26,30},{-78,30},{-78,6}},  color={0,0,127}));
+          connect(gain.u, externalPressure)
+            annotation (Line(points={{-6.66134e-16,-64},{0,-100}}, color={0,0,127}));
+          connect(gain.y, C1.externalPressure) annotation (Line(points={{0,-41},{0,-20},
+                  {-32,-20},{-32,-8}}, color={0,0,127}));
+          connect(gain.y, C2.externalPressure) annotation (Line(points={{0,-41},{0,-20},
+                  {48,-20},{48,-8}}, color={0,0,127}));
+          connect(port_a, R1.port_a) annotation (Line(
+              points={{-100,0},{-80,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(R1.port_b, C1.q_in) annotation (Line(
+              points={{-60,0},{-40,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(port_b, R2.port_b) annotation (Line(
+              points={{100,0},{80,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(R2.port_a, C2.q_in) annotation (Line(
+              points={{60,0},{40,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(C2.q_in, rm.port_b) annotation (Line(
+              points={{40,0},{10,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(rm.port_a, C1.q_in) annotation (Line(
+              points={{-10,0},{-54,0},{-54,-2.22045e-16},{-40,-2.22045e-16}},
+              color={0,0,0},
+              thickness=1));
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                coordinateSystem(preserveAspectRatio=false)));
+        end CoronaryLayer;
+
+        model CoronaryTest
+          CoronaryCirculation coronaryCirculation(coronaryLayer_Endo(r0m(
+                  displayUnit="(mmHg.s)/ml")))
+            annotation (Placement(transformation(extent={{-20,-20},{20,20}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedVolume PAo(usePressureInput=
+                true)
+            annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedVolume P_RA
+            annotation (Placement(transformation(extent={{60,-10},{40,10}})));
+          Modelica.Blocks.Tables.CombiTable1Ds combiTable1Ds(
+            tableOnFile=true,
+            tableName="pressureData",
+            fileName="pdata.mat",
+            columns=2:4,
+            smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
+            extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint,
+            verboseExtrapolation=false) annotation (Placement(transformation(
+                  extent={{-60,-60},{-40,-40}})));
+          Modelica.Blocks.Sources.SawTooth sawTooth(amplitude=10, period=10)
+            annotation (Placement(transformation(extent={{-100,-60},{-80,-40}})));
+          Modelica.Blocks.Math.Gain gain(k=mmHg2SI)
+            annotation (Placement(transformation(extent={{-78,-6},{-66,6}})));
+          parameter Real mmHg2SI=133.322
+            "Gain value multiplied with input signal";
+          Modelica.Blocks.Math.Gain gain1(k=mmHg2SI)
+            annotation (Placement(transformation(extent={{-14,-56},{-2,-44}})));
+        equation
+          connect(PAo.y, coronaryCirculation.port_a) annotation (Line(
+              points={{-40,0},{-20,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(P_RA.y, coronaryCirculation.port_b) annotation (Line(
+              points={{40,0},{20,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(sawTooth.y, combiTable1Ds.u)
+            annotation (Line(points={{-79,-50},{-62,-50}}, color={0,0,127}));
+          connect(PAo.pressure, gain.y)
+            annotation (Line(points={{-60,0},{-65.4,0}}, color={0,0,127}));
+          connect(gain1.y, coronaryCirculation.externalPressure) annotation (
+              Line(points={{-1.4,-50},{4,-50},{4,-20}}, color={0,0,127}));
+          connect(gain1.u, combiTable1Ds.y[2])
+            annotation (Line(points={{-15.2,-50},{-39,-50}}, color={0,0,127}));
+          connect(gain.u, combiTable1Ds.y[1]) annotation (Line(points={{-79.2,0},
+                  {-90,0},{-90,-22},{-26,-22},{-26,-50},{-39,-50}}, color={0,0,
+                  127}));
+          annotation (
+            Icon(coordinateSystem(preserveAspectRatio=false)),
+            Diagram(coordinateSystem(preserveAspectRatio=false)),
+            experiment(
+              StopTime=10,
+              Interval=0.01,
+              Tolerance=1e-09,
+              __Dymola_Algorithm="Cvode"));
+        end CoronaryTest;
+
+        model CoronaryTestHuman
+          CoronaryCirculation coronaryCirculation(
+            coronaryLayer_Endo(r0m(displayUnit="(mmHg.s)/ml")),
+            target_q=3.73333e-06,
+            rf=0.6)
+            annotation (Placement(transformation(extent={{20,-20},{60,20}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedVolume PAo(usePressureInput=
+                true)
+            annotation (Placement(transformation(extent={{-20,-10},{0,10}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedVolume P_RA(P=533.28954966)
+            annotation (Placement(transformation(extent={{100,-10},{80,10}})));
+          Modelica.Blocks.Tables.CombiTable1Ds combiTable1Ds(
+            tableOnFile=true,
+            tableName="pressureData",
+            fileName="pdata.mat",
+            columns=2:4,
+            smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments,
+            extrapolation=Modelica.Blocks.Types.Extrapolation.HoldLastPoint,
+            verboseExtrapolation=false) annotation (Placement(transformation(
+                  extent={{-60,-60},{-40,-40}})));
+          Modelica.Blocks.Sources.SawTooth sawTooth(amplitude=10, period=10)
+            annotation (Placement(transformation(extent={{-100,-60},{-80,-40}})));
+          Modelica.Blocks.Math.Gain gain(k=108.0)
+            annotation (Placement(transformation(extent={{-78,-6},{-66,6}})));
+          parameter Real mmHg2SI=100.0
+            "Gain value multiplied with input signal";
+          Modelica.Blocks.Math.Gain gain1(k=108.0)
+            annotation (Placement(transformation(extent={{-14,-56},{-2,-44}})));
+        equation
+          connect(PAo.y, coronaryCirculation.port_a) annotation (Line(
+              points={{0,0},{20,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(P_RA.y, coronaryCirculation.port_b) annotation (Line(
+              points={{80,0},{60,0}},
+              color={0,0,0},
+              thickness=1));
+          connect(sawTooth.y, combiTable1Ds.u)
+            annotation (Line(points={{-79,-50},{-62,-50}}, color={0,0,127}));
+          connect(PAo.pressure, gain.y)
+            annotation (Line(points={{-20,0},{-65.4,0}}, color={0,0,127}));
+          connect(gain1.y, coronaryCirculation.externalPressure) annotation (
+              Line(points={{-1.4,-50},{44,-50},{44,-20}}, color={0,0,127}));
+          connect(gain1.u, combiTable1Ds.y[2])
+            annotation (Line(points={{-15.2,-50},{-39,-50}}, color={0,0,127}));
+          connect(gain.u, combiTable1Ds.y[1]) annotation (Line(points={{-79.2,0},
+                  {-90,0},{-90,-22},{-26,-22},{-26,-50},{-39,-50}}, color={0,0,
+                  127}));
+          annotation (
+            Icon(coordinateSystem(preserveAspectRatio=false)),
+            Diagram(coordinateSystem(preserveAspectRatio=false)),
+            experiment(
+              StopTime=10,
+              Interval=0.01,
+              Tolerance=1e-09,
+              __Dymola_Algorithm="Cvode"));
+        end CoronaryTestHuman;
+
+        package PhysiolibraryExtensions
+          model ElasticVesselVolFractionOutput
+            "Elastic vessel extended by (V0/V)^2 output"
+            extends Physiolibrary.Hydraulic.Components.ElasticVessel(final excessVolume_min = -Modelica.Constants.inf, final CollapsingPressureVolume = -Modelica.Constants.inf);
+            parameter Real cf = 1 "Compliance factor fix - inconsistent in the source matlab model";
+            Physiolibrary.Types.RealIO.FractionOutput
+                                      VolFracSq = ((zpv/cf)/volume)^2 "(V0/V)^2 output"         annotation (Placement(transformation(
+                    extent={{-20,-20},{20,20}},
+                  rotation=270,
+                  origin={82,-40}), iconTransformation(
+                  extent={{-20,-20},{20,20}},
+                  rotation=0,
+                  origin={100,-40})));
+          end ElasticVesselVolFractionOutput;
+
+          model ResistorFractionInput "Reistor with resistance input"
+             extends Physiolibrary.Icons.HydraulicResistor;
+
+            Physiolibrary.Hydraulic.Components.Resistor resistor(useConductanceInput=true,
+                Resistance=7999343244.9)
+              annotation (Placement(transformation(extent={{-10,-10},{10,10}})));
+            Physiolibrary.Blocks.Math.Reciprocal rec annotation (Placement(transformation(
+                  extent={{-10,-10},{10,10}},
+                  rotation=0,
+                  origin={-18,50})));
+            Physiolibrary.Types.RealIO.FractionInput ResistanceModifier annotation (
+                Placement(transformation(extent={{-120,80},{-80,120}}),
+                  iconTransformation(
+                  extent={{-20,-20},{20,20}},
+                  rotation=0,
+                  origin={-80,60})));
+            Physiolibrary.Types.Constants.HydraulicResistanceConst hydraulicResistance(k(
+                  displayUnit="(Pa.s)/m3") = R0)
+              annotation (Placement(transformation(extent={{-94,40},{-86,48}})));
+            Modelica.Blocks.Math.Product product1
+              annotation (Placement(transformation(extent={{-60,40},{-40,60}})));
+            parameter Physiolibrary.Types.HydraulicResistance R0
+              "Basal Hydraulic resistance";
+            Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_a
+              annotation (Placement(transformation(extent={{-110,-10},{-90,10}})));
+            Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b port_b
+              annotation (Placement(transformation(extent={{90,-10},{110,10}})));
+          equation
+            connect(rec.y, resistor.cond)
+              annotation (Line(points={{-7,50},{0,50},{0,6}}, color={0,0,127}));
+            connect(rec.u, product1.y)
+              annotation (Line(points={{-30,50},{-39,50}}, color={0,0,127}));
+            connect(hydraulicResistance.y, product1.u2)
+              annotation (Line(points={{-85,44},{-62,44}}, color={0,0,127}));
+            connect(ResistanceModifier, product1.u1) annotation (Line(points={{-100,100},{
+                    -70,100},{-70,56},{-62,56}}, color={0,0,127}));
+            connect(resistor.q_out, port_b) annotation (Line(
+                points={{10,0},{100,0}},
+                color={0,0,0},
+                thickness=1));
+            connect(resistor.q_in, port_a) annotation (Line(
+                points={{-10,0},{-100,0}},
+                color={0,0,0},
+                thickness=1));
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={Text(
+                    extent={{-60,40},{-20,100}},
+                    lineColor={28,108,200},
+                    textString="f")}),                                     Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end ResistorFractionInput;
+
+          model RmCalc
+            Physiolibrary.Types.RealIO.FractionInput f_vol1 annotation (Placement(
+                  transformation(extent={{-17,-47},{-11,-41}}), iconTransformation(extent={{-120,
+                      -20},{-80,20}})));
+            Physiolibrary.Types.RealIO.FractionInput f_vol2 annotation (Placement(
+                  transformation(extent={{-3,-45},{-3,-45}}), iconTransformation(extent={{20,-20},
+                      {-20,20}},
+                  rotation=0,
+                  origin={100,0})));
+            Physiolibrary.Types.RealIO.FractionOutput rMod annotation (
+                Placement(transformation(extent={{-18,-102},{22,-62}}),iconTransformation(
+                    extent={{-20,-20},{20,20}},
+                  rotation=270,
+                  origin={0,-100})));
+            parameter Real gamma = 0.75;
+          equation
+            rMod = gamma*f_vol1 + (1-gamma)*f_vol2;
+          end RmCalc;
+        end PhysiolibraryExtensions;
+      end Coronary;
     end Subsystems;
 
     package Icons
@@ -49858,6 +50296,13 @@ P_hs_plus_dist"),
 </html>"));
       end CVS_valsalva;
 
+      model CVS_valsalva_overshootTests
+        extends CVS_valsalva(settings(tissues_tau_R=10));
+      end CVS_valsalva_overshootTests;
+
+      model CVS_Valsalva_eta_vc
+        extends CVS_valsalva(settings(eta_vc=0.5));
+      end CVS_Valsalva_eta_vc;
     end Valsalva;
 
     package Variations
@@ -54714,6 +55159,40 @@ P_hs_plus_dist"),
           extends Impairments.Normal.imp_noVcLin;
         end CVS_NoVcVlin;
       end Figures;
+
+      package CoronaryCirculation
+        model CVS_Coronaries
+          extends CardiovascularSystem(SystemicComponent(cardiac_tissue(Ra(
+                    displayUnit="(mmHg.s)/ml") = 1.33322387415e+20)));
+          Components.Subsystems.Coronary.CoronaryCirculation
+            coronaryCirculation(
+            coronaryLayer_Endo(r0m(displayUnit="(mmHg.s)/ml")),
+            target_q(displayUnit="l/min") = 3.73333e-06,
+            rf=0.006,
+            inertia(I(displayUnit="mmHg.s2/ml") = 399967000.0))
+            annotation (Placement(transformation(extent={{-32,0},{-12,20}})));
+          Modelica.Blocks.Sources.RealExpression P_LV_src(y=P_LV)
+            annotation (Placement(transformation(extent={{8,-8},{-6,8}})));
+        equation
+          connect(coronaryCirculation.port_b, heartComponent.sv) annotation (
+              Line(
+              points={{-12,10},{24,10},{24,-16.4},{-16,-16.4}},
+              color={0,0,0},
+              thickness=1));
+          connect(coronaryCirculation.port_a, SystemicComponent.port_a)
+            annotation (Line(
+              points={{-32,10},{-64,10},{-64,28},{-58,28}},
+              color={0,0,0},
+              thickness=1));
+          connect(P_LV_src.y, coronaryCirculation.externalPressure)
+            annotation (Line(points={{-6.7,0},{-20,0}}, color={0,0,127}));
+          annotation (experiment(
+              StopTime=20,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_Coronaries;
+      end CoronaryCirculation;
     end Variations;
 
     package Experiments
