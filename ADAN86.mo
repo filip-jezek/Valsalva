@@ -787,11 +787,11 @@ type"),       Text(
       model ConditionalConnection "Debug or experimental switch for intercepting the through signal. Does not affect the signal at all by default."
         extends Modelica.Blocks.Interfaces.SISO;
         Modelica.Blocks.Sources.Constant const1(k=disconnectedValue)
-          annotation (Placement(transformation(extent={{16,-52},{0,-38}})));
+          annotation (Placement(transformation(extent={{-6,-48},{-22,-34}})));
         Modelica.Blocks.Logical.Switch switch1
-          annotation (Placement(transformation(extent={{-2,-18},{18,2}})));
+          annotation (Placement(transformation(extent={{-20,-10},{0,10}})));
         Modelica.Blocks.Sources.BooleanExpression useClosedLoopHR(y=not disconnected)
-          annotation (Placement(transformation(extent={{-40,-80},{-20,-60}})));
+          annotation (Placement(transformation(extent={{-88,-46},{-68,-26}})));
       /*  
   Modelica.Blocks.Interfaces.RealInput u1 annotation (Placement(transformation(
           rotation=0, extent={{-70,-8},{-50,12}}), iconTransformation(extent={{-60,-10},
@@ -804,56 +804,79 @@ type"),       Text(
 
       parameter Boolean UseAdditionalInput =  false "Use another input";
       parameter Real disconnectedValue = 0 "output for disconnected = true. Use SI units!" annotation(Dialog(enable = disconnected));
-        MyDelay                              myDelay(   delayTime=delayTime,
-            delayEnabled=delayEnabled)
-          annotation (Placement(transformation(extent={{26,-18},{46,2}})));
-        parameter Boolean delayEnabled=false annotation(choices(checkBox=true));
-        parameter Modelica.SIunits.Time delayTime=0
-          "Delay time of output with respect to input signal" annotation(Dialog(enable=delayEnabled));
+        MyDelay myDelay(delayTime=delayTransport_Time, delayEnabled=
+              delayTransport_Enabled)
+          annotation (Placement(transformation(extent={{40,-10},{60,10}})));
+        parameter Boolean delayTransport_Enabled=false
+          "Enable pure constant transport delay"
+                                             annotation(choices(checkBox=true));
+        parameter Modelica.SIunits.Time delayTransport_Time=0
+          "Delay time of output with respect to input signal" annotation(Dialog(enable=
+                delayTransport_Enabled));
+        parameter Boolean delayIntegral_Enabled=false
+          "Enable assymetrical integral delay"
+                                             annotation(choices(checkBox=true));
+        parameter Modelica.SIunits.Time delayInt_Act=0
+          "Delay time of output with respect to input signal" annotation(Dialog(enable=
+                delayIntegral_Enabled));
+        parameter Modelica.SIunits.Time delayInt_Relax=0
+          "Delay time of output with respect to input signal for activation"
+          annotation (Dialog(enable=delayIntegral_Enabled));
+
         Modelica.Blocks.Nonlinear.Limiter limiter(uMax=uMax, uMin=uMin)
-          annotation (Placement(transformation(extent={{56,-18},{76,2}})));
+          annotation (Placement(transformation(extent={{70,-10},{90,10}})));
         parameter Real uMax=Modelica.Constants.inf "Upper limits of input signals";
         parameter Real uMin=-uMax "Lower limits of input signals";
         Modelica.Blocks.Math.Gain         gain(k=phi_gain)
-          annotation (Placement(transformation(extent={{-78,-10},{-58,10}})));
+          annotation (Placement(transformation(extent={{-90,-10},{-70,10}})));
         Modelica.Blocks.Sources.Constant const_shiftOffset(k=const_offset) if
                        not UseAdditionalInput
-          annotation (Placement(transformation(extent={{-78,24},{-62,38}})));
+          annotation (Placement(transformation(extent={{-98,24},{-82,38}})));
         parameter Real phi0=0.25 "Default phi0";
         parameter Real phi_gain=1 "Phi Gain multiplier";
         Modelica.Blocks.Math.Add         add3_1
-          annotation (Placement(transformation(extent={{-38,-3},{-22,11}})));
+          annotation (Placement(transformation(extent={{-56,1},{-40,15}})));
         Modelica.Blocks.Interfaces.RealInput
                   u1 if UseAdditionalInput
                     "Connector of Real input signal" annotation (Placement(
               transformation(extent={{-142,70},{-102,110}})));
         parameter Real const_offset=-(phi_gain - 1)*phi0 annotation(Dialog(enable = not UseAdditionalInput));
+        IntegralActRelaxDelay integralActRelaxDelay(
+          delayEnabled=delayIntegral_Enabled,
+          phi0=phi0,
+          delayTimeAct=delayInt_Act,
+          delayTimeRelax=delayInt_Relax) annotation (Placement(transformation(
+                rotation=0, extent={{10,-10},{30,10}})));
       protected
         Boolean showLimiterLine = not disconnected and (uMax <> Modelica.Constants.inf or uMax <> -uMin);
       equation
 
-        connect(switch1.u3, const1.y) annotation (Line(points={{-4,-16},{-10,
-                -16},{-10,-45},{-0.8,-45}},
+        connect(switch1.u3, const1.y) annotation (Line(points={{-22,-8},{-32,-8},
+                {-32,-41},{-22.8,-41}},
                                    color={0,0,127}));
-        connect(useClosedLoopHR.y,switch1. u2) annotation (Line(points={{-19,-70},
-                {-12,-70},{-12,-8},{-4,-8}},    color={255,0,255}));
-        connect(switch1.y, myDelay.u)
-          annotation (Line(points={{19,-8},{24,-8}}, color={0,0,127}));
-        connect(myDelay.y, limiter.u)
-          annotation (Line(points={{47,-8},{54,-8}}, color={0,0,127}));
-        connect(limiter.y, y) annotation (Line(points={{77,-8},{90,-8},{90,0},{
-                110,0}},
+        connect(useClosedLoopHR.y,switch1. u2) annotation (Line(points={{-67,-36},
+                {-36,-36},{-36,0},{-22,0}},     color={255,0,255}));
+        connect(switch1.y,integralActRelaxDelay.u)
+          annotation (Line(points={{1,0},{10,0}},    color={0,0,127}));
+        connect(limiter.y, y) annotation (Line(points={{91,0},{110,0}},
               color={0,0,127}));
         connect(u, gain.u)
-          annotation (Line(points={{-120,0},{-80,0}}, color={0,0,127}));
-        connect(switch1.u1, add3_1.y) annotation (Line(points={{-4,0},{-12,0},{-12,4},
-                {-21.2,4}}, color={0,0,127}));
-        connect(gain.y, add3_1.u2) annotation (Line(points={{-57,0},{-48,0},{-48,-0.2},
-                {-39.6,-0.2}}, color={0,0,127}));
-        connect(const_shiftOffset.y, add3_1.u1) annotation (Line(points={{-61.2,31},{-46,
-                31},{-46,8.2},{-39.6,8.2}}, color={0,0,127}));
-        connect(u1, add3_1.u1) annotation (Line(points={{-122,90},{-46,90},{-46,8.2},{
-                -39.6,8.2}}, color={0,0,127}));
+          annotation (Line(points={{-120,0},{-92,0}}, color={0,0,127}));
+        connect(switch1.u1, add3_1.y) annotation (Line(points={{-22,8},{-39.2,8}},
+                            color={0,0,127}));
+        connect(gain.y, add3_1.u2) annotation (Line(points={{-69,0},{-60,0},{
+                -60,3.8},{-57.6,3.8}},
+                               color={0,0,127}));
+        connect(const_shiftOffset.y, add3_1.u1) annotation (Line(points={{-81.2,
+                31},{-68,31},{-68,12.2},{-57.6,12.2}},
+                                            color={0,0,127}));
+        connect(u1, add3_1.u1) annotation (Line(points={{-122,90},{-68,90},{-68,
+                12.2},{-57.6,12.2}},
+                             color={0,0,127}));
+        connect(integralActRelaxDelay.y, myDelay.u)
+          annotation (Line(points={{30,0},{38,0}}, color={0,0,127}));
+        connect(myDelay.y, limiter.u)
+          annotation (Line(points={{61,0},{68,0}}, color={0,0,127}));
         annotation (Diagram(coordinateSystem(extent={{-100,-100},{100,100}})),
                                                                            Icon(
               coordinateSystem(extent={{-100,-80},{100,100}}),
@@ -1213,7 +1236,7 @@ type"),       Text(
         parameter Real scale=1.0;
         Real cost = (heartRate2_1.HR - readData.heart_rate)^2*scale;
         output Real sum_cost;
-          ConditionalConnection conditionalConnection(delayTime=0.1)
+          ConditionalConnection conditionalConnection(delayInt_Act=0.1)
             annotation (Placement(transformation(extent={{22,32},{42,50}})));
           parameter Physiolibrary.Types.Time Ts=30
             "Time constant for averaging";
@@ -1254,15 +1277,17 @@ type"),       Text(
         model FitHRData
           extends HrDataElement(readData(ExperimentNr=1,
                                          path="..\\"), conditionalConnection(
-                delayEnabled=true));
+                delayIntegral_Enabled=
+                             true));
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end FitHRData;
 
         model HrDataMoreElements
 
-          replaceable HrDataElement hrDataElement[4](conditionalConnection(delayEnabled=
-                 true, delayTime=delayTime))         constrainedby
+          replaceable HrDataElement hrDataElement[4](conditionalConnection(delayIntegral_Enabled=
+                 true, delayInt_Act=
+                                 delayTime))         constrainedby
             HrDataElement(
               readData(ExperimentNr={1,2,3,4}), systemicMockPressure(baroreflex_system(
                   baroreflex(
@@ -1448,6 +1473,31 @@ type"),       Text(
                 lineColor={28,108,200},
                 textString="maxVal")}));
       end Stepping;
+
+      model IntegralActRelaxDelay
+        parameter Boolean delayEnabled=false annotation(choices(checkBox=true));
+        parameter Physiolibrary.Types.Fraction phi0;
+        parameter Modelica.SIunits.Time delayTimeAct=0
+          "Delay time of output with respect to input signal for activation"
+                                                              annotation(Dialog(enable=
+                delayEnabled));
+        parameter Modelica.SIunits.Time delayTimeRelax=0
+          "Delay time of output with respect to input signal for activation"
+                                                              annotation(Dialog(enable=
+                delayEnabled));
+
+        Modelica.Blocks.Interfaces.RealInput u annotation (Placement(transformation(
+                rotation=0, extent={{-110,-10},{-90,10}})));
+        Modelica.Blocks.Interfaces.RealOutput y(start = phi0) annotation (Placement(transformation(
+                rotation=0, extent={{90,-10},{110,10}})));
+
+      equation
+        if delayEnabled then
+          der(y) = max(u -y, 0)/delayTimeAct + min(u -y, 0)/delayTimeRelax;
+        else
+          y = u;
+        end if;
+      end IntegralActRelaxDelay;
     end Signals;
 
     package Basic
@@ -3953,7 +4003,7 @@ type"),       Text(
           //   Real _E = (Emin + Emax*drivingFunction) "Elastance function in ml/mmhg";
           //   Physiolibrary.Types.HydraulicElastance E=_E/Constants.ml_per_mmhg2SI;
 
-            Physiolibrary.Types.HydraulicElastance E=D;
+            Physiolibrary.Types.HydraulicElastance E=contractilityFraction*D;
 
             Physiolibrary.Types.Volume volume(start=100e-6);// = _VLA*Constants.ml2SI;
             parameter Physiolibrary.Types.Volume volume_min=5e-06  "Volume limiter for external pressures";
@@ -3969,7 +4019,7 @@ type"),       Text(
            Modelica.SIunits.Work currentWork;
            Modelica.SIunits.Work work;
 
-
+            parameter Physiolibrary.Types.Fraction contractilityFraction=1;
             parameter Boolean enableCollagen = false "Enab;e nonlinear collagen force, effectively limiting atrial volume" annotation(choices(checkBox=true));
             parameter Physiolibrary.Types.Volume V0_col=100e-6
               "minimal volume to produce collagen pressure";
@@ -11824,7 +11874,10 @@ P_hs/2")}));
         // parameter Real tissue_chi_C = 0.09;
         // Real tissue_chi_C_max;
         Physiolibrary.Types.Volume linearOverflow;
+        Physiolibrary.Types.Fraction phi_delayed( start = phi0);
         equation
+
+          der(phi_delayed) = max(phi - phi_delayed, 0)/settings.veins_activation_tau + min(phi - phi_delayed, 0)/settings.veins_relaxation_tau;
 
           if exercise > 0 then
         //     V_n_phi =V_n*(1 + exercise*settings.tissue_chi_C)/(1 + settings.tissues_eta_C*
@@ -11833,7 +11886,7 @@ P_hs/2")}));
         //     V_maxExponential = V_n*(1 + 1*tissue_chi_C_max);
           else
             V_n_phi =V_n*(1 + exercise*settings.tissue_chi_C)/(1 + settings.tissues_eta_C*
-                (phi - settings.phi0));
+                (phi_delayed - settings.phi0));
         //         0 = tissue_chi_C_max;
         //     0 = tissue_chi_C;
           end if;
@@ -38731,10 +38784,10 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
         Components.Signals.ConditionalConnection condHRPhi(
           disconnectedValue=settings.phi0,
-          delayEnabled=true,
-          delayTime=settings.Td_phi_hr,
-          phi0=settings.phi0) annotation (Placement(transformation(extent={{56,-36.7408},
-                  {44,-26.0741}})));
+          delayIntegral_Enabled=true,
+          delayInt_Act=settings.Td_phi_hr,
+          phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
+                  -36.7408},{44,-26.0741}})));
         replaceable Components.Subsystems.Baroreflex.HeartRate_HRMinMax
                                                                heartRate(phi0=
               settings.phi0,
@@ -38762,8 +38815,8 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condSystemicPhi(
           disconnectedValue=0.25,
           disconnected=false,
-          delayEnabled=true,
-          delayTime=settings.Td_phi_syst,
+          delayIntegral_Enabled=true,
+          delayInt_Act=settings.Td_phi_syst,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
                   15.5556},{44,25.5556}})));
         Modelica.Blocks.Logical.Switch switch1
@@ -38773,11 +38826,11 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condHeartPhi(
           disconnectedValue=0.25,
           disconnected=false,
-          delayEnabled=true,
-          delayTime=settings.Td_phi_heart,
+          delayIntegral_Enabled=true,
+          delayInt_Act=settings.Td_phi_heart,
           uMin=0.2,
-          phi0=settings.phi0)          annotation (Placement(transformation(
-                extent={{56,-20.7408},{44,-10.0741}})));
+          phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
+                  -20.7408},{44,-10.0741}})));
         Components.Signals.ConditionalConnection condTP_IP(
           disconnectedValue=0,
           disconnected=true,
@@ -38905,10 +38958,10 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
         Components.Signals.ConditionalConnection condHRPhi(
           disconnectedValue=settings.phi0,
-          delayEnabled=true,
-          delayTime=settings.Td_phi_hr,
-          phi0=settings.phi0) annotation (Placement(transformation(extent={{56,-36.7408},
-                  {44,-26.0741}})));
+          delayIntegral_Enabled=true,
+          delayInt_Act=settings.Td_phi_hr,
+          phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
+                  -36.7408},{44,-26.0741}})));
         replaceable Components.Subsystems.Baroreflex.HeartRate_HRMinMax
                                                                heartRate(phi0=
               settings.phi0,
@@ -38936,8 +38989,8 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condSystemicPhi(
           disconnectedValue=0.25,
           disconnected=false,
-          delayEnabled=true,
-          delayTime=settings.Td_phi_syst,
+          delayIntegral_Enabled=true,
+          delayInt_Act=settings.Td_phi_syst,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
                   15.5556},{44,25.5556}})));
         Modelica.Blocks.Logical.Switch switch1
@@ -38947,11 +39000,11 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condHeartPhi(
           disconnectedValue=0.25,
           disconnected=false,
-          delayEnabled=true,
-          delayTime=settings.Td_phi_heart,
+          delayIntegral_Enabled=true,
+          delayInt_Act=settings.Td_phi_heart,
           uMin=0.2,
-          phi0=settings.phi0)          annotation (Placement(transformation(
-                extent={{56,-20.7408},{44,-10.0741}})));
+          phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
+                  -20.7408},{44,-10.0741}})));
         Components.Signals.ConditionalConnection condTP_IP(
           disconnectedValue=0,
           disconnected=true,
@@ -42901,8 +42954,10 @@ P_hs_plus_dist"),
           SystemicComponent(UseExerciseInput=false),
           condHRPhi(
             disconnected=false,
-            delayEnabled=true,
-            delayTime=settings.baro_hr_delay),
+            delayIntegral_Enabled=
+                         true,
+            delayInt_Act=
+                      settings.baro_hr_delay),
           phi_fixed(
             amplitude=0,
             offset=0.25,
@@ -47914,14 +47969,34 @@ P_hs_plus_dist"),
         end CVS_IncrHR;
 
         model CVS_impLV
-          extends CVS_IncrHR(SEPcontractilityFraction=LVcontractilityFraction,
-              LVcontractilityFraction=1);
+          extends CVS_IncrHR(
+            SEPcontractilityFraction=LVcontractilityFraction,
+            LVcontractilityFraction=1,
+            heartComponent(
+              ventricles(SEP_wall(contractilityFraction=LVcontractilityFraction)),
+              ra(contractilityFraction=RVcontractilityFraction),
+              la(contractilityFraction=LVcontractilityFraction)));
+
           annotation (experiment(
               StopTime=30,
               Interval=0.02,
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end CVS_impLV;
+
+        model CVS_fit "Manual fit to cardiogenic shock patient"
+          extends CVS_impLV(
+            LVcontractilityFraction=0.07,
+            heartComponent(ventricles(SEP_wall(contractilityFraction=(
+                      LVcontractilityFraction + RVcontractilityFraction)/2))),
+            settings(V_PV_init=0.0005, baro_tau_s=10),
+            useAutonomousPhi(y=true));
+          annotation (experiment(
+              StopTime=30,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_fit;
       end AdditionalOutputs;
     end Identification;
 
@@ -48126,9 +48201,12 @@ P_hs_plus_dist"),
 
         model CardiovascularSystem "Experimental maunua; tuning setings"
           extends Obsolete.partialCVS_ss(
-            condHRPhi(delayEnabled=false),
-            condHeartPhi(delayEnabled=false),
-            condSystemicPhi(delayEnabled=false),
+            condHRPhi(delayIntegral_Enabled=
+                                   false),
+            condHeartPhi(delayIntegral_Enabled=
+                                      false),
+            condSystemicPhi(delayIntegral_Enabled=
+                                         false),
             settings(
               heart_atr_D_A(displayUnit="Pa/m3"),
               pulm_C_PV=3.0002463033826e-07,
@@ -49028,7 +49106,7 @@ P_hs_plus_dist"),
           end KnockOff_Venoconstriction;
 
           model KnockOff_Chronotropy
-            extends knockOff_base(condHRPhi(disconnected=true, delayEnabled=
+            extends knockOff_base(condHRPhi(disconnected=true, delayIntegral_Enabled=
                     false));
           end KnockOff_Chronotropy;
 
@@ -49464,7 +49542,9 @@ P_hs_plus_dist"),
 
         model delays "with delays estimated from pstras"
           extends CVS_valsalva(
-            condSystemicPhi(delayEnabled=true, delayTime=2));
+            condSystemicPhi(delayTransport_Enabled=
+                                         true, delayTransport_Time=
+                                                         2));
         end delays;
 
         model CVS_valsalva_test
@@ -49828,6 +49908,67 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end CVS_VS_RaCollagen;
+
+        model CVS_valsalva_overshootDecay
+          "Experiments on how to decay the overshoot"
+          import ADAN_main;
+
+            //   settings(V_PV_init=1e-06*(-1297.5 + 200), pulm_C_PV=3.7503078792283e-07),
+            // pulmonaryComponent(c_pv(volume_start=65e-6 + 2000e-6 + settings.V_PV_init +
+            //         200e-6))
+          extends CVS_valsalva(
+            settings(tissues_tau_R=10),
+            condHeartPhi(
+              uMin=0.24,
+              delayInt_Relax=3,
+              delayIntegral_Enabled=
+                           true,
+              delayInt_Act=0.1),
+            condSystemicPhi(
+              uMin=0.24,
+              delayInt_Relax=3,
+              delayIntegral_Enabled=
+                           true,
+              delayInt_Act=0.1),
+            condHRPhi(
+              uMin=0.2,
+              delayInt_Relax=0.2,
+              delayIntegral_Enabled=
+                           true,
+              delayInt_Act=0.1),
+            SystemicComponent(UseTiltInput=true));
+
+        // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
+        //     useAutonomousPhi(y=true),
+        //     heartComponent(
+        //       ra(enabled=false),
+        //       la(enabled=false),
+        //       ventricles(
+        //         LV_wall(L0=1.6),
+        //         SEP_wall(L0=1.6),
+        //         RV_wall(L0=1.6))),
+        //     settings(
+        //       V_PV_init=0.00035,
+        //       heart_R_vlv(displayUnit="(Pa.s)/m3"),
+        //       heart_R_LA(displayUnit="(mmHg.min)/l") = 3199737.29796,
+        //       heart_vntr_L0=1.6)
+          replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
+            height=Modelica.Constants.pi/3,
+            startTime=0,
+            duration=1)   constrainedby Modelica.Blocks.Sources.Ramp
+            annotation (Placement(transformation(extent={{-98,36},{-78,56}})));
+        equation
+          connect(Tilt_ramp.y, SystemicComponent.tilt_input) annotation (Line(points={{-77,
+                  46},{-40,46},{-40,32},{-22,32},{-22,20}}, color={0,0,127}));
+          annotation (experiment(
+              StopTime=60,
+              Interval=0.01,
+              Tolerance=1e-07,
+              __Dymola_Algorithm="Cvode",
+            __OpenModelica_simulationFlags(lv = "LOG_STATS", s = "cvode")), Documentation(info="<html>
+<p>This model simulates Valsalva maneuver, based on the normal resting supine case</p>
+</html>"));
+        end CVS_valsalva_overshootDecay;
       end Experiments;
 
       model CVS_valsalva
@@ -54086,7 +54227,8 @@ P_hs_plus_dist"),
             c_pa(volume(start=5.708838e-05, fixed=true)),
             c_pv(volume(start=0.00032910754, fixed=true))),
           settings(initByPressure=false),
-          condSystemicPhi(delayEnabled=false));
+          condSystemicPhi(delayIntegral_Enabled=
+                                       false));
 
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)));
