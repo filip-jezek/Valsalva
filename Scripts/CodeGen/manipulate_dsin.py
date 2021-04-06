@@ -190,9 +190,11 @@ def getInitParams(dsFileIn='dsin.txt', OptOutputFileIn = 'OutputListingMain.txt'
                     continue
                 s = l.rstrip('\n').split(',')
                 if len(s) >= 5: 
-                    op = OptimParam(s[0], min=s[2], max=s[3], step=s[4])                    
+                    op = OptimParam(s[0], min=s[2], max=s[3], step=s[4], value=s[1])                    
                 elif len(s) == 4: 
-                    op = OptimParam(s[0], min=s[2], max=s[3])
+                    op = OptimParam(s[0], min=s[2], max=s[3], value=s[1])
+                elif len(s) == 2:
+                    op = OptimParam(s[0], value=s[1])                    
                 elif len(s) >= 1:
                     op = OptimParam(s[0])
                 ops[s[0]] = op
@@ -444,7 +446,8 @@ OptimizationSettings{
   WriteStepNumber = false;
   UnitsOfExecution = 4;
 }\n""")
-            file.write("""\n
+            if USEPSO:
+                file.write("""\n
 Algorithm{
   Main = GPSPSOCCHJ;
   NeighborhoodTopology = vonNeumann;
@@ -463,16 +466,17 @@ Algorithm{
   NumberOfStepReduction = 4;
 }""" )
 
-            file.write("""\n
- /*
- Algorithm{
+            else:
+                file.write("""\n
+ 
+Algorithm{
  Main = GPSHookeJeeves;
  MeshSizeDivider = 2;
  InitialMeshSizeExponent = 0;
  MeshSizeExponentIncrement = 1;
  NumberOfStepReduction = 6;
 }
-*/""" )
+""" )
             # jsut to get back at proper  indent
             pass
 
@@ -578,17 +582,21 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
     
 
 overwriteOptParamFile = True
-overWriteDsinTemplate = False
-# DSFILEIN = 'dsin.txt'
+overWriteDsinTemplate = True
+
 DSFILEIN = None
-OPTOUTPUTFILEIN = 'OutputListingMain.txt'
-# OPTOUTPUTFILEIN = None
+# OPTOUTPUTFILEIN = 'OutputListingMain.txt'
+
+# DSFILEIN = 'dsin.txt'
+OPTOUTPUTFILEIN = None
+
+USEPSO = False
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
-    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
-    writeInitStatesFromDsin(dsFileIn="dsin.txt")
+    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
+    # writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')
     print('Done, Johne')
