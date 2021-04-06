@@ -816,10 +816,10 @@ type"),       Text(
         parameter Boolean delayIntegral_Enabled=false
           "Enable assymetrical integral delay"
                                              annotation(choices(checkBox=true));
-        parameter Modelica.SIunits.Time delayInt_Act=0
+        parameter Modelica.SIunits.Time delayInt_Act=0.001
           "Delay time of output with respect to input signal" annotation(Dialog(enable=
                 delayIntegral_Enabled));
-        parameter Modelica.SIunits.Time delayInt_Relax=0
+        parameter Modelica.SIunits.Time delayInt_Relax=0.001
           "Delay time of output with respect to input signal for activation"
           annotation (Dialog(enable=delayIntegral_Enabled));
 
@@ -39220,7 +39220,7 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
         Components.Signals.ConditionalConnection condHRPhi(
           disconnectedValue=settings.phi0,
-          delayIntegral_Enabled=true,
+          delayIntegral_Enabled=false,
           delayInt_Act=settings.Td_phi_hr,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
                   -36.7408},{44,-26.0741}})));
@@ -39251,7 +39251,7 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condSystemicPhi(
           disconnectedValue=0.25,
           disconnected=false,
-          delayIntegral_Enabled=true,
+          delayIntegral_Enabled=false,
           delayInt_Act=settings.Td_phi_syst,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
                   15.5556},{44,25.5556}})));
@@ -39262,7 +39262,7 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condHeartPhi(
           disconnectedValue=0.25,
           disconnected=false,
-          delayIntegral_Enabled=true,
+          delayIntegral_Enabled=false,
           delayInt_Act=settings.Td_phi_heart,
           uMin=0.2,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
@@ -39394,7 +39394,9 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
         Components.Signals.ConditionalConnection condHRPhi(
           disconnectedValue=settings.phi0,
-          delayIntegral_Enabled=true,
+          delayTransport_Enabled=false,
+          delayTransport_Time=settings.Td_phi_hr,
+          delayIntegral_Enabled=false,
           delayInt_Act=settings.Td_phi_hr,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
                   -36.7408},{44,-26.0741}})));
@@ -39425,7 +39427,9 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condSystemicPhi(
           disconnectedValue=0.25,
           disconnected=false,
-          delayIntegral_Enabled=true,
+          delayTransport_Enabled=false,
+          delayTransport_Time=settings.Td_phi_syst,
+          delayIntegral_Enabled=false,
           delayInt_Act=settings.Td_phi_syst,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
                   15.5556},{44,25.5556}})));
@@ -39436,7 +39440,9 @@ P_hs_plus_dist"),
         Components.Signals.ConditionalConnection condHeartPhi(
           disconnectedValue=0.25,
           disconnected=false,
-          delayIntegral_Enabled=true,
+          delayTransport_Enabled=false,
+          delayTransport_Time=settings.Td_phi_heart,
+          delayIntegral_Enabled=false,
           delayInt_Act=settings.Td_phi_heart,
           uMin=0.2,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
