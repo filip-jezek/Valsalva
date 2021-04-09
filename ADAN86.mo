@@ -2789,8 +2789,7 @@ type"),       Text(
           parameter Physiolibrary.Types.Frequency HR_max = 3;
           parameter Physiolibrary.Types.Frequency HR_nom = 1;
 
-          Physiolibrary.Types.Frequency H0 = HR_nom - H1*phi0;
-          Physiolibrary.Types.Frequency H1 = HR_max - H0;
+          Real eta_HR;
 
           Physiolibrary.Types.RealIO.FrequencyOutput HR annotation (Placement(
                 transformation(extent={{90,-10},{110,10}}), iconTransformation(extent={{92,-10},
@@ -2801,7 +2800,8 @@ type"),       Text(
                     20}})));
 
         equation
-          HR = H0 + H1*phi;
+          HR_max =HR_nom*(1 + eta_HR*(1 - phi0));
+          HR =HR_nom*(1 + eta_HR*(phi - phi0));
 
         end HeartRate_HRMinMax;
 
