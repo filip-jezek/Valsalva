@@ -7548,7 +7548,7 @@ type"),       Text(
             Physiolibrary.Types.Frequency HR_true(start = 1) "Heart rate calculated from true systolic intervals";
             Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
                   transformation(rotation=0, extent={{-110,-10},{-90,10}})));
-            Physiolibrary.Types.RealIO.FractionInput phiInput annotation (Placement(
+            Physiolibrary.Types.RealIO.FractionInput phiInput if usePhiInput annotation (Placement(
                   transformation(rotation=0, extent={{-110,50},{-90,70}})));
 
             Physiolibrary.Types.RealIO.FractionOutput cardiac_cycle
@@ -7559,6 +7559,7 @@ type"),       Text(
                   transformation(rotation=0, extent={{90,-70},{110,-50}}),
                   iconTransformation(extent={{80,-100},{120,-60}})));
             Integer beats(start = 0);
+            parameter Boolean usePhiInput = false;
           equation
 
             t0 = cardiac_cycle / frequency;
@@ -10433,6 +10434,7 @@ Kalecky")}), experiment(
 
             parameter Boolean UseTiltInput=false
               "Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account."  annotation(choices(checkBox=true));
+
             parameter Boolean UseVasoconstrictionEffect = false annotation(choices(checkBox=true),Dialog(group = "Parameters"));
             parameter Real sinAlpha=0   "Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input."  annotation (Dialog(tab = "General", group = "Orientations", enabled = not UseSinAlphaInput));
             parameter Boolean UseDistentionOutput = false "Provides relative distention fraction output, otherwise hidden and not calculated" annotation(choices(checkBox=true));
@@ -11710,6 +11712,16 @@ P_hs/2")}));
                 UseExercise=true,
                 volume(fixed = not settings.initByPressure));
 
+          parameter Boolean UseIABPInput = false annotation(choices(checkBox=true), Evaluate = true);
+          parameter Modelica.SIunits.Diameter d_IABP = 0 "diameter of IABP" annotation(Evaluate=UseIABPInput, HideResult = not UseIABPInput);
+          Physiolibrary.Types.Volume iabp_volume = if not UseIABPInput then 0 else _iabp*l*Modelica.Constants.pi*((d_IABP/2)^2) annotation(HideResult = not UseIABPInput);
+          Physiolibrary.Types.RealIO.FractionInput IABPInput=_iabp if UseIABPInput
+            "Custom IABP input" annotation (Placement(transformation(extent={{-44,10},{-24,
+                    30}}), iconTransformation(
+                extent={{-20,-20},{20,20}},
+                rotation=90,
+                origin={-40,-20})));
+
           Physiolibrary.Types.Pressure p_C(
             start=10000.0,
             fixed=settings.initByPressure) "Pressure of elastic compartment";
@@ -11717,7 +11729,11 @@ P_hs/2")}));
           Physiolibrary.Types.HydraulicCompliance compliance "Real compliance after all effects";
           Physiolibrary.Types.Fraction r_phi = r*(1 - settings.eta_vc*(phi - phi0)) "Radius depends on sympathetic activation phi";
 
+          Physiolibrary.Types.Fraction _iabp;
         equation
+          if not UseIABPInput then
+            _iabp = 0;
+          end if;
 
           if UseVasoconstrictionEffect then
             // TODO divide for arteries and veins
@@ -11726,7 +11742,12 @@ P_hs/2")}));
             compliance = C;
           end if;
 
-          volume = (p_C)  *compliance + zpv "Lim 2013";
+          if not UseIABPInput then
+            volume = (p_C)  *compliance + zpv;
+          else
+            volume = max((p_C)  *compliance + zpv - iabp_volume, 0);
+          end if;
+
 
           if UseInertance then
             der(q_in) = (p_in_hs-p_out_hs-R*q_in)/I;
@@ -11880,10 +11901,10 @@ P_hs/2")}));
           if exercise > 0 then
         //     V_n_phi =V_n*(1 + exercise*settings.tissue_chi_C)/(1 + settings.tissues_eta_C*
         //         (phi_exercise - settings.phi0));
-            V_n_phi =V_n*(1 + exercise*settings.tissue_chi_C);
+            V_n_phi =V_n/(1 + exercise*settings.tissue_chi_C);
         //     V_maxExponential = V_n*(1 + 1*tissue_chi_C_max);
           else
-            V_n_phi =V_n*(1 + exercise*settings.tissue_chi_C)/(1 + settings.tissues_eta_C*
+            V_n_phi =V_n/(1 + settings.tissues_eta_C*
                 (phi_delayed - settings.phi0));
         //         0 = tissue_chi_C_max;
         //     0 = tissue_chi_C;
@@ -28189,7 +28210,7 @@ P_hs_plus_dist"),
         model CoronaryCirculation
           extends Physiolibrary.Icons.PerfusionOD;
 
-          CoronaryLayer coronaryLayer_Endo(
+          CoronaryLayer coronaryLayer_SubEpicardium(
             cf_l=0.55*cf,
             rf_l=1.28*rf,
             pf_l=0.167*pf)
@@ -28199,7 +28220,7 @@ P_hs_plus_dist"),
             rf_l=1.12*rf,
             pf_l=0.500*pf)
             annotation (Placement(transformation(extent={{6,-10},{26,10}})));
-          CoronaryLayer coronaryLayer_epi(
+          CoronaryLayer coronaryLayer_SubEndocardium(
             cf_l=1*cf,
             rf_l=1*rf,
             pf_l=0.833*pf)
@@ -28243,31 +28264,35 @@ P_hs_plus_dist"),
           der(q_avg)*3 = port_a.q - q_avg;
 
 
-          connect(coronaryLayer_Endo.port_a, coronaryLayer_Mid.port_a) annotation (Line(
+          connect(coronaryLayer_SubEpicardium.port_a, coronaryLayer_Mid.port_a)
+            annotation (Line(
               points={{6,40},{0,40},{0,0},{6,0}},
               color={0,0,0},
               thickness=1));
-          connect(coronaryLayer_epi.port_a, coronaryLayer_Mid.port_a) annotation (Line(
+          connect(coronaryLayer_SubEndocardium.port_a, coronaryLayer_Mid.port_a)
+            annotation (Line(
               points={{6,-40},{0,-40},{0,0},{6,0}},
               color={0,0,0},
               thickness=1));
-          connect(coronaryLayer_Endo.port_b, coronaryLayer_Mid.port_b) annotation (Line(
+          connect(coronaryLayer_SubEpicardium.port_b, coronaryLayer_Mid.port_b)
+            annotation (Line(
               points={{26,40},{32,40},{32,0},{26,0}},
               color={0,0,0},
               thickness=1));
-          connect(coronaryLayer_epi.port_b, coronaryLayer_Mid.port_b) annotation (Line(
+          connect(coronaryLayer_SubEndocardium.port_b, coronaryLayer_Mid.port_b)
+            annotation (Line(
               points={{26,-40},{32,-40},{32,0},{26,0}},
               color={0,0,0},
               thickness=1));
-          connect(coronaryLayer_epi.externalPressure, externalPressure)
-            annotation (Line(points={{16,-50},{16,-100},{20,-100}},
-                                                          color={0,0,127}));
+          connect(coronaryLayer_SubEndocardium.externalPressure,
+            externalPressure) annotation (Line(points={{16,-50},{16,-100},{20,-100}},
+                color={0,0,127}));
           connect(coronaryLayer_Mid.externalPressure, externalPressure)
             annotation (Line(points={{16,-10},{16,-100},{20,-100}},
                                                           color={0,0,127}));
-          connect(coronaryLayer_Endo.externalPressure, externalPressure)
-            annotation (Line(points={{16,30},{16,-100},{20,-100}},
-                                                         color={0,0,127}));
+          connect(coronaryLayer_SubEpicardium.externalPressure,
+            externalPressure) annotation (Line(points={{16,30},{16,-100},{20,-100}},
+                color={0,0,127}));
           connect(PA.q_in, coronaryLayer_Mid.port_a) annotation (Line(
               points={{-20,0},{6,0}},
               color={0,0,0},
@@ -28423,8 +28448,8 @@ P_hs_plus_dist"),
         end CoronaryLayer;
 
         model CoronaryTest
-          CoronaryCirculation coronaryCirculation(coronaryLayer_Endo(r0m(
-                  displayUnit="(mmHg.s)/ml")))
+          CoronaryCirculation coronaryCirculation(coronaryLayer_SubEpicardium(
+                r0m(displayUnit="(mmHg.s)/ml")), target_q=1.6666666666667e-05)
             annotation (Placement(transformation(extent={{-20,-20},{20,20}})));
           Physiolibrary.Hydraulic.Sources.UnlimitedVolume PAo(usePressureInput=
                 true)
@@ -28480,7 +28505,8 @@ P_hs_plus_dist"),
 
         model CoronaryTestHuman
           CoronaryCirculation coronaryCirculation(
-            coronaryLayer_Endo(r0m(displayUnit="(mmHg.s)/ml")),
+            coronaryLayer_SubEpicardium(r0m(displayUnit="(mmHg.s)/ml")),
+            cf=1,
             target_q=3.73333e-06,
             rf=0.6)
             annotation (Placement(transformation(extent={{20,-20},{60,20}})));
@@ -55321,7 +55347,7 @@ P_hs_plus_dist"),
                     displayUnit="(mmHg.s)/ml") = 1.33322387415e+20)));
           Components.Subsystems.Coronary.CoronaryCirculation
             coronaryCirculation(
-            coronaryLayer_Endo(r0m(displayUnit="(mmHg.s)/ml")),
+            coronaryLayer_SubEpicardium(r0m(displayUnit="(mmHg.s)/ml")),
             target_q(displayUnit="l/min") = 3.73333e-06,
             rf=0.006,
             inertia(I(displayUnit="mmHg.s2/ml") = 399967000.0))
