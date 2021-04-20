@@ -28283,7 +28283,20 @@ P_hs_plus_dist"),
         parameter Physiolibrary.Types.Volume V_normal(displayUnit="l")=0.07;
         Physiolibrary.Types.Volume V_int = V_excess + V_normal;
         output Physiolibrary.Types.Volume V_excess(min = -V_normal) = V_normal*(Vr -1);
+        output Physiolibrary.Types.Volume V_excess_avg;
+        output Real V_excess_i;
+        Physiolibrary.Types.VolumeFlowRate dV_excess;
+        Modelica.SIunits.Time t0(start =  -1);
         equation
+          der(V_excess_i) = V_excess;
+          der(V_excess) = dV_excess;
+
+          when dV_excess > 0 then
+            t0 = time;
+            reinit(V_excess_i, 0);
+            V_excess_avg = V_excess_i/(time - pre(t0));
+          end when;
+
           sum(J1) = J2;
           J2 = J3;
 
@@ -49808,6 +49821,10 @@ P_hs_plus_dist"),
               Tolerance=1e-07,
               __Dymola_Algorithm="Cvode"));
         end OlufsenTriSeg_tiltable_exercise_MusclePump;
+
+        model CVS_diastolicEx
+          extends CVS_exercise(settings(tissue_chi_C=-0.12, tissues_chi_R=15.0));
+        end CVS_diastolicEx;
       end Experiments;
 
       model CVS_exercise "Simplified heart model"
@@ -55421,16 +55438,6 @@ P_hs_plus_dist"),
               __Dymola_Algorithm="Cvode"));
         end CVS_renalRegulation_HFpEF;
 
-        model CVS_renalRegulation_HFpEF_1700_LVOnly
-          extends CVS_renalRegulation_HFpEF(stiffeningFactor=17, heartComponent(
-                ventricles(SEP_wall(k_passive=settings.heart_vntr_k_passive))));
-          annotation (experiment(
-              StopTime=36000,
-              Interval=0.02,
-              Tolerance=1e-06,
-              __Dymola_Algorithm="Cvode"));
-        end CVS_renalRegulation_HFpEF_1700_LVOnly;
-
         model CVS_renalRegulation_HFpEF_baro
           extends Renals_VolumeLoad(
                 heartComponent(
@@ -55443,7 +55450,7 @@ P_hs_plus_dist"),
             addedVolume(volume_start=initVol),
             useAutonomousPhi(y=true));
 
-          parameter Physiolibrary.Types.Fraction LVfunctionFraction=0.4;
+          parameter Physiolibrary.Types.Fraction LVfunctionFraction=1;
           parameter Physiolibrary.Types.Fraction RVfunctionFraction=1;
 
         parameter Physiolibrary.Types.Pressure BPM_cutOff=13332.2387415;
@@ -55501,6 +55508,46 @@ P_hs_plus_dist"),
                    tau_R_K_afferent=6), renal_L166(tau_R_K_afferent=6)),
                 settings(baro_fsn=0.036));
           end CVS_TestBaroConvergence;
+
+          model CVS_renalRegulation_HFpEF_43
+            extends CVS_renalRegulation_HFpEF_baro(stiffeningFactor=43, initVol=
+                 0);
+            annotation (experiment(
+                StopTime=2000,
+                Interval=0.1,
+                Tolerance=1e-06,
+                __Dymola_Algorithm="Cvode"));
+          end CVS_renalRegulation_HFpEF_43;
+
+          model CVS_renalRegulation_HFpEF_1700_LVOnly
+            extends CVS_renalRegulation_HFpEF(stiffeningFactor=17, heartComponent(
+                  ventricles(SEP_wall(k_passive=settings.heart_vntr_k_passive))));
+            annotation (experiment(
+                StopTime=36000,
+                Interval=0.02,
+                Tolerance=1e-06,
+                __Dymola_Algorithm="Cvode"));
+          end CVS_renalRegulation_HFpEF_1700_LVOnly;
+
+          model CVS_renalRegulation_HFpEF_43_init1000
+            extends CVS_renalRegulation_HFpEF_baro(stiffeningFactor=43, initVol=
+                 0.001);
+            annotation (experiment(
+                StopTime=2000,
+                Interval=0.1,
+                Tolerance=1e-06,
+                __Dymola_Algorithm="Cvode"));
+          end CVS_renalRegulation_HFpEF_43_init1000;
+
+          model CVS_renalRegulation_HFpEF_43_Drained
+            extends CVS_renalRegulation_HFpEF_43(initVol=0.001657,
+                unlimitedPump(useSolutionFlowInput=false, SolutionFlow=0));
+          end CVS_renalRegulation_HFpEF_43_Drained;
+
+          model CVS_renalRegulation_HFpEF_43_DrainedReturned
+            extends CVS_renalRegulation_HFpEF_43(initVol=1e-06*(1657 + 5000),
+                unlimitedPump(useSolutionFlowInput=false, SolutionFlow=0));
+          end CVS_renalRegulation_HFpEF_43_DrainedReturned;
         end Experiments;
       end Renals;
 
