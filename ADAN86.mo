@@ -2789,8 +2789,7 @@ type"),       Text(
           parameter Physiolibrary.Types.Frequency HR_max = 3;
           parameter Physiolibrary.Types.Frequency HR_nom = 1;
 
-          Physiolibrary.Types.Frequency H0 = HR_nom - H1*phi0;
-          Physiolibrary.Types.Frequency H1 = HR_max - H0;
+          Real eta_HR;
 
           Physiolibrary.Types.RealIO.FrequencyOutput HR annotation (Placement(
                 transformation(extent={{90,-10},{110,10}}), iconTransformation(extent={{92,-10},
@@ -2801,7 +2800,8 @@ type"),       Text(
                     20}})));
 
         equation
-          HR = H0 + H1*phi;
+          HR_max =HR_nom*(1 + eta_HR*(1 - phi0));
+          HR =HR_nom*(1 + eta_HR*(phi - phi0));
 
         end HeartRate_HRMinMax;
 
@@ -3920,14 +3920,14 @@ type"),       Text(
           //             {-2,-40}})));
             Physiolibrary.Types.RealIO.FractionInput phiInput=phi_inf if usePhiInput
               "Sympathetic activation"
-              annotation (Placement(transformation(extent={{-122,70},{-82,110}}),
+              annotation (Placement(transformation(extent={{-120,70},{-80,110}}),
                   iconTransformation(extent={{-120,60},{-80,100}})));
             Physiolibrary.Types.Fraction phi_;
             Modelica.Blocks.Interfaces.RealInput t0 "Start time of current cardiac cycle"
               annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
                   iconTransformation(extent={{-120,-20},{-80,20}})));
             parameter Modelica.SIunits.Time t0_delay = 0 "Delay of contraction after SA node ";
-            parameter Modelica.SIunits.Time t0_delay_maxAct=0
+            parameter Modelica.SIunits.Time t0_delay_maxAct=t0_delay
               "Delay of contraction after SA node ";
             Real t0_delay_coeff "delay activation slope coefficient";
             Modelica.SIunits.Time t0_delay_phi = t0_delay + t0_delay_coeff *(phi_ - phi0) "Systolic delay varying on phi";
@@ -7548,7 +7548,7 @@ type"),       Text(
             Physiolibrary.Types.Frequency HR_true(start = 1) "Heart rate calculated from true systolic intervals";
             Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
                   transformation(rotation=0, extent={{-110,-10},{-90,10}})));
-            Physiolibrary.Types.RealIO.FractionInput phiInput annotation (Placement(
+            Physiolibrary.Types.RealIO.FractionInput phiInput if usePhiInput annotation (Placement(
                   transformation(rotation=0, extent={{-110,50},{-90,70}})));
 
             Physiolibrary.Types.RealIO.FractionOutput cardiac_cycle
@@ -7559,6 +7559,7 @@ type"),       Text(
                   transformation(rotation=0, extent={{90,-70},{110,-50}}),
                   iconTransformation(extent={{80,-100},{120,-60}})));
             Integer beats(start = 0);
+            parameter Boolean usePhiInput = false;
           equation
 
             t0 = cardiac_cycle / frequency;
@@ -7625,9 +7626,9 @@ type"),       Text(
             replaceable Heart_SmithOlufsen heartComponent(
               HR=1,
               UseFrequencyInput=true,
-              UseThoracicPressureInput=true) constrainedby
+              UseThoracic_PressureInput=true) constrainedby
               Components.Subsystems.Heart.partialHeart(UseFrequencyInput=true,
-                UseThoracicPressureInput=true) annotation (Placement(
+                UseThoracic_PressureInput=true) annotation (Placement(
                   transformation(extent={{-12,-32},{-32,-12}})));
             replaceable Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent(UseThoracic_PressureInput=true) constrainedby
@@ -8049,7 +8050,7 @@ type"),       Text(
           model ADANVR
             Heart_ADAN_VR heart_ADAN_VR(
               UseFrequencyInput=false,
-              UseThoracicPressureInput=false,
+              UseThoracic_PressureInput=false,
               UsePhiInput=false)
               annotation (Placement(transformation(extent={{-10,-8},{10,12}})));
             outer Settings settings(
@@ -8463,7 +8464,7 @@ type"),       Text(
           extends Physiolibrary.Icons.Heart;
 
           parameter Boolean UseFrequencyInput=true    annotation(choices(checkBox=true));
-          parameter Boolean UseThoracicPressureInput=true    annotation(choices(checkBox=true));
+          parameter Boolean UseThoracic_PressureInput=true   annotation(choices(checkBox=true));
           parameter Boolean UsePhiInput=true    annotation(choices(checkBox=true));
           parameter Physiolibrary.Types.Frequency HR=1   "Heart rate, when not specified externally" annotation(Dialog(enabled = not UseFrequencyInput));
 
@@ -8476,7 +8477,8 @@ type"),       Text(
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a pv
             annotation (Placement(transformation(extent={{90,-70},{110,-50}}),
                 iconTransformation(extent={{90,-44},{110,-24}})));
-          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input if UseThoracicPressureInput  annotation (Placement(
+          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input if
+            UseThoracic_PressureInput                                                                   annotation (Placement(
                 transformation(extent={{-20,-20},{20,20}},
                 rotation=90,
                 origin={0,-100}),                             iconTransformation(extent={{-20,
@@ -8492,8 +8494,8 @@ type"),       Text(
                  HR) if
                not UseFrequencyInput
             annotation (Placement(transformation(extent={{-96,-4},{-88,4}})));
-          Physiolibrary.Types.Constants.PressureConst P0(k=0) if
-               not UseThoracicPressureInput
+          Physiolibrary.Types.Constants.PressureConst P0(k=0) if not
+            UseThoracic_PressureInput
             annotation (Placement(transformation(extent={{4,-4},{-4,4}},
                 rotation=270,
                 origin={0,-86})));
@@ -10433,6 +10435,7 @@ Kalecky")}), experiment(
 
             parameter Boolean UseTiltInput=false
               "Use custom vessel tilt angle, otherwise the segment takes the Systemic Tilt. Note that the sinAlpha is still taken into account."  annotation(choices(checkBox=true));
+
             parameter Boolean UseVasoconstrictionEffect = false annotation(choices(checkBox=true),Dialog(group = "Parameters"));
             parameter Real sinAlpha=0   "Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input."  annotation (Dialog(tab = "General", group = "Orientations", enabled = not UseSinAlphaInput));
             parameter Boolean UseDistentionOutput = false "Provides relative distention fraction output, otherwise hidden and not calculated" annotation(choices(checkBox=true));
@@ -11710,6 +11713,17 @@ P_hs/2")}));
                 UseExercise=true,
                 volume(fixed = not settings.initByPressure));
 
+          parameter Boolean UseIABPInput = false annotation(choices(checkBox=true), Evaluate = true);
+          parameter Modelica.SIunits.Diameter d_IABP = 0 "diameter of IABP" annotation(Evaluate=UseIABPInput, HideResult = not UseIABPInput);
+          Physiolibrary.Types.Volume iabp_volume = if not UseIABPInput then 0 else _iabp*l*Modelica.Constants.pi*((d_IABP/2)^2) annotation(HideResult = not UseIABPInput);
+          Physiolibrary.Types.RealIO.FractionInput IABPInput=_iabp if UseIABPInput
+            "Custom IABP input" annotation (Placement(transformation(extent={{-44,10},{-24,
+                    30}}), iconTransformation(
+                extent={{-20,-20},{20,20}},
+                rotation=90,
+                origin={-40,-20})));
+          parameter Boolean UseStent=false   "Use constant linear complinace to mimic implanted stent" annotation(choices(checkBox=true), Evaluate = true);
+
           Physiolibrary.Types.Pressure p_C(
             start=10000.0,
             fixed=settings.initByPressure) "Pressure of elastic compartment";
@@ -11717,16 +11731,25 @@ P_hs/2")}));
           Physiolibrary.Types.HydraulicCompliance compliance "Real compliance after all effects";
           Physiolibrary.Types.Fraction r_phi = r*(1 - settings.eta_vc*(phi - phi0)) "Radius depends on sympathetic activation phi";
 
+          Physiolibrary.Types.Fraction _iabp;
         equation
+          if not UseIABPInput then
+            _iabp = 0;
+          end if;
 
-          if UseVasoconstrictionEffect then
+          if UseVasoconstrictionEffect and not UseStent then
             // TODO divide for arteries and veins
             compliance = 2*Modelica.Constants.pi*(r_phi^3) *l/(E*h);
           else
             compliance = C;
           end if;
 
-          volume = (p_C)  *compliance + zpv "Lim 2013";
+          if not UseIABPInput then
+            volume = (p_C)  *compliance + zpv;
+          else
+            volume = max((p_C)  *compliance + zpv - iabp_volume, 0);
+          end if;
+
 
           if UseInertance then
             der(q_in) = (p_in_hs-p_out_hs-R*q_in)/I;
@@ -11742,7 +11765,25 @@ P_hs/2")}));
                     points={{-80,0},{80,0}},
                     color={238,46,47},
                     arrow={Arrow.None,Arrow.Filled},
-                    thickness=1)}),   Diagram(graphics={
+                    thickness=1), Ellipse(
+                  extent={{-100,-20},{100,-44}},
+                  pattern=LinePattern.None,
+                  lineColor={0,0,0},
+                  fillColor={255,255,0},
+                  fillPattern=FillPattern.Solid,
+                   visible = DynamicSelect(false, UseIABPInput)),
+                Line(
+                  points={{-100,20},{-30,50}},
+                  color={0,0,0},
+                  pattern=LinePattern.None),
+                Line(
+                  points={{-98,28},{-20,30},{-64,32},{-16,32},{-38,34},{-10,-30}},
+                  color={0,0,0},
+                  pattern=LinePattern.None),
+                Line(points={{-110,20},{110,20}}, color={0,0,0},
+                    thickness=0.5),
+                Line(points={{-110,-20},{110,-20}}, color={0,0,0},
+                    thickness=0.5)}), Diagram(graphics={
                 Rectangle(extent={{-44,6},{-16,-6}}, lineColor={28,108,200}),
                 Ellipse(extent={{6,60},{34,32}}, lineColor={28,108,200}),
                 Line(points={{-80,0},{-44,0}}, color={28,108,200}),
@@ -28202,7 +28243,7 @@ P_hs_plus_dist"),
         model CoronaryCirculation
           extends Physiolibrary.Icons.PerfusionOD;
 
-          CoronaryLayer coronaryLayer_Endo(
+          CoronaryLayer coronaryLayer_SubEpicardium(
             cf_l=0.55*cf,
             rf_l=1.28*rf,
             pf_l=0.167*pf)
@@ -28212,7 +28253,7 @@ P_hs_plus_dist"),
             rf_l=1.12*rf,
             pf_l=0.500*pf)
             annotation (Placement(transformation(extent={{6,-10},{26,10}})));
-          CoronaryLayer coronaryLayer_epi(
+          CoronaryLayer coronaryLayer_SubEndocardium(
             cf_l=1*cf,
             rf_l=1*rf,
             pf_l=0.833*pf)
@@ -28256,31 +28297,35 @@ P_hs_plus_dist"),
           der(q_avg)*3 = port_a.q - q_avg;
 
 
-          connect(coronaryLayer_Endo.port_a, coronaryLayer_Mid.port_a) annotation (Line(
+          connect(coronaryLayer_SubEpicardium.port_a, coronaryLayer_Mid.port_a)
+            annotation (Line(
               points={{6,40},{0,40},{0,0},{6,0}},
               color={0,0,0},
               thickness=1));
-          connect(coronaryLayer_epi.port_a, coronaryLayer_Mid.port_a) annotation (Line(
+          connect(coronaryLayer_SubEndocardium.port_a, coronaryLayer_Mid.port_a)
+            annotation (Line(
               points={{6,-40},{0,-40},{0,0},{6,0}},
               color={0,0,0},
               thickness=1));
-          connect(coronaryLayer_Endo.port_b, coronaryLayer_Mid.port_b) annotation (Line(
+          connect(coronaryLayer_SubEpicardium.port_b, coronaryLayer_Mid.port_b)
+            annotation (Line(
               points={{26,40},{32,40},{32,0},{26,0}},
               color={0,0,0},
               thickness=1));
-          connect(coronaryLayer_epi.port_b, coronaryLayer_Mid.port_b) annotation (Line(
+          connect(coronaryLayer_SubEndocardium.port_b, coronaryLayer_Mid.port_b)
+            annotation (Line(
               points={{26,-40},{32,-40},{32,0},{26,0}},
               color={0,0,0},
               thickness=1));
-          connect(coronaryLayer_epi.externalPressure, externalPressure)
-            annotation (Line(points={{16,-50},{16,-100},{20,-100}},
-                                                          color={0,0,127}));
+          connect(coronaryLayer_SubEndocardium.externalPressure,
+            externalPressure) annotation (Line(points={{16,-50},{16,-100},{20,-100}},
+                color={0,0,127}));
           connect(coronaryLayer_Mid.externalPressure, externalPressure)
             annotation (Line(points={{16,-10},{16,-100},{20,-100}},
                                                           color={0,0,127}));
-          connect(coronaryLayer_Endo.externalPressure, externalPressure)
-            annotation (Line(points={{16,30},{16,-100},{20,-100}},
-                                                         color={0,0,127}));
+          connect(coronaryLayer_SubEpicardium.externalPressure,
+            externalPressure) annotation (Line(points={{16,30},{16,-100},{20,-100}},
+                color={0,0,127}));
           connect(PA.q_in, coronaryLayer_Mid.port_a) annotation (Line(
               points={{-20,0},{6,0}},
               color={0,0,0},
@@ -28436,8 +28481,8 @@ P_hs_plus_dist"),
         end CoronaryLayer;
 
         model CoronaryTest
-          CoronaryCirculation coronaryCirculation(coronaryLayer_Endo(r0m(
-                  displayUnit="(mmHg.s)/ml")))
+          CoronaryCirculation coronaryCirculation(coronaryLayer_SubEpicardium(
+                r0m(displayUnit="(mmHg.s)/ml")), target_q=1.6666666666667e-05)
             annotation (Placement(transformation(extent={{-20,-20},{20,20}})));
           Physiolibrary.Hydraulic.Sources.UnlimitedVolume PAo(usePressureInput=
                 true)
@@ -28493,7 +28538,8 @@ P_hs_plus_dist"),
 
         model CoronaryTestHuman
           CoronaryCirculation coronaryCirculation(
-            coronaryLayer_Endo(r0m(displayUnit="(mmHg.s)/ml")),
+            coronaryLayer_SubEpicardium(r0m(displayUnit="(mmHg.s)/ml")),
+            cf=1,
             target_q=3.73333e-06,
             rf=0.6)
             annotation (Placement(transformation(extent={{20,-20},{60,20}})));
@@ -34393,7 +34439,7 @@ P_hs_plus_dist"),
 
     model Mynard_heart
       Components.Subsystems.Heart.Heart_ADAN_VR heartComponent(
-        UseThoracicPressureInput=true,
+        UseThoracic_PressureInput=true,
         HR=1,
         Heart1(q_lv(start=6e-5), q_rv(start=6e-5)))
         annotation (Placement(transformation(extent={{-20,-40},{0,-20}})));
@@ -35166,7 +35212,7 @@ P_hs_plus_dist"),
 
     model TestTriSegMech_Lumens
       Components.Subsystems.Heart.Heart_TriSegMechanics_Lumens heart(
-        UseThoracicPressureInput=true,
+        UseThoracic_PressureInput=true,
         HR=HR,
         ventricles(V_LV(start=0.00015), V_RV(start=0.00015)))
         annotation (Placement(transformation(extent={{10,-10},{-10,10}})));
@@ -35543,9 +35589,13 @@ P_hs_plus_dist"),
         __Dymola_choicesAllMatching = true,
         Placement(transformation(extent = {{-58, 18}, {18, 48}})));
       public
-      replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Simple heartComponent(UseFrequencyInput = false, UseThoracicPressureInput = false, UsePhiInput = false) constrainedby
-          Components.Subsystems.Heart.partialHeart                                                                                                                                                                                 annotation (
-         Placement(transformation(extent = {{-16, -32}, {-36, -12}})));
+        replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Simple
+          heartComponent(
+          UseFrequencyInput=false,
+          UseThoracic_PressureInput=false,
+          UsePhiInput=false) constrainedby
+          Components.Subsystems.Heart.partialHeart
+          annotation (Placement(transformation(extent={{-16,-32},{-36,-12}})));
       replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent(
           UseThoracic_PressureInput=false)                                                                                       constrainedby
           Components.Subsystems.Pulmonary.partialPulmonary                                                                                                                                      annotation (
@@ -38087,7 +38137,8 @@ P_hs_plus_dist"),
       model simplestVS_components_TriSeg
         extends simplestVS_components(redeclare
             Components.Subsystems.Heart.Heart_TriSegMechanics_Simple
-            heart_SimplestVS(UseThoracicPressureInput=true));
+            heart_SimplestVS(UseThoracic_PressureInput=
+                                                      true));
       end simplestVS_components_TriSeg;
     end Experiments;
 
@@ -38143,7 +38194,7 @@ P_hs_plus_dist"),
         constrainedby Modelica.Blocks.Interfaces.SO
         annotation (Placement(transformation(extent={{-140,62},{-124,76}})));
       replaceable Components.Subsystems.Heart.Heart_SimplestVS heart_SimplestVS(
-          UseThoracicPressureInput=true) constrainedby
+          UseThoracic_PressureInput=true) constrainedby
         Components.Subsystems.Heart.partialHeart annotation (Placement(
             transformation(rotation=0, extent={{-30,-8},{-50,-28}})));
       Physiolibrary.Hydraulic.Components.ElasticVessel C_TA(
@@ -39207,11 +39258,11 @@ P_hs_plus_dist"),
         replaceable Components.Subsystems.Heart.Heart_TriSegMechanicsSimple
           heartComponent(
           UseFrequencyInput=true,
-          UseThoracicPressureInput=true,
+          UseThoracic_PressureInput=true,
           UsePhiInput=true,
           mitralValve(calculateAdditionalMetrics=true),
           aorticValve(calculateAdditionalMetrics=true),
-          pericardium(V0=0.0004))                       constrainedby
+          pericardium(V0=0.0004)) constrainedby
           Components.Subsystems.Heart.partialHeart
           annotation (Placement(transformation(extent={{-16,-32},{-36,-12}})));
         replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent(
@@ -39369,8 +39420,7 @@ P_hs_plus_dist"),
         "Base class for circulatory model. Dont overuse parametrization here, as it gets overridden when redeclaring. Based on EDPVR identification."
         extends Physiolibrary.Icons.CardioVascular;
         replaceable Components.Subsystems.Systemic.Postures.SystemicAV_SupineTilt
-          SystemicComponent(
-          UseThoracic_PressureInput=true,
+          SystemicComponent(UseThoracic_PressureInput=false,
           UsePhi_Input=true) constrainedby
           Components.Subsystems.Systemic.partialSystemic
                      annotation (
@@ -39381,15 +39431,15 @@ P_hs_plus_dist"),
         replaceable Components.Subsystems.Heart.Heart_TriSegMechanicsSimple
           heartComponent(
           UseFrequencyInput=true,
-          UseThoracicPressureInput=true,
+          UseThoracic_PressureInput=false,
           UsePhiInput=true,
           mitralValve(calculateAdditionalMetrics=true),
           aorticValve(calculateAdditionalMetrics=true),
-          pericardium(V0=0.0004))                       constrainedby
+          pericardium(V0=0.0004)) constrainedby
           Components.Subsystems.Heart.partialHeart
           annotation (Placement(transformation(extent={{-16,-32},{-36,-12}})));
         replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg_NonLinear pulmonaryComponent(
-            UseThoracic_PressureInput=true)
+            UseThoracic_PressureInput=false)
         constrainedby Components.Subsystems.Pulmonary.partialPulmonary annotation (
             Placement(transformation(extent={{-34,-62},{-14,-42}})));
       Modelica.Blocks.Sources.Trapezoid phi_fixed(
@@ -39420,23 +39470,6 @@ P_hs_plus_dist"),
           HR_nom=settings.HR_nominal)
           constrainedby Components.Subsystems.Baroreflex.partialHeartRate
           annotation (Placement(transformation(extent={{10,-38},{-2,-26}})));
-      replaceable
-      Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
-            amplitude=40*133.32,
-            rising=0.1,
-            width=14.8,
-            falling=0.1,
-            period=60,
-            nperiod=-1,
-            startTime=20) constrainedby Modelica.Blocks.Interfaces.SO
-          annotation (Placement(transformation(extent={{-100,-72},{-80,-52}})));
-        Components.Signals.ConditionalConnection condTP_PC(
-          disconnectedValue=0,
-          disconnected=true,
-          phi_gain=settings.pulm_tp_pleural_frac,
-          const_offset=0) "Thoracic pressure effect on pericardium."
-          annotation (Placement(transformation(extent={{-69,-61.3333},{-55,
-                  -49.3333}})));
         Components.Signals.ConditionalConnection condSystemicPhi(
           disconnectedValue=0.25,
           disconnected=false,
@@ -39460,22 +39493,6 @@ P_hs_plus_dist"),
           uMin=0.2,
           phi0=settings.phi0) annotation (Placement(transformation(extent={{56,
                   -20.7408},{44,-10.0741}})));
-        Components.Signals.ConditionalConnection condTP_IP(
-          disconnectedValue=0,
-          disconnected=true,
-          phi0=0,
-          phi_gain=1,
-          const_offset=0)
-          "Thoracic pressure effect on intra-pleural circulatory (i.e. lung tissue only)"
-          annotation (Placement(transformation(extent={{-69,-81.3333},{-55,
-                  -69.3333}})));
-        Components.Signals.ConditionalConnection condTP_EP1(
-          disconnectedValue=0,
-          disconnected=true,
-          phi_gain=settings.pulm_tp_pleural_frac,
-          const_offset=0) "Thoracic pressure effect on extra-pleural circulatory"
-          annotation (Placement(transformation(extent={{-69,-43.3333},{-55,
-                  -31.3333}})));
       //   parameter Real heart_vntr_Lsref=1.9 " Resting SL, micron ";
       //   parameter Real heart_vntr_L0=0.907 "micron";
       //   parameter Real heart_vntr_SLcollagen=2.25;
@@ -39506,10 +39523,6 @@ P_hs_plus_dist"),
         connect(heartRate.HR, heartComponent.frequency_input)
           annotation (Line(points={{-2.12,-32},{-6,-32},{-6,-22},{-16,-22}},
                                                            color={0,0,127}));
-        connect(thoracic_pressure_ramp.y,condTP_PC. u) annotation (Line(points={{-79,-62},
-                {-74,-62},{-74,-56},{-70.4,-56}}, color={0,0,127}));
-        connect(condTP_PC.y, heartComponent.thoracic_pressure_input) annotation (Line(
-              points={{-54.3,-56},{-26,-56},{-26,-32}}, color={0,0,127}));
         connect(SystemicComponent.phi_input, condSystemicPhi.y) annotation (Line(
               points={{-16,20},{14,20},{14,20},{43.4,20}}, color={0,0,127}));
         connect(useAutonomousPhi.y,switch1. u2) annotation (Line(points={{-5,78},{14.3,
@@ -39527,15 +39540,6 @@ P_hs_plus_dist"),
                 78},{80,78},{80,20},{57.2,20}}, color={0,0,127}));
         connect(switch1.y, condHeartPhi.u) annotation (Line(points={{36.725,78},
                 {80,78},{80,-16},{57.2,-16}}, color={0,0,127}));
-        connect(condTP_IP.y, pulmonaryComponent.thoracic_pressure) annotation (Line(
-              points={{-54.3,-76},{-40,-76},{-40,-62},{-24,-62}}, color={0,0,127}));
-        connect(condTP_IP.u, thoracic_pressure_ramp.y) annotation (Line(points={{-70.4,
-                -76},{-74,-76},{-74,-62},{-79,-62}},           color={0,0,127}));
-        connect(condTP_EP1.y, SystemicComponent.thoracic_pressure_input)
-          annotation (Line(points={{-54.3,-38},{-46,-38},{-46,20},{-34,20}},
-              color={0,0,127}));
-        connect(condTP_EP1.u, condTP_PC.u) annotation (Line(points={{-70.4,-38},
-                {-74,-38},{-74,-56},{-70.4,-56}}, color={0,0,127}));
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)),
           experiment(
@@ -39546,8 +39550,7 @@ P_hs_plus_dist"),
       end partialCVS_EDPVR;
 
       model partialCVS_optimized
-        extends partialCVS_EDPVR(
-          settings(
+        extends partialCVS_EDPVR(settings(
             V_PV_init=0,
             heart_R_LA(displayUnit="(mmHg.s)/ml") = 4139729,
             heart_vntr_D_0=12.91385,
@@ -39611,15 +39614,10 @@ P_hs_plus_dist"),
             tissues_gamma=0.5,
             tissues_tau_R(displayUnit="s") = 0,
             veins_C_phi=0.09,
-                    heart_vntr_PConcollagen=20.0,
+            heart_vntr_PConcollagen=20.0,
             heart_vntr_PExpcollagen=3.25,
-                    heart_vntr_SLcollagen=2.1,
-                    heart_vntr_k_passive=10.0),
-          condTP_EP1(disconnected=true),
-          condTP_PC(disconnected=true),
-          condTP_IP(disconnected=true),
-          useAutonomousPhi(y=true),
-          thoracic_pressure_ramp(nperiod=0));
+            heart_vntr_SLcollagen=2.1,
+            heart_vntr_k_passive=10.0), useAutonomousPhi(y=true));
         annotation (__Dymola_Commands(file(ensureSimulated=true) = "\"EvaluateSimulation.mos\""
               "EvaluateUseCases"));
       end partialCVS_optimized;
@@ -40338,7 +40336,7 @@ P_hs_plus_dist"),
 
       model Lumped_simple
         Components.Subsystems.Heart.Heart_ADAN_VR heartComponent(
-          UseThoracicPressureInput=true,
+          UseThoracic_PressureInput=true,
           HR=1,
           Heart1(q_la(start=0.0004), q_ra(displayUnit="ml")))
           annotation (Placement(transformation(extent={{0,-22},{-20,-2}})));
@@ -40420,7 +40418,8 @@ P_hs_plus_dist"),
           redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
             pulmonaryComponent(UseThoracic_PressureInput=true),
           redeclare Components.Subsystems.Heart.Heart_Smith heartComponent(
-              UseFrequencyInput=true, UseThoracicPressureInput=true),
+              UseFrequencyInput=true, UseThoracic_PressureInput=
+                                                               true),
           redeclare Components.Subsystems.Systemic.Systemic_simplest Systemic1(
             UseThoracic_PressureInput=true,
             UsePhi_Input=true,
@@ -40522,7 +40521,8 @@ P_hs_plus_dist"),
             Heart1(q_lv(displayUnit="ml", start=0.0003), q_rv(displayUnit="ml",
                   start=0.0003)),
             UseFrequencyInput=true,
-            UseThoracicPressureInput=true));
+            UseThoracic_PressureInput=
+                                     true));
         Components.Signals.ConditionalConnection conditionalConnection(
             disconnectedValue=0.25, disconnected=false)
           annotation (Placement(transformation(extent={{8,4},{-4,10}})));
@@ -41201,7 +41201,8 @@ P_hs_plus_dist"),
             redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent(UseThoracic_PressureInput=true),
             redeclare Components.Subsystems.Heart.Heart_Smith heartComponent(
-                UseFrequencyInput=true, UseThoracicPressureInput=true),
+                UseFrequencyInput=true, UseThoracic_PressureInput=
+                                                                 true),
             redeclare Components.Subsystems.Systemic.Systemic_simplest
               Systemic1(
               UseThoracic_PressureInput=true,
@@ -41244,7 +41245,8 @@ P_hs_plus_dist"),
             redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent(UseThoracic_PressureInput=true),
             redeclare Components.Subsystems.Heart.Heart_Smith heartComponent(
-                UseFrequencyInput=true, UseThoracicPressureInput=true),
+                UseFrequencyInput=true, UseThoracic_PressureInput=
+                                                                 true),
             redeclare Components.Subsystems.Systemic.Systemic_simplest
               Systemic1(
               alphaZPV=0,
@@ -41358,7 +41360,8 @@ P_hs_plus_dist"),
               pulmonaryComponent(UseThoracic_PressureInput=true),
             redeclare replaceable
               Components.Subsystems.Heart.Heart_SmithOlufsen heartComponent(
-                UseFrequencyInput=true, UseThoracicPressureInput=true),
+                UseFrequencyInput=true, UseThoracic_PressureInput=
+                                                                 true),
             settings(
               UseNonLinear_TissuesCompliance=false,
               veins_UsePhiEffect=false,
@@ -41571,7 +41574,8 @@ P_hs_plus_dist"),
             redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent(UseThoracic_PressureInput=true),
             redeclare Components.Subsystems.Heart.Heart_Smith heartComponent(
-                UseFrequencyInput=true, UseThoracicPressureInput=true),
+                UseFrequencyInput=true, UseThoracic_PressureInput=
+                                                                 true),
             settings(
               UseNonLinear_TissuesCompliance=true,
               veins_UsePhiEffect=false,
@@ -41613,7 +41617,8 @@ P_hs_plus_dist"),
             redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent(UseThoracic_PressureInput=true),
             redeclare Components.Subsystems.Heart.Heart_Smith heartComponent(
-                UseFrequencyInput=true, UseThoracicPressureInput=true));
+                UseFrequencyInput=true, UseThoracic_PressureInput=
+                                                                 true));
 
           Physiolibrary.Hydraulic.Sources.UnlimitedOutflowPump
             unlimitedOutflowPump(useSolutionFlowInput=true, SolutionFlow(
@@ -41698,10 +41703,10 @@ P_hs_plus_dist"),
           replaceable Components.Subsystems.Heart.Heart_ADAN_VR heartComponent(
             HR=1,
             UseFrequencyInput=true,
-            UseThoracicPressureInput=true) constrainedby
+            UseThoracic_PressureInput=true) constrainedby
             Components.Subsystems.Heart.partialHeart(UseFrequencyInput=true,
-              UseThoracicPressureInput=true)
-            annotation (Placement(transformation(extent={{-12,-32},{-32,-12}})));
+              UseThoracic_PressureInput=true) annotation (Placement(
+                transformation(extent={{-12,-32},{-32,-12}})));
           replaceable Components.Subsystems.Pulmonary.Pulmonary_ADAN_VR
             pulmonaryComponent(UseThoracic_PressureInput=true) constrainedby
             Components.Subsystems.Pulmonary.partialPulmonary
@@ -41816,8 +41821,9 @@ P_hs_plus_dist"),
             redeclare Components.Subsystems.Heart.Heart_SmithOlufsen
               heartComponent(
               UseFrequencyInput=true,
-              UseThoracicPressureInput=true,
-              UsePhiInput=true),
+              UsePhiInput=true,
+              UseThoracic_PressureInput=
+                                       true),
             redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent,
             venousPressure(
@@ -41901,9 +41907,9 @@ P_hs_plus_dist"),
             heartComponent(
             HR=1,
             UseFrequencyInput=true,
-            UseThoracicPressureInput=true) constrainedby
+            UseThoracic_PressureInput=true) constrainedby
             Components.Subsystems.Heart.partialHeart(UseFrequencyInput=true,
-              UseThoracicPressureInput=true) annotation (Placement(
+              UseThoracic_PressureInput=true) annotation (Placement(
                 transformation(extent={{-12,-32},{-32,-12}})));
           replaceable Components.Subsystems.Pulmonary.Pulmonary_Smith
             pulmonaryComponent(UseThoracic_PressureInput=true) constrainedby
@@ -42199,7 +42205,7 @@ P_hs_plus_dist"),
               Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent(UseThoracic_PressureInput=true),
             redeclare replaceable Components.Subsystems.Heart.Heart_Smith
-              heartComponent(UseFrequencyInput=true, UseThoracicPressureInput=
+              heartComponent(UseFrequencyInput=true, UseThoracic_PressureInput=
                   true),
             settings(
               UseNonLinear_TissuesCompliance=true,
@@ -42587,7 +42593,7 @@ P_hs_plus_dist"),
               coronary_veins(disableVenoconstriction=true)),
             phi_fixed(rising=20),
             redeclare Components.Subsystems.Heart.Heart_SmithOlufsenMynard
-              heartComponent(UseFrequencyInput=true, UseThoracicPressureInput=
+              heartComponent(UseFrequencyInput=true, UseThoracic_PressureInput=
                   true),
             Exercfise(rising=20),
             settings(
@@ -43267,9 +43273,9 @@ P_hs_plus_dist"),
 
       public
         replaceable Components.Subsystems.Heart.Heart_TriSegMechanics_Simple
-                                                              heartComponent(
+          heartComponent(
           UseFrequencyInput=true,
-          UseThoracicPressureInput=true,
+          UseThoracic_PressureInput=true,
           HR=1) constrainedby Components.Subsystems.Heart.partialHeart
           annotation (Placement(transformation(extent={{-16,-32},{-36,-12}})));
         replaceable Components.Subsystems.Pulmonary.Pulmonary_ADAN_VR
@@ -43421,10 +43427,11 @@ P_hs_plus_dist"),
           redeclare Components.Subsystems.Heart.Heart_TriSegMechanics_Simple
             heartComponent(
             UseFrequencyInput=true,
-            UseThoracicPressureInput=true,
             UsePhiInput=true,
             aorticValve(calculateAdditionalMetrics=settings.EvaluateFunctionalParams),
-            mitralValve(calculateAdditionalMetrics=settings.EvaluateFunctionalParams)),
+            mitralValve(calculateAdditionalMetrics=settings.EvaluateFunctionalParams),
+            UseThoracic_PressureInput=
+                                     true),
           settings(
             V_PV_init=7.4e-05,
             tissues_gamma=0.5,
@@ -43466,8 +43473,9 @@ P_hs_plus_dist"),
             Components.Subsystems.Heart.Heart_TriSegMechanics_Lumens
             heartComponent(
             UseFrequencyInput=true,
-            UseThoracicPressureInput=true,
-            UsePhiInput=true),
+            UsePhiInput=true,
+            UseThoracic_PressureInput=
+                                     true),
           redeclare replaceable Components.Subsystems.Pulmonary.PulmonaryTriSeg
             pulmonaryComponent(UseThoracic_PressureInput=true),
           heartRate(HR_nom(displayUnit="1/min")),
@@ -44720,8 +44728,7 @@ P_hs_plus_dist"),
 
       model OlufsenTriSeg_optimized "Generated by PostProcess/postprocess_optim.py optimized at Mar 20 17:13:45 CET 2021
  with cost 0.039284 lowest at run 720"
-        extends ADAN_main.SystemicTree.Auxiliary.partialCVS_optimized(
-          settings(
+        extends ADAN_main.SystemicTree.Auxiliary.partialCVS_optimized(settings(
             V_PV_init=6.1875e-05,
             heart_R_LA=4139729,
             heart_vntr_D_0=12.91385,
@@ -44729,7 +44736,7 @@ P_hs_plus_dist"),
             heart_atr_D_0=15407920,
             heart_atr_D_A=113536000,
             syst_TPR=124846900,
-            syst_TR_frac =          5.012728e+00,
+            syst_TR_frac=5.012728e+00,
             baro_tau_s=10,
             baro_fsn=0.0372,
             pulm_C_PA=4.799251e-08,
@@ -44738,12 +44745,7 @@ P_hs_plus_dist"),
             veins_linearE_rel=765,
             veins_linearV0_rel=0.793,
             veins_delayed_activation=true,
-            veins_activation_tau=1),
-          condTP_EP1(disconnected=true),
-          condTP_PC(disconnected=true),
-          condTP_IP(disconnected=true),
-          useAutonomousPhi(y=true),
-          thoracic_pressure_ramp(nperiod=0));
+            veins_activation_tau=1), useAutonomousPhi(y=true));
       end OlufsenTriSeg_optimized;
     end Obsolete;
 
@@ -44826,13 +44828,9 @@ P_hs_plus_dist"),
           end CVS_baseline;
 
           model LHF
-            extends CVS_valsalva_PP2(
-              condTP_EP1(disconnected=true),
-              condTP_PC(disconnected=true),
-              condTP_IP(disconnected=true),
-              heartComponent(ventricles(LV_wall(contractilityFraction=0.5),
-                    SEP_wall(contractilityFraction=0.5))),
-              settings(
+            extends CVS_valsalva_PP2(heartComponent(ventricles(LV_wall(
+                      contractilityFraction=0.5), SEP_wall(
+                      contractilityFraction=0.5))), settings(
                 V_PV_init=0,
                 heart_vntr_D_A(displayUnit="Pa/m3"),
                 heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 6000));
@@ -44851,13 +44849,9 @@ P_hs_plus_dist"),
           end LHF_Vw;
 
           model RHF
-            extends CVS_valsalva_PP2(
-              condTP_EP1(disconnected=true),
-              condTP_PC(disconnected=true),
-              condTP_IP(disconnected=true),
-              heartComponent(ventricles(RV_wall(contractilityFraction=0.5),
-                    SEP_wall(contractilityFraction=0.5))),
-              settings(
+            extends CVS_valsalva_PP2(heartComponent(ventricles(RV_wall(
+                      contractilityFraction=0.5), SEP_wall(
+                      contractilityFraction=0.5))), settings(
                 V_PV_init=0,
                 heart_vntr_D_A(displayUnit="Pa/m3"),
                 heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 6000));
@@ -44893,8 +44887,7 @@ P_hs_plus_dist"),
                 abdominal_aorta_C188(LimitBackflow=false),
                 common_carotid_L48_A(LimitBackflow=false),
                 subclavian_L66(LimitBackflow=false),
-                aortic_arch_C64(LimitBackflow=false)), thoracic_pressure_ramp(
-                  startTime=20));
+                aortic_arch_C64(LimitBackflow=false)));
             annotation (experiment(
                 StopTime=90,
                 Interval=0.02,
@@ -45209,29 +45202,28 @@ P_hs_plus_dist"),
  with cost 0.891728 lowest at run 972"
           extends
             ADAN_main.SystemicTree.Identification.SingleModelRun.CVS_valsalva_optim(
-            settings(
-                  V_PV_init =          1.505469e-22,
-              heart_R_vlv =          8.183594e+03,
-              heart_R_LA =          5.538875e+06,
-              heart_atr_D_A =          4.537345e+07,
-              heart_vntr_xi_Vw =          6.426586e-01,
-              heart_vntr_xi_AmRef =          1.094465e+00,
-              heart_vntr_k_passive =          1.975000e+01,
-              eta_vc =          1.055510e-01,
-              tissues_eta_Ra =          2.445225e+00,
-              tissues_eta_C =          4.421191e-01,
-              veins_gamma =          3.843750e-01,
-              pulm_C_PV =          2.759552e-07,
-              pulm_C_PA =          4.147500e-08,
-              pulm_R =          9.613356e+06,
-              heart_atr_D_0 =                1.124015e+07,
-              heart_vntr_D_0 =           1.422422e+01,
-              heart_vntr_D_A =           3.090203e+03,
-              heart_vntr_TS =           1.190000e-01,
-              heart_vntr_TR =           3.990000e-01,
-              heart_vntr_TR_maxAct =           1.082666e-01,
-              heart_vntr_D_A_maxAct =           1.422773e+04),
-            thoracic_pressure_ramp(offset=50));
+              settings(
+              V_PV_init=1.505469e-22,
+              heart_R_vlv=8.183594e+03,
+              heart_R_LA=5.538875e+06,
+              heart_atr_D_A=4.537345e+07,
+              heart_vntr_xi_Vw=6.426586e-01,
+              heart_vntr_xi_AmRef=1.094465e+00,
+              heart_vntr_k_passive=1.975000e+01,
+              eta_vc=1.055510e-01,
+              tissues_eta_Ra=2.445225e+00,
+              tissues_eta_C=4.421191e-01,
+              veins_gamma=3.843750e-01,
+              pulm_C_PV=2.759552e-07,
+              pulm_C_PA=4.147500e-08,
+              pulm_R=9.613356e+06,
+              heart_atr_D_0=1.124015e+07,
+              heart_vntr_D_0=1.422422e+01,
+              heart_vntr_D_A=3.090203e+03,
+              heart_vntr_TS=1.190000e-01,
+              heart_vntr_TR=3.990000e-01,
+              heart_vntr_TR_maxAct=1.082666e-01,
+              heart_vntr_D_A_maxAct=1.422773e+04));
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
 
@@ -45353,9 +45345,6 @@ P_hs_plus_dist"),
               offset=settings.phi0,
               startTime=10),
             condHeartPhi(disconnected=false),
-            condTP_EP1(disconnected=true),
-            condTP_PC(disconnected=true),
-            condTP_IP(disconnected=true),
             settings(chi_phi=0.9),
             useAutonomousPhi(y=false));
           replaceable Modelica.Blocks.Sources.Ramp Exercise(
@@ -45444,7 +45433,8 @@ P_hs_plus_dist"),
             redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent(UseThoracic_PressureInput=true),
             redeclare Components.Subsystems.Heart.Heart_Smith heartComponent(
-                UseFrequencyInput=true, UseThoracicPressureInput=true),
+                UseFrequencyInput=true, UseThoracic_PressureInput=
+                                                                 true),
             settings(
               heart_alphaE=3,
               UseNonLinear_TissuesCompliance=true,
@@ -45642,13 +45632,8 @@ P_hs_plus_dist"),
 
         model CVS_valsalva_optim
           "Prolonged steady state to optim baseline and valsalva at once"
-          extends Valsalva.CVS_valsalva(
-            condTP_PC(disconnected=false),
-            condTP_IP(disconnected=false),
-            condTP_EP1(disconnected=false),
-            condHeartPhi(uMin=settings.phi0),
-            thoracic_pressure_ramp(startTime=50),
-            settings(
+          extends Valsalva.CVS_valsalva(condHeartPhi(uMin=settings.phi0),
+              settings(
               heart_R_RA=settings.heart_R_LA,
               tissues_eta_Rv=0,
               heart_vntr_TS_maxAct(displayUnit="s"),
@@ -48466,8 +48451,9 @@ P_hs_plus_dist"),
             redeclare Components.Subsystems.Heart.Heart_SmithOlufsenMynard
               heartComponent(
               UseFrequencyInput=true,
-              UseThoracicPressureInput=true,
-              UsePhiInput=true),
+              UsePhiInput=true,
+              UseThoracic_PressureInput=
+                                       true),
             redeclare Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent,
             redeclare Components.Subsystems.Baroreflex.HeartRate_HRMinMax
@@ -49101,16 +49087,8 @@ P_hs_plus_dist"),
         end OptimizedBaseline_tiltable;
 
         model OlufsenTriseg_tiltable_reparam_valsalva
-          extends Experiments.OlufsenTriseg_tiltable_reparam(
-            condTP_PC(disconnected=false),
-            thoracic_pressure_ramp(
-              rising=1,
-              width=15,
-              falling=1,
-              period=40,
-              nperiod=1,
-              startTime=10),
-            Tilt_ramp(startTime=4000));
+          extends Experiments.OlufsenTriseg_tiltable_reparam(Tilt_ramp(
+                startTime=4000));
           annotation (experiment(
               StopTime=80,
               Interval=0.02,
@@ -49120,9 +49098,7 @@ P_hs_plus_dist"),
 
         model OlufsenTriSeg_tiltable_sit
           "tilting to sitting position. Zero degree tilt while sitting does not elevate lower limbs."
-          extends CVS_tiltable(
-            condTP_PC(disconnected=false),
-            SystemicComponent(
+          extends CVS_tiltable(SystemicComponent(
               femoral_R226(sinAlpha=0),
               popliteal_R228(sinAlpha=0),
               popliteal_L206(sinAlpha=0),
@@ -49132,13 +49108,7 @@ P_hs_plus_dist"),
               popliteal_vein_R48(sinAlpha=0),
               femoral_vein_L76(sinAlpha=0),
               popliteal_vein_L78(sinAlpha=0),
-              femoral_vein_L72(sinAlpha=0)),
-            thoracic_pressure_ramp(
-              rising=1,
-              width=15,
-              falling=1,
-              startTime=60),
-            Tilt_ramp(startTime=1000));
+              femoral_vein_L72(sinAlpha=0)), Tilt_ramp(startTime=1000));
         end OlufsenTriSeg_tiltable_sit;
 
         model OlufsenTriSeg_LegRaise
@@ -49217,9 +49187,7 @@ P_hs_plus_dist"),
 
         model OlufsenTriSeg_tiltable_sitAndValsalva
           "tilting to sitting position, followed by valsalva"
-          extends CVS_tiltable(
-            condTP_PC(disconnected=false),
-            SystemicComponent(
+          extends CVS_tiltable(SystemicComponent(
               femoral_R226(sinAlpha=0),
               popliteal_R228(sinAlpha=0),
               popliteal_L206(sinAlpha=0),
@@ -49229,13 +49197,7 @@ P_hs_plus_dist"),
               popliteal_vein_R48(sinAlpha=0),
               femoral_vein_L76(sinAlpha=0),
               popliteal_vein_L78(sinAlpha=0),
-              femoral_vein_L72(sinAlpha=0)),
-            thoracic_pressure_ramp(
-              rising=1,
-              width=15,
-              falling=1,
-              startTime=60),
-            Tilt_ramp(height=0, startTime=10));
+              femoral_vein_L72(sinAlpha=0)), Tilt_ramp(height=0, startTime=10));
         end OlufsenTriSeg_tiltable_sitAndValsalva;
 
         model base
@@ -49256,8 +49218,9 @@ P_hs_plus_dist"),
             redeclare replaceable
               Components.Subsystems.Heart.Heart_SmithOlufsenMynard heartComponent(
               UseFrequencyInput=true,
-              UseThoracicPressureInput=true,
-              UsePhiInput=true),
+              UsePhiInput=true,
+              UseThoracic_PressureInput=
+                                       true),
             redeclare replaceable Components.Subsystems.Pulmonary.Pulmonary_Smith
               pulmonaryComponent constrainedby
               Components.Subsystems.Pulmonary.partialPulmonary,
@@ -49841,9 +49804,7 @@ P_hs_plus_dist"),
 
       package Experiments
         model OlufsenTriSeg_valsalva_KosinskiBaro
-          extends CVS_valsalva(
-            condTP_PC(disconnected=false),
-            SystemicComponent(baroreflex_system(
+          extends CVS_valsalva(SystemicComponent(baroreflex_system(
                 baroreflex(
                   fsn(displayUnit="Hz") = 0.036,
                   f1=0.0041,
@@ -49857,9 +49818,7 @@ P_hs_plus_dist"),
                   delta0=0.6*delta0_factor,
                   epsilon(start=1.6),
                   s(start=0.81),
-                  tau_s=30.0))),
-            thoracic_pressure_ramp(startTime=60),
-            useAutonomousPhi(y=true));
+                  tau_s=30.0))), useAutonomousPhi(y=true));
                   parameter Physiolibrary.Types.Fraction delta0_factor=0.4;
 
           annotation (experiment(
@@ -49875,7 +49834,6 @@ P_hs_plus_dist"),
                 baroreceptor_aortic(tau_s=60),
                 baroreceptor_carotid(tau_s=60),
                 baroreflex(f1=0.0031))),
-            thoracic_pressure_ramp(startTime=20.0),
             delta0_factor=0.25,
             settings(syst_art_UseVasoconstrictionEffect=false));
           annotation (experiment(
@@ -49897,9 +49855,7 @@ P_hs_plus_dist"),
 
         model OlufsenTriSeg_valsalva_KosinskiBaro_tiltable_sit
           "tilting to sitting position. Zero degree tilt while sitting does not elevate lower limbs."
-          extends Tilt.CVS_tiltable(
-            condTP_PC(disconnected=false),
-            SystemicComponent(
+          extends Tilt.CVS_tiltable(SystemicComponent(
               femoral_R226(sinAlpha=0),
               popliteal_R228(sinAlpha=0),
               popliteal_L206(sinAlpha=0),
@@ -49909,18 +49865,12 @@ P_hs_plus_dist"),
               popliteal_vein_R48(sinAlpha=0),
               femoral_vein_L76(sinAlpha=0),
               popliteal_vein_L78(sinAlpha=0),
-              femoral_vein_L72(sinAlpha=0)),
-            thoracic_pressure_ramp(
-              rising=1,
-              width=15,
-              falling=1,
-              startTime=60),
-            Tilt_ramp(startTime=1000));
+              femoral_vein_L72(sinAlpha=0)), Tilt_ramp(startTime=1000));
         end OlufsenTriSeg_valsalva_KosinskiBaro_tiltable_sit;
 
         model OlufsenTriSeg_valsalva_exhale
           "LArge exhale at the end of the valsalva"
-          extends CVS_valsalva(condTP_PC(UseAdditionalInput=true));
+          extends CVS_valsalva;
         replaceable
         Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp1(
             rising=0.5,
@@ -50007,8 +49957,7 @@ P_hs_plus_dist"),
         end delays;
 
         model CVS_valsalva_test
-          extends Obsolete.partialCVS_ss_noHeart( condTP_PC(disconnected=false),
-              condTP_IP(disconnected=false));
+          extends Obsolete.partialCVS_ss_noHeart;
         //           SystemicComponent(
         //         baroreflex_system(
         //           baroreflex(phi_mean(start = 0.24930115, fixed = true), phi(start = 0.25175378, fixed = true)),
@@ -50205,21 +50154,20 @@ P_hs_plus_dist"),
           extends CVS_valsalva_test( redeclare
               Components.Subsystems.Heart.Heart_SimplestVS heartComponent(
               UseFrequencyInput=true,
-              UseThoracicPressureInput=true,
-              UsePhiInput=true));
+              UsePhiInput=true,
+              UseThoracic_PressureInput=
+                                       true));
         end CVS_SimplestHeart;
 
         model CVS_VS_nonlinPV
-          extends CVS_valsalva(
-            condTP_PC(disconnected=false),
-            redeclare Components.Subsystems.Pulmonary.PulmonaryTriSegNonLOnearVeins
+          extends CVS_valsalva(redeclare
+              Components.Subsystems.Pulmonary.PulmonaryTriSegNonLOnearVeins
               pulmonaryComponent(UseThoracic_PressureInput=true, c_pv(
                 volume_full=0.001,
                 ZeroPressureVolume=1e-06,
                 volume(start=0.00035, fixed=false),
                 p_transm_full=4000,
-                V0=0.00035)),
-            thoracic_pressure_ramp(nperiod=-1));
+                V0=0.00035)));
         end CVS_VS_nonlinPV;
 
         model CVS_VS_base
@@ -50252,8 +50200,7 @@ P_hs_plus_dist"),
         end CVS_VS_TriSegL0;
 
         model CVS_VS_pericardium
-          extends CVS_valsalva(condTP_EP1(disconnected=false), condTP_PC(
-                UseAdditionalInput=true));
+          extends CVS_valsalva;
           Components.Subsystems.Heart.Auxiliary.PericardiumPressure
             pericardiumTest(
             heartVolume=heartComponent.volume,
@@ -50270,9 +50217,10 @@ P_hs_plus_dist"),
               Components.Subsystems.Heart.Heart_TriSegMechanics_Simple_AtrialValves
               heartComponent(
               UseFrequencyInput=true,
-              UseThoracicPressureInput=true,
               UsePhiInput=true,
-              atrial_res_frac=2));
+              atrial_res_frac=2,
+              UseThoracic_PressureInput=
+                                       true));
         end CVS_VS_AtrialValves;
 
         model CVS_VS_AtrialInertance
@@ -50280,9 +50228,10 @@ P_hs_plus_dist"),
               Components.Subsystems.Heart.Heart_TriSegMechanics_Simple_AtrialInertia
               heartComponent(
               UseFrequencyInput=true,
-              UseThoracicPressureInput=true,
               UsePhiInput=true,
-              r_SystemicVenousInflow(inertance(displayUnit="mmHg.s2/ml"))));
+              r_SystemicVenousInflow(inertance(displayUnit="mmHg.s2/ml")),
+              UseThoracic_PressureInput=
+                                       true));
         end CVS_VS_AtrialInertance;
 
         model CVS_VS_SLRest "Variation on SLRest"
@@ -50316,10 +50265,7 @@ P_hs_plus_dist"),
             //         200e-6))
           extends
             ADAN_main.SystemicTree.Identification.Results.CVS_baseline_optimizedEDP(
-            condTP_PC(disconnected=false),
-            condTP_IP(disconnected=false),
-            condTP_EP1(disconnected=false),
-            condHeartPhi(uMin=settings.phi0));
+              condHeartPhi(uMin=settings.phi0));
 
         // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
         //     useAutonomousPhi(y=true),
@@ -50437,11 +50383,10 @@ P_hs_plus_dist"),
           // pulmonaryComponent(c_pv(volume_start=65e-6 + 2000e-6 + settings.V_PV_init +
           //         200e-6))
         extends ADAN_main.SystemicTree.CardiovascularSystem(
-          condTP_PC(disconnected=false),
-          condTP_IP(disconnected=false),
-          condTP_EP1(disconnected=false),
           useAutonomousPhi(y=true),
-          thoracic_pressure_ramp(nperiod=-1));
+          SystemicComponent(UseThoracic_PressureInput=true),
+          pulmonaryComponent(UseThoracic_PressureInput=true),
+          heartComponent(UseThoracic_PressureInput=true));
 
       // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
       //     useAutonomousPhi(y=true),
@@ -50457,6 +50402,61 @@ P_hs_plus_dist"),
       //       heart_R_vlv(displayUnit="(Pa.s)/m3"),
       //       heart_R_LA(displayUnit="(mmHg.min)/l") = 3199737.29796,
       //       heart_vntr_L0=1.6)
+      replaceable
+      Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
+          nperiod=-1,
+          amplitude=40*133.32,
+          rising=0.1,
+          width=14.8,
+          falling=0.1,
+          period=60,
+          startTime=20)   constrainedby Modelica.Blocks.Sources.Trapezoid
+          annotation (Placement(transformation(extent={{-100,-70},{-80,-50}})));
+        ADAN_main.Components.Signals.ConditionalConnection
+                                                 condTP_PC(
+          disconnected=false,
+          disconnectedValue=0,
+          phi_gain=settings.pulm_tp_pleural_frac,
+          const_offset=0) "Thoracic pressure effect on pericardium."
+          annotation (Placement(transformation(extent={{-69,-59.333},{-55,
+                  -47.333}})));
+        ADAN_main.Components.Signals.ConditionalConnection
+                                                 condTP_IP(
+          disconnected=false,
+          disconnectedValue=0,
+          phi0=0,
+          phi_gain=1,
+          const_offset=0)
+          "Thoracic pressure effect on intra-pleural circulatory (i.e. lung tissue only)"
+          annotation (Placement(transformation(extent={{-69,-79.333},{-55,
+                  -67.333}})));
+        ADAN_main.Components.Signals.ConditionalConnection
+                                                 condTP_EP1(
+          disconnected=false,
+          disconnectedValue=0,
+          phi_gain=settings.pulm_tp_pleural_frac,
+          const_offset=0) "Thoracic pressure effect on extra-pleural circulatory"
+          annotation (Placement(transformation(extent={{-69,-41.333},{-55,
+                  -29.3333}})));
+      equation
+        connect(thoracic_pressure_ramp.y,condTP_PC. u) annotation (Line(points={{-79,-60},
+                {-74,-60},{-74,-53.9997},{-70.4,-53.9997}},
+                                                  color={0,0,127}));
+        connect(condTP_PC.y, heartComponent.thoracic_pressure_input) annotation (Line(
+              points={{-54.3,-53.9997},{-26,-53.9997},{-26,-32}},
+                                                        color={0,0,127}));
+        connect(condTP_IP.y, pulmonaryComponent.thoracic_pressure) annotation (Line(
+              points={{-54.3,-73.9997},{-40,-73.9997},{-40,-62},{-24,-62}},
+                                                                  color={0,0,127}));
+        connect(condTP_IP.u,thoracic_pressure_ramp. y) annotation (Line(points={{-70.4,
+                -73.9997},{-74,-73.9997},{-74,-60},{-79,-60}}, color={0,0,127}));
+        connect(condTP_EP1.y, SystemicComponent.thoracic_pressure_input)
+          annotation (Line(points={{-54.3,-35.9998},{-46,-35.9998},{-46,20},{
+                -34,20}},
+              color={0,0,127}));
+        connect(condTP_EP1.u,condTP_PC. u) annotation (Line(points={{-70.4,
+                -35.9998},{-74,-35.9998},{-74,-53.9997},{-70.4,-53.9997}},
+                                                  color={0,0,127}));
         annotation (experiment(
             StopTime=60,
             Interval=0.01,
@@ -50559,22 +50559,13 @@ P_hs_plus_dist"),
         end UseCase_tiltable;
 
         model UseCase_valsalva
-          extends UseCase_base(
-            condTP_PC(disconnected=false),
-            phi_fixed(
+          extends UseCase_base(phi_fixed(
               amplitude=-0.0025,
               rising=0,
               width=60,
               falling=0,
               nperiod=1,
-              startTime=30),
-            thoracic_pressure_ramp(
-              rising=0.5,
-              width=14,
-              falling=0.5,
-              nperiod=1,
-              startTime=20),
-            useAutonomousPhi(y=true));
+              startTime=30), useAutonomousPhi(y=true));
           annotation (experiment(
               StopTime=60,
               Interval=0.02,
@@ -55368,7 +55359,7 @@ P_hs_plus_dist"),
                     displayUnit="(mmHg.s)/ml") = 1.33322387415e+20)));
           Components.Subsystems.Coronary.CoronaryCirculation
             coronaryCirculation(
-            coronaryLayer_Endo(r0m(displayUnit="(mmHg.s)/ml")),
+            coronaryLayer_SubEpicardium(r0m(displayUnit="(mmHg.s)/ml")),
             target_q(displayUnit="l/min") = 3.73333e-06,
             rf=0.006,
             inertia(I(displayUnit="mmHg.s2/ml") = 399967000.0))
@@ -55444,14 +55435,10 @@ P_hs_plus_dist"),
       end HFpEF;
 
       model HFrEF
-        extends CardiovascularSystem(
-          condTP_EP1(disconnected=true),
-          condTP_PC(disconnected=true),
-          condTP_IP(disconnected=true),
-          heartComponent(ventricles(LV_wall(contractilityFraction=0.5),
-                SEP_wall(contractilityFraction=0.5))),
-          settings(baro_tau_s=10, heart_vntr_D_A_maxAct(displayUnit="Pa/m3")=
-              3500));
+        extends CardiovascularSystem(heartComponent(ventricles(LV_wall(
+                  contractilityFraction=0.5), SEP_wall(contractilityFraction=
+                    0.5))), settings(baro_tau_s=10, heart_vntr_D_A_maxAct(
+                displayUnit="Pa/m3") = 3500));
         annotation (experiment(
             StopTime=40,
             Interval=0.02,
@@ -55889,10 +55876,10 @@ P_hs_plus_dist"),
       package BaroreceptorStimulation
         model OlufsenTriSeg_valsalva_KosinskiBaro_longTs_Stimulation
           extends
-            Valsalva.Experiments.OlufsenTriSeg_valsalva_KosinskiBaro_longTs(      condTP_PC(
-                        disconnected=true), SystemicComponent(baroreflex_system(
-                  baroreceptor_carotid(useStimulationInput=true),
-                  externalStimulation(height=10, startTime=300))));
+            Valsalva.Experiments.OlufsenTriSeg_valsalva_KosinskiBaro_longTs(
+              SystemicComponent(baroreflex_system(baroreceptor_carotid(
+                    useStimulationInput=true), externalStimulation(height=10,
+                    startTime=300))));
           annotation (experiment(
               StopTime=1800,
               Interval=0.02,
