@@ -9021,19 +9021,19 @@ type"),       Text(
               thickness=1,
               smooth=Smooth.None));
           connect(sa, aorticValve.q_out) annotation (Line(
-              points={{-100,-34},{-100,-60},{-96,-60},{-96,-20},{-88,-20}},
+              points={{-100,-60},{-100,-60},{-96,-60},{-96,-20},{-88,-20}},
               color={0,0,0},
               thickness=1));
           connect(Lmt.q_in, pv) annotation (Line(
-              points={{80,-20},{80,-82},{100,-82},{100,-34}},
+              points={{80,-20},{80,-82},{100,-82},{100,-60}},
               color={0,0,0},
               thickness=1));
           connect(sv, Ltc.q_in) annotation (Line(
-              points={{-100,56},{-100,34},{-88,34}},
+              points={{-100,60},{-100,34},{-88,34}},
               color={0,0,0},
               thickness=1));
           connect(pulmonaryValve.q_out, pa) annotation (Line(
-              points={{82,34},{92,34},{92,56},{100,56}},
+              points={{82,34},{92,34},{92,60},{100,60}},
               color={0,0,0},
               thickness=1));
           connect(tricuspidValve.q_out, smithOttesen_VentricularInteraction_flat_.rvflow)
@@ -9064,10 +9064,10 @@ type"),       Text(
                   -44.5},{0,-44.5},{0,-100}},
                                          color={0,0,127}));
           connect(phi, smithOttesen_VentricularInteraction_flat_.phi) annotation (
-             Line(points={{-100,78},{-56,78},{-56,24.2},{-11,24.2}}, color={0,0,
+             Line(points={{-100,80},{-56,80},{-56,24.2},{-11,24.2}}, color={0,0,
                   127}));
           connect(phi0.y, smithOttesen_VentricularInteraction_flat_.phi)
-            annotation (Line(points={{-81,78},{-20,78},{-20,24.2},{-11,24.2}},
+            annotation (Line(points={{-81,80},{-20,80},{-20,24.2},{-11,24.2}},
                 color={0,0,127}));
           connect(smithOttesen_VentricularInteraction_flat_.Pth, P0.y)
             annotation (Line(points={{13.3,9},{13.3,-44.5},{-8,-44.5},{-8,-74},
@@ -10373,6 +10373,222 @@ Kalecky")}), experiment(
               experiment(Tolerance=1e-07, __Dymola_Algorithm="Cvode"));
           end EDPVRtest;
         end Data;
+
+        model Heart_4chambers_valves "A 4-chamber surrogate model"
+          extends partialHeart(
+            UsePhiInput=false,
+            UseThoracic_PressureInput=false,
+            UseFrequencyInput=true);
+          parameter String class_name="valves";
+          replaceable
+          Physiolibrary.Hydraulic.Components.IdealValveResistance
+                               tricuspidValve(
+            _Goff(displayUnit="ml/(mmHg.min)"),
+            Pknee=0,
+            useChatteringProtection=false,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=settings.heart_R_vlv)
+                        constrainedby
+            Physiolibrary.Hydraulic.Components.IdealValveResistance(
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=R_vlv)
+            annotation (Placement(transformation(extent={{-6,50},{14,70}})));
+          replaceable
+          Physiolibrary.Hydraulic.Components.IdealValveResistance
+                               pulmonaryValve(
+            _Goff(displayUnit="ml/(mmHg.min)"),
+            Pknee=0,
+            useChatteringProtection=false,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=settings.heart_R_vlv)
+                        constrainedby
+            Physiolibrary.Hydraulic.Components.IdealValveResistance(
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=R_vlv)
+            annotation (Placement(transformation(extent={{50,50},{70,70}})));
+          replaceable
+          Basic.IdealValveResistanceWithMeasurements
+                               mitralValve(
+            _Goff(displayUnit="ml/(mmHg.min)"),
+            Pknee=0,
+            useChatteringProtection=false,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=settings.heart_R_vlv,
+            useCycleInput=true) constrainedby
+            Physiolibrary.Hydraulic.Components.IdealValveResistance(
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=R_vlv)
+            annotation (Placement(transformation(extent={{50,-70},{30,-50}})));
+          replaceable Basic.IdealValveResistanceWithMeasurements aorticValve(
+            _Goff(displayUnit="ml/(mmHg.min)"),
+            Pknee=0,
+            useCycleInput=true,
+            useChatteringProtection=false,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=settings.heart_R_vlv)
+                        constrainedby
+            Physiolibrary.Hydraulic.Components.IdealValveResistance(
+            useChatteringProtection=true,
+            chatteringProtectionTime(displayUnit="ms") = 0.01,
+            _Ron=R_vlv) annotation (Placement(transformation(extent={{0,-70},{-20,-50}})));
+
+          replaceable
+          Physiolibrary.Hydraulic.Components.Resistor r_SystemicVenousInflow(Resistance=
+               settings.heart_R_RA) constrainedby
+            Physiolibrary.Hydraulic.Interfaces.OnePort
+            "Resistance of the inflow to the atria"
+            annotation (Placement(transformation(extent={{-88,50},{-68,70}})));
+          replaceable
+          Physiolibrary.Hydraulic.Components.Resistor r_PulmonaryVenousInflow(
+              Resistance=settings.heart_R_LA) constrainedby
+            Physiolibrary.Hydraulic.Interfaces.OnePort
+            "Resistance of the inflow to the atria"
+            annotation (Placement(transformation(extent={{90,-70},{70,-50}})));
+
+        Physiolibrary.Types.Volume volume;
+          Auxiliary.SA_node sa_node annotation (Placement(transformation(
+                  rotation=0, extent={{-88,22},{-68,42}})));
+          Modelica.Blocks.Math.Add add annotation (Placement(transformation(
+                extent={{-5,-5},{5,5}},
+                rotation=90,
+                origin={10,-70})));
+          Physiolibrary.Types.Constants.PressureConst P1(k=0) if not
+            UseThoracic_PressureInput
+            annotation (Placement(transformation(extent={{4,-4},{-4,4}},
+                rotation=0,
+                origin={28,-88})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel rv(volume_start=
+                0.00012,                                      useComplianceInput=true)
+            annotation (Placement(transformation(extent={{16,10},{36,30}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel la(useComplianceInput=true)
+            annotation (Placement(transformation(extent={{8,-30},{28,-10}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel lv(volume_start=
+                0.00013,                                      useComplianceInput=true)
+            annotation (Placement(transformation(extent={{48,-30},{68,-10}})));
+          Physiolibrary.Hydraulic.Components.ElasticVessel ra(useComplianceInput=true)
+            annotation (Placement(transformation(extent={{-32,10},{-12,30}})));
+          Physiolibrary.Types.RealIO.HydraulicComplianceInput c_ra annotation (
+              Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=0,
+                origin={-44,34}), iconTransformation(
+                extent={{-11,-11},{11,11}},
+                rotation=270,
+                origin={-59,101})));
+          Physiolibrary.Types.RealIO.HydraulicComplianceInput c_rv annotation (
+              Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=0,
+                origin={60,100}), iconTransformation(
+                extent={{-10,-10},{10,10}},
+                origin={60,100},
+                rotation=270)));
+          Physiolibrary.Types.RealIO.HydraulicComplianceInput c_lv annotation (
+              Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=0,
+                origin={40,-6}), iconTransformation(
+                extent={{-10,-10},{10,10}},
+                origin={60,-98},
+                rotation=90)));
+          Physiolibrary.Types.RealIO.HydraulicComplianceInput c_la annotation (
+              Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=0,
+                origin={-4,-6}), iconTransformation(
+                extent={{-10,-10},{10,10}},
+                origin={-60,-98},
+                rotation=90)));
+        equation
+          volume =ra.volume + la.volume + lv.volume + rv.volume;
+          connect(pulmonaryValve.q_out, pa) annotation (Line(
+              points={{70,60},{100,60}},
+              color={0,0,0},
+              thickness=1));
+          connect(aorticValve.q_out, sa) annotation (Line(
+              points={{-20,-60},{-100,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(tricuspidValve.q_in, r_SystemicVenousInflow.q_out) annotation (Line(
+              points={{-6,60},{-68,60}},
+              color={0,0,0},
+              thickness=1));
+          connect(r_SystemicVenousInflow.q_in, sv) annotation (Line(
+              points={{-88,60},{-100,60}},
+              color={0,0,0},
+              thickness=1));
+          connect(mitralValve.q_in, r_PulmonaryVenousInflow.q_out) annotation (Line(
+              points={{50,-60},{70,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(r_PulmonaryVenousInflow.q_in, pv) annotation (Line(
+              points={{90,-60},{100,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(tricuspidValve.q_out, pulmonaryValve.q_in) annotation (Line(
+              points={{14,60},{50,60}},
+              color={0,0,0},
+              thickness=1));
+          connect(mitralValve.q_out, aorticValve.q_in) annotation (Line(
+              points={{30,-60},{0,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(frequency_input,sa_node.frequency)           annotation (Line(points={{-106,0},
+                  {-96,0},{-96,32},{-88,32}},          color={0,0,127}));
+          connect(HR0.y,sa_node.frequency)           annotation (Line(points={{-87,0},
+                  {-96,0},{-96,32},{-88,32}},
+                                         color={0,0,127}));
+          connect(sa_node.phiInput,          phi) annotation (Line(points={{-88,38},{-96,
+                  38},{-96,80},{-100,80}},          color={0,0,127}));
+          connect(sa_node.phiInput,          phi0.y) annotation (Line(points={{-88,38},{
+                  -96,38},{-96,80},{-81,80}},          color={0,0,127}));
+          connect(mitralValve.cardiac_cycle, aorticValve.cardiac_cycle) annotation (
+              Line(
+              points={{40,-50},{-10,-50}},
+              color={244,125,35},
+              thickness=0.5));
+          connect(P0.y, add.u1) annotation (Line(points={{0,-81},{7,-81},{7,-76}},
+                color={0,0,127}));
+          connect(thoracic_pressure_input, add.u1) annotation (Line(points={{0,
+                  -100},{7,-100},{7,-76}}, color={0,0,127}));
+          connect(sa_node.cardiac_cycle, aorticValve.cardiac_cycle) annotation (Line(
+                points={{-68,32},{-64,32},{-64,-50},{-10,-50}}, color={0,0,127}));
+          connect(P1.y, add.u2)
+            annotation (Line(points={{23,-88},{13,-88},{13,-76}}, color={0,0,127}));
+          connect(rv.q_in, pulmonaryValve.q_in) annotation (Line(
+              points={{26,20},{36,20},{36,60},{50,60}},
+              color={0,0,0},
+              thickness=1));
+          connect(la.q_in, aorticValve.q_in) annotation (Line(
+              points={{18,-20},{18,-60},{0,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(ra.q_in, r_SystemicVenousInflow.q_out) annotation (Line(
+              points={{-22,20},{-10,20},{-10,60},{-68,60}},
+              color={0,0,0},
+              thickness=1));
+          connect(lv.q_in, r_PulmonaryVenousInflow.q_out) annotation (Line(
+              points={{58,-20},{58,-60},{70,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(ra.compliance, c_ra)
+            annotation (Line(points={{-22,28},{-22,34},{-44,34}}, color={0,0,127}));
+          connect(rv.compliance, c_rv)
+            annotation (Line(points={{26,28},{26,100},{60,100}}, color={0,0,127}));
+          connect(lv.compliance, c_lv)
+            annotation (Line(points={{58,-12},{58,-6},{40,-6}}, color={0,0,127}));
+          connect(la.compliance, c_la)
+            annotation (Line(points={{18,-12},{18,-6},{-4,-6}}, color={0,0,127}));
+          annotation (Icon(graphics={Text(
+                  extent={{-100,20},{100,100}},
+                  lineColor={0,0,0},
+                  textString="4 Chamber
+compliance
+%class_name")}));
+        end Heart_4chambers_valves;
       end Heart;
 
       package Systemic
@@ -12698,8 +12914,8 @@ P_hs_plus_dist"),
                 eta_vc=0.2201054,
                 tissues_eta_Ra=1.245225,
                 tissues_eta_C=0.5058013,
-                tissues_chi_R=16.578623,
-                tissue_chi_C(displayUnit="1") = 0.5,
+                tissues_chi_R=0,
+                tissue_chi_C(displayUnit="%") = -0.1,
               V_PV_init=0,
                 heart_atr_D_A=55215000,
                 heart_vntr_xi_Vw=0.9014874,
@@ -12749,7 +12965,7 @@ P_hs_plus_dist"),
                 tissues_gamma=0.5,
               tissues_tau_R(displayUnit="s") = 0,
                 veins_C_phi=0.09,
-              veins_activation_tau=0)
+                veins_activation_tau=1e-3)
               annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
             Modelica.Blocks.Sources.Ramp phi_ramp(
                 height=0,
@@ -28533,7 +28749,7 @@ P_hs_plus_dist"),
           Volume v_drained;
           parameter Modelica.SIunits.Time drain_start=12*60*60;
           parameter VolumeFlowRate drain_q = 1e-6/60;
-          VolumeFlowRate lymphDrain=if timeSpedUp > drain_start + lymphaticsSettleTime
+          VolumeFlowRate lymphDrain=if timeSpedUp > drain_start
                then drain_q else 0;
           Modelica.Blocks.Sources.Pulse timeSpeedUpFactor(
             amplitude=360,
@@ -28863,9 +29079,8 @@ P_hs_plus_dist"),
         end CoronaryLayer;
 
         model CoronaryTest
-          CoronaryCirculation coronaryCirculation(
-                                                 target_q=1.6666666666667e-05, weight=
-                0.14)
+          CoronaryCirculation coronaryCirculation(target_q=3.3333333333333e-06,
+              weight=0.15)
             annotation (Placement(transformation(extent={{-20,-20},{20,20}})));
           Physiolibrary.Hydraulic.Sources.UnlimitedVolume PAo(usePressureInput=
                 true)
@@ -50214,6 +50429,14 @@ P_hs_plus_dist"),
       model CVS_exercise_noVenousConstriction
         extends CVS_exercise(settings(veins_UsePhiEffect=false));
       end CVS_exercise_noVenousConstriction;
+
+      model CVS_exercise_max
+        extends CVS_exercise(SystemicComponent(
+            ulnar_T2_R42(UseExercise=true),
+            radial_T1_R44(UseExercise=true),
+            ulnar_T2_L90(UseExercise=true),
+            radial_T1_L92(UseExercise=true)), Exercise(height=1));
+      end CVS_exercise_max;
     end Exercise;
 
     package Valsalva
@@ -55843,10 +56066,13 @@ P_hs_plus_dist"),
             tau(displayUnit="s"),
             p_int_diff=2666.4477483,
             V_normal=0.015,
-            drain_start=86400,
-            drain_q=1.6666666666667e-07,
-            timeSpeedUpFactor(amplitude=1500),
-            lymphaticsSettleTime=86400)
+            drain_start=50400,
+            drain_q=8.3333333333333e-08,
+            timeSpeedUpFactor(
+              amplitude=360,
+              width=100*10/40,
+              period=40),
+            lymphaticsSettleTime=43200)
             annotation (Placement(transformation(extent={{40,38},{60,58}})));
           Physiolibrary.Hydraulic.Sensors.PressureMeasure pressureMeasure
             annotation (Placement(transformation(extent={{18,30},{38,50}})));
@@ -55879,6 +56105,129 @@ P_hs_plus_dist"),
               __Dymola_Algorithm="Cvode"));
         end CVS_lymphatics;
       end Lymphatics;
+
+      package Surrogates
+        model CVS_4ChC "Four chambers compliance simplification"
+          extends Auxiliary.partialCVS(redeclare
+              Components.Subsystems.Heart.Heart_4chambers_valves heartComponent);
+          Physiolibrary.Types.RealIO.HydraulicComplianceInput c_la annotation (
+              Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=0,
+                origin={-16,-40}), iconTransformation(
+                extent={{-10,-10},{10,10}},
+                origin={-58,-106},
+                rotation=90)));
+          Physiolibrary.Types.RealIO.HydraulicComplianceInput c_lv annotation (
+              Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=0,
+                origin={-38,-40}), iconTransformation(
+                extent={{-10,-10},{10,10}},
+                origin={62,-106},
+                rotation=90)));
+          Physiolibrary.Types.RealIO.HydraulicComplianceInput c_rv annotation (
+              Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=0,
+                origin={-32,0}), iconTransformation(
+                extent={{-10,-10},{10,10}},
+                origin={62,92},
+                rotation=270)));
+          Physiolibrary.Types.RealIO.HydraulicComplianceInput c_ra annotation (
+              Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=0,
+                origin={-12,-4}), iconTransformation(
+                extent={{-11,-11},{11,11}},
+                rotation=270,
+                origin={-57,93})));
+        equation
+          connect(heartComponent.c_ra, c_ra) annotation (Line(points={{-20.1,-11.9},{-20.1,
+                  -4},{-12,-4}}, color={0,0,127}));
+          connect(heartComponent.c_rv, c_rv)
+            annotation (Line(points={{-32,-12},{-32,0}}, color={0,0,127}));
+          connect(heartComponent.c_la, c_la) annotation (Line(points={{-20,-31.8},{-20,-40},
+                  {-16,-40}}, color={0,0,127}));
+          connect(heartComponent.c_lv, c_lv) annotation (Line(points={{-32,-31.8},{-32,-40},
+                  {-38,-40}}, color={0,0,127}));
+        end CVS_4ChC;
+
+        model Test_CVS4ChC
+          extends Modelica.Icons.Example;
+          CVS_4ChC cVS_4ChC(settings(V_PV_init=0.001))
+            annotation (Placement(transformation(extent={{30,-10},{50,10}})));
+          Components.Subsystems.Heart.Auxiliary.SA_node
+                            sa_node(cardiac_cycle(start=0.9817032, fixed=true))
+                                    annotation (Placement(transformation(
+                  rotation=0, extent={{-44,-12},{-24,8}})));
+          Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.Driving_Olufsen
+            driving_a(
+            usePhiInput=false,
+            D_0(displayUnit="Pa/m3") = 1.5e7,
+            D_A(displayUnit="Pa/m3") = 1.1e8,
+            TS=0.2,
+            TR=0.2)
+            annotation (Placement(transformation(extent={{-8,4},{12,24}})));
+          Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit=
+                  "1/min") = 1.0666666666667)
+            annotation (Placement(transformation(extent={{-62,-6},{-54,2}})));
+          Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.Driving_Olufsen
+            driving_lv(
+            usePhiInput=false,
+            t0_delay=0.1,
+            D_0(displayUnit="Pa/m3") = 3.2e6,
+            D_A(displayUnit="Pa/m3") = 2.2e8,
+            TS=0.2,
+            TR=0.2,
+            TR_maxAct(displayUnit="s"))
+            annotation (Placement(transformation(extent={{-8,-36},{12,-16}})));
+          Physiolibrary.Blocks.Math.Reciprocal rec
+            annotation (Placement(transformation(extent={{24,-30},{32,-22}})));
+          Physiolibrary.Blocks.Math.Reciprocal rec1
+            annotation (Placement(transformation(extent={{18,10},{26,18}})));
+          Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.Driving_Olufsen
+            driving_rv(
+            usePhiInput=false,
+            t0_delay=0.1,
+            D_0(displayUnit="Pa/m3") = 0.77e6,
+            D_A(displayUnit="Pa/m3") = 5e7,
+            TS=0.2,
+            TR=0.2,
+            TR_maxAct(displayUnit="s"))
+            annotation (Placement(transformation(extent={{-8,-62},{12,-42}})));
+          Physiolibrary.Blocks.Math.Reciprocal rec2
+            annotation (Placement(transformation(extent={{24,-56},{32,-48}})));
+        equation
+          connect(HR0.y, sa_node.frequency)
+            annotation (Line(points={{-53,-2},{-44,-2}}, color={0,0,127}));
+          connect(sa_node.t0, driving_a.t0) annotation (Line(points={{-24,6},{
+                  -16,6},{-16,14},{-8,14}}, color={0,0,127}));
+          connect(sa_node.t0, driving_lv.t0) annotation (Line(points={{-24,6},{
+                  -16,6},{-16,-26},{-8,-26}}, color={0,0,127}));
+          connect(rec.u, driving_lv.D)
+            annotation (Line(points={{23.2,-26},{13,-26}}, color={0,0,127}));
+          connect(rec.y, cVS_4ChC.c_lv) annotation (Line(points={{32.4,-26},{
+                  46.2,-26},{46.2,-10.6}}, color={0,0,127}));
+          connect(driving_a.D, rec1.u)
+            annotation (Line(points={{13,14},{17.2,14}}, color={0,0,127}));
+          connect(rec1.y, cVS_4ChC.c_ra) annotation (Line(points={{26.4,14},{
+                  34.3,14},{34.3,9.3}}, color={0,0,127}));
+          connect(rec1.y, cVS_4ChC.c_la) annotation (Line(points={{26.4,14},{30,
+                  14},{30,-10.6},{34.2,-10.6}}, color={0,0,127}));
+          connect(driving_rv.D, rec2.u)
+            annotation (Line(points={{13,-52},{23.2,-52}}, color={0,0,127}));
+          connect(rec2.y, cVS_4ChC.c_rv) annotation (Line(points={{32.4,-52},{
+                  56,-52},{56,9.2},{46.2,9.2}}, color={0,0,127}));
+          connect(driving_rv.t0, driving_lv.t0) annotation (Line(points={{-8,
+                  -52},{-16,-52},{-16,-26},{-8,-26}}, color={0,0,127}));
+          annotation (experiment(
+              StopTime=10,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end Test_CVS4ChC;
+      end Surrogates;
     end Variations;
 
     package Experiments
