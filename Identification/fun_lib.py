@@ -40,7 +40,8 @@ class ObjectiveVar:
                 value=None, 
                 targetValue=None, 
                 limit=None, 
-                weight=1, 
+                weight=None,
+                tolerance = None,
                 k_p=1e3, 
                 std = None,
                 base = 1,
@@ -49,7 +50,20 @@ class ObjectiveVar:
         self.targetValue = targetValue
         self.value = value
         self.limit = limit if limit is not None else [-math.inf, math.inf]
-        self.weight = weight
+
+        if weight is None:
+            if tolerance is not None and targetValue is None and limit is not None:
+                # calculate the weight from limits
+                self.weight=max(limit)/tolerance
+            elif tolerance is not None and targetValue is not None:
+                # calculate the weigth from tolerance and target value
+                self.weight = targetValue/tolerance
+            else:
+                # cant calculate the weight
+                self.weight = 1
+        else:
+            self.weight = weight
+
         # self.costLimit = -1 # unlimited costs
         self.k_p = k_p # penalty multiplier for out ouf limit values
         self.costFunctionType = costFunctionType
@@ -150,7 +164,7 @@ class ObjectiveVar:
         else:
             target = ' ??wat?? '
         
-        return target.ljust(9)
+        return target.ljust(6)
 
     def __repr__(self):
         return '%s,%.3g,%s' % (self.name, self.value, self.target_log())
@@ -602,7 +616,7 @@ def logObjectives(objectivesLog_path, objectives, sortBy = 'cost', compare_to_lo
             header_names = 'Name'.ljust(max_name_len)
 
 
-            header = '%s, value    , target   , cost     ,%% tot, [%% base costs], total = %.6e\n' % (header_names, total_cost)
+            header = '%s, value    , target   , cost     ,%% tot, [val, target, weight], total = %.6e\n' % (header_names, total_cost)
             file.write(header)
             if printToStdin:
                 print(header)
@@ -616,7 +630,7 @@ def logObjectives(objectivesLog_path, objectives, sortBy = 'cost', compare_to_lo
                     return sorted(objectives, key = lambda o: o.name, reverse=False)
             
             for o in sortedObjectives():
-                s = '%s,%.3e ,%s ,%.3e , %02.0f  , %g, %s, %s\n' % (o.name.ljust(max_name_len), o.value, o.target_log(), o.cost(), round(o.cost()/total_cost*100), o.value*o.base, o.target_log(normalizeToBase=True), o.cost_to_base_comparisson())
+                s = '%s,%.3e ,%s ,%.3e , %02.0f  , %g, %s, %s, %s\n' % (o.name.ljust(max_name_len), o.value, o.target_log(), o.cost(), round(o.cost()/total_cost*100), round(o.value*o.base, 4), o.target_log(normalizeToBase=True), o.cost_to_base_comparisson(), round(o.weight, ndigits=3))
                 file.write(s)
                 if printToStdin:
                     print(s)
