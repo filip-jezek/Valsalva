@@ -1,0 +1,14 @@
+# name, value, [min, max, step]
+settings.V_PV_init,-1.875e-05,-2e-3,2e-3,100e-6
+settings.heart_R_LA,3226266.8,2999753,30666365,33330
+settings.heart_vntr_D_0,13.8576,6.340895,20,0.2
+settings.heart_vntr_D_A,1304.7833,500,3000,50
+settings.heart_atr_D_0,8639511.0,1649608.0,105460632,140551.2
+settings.heart_atr_D_A,71158368.0,4993500.0,600736500,552150.0
+settings.syst_TPR,128412768.0,15391250.0,1810033750.0,1282125.0
+settings.syst_TR_frac,4.8953433,2.2261831,15.1653349,0.04695759
+settings.pulm_C_PA,4.799251e-08,2e-08,20e-08,0.1e-8
+settings.pulm_R,7932732.0,3265388.1,39091029.9000000004,36282.090000000004
+settings.heart_vntr_TS,0.19525331,0.059425,0.3707500000000001,0.01
+settings.heart_vntr_TR,0.456875,0.1,0.5,0.01
+settings.syst_art_k_E,0.4123268,0.2,0.6,0.01

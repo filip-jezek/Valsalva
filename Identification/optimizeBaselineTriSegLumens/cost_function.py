@@ -45,7 +45,7 @@ def plotObjectives(vars_set, interval, objectives):
 def getObjectives(vars_set):
 
     
-    fun_lib.checkSimulationLength(vars_set['time'][-1],30)
+    fun_lib.checkSimulationLength(vars_set['time'][-1],20)
 
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
@@ -96,35 +96,36 @@ def getObjectives(vars_set):
         distance)
 
     # build costs
-    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval]), 120*mmHg2SI, None, 1, 1/mmHg2SI),
-            ('BPd', min(vars_set['brachial_pressure'][interval]), 80*mmHg2SI, None, 1, 1/mmHg2SI),
-            ('EDV', numpy.max(vars_set['V_LV'][interval]), 150*ml2SI, None, 1, 1/ml2SI),
-            ('ESV', numpy.min(vars_set['V_LV'][interval]), 60*ml2SI, None, 1, 1/ml2SI),
-            ('ESV_la', numpy.min(vars_set['V_la'][interval]), 12*ml2SI, None, 1e-1, 1/ml2SI),
-            ('EDV_la', numpy.max(vars_set['V_la'][interval]), 41*ml2SI, None, 1e-1, 1/ml2SI),
-            ('Q_MV_f', vla_peak_frac, None, [1.5, 2], 1e-4, 100),
-            ('Qdot_mv', atrial_kick, None, [0.2, 0.3], 1e-4, 100),
-            ('q_mv_sad', q_mv_saddle, None, [0, q_mv_Patrial*0.2], 1e-3, 1),
-            ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, 0, 1),
-            ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, 0, 1),            
-            ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 1, 1/bpm2SI), 
+    ov = [  ('BPs', max(vars_set['brachial_pressure'][interval])/mmHg2SI, 120, None, 1),
+            ('BPd', min(vars_set['brachial_pressure'][interval])/mmHg2SI, 80, None, 1),
+            ('EDV', numpy.max(vars_set['V_LV'][interval])/ml2SI, 150, None, 2),
+            ('ESV', numpy.min(vars_set['V_LV'][interval])/ml2SI, 60, None, 2),
+            ('ESV_la', numpy.min(vars_set['V_la'][interval])/ml2SI, 12*ml2SI, None, 1e-1),
+            ('EDV_la', numpy.max(vars_set['V_la'][interval])/ml2SI, 41*ml2SI, None, 1e-1),
+            ('Q_MV_f', vla_peak_frac*1, None, [1.5, 2], 0.1),
+            ('Qdot_mv', atrial_kick*1, None, [0.2, 0.3], 0.05),
+            ('q_mv_sad', q_mv_saddle*100, None, [0, q_mv_Patrial*20], 10,
+            # ('SL_max', max(vars_set['SLo_max'][interval]), 2.2, None, 0, 1),
+            # ('SL_min', min(vars_set['SLo_min'][interval]), 1.75, None, 0, 1),            
+            # ('HR', numpy.mean(vars_set['HR'][interval]) , 64*bpm2SI, None, 1, 1/bpm2SI), 
 # set by assumption and loop closed
 #            ('HR', numpy.mean(vars_set['HR'][interval]), HR_target, None, 1), 
 # set by EDV and ESV
 #            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), EF_target, None, 1),
 # set by HR and EDV AND ESV, just emphasized here
-            ('CO', sum(vars_set['CO'][interval]) / len(interval), 5.76*lpm2SI, None, 10, 1/lpm2SI),
-            ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval), 20*mmHg2SI, None, 1, 1/mmHg2SI),
-            ('Ppas', numpy.max(vars_set['P_pa'][interval]), 20.5*mmHg2SI, None, 1, 1/mmHg2SI),
-            ('Ppad', numpy.min(vars_set['P_pa'][interval]), 8.8*mmHg2SI, None, 1, 1/mmHg2SI),
-            ('Ppv', numpy.mean(vars_set['P_pv'][interval]), 8*mmHg2SI, None, 1, 1/mmHg2SI),
+            ('CO', sum(vars_set['CO'][interval]) / len(interval)/lpm2SI, 5.76, None, 0.1),
+            # ('BPk', sum(vars_set['renal_capillary'][interval]) / len(interval)/mmHg2SI, 20, None, 1, 1/mmHg2SI),
+            ('Ppas', numpy.max(vars_set['P_pa'][interval])/mmHg2SI, 20.5, None, 5),
+            ('Ppad', numpy.min(vars_set['P_pa'][interval])/mmHg2SI, 8.8, 5),
+            ('Ppv', numpy.mean(vars_set['P_pv'][interval])/mmHg2SI, 8, 2),
             # ('EDP', numpy.min(vars_set['P_LV'][interval]), None, [6*mmHg2SI, 12*mmHg2SI], 1e-3),
-            ('P_MV_o', numpy.mean(vars_set['P_MV_o'][interval]), 4.5*mmHg2SI, None, 0, 1/mmHg2SI),
-            ('P_MV_c', numpy.mean(vars_set['P_MV_c'][interval]), 6*mmHg2SI, None, 0, 1/mmHg2SI),
+            # ('P_MV_o', numpy.mean(vars_set['P_MV_o'][interval])/mmHg2SI, 4.5*mmHg2SI, None, 0, 1/mmHg2SI),
+            # ('P_MV_c', numpy.mean(vars_set['P_MV_c'][interval])/mmHg2SI, 6*mmHg2SI, None, 0, 1/mmHg2SI),
             # ('BPMeanStd', numpy.std(vars_set['brachial_pressure_mean'][steady_interval]), None, [0, 4*mmHg2SI], 0, 1/mmHg2SI),
-            ('PWV', pwv, None, [5, 10], 0, 1)            ]
+            ('Ts', max(vars_set['TEjection'][interval]), 0.292, 0.05),
+            ('PWV', pwv, None, [5, 10], 1)            ]
 
-    objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight=o[4], base = o[5], k_p=1e3), ov))
+    objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], weight=o[2]/o[4], base = 1, k_p=1), ov))
 
 
     # to have comparable cost function values one must have the stds ready
