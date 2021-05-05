@@ -8,6 +8,7 @@ Follow the prerequisites in https://github.com/filip-jezek/Valsalva/blob/master/
 ## Loading the model
 IMPORTANT!! The modelica source file formatting is overwritten just by loading into OpenModelica without prompt. Might cause some troubles when opened in two editors at once.
 
+- Load Modelica Standard Library - Version 3.2.3, if not already loaded. If you are having the 4.0 version already, you can grab the former one from [Github repository](https://github.com/modelica/ModelicaStandardLibrary/tree/maint/3.2.3)
 - Load the Physiolibrary 2.4
   - File - load - Physiolibrary/Physiolibrary/Package.mo
 - Open the ADAN86.mo model
@@ -18,7 +19,7 @@ IMPORTANT!! The modelica source file formatting is overwritten just by loading i
 ## running the baseline simulation
 
 - navigate to ADAN_main.SystemicTree.CardiovascularSystem and doubleclick to open. This is a base class, all changes applied here are inherited in other models.
-- Select Simulation - Simulation Setup from the menu. Set simulation time (here 30s) and some reasonable interval (e.g. 0.02s). Make sure the CVODE solver is selected, as the simulation might be unstable with other solvers. Click OK. The OM editor might hang for a while, please be patient.
+- Select Simulation - Simulation Setup from the menu. Set simulation time (here 30s) and some reasonable interval (e.g. 0.02s). Make sure the **CVODE** solver is selected, as the simulation might be unstable with other solvers. Click OK. The OM editor might hang for a while, please be patient.
 - Select variables to plot in right panel "Variables Browser"
 - To draw X-Y plot (e.g. PV loop) select the New parametric plot button and click on the variable for X axis (e.g. V_LV and then on the variable intended for Y axis (e.g. P_LV)
 - To adjust a parameter, find it in Variables browser and modify it. Click the Re-simulate button. The simulation will rerun with updated parameter value. Note, tha this change is not saved in the model.
@@ -51,7 +52,7 @@ IMPORTANT!! The modelica source file formatting is overwritten just by loading i
 
 ## Using Modelica
 Explore additional resources about Modelica and how to use it.
- - video
- - tiller university
- - fritzson..?
+ - [Modelica benefits demonstration](https://www.youtube.com/watch?v=LkAKQsur_Do)
+ - [Modelica University](OpenModelica quick-start guide)
+ - [PEter Fritson's book Principles of Object-Oriented Modeling and Simulation with Modelica 3.3: A Cyber-Physical Approach](https://www.amazon.com/Principles-Object-Oriented-Modeling-Simulation-Modelica/dp/111885912X)
 
