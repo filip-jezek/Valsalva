@@ -117,7 +117,7 @@ def getValsFromDsin(lines:Iterable[Text], keys: Iterable[Text]):
                 value_type_code = lin.split()[1]
                 if value_type_code == '280':
                     value_type = 'stateInit'
-                elif value_type_code == '361':
+                elif value_type_code in ['361', '353']:
                     value_type = 'bool'
                 elif value_type_code == '288':
                     value_type = 'guess'
@@ -376,7 +376,7 @@ def getInputParams(dsFileIn='dsin.txt', filter = '', types = (280, 272), accept 
     
     return tunable_params
 
-def writeInitStatesFromDsin(dsFileIn = 'dsin.txt', filter = '', outputFile = 'states.csv', accept = [2, 6], types = (280, 272, 361)):
+def writeInitStatesFromDsin(dsFileIn = 'dsin.txt', filter = '', outputFile = 'states.csv', accept = [2, 6], types = (280, 272, 361, 353)):
     initStates = getInputParams(dsFileIn, filter = filter, accept = accept, types = types)
 
     with open(dsFileIn) as file:
@@ -587,8 +587,8 @@ overWriteDsinTemplate = True
 DSFILEIN = None
 OPTOUTPUTFILEIN = 'OutputListingMain.txt'
 
-# DSFILEIN = 'dsin.txt'
-# OPTOUTPUTFILEIN = None
+DSFILEIN = 'dsin.txt'
+OPTOUTPUTFILEIN = None
 
 USEPSO = False
 
@@ -603,6 +603,6 @@ def run():
     
 # if __name__ == "__main__":
 run()
-    # writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'params_for_SA.txt', filter = 'settings.', accept = [1, 2], types = (280, 272, 361))
+# writeInitStatesFromDsin(dsFileIn = 'dsin.txt', outputFile = 'params_for_SA.txt', filter = 'settings.', accept = [1, 2], types = (280, 272, 361))
     
 

@@ -200,26 +200,26 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
         (sig, phase, phase_offset, fun, baseline, name, include_in_cost) = o
         interval, _ = getInterval(phase, phase_offset)
         value = fun(sig[interval])/baseline
-        return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost, base = baseline)
+        return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost, base = baseline, tolerance = 1/baseline)
 
     def buildTimeObjective(to):
         (sig, phase, phase_offset, fun, name, include_in_cost) = to
         interval, offset = getInterval(phase, phase_offset)        
         value = time[fun(sig[interval])] + offset[0]
-        return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost)        
+        return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost, tolerance=1)        
 
     def buildPPObjective(po):
-        (name, timeObjName, phase, weight, include_in_cost) = po
+        (name, timeObjName, phase, tolerance, include_in_cost) = po
         o = fun_lib.getObjectiveByName(objectives, timeObjName).value + phase[0]
         i = fun_lib.findLowestIndex(o, time)
         value = ppulse[i]/baseline_pp
-        return fun_lib.ObjectiveVar(name, value=value, weight=weight, costFunctionType=include_in_cost, base=baseline_pp)
+        return fun_lib.ObjectiveVar(name, value=value, costFunctionType=include_in_cost, base=baseline_pp, tolerance=1/baseline_pp)
 
     def buildSVObjective(svo):
-        (phase, phase_offset, name, limit, weight, include_in_cost) = svo
+        (phase, phase_offset, name, limit, tolerance, include_in_cost) = svo
         phase_interval, _ = getInterval(phase, phase_offset)
         sv_val_valsalva = numpy.min(SV[phase_interval])
-        return fun_lib.ObjectiveVar(name, sv_val_valsalva, limit=limit, std = limit[0]*0.1, k_p=1, weight = weight, costFunctionType=include_in_cost)
+        return fun_lib.ObjectiveVar(name, sv_val_valsalva, limit=limit, std = limit[0]*0.1, k_p=1, tolerance = tolerance, costFunctionType=include_in_cost)
 
     phase_values = [(bp_mean, phase1, (-1, 0), numpy.max  , baseline_bp, 'ph1_peak'    , IGNORE),
                     (bp_mean, phase2, (2, -2), numpy.min  , baseline_bp, 'ph2_mean_min', IGNORE),
@@ -246,9 +246,9 @@ def getObjectives(vars_set, targetsFileName = r'../../../data/Valsalva/targetVal
                  ('pp_ph2_max'     , 't_ph2_max'     , phase4, 1, COUNT), # realtive to phase 4
                  ('pp_ph4_drop'    , 't_ph4_drop'    , phase4, 1, IGNORE)]
 
-    sv_values = [(phase2, (2, -1), 'SV_min_valsalva', [25, 40], 1, COUNT),
+    sv_values = [(phase2, (2, -1), 'SV_min_valsalva', [25, 40], 10, COUNT),
                  (phase1, (0,  5), 'SV_min_midValsalva', [55, 150], 10, COUNT),
-                 (phase4, (3, 4), 'SV_min_recovery', [60, 200], 1, COUNT),                ]
+                 (phase4, (3, 4), 'SV_min_recovery', [60, 200], 5, COUNT),                ]
 
     # map the inputs to ObjectiveVar
     objectives.extend(map(buildValueObjective, phase_values))

@@ -17,11 +17,12 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'IABP_optimized'
+base_model_full_path = 'ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized1'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
-steadyStateAt = 399
+steadyStateAt = 599.6
+mat_file_path = 'settings.baro_fsn = 0.0355333333.mat' # or none to detect automatically
 
 # get the main and path
 if '.' in base_model_full_path:
@@ -42,7 +43,8 @@ lines = (line for line in m if line[0].rsplit('.', 1)[-1] not in exclude_filter)
 mc_tree = mc.ModelicaClass.BuildObjectTree(lines, root=base_model)
 
 
-mat_file_path = relative_folder + base_model + '.mat'
+if mat_file_path is None:
+    mat_file_path = relative_folder + base_model + '.mat'
 
 mat_date = str(datetime.datetime.fromtimestamp(os.path.getmtime(mat_file_path)))
 

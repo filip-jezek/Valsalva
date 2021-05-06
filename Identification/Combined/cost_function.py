@@ -185,4 +185,5 @@ def getObjectives(vars_set:dict):
 
                 
     
-    return cost_objectives
+    # return cost_objectives
+    return all_objectives
