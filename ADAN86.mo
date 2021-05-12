@@ -28695,7 +28695,7 @@ P_hs_plus_dist"),
                                  iconTransformation(extent={{-110,-10},{-90,10}})));
 
         //   Real capillaryPressures[:] = {1412, 12412};
-          Pressure capillaryPressures_mean[nc](each start = 2664);
+        //   Pressure capillaryPressures_mean[nc](each start = 2664);
           Pressure p_vc_mean( start = 666);
           RealIO.PressureInput p_vc "vena cava pressure"
                                                         annotation (Placement(transformation(extent={{-102,
@@ -28707,7 +28707,7 @@ P_hs_plus_dist"),
           parameter Pressure deltaPi=1066.57909932;
 
           VolumeFlowRate J1[nc];
-          VolumeFlowRate J1_s = sum(J1);
+          VolumeFlowRate J1_s;
           VolumeFlowRate J2 = k2*(p_isf -  p_lymph);
           VolumeFlowRate J3 = k3*(p_lymph -  p_vc_mean);
 
@@ -28737,7 +28737,7 @@ P_hs_plus_dist"),
           parameter Volume v_lymph_nom=0.001;
 
           parameter Fraction reintroduceFraction = 0;
-          RealIO.VolumeFlowRateOutput lymph_diff = if timeSpedUp > lymphaticsSettleTime then (J1_s - J3 + (1-reintroduceFraction)*lymphDrain)*speedUpFact else 0 annotation (Placement(transformation(extent={{80,-100},
+          RealIO.VolumeFlowRateOutput lymph_diff = if timeSpedUp > lymphaticsSettleTime then (J1_s - J3 - reintroduceFraction*lymphDrain)*speedUpFact else 0 annotation (Placement(transformation(extent={{80,-100},
                     {100,-80}}),iconTransformation(extent={{92,-110},{112,-90}})));
 
 
@@ -28770,6 +28770,13 @@ P_hs_plus_dist"),
         protected
           RealIO.FractionInput speedUpFact "How long lasts one second after speedup"
              annotation (Placement(transformation(extent={{6,-10},{26,10}})));
+        public
+                    Boolean beat = false "Synchronization signal"
+            annotation (Dialog(group="Time varying output signal"), Placement(
+                transformation(extent={{100,-10},{120,10}})));
+                Real p_vc_s;
+                Real J1s_s;
+                Real t0;
         equation
           der(v_isf)/speedUpFact = J1_s - J2;
           der(v_lymph)/speedUpFact = J2 - J3 - lymphDrain;
@@ -28779,12 +28786,24 @@ P_hs_plus_dist"),
           der(timeSpedUp)/speedUpFact = 1;
 
           for i in 1:nc loop
-            k1*(capillaryPressures_mean[i] - deltaPi -p_isf)  = J1[i];
-          der(capillaryPressures_mean[i])*tau = capillaryPressures[i] -
-            capillaryPressures_mean[i];
+            k1*(capillaryPressures[i] - deltaPi -p_isf)  = J1[i];
+        //     k1*(capillaryPressures_mean[i] - deltaPi -p_isf)  = J1[i];
+        //   der(capillaryPressures_mean[i])*tau = capillaryPressures[i] -
+        //     capillaryPressures_mean[i];
           end for;
 
-          der(p_vc_mean)*tau = p_vc - p_vc_mean;
+        //   der(p_vc_mean)*tau = p_vc - p_vc_mean;
+        // J1_s = sum(J1);
+
+          der(p_vc_s) = p_vc;
+          der(J1s_s) = sum(J1);
+          when beat then
+            t0 = time;
+            reinit(p_vc_s, 0);
+            reinit(J1s_s, 0);
+            p_vc_mean = p_vc_s/(time - pre(t0));
+            J1_s = J1s_s/(time - pre(t0));
+          end when;
 
           connect(timeSpeedUpFactor.y, add.u2)
             annotation (Line(points={{79,-10},{70,-10},{70,-6},{62,-6}},
@@ -47415,8 +47434,8 @@ P_hs_plus_dist"),
         end CombinedModels_FMUs_BaselineValsalvaTilt_BaselineExercise;
 
         model CombinedModels_FMUs_ExceptBaseline
-          extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime
-                =0, fmi_StopTime=30));
+          extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime=
+                 0, fmi_StopTime=30));
         end CombinedModels_FMUs_ExceptBaseline;
       end CombinedModel;
 
@@ -49025,8 +49044,8 @@ P_hs_plus_dist"),
                 abdominal_aorta_C188(q_in(start = -2.0703901e-05, fixed = true), volume(start = 1.8004192e-05, fixed = true)),
                 abdominal_aorta_C192(q_in(start = 2.1879803e-06, fixed = true), volume(start = 1.128601e-05, fixed = true)),
                 celiac_trunk_C116(volume(start = 0.00034088033, fixed = true), phi_delayed(start = 0.2546652, fixed = true)),
-                renal_L166(volume(start = 0.00030793404, fixed = true), phi_delayed(start = 0.2546652, fixed = true)),
-                renal_R178(volume(start = 0.0003051728, fixed = true), phi_delayed(start = 0.2546652, fixed = true)),
+                renal_L166(volume(start = 0.00030793404, fixed = true)),
+                renal_R178(volume(start = 0.0003051728, fixed = true)),
                 common_iliac_R216(q_in(start = 8.7540875e-06, fixed = true), volume(start = 9.474735e-06, fixed = true)),
                 internal_iliac_T1_R218(volume(start = 0.00016764645, fixed = true), phi_delayed(start = 0.2546652, fixed = true)),
                 external_iliac_R220(q_in(start = 1.572382e-05, fixed = true), volume(start = 5.2979703e-06, fixed = true)),
