@@ -2646,6 +2646,21 @@ type"),       Text(
 <p><br><b>Ohm&apos;s law</b>. It is used conductance (=1/resistance) because it could be numerical zero better then infinity in resistance. </p>
 </html>"));
       end Resistor_NonLinearSlow;
+
+    model ValveInertia "Inertia calculated for valvular orifices"
+      extends Physiolibrary.Hydraulic.Components.Inertia(I = settings.blood_rho*l/(3.14*D^2/4), R = 8*3.14*l*settings.blood_mu/A);
+      outer Settings settings
+        annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+        parameter Physiolibrary.Types.Length l = 0.01 "length of the orifice (or the 'action cone')";
+        parameter Physiolibrary.Types.Length D = 2*sqrt(A/3.14) "inner valvular diameter";
+        parameter Physiolibrary.Types.Area A_ind = 2.5 "Indexed valvular diameter per body size, cm2/m2";
+        parameter Physiolibrary.Types.Area A = A_ind*settings.BSA;
+    //     parameter Physiolibrary.Types.HydraulicResistance R = 8*3.14*l*settings.blood_mu/A;
+        //parameter Physiolibrary.Types.HydraulicInertance I = settings.blood_rho*l/(3.14*D^2/4);
+
+
+    end ValveInertia;
+
     end Basic;
 
     package Subsystems
@@ -9964,15 +9979,16 @@ Kalecky")}), experiment(
           replaceable Basic.IdealValveResistanceWithMeasurements aorticValve(
             _Goff(displayUnit="ml/(mmHg.min)"),
             Pknee=0,
+            _Ron=settings.heart_R_vlv,
             useCycleInput=true,
             useChatteringProtection=false,
-            chatteringProtectionTime(displayUnit="ms") = 0.01,
-            _Ron=settings.heart_R_vlv) constrainedby
+            chatteringProtectionTime(displayUnit="ms") = 0.01)
+                                       constrainedby
             Physiolibrary.Hydraulic.Components.IdealValveResistance(
             useChatteringProtection=true,
             chatteringProtectionTime(displayUnit="ms") = 0.01,
             _Ron=R_vlv)
-            annotation (Placement(transformation(extent={{0,-70},{-20,-50}})));
+            annotation (Placement(transformation(extent={{-18,-70},{-38,-50}})));
           replaceable Physiolibrary.Hydraulic.Components.Resistor
             r_SystemicVenousInflow(Resistance=settings.heart_R_RA)
             constrainedby Physiolibrary.Hydraulic.Interfaces.OnePort
@@ -10039,16 +10055,26 @@ Kalecky")}), experiment(
                 extent={{-5,-5},{5,5}},
                 rotation=90,
                 origin={10,-70})));
+          Basic.ValveInertia valveInertia_aortic(enabled=false, A_ind=0.0002)
+            "Indexed area by Capps 2000, PMID 10788818" annotation (Placement(
+                transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=180,
+                origin={-60,-60})));
+          Basic.ValveInertia valveInertia_Mitral(enabled=false, A_ind=0.00053)
+            "Indexed area by Sonne 10.1093/ejechocard/jen237" annotation (
+              Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=180,
+                origin={62,-88})));
+          Basic.ValveInertia valveInertia_pulmonary(enabled=false, A_ind=
+                0.00026) "Indexed area by Capps 2000, PMID 10788818"
+            annotation (Placement(transformation(
+                extent={{10,-10},{-10,10}},
+                rotation=180,
+                origin={84,60})));
         equation
           volume = ra.volume + la.volume + ventricles.V_LV + ventricles.V_RV;
-          connect(pulmonaryValve.q_out, pa) annotation (Line(
-              points={{70,60},{100,60}},
-              color={0,0,0},
-              thickness=1));
-          connect(aorticValve.q_out, sa) annotation (Line(
-              points={{-20,-60},{-100,-60}},
-              color={0,0,0},
-              thickness=1));
           connect(tricuspidValve.q_in, r_SystemicVenousInflow.q_out)
             annotation (Line(
               points={{-6,60},{-68,60}},
@@ -10058,21 +10084,12 @@ Kalecky")}), experiment(
               points={{-88,60},{-100,60}},
               color={0,0,0},
               thickness=1));
-          connect(mitralValve.q_in, r_PulmonaryVenousInflow.q_out) annotation (
-              Line(
-              points={{50,-60},{70,-60}},
-              color={0,0,0},
-              thickness=1));
           connect(r_PulmonaryVenousInflow.q_in, pv) annotation (Line(
               points={{90,-60},{100,-60}},
               color={0,0,0},
               thickness=1));
           connect(tricuspidValve.q_out, pulmonaryValve.q_in) annotation (Line(
               points={{14,60},{50,60}},
-              color={0,0,0},
-              thickness=1));
-          connect(mitralValve.q_out, aorticValve.q_in) annotation (Line(
-              points={{30,-60},{0,-60}},
               color={0,0,0},
               thickness=1));
           connect(ventricles.port_rv, idealValve_deactivable.q_out) annotation (
@@ -10088,11 +10105,6 @@ Kalecky")}), experiment(
           connect(ventricles.port_lv, idealValve_deactivable1.q_out)
             annotation (Line(
               points={{18,-16},{24,-16},{24,-18}},
-              color={0,0,0},
-              thickness=1));
-          connect(idealValve_deactivable1.q_in, aorticValve.q_in) annotation (
-              Line(
-              points={{24,-26},{24,-60},{0,-60}},
               color={0,0,0},
               thickness=1));
           connect(ventricles.volumeLimiterRV, idealValve_deactivable.ActivateLimiter)
@@ -10161,12 +10173,12 @@ Kalecky")}), experiment(
                   {0,-8},{-60,-8},{-60,32},{-54,32}}, color={0,0,127}));
           connect(mitralValve.cardiac_cycle, aorticValve.cardiac_cycle)
             annotation (Line(
-              points={{40,-50},{-10,-50}},
+              points={{40,-50},{-28,-50}},
               color={244,125,35},
               thickness=0.5));
           connect(aorticValve.cardiac_cycle, ventricles.cardiac_cycle)
             annotation (Line(
-              points={{-10,-50},{-66,-50},{-66,-20},{0,-20}},
+              points={{-28,-50},{-66,-50},{-66,-20},{0,-20}},
               color={244,125,35},
               thickness=0.5));
           connect(P0.y, add.u1) annotation (Line(points={{0,-81},{7,-81},{7,-76}},
@@ -10187,6 +10199,41 @@ Kalecky")}), experiment(
               points={{40,-50},{40,70},{60,70}},
               color={244,125,35},
               thickness=0.5));
+          connect(aorticValve.q_out, valveInertia_aortic.q_in) annotation (Line(
+              points={{-38,-60},{-50,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(valveInertia_aortic.q_out, sa) annotation (Line(
+              points={{-70,-60},{-100,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(mitralValve.q_out, idealValve_deactivable1.q_in) annotation (
+              Line(
+              points={{30,-60},{24,-60},{24,-26}},
+              color={0,0,0},
+              thickness=1));
+          connect(aorticValve.q_in, mitralValve.q_out) annotation (Line(
+              points={{-18,-60},{30,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(mitralValve.q_in, valveInertia_Mitral.q_out) annotation (Line(
+              points={{50,-60},{50,-88},{52,-88}},
+              color={0,0,0},
+              thickness=1));
+          connect(valveInertia_Mitral.q_in, r_PulmonaryVenousInflow.q_out)
+            annotation (Line(
+              points={{72,-88},{84,-88},{84,-76},{62,-76},{62,-60},{70,-60}},
+              color={0,0,0},
+              thickness=1));
+          connect(pa, valveInertia_pulmonary.q_out) annotation (Line(
+              points={{100,60},{94,60}},
+              color={0,0,0},
+              thickness=1));
+          connect(valveInertia_pulmonary.q_in, pulmonaryValve.q_out)
+            annotation (Line(
+              points={{74,60},{70,60}},
+              color={0,0,0},
+              thickness=1));
           annotation (Icon(graphics={Text(
                   extent={{-100,20},{100,100}},
                   lineColor={0,0,0},
@@ -12179,8 +12226,8 @@ P_hs/2")}));
           Physiolibrary.Types.HydraulicResistance Ra_phi(start=Ra, fixed=false)
             "Delayed arterioles resistance dependent on phi";
             Physiolibrary.Types.HydraulicResistance Rv_phi=Rv*(1 + (phi -
-                settings.phi0)*settings.tissues_eta_Rv)/(1 + exercise*settings.tissues_chi_R)
-              "Venules resistance dependent on phi and exercise";
+                settings.phi0)*settings.tissues_eta_Rv)
+              "Venules resistance dependent on phi and exercise"; // *1/(1 + exercise*settings.tissues_chi_R)
 
           parameter Real k=C/(V_maxExponential - V_n)
             "For Pstras non-linear PV characteristics. For gamma = 0.0003750308";
@@ -39832,7 +39879,8 @@ P_hs_plus_dist"),
 
     model CardiovascularSystem
       //   extends Auxiliary.partialCVS_optimized_ss;
-      extends ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized1_init;
+      //  extends ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized1_init;
+      extends Experiments.CVS_SATejection;
 
       annotation (
         experiment(
@@ -40473,6 +40521,7 @@ P_hs_plus_dist"),
       Physiolibrary.Types.Pressure brachial_pressure_diastolic_i(start = 0);
 
       Real brachial_pressure_int "integration of pressure to find the true mean";
+        output Physiolibrary.Types.Pressure ascending_aorta = SystemicComponent.ascending_aorta_A.p1 "PRessure in ascending aorta";
         output Physiolibrary.Types.Pressure renal_capillary=SystemicComponent.renal_L166.p_C;
         output Physiolibrary.Types.VolumeFlowRate CO(displayUnit = "l/min") = heartComponent.aorticValve.CO;
         output Physiolibrary.Types.Pressure carotid_pressure=SystemicComponent.common_carotid_L48_D.p_out_hs;
@@ -47415,8 +47464,8 @@ P_hs_plus_dist"),
         end CombinedModels_FMUs_BaselineValsalvaTilt_BaselineExercise;
 
         model CombinedModels_FMUs_ExceptBaseline
-          extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime
-                =0, fmi_StopTime=30));
+          extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime=
+                 0, fmi_StopTime=30));
         end CombinedModels_FMUs_ExceptBaseline;
       end CombinedModel;
 
@@ -50581,7 +50630,9 @@ P_hs_plus_dist"),
             offset=settings.phi0,
             startTime=0),
           useAutonomousPhi(y=false),
-          settings(tissues_chi_R(displayUnit="1") = 20, tissue_chi_C=0.09));
+          settings(tissues_chi_R(displayUnit="1") = 20, tissue_chi_C=0.09),
+          heartComponent(aorticValve(_Ron(displayUnit="(mmHg.s)/ml") =
+                1333223.87415)));
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           offset=0,
@@ -50599,7 +50650,7 @@ P_hs_plus_dist"),
         connect(Exercise.y, SystemicComponent.exercise_input) annotation (Line(
               points={{-79,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
         annotation (experiment(
-            StopTime=90,
+            StopTime=20,
             Interval=0.01,
             Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"),
@@ -57038,6 +57089,28 @@ P_hs_plus_dist"),
             Line(points={{-79,-10},{-48,-10},{-48,-30},{-38,-30}}, color={0,0,
                 127}));
       end CardiovascularSystem_incrConduct;
+
+      model CVS_SATejection
+        extends ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized1_init(
+          heartComponent(
+            aorticValve(_Ron(displayUnit="(Pa.s)/m3") = 11076513),
+            valveInertia_aortic(enabled=true, l=0.02),
+            valveInertia_Mitral(enabled=true, l=0.005),
+            valveInertia_pulmonary(enabled=true)),
+          useAutonomousPhi(y=false),
+          settings(heart_R_vlv(displayUnit="(mmHg.s)/ml") = 266645.0));
+        parameter Physiolibrary.Types.HydraulicInertance I=120000.0
+                                                                "Inertance";
+        parameter Physiolibrary.Types.HydraulicResistance ao_Ron(displayUnit="(mmHg.s)/ml")=
+           6666120.0
+          "forward state resistance";
+
+        annotation (experiment(
+            StopTime=10,
+            Interval=0.005,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end CVS_SATejection;
     end Experiments;
 
   annotation(preferredView="info",

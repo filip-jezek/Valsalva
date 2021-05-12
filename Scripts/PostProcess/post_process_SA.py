@@ -98,6 +98,8 @@ dpi = 100
 plt.figure(figsize = [800/dpi, 800/dpi], dpi=dpi)
 plt.rc('ytick', labelsize=6)
 plt.axvline(x=s_mean, color='r')
+
+plt.axvline(x=0.988, color='k')
 plt.barh(range(len(heights)), heights, tick_label = labels)
 
 plt.subplots_adjust(left=0.4)

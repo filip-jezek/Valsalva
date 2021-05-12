@@ -51,7 +51,7 @@ def getObjectives(vars_set):
     # HR is system input (change in phi) from 70 to 89
 
     # t = vars_set['time'][-1]
-    t = 30
+    t = 20
     interval = fun_lib.findInterval(t-5, t, vars_set['time'])
 
     BPs_target = 194.4*mmHg2SI
