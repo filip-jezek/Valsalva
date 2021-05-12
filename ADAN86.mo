@@ -28772,8 +28772,8 @@ P_hs_plus_dist"),
         parameter Real c =     -0.7703;
         parameter Real d =  -0.0007743;
         parameter Pressure p_int_diff=1866.51342381;
-        Pressure x=p_isf   - p_int_diff;
-        output Fraction Vr(start = 1) = max(0, p1*x.^2 + p2*x + p3) + max(0,a*exp(b*x) + c*exp(d*x));
+        Pressure x(start)= p_isf   - p_int_diff;
+        output Fraction Vr(start = 1); // max(0, p1*x.^2 + p2*x + p3) + max(0,a*exp(b*x) + c*exp(d*x));
         parameter Volume V_normal=0.07 annotation(Evaluate=false);
           Volume v_isf(start = V_normal)= V_normal*Vr;
         output Volume V_excess(min = -1) = V_normal*(Vr -1);
@@ -28818,13 +28818,19 @@ P_hs_plus_dist"),
           RealIO.FractionInput speedUpFact "How long lasts one second after speedup"
              annotation (Placement(transformation(extent={{6,-10},{26,10}})));
         public
-                    Boolean beat = false "Synchronization signal"
+                    Boolean beat = sample(0.01, 0.1) "Synchronization signal"
             annotation (Dialog(group="Time varying output signal"), Placement(
                 transformation(extent={{100,-10},{120,10}})));
                 Real p_vc_s;
                 Real J1s_s;
                 Real t0;
+                Real breakpoint = (a*exp(b*x) + c*exp(d*x));
+                Real braking = 1/(1+exp(-k*breakpoint))*breakpoint;
+                parameter Real k = 100;
         equation
+          Vr = p1*x.^2 + p2*x + p3 + 1/(1+exp(-k*breakpoint))*breakpoint;
+
+
           der(v_isf)/speedUpFact = J1_s - J2;
           der(v_lymph)/speedUpFact = J2 - J3 - lymphDrain;
           v_lymph = p_lymph*C_lymph;
@@ -50650,7 +50656,7 @@ P_hs_plus_dist"),
             startTime=0),
           useAutonomousPhi(y=false),
           settings(tissues_chi_R(displayUnit="1") = 20, tissue_chi_C=0.09),
-          heartComponent(aorticValve(_Ron(displayUnit="(mmHg.s)/ml") =
+          heartComponent(aorticValve(_Ron(displayUnit="(mmHg.s)/ml")=
                 1333223.87415)));
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
@@ -56424,7 +56430,8 @@ P_hs_plus_dist"),
               amplitude=360,
               width=100*10/40,
               period=40),
-            lymphaticsSettleTime=43200)
+            lymphaticsSettleTime=43200,
+            beat=heartComponent.sa_node.beat)
             annotation (Placement(transformation(extent={{40,38},{60,58}})));
           Physiolibrary.Hydraulic.Sensors.PressureMeasure pressureMeasure
             annotation (Placement(transformation(extent={{18,30},{38,50}})));
