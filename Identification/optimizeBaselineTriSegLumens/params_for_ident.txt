@@ -1,11 +1,11 @@
 # name, value, [min, max, step]
-settings.heart_vntr_D_0,8.398225,1,20,0.2
-settings.heart_R_LA,5491134.0,2999753,30666365,33330
-settings.heart_vntr_D_A,1423.533,500,3000,50
-settings.heart_vntr_TS,0.3452533,0.1,0.5,0.01
-settings.heart_vntr_TR,0.121875,0.1,0.5,0.01
-settings.heart_atr_D_0,10789530.0,1649608.0,105460632,140551.2
-settings.heart_atr_D_A,94193450.0,4993500.0,600736500,552150.0
-heartComponent.aorticValve._Ron,11076513.0,110765,110765130,0.0
-settings.syst_TPR,127130700.0,15391250.0,1810033750.0,1282125.0
-settings.syst_TR_frac,6.360572,2.2261831,15.1653349,0.04695759
+settings.heart_vntr_D_0,12.198225,1,20,0.2
+settings.heart_R_LA,6124404.0,2999753,30666365,33330
+settings.heart_vntr_D_A,523.533,500,3000,50
+settings.heart_vntr_TS,0.2552533,0.1,0.5,0.01
+settings.heart_vntr_TR,0.111875,0.1,0.5,0.01
+settings.heart_atr_D_0,13459999.0,1649608.0,105460632,140551.2
+settings.heart_atr_D_A,83702560.0,4993500.0,600736500,552150.0
+heartComponent.aorticValve._Ron,20107652.0,110765,110765130,0.0
+settings.syst_TPR,102770272.0,15391250.0,1810033750.0,1282125.0
+settings.syst_TR_frac,5.515337,2.2261831,15.1653349,0.04695759

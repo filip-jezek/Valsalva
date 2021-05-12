@@ -2653,7 +2653,7 @@ type"),       Text(
         annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
         parameter Physiolibrary.Types.Length l = 0.01 "length of the orifice (or the 'action cone')";
         parameter Physiolibrary.Types.Length D = 2*sqrt(A/3.14) "inner valvular diameter";
-        parameter Physiolibrary.Types.Area A_ind = 2.5 "Indexed valvular diameter per body size, cm2/m2";
+        parameter Physiolibrary.Types.Area A_ind = 2.5e-4 "Indexed valvular diameter per body size, cm2/m2";
         parameter Physiolibrary.Types.Area A = A_ind*settings.BSA;
     //     parameter Physiolibrary.Types.HydraulicResistance R = 8*3.14*l*settings.blood_mu/A;
         //parameter Physiolibrary.Types.HydraulicInertance I = settings.blood_rho*l/(3.14*D^2/4);

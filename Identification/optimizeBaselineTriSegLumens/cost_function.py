@@ -93,7 +93,7 @@ def getObjectives(vars_set):
     vla_peak_frac = q_mv_Ppassive/q_mv_Patrial
     (atrial_kick, q_mv_saddle) = fun_lib.calculateQdot_mv(vars_set['V_LV'], vars_set['q_mv'], time, intervalQMV)
     # peak pressure drop on aortic valve
-    dp_av = numpy.max(vars_set['ascending_aorta'][interval]) - numpy.max(vars_set['V_LV'][interval])
+    dp_av = numpy.max(vars_set['ascending_aorta'][interval]) - numpy.max(vars_set['P_LV'][interval])
 
     # Van Bortel 2012 siggest using 80 % of carotid to femoral distance
     # distance = vars_set['speedSegmentLength'][1]*0.8
