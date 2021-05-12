@@ -587,10 +587,10 @@ overWriteDsinTemplate = True
 DSFILEIN = None
 OPTOUTPUTFILEIN = 'OutputListingMain.txt'
 
-DSFILEIN = 'dsin.txt'
-OPTOUTPUTFILEIN = None
+# DSFILEIN = 'dsin.txt'
+# OPTOUTPUTFILEIN = None
 
-USEPSO = False
+USEPSO = True
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')

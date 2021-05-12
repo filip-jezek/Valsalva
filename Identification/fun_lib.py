@@ -54,10 +54,10 @@ class ObjectiveVar:
         if weight is None:
             if tolerance is not None and targetValue is None and limit is not None:
                 # calculate the weight from limits
-                self.weight=max(limit)/tolerance
+                self.weight= 0 if tolerance == 0 else max(limit)/tolerance 
             elif tolerance is not None and targetValue is not None:
                 # calculate the weigth from tolerance and target value
-                self.weight = targetValue/tolerance
+                self.weight = 0 if tolerance == 0 else targetValue/tolerance
             else:
                 # cant calculate the weight
                 self.weight = 1
