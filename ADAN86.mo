@@ -2754,14 +2754,56 @@ type"),       Text(
             "Generalized activation coefficient 0.25 for baseline supine resting."
                                                         annotation (Placement(
                 transformation(extent={{96,70},{116,90}})));
+
+        //         Boolean beat = sample(0.1, 1);
+        //
+        // parameter Real phi0 = 0.25;
+        // Real fbr_ao_contrib_i, fbr_ao_contrib_a(start = 1), fbr_car_contrib_i, fbr_car_contrib_a(start = 1), t0;
+        // Real f1_adj(start = f1), f1_set(start = f1), phi_adj(start = phi0, fixed = true);
+        // Boolean init_phase = if time > t_init_phase then false else true;
+        // parameter Real t_init_phase = 120;
+        // Real f1_adj_a, f1_adj_i;
         equation
+        //   der(fbr_ao_contrib_i) = fbr_ao_contrib;
+        //   der(fbr_car_contrib_i) = fbr_car_contrib;
+        //
+        //   when beat then
+        //     t0 = time;
+        //     fbr_ao_contrib_a = fbr_ao_contrib_i/(time-pre(t0));
+        //     fbr_car_contrib_a = fbr_car_contrib_i/(time-pre(t0));
+        //     f1_adj_a = f1_adj_i/(time-pre(t0));
+        //     reinit(fbr_ao_contrib_i, 0);
+        //     reinit(fbr_car_contrib_i, 0);
+        //     reinit(f1_adj_i, 0);
+        //   end when;
+
+          // what the f1 has to be given the fsn
+          // der(f1_adj) = fsn*(1 - phi_adj) - phi_adj*f1_adj*max(fbr_ao_contrib_a + fbr_car_contrib_a, 1e-9);
+        //   der(f1_adj)*10 = fsn*(1 - phi_adj) - phi_adj*f1_adj*(fbr_ao_contrib + fbr_car_contrib);
+        //   der(f1_adj_i) = f1_adj;
+        //
+        //   if init_phase then
+        //     // no change in
+        //     der(phi_adj) = 0;
+        //   else
+        //     der(phi_adj) = fsn*(1 - phi_adj) - phi_adj*f1_set*(fbr_ao_contrib + fbr_car_contrib);
+        //   end if;
+        //
+        //   when not init_phase then
+        //     f1_set = f1_adj_a;
+        //   end when;
+        //
+
+
         //   when time > resetAt then
         //     reinit(fiSN, fiSN_start);
         //   end when;
-          der(phi_mean)*tau_mean =phi - phi_mean;
+          der(phi_mean)*tau_mean = phi - phi_mean;
+
 
         //   // TODO get rid of this!
         //   if time < 60 then
+        // phi = phi_adj;
           der(phi)= fsn*(1 - phi) - phi*f1*(fbr_ao_contrib + fbr_car_contrib);
         //   else
         //     der(fiSN) = 0;
@@ -12226,7 +12268,7 @@ P_hs/2")}));
           Physiolibrary.Types.HydraulicResistance Ra_phi(start=Ra, fixed=false)
             "Delayed arterioles resistance dependent on phi";
             Physiolibrary.Types.HydraulicResistance Rv_phi=Rv*(1 + (phi -
-                settings.phi0)*settings.tissues_eta_Rv)
+                settings.phi0)*settings.tissues_eta_Rv)/(1 + exercise*settings.tissue_chi_C)
               "Venules resistance dependent on phi and exercise"; // *1/(1 + exercise*settings.tissues_chi_R)
 
           parameter Real k=C/(V_maxExponential - V_n)
@@ -12289,17 +12331,17 @@ P_hs/2")}));
 
           der(phi_delayed) = max(phi - phi_delayed, 0)/settings.veins_activation_tau + min(phi - phi_delayed, 0)/settings.veins_relaxation_tau;
 
-          if exercise > 0 then
+        //   if exercise > 0 then
         //     V_n_phi =V_n*(1 + exercise*settings.tissue_chi_C)/(1 + settings.tissues_eta_C*
         //         (phi_exercise - settings.phi0));
-            V_n_phi =V_n/(1 + exercise*settings.tissue_chi_C);
+        //     V_n_phi =V_n/(1 + exercise*settings.tissue_chi_C);
         //     V_maxExponential = V_n*(1 + 1*tissue_chi_C_max);
-          else
+        //   else
             V_n_phi =V_n/(1 + settings.tissues_eta_C*
                 (phi_delayed - settings.phi0));
         //         0 = tissue_chi_C_max;
         //     0 = tissue_chi_C;
-          end if;
+        //   end if;
 
           assert(Rv_phi > 0, "The exercise_factor too high, driving the venous resistance negative!");
           assert(V_maxExponential > V_n_phi, "The V_n is higher than V_max!");
@@ -39904,8 +39946,9 @@ P_hs_plus_dist"),
 
     model CardiovascularSystem
       //   extends Auxiliary.partialCVS_optimized_ss;
-      //  extends ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized1_init;
-      extends Experiments.CVS_SATejection;
+      extends ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized1_init;
+      //extends Experiments.CVS_SATejection(SystemicComponent(baroreflex_system(
+          //    baroreflex(beat = heartComponent.sa_node.beat))));
 
       annotation (
         experiment(
@@ -51376,9 +51419,11 @@ P_hs_plus_dist"),
           //         200e-6))
         extends ADAN_main.SystemicTree.CardiovascularSystem(
           useAutonomousPhi(y=true),
-          SystemicComponent(UseThoracic_PressureInput=true),
+          SystemicComponent(UseThoracic_PressureInput=true, baroreflex_system(
+                baroreflex(phi(fixed=false)))),
           pulmonaryComponent(UseThoracic_PressureInput=true),
-          heartComponent(UseThoracic_PressureInput=true));
+          heartComponent(UseThoracic_PressureInput=true),
+          settings(dummy=2));
 
       // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
       //     useAutonomousPhi(y=true),
@@ -57119,22 +57164,16 @@ P_hs_plus_dist"),
       model CVS_SATejection
         extends ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized1_init(
           heartComponent(
-            aorticValve(_Ron(displayUnit="(Pa.s)/m3") = 11076513),
+            aorticValve(_Ron(displayUnit="(Pa.s)/m3") = 176513),
             valveInertia_aortic(enabled=true, l=0.02),
             valveInertia_Mitral(enabled=true, l=0.005),
-            valveInertia_pulmonary(enabled=true)),
+            valveInertia_pulmonary(enabled=false)),
           useAutonomousPhi(y=false),
           settings(heart_R_vlv(displayUnit="(mmHg.s)/ml") = 266645.0));
-        parameter Physiolibrary.Types.HydraulicInertance I=120000.0
-                                                                "Inertance";
-        parameter Physiolibrary.Types.HydraulicResistance ao_Ron(displayUnit="(mmHg.s)/ml")=
-           6666120.0
-          "forward state resistance";
-
         annotation (experiment(
-            StopTime=10,
-            Interval=0.005,
-            Tolerance=1e-06,
+            StopTime=20,
+            Interval=0.02,
+            Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
       end CVS_SATejection;
     end Experiments;

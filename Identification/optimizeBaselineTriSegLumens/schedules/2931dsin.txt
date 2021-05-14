@@ -9,7 +9,7 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-      10                   # StopTime     Time at which integration stops
+      20                   # StopTime     Time at which integration stops
   2.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
   9.9999999999999995E-08   # Tolerance    Relative precision of signals for
@@ -54,7 +54,7 @@ double method(27,1)
                            #          grid = 4   runs forever (stopped by model)
        1                   # nt       Use every NT time instant, if grid = 3
        3                   # dense    1/2/3 restart/step/interpolate GRID points
-       1                   # evgrid   0/1 do not/save event points in comm. time grid
+ 0
        1                   # evu      0/1 U-discontinuity does not/trigger events
        0                   # evuord       U-discontinuity order to consider (0,1,...)
        0                   # error    0/1/2 One message/warning/error messages
@@ -94,7 +94,7 @@ int settings(13,1)
  1                         # lw       0/1 do not/store w  (auxiliary signals)
  1                         # la       0/1 do not/store a  (alias     signals)
  0                         # lperf    0/1 do not/store performance indicators
- 0                         # levent   0/1 do not/store event point
+ 0
  1                         # lres     0/1 do not/store results on result file
  0                         # lshare   0/1 do not/store info data for shared memory on dsshare.txt
  1                         # lform    0/1 ASCII/Matlab-binary storage format of results
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(12249,100)
+char initialName(12247,100)
 settings.phi0
 settings.height
 settings.weight
@@ -11691,6 +11691,7 @@ heartComponent.UseThoracic_PressureInput
 heartComponent.UsePhiInput
 heartComponent.HR
 heartComponent.pv.q
+heartComponent.pa.q
 heartComponent.P0.k
 heartComponent.tricuspidValve.q_in.pressure
 heartComponent.tricuspidValve.q_in.q
@@ -11708,7 +11709,6 @@ heartComponent.tricuspidValve.useLimitationInputs
 heartComponent.tricuspidValve.unitPressure
 heartComponent.tricuspidValve.unitFlow
 heartComponent.tricuspidValve._Ron
-heartComponent.pulmonaryValve.q_out.pressure
 heartComponent.pulmonaryValve.dp
 heartComponent.pulmonaryValve.useChatteringProtection
 heartComponent.pulmonaryValve.chatteringProtectionTime
@@ -12100,8 +12100,6 @@ heartComponent.valveInertia_Mitral.l
 heartComponent.valveInertia_Mitral.D
 heartComponent.valveInertia_Mitral.A_ind
 heartComponent.valveInertia_Mitral.A
-heartComponent.valveInertia_pulmonary.q_in.q
-heartComponent.valveInertia_pulmonary.q_in.der(q)
 heartComponent.valveInertia_pulmonary.dp
 heartComponent.valveInertia_pulmonary.volumeFlow_start
 heartComponent.valveInertia_pulmonary.I
@@ -12353,7 +12351,7 @@ qf_kidneys
 qf_heart
 qf_Others
 
-double initialValue(12249,6)
+double initialValue(12247,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -12372,13 +12370,13 @@ double initialValue(12249,6)
   6   256   # settings.BSA
   0       0                       0                       0                
   6   257   # settings.initByPressure
- -1       0                 -1.0000000000000000E-02 1.0000000000000000E+100
+ -1 3.125E-6 -0.01 1e+100
   1   280   # settings.V_PV_init
  -1  6.9999999999999996E-01       0                       0                
   1   280   # settings.chi_phi
  -1  2.6664500000000000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
- -1  5.4911340000000000E+06       0                 1.0000000000000000E+100
+ -1 3293446.5 0.0 1e+100
   1   280   # settings.heart_R_LA
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.heart_R_RA
@@ -12390,19 +12388,19 @@ double initialValue(12249,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1  8.3982250000000001E+00       0                       0                
+ -1 10.348225 0.0 0.0
   1   280   # settings.heart_vntr_D_0
  -1  4.2156250000000001E-04       0                       0                
   1   280   # settings.heart_vntr_D_0_maxAct
- -1  1.4235329999999999E+03       0                       0                
+ -1 1296.9705 0.0 0.0
   1   280   # settings.heart_vntr_D_A
  -1  1.0821879999999999E+04       0                       0                
   1   280   # settings.heart_vntr_D_A_maxAct
- -1  3.4525329999999999E-01       0                       0                
+ -1 0.4421283 0.0 0.0
   1   280   # settings.heart_vntr_TS
  -1  3.4774042999999998E-02       0                       0                
   1   280   # settings.heart_vntr_TS_maxAct
- -1  1.2187500000000000E-01       0                       0                
+ -1 0.18125 0.0 0.0
   1   280   # settings.heart_vntr_TR
  -1  1.1722694000000000E-01       0                       0                
   1   280   # settings.heart_vntr_TR_maxAct
@@ -12410,9 +12408,9 @@ double initialValue(12249,6)
   1   280   # settings.heart_vntr_Tact
  -1  8.0000000000000002E-02       0                       0                
   1   280   # settings.heart_vntr_Tact_maxAct
- -1  1.0789530000000000E+07       0                       0                
+ -1 2.6311612E7 0.0 0.0
   1   280   # settings.heart_atr_D_0
- -1  9.4193450000000000E+07       0                       0                
+ -1 8.7274248E7 0.0 0.0
   1   280   # settings.heart_atr_D_A
  -1  1.8825000000000000E-01       0                       0                
   1   280   # settings.heart_atr_TS
@@ -12438,9 +12436,9 @@ double initialValue(12249,6)
   1   280   # settings.heart_vntr_PExpcollagen
  -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
- -1  1.2713070000000000E+08       0                 1.0000000000000000E+100
+ -1 1.28693288E8 0.0 1e+100
   1   280   # settings.syst_TPR
- -1  6.3605720000000003E+00       0                       0                
+ -1 4.997329 0.0 0.0
   1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
@@ -12572,13 +12570,13 @@ double initialValue(12249,6)
   1   280   # settings.pulm_CO_target
  -1  3.1942059999999999E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1  2.0008140000000001E-08       0                       0                
+ -1 1.463314E-8 0.0 0.0
   1   280   # settings.pulm_C_PA
  -1  1.3332238741500000E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
- -1  9.1589350000000000E+06       0                 1.0000000000000000E+100
+ -1 9986631.0 0.0 1e+100
   1   280   # settings.pulm_R
  -1  3.3333333333333002E-04       0                       0                
   1   280   # settings.pulm_q_nom_maxq
@@ -35530,6 +35528,8 @@ double initialValue(12249,6)
   1   280   # heartComponent.HR
   0       0                       0                       0                
   6   388   # heartComponent.pv.q
+  0       0                       0                       0                
+  6   388   # heartComponent.pa.q
  -1       0                       0                       0                
   1   280   # heartComponent.P0.k
   0       0                       0                       0                
@@ -35564,8 +35564,6 @@ double initialValue(12249,6)
   6  1280   # heartComponent.tricuspidValve.unitFlow
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.tricuspidValve._Ron
-  0       0                       0                       0                
-  6   260   # heartComponent.pulmonaryValve.q_out.pressure
   0       0                       0                       0                
   6   256   # heartComponent.pulmonaryValve.dp
   0       0                       0                       0                
@@ -35722,7 +35720,7 @@ double initialValue(12249,6)
   6  1280   # heartComponent.aorticValve.unitPressure
   0       1                       0                       0                
   6  1280   # heartComponent.aorticValve.unitFlow
- -1  1.7651300000000000E+05       0                 1.0000000000000000E+100
+ -1 176513.0 0.0 1e+100
   1   280   # heartComponent.aorticValve._Ron
   0       1                       0                       0                
   6   769   # heartComponent.aorticValve.calculateAdditionalMetrics
@@ -36348,10 +36346,6 @@ double initialValue(12249,6)
   1   280   # heartComponent.valveInertia_Mitral.A_ind
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_Mitral.A
- -1       0                       0                       0                
-  2   412   # heartComponent.valveInertia_pulmonary.q_in.q
-  0       0                       0                       0                
-  3   260   # heartComponent.valveInertia_pulmonary.q_in.der(q)
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_pulmonary.dp
  -1  2.9999999999999999E-01       0                       0                
@@ -36902,7 +36896,7 @@ double initialValue(12249,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(12249,232)
+char initialDescription(12247,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -48491,6 +48485,7 @@ Rezai, Blood Press Monit 2013, for male subjects [m]
 [:#(type=Boolean)]
 Heart rate, when not specified externally [Hz|1/min]
 Volume flow [m3/s|ml/min]
+Volume flow [m3/s|ml/min]
 Constant Pressure output value [Pa|mmHg]
 Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
@@ -48508,7 +48503,6 @@ Forward threshold pressure [Pa|mmHg]
 [Pa|mmHg]
 [m3/s|ml/min]
 forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Pressure [Pa|mmHg]
 Pressure gradient [Pa|mmHg]
 [:#(type=Boolean)]
 Minimal period of time, in which a closed valve stays closed [s|ms]
@@ -48900,8 +48894,6 @@ length of the orifice (or the 'action cone') [m|cm]
 inner valvular diameter [m|cm]
 Indexed valvular diameter per body size, cm2/m2 [m2|cm2]
 [m2|cm2]
-Volume flow [m3/s|ml/min]
-der(Volume flow) [m3/s2]
 Pressure gradient [Pa|mmHg]
 Volumetric flow start value [m3/s|ml/min]
 Inertance [Pa.s2/m3|mmHg.min2/ml]

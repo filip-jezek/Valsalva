@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(12258,100)
+char initialName(12248,100)
 settings.phi0
 settings.height
 settings.weight
@@ -11691,6 +11691,7 @@ heartComponent.UseThoracic_PressureInput
 heartComponent.UsePhiInput
 heartComponent.HR
 heartComponent.pv.q
+heartComponent.pa.q
 heartComponent.P0.k
 heartComponent.tricuspidValve.q_in.pressure
 heartComponent.tricuspidValve.q_in.q
@@ -11708,7 +11709,6 @@ heartComponent.tricuspidValve.useLimitationInputs
 heartComponent.tricuspidValve.unitPressure
 heartComponent.tricuspidValve.unitFlow
 heartComponent.tricuspidValve._Ron
-heartComponent.pulmonaryValve.q_out.pressure
 heartComponent.pulmonaryValve.dp
 heartComponent.pulmonaryValve.useChatteringProtection
 heartComponent.pulmonaryValve.chatteringProtectionTime
@@ -11774,7 +11774,6 @@ heartComponent.mitralValve.T0_cycle
 heartComponent.mitralValve.CO_acc
 heartComponent.mitralValve.der(CO_acc)
 heartComponent.mitralValve.CO
-heartComponent.aorticValve.q_out.pressure
 heartComponent.aorticValve.dp
 heartComponent.aorticValve.useChatteringProtection
 heartComponent.aorticValve.chatteringProtectionTime
@@ -11813,7 +11812,6 @@ heartComponent.r_SystemicVenousInflow.useConductanceInput
 heartComponent.r_SystemicVenousInflow.Conductance
 heartComponent.r_SystemicVenousInflow.Resistance
 heartComponent.r_SystemicVenousInflow.conditionalConductance
-heartComponent.r_PulmonaryVenousInflow.q_out.pressure
 heartComponent.r_PulmonaryVenousInflow.dp
 heartComponent.r_PulmonaryVenousInflow.enable
 heartComponent.r_PulmonaryVenousInflow.useConductanceInput
@@ -12078,8 +12076,6 @@ heartComponent.pericardium.V0
 heartComponent.pericardium.s
 heartComponent.add.k1
 heartComponent.add.k2
-heartComponent.valveInertia_aortic.q_in.q
-heartComponent.valveInertia_aortic.q_in.der(q)
 heartComponent.valveInertia_aortic.dp
 heartComponent.valveInertia_aortic.volumeFlow_start
 heartComponent.valveInertia_aortic.I
@@ -12089,8 +12085,6 @@ heartComponent.valveInertia_aortic.l
 heartComponent.valveInertia_aortic.D
 heartComponent.valveInertia_aortic.A_ind
 heartComponent.valveInertia_aortic.A
-heartComponent.valveInertia_Mitral.q_in.q
-heartComponent.valveInertia_Mitral.q_in.der(q)
 heartComponent.valveInertia_Mitral.dp
 heartComponent.valveInertia_Mitral.volumeFlow_start
 heartComponent.valveInertia_Mitral.I
@@ -12100,8 +12094,6 @@ heartComponent.valveInertia_Mitral.l
 heartComponent.valveInertia_Mitral.D
 heartComponent.valveInertia_Mitral.A_ind
 heartComponent.valveInertia_Mitral.A
-heartComponent.valveInertia_pulmonary.q_in.q
-heartComponent.valveInertia_pulmonary.q_in.der(q)
 heartComponent.valveInertia_pulmonary.dp
 heartComponent.valveInertia_pulmonary.volumeFlow_start
 heartComponent.valveInertia_pulmonary.I
@@ -12352,8 +12344,6 @@ qf_Digestive
 qf_kidneys
 qf_heart
 qf_Others
-I
-ao_Ron
 Exercise.height
 Exercise.duration
 Exercise.offset
@@ -12362,7 +12352,7 @@ q_exercised_avg
 der(q_exercised_avg)
 q_exercised
 
-double initialValue(12258,6)
+double initialValue(12248,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -12385,7 +12375,7 @@ double initialValue(12258,6)
   1   280   # settings.V_PV_init
  -1  6.9999999999999996E-01       0                       0                
   1   280   # settings.chi_phi
- -1  2.6664500000000000E+05       0                 1.0000000000000000E+100
+ -1  1.3332238741500000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
  -1  5.4911340000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
@@ -17167,8 +17157,8 @@ double initialValue(12258,6)
   6   256   # SystemicComponent.renal_L166.V_r
   0       0                       0                 1.0000000000000000E+100
   6   256   # SystemicComponent.renal_L166.linearOverflow
- -1  2.5466519999999998E-01       0                       0                
-  2   280   # SystemicComponent.renal_L166.phi_delayed
+ -1       0                       0                       0                
+  2   272   # SystemicComponent.renal_L166.phi_delayed
   0       0                       0                       0                
   3   256   # SystemicComponent.renal_L166.der(phi_delayed)
   0       0                       0                       0                
@@ -17289,8 +17279,8 @@ double initialValue(12258,6)
   6   256   # SystemicComponent.renal_R178.V_r
   0       0                       0                 1.0000000000000000E+100
   6   256   # SystemicComponent.renal_R178.linearOverflow
- -1  2.5466519999999998E-01       0                       0                
-  2   280   # SystemicComponent.renal_R178.phi_delayed
+ -1       0                       0                       0                
+  2   272   # SystemicComponent.renal_R178.phi_delayed
   0       0                       0                       0                
   3   256   # SystemicComponent.renal_R178.der(phi_delayed)
   0       0                       0                       0                
@@ -35539,6 +35529,8 @@ double initialValue(12258,6)
   1   280   # heartComponent.HR
   0       0                       0                       0                
   6   388   # heartComponent.pv.q
+  0       0                       0                       0                
+  6   388   # heartComponent.pa.q
  -1       0                       0                       0                
   1   280   # heartComponent.P0.k
   0       0                       0                       0                
@@ -35573,8 +35565,6 @@ double initialValue(12258,6)
   6  1280   # heartComponent.tricuspidValve.unitFlow
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.tricuspidValve._Ron
-  0       0                       0                       0                
-  6   260   # heartComponent.pulmonaryValve.q_out.pressure
   0       0                       0                       0                
   6   256   # heartComponent.pulmonaryValve.dp
   0       0                       0                       0                
@@ -35706,8 +35696,6 @@ double initialValue(12258,6)
   0       0                       0                       0                
   6   328   # heartComponent.mitralValve.CO
   0       0                       0                       0                
-  6   260   # heartComponent.aorticValve.q_out.pressure
-  0       0                       0                       0                
   6   256   # heartComponent.aorticValve.dp
   0       0                       0                       0                
   6   257   # heartComponent.aorticValve.useChatteringProtection
@@ -35783,8 +35771,6 @@ double initialValue(12258,6)
   6   256   # heartComponent.r_SystemicVenousInflow.Resistance
   0       0                       0                 1.0000000000000000E+100
   6  1280   # heartComponent.r_SystemicVenousInflow.conditionalConductance
-  0       0                       0                       0                
-  6   260   # heartComponent.r_PulmonaryVenousInflow.q_out.pressure
   0       0                       0                       0                
   6   256   # heartComponent.r_PulmonaryVenousInflow.dp
   0       1                       0                       0                
@@ -36313,10 +36299,6 @@ double initialValue(12258,6)
   1   280   # heartComponent.add.k1
  -1       1                       0                       0                
   1   280   # heartComponent.add.k2
- -1       0                       0                       0                
-  2   412   # heartComponent.valveInertia_aortic.q_in.q
-  0       0                       0                       0                
-  3   260   # heartComponent.valveInertia_aortic.q_in.der(q)
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_aortic.dp
  -1  2.9999999999999999E-01       0                       0                
@@ -36325,9 +36307,9 @@ double initialValue(12258,6)
   6   256   # heartComponent.valveInertia_aortic.I
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.valveInertia_aortic.R
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # heartComponent.valveInertia_aortic.enabled
- -1  2.0000000000000000E-02       0                       0                
+ -1  1.0000000000000000E-02       0                       0                
   1   280   # heartComponent.valveInertia_aortic.l
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_aortic.D
@@ -36335,10 +36317,6 @@ double initialValue(12258,6)
   1   280   # heartComponent.valveInertia_aortic.A_ind
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_aortic.A
- -1       0                       0                       0                
-  2   412   # heartComponent.valveInertia_Mitral.q_in.q
-  0       0                       0                       0                
-  3   260   # heartComponent.valveInertia_Mitral.q_in.der(q)
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_Mitral.dp
  -1  2.9999999999999999E-01       0                       0                
@@ -36347,9 +36325,9 @@ double initialValue(12258,6)
   6   256   # heartComponent.valveInertia_Mitral.I
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.valveInertia_Mitral.R
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # heartComponent.valveInertia_Mitral.enabled
- -1  5.0000000000000001E-03       0                       0                
+ -1  1.0000000000000000E-02       0                       0                
   1   280   # heartComponent.valveInertia_Mitral.l
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_Mitral.D
@@ -36357,10 +36335,6 @@ double initialValue(12258,6)
   1   280   # heartComponent.valveInertia_Mitral.A_ind
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_Mitral.A
- -1       0                       0                       0                
-  2   412   # heartComponent.valveInertia_pulmonary.q_in.q
-  0       0                       0                       0                
-  3   260   # heartComponent.valveInertia_pulmonary.q_in.der(q)
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_pulmonary.dp
  -1  2.9999999999999999E-01       0                       0                
@@ -36369,7 +36343,7 @@ double initialValue(12258,6)
   6   256   # heartComponent.valveInertia_pulmonary.I
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.valveInertia_pulmonary.R
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # heartComponent.valveInertia_pulmonary.enabled
  -1  1.0000000000000000E-02       0                       0                
   1   280   # heartComponent.valveInertia_pulmonary.l
@@ -36861,10 +36835,6 @@ double initialValue(12258,6)
   6   256   # qf_heart
   0       0                       0                       0                
   6   256   # qf_Others
- -1  1.2000000000000000E+05       0                       0                
-  1   280   # I
- -1  6.6661200000000000E+06       0                 1.0000000000000000E+100
-  1   280   # ao_Ron
   0       0                       0                       0                
   6   256   # Exercise.height
  -1       1                       0                 1.0000000000000000E+100
@@ -36929,7 +36899,7 @@ double initialValue(12258,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(12258,232)
+char initialDescription(12248,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -36941,7 +36911,7 @@ Du Bois formula for body surface area
 Use nominal pressure to initialize vessel volume. False to use volume directly [:#(type=Boolean)]
 Volume adjustment [m3|ml]
 Maximal sympathetic activation during exercise [1|%]
-Open valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
+Open valve resistance [(Pa.s)/m3|(Pa.s)/m3]
 Resistance of left atrium [(Pa.s)/m3|(mmHg.s)/ml]
 Resistance of the right atrium [(Pa.s)/m3|(dyn.s)/cm5]
 Viscoelastic resistance of the atria [(Pa.s)/m3|(dyn.s)/cm5]
@@ -48518,6 +48488,7 @@ Rezai, Blood Press Monit 2013, for male subjects [m]
 [:#(type=Boolean)]
 Heart rate, when not specified externally [Hz|1/min]
 Volume flow [m3/s|ml/min]
+Volume flow [m3/s|ml/min]
 Constant Pressure output value [Pa|mmHg]
 Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
@@ -48535,7 +48506,6 @@ Forward threshold pressure [Pa|mmHg]
 [Pa|mmHg]
 [m3/s|ml/min]
 forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Pressure [Pa|mmHg]
 Pressure gradient [Pa|mmHg]
 [:#(type=Boolean)]
 Minimal period of time, in which a closed valve stays closed [s|ms]
@@ -48601,7 +48571,6 @@ Time of beggining of current cardiac cycle. May be same as T0, when the cardiacC
 Accumulated volume since valve closing [m3|ml]
 der(Accumulated volume since valve closing) [m3/s]
 [m3/s|ml/min]
-Pressure [Pa|mmHg]
 Pressure gradient [Pa|mmHg]
 [:#(type=Boolean)]
 Minimal period of time, in which a closed valve stays closed [s|ms]
@@ -48640,7 +48609,6 @@ if false, no resistance is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
-Pressure [Pa|mmHg]
 Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
@@ -48905,8 +48873,6 @@ minimalvolume to produce additional pressure [m3|ml]
 exponential steepness of stiffness
 Gain of input signal 1
 Gain of input signal 2
-Volume flow [m3/s|ml/min]
-der(Volume flow) [m3/s2]
 Pressure gradient [Pa|mmHg]
 Volumetric flow start value [m3/s|ml/min]
 Inertance [Pa.s2/m3|mmHg.min2/ml]
@@ -48916,8 +48882,6 @@ length of the orifice (or the 'action cone') [m|cm]
 inner valvular diameter [m|cm]
 Indexed valvular diameter per body size, cm2/m2 [m2|cm2]
 [m2|cm2]
-Volume flow [m3/s|ml/min]
-der(Volume flow) [m3/s2]
 Pressure gradient [Pa|mmHg]
 Volumetric flow start value [m3/s|ml/min]
 Inertance [Pa.s2/m3|mmHg.min2/ml]
@@ -48927,8 +48891,6 @@ length of the orifice (or the 'action cone') [m|cm]
 inner valvular diameter [m|cm]
 Indexed valvular diameter per body size, cm2/m2 [m2|cm2]
 [m2|cm2]
-Volume flow [m3/s|ml/min]
-der(Volume flow) [m3/s2]
 Pressure gradient [Pa|mmHg]
 Volumetric flow start value [m3/s|ml/min]
 Inertance [Pa.s2/m3|mmHg.min2/ml]
@@ -49179,8 +49141,6 @@ Integration costant for min-max calculations [s|min]
 [1|%]
 [1|%]
 [1|%]
-Inertance [Pa.s2/m3|mmHg.min2/ml]
-forward state resistance [(Pa.s)/m3|(mmHg.s)/ml]
 Height of ramps
 Duration of ramp (= 0.0 gives a Step) [s]
 Offset of output signal y

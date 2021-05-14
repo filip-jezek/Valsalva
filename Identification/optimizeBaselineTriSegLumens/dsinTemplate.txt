@@ -9,10 +9,10 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-      10                   # StopTime     Time at which integration stops
-  5.0000000000000001E-03   # Increment    Communication step size, if > 0
+      20                   # StopTime     Time at which integration stops
+  2.0000000000000000E-02   # Increment    Communication step size, if > 0
        0                   # nInterval    Number of communication intervals, if > 0
-  9.9999999999999995E-07   # Tolerance    Relative precision of signals for
+  9.9999999999999995E-08   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
        0                   # MaxFixedStep Maximum step size of fixed step size
                            #              integrators, if > 0.0
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(12251,100)
+char initialName(12247,100)
 settings.phi0
 settings.height
 settings.weight
@@ -11691,6 +11691,7 @@ heartComponent.UseThoracic_PressureInput
 heartComponent.UsePhiInput
 heartComponent.HR
 heartComponent.pv.q
+heartComponent.pa.q
 heartComponent.P0.k
 heartComponent.tricuspidValve.q_in.pressure
 heartComponent.tricuspidValve.q_in.q
@@ -11708,7 +11709,6 @@ heartComponent.tricuspidValve.useLimitationInputs
 heartComponent.tricuspidValve.unitPressure
 heartComponent.tricuspidValve.unitFlow
 heartComponent.tricuspidValve._Ron
-heartComponent.pulmonaryValve.q_out.pressure
 heartComponent.pulmonaryValve.dp
 heartComponent.pulmonaryValve.useChatteringProtection
 heartComponent.pulmonaryValve.chatteringProtectionTime
@@ -12100,8 +12100,6 @@ heartComponent.valveInertia_Mitral.l
 heartComponent.valveInertia_Mitral.D
 heartComponent.valveInertia_Mitral.A_ind
 heartComponent.valveInertia_Mitral.A
-heartComponent.valveInertia_pulmonary.q_in.q
-heartComponent.valveInertia_pulmonary.q_in.der(q)
 heartComponent.valveInertia_pulmonary.dp
 heartComponent.valveInertia_pulmonary.volumeFlow_start
 heartComponent.valveInertia_pulmonary.I
@@ -12352,10 +12350,8 @@ qf_Digestive
 qf_kidneys
 qf_heart
 qf_Others
-I
-ao_Ron
 
-double initialValue(12251,6)
+double initialValue(12247,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -12374,7 +12370,7 @@ double initialValue(12251,6)
   6   256   # settings.BSA
   0       0                       0                       0                
   6   257   # settings.initByPressure
- -1  1.0000000000000000E-03 -1.0000000000000000E-02 1.0000000000000000E+100
+ -1 %settings.V_PV_init% -0.01 1e+100
   1   280   # settings.V_PV_init
  -1  6.9999999999999996E-01       0                       0                
   1   280   # settings.chi_phi
@@ -12574,13 +12570,13 @@ double initialValue(12251,6)
   1   280   # settings.pulm_CO_target
  -1  3.1942059999999999E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1  2.0008140000000001E-08       0                       0                
+ -1 %settings.pulm_C_PA% 0.0 0.0
   1   280   # settings.pulm_C_PA
  -1  1.3332238741500000E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
- -1  9.1589350000000000E+06       0                 1.0000000000000000E+100
+ -1 %settings.pulm_R% 0.0 1e+100
   1   280   # settings.pulm_R
  -1  3.3333333333333002E-04       0                       0                
   1   280   # settings.pulm_q_nom_maxq
@@ -17160,8 +17156,8 @@ double initialValue(12251,6)
   6   256   # SystemicComponent.renal_L166.V_r
   0       0                       0                 1.0000000000000000E+100
   6   256   # SystemicComponent.renal_L166.linearOverflow
- -1  2.5466519999999998E-01       0                       0                
-  2   280   # SystemicComponent.renal_L166.phi_delayed
+ -1       0                       0                       0                
+  2   272   # SystemicComponent.renal_L166.phi_delayed
   0       0                       0                       0                
   3   256   # SystemicComponent.renal_L166.der(phi_delayed)
   0       0                       0                       0                
@@ -17282,8 +17278,8 @@ double initialValue(12251,6)
   6   256   # SystemicComponent.renal_R178.V_r
   0       0                       0                 1.0000000000000000E+100
   6   256   # SystemicComponent.renal_R178.linearOverflow
- -1  2.5466519999999998E-01       0                       0                
-  2   280   # SystemicComponent.renal_R178.phi_delayed
+ -1       0                       0                       0                
+  2   272   # SystemicComponent.renal_R178.phi_delayed
   0       0                       0                       0                
   3   256   # SystemicComponent.renal_R178.der(phi_delayed)
   0       0                       0                       0                
@@ -35532,6 +35528,8 @@ double initialValue(12251,6)
   1   280   # heartComponent.HR
   0       0                       0                       0                
   6   388   # heartComponent.pv.q
+  0       0                       0                       0                
+  6   388   # heartComponent.pa.q
  -1       0                       0                       0                
   1   280   # heartComponent.P0.k
   0       0                       0                       0                
@@ -35566,8 +35564,6 @@ double initialValue(12251,6)
   6  1280   # heartComponent.tricuspidValve.unitFlow
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.tricuspidValve._Ron
-  0       0                       0                       0                
-  6   260   # heartComponent.pulmonaryValve.q_out.pressure
   0       0                       0                       0                
   6   256   # heartComponent.pulmonaryValve.dp
   0       0                       0                       0                
@@ -36350,10 +36346,6 @@ double initialValue(12251,6)
   1   280   # heartComponent.valveInertia_Mitral.A_ind
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_Mitral.A
- -1       0                       0                       0                
-  2   412   # heartComponent.valveInertia_pulmonary.q_in.q
-  0       0                       0                       0                
-  3   260   # heartComponent.valveInertia_pulmonary.q_in.der(q)
   0       0                       0                       0                
   6   256   # heartComponent.valveInertia_pulmonary.dp
  -1  2.9999999999999999E-01       0                       0                
@@ -36362,7 +36354,7 @@ double initialValue(12251,6)
   6   256   # heartComponent.valveInertia_pulmonary.I
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.valveInertia_pulmonary.R
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # heartComponent.valveInertia_pulmonary.enabled
  -1  1.0000000000000000E-02       0                       0                
   1   280   # heartComponent.valveInertia_pulmonary.l
@@ -36854,10 +36846,6 @@ double initialValue(12251,6)
   6   256   # qf_heart
   0       0                       0                       0                
   6   256   # qf_Others
- -1  1.2000000000000000E+05       0                       0                
-  1   280   # I
- -1  6.6661200000000000E+06       0                 1.0000000000000000E+100
-  1   280   # ao_Ron
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -36908,7 +36896,7 @@ double initialValue(12251,6)
 #   nominal value (and maybe minimum and maximum values given in 
 #   column 3 and 4). If these values are zero, scale(i)=1 is used).
 #
-char initialDescription(12251,232)
+char initialDescription(12247,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -48497,6 +48485,7 @@ Rezai, Blood Press Monit 2013, for male subjects [m]
 [:#(type=Boolean)]
 Heart rate, when not specified externally [Hz|1/min]
 Volume flow [m3/s|ml/min]
+Volume flow [m3/s|ml/min]
 Constant Pressure output value [Pa|mmHg]
 Pressure [Pa|mmHg]
 Volume flow [m3/s|ml/min]
@@ -48514,7 +48503,6 @@ Forward threshold pressure [Pa|mmHg]
 [Pa|mmHg]
 [m3/s|ml/min]
 forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Pressure [Pa|mmHg]
 Pressure gradient [Pa|mmHg]
 [:#(type=Boolean)]
 Minimal period of time, in which a closed valve stays closed [s|ms]
@@ -48906,8 +48894,6 @@ length of the orifice (or the 'action cone') [m|cm]
 inner valvular diameter [m|cm]
 Indexed valvular diameter per body size, cm2/m2 [m2|cm2]
 [m2|cm2]
-Volume flow [m3/s|ml/min]
-der(Volume flow) [m3/s2]
 Pressure gradient [Pa|mmHg]
 Volumetric flow start value [m3/s|ml/min]
 Inertance [Pa.s2/m3|mmHg.min2/ml]
@@ -49158,6 +49144,4 @@ Integration costant for min-max calculations [s|min]
 [1|%]
 [1|%]
 [1|%]
-Inertance [Pa.s2/m3|mmHg.min2/ml]
-forward state resistance [(Pa.s)/m3|(mmHg.s)/ml]
 

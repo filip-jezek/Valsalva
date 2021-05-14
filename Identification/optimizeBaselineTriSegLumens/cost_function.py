@@ -111,7 +111,7 @@ def getObjectives(vars_set):
             ('ESV', numpy.min(vars_set['V_LV'][interval])/ml2SI, 60, None, 3),
             ('ESV_la', numpy.min(vars_set['V_la'][interval])/ml2SI, 12, None, 5),
             ('EDV_la', numpy.max(vars_set['V_la'][interval])/ml2SI, 41, None, 5),
-            ('dp_av', dp_av/mmHg2SI, None, [0, 5], 0.1),
+            ('dp_av', dp_av/mmHg2SI, None, [-5, 5], 0.1),
             ('Q_MV_f', vla_peak_frac*1, None, [1.5, 2], 0),
             ('Qdot_mv', atrial_kick*1, None, [0.2, 0.3], 0),
             ('q_mv_sad', q_mv_saddle*100, None, [0, q_mv_Patrial*20], 0),
@@ -132,7 +132,7 @@ def getObjectives(vars_set):
             # ('P_MV_o', numpy.mean(vars_set['P_MV_o'][interval])/mmHg2SI, 4.5*mmHg2SI, None, 0, 1/mmHg2SI),
             # ('P_MV_c', numpy.mean(vars_set['P_MV_c'][interval])/mmHg2SI, 6*mmHg2SI, None, 0, 1/mmHg2SI),
             # ('BPMeanStd', numpy.std(vars_set['brachial_pressure_mean'][steady_interval]), None, [0, 4*mmHg2SI], 0, 1/mmHg2SI),
-            ('Ts', max(vars_set['TEjection'][interval]), 0.292, None, 0.0001),
+            ('Ts', max(vars_set['TEjection'][interval]), 0.292, None, 0.02),
             ('PWV', pwv, None, [5, 10], 1)            ]
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], tolerance=o[4], k_p=1), ov))
