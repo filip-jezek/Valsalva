@@ -17,12 +17,12 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized1'
+base_model_full_path = 'ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized2'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
-steadyStateAt = 599.6
-mat_file_path = 'settings.baro_fsn = 0.0355333333.mat' # or none to detect automatically
+steadyStateAt = 299.5
+mat_file_path = 'settings.baro_f1 = 0.0035.mat' # or none to detect automatically
 
 # get the main and path
 if '.' in base_model_full_path:

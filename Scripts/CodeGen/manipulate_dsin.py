@@ -595,8 +595,8 @@ USEPSO = True
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
-    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
-    # writeInitStatesFromDsin(dsFileIn="dsin.txt")
+    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
+    writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')
     print('Done, Johne')
