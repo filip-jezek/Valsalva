@@ -2,6 +2,24 @@
 package ADAN_main
 
   package UsersGuide "User's Guide"
+    model Nomenclature "A description of nomenclature"
+      annotation (
+        Icon(coordinateSystem(preserveAspectRatio=false)),
+        Diagram(coordinateSystem(preserveAspectRatio=false)),
+        Documentation(info="<html>
+<p><b>Settings</b></p>
+<p>Settings contain shared parametrization for the whole model. To counter name collisions, the parameters in settings use an informative path prefix, e.g. Systemic_artery_XXX</p>
+<p><b>Name symbols</b></p>
+<ul>
+<li>phi - sympathetic activation</li>
+<li>eta_XXX - slope parameter for sympathetic activation effect on XXX </li>
+<li>chi_XXX - effect of exercise</li>
+<li>xi_XXX - helper factor used for identification (e.g. scaling multiple dependent parameters)</li>
+<li></li>
+</ul>
+</html>"));
+    end Nomenclature;
+
     package DemonstrateInheritance "Inheritance and redeclaration examples"
       model sub_A
         replaceable parameter Integer param = 1;
@@ -139,23 +157,6 @@ package ADAN_main
       annotation (DocumentationClass=false);
     end DemonstrateInheritance;
 
-    model Nomenclature "A description of nomenclature"
-      annotation (
-        Icon(coordinateSystem(preserveAspectRatio=false)),
-        Diagram(coordinateSystem(preserveAspectRatio=false)),
-        Documentation(info="<html>
-<p><b>Settings</b></p>
-<p>Settings contain shared parametrization for the whole model. To counter name collisions, the parameters in settings use an informative path prefix, e.g. Systemic_artery_XXX</p>
-<p><b>Name symbols</b></p>
-<ul>
-<li>phi - sympathetic activation</li>
-<li>eta_XXX - slope parameter for sympathetic activation effect on XXX </li>
-<li>chi_XXX - effect of exercise</li>
-<li>xi_XXX - helper factor used for identification (e.g. scaling multiple dependent parameters)</li>
-<li></li>
-</ul>
-</html>"));
-    end Nomenclature;
   annotation(DocumentationClass = true);
   end UsersGuide;
 
@@ -168,7 +169,8 @@ package ADAN_main
       // general
       parameter Fraction phi0=0.25   "Baseline resting phi" annotation(Dialog(group = "General"));
       parameter Physiolibrary.Types.Height height=1.7   "Subject's height for scaling vessel lengths" annotation(Dialog(group = "General"));
-      parameter Modelica.SIunits.Mass weight = BMI*(height^2) "Subject's weight" annotation(Dialog(group = "General"));
+      parameter Modelica.Units.SI.Mass weight=BMI*(height^2) "Subject's weight"
+        annotation (Dialog(group="General"));
       parameter Real age = 35 annotation(Dialog(group = "General"));
       parameter Frequency HR_nominal=1   "Resting heart rate (at phi0)"
         annotation(Dialog(group = "General"));
@@ -500,9 +502,9 @@ package ADAN_main
       parameter Fraction experimental_zpv_factor=0.5   "A fraction of venous nominal diameter which creates ZPV for linear veins";
       parameter Fraction experimental_C_factor=1   "A fraction of nominal C";
       parameter Real experimental_L0=0.907;
-      parameter Modelica.SIunits.Time Td_phi_syst = 0;
-      parameter Modelica.SIunits.Time Td_phi_hr = 0;
-      parameter Modelica.SIunits.Time Td_phi_heart = 0;
+      parameter Modelica.Units.SI.Time Td_phi_syst=0;
+      parameter Modelica.Units.SI.Time Td_phi_hr=0;
+      parameter Modelica.Units.SI.Time Td_phi_heart=0;
         annotation(Dialog(tab = "Heart", group = "Simple atria"),
                      Dialog(tab = "Heart", group = "TriSegOttesen drive"),
                    defaultComponentName =     "settings",
@@ -610,7 +612,7 @@ type"),       Text(
         import ADAN_main;
         extends ADAN_main.Components.Interfaces.Pq_terminator_p(redeclare
             ADAN_main.Components.Interfaces.HydraulicPort_b_leveled port_a);
-        parameter Modelica.SIunits.Height level = 0;
+        parameter Modelica.Units.SI.Height level=0;
       equation
         port_a.position = level;
 
@@ -620,7 +622,7 @@ type"),       Text(
         import ADAN_main;
         extends ADAN_main.Components.Interfaces.Pq_terminator_v(redeclare
             ADAN_main.Components.Interfaces.HydraulicPort_b_leveled port_a);
-        parameter Modelica.SIunits.Height level = 0;
+        parameter Modelica.Units.SI.Height level=0;
       equation
         port_a.position = level;
 
@@ -699,7 +701,7 @@ type"),       Text(
 
       connector HydraulicPort_a_leveled
         extends Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a;
-        Modelica.SIunits.Height position;
+        Modelica.Units.SI.Height position;
           annotation (
           defaultComponentName="leveledPort_a",
           Icon(graphics={Ellipse(
@@ -718,7 +720,7 @@ type"),       Text(
 
       connector HydraulicPort_b_leveled
         extends Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b;
-        Modelica.SIunits.Height position;
+        Modelica.Units.SI.Height position;
           annotation (
           defaultComponentName="leveledPort_b",
           Icon(graphics={Ellipse(
@@ -809,16 +811,16 @@ type"),       Text(
         parameter Boolean delayTransport_Enabled=false
           "Enable pure constant transport delay"
                                              annotation(choices(checkBox=true));
-        parameter Modelica.SIunits.Time delayTransport_Time=0
-          "Delay time of output with respect to input signal" annotation(Dialog(enable=
-                delayTransport_Enabled));
+        parameter Modelica.Units.SI.Time delayTransport_Time=0
+          "Delay time of output with respect to input signal"
+          annotation (Dialog(enable=delayTransport_Enabled));
         parameter Boolean delayIntegral_Enabled=false
           "Enable assymetrical integral delay"
                                              annotation(choices(checkBox=true));
-        parameter Modelica.SIunits.Time delayInt_Act=0.001
-          "Delay time of output with respect to input signal" annotation(Dialog(enable=
-                delayIntegral_Enabled));
-        parameter Modelica.SIunits.Time delayInt_Relax=0.001
+        parameter Modelica.Units.SI.Time delayInt_Act=0.001
+          "Delay time of output with respect to input signal"
+          annotation (Dialog(enable=delayIntegral_Enabled));
+        parameter Modelica.Units.SI.Time delayInt_Relax=0.001
           "Delay time of output with respect to input signal for activation"
           annotation (Dialog(enable=delayIntegral_Enabled));
 
@@ -909,7 +911,7 @@ type"),       Text(
 
       model MyDelay
         extends Modelica.Blocks.Interfaces.SISO;
-        parameter Modelica.SIunits.Time delayTime(start=1)
+        parameter Modelica.Units.SI.Time delayTime(start=1)
           "Delay time of output with respect to input signal";
         parameter Boolean delayEnabled=false;
 
@@ -960,17 +962,17 @@ type"),       Text(
               transformation(extent={{-120,-20},{-80,20}}), iconTransformation(extent={{-120,
                   -20},{-80,20}})));
         parameter Physiolibrary.Types.Volume v0;
-        Modelica.SIunits.Diameter d;
-        Modelica.SIunits.Diameter d0;
-        Modelica.SIunits.Length l_wall;
-        Modelica.SIunits.Length l0_wall;
+        Modelica.Units.SI.Diameter d;
+        Modelica.Units.SI.Diameter d0;
+        Modelica.Units.SI.Length l_wall;
+        Modelica.Units.SI.Length l0_wall;
         Physiolibrary.Types.RealIO.FractionOutput dr = dd "Distention ratio" annotation (Placement(
               transformation(extent={{90,-10},{110,10}}), iconTransformation(extent={{-10,-10},
                   {10,10}},
               rotation=0,
               origin={100,0})));
 
-        parameter Modelica.SIunits.Length l = 1;
+        parameter Modelica.Units.SI.Length l=1;
         Physiolibrary.Types.Fraction cd = l_wall/l0_wall "Circumferential distention";
         Physiolibrary.Types.Fraction dd = d/d0 "diameter distention";
       equation
@@ -1016,7 +1018,7 @@ type"),       Text(
         model ReadData
           parameter Real stopTime=Modelica.Constants.inf
             "Last point before repeat";
-          parameter Modelica.SIunits.Time startTime=0
+          parameter Modelica.Units.SI.Time startTime=0
             "Start time of the repeat";
 
           parameter Integer ExperimentNr = 1;
@@ -1157,7 +1159,7 @@ type"),       Text(
                     Real T =  1/readData.heart_rate + correction;
 
                     //             Real T =  (if readData.heart_rate > 1e-6 then 1/readData.heart_rate else Modelica.Constants.inf)  + correction;
-                    parameter Modelica.SIunits.Time correction = 0;
+          parameter Modelica.Units.SI.Time correction=0;
 
         equation
           when pre(t0) + T < t then
@@ -1298,7 +1300,7 @@ type"),       Text(
           parameter Physiolibrary.Types.Frequency fsn=0.01725
             "rising factor of the phi";
           parameter Physiolibrary.Types.Fraction g=0.70375 "Aortic / carotid ratio";
-          parameter Modelica.SIunits.Time delayTime=0.771875
+          parameter Modelica.Units.SI.Time delayTime=0.771875
             "Delay time of output with respect to input signal";
                 Real cost = sum(hrDataElement.cost);
                 output Real sum_costs = sum(hrDataElement.sum_cost);
@@ -1424,14 +1426,14 @@ type"),       Text(
         extends Modelica.Blocks.Interfaces.SignalSource(y(start = offset));
 
 
-        parameter Modelica.SIunits.Time startTime = 0;
-        parameter Modelica.SIunits.Time interval = 1;
+        parameter Modelica.Units.SI.Time startTime=0;
+        parameter Modelica.Units.SI.Time interval=1;
 
         parameter Physiolibrary.Types.Fraction offset = 0;
         parameter Physiolibrary.Types.Fraction increment = 1;
         parameter Physiolibrary.Types.Fraction maxVal = 10;
 
-        Modelica.SIunits.Time t0(start = -interval);
+        Modelica.Units.SI.Time t0(start=-interval);
         Physiolibrary.Types.Fraction y_(start = offset) "non dealayed val";
         Physiolibrary.Types.Fraction plot_Step "Use as X axis for exercise stepping. Plots the state just before the next step increase";
         parameter Real tau = 1;
@@ -1476,14 +1478,12 @@ type"),       Text(
       model IntegralActRelaxDelay
         parameter Boolean delayEnabled=false annotation(choices(checkBox=true));
         parameter Physiolibrary.Types.Fraction phi0;
-        parameter Modelica.SIunits.Time delayTimeAct=0
+        parameter Modelica.Units.SI.Time delayTimeAct=0
           "Delay time of output with respect to input signal for activation"
-                                                              annotation(Dialog(enable=
-                delayEnabled));
-        parameter Modelica.SIunits.Time delayTimeRelax=0
+          annotation (Dialog(enable=delayEnabled));
+        parameter Modelica.Units.SI.Time delayTimeRelax=0
           "Delay time of output with respect to input signal for activation"
-                                                              annotation(Dialog(enable=
-                delayEnabled));
+          annotation (Dialog(enable=delayEnabled));
 
         Modelica.Blocks.Interfaces.RealInput u annotation (Placement(transformation(
                 rotation=0, extent={{-110,-10},{-90,10}})));
@@ -1898,13 +1898,14 @@ type"),       Text(
 
       model ValveMynard "Valve by Mynard et al 2012, doi 10.1002/cnm.1466"
         extends Physiolibrary.Hydraulic.Interfaces.OnePort;
-        type Area = Modelica.SIunits.Area(nominal = 1e-4);
+        type Area = Modelica.Units.SI.Area (
+                                          nominal = 1e-4);
 
         Area ARef=ARef_init;
 
         parameter Area ARef_init
           "Starting value of reference cross-sectional area";
-        parameter Modelica.SIunits.Length l "Length of valve segment";
+        parameter Modelica.Units.SI.Length l "Length of valve segment";
         parameter Physiolibrary.Types.Pressure dpO=0 "Opening pressure";
         parameter Physiolibrary.Types.Pressure dpC=0 "Closing pressure";
         parameter Real Ko(unit="m2/(N.s)") "Opening rate coefficient";
@@ -2573,7 +2574,7 @@ type"),       Text(
         parameter Physiolibrary.Types.VolumeFlowRate Q_high=0.00033333333333333
           "Nominal flow for maximal flow case (e.g. exercise)" annotation (Dialog(enable=
                 useNominalParametrization and useNonlinearResistance));
-        parameter Modelica.SIunits.Time tau = 1;
+        parameter Modelica.Units.SI.Time tau=1;
         parameter Physiolibrary.Types.VolumeFlowRate maxLinearFlow=Q_nom
           "Maximal flow having constant TPR to prevent multistable simulation" annotation (Dialog(enable = useNonlinearResistance));
         Physiolibrary.Types.HydraulicResistance TPR= a*q_avg + b;
@@ -2749,7 +2750,8 @@ type"),       Text(
           Real fbr_car_contrib=2*(1 - g)*carotid_BR
             "Weighted contribution of carotid firing rate";
         //     parameter Modelica.SIunits.Time resetAt = -1;
-          parameter Modelica.SIunits.Time tau_mean = 10 "time constant for integral average";
+          parameter Modelica.Units.SI.Time tau_mean=10
+            "time constant for integral average";
           Physiolibrary.Types.RealIO.FractionOutput phi(start=0.25)
             "Generalized activation coefficient 0.25 for baseline supine resting."
                                                         annotation (Placement(
@@ -3231,10 +3233,10 @@ type"),       Text(
               annotation (Placement(transformation(extent={{82,-14},{62,6}})));
             constant Real mmHg2SI=133.322;
             Modelica.Blocks.Sources.Sine sine(
+              f(displayUnit="1/min") = 1.2,
               amplitude=(PA_s - PA_d)/2,
-              freqHz(displayUnit="1/min") = 1.2,
-              offset=PA_d + (PA_s - PA_d)/2)
-              annotation (Placement(transformation(extent={{-100,-14},{-80,6}})));
+              offset=PA_d + (PA_s - PA_d)/2) annotation (Placement(
+                  transformation(extent={{-100,-14},{-80,6}})));
            parameter Physiolibrary.Types.Pressure PA_s=15998.6864898;
            parameter Physiolibrary.Types.Pressure PA_d=10665.7909932;
           equation
@@ -4005,13 +4007,17 @@ type"),       Text(
             Modelica.Blocks.Interfaces.RealInput t0 "Start time of current cardiac cycle"
               annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
                   iconTransformation(extent={{-120,-20},{-80,20}})));
-            parameter Modelica.SIunits.Time t0_delay = 0 "Delay of contraction after SA node ";
-            parameter Modelica.SIunits.Time t0_delay_maxAct=t0_delay
+            parameter Modelica.Units.SI.Time t0_delay=0
+              "Delay of contraction after SA node ";
+            parameter Modelica.Units.SI.Time t0_delay_maxAct=t0_delay
               "Delay of contraction after SA node ";
             Real t0_delay_coeff "delay activation slope coefficient";
-            Modelica.SIunits.Time t0_delay_phi = t0_delay + t0_delay_coeff *(phi_ - phi0) "Systolic delay varying on phi";
-            Modelica.SIunits.Time tm = if t0_delay_phi > 0 then time - time0 else t0 "Time since beggining of the (delayed) systole";
-            Modelica.SIunits.Time time0(start = -Modelica.Constants.inf) "time of the last beat";
+            Modelica.Units.SI.Time t0_delay_phi=t0_delay + t0_delay_coeff*(phi_
+                 - phi0) "Systolic delay varying on phi";
+            Modelica.Units.SI.Time tm=if t0_delay_phi > 0 then time - time0
+                 else t0 "Time since beggining of the (delayed) systole";
+            Modelica.Units.SI.Time time0(start=-Modelica.Constants.inf)
+              "time of the last beat";
 
                   // initial equation
           //   if initializeCardiac_cycle and t_offset <> 0 then
@@ -4095,8 +4101,8 @@ type"),       Text(
                       Physiolibrary.Types.Pressure thoracic_pressure_inside = thoracic_pressure_input
                 *max(min(volume /volume_min, 1), 0) "limiting external pressure for small or negative volumes";
 
-           Modelica.SIunits.Work currentWork;
-           Modelica.SIunits.Work work;
+            Modelica.Units.SI.Work currentWork;
+            Modelica.Units.SI.Work work;
 
             parameter Physiolibrary.Types.Fraction contractilityFraction=1;
             parameter Boolean enableCollagen = false "Enab;e nonlinear collagen force, effectively limiting atrial volume" annotation(choices(checkBox=true));
@@ -4171,8 +4177,8 @@ type"),       Text(
                       Physiolibrary.Types.Pressure thoracic_pressure_inside = thoracic_pressure_input
                 *max(min(volume /volume_min, 1), 0) "limiting external pressure for small or negative volumes";
 
-           Modelica.SIunits.Work currentWork;
-           Modelica.SIunits.Work work;
+            Modelica.Units.SI.Work currentWork;
+            Modelica.Units.SI.Work work;
 
           equation
 
@@ -4742,7 +4748,7 @@ type"),       Text(
           //   Real mta_;
             input Real T(unit = "s");
             Physiolibrary.Types.Frequency f = 1/T;
-            discrete Modelica.SIunits.Time last_beat(start = 0);
+            discrete Modelica.Units.SI.Time last_beat(start=0);
           //  Real int_f;
             Real d_mt = t_onset_a/f;
 
@@ -6196,7 +6202,7 @@ type"),       Text(
               extends
                 ADAN_main.Components.Subsystems.Heart.Auxiliary.partialDriving;
 
-              parameter Modelica.SIunits.Time tauR =  0.048;
+              parameter Modelica.Units.SI.Time tauR=0.048;
               Real x=min(8, max(0, t0/tauR));
               Real Fr = 0.02*(x^3)*((8-x)^2)*exp(-x);
               parameter Physiolibrary.Types.Fraction phi_effect_Ca = 0;
@@ -6619,7 +6625,7 @@ type"),       Text(
               "As close to original Lumens model as possible, with exception of passive force."
               extends partialVentricleWall;
               Real sinalpha = Tx/Tm;
-              Modelica.SIunits.Angle alpha = asin(sinalpha);
+              Modelica.Units.SI.Angle alpha=asin(sinalpha);
 
               // Inlcuded in the base class:
               //   input Real xm;
@@ -6653,9 +6659,12 @@ type"),       Text(
               parameter Real SLrest=1.51 "microns";
 
               // same parameters as in driving function. Change with care.
-              parameter Modelica.SIunits.Time tauD=0.032 "Factor scaling contraction decay time";
-              parameter Modelica.SIunits.Time tauR=0.048 "Factor scaling contraction rise time";
-              parameter Modelica.SIunits.Time tauSC=0.425 "Factor scaling duration of contraction";
+              parameter Modelica.Units.SI.Time tauD=0.032
+                "Factor scaling contraction decay time";
+              parameter Modelica.Units.SI.Time tauR=0.048
+                "Factor scaling contraction rise time";
+              parameter Modelica.Units.SI.Time tauSC=0.425
+                "Factor scaling duration of contraction";
               parameter Real Crest=0.02 "Diastolic resting level of activation";
 
               Real CL=tanh(4*(SL - SLrest)^2) "increase of activation with sarcomere length";
@@ -6720,7 +6729,7 @@ type"),       Text(
               outer Physiolibrary.Types.Fraction phi;
 
               Real sinalpha = Tx/Tm;
-              Modelica.SIunits.Angle alpha = asin(sinalpha);
+              Modelica.Units.SI.Angle alpha=asin(sinalpha);
 
               // Inlcuded in the base class:
               //   input Real xm;
@@ -6937,7 +6946,7 @@ type"),       Text(
               outer Physiolibrary.Types.Fraction phi;
 
               Real sinalpha = Tx/Tm;
-              Modelica.SIunits.Angle alpha = asin(sinalpha);
+              Modelica.Units.SI.Angle alpha=asin(sinalpha);
 
               // Inlcuded in the base class:
               //   input Real xm;
@@ -7104,9 +7113,9 @@ type"),       Text(
               Physiolibrary.Types.Pressure P_RV=_P_RV*Constants.mmHg2SI;
               inner Physiolibrary.Types.Fraction phi = phi_input "Global provider of phi for any components interested";
 
-             Modelica.SIunits.Work currentWork_LV;
+              Modelica.Units.SI.Work currentWork_LV;
              Physiolibrary.Types.Power power_LV;
-             Modelica.SIunits.Work currentWork_RV;
+              Modelica.Units.SI.Work currentWork_RV;
              Physiolibrary.Types.Power power_RV;
 
               Physiolibrary.Types.RealIO.TimeInput t0
@@ -7639,7 +7648,7 @@ type"),       Text(
                   iconTransformation(extent={{80,-100},{120,-60}})));
             Integer beats(start = 0);
             parameter Boolean usePhiInput = false;
-            Modelica.SIunits.Time time0;
+            Modelica.Units.SI.Time time0;
           equation
 
            // t0 = cardiac_cycle / frequency_avg;
@@ -10869,7 +10878,7 @@ compliance
           partial model PartialSystemicVessel
             "Base model for all systemic arteries and veins"
             extends PartialSystemicElement;
-            outer Modelica.SIunits.Angle Tilt;
+              outer Modelica.Units.SI.Angle Tilt;
             outer Physiolibrary.Types.Fraction Exercise;
 
             parameter Boolean UseTiltInput=false
@@ -10884,15 +10893,22 @@ compliance
               "input pressure including the hydrostatic pressure";
             Physiolibrary.Types.Pressure p_out_hs=p_out + P_hs/2
               "Output pressure including the hydrostatic pressure";
-            Modelica.SIunits.Position hydrostatic_level = (port_a.position + height/2);
-            Modelica.SIunits.Height height = sin(_tilt)*sinAlpha*l "Actual height of the vessel depends on tilt and sinAlpha";
+              Modelica.Units.SI.Position hydrostatic_level=(port_a.position +
+                  height/2);
+              Modelica.Units.SI.Height height=sin(_tilt)*sinAlpha*l
+                "Actual height of the vessel depends on tilt and sinAlpha";
 
 
            parameter Real E(unit = "Pa") = 4e5 "Elasticity"  annotation (Dialog(tab = "General", group = "Vessel properties", enable = not UseNonLinearCompliance));
-           parameter Modelica.SIunits.Length l = 1e-2 "Segment length" annotation (Dialog(tab = "General", group = "Vessel properties"));
-           parameter Modelica.SIunits.Radius r = 1e-3 "Inner vessel radius" annotation (Dialog(tab = "General", group = "Vessel properties"));
+              parameter Modelica.Units.SI.Length l=1e-2 "Segment length"
+                annotation (Dialog(tab="General", group="Vessel properties"));
+              parameter Modelica.Units.SI.Radius r=1e-3 "Inner vessel radius"
+                annotation (Dialog(tab="General", group="Vessel properties"));
 
-            parameter Modelica.SIunits.Thickness h = r*(settings.vessel_a*exp(settings.vessel_b*r)+settings.vessel_c*exp(settings.vessel_d*r)) "Thickness of the vessel wall. Eq. from (Safaei 2018)" annotation (Dialog(tab = "General", group = "Vessel properties"));
+              parameter Modelica.Units.SI.Thickness h=r*(settings.vessel_a*exp(
+                  settings.vessel_b*r) + settings.vessel_c*exp(settings.vessel_d
+                  *r)) "Thickness of the vessel wall. Eq. from (Safaei 2018)"
+                annotation (Dialog(tab="General", group="Vessel properties"));
 
             parameter Physiolibrary.Types.HydraulicInertance I = settings.blood_rho*l/(Modelica.Constants.pi*(r)^2) "Inertance eq from (Safaei 2018)" annotation (Dialog(tab = "General", group = "Calculated parameters"));
             parameter Physiolibrary.Types.HydraulicCompliance C = 2*Modelica.Constants.pi*(r^3) *l/(E*h) "Compliance eq from (Safaei 2018)"
@@ -10915,7 +10931,7 @@ compliance
                   origin={-80,-20})));
 
             protected
-            Modelica.SIunits.Angle _tilt;
+              Modelica.Units.SI.Angle _tilt;
           equation
             if not UseTiltInput then
               // use the outer Tilt set for the whole systemic circulation
@@ -10982,12 +10998,13 @@ P_hs/2")}));
 
               Fraction phi_ = if settings.veins_UsePhiEffect and not disableVenoconstriction then phi else phi0 "internal on-off phi";
             //  parameter Boolean UsePhiEffect = true;
-              parameter Modelica.SIunits.Length l;
+                parameter Modelica.Units.SI.Length l;
               parameter Volume V0 "Initial volume";
               parameter Volume V_min "minimal collapsing pressure";
               parameter Pressure p0 "Nominal pressure for initialization";
               Pressure p "Fluid pressure";
-              Modelica.SIunits.Radius r = sqrt(max(V, 0)/(l*Modelica.Constants.pi)) "Actual vessel radius";
+                Modelica.Units.SI.Radius r=sqrt(max(V, 0)/(l*Modelica.Constants.pi))
+                  "Actual vessel radius";
 
               outer Settings settings
                 annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
@@ -11112,15 +11129,18 @@ P_hs/2")}));
                 V(start=V0, fixed=true),
                 V0=l*Modelica.Constants.pi*(r_n)^2,
                 V_min=Modelica.Constants.pi*(wall_L_min/Modelica.Constants.pi/2)^2*l);
-              parameter Modelica.SIunits.Radius r_n "Nominal vessel inner radius";
-              Modelica.SIunits.Diameter D(start=2*r_n) "Vessel actual (inner) diameter";
+                parameter Modelica.Units.SI.Radius r_n
+                  "Nominal vessel inner radius";
+                Modelica.Units.SI.Diameter D(start=2*r_n)
+                  "Vessel actual (inner) diameter";
 
               Physiolibrary.Types.Fraction ll0( start = 1)=wall_L/wall_L0;
-              Modelica.SIunits.Length wall_L=Modelica.Constants.pi*D
-                "Circumferential wall length";
-              parameter Modelica.SIunits.Length wall_L0=Modelica.Constants.pi*r_n*2
-                "Circumferential wall length at nominal";
-              parameter Modelica.SIunits.Length wall_L_min=wall_L0*gamma "Minimal circumferential length";
+                Modelica.Units.SI.Length wall_L=Modelica.Constants.pi*D
+                  "Circumferential wall length";
+                parameter Modelica.Units.SI.Length wall_L0=Modelica.Constants.pi
+                    *r_n*2 "Circumferential wall length at nominal";
+                parameter Modelica.Units.SI.Length wall_L_min=wall_L0*gamma
+                  "Minimal circumferential length";
               parameter Real gamma = settings.veins_gamma "fraction of nominal diameter to minimal zero-pressure diameter";
               parameter Real alpha = settings.veins_alpha "how many times the tension is larger for maximal activation from resting activation at nominal diameter";
 
@@ -11172,8 +11192,10 @@ P_hs/2")}));
                 V_min = Modelica.Constants.pi*r_0^2*l,
                 r(start = r_n, fixed = false));
               type Tension =   Real (final quantity = "Tension", final unit = "N/m");
-              type Radius =   Modelica.SIunits.Radius(final nominal =   1e-6);
-              type CircumferentialLength =   Modelica.SIunits.Length(final nominal =   1e-3);
+              type Radius =   Modelica.Units.SI.Radius (
+                                                      final nominal =   1e-6);
+              type CircumferentialLength =   Modelica.Units.SI.Length (
+                                                                     final nominal =   1e-3);
               // GENERAL INPUT PARAMETERS
             //  parameter Boolean useViscoElasticDelay = false;
             //   parameter Physiolibrary.Types.Fraction gamma =   0.5
@@ -12039,7 +12061,8 @@ P_hs/2")}));
                 ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Artery(
                   redeclare Interfaces.HydraulicPort_a_leveled port_a,
                   redeclare Interfaces.HydraulicPort_b_leveled port_b);
-            Modelica.SIunits.Position hydrostatic_level = (port_a.position + height/2);
+              Modelica.Units.SI.Position hydrostatic_level=(port_a.position +
+                  height/2);
           //   Physiolibrary.Types.Pressure hydrostatic_pressure = hydrostatic_level*settings.blood_rho*Modelica.Constants.g_n "Total hydrostatic pressure at given point (synthetic)";
           //   Physiolibrary.Types.Pressure hydraulic_pressure = u_C + hydrostatic_pressure "Vessel pressure without the hydrostatic part (synthetic)";
           equation
@@ -12051,7 +12074,8 @@ P_hs/2")}));
                 ADAN_main.Components.Subsystems.Systemic.Vessel_modules.Vein(
                   redeclare Interfaces.HydraulicPort_a_leveled port_a,
                   redeclare Interfaces.HydraulicPort_b_leveled port_b);
-            Modelica.SIunits.Position hydrostatic_level = (port_a.position + height/2);
+              Modelica.Units.SI.Position hydrostatic_level=(port_a.position +
+                  height/2);
           //   Physiolibrary.Types.Pressure hydrostatic_pressure = hydrostatic_level*settings.blood_rho*Modelica.Constants.g_n "Total hydrostatic pressure at given point (synthetic)";
           //   Physiolibrary.Types.Pressure hydraulic_pressure = p - hydrostatic_pressure "Vessel pressure without the hydrostatic part (synthetic)";
 
@@ -12065,7 +12089,8 @@ P_hs/2")}));
                 ADAN_main.Components.Subsystems.Systemic.Vessel_modules.vp_vein_linear(
                   redeclare Interfaces.HydraulicPort_a_leveled port_a,
                   redeclare Interfaces.HydraulicPort_b_leveled port_b);
-            Modelica.SIunits.Position hydrostatic_level = (port_a.position + height/2);
+              Modelica.Units.SI.Position hydrostatic_level=(port_a.position +
+                  height/2);
           //   Physiolibrary.Types.Pressure hydrostatic_pressure = hydrostatic_level*settings.blood_rho*Modelica.Constants.g_n "Total hydrostatic pressure at given point (synthetic)";
           //   Physiolibrary.Types.Pressure hydraulic_pressure = p - hydrostatic_pressure "Vessel pressure without the hydrostatic part (synthetic)";
 
@@ -12078,7 +12103,8 @@ P_hs/2")}));
               extends Obsolete.vp_vein_tDF(redeclare
                   Interfaces.HydraulicPort_a_leveled port_a, redeclare
                   Interfaces.HydraulicPort_b_leveled port_b);
-            Modelica.SIunits.Position hydrostatic_level = (port_a.position + height/2);
+              Modelica.Units.SI.Position hydrostatic_level=(port_a.position +
+                  height/2);
 
           equation
             port_a.position + height = port_b.position;
@@ -12153,7 +12179,8 @@ P_hs/2")}));
                 volume(fixed = not settings.initByPressure));
 
           parameter Boolean UseIABPInput = false annotation(choices(checkBox=true), Evaluate = true);
-          parameter Modelica.SIunits.Diameter d_IABP = 0 "diameter of IABP" annotation(Evaluate=UseIABPInput, HideResult = not UseIABPInput);
+            parameter Modelica.Units.SI.Diameter d_IABP=0 "diameter of IABP"
+              annotation (Evaluate=UseIABPInput, HideResult=not UseIABPInput);
           Physiolibrary.Types.Volume iabp_volume = if not UseIABPInput then 0 else _iabp*l*Modelica.Constants.pi*((d_IABP/2)^2) annotation(HideResult = not UseIABPInput);
           Physiolibrary.Types.RealIO.FractionInput IABPInput=_iabp if UseIABPInput
             "Custom IABP input" annotation (Placement(transformation(extent={{-44,10},{-24,
@@ -12329,18 +12356,21 @@ P_hs/2")}));
 
         //Physiolibrary.Types.HydraulicCompliance C_calculated = volume/(p_C - 1/k_phi*log((V_max - V_us)/(V_max - volume_linearBreakpoint)));
 
-          outer Modelica.SIunits.Angle Tilt;
+            outer Modelica.Units.SI.Angle Tilt;
           Physiolibrary.Types.Pressure P_hs = height*settings.blood_rho*Modelica.Constants.g_n "Hydrostatic pressure of the whole tissue";
           Physiolibrary.Types.Pressure P_hs_plus_dist=added_height/2*settings.blood_rho*
               Modelica.Constants.g_n "Hydrostatic pressure of the half of additional distance (gravity center)";
-          parameter Modelica.SIunits.Height add_length=0
-            "Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size.";
+            parameter Modelica.Units.SI.Height add_length=0
+              "Additional height of the tissue at vertical position, negative value points downwards. Moves the center of gravity by half of its size.";
 
-          Modelica.SIunits.Height added_height=(port_a.position + height/2)*(settings.syst_tissues_hydrostaticLevel_correction
-               - 1) + sin(Tilt)*add_length
-            "Tilted additional height of the tissue mass center";
-          Modelica.SIunits.Height height=port_b.position - port_a.position "height difference between connectors. Already includes Tilt information, as the distances in ports are tilted";
-          Modelica.SIunits.Position hydrostatic_level = port_a.position + (height + sin(Tilt)*added_height)/2;
+            Modelica.Units.SI.Height added_height=(port_a.position + height/2)*
+                (settings.syst_tissues_hydrostaticLevel_correction - 1) + sin(
+                Tilt)*add_length
+              "Tilted additional height of the tissue mass center";
+            Modelica.Units.SI.Height height=port_b.position - port_a.position
+              "height difference between connectors. Already includes Tilt information, as the distances in ports are tilted";
+            Modelica.Units.SI.Position hydrostatic_level=port_a.position + (
+                height + sin(Tilt)*added_height)/2;
 
           outer Physiolibrary.Types.Fraction adenosine "adenosine dose fraction";
         //   Physiolibrary.Types.Pressure collapsingPressure "the vessel PV lower limb";
@@ -12788,8 +12818,8 @@ P_hs_plus_dist"),
         end Vein_linear;
 
         model vp_vein_linear "Vein with linear PV characteristics"
-            extends
-        Vein(   redeclare Auxiliary.Compliances.compliance_linear
+            extends Vein(
+                redeclare Auxiliary.Compliances.compliance_linear
                 compliant_vessel(C=l*Modelica.Constants.pi*((r*settings.veins_diameter_correction)
                     ^2)/settings.tissues_Pv_nom, zpv=l*Modelica.Constants.pi*((
                     r*settings.veins_diameter_correction)^2)));
@@ -12964,7 +12994,7 @@ P_hs_plus_dist"),
         package tests
           model TestTissuePV
 
-            inner Modelica.SIunits.Angle Tilt = 0;
+              inner Modelica.Units.SI.Angle Tilt=0;
             inner Physiolibrary.Types.Pressure P_th = 0
               "Thoracic pressure, developed by the airway pressure. Might affect also abdominal cavity.";
             inner Physiolibrary.Types.Pressure outer_pressure = 0;
@@ -13137,7 +13167,7 @@ P_hs_plus_dist"),
 
           model TestVeinPV
 
-            inner Modelica.SIunits.Angle Tilt = 0;
+              inner Modelica.Units.SI.Angle Tilt=0;
             inner Physiolibrary.Types.Pressure P_th = 0
               "Thoracic pressure, developed by the airway pressure. Might affect also abdominal cavity.";
             inner Physiolibrary.Types.Pressure outer_pressure = 0;
@@ -13322,7 +13352,7 @@ P_hs_plus_dist"),
 
           model TestVeinPV_volumes
 
-            inner Modelica.SIunits.Angle Tilt = 0;
+              inner Modelica.Units.SI.Angle Tilt=0;
             inner Physiolibrary.Types.Pressure P_th = 0
               "Thoracic pressure, developed by the airway pressure. Might affect also abdominal cavity.";
             inner Physiolibrary.Types.Pressure outer_pressure = 0;
@@ -16517,7 +16547,7 @@ P_hs_plus_dist"),
         //
         //   inner parameter Physiolibrary.Types.Fraction phi0 = 0.25 "default value of phi. Also used for normalization";
 
-          inner Modelica.SIunits.Angle Tilt;
+          inner Modelica.Units.SI.Angle Tilt;
           inner Physiolibrary.Types.Pressure P_th
             "Thoracic pressure, developed by the airway pressure. Might affect also abdominal cavity.";
           inner Physiolibrary.Types.Pressure outer_pressure;
@@ -19695,66 +19725,33 @@ P_hs_plus_dist"),
 
          // Physiolibrary.Types.Volume zpvs_venous =   zpv_venous * ZPV_effect;
 
-        Modelica.SIunits.Length l_arterial = ascending_aorta_A.l +
-            ascending_aorta_B.l +
-            ascending_aorta_C.l +
-            ascending_aorta_D.l +
-            aortic_arch_C2.l +
-            brachiocephalic_trunk_C4.l +
-            aortic_arch_C46.l +
-            aortic_arch_C64.l +
-            aortic_arch_C94.l +
-            thoracic_aorta_C96.l +
-            thoracic_aorta_C100.l +
-            thoracic_aorta_C104.l +
-            thoracic_aorta_C108.l +
-            thoracic_aorta_C112.l +
-            abdominal_aorta_C114.l +
-            abdominal_aorta_C136.l +
-            abdominal_aorta_C164.l +
-            abdominal_aorta_C176.l +
-            abdominal_aorta_C188.l +
-            abdominal_aorta_C192.l +
-            common_iliac_R216.l +
-            external_iliac_R220.l +
-            femoral_R222.l +
-            femoral_R226.l +
-            popliteal_R228.l +
-            popliteal_R232.l +
-            tibiofibular_trunk_R234.l +
-            common_iliac_L194.l +
-            external_iliac_L198.l +
-            femoral_L200.l +
-            femoral_L204.l +
-            popliteal_L206.l +
-            popliteal_L210.l +
-            tibiofibular_trunk_L212.l +
-            subclavian_R28.l +
-            subclavian_R30.l +
-            axillary_R32.l +
-            brachial_R34.l +
-            brachial_L82_HeartLevel.l +
-            ulnar_T2_R36.l +
-            subclavian_L66.l +
-            subclavian_L78.l +
-            axillary_L80.l +
-            brachial_L82.l +
-            ulnar_T2_L84.l +
-            common_carotid_R6_A.l +
-            common_carotid_R6_B.l +
-            common_carotid_R6_C.l +
-            internal_carotid_R8_A.l +
-            internal_carotid_R8_B.l +
-            common_carotid_L48_A.l +
-            common_carotid_L48_B.l +
-            common_carotid_L48_C.l +
-            common_carotid_L48_D.l +
-            internal_carotid_L50_A.l +
-            internal_carotid_L50_B.l +
-            coronary_arteries.l +
-            mesenteric_artery.l;
+          Modelica.Units.SI.Length l_arterial=ascending_aorta_A.l +
+              ascending_aorta_B.l + ascending_aorta_C.l + ascending_aorta_D.l
+               + aortic_arch_C2.l + brachiocephalic_trunk_C4.l +
+              aortic_arch_C46.l + aortic_arch_C64.l + aortic_arch_C94.l +
+              thoracic_aorta_C96.l + thoracic_aorta_C100.l +
+              thoracic_aorta_C104.l + thoracic_aorta_C108.l +
+              thoracic_aorta_C112.l + abdominal_aorta_C114.l +
+              abdominal_aorta_C136.l + abdominal_aorta_C164.l +
+              abdominal_aorta_C176.l + abdominal_aorta_C188.l +
+              abdominal_aorta_C192.l + common_iliac_R216.l +
+              external_iliac_R220.l + femoral_R222.l + femoral_R226.l +
+              popliteal_R228.l + popliteal_R232.l + tibiofibular_trunk_R234.l
+               + common_iliac_L194.l + external_iliac_L198.l + femoral_L200.l
+               + femoral_L204.l + popliteal_L206.l + popliteal_L210.l +
+              tibiofibular_trunk_L212.l + subclavian_R28.l + subclavian_R30.l
+               + axillary_R32.l + brachial_R34.l + brachial_L82_HeartLevel.l +
+              ulnar_T2_R36.l + subclavian_L66.l + subclavian_L78.l +
+              axillary_L80.l + brachial_L82.l + ulnar_T2_L84.l +
+              common_carotid_R6_A.l + common_carotid_R6_B.l +
+              common_carotid_R6_C.l + internal_carotid_R8_A.l +
+              internal_carotid_R8_B.l + common_carotid_L48_A.l +
+              common_carotid_L48_B.l + common_carotid_L48_C.l +
+              common_carotid_L48_D.l + internal_carotid_L50_A.l +
+              internal_carotid_L50_B.l + coronary_arteries.l +
+              mesenteric_artery.l;
 
-          Modelica.SIunits.Length l_venous=superior_vena_cava_C2.l +
+          Modelica.Units.SI.Length l_venous=superior_vena_cava_C2.l +
               superior_vena_cava_C88.l + inferior_vena_cava_C8.l +
               hepatic_vein_T1_C10.l + inferior_vena_cava_C12.l +
               inferior_vena_cava_C16.l + renal_vein_T1_R18.l +
@@ -19787,54 +19784,39 @@ P_hs_plus_dist"),
                + ulnar_vein_T7_L144.l + brachial_vein_L152.l +
               radial_vein_T3_L154.l + coronary_veins.l + splanchnic_vein.l;
 
-              parameter Modelica.SIunits.Length speedSegmentLength=
-         common_carotid_L48_A.l +
-         common_carotid_L48_B.l +
-         common_carotid_L48_C.l +
-         common_carotid_L48_D.l +
-         aortic_arch_C94.l +
-         thoracic_aorta_C96.l +
-         thoracic_aorta_C100.l +
-         thoracic_aorta_C104.l +
-         thoracic_aorta_C108.l +
-         thoracic_aorta_C112.l +
-         abdominal_aorta_C114.l +
-         abdominal_aorta_C136.l +
-         abdominal_aorta_C164.l +
-         abdominal_aorta_C176.l +
-         abdominal_aorta_C188.l +
-         abdominal_aorta_C192.l +
-         common_iliac_R216.l +
-         external_iliac_R220.l +
-         femoral_R222.l "Distance between carotid_L48_D and femoral_R222";
+          parameter Modelica.Units.SI.Length speedSegmentLength=
+              common_carotid_L48_A.l + common_carotid_L48_B.l +
+              common_carotid_L48_C.l + common_carotid_L48_D.l + aortic_arch_C94.l
+               + thoracic_aorta_C96.l + thoracic_aorta_C100.l +
+              thoracic_aorta_C104.l + thoracic_aorta_C108.l +
+              thoracic_aorta_C112.l + abdominal_aorta_C114.l +
+              abdominal_aorta_C136.l + abdominal_aorta_C164.l +
+              abdominal_aorta_C176.l + abdominal_aorta_C188.l +
+              abdominal_aorta_C192.l + common_iliac_R216.l +
+              external_iliac_R220.l + femoral_R222.l
+            "Distance between carotid_L48_D and femoral_R222";
 
-          parameter Modelica.SIunits.Length aortic_length=
-            ascending_aorta_A.l +
-            ascending_aorta_B.l +
-            ascending_aorta_C.l +
-            ascending_aorta_D.l +
-            aortic_arch_C2.l +
-            aortic_arch_C46.l +
-            aortic_arch_C64.l +
-            aortic_arch_C94.l +
-            thoracic_aorta_C96.l +
-            thoracic_aorta_C100.l +
-            thoracic_aorta_C104.l +
-            thoracic_aorta_C108.l +
-            thoracic_aorta_C112.l +
-            abdominal_aorta_C114.l +
-            abdominal_aorta_C136.l +
-            abdominal_aorta_C164.l +
-            abdominal_aorta_C176.l +
-            abdominal_aorta_C188.l +
-            abdominal_aorta_C192.l "Length of the whole aorta for comparison to body size";
+          parameter Modelica.Units.SI.Length aortic_length=ascending_aorta_A.l
+               + ascending_aorta_B.l + ascending_aorta_C.l + ascending_aorta_D.l
+               + aortic_arch_C2.l + aortic_arch_C46.l + aortic_arch_C64.l +
+              aortic_arch_C94.l + thoracic_aorta_C96.l + thoracic_aorta_C100.l
+               + thoracic_aorta_C104.l + thoracic_aorta_C108.l +
+              thoracic_aorta_C112.l + abdominal_aorta_C114.l +
+              abdominal_aorta_C136.l + abdominal_aorta_C164.l +
+              abdominal_aorta_C176.l + abdominal_aorta_C188.l +
+              abdominal_aorta_C192.l
+            "Length of the whole aorta for comparison to body size";
 
             parameter Real age = settings.age "patient age";
-            parameter Modelica.SIunits.Mass weight = settings.weight;
-            parameter Modelica.SIunits.Height height(start = 1.7) = settings.height;
+          parameter Modelica.Units.SI.Mass weight=settings.weight;
+          parameter Modelica.Units.SI.Height height(start=1.7) = settings.height;
             parameter Real BMI =  settings.BMI;
-            parameter Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*age+0.5409*(height*100)+0.3476*BMI) "Zemtsovskaja, HT 2019 for male subjects";
-            parameter Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*age+2.5*height*100) "Rezai, Blood Press Monit 2013, for male subjects";
+          parameter Modelica.Units.SI.Length aortic_length_calc=1/100*(-67.2793
+               + 0.2487*age + 0.5409*(height*100) + 0.3476*BMI)
+            "Zemtsovskaja, HT 2019 for male subjects";
+          parameter Modelica.Units.SI.Length aortic_length_calc2=1/1000*(-109.7
+               + 2.9*age + 2.5*height*100)
+            "Rezai, Blood Press Monit 2013, for male subjects";
         //    parameter Physiolibrary.Types.Fraction thoracic_pressure_ratio = 0.8 "fraction of thoracic pressure in the abdominal cavity";
         equation
           //BMI = weight/(height^2);
@@ -26604,8 +26586,8 @@ P_hs_plus_dist"),
             import ADAN_main;
             import ADAN_main;
             extends
-              ADAN_main.Components.Subsystems.Systemic.ADAN86ArterialTree.arteries_ADAN86(
-               redeclare ADAN_main.Components.Obsolete.pv_jII_type_baroreceptor
+              ADAN_main.Components.Subsystems.Systemic.ADAN86ArterialTree.arteries_ADAN86
+              (redeclare ADAN_main.Components.Obsolete.pv_jII_type_baroreceptor
                 aortic_arch_C46, redeclare
                 ADAN_main.Components.Obsolete.pv_type_baroreceptor
                 internal_carotid_R8_A);
@@ -28188,7 +28170,7 @@ P_hs_plus_dist"),
               constant Real R2SI(unit="Pa.s/m3") = mmHg2SI*1.0/ml2SI;
               // INPUT PARAMETERS
               parameter Pressure P_A2=100*mmHg2SI;
-              parameter Modelica.SIunits.Area BSA = 1.73;
+                parameter Modelica.Units.SI.Area BSA=1.73;
 
               // Adjustble Parameters
               parameter HydraulicResistance R_K_a0=35*mmHg2SI/RBFo;
@@ -28218,7 +28200,8 @@ P_hs_plus_dist"),
               parameter HydraulicCompliance C_AKIDNEY=0.002*BVo/(90*mmHg2SI) "assumes 0.002 of BV at 90 mmHg";
               parameter HydraulicCompliance C_VKIDNEY=0.002*BVo/(10*mmHg2SI) "assumes 0.002 of BV at 10 mmHg";
               parameter Pressure PI_i=28*mmHg2SI "Onkotic pressure";
-              parameter Modelica.SIunits.Time tau_R_K_afferent=60 "Time constant in seconds";
+                parameter Modelica.Units.SI.Time tau_R_K_afferent=60
+                  "Time constant in seconds";
               parameter Pressure P_SV=PSVo;
 
               parameter Real D0=10 "TODO";
@@ -28358,7 +28341,7 @@ P_hs_plus_dist"),
             constant Real C2SI(unit="m3/Pa") = ml2SI/mmHg2SI;
             constant Real R2SI(unit="Pa.s/m3") = mmHg2SI*1.0/ml2SI;
             // INPUT PARAMETERS
-            parameter Modelica.SIunits.Area BSA = 1.73;
+              parameter Modelica.Units.SI.Area BSA=1.73;
             parameter Real halving = 0.5 "halving of volumes to divide for two kidneys";
 
             // Adjustble Parameters
@@ -28393,7 +28376,8 @@ P_hs_plus_dist"),
             parameter HydraulicCompliance C_VKIDNEY=0.002*BVo/(10*mmHg2SI) "assumes 0.002 of BV at 10 mmHg";
             parameter Pressure PI_i=3733.02684762
                                                "Onkotic pressure";
-            parameter Modelica.SIunits.Time tau_R_K_afferent=60 "Time constant in seconds";
+              parameter Modelica.Units.SI.Time tau_R_K_afferent=60
+                "Time constant in seconds";
 
 
             parameter Real D0=10 "TODO";
@@ -28469,7 +28453,7 @@ P_hs_plus_dist"),
             constant Real C2SI(unit="m3/Pa") = ml2SI/mmHg2SI;
             constant Real R2SI(unit="Pa.s/m3") = mmHg2SI*1.0/ml2SI;
             // INPUT PARAMETERS
-            parameter Modelica.SIunits.Area BSA = 1.73;
+              parameter Modelica.Units.SI.Area BSA=1.73;
             parameter Real halving = 0.5 "halving of volumes to divide for two kidneys";
 
             // Adjustble Parameters
@@ -28504,7 +28488,8 @@ P_hs_plus_dist"),
             parameter HydraulicCompliance C_VKIDNEY=0.002*BVo/(10*mmHg2SI) "assumes 0.002 of BV at 10 mmHg";
             parameter Pressure PI_i=3733.02684762
                                                "Onkotic pressure";
-            parameter Modelica.SIunits.Time tau_R_K_afferent=60 "Time constant in seconds";
+              parameter Modelica.Units.SI.Time tau_R_K_afferent=60
+                "Time constant in seconds";
 
             parameter Real D0=10 "TODO";
             parameter Boolean leakUrine = false "If true, leaks the urine from the organism. Total volume decreases then!!";
@@ -28580,7 +28565,7 @@ P_hs_plus_dist"),
           Physiolibrary.Types.VolumeFlowRate J2 = k2*(p_int -  p_lymph);
           Physiolibrary.Types.VolumeFlowRate J3 = k3*(p_lymph -  p_vc_mean);
 
-          parameter Modelica.SIunits.Time tau = 10;
+          parameter Modelica.Units.SI.Time tau=10;
           parameter Physiolibrary.Types.Pressure deltaPi=1066.57909932;
 
           parameter Physiolibrary.Types.HydraulicConductance k1=7.35e-12;
@@ -28750,7 +28735,7 @@ P_hs_plus_dist"),
                                 iconTransformation(extent={{-100,-100},{-80,-80}})));
 
           output Physiolibrary.Types.VolumeFlowRate lymph_flow = J1_s  "normal Lymphatic flow per day is 5.787037037037e-08";
-          parameter Modelica.SIunits.Time tau = 10;
+          parameter Modelica.Units.SI.Time tau=10;
           parameter Physiolibrary.Types.Pressure deltaPi=1066.57909932;
 
           Physiolibrary.Types.VolumeFlowRate J1[nc];
@@ -28818,7 +28803,7 @@ P_hs_plus_dist"),
                                 iconTransformation(extent={{-110,-110},{-90,-90}})));
 
           output VolumeFlowRate lymph_flow = J1_s  "normal Lymphatic flow per day is 5.787037037037e-08";
-          parameter Modelica.SIunits.Time tau=10;
+          parameter Modelica.Units.SI.Time tau=10;
           parameter Pressure deltaPi=1066.57909932;
 
           VolumeFlowRate J1[nc];
@@ -28857,12 +28842,12 @@ P_hs_plus_dist"),
 
 
 
-          Modelica.SIunits.Time time_speedUp=speedUpFact "Speed-up factor";
-          Modelica.SIunits.Time timeSpedUp;
+          Modelica.Units.SI.Time time_speedUp=speedUpFact "Speed-up factor";
+          Modelica.Units.SI.Time timeSpedUp;
           Volume volume = v_isf + v_lymph;
           Volume q_int(start = v_lymph_nom + V_normal) "Should be same as volume. Just cross checking the calculations";
           Volume v_drained;
-          parameter Modelica.SIunits.Time drain_start=-1;
+          parameter Modelica.Units.SI.Time drain_start=-1;
           parameter VolumeFlowRate drain_q = 1e-6/60;
           VolumeFlowRate lymphDrain=if drain_start > 0 and time > drain_start
                then drain_q else 0;
@@ -28878,7 +28863,7 @@ P_hs_plus_dist"),
             offset=3600,
             startTime=lymphaticsSettleTime/3600)
             annotation (Placement(transformation(extent={{100,30},{80,50}})));
-          parameter Modelica.SIunits.Time lymphaticsSettleTime=43200
+          parameter Modelica.Units.SI.Time lymphaticsSettleTime=43200
             "How long the lymphatics should fast-settle before invoking any output.";
           Modelica.Blocks.Math.Add add
             annotation (Placement(transformation(extent={{60,-10},{40,10}})));
@@ -29001,7 +28986,7 @@ P_hs_plus_dist"),
           Physiolibrary.Types.Fraction EndoEpi_avg2 = endo_a / epi_a;
 
           Physiolibrary.Types.Volume volume = PA.volume + PV.volume + coronaryLayer_SubEndocardium.volume + coronaryLayer_Mid.volume + coronaryLayer_SubEpicardium.volume;
-          parameter Modelica.SIunits.Time tau = 4;
+          parameter Modelica.Units.SI.Time tau=4;
           Physiolibrary.Types.RealIO.PressureInput externalPressure if
             useExternalPressureInput annotation (Placement(transformation(
                 extent={{20,-20},{-20,20}},
@@ -29624,13 +29609,14 @@ P_hs_plus_dist"),
         Modelica.Blocks.Interfaces.RealOutput y annotation (Placement(transformation(
                 extent={{76,-30},{96,-10}}), iconTransformation(extent={{72,-30},{92,-10}})));
 
-        Modelica.SIunits.Diameter dc "Current diameter";
-        Modelica.SIunits.Diameter rc "Current radius";
+        Modelica.Units.SI.Diameter dc "Current diameter";
+        Modelica.Units.SI.Diameter rc "Current radius";
 
         // Real d = noEvent( if v > 0 then sqrt(v/v0) else 0) "The distension ratio r/r0";
         Real diameter = dc/d0;
 
-        parameter Modelica.SIunits.Diameter d0 = 5.45e-3 "Normal vessel diameter";
+        parameter Modelica.Units.SI.Diameter d0=5.45e-3
+          "Normal vessel diameter";
 
       equation
         volume + v0= Modelica.Constants.pi*((dc/2)^2) *l;
@@ -29775,13 +29761,13 @@ P_hs_plus_dist"),
       Modelica.Blocks.Interfaces.RealOutput y annotation (Placement(transformation(
               extent={{76,-30},{96,-10}}), iconTransformation(extent={{72,-30},{92,-10}})));
 
-      Modelica.SIunits.Diameter dc "Current diameter";
-      Modelica.SIunits.Diameter rc "Current radius";
+        Modelica.Units.SI.Diameter dc "Current diameter";
+        Modelica.Units.SI.Diameter rc "Current radius";
 
       // Real d = noEvent( if v > 0 then sqrt(v/v0) else 0) "The distension ratio r/r0";
       Real diameter = dc/d0;
 
-      parameter Modelica.SIunits.Diameter d0 = 32e-3 "Normal vessel diameter";
+        parameter Modelica.Units.SI.Diameter d0=32e-3 "Normal vessel diameter";
 
     equation
       volume + v0= Modelica.Constants.pi*((dc/2)^2) *l;
@@ -30416,23 +30402,25 @@ P_hs_plus_dist"),
       Real T_act_max;
       parameter Physiolibrary.Types.Time tau = 0.1 "Time constant of the smooth muscle activation";
 
-        Modelica.SIunits.Length wall_L=Modelica.Constants.pi*D
+        Modelica.Units.SI.Length wall_L=Modelica.Constants.pi*D
           "Circumferential wall length";
-        parameter Modelica.SIunits.Length wall_L0=Modelica.Constants.pi*r*2 "Circumferential wall length at nominal";
-        parameter Modelica.SIunits.Length wall_L_min=wall_L0*gamma "Minimal circumferential length";
+        parameter Modelica.Units.SI.Length wall_L0=Modelica.Constants.pi*r*2
+          "Circumferential wall length at nominal";
+        parameter Modelica.Units.SI.Length wall_L_min=wall_L0*gamma
+          "Minimal circumferential length";
         parameter Real gamma = 1/2;
         parameter Real alpha = 2.5;// = T_pass/(T_pass + T_act_max);
         parameter Physiolibrary.Types.Pressure P_passiveBase = 2*133;
         Real T_pass_nominal = C_pass*(exp((wall_L0 - wall_L_min) /wall_L_min) - 1);
         Real T_max_nominal = (T_pass_nominal  + C_act);
 
-      Modelica.SIunits.Diameter D(start = 2*r);
+        Modelica.Units.SI.Diameter D(start=2*r);
       //Modelica.SIunits.Diameter D_inst(start = 2*r);
 
       Real C_pass;// = 2.52 "Fitted to have 2 mmHg @ l=l0, orig 0.459";//0.459;
       Real C_act;// = 10.4 "(N/m)";
 
-      parameter Modelica.SIunits.Length vessel_length = 11.3168e-2;
+        parameter Modelica.Units.SI.Length vessel_length=11.3168e-2;
       Physiolibrary.Types.Volume V = l * Modelica.Constants.pi * (D/2)^2;
       parameter Physiolibrary.Types.Volume V0 = l * Modelica.Constants.pi * (r)^2;
       //parameter Modelica.SIunits.Diameter D0 = 2*T_total/p0 ;
@@ -30505,7 +30493,7 @@ P_hs_plus_dist"),
 
         Physiolibrary.Types.Volume Vmax = 2*zpv;
 
-        outer Modelica.SIunits.Angle Tilt;
+        outer Modelica.Units.SI.Angle Tilt;
         Physiolibrary.Types.Pressure P_hs = sin(Tilt)*height*rho*Modelica.Constants.g_n "Hydrostatic pressure";
         Physiolibrary.Types.Pressure u_out_hs=p_out   + P_hs "Output pressure including the hydrostatic pressure";
 
@@ -30525,10 +30513,12 @@ P_hs_plus_dist"),
       Real T_act_max;
       parameter Physiolibrary.Types.Time tau=0.1   "Time constant of the smooth muscle activation";
 
-        Modelica.SIunits.Length wall_L=Modelica.Constants.pi*D
+        Modelica.Units.SI.Length wall_L=Modelica.Constants.pi*D
           "Circumferential wall length";
-        parameter Modelica.SIunits.Length wall_L0=Modelica.Constants.pi*r*2 "Circumferential wall length at nominal";
-        parameter Modelica.SIunits.Length wall_L_min=wall_L0*gamma "Minimal circumferential length";
+        parameter Modelica.Units.SI.Length wall_L0=Modelica.Constants.pi*r*2
+          "Circumferential wall length at nominal";
+        parameter Modelica.Units.SI.Length wall_L_min=wall_L0*gamma
+          "Minimal circumferential length";
         outer parameter Real gamma;// = 1/2;
         outer parameter Real alpha;// = 2.5;// = T_pass/(T_pass + T_act_max);
 
@@ -30537,7 +30527,7 @@ P_hs_plus_dist"),
         Real T_pass_nominal = T_pass_base + C_act*0.25;
         Real T_max_nominal = (T_pass_base  + C_act);
 
-      Modelica.SIunits.Diameter D(start = 2*r);
+        Modelica.Units.SI.Diameter D(start=2*r);
       //Modelica.SIunits.Diameter D_inst(start = 2*r);
 
       Real C_pass(start = 1);// = 2.52 "Fitted to have 2 mmHg @ l=l0, orig 0.459";//0.459;
@@ -30547,7 +30537,7 @@ P_hs_plus_dist"),
       parameter Real Cd_act = 1;
       parameter Real Cdd_act = 0.4;
 
-      parameter Modelica.SIunits.Length vessel_length = 11.3168e-2;
+        parameter Modelica.Units.SI.Length vessel_length=11.3168e-2;
       Physiolibrary.Types.Volume V = l * Modelica.Constants.pi * (D/2)^2;
       parameter Physiolibrary.Types.Volume V0 = l * Modelica.Constants.pi * (r)^2;
       //parameter Modelica.SIunits.Diameter D0 = 2*T_total/p0 ;
@@ -30755,11 +30745,11 @@ P_hs_plus_dist"),
         Physiolibrary.Types.Pressure Pd;
         parameter Physiolibrary.Types.Time tau = 0.001;
 
-        Modelica.SIunits.Length L = Modelica.Constants.pi*D;
-        Modelica.SIunits.Length L0 = Modelica.Constants.pi*D0;
+          Modelica.Units.SI.Length L=Modelica.Constants.pi*D;
+          Modelica.Units.SI.Length L0=Modelica.Constants.pi*D0;
 
-        Modelica.SIunits.Diameter D;
-        parameter Modelica.SIunits.Diameter D0= 0.0189322;
+          Modelica.Units.SI.Diameter D;
+          parameter Modelica.Units.SI.Diameter D0=0.0189322;
 
         //Real C_pass;
         //Real Cd_pass;
@@ -30770,7 +30760,7 @@ P_hs_plus_dist"),
         parameter Real Cd_act = 0.910;
         parameter Real Cdd_act = 0.374;
 
-        parameter Modelica.SIunits.Length vessel_length = 11.3168e-2;
+          parameter Modelica.Units.SI.Length vessel_length=11.3168e-2;
         Physiolibrary.Types.Volume V = vessel_length * Modelica.Constants.pi * (D/2)^2;
         Physiolibrary.Types.Volume V0 = vessel_length * Modelica.Constants.pi * (D0/2)^2;
 
@@ -30781,8 +30771,10 @@ P_hs_plus_dist"),
           Physiolibrary.Types.Volume Vmax = 2*zpv;
           parameter Physiolibrary.Types.Volume zpv = l*Modelica.Constants.pi*(r^2) "Zero-pressure volume" annotation (Dialog(tab = "General", group = "Calculated parameters"));
             parameter Physiolibrary.Types.Volume zpvs = zpv;
-         parameter Modelica.SIunits.Length l = vessel_length "Segmant length" annotation (Dialog(tab = "General", group = "Vessel properties"));
-         parameter Modelica.SIunits.Radius r = D0/2 "Vessel radius" annotation (Dialog(tab = "General", group = "Vessel properties"));
+          parameter Modelica.Units.SI.Length l=vessel_length "Segmant length"
+            annotation (Dialog(tab="General", group="Vessel properties"));
+          parameter Modelica.Units.SI.Radius r=D0/2 "Vessel radius"
+            annotation (Dialog(tab="General", group="Vessel properties"));
           Physiolibrary.Types.HydraulicCompliance c0 = zpv/p0 "nominal compliance";
           parameter Integer PV_variant = -1;
           Physiolibrary.Types.Pressure u_C;
@@ -34215,7 +34207,7 @@ P_hs_plus_dist"),
         annotation (Placement(transformation(extent={{-20,-61},{0,-56}})));
       Modelica.Blocks.Sources.Sine sine(
         amplitude=3300,
-        freqHz=10,
+        f=10,
         offset=13300)
         annotation (Placement(transformation(extent={{-64,-8},{-84,12}})));
       ADAN_main.Components.Subsystems.Systemic.Vessel_modules.arterialTree.pp_BC_type
@@ -34720,7 +34712,7 @@ P_hs_plus_dist"),
 
       Modelica.Blocks.Sources.Sine sine(
         amplitude=150e-6,
-        freqHz=1.2,
+        f=1.2,
         offset=20e-6)
         annotation (Placement(transformation(extent={{-64,18},{-44,38}})));
       annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
@@ -35417,7 +35409,7 @@ P_hs_plus_dist"),
 
       inner parameter Physiolibrary.Types.Fraction venous_diameter_correction=1.5;
     //   inner parameter Physiolibrary.Types.Fraction C_fact=1;
-      inner Modelica.SIunits.Angle Tilt = 0;
+      inner Modelica.Units.SI.Angle Tilt=0;
 
     //   inner parameter Physiolibrary.Types.Fraction cfactor=1;
       inner Physiolibrary.Types.Pressure thoracic_pressure = external_pressure.y;
@@ -35598,7 +35590,7 @@ P_hs_plus_dist"),
 
       inner parameter Physiolibrary.Types.Fraction venous_diameter_correction=1.5;
       inner parameter Physiolibrary.Types.Fraction C_fact=1;
-      inner Modelica.SIunits.Angle Tilt = 0;
+      inner Modelica.Units.SI.Angle Tilt=0;
 
       inner parameter Physiolibrary.Types.Fraction cfactor=1;
       inner Physiolibrary.Types.Pressure thoracic_pressure = external_pressure.y;
@@ -35992,8 +35984,8 @@ P_hs_plus_dist"),
       inner Modelica.Mechanics.MultiBody.World world
         annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
 
-    Modelica.SIunits.Radius rs = 1/heart.ventricles.SEP_wall.Cm;
-    Modelica.SIunits.Position cs = heart.ventricles.SEP_wall.xm - rs;
+      Modelica.Units.SI.Radius rs=1/heart.ventricles.SEP_wall.Cm;
+      Modelica.Units.SI.Position cs=heart.ventricles.SEP_wall.xm - rs;
     equation
       connect(heart.sa, systemic_TriSeg.port_a) annotation (Line(
           points={{-10,10},{-38,10},{-38,40}},
@@ -36178,7 +36170,8 @@ P_hs_plus_dist"),
     end TestRat;
 
     model LumensPhiSensitivity
-      extends SystemicTree.Identification.Results.Experiments.TriSeg_OptimizedBaseline(
+      extends
+        SystemicTree.Identification.Results.Experiments.TriSeg_OptimizedBaseline(
         condHRPhi(disconnected=false),
         condSystemicPhi(disconnected=true),
         phi_fixed(
@@ -36200,11 +36193,11 @@ P_hs_plus_dist"),
               tauSC=tauSC),
             calciumMechanics(tauR=tauR))),
         condHeartPhi(disconnected=false));
-      parameter Modelica.SIunits.Time tauD=0.032
+      parameter Modelica.Units.SI.Time tauD=0.032
         "Factor scaling contraction decay time";
-      parameter Modelica.SIunits.Time tauR=0.048/2
+      parameter Modelica.Units.SI.Time tauR=0.048/2
         "Factor scaling contraction rise time";
-      parameter Modelica.SIunits.Time tauSC=0.425/2
+      parameter Modelica.Units.SI.Time tauSC=0.425/2
         "Factor scaling duration of contraction";
     equation
       connect(heartComponent.phi, condHeartPhi.y) annotation (Line(points={{-16,-16},
@@ -36765,7 +36758,7 @@ P_hs_plus_dist"),
         annotation (Placement(transformation(extent={{80,-10},{60,10}})));
       Modelica.Blocks.Sources.Sine sine(
         amplitude=2e-5,
-        freqHz=1,
+        f=1,
         offset=0.5e-5)
         annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
       Physiolibrary.Hydraulic.Components.ElasticVessel elasticVessel1(
@@ -38635,7 +38628,7 @@ P_hs_plus_dist"),
       //       ventricularInteraction_flat.Vrv + pulmonaryArteries.volume +
       //       pulmonaryVeins.volume;
 
-        inner Modelica.SIunits.Angle Tilt = 0;
+        inner Modelica.Units.SI.Angle Tilt=0;
 
         inner Physiolibrary.Types.Pressure thoracic_pressure = 0;
 
@@ -39820,7 +39813,7 @@ P_hs_plus_dist"),
                 resetAt=0.0))),
           useClosedLoopHR(y=true));
 
-          inner Modelica.SIunits.Angle Tilt = 0;
+        inner Modelica.Units.SI.Angle Tilt=0;
         Components.Basic.venousVariableCompliance VenousVariableCompliance(
             useVariableCompliance=false) annotation (Placement(transformation(
               rotation=0,
@@ -39972,7 +39965,8 @@ P_hs_plus_dist"),
 
     model CardiovascularSystem
       //   extends Auxiliary.partialCVS_optimized_ss;
-      extends ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized2_init;
+      extends
+        ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized2_init;
       //extends Experiments.CVS_SATejection(SystemicComponent(baroreflex_system(
           //    baroreflex(beat = heartComponent.sa_node.beat))));
 
@@ -40632,8 +40626,8 @@ P_hs_plus_dist"),
       Real CI = CO*1000*60/settings.BSA "Cardiac index l/min/m2";
       Physiolibrary.Types.Power CardiacPowerBrachial = brachial_pressure_mean*CO;
       Physiolibrary.Types.PowerPerMass CardiacPowerIndex = brachial_pressure_mean*CO/settings.BSA;
-        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
-        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        output Modelica.Units.SI.Time TEjection=heartComponent.aorticValve.Ts;
+        output Modelica.Units.SI.Time TFilling=heartComponent.mitralValve.Ts;
         output Physiolibrary.Types.Pressure thoracic_pressure=SystemicComponent.P_th;
         output Physiolibrary.Types.Pressure P_pa = pulmonaryComponent.r_pa.q_in.pressure
           "Pressure in pulmonary arteries";
@@ -40647,20 +40641,20 @@ P_hs_plus_dist"),
           "For debug purposes, should be constant (up to numerical precision)";
 
 
-        output Modelica.SIunits.Length speedSegmentLength=
-            SystemicComponent.common_carotid_L48_A.l + SystemicComponent.common_carotid_L48_B.l
-             + SystemicComponent.common_carotid_L48_C.l + SystemicComponent.common_carotid_L48_D.l
-             + SystemicComponent.aortic_arch_C64.l + SystemicComponent.aortic_arch_C94.l
-             + SystemicComponent.thoracic_aorta_C96.l + SystemicComponent.thoracic_aorta_C100.l
-             + SystemicComponent.thoracic_aorta_C104.l + SystemicComponent.thoracic_aorta_C108.l
-             + SystemicComponent.thoracic_aorta_C112.l + SystemicComponent.abdominal_aorta_C114.l
-             + SystemicComponent.abdominal_aorta_C136.l + SystemicComponent.abdominal_aorta_C164.l
-             + SystemicComponent.abdominal_aorta_C176.l + SystemicComponent.abdominal_aorta_C188.l
-             + SystemicComponent.abdominal_aorta_C192.l + SystemicComponent.common_iliac_R216.l
-             + SystemicComponent.external_iliac_R220.l + SystemicComponent.femoral_R222.l
+        output Modelica.Units.SI.Length speedSegmentLength=SystemicComponent.common_carotid_L48_A.l
+             + SystemicComponent.common_carotid_L48_B.l + SystemicComponent.common_carotid_L48_C.l
+             + SystemicComponent.common_carotid_L48_D.l + SystemicComponent.aortic_arch_C64.l
+             + SystemicComponent.aortic_arch_C94.l + SystemicComponent.thoracic_aorta_C96.l
+             + SystemicComponent.thoracic_aorta_C100.l + SystemicComponent.thoracic_aorta_C104.l
+             + SystemicComponent.thoracic_aorta_C108.l + SystemicComponent.thoracic_aorta_C112.l
+             + SystemicComponent.abdominal_aorta_C114.l + SystemicComponent.abdominal_aorta_C136.l
+             + SystemicComponent.abdominal_aorta_C164.l + SystemicComponent.abdominal_aorta_C176.l
+             + SystemicComponent.abdominal_aorta_C188.l + SystemicComponent.abdominal_aorta_C192.l
+             + SystemicComponent.common_iliac_R216.l + SystemicComponent.external_iliac_R220.l
+             + SystemicComponent.femoral_R222.l
           "Distance between carotid_L48 and femoral_R222 for calculating pulse wave propagation speed";
 
-        Modelica.SIunits.Length aortic_length=SystemicComponent.ascending_aorta_A.l
+        Modelica.Units.SI.Length aortic_length=SystemicComponent.ascending_aorta_A.l
              + SystemicComponent.ascending_aorta_B.l + SystemicComponent.ascending_aorta_C.l
              + SystemicComponent.ascending_aorta_D.l + SystemicComponent.aortic_arch_C2.l
              + SystemicComponent.aortic_arch_C46.l + SystemicComponent.aortic_arch_C64.l
@@ -40674,11 +40668,13 @@ P_hs_plus_dist"),
 
 
       //     Modelica.SIunits.Weight weight(start = 70) "Body weight estimated from height and BMI";
-          Modelica.SIunits.Height height(start = 1.7)
+        Modelica.Units.SI.Height height(start=1.7)
           "Body height, estimated from aortic length calculation. Have to eb manually set to settings due to computational procedure";
-          Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*settings.age+0.5409*(height*100)+0.3476*settings.BMI)
+        Modelica.Units.SI.Length aortic_length_calc=1/100*(-67.2793 + 0.2487*
+            settings.age + 0.5409*(height*100) + 0.3476*settings.BMI)
           "Zemtsovskaja, HT 2019 for male subjects";
-          Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*settings.age+2.5*height*100)
+        Modelica.Units.SI.Length aortic_length_calc2=1/1000*(-109.7 + 2.9*
+            settings.age + 2.5*height*100)
           "Rezai, Blood Press Monit 2013, for male subjects";
 
         output Physiolibrary.Types.Pressure P_LA = heartComponent.mitralValve.q_in.pressure
@@ -40994,7 +40990,7 @@ P_hs_plus_dist"),
           v_pvn=Pulmonary1.v_pvn,
           t=environment1.time_)
           annotation (Placement(transformation(extent={{-10,80},{10,100}})));
-        Modelica.Blocks.Sources.Sine     sine(amplitude=533, freqHz=0.2)
+        Modelica.Blocks.Sources.Sine sine(amplitude=533, f=0.2)
           annotation (Placement(transformation(extent={{-74,-82},{-54,-62}})));
         Modelica.Blocks.Sources.Constant const1(k=1)
           annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
@@ -41043,7 +41039,7 @@ P_hs_plus_dist"),
           t=environment1.time_,
           q_rv(displayUnit="ml"))
           annotation (Placement(transformation(extent={{-10,80},{10,100}})));
-        Modelica.Blocks.Sources.Sine     sine(amplitude=0,   freqHz=0.2)
+        Modelica.Blocks.Sources.Sine sine(amplitude=0, f=0.2)
           annotation (Placement(transformation(extent={{-74,-82},{-54,-62}})));
         Modelica.Blocks.Sources.Constant const1(k=1)
           annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
@@ -41085,7 +41081,7 @@ P_hs_plus_dist"),
           Heart1(q_la(start=0.0004), q_ra(displayUnit="ml")))
           annotation (Placement(transformation(extent={{0,-22},{-20,-2}})));
 
-      parameter Modelica.SIunits.Length L_Systemic = 3.28 "Sum of all lengths";
+        parameter Modelica.Units.SI.Length L_Systemic=3.28 "Sum of all lengths";
       parameter Physiolibrary.Types.Volume V_systemic=0.000216 "Sum of all ZPV";
       parameter Physiolibrary.Types.VolumeFlowRate CO=9.6666666666667e-05
                                                       "cardiac output";
@@ -43990,7 +43986,7 @@ P_hs_plus_dist"),
         Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance(
               displayUnit="(Pa.s)/m3") = 7999.3432449)
           annotation (Placement(transformation(extent={{-120,-10},{-100,10}})));
-        parameter Modelica.SIunits.Time tauSC=0.225;
+        parameter Modelica.Units.SI.Time tauSC=0.225;
       equation
         connect(Exercise.y, SystemicComponent.exercise_input) annotation (Line(
               points={{-55,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
@@ -44194,8 +44190,8 @@ P_hs_plus_dist"),
 
       //    useAutonomousPhi(y=true),
 
-        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
-        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        output Modelica.Units.SI.Time TEjection=heartComponent.aorticValve.Ts;
+        output Modelica.Units.SI.Time TFilling=heartComponent.mitralValve.Ts;
         output Physiolibrary.Types.Pressure thoracic_pressure=SystemicComponent.P_th;
         output Physiolibrary.Types.Pressure P_pa = pulmonaryComponent.r_pa.q_in.pressure "Pressure in pulmonary arteries";
         output Physiolibrary.Types.Pressure P_pv = pulmonaryComponent.r_pa.q_out.pressure "Pressure in pulmonary veins";
@@ -45654,7 +45650,7 @@ P_hs_plus_dist"),
          "Generated by PostProcess/postprocess_optim.py optimized at May 05 14:47:06 CEST 2021
  with cost 0.292641 lowest at run 3428"
           extends
-              ADAN_main.SystemicTree.Identification.SingleModelRun.OptimizeBaseline(settings(
+            ADAN_main.SystemicTree.Identification.SingleModelRun.OptimizeBaseline(  settings(
               V_PV_init=-1.875e-05,
               heart_R_LA=5491134,
               heart_vntr_D_0 =          8.398225e+00,
@@ -46111,8 +46107,8 @@ P_hs_plus_dist"),
             height=1,
             duration=1) constrainedby Modelica.Blocks.Interfaces.SO
             annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
-          output Modelica.SIunits.Time TEjection=heartComponent.aorticValve.Ts;
-          output Modelica.SIunits.Time TFilling=heartComponent.mitralValve.Ts;
+          output Modelica.Units.SI.Time TEjection=heartComponent.aorticValve.Ts;
+          output Modelica.Units.SI.Time TFilling=heartComponent.mitralValve.Ts;
         equation
           connect(Exercise.y, SystemicComponent.exercise_input) annotation (
               Line(points={{-79,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
@@ -48317,7 +48313,8 @@ P_hs_plus_dist"),
 
       model Optimized_ss_baro_init "Steady state initialization from 2020-09-14 10:44:32.920763 at time 179.92"
           extends
-            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized5(
+            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized5
+            (
             SystemicComponent(
               baroreflex_system(
                 baroreflex(phi_mean(start=0.24930115, fixed=true), phi(start=
@@ -48973,8 +48970,7 @@ P_hs_plus_dist"),
         end mergeTest;
 
         model CVS_baseline_fastBaro_init "Steady state initialization from 2020-11-26 20:21:51.384973 at time 599.88"
-          extends
-            Identification.Results.AdjustPVloop_optim(
+          extends Identification.Results.AdjustPVloop_optim(
               SystemicComponent(
                 baroreflex_system(
                   baroreflex(phi(start = 0.25674924, fixed = true)),
@@ -49145,8 +49141,9 @@ P_hs_plus_dist"),
         end CVS_baseline_fastBaro_init;
 
         model OlufsenTriSeg_optimized1_init "Steady state initialization from 2021-05-06 21:29:10.433709 at time 599.62"
-          extends ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized1(
-              SystemicComponent(
+          extends
+            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized1
+            ( SystemicComponent(
                 baroreflex_system(
                   baroreflex(phi_mean(start = 0.2504567, fixed = true), phi(start = 0.24661149, fixed = true)),
                   baroreceptor_aortic(fbr_int(start = 14.02404, fixed = true), epsilon(start = 1.5292943, fixed = true), s(start = 0.8019683, fixed = true)),
@@ -49387,7 +49384,9 @@ P_hs_plus_dist"),
         end OlufsenTriSeg_optimized1_init;
 
       model OlufsenTriSeg_optimized2_init "Steady state initialization from 2021-05-14 13:57:18.502322 at time 299.5"
-        extends ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized2(
+        extends
+            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized2
+            (
             SystemicComponent(
               baroreflex_system(
                 baroreflex(phi_mean(start = 0.25164273, fixed = true), phi(start = 0.24665853, fixed = true), f1_adj(start = 0.0030635502, fixed = true)),
@@ -49644,7 +49643,8 @@ P_hs_plus_dist"),
           Physiolibrary.Types.Pressure PAPs;
           Physiolibrary.Types.Pressure PAPd;
 
-          Modelica.SIunits.Time tau_int = 3 "INtegral time constant for averaging results";
+          Modelica.Units.SI.Time tau_int=3
+            "INtegral time constant for averaging results";
         equation
 
           der(PAPs_i)*tau = max(P_pa  - PAPs_i, 0);
@@ -49750,7 +49750,7 @@ P_hs_plus_dist"),
           Components.Signals.ConditionalConnection condHeartPhi(disconnectedValue=
                0.25, disconnected=false) annotation (Placement(transformation(
                   extent={{42,37.2592},{54,47.9259}})));
-          parameter Modelica.SIunits.Length speedSegmentLength=
+          parameter Modelica.Units.SI.Length speedSegmentLength=
               SystemicComponent.common_carotid_L48_A.l + SystemicComponent.common_carotid_L48_B.l
                + SystemicComponent.common_carotid_L48_C.l + SystemicComponent.common_carotid_L48_D.l
                + SystemicComponent.aortic_arch_C64.l + SystemicComponent.aortic_arch_C94.l
@@ -49763,7 +49763,7 @@ P_hs_plus_dist"),
                + SystemicComponent.external_iliac_R220.l + SystemicComponent.femoral_R222.l
             "Distance between carotid_L48 and femoral_R222";
 
-          parameter Modelica.SIunits.Length aortic_length=SystemicComponent.ascending_aorta_A.l
+          parameter Modelica.Units.SI.Length aortic_length=SystemicComponent.ascending_aorta_A.l
                + SystemicComponent.ascending_aorta_B.l + SystemicComponent.ascending_aorta_C.l
                + SystemicComponent.ascending_aorta_D.l + SystemicComponent.aortic_arch_C2.l
                + SystemicComponent.aortic_arch_C46.l + SystemicComponent.aortic_arch_C64.l
@@ -49776,11 +49776,15 @@ P_hs_plus_dist"),
             "Length of the whole aorta for comparison to body size";
 
             parameter Real age = 35 "patient age";
-            Modelica.SIunits.Mass weight;
-            Modelica.SIunits.Height height(start = 1.7);
+          Modelica.Units.SI.Mass weight;
+          Modelica.Units.SI.Height height(start=1.7);
             parameter Real BMI = 25;
-            Modelica.SIunits.Length aortic_length_calc=1/100*(-67.2793+0.2487*age+0.5409*(height*100)+0.3476*BMI) "Zemtsovskaja, HT 2019 for male subjects";
-            Modelica.SIunits.Length aortic_length_calc2 = 1/1000*(- 109.7+2.9*age+2.5*height*100) "Rezai, Blood Press Monit 2013, for male subjects";
+          Modelica.Units.SI.Length aortic_length_calc=1/100*(-67.2793 + 0.2487*
+              age + 0.5409*(height*100) + 0.3476*BMI)
+            "Zemtsovskaja, HT 2019 for male subjects";
+          Modelica.Units.SI.Length aortic_length_calc2=1/1000*(-109.7 + 2.9*age
+               + 2.5*height*100)
+            "Rezai, Blood Press Monit 2013, for male subjects";
 
           output Physiolibrary.Types.Pressure brachial_pressure=
               SystemicComponent.brachial_L82_HeartLevel.p_C;
@@ -49869,7 +49873,7 @@ P_hs_plus_dist"),
 
           Physiolibrary.Types.Pressure PAavg(start = 14*133);
           Physiolibrary.Types.Pressure PVavg(start = 5*133);
-          parameter Modelica.SIunits.Time tau = 10;
+          parameter Modelica.Units.SI.Time tau=10;
         equation
           tau*der(PAavg) = pulmonaryComponent.c_pa.q_in.pressure - PAavg;
           tau*der(PVavg) = pulmonaryComponent.c_pv.q_in.pressure - PVavg;
@@ -50922,8 +50926,8 @@ P_hs_plus_dist"),
               internal_iliac_T1_L196(LimitBackflow=true)),
             phi_fixed(nperiod=0),
             Tilt_ramp(startTime=0));
-        replaceable Modelica.Blocks.Sources.Sine muscle_pump_pressure(
-            freqHz=2,
+          replaceable Modelica.Blocks.Sources.Sine muscle_pump_pressure(
+            f=2,
             startTime=60,
             amplitude=40*133,
             offset=0) constrainedby Modelica.Blocks.Sources.Trapezoid
@@ -50998,8 +51002,8 @@ P_hs_plus_dist"),
           height=settings.chi_phi,
           duration=1) constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
-        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
-        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        output Modelica.Units.SI.Time TEjection=heartComponent.aorticValve.Ts;
+        output Modelica.Units.SI.Time TFilling=heartComponent.mitralValve.Ts;
         Physiolibrary.Types.VolumeFlowRate q_exercised_avg;
         Physiolibrary.Types.VolumeFlowRate q_exercised=
           SystemicComponent.internal_iliac_T1_R218.port_a.q + SystemicComponent.profundus_T2_R224.port_a.q + SystemicComponent.anterior_tibial_T3_R230.port_a.q + SystemicComponent.posterior_tibial_T4_R236.port_a.q + SystemicComponent.posterior_tibial_T4_L214.port_a.q + SystemicComponent.anterior_tibial_T3_L208.port_a.q + SystemicComponent.profundus_T2_L202.port_a.q + SystemicComponent.internal_iliac_T1_L196.port_a.q;
@@ -51849,8 +51853,8 @@ P_hs_plus_dist"),
             height=1,
             duration=0) constrainedby Modelica.Blocks.Interfaces.SO
             annotation (Placement(transformation(extent={{-76,52},{-56,72}})));
-          output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
-          output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+          output Modelica.Units.SI.Time TEjection=heartComponent.aorticValve.Ts;
+          output Modelica.Units.SI.Time TFilling=heartComponent.mitralValve.Ts;
         equation
           connect(Exercise.y, SystemicComponent.exercise_input) annotation (
               Line(points={{-55,62},{-34,62},{-34,36},{-28,36}}, color={0,0,127}));
@@ -52242,9 +52246,9 @@ P_hs_plus_dist"),
             disconnected=false,
             UseAdditionalInput=true,
             uMax=40*133), thoracic_pressure_ramp(amplitude=50*133, nperiod=0));
-      Modelica.Blocks.Sources.Sine      thoracic_pressure_ramp1(
+        Modelica.Blocks.Sources.Sine thoracic_pressure_ramp1(
+          f(displayUnit="1/min") = 0.26666666666667,
           amplitude=133.32*5,
-          freqHz(displayUnit="1/min") = 0.26666666666667,
           offset=-133.32*4,
           startTime=0)
           annotation (Placement(transformation(extent={{-100,-10},{-80,10}})));
@@ -52685,7 +52689,7 @@ P_hs_plus_dist"),
             Physiolibrary.Types.Pressure p_in(start = 13e3);
             Physiolibrary.Types.Pressure p_out(start = 13e3);
             Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-            parameter Modelica.SIunits.Time tau_avg = 10;
+            parameter Modelica.Units.SI.Time tau_avg=10;
             equation
                 // integrate only during open valve
                 if heartComponent.aorticValve.open then
@@ -52964,7 +52968,7 @@ P_hs_plus_dist"),
             Physiolibrary.Types.Pressure p_in(start = 13e3);
             Physiolibrary.Types.Pressure p_out(start = 13e3);
             Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-            parameter Modelica.SIunits.Time tau_avg = 10;
+            parameter Modelica.Units.SI.Time tau_avg=10;
             equation
                 // integrate only during open valve
                 if heartComponent.aorticValve.open then
@@ -53548,7 +53552,7 @@ P_hs_plus_dist"),
             Physiolibrary.Types.Pressure p_in(start = 13e3);
             Physiolibrary.Types.Pressure p_out(start = 13e3);
             Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-            parameter Modelica.SIunits.Time tau_avg = 10;
+            parameter Modelica.Units.SI.Time tau_avg=10;
             equation
                 // integrate only during open valve
                 if heartComponent.aorticValve.open then
@@ -53895,7 +53899,7 @@ P_hs_plus_dist"),
             Physiolibrary.Types.Pressure p_in(start = 13e3);
             Physiolibrary.Types.Pressure p_out(start = 13e3);
             Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-            parameter Modelica.SIunits.Time tau_avg = 10;
+            parameter Modelica.Units.SI.Time tau_avg=10;
             equation
                 // integrate only during open valve
                 if heartComponent.aorticValve.open then
@@ -54479,7 +54483,7 @@ P_hs_plus_dist"),
             Physiolibrary.Types.Pressure p_in(start = 13e3);
             Physiolibrary.Types.Pressure p_out(start = 13e3);
             Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-            parameter Modelica.SIunits.Time tau_avg = 10;
+            parameter Modelica.Units.SI.Time tau_avg=10;
             equation
                 // integrate only during open valve
                 if heartComponent.aorticValve.open then
@@ -54825,7 +54829,7 @@ P_hs_plus_dist"),
             Physiolibrary.Types.Pressure p_in(start = 13e3);
             Physiolibrary.Types.Pressure p_out(start = 13e3);
             Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-            parameter Modelica.SIunits.Time tau_avg = 10;
+            parameter Modelica.Units.SI.Time tau_avg=10;
             equation
                 // integrate only during open valve
                 if heartComponent.aorticValve.open then
@@ -54932,7 +54936,7 @@ P_hs_plus_dist"),
             Physiolibrary.Types.Pressure p_in(start = 13e3);
             Physiolibrary.Types.Pressure p_out(start = 13e3);
             Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-            parameter Modelica.SIunits.Time tau_avg = 10;
+            parameter Modelica.Units.SI.Time tau_avg=10;
             equation
                 // integrate only during open valve
                 if heartComponent.aorticValve.open then
@@ -55039,7 +55043,7 @@ P_hs_plus_dist"),
             Physiolibrary.Types.Pressure p_in(start = 13e3);
             Physiolibrary.Types.Pressure p_out(start = 13e3);
             Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-            parameter Modelica.SIunits.Time tau_avg = 10;
+            parameter Modelica.Units.SI.Time tau_avg=10;
             equation
                 // integrate only during open valve
                 if heartComponent.aorticValve.open then
@@ -55489,7 +55493,7 @@ P_hs_plus_dist"),
             Physiolibrary.Types.Pressure p_in(start = 13e3);
             Physiolibrary.Types.Pressure p_out(start = 13e3);
             Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-            parameter Modelica.SIunits.Time tau_avg = 10;
+            parameter Modelica.Units.SI.Time tau_avg=10;
             equation
                 // integrate only during open valve
                 if heartComponent.aorticValve.open then
@@ -57090,8 +57094,8 @@ P_hs_plus_dist"),
       Real CI = CO*1000*60/settings.BSA "Cardiac index l/min/m2";
       Physiolibrary.Types.Power CardiacPowerBrachial = brachial_pressure_mean*CO;
       Physiolibrary.Types.PowerPerMass CardiacPowerIndex = brachial_pressure_mean*CO/settings.BSA;
-        output Modelica.SIunits.Time TEjection = heartComponent.aorticValve.Ts;
-        output Modelica.SIunits.Time TFilling = heartComponent.mitralValve.Ts;
+        output Modelica.Units.SI.Time TEjection=heartComponent.aorticValve.Ts;
+        output Modelica.Units.SI.Time TFilling=heartComponent.mitralValve.Ts;
         output Physiolibrary.Types.Pressure P_pa = pulmonaryComponent.r_pa.q_in.pressure
           "Pressure in pulmonary arteries";
         output Physiolibrary.Types.Pressure P_pv = pulmonaryComponent.r_pa.q_out.pressure
@@ -57391,7 +57395,7 @@ P_hs_plus_dist"),
       Physiolibrary.Types.Pressure p_in(start = 13e3);
       Physiolibrary.Types.Pressure p_out(start = 13e3);
       Physiolibrary.Types.Pressure dp_aortic = p_in - p_out;
-      parameter Modelica.SIunits.Time tau_avg = 10;
+        parameter Modelica.Units.SI.Time tau_avg=10;
       equation
           // integrate only during open valve
           if heartComponent.aorticValve.open then
@@ -57452,7 +57456,8 @@ P_hs_plus_dist"),
       end CardiovascularSystem_incrConduct;
 
       model CVS_SATejection
-        extends ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized1_init(
+        extends
+          ADAN_main.SystemicTree.Identification.SteadyState.OlufsenTriSeg_optimized1_init(
           heartComponent(
             aorticValve(_Ron(displayUnit="(Pa.s)/m3") = 176513),
             valveInertia_aortic(enabled=true, l=0.02),
@@ -57483,7 +57488,7 @@ P_hs_plus_dist"),
           duration=1) constrainedby Modelica.Blocks.Sources.Ramp
           annotation (Placement(transformation(extent={{-64,-100},{-44,-80}})));
         Physiolibrary.Types.Constants.HydraulicConductanceConst
-          hydraulicConductance(k(displayUnit="l/(mmHg.min)") =
+          hydraulicConductance(k(displayUnit="l/(mmHg.min)")=
             3.7503078792283e-08)
           annotation (Placement(transformation(extent={{-62,-64},{-54,-56}})));
       equation
@@ -57515,12 +57520,12 @@ P_hs_plus_dist"),
 <p>Generated from <a href=\"https://models.cellml.org/workspace/4ac\">https://models.cellml.org/workspace/4ac</a> Revision: b580e909bfa88dbf598e9fd1f4b15024e676e9b6 from Date: 2019-04-08 8:13:36 AM, Message: tuning the param for veins</p>
 </html>"));
   end SystemicTree;
-  annotation (uses(                                     Modelica(version=
-            "3.2.3"),
-      Physiolibrary(version="2.4.0")),
+  annotation (preferredView="info",uses(Modelica(version="4.0.0"), Physiolibrary(version="2.4.1")),
                        experiment(
       StopTime=60,
       __Dymola_NumberOfIntervals=1500,
       Tolerance=0.000001,
-      __Dymola_Algorithm="Cvode"));
+      __Dymola_Algorithm="Cvode"),
+    version="1.1",
+    conversion(from(version="", script="modelica://ADAN_main/Scripts/Dymola/ConvertFromADAN_main_1.mos")));
 end ADAN_main;
