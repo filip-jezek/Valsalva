@@ -2856,9 +2856,15 @@ type"),       Text(
                   extent={{-120,-20},{-80,20}}),iconTransformation(extent={{-120,-20},{-80,
                     20}})));
 
+        // Physiolibrary.Types.Fraction phi_avg;
+        // parameter Modelica.SIunits.Time tau = 0.001 "averaging phi";
+
         equation
+        //   der(phi_avg)*tau = phi - phi_avg;
+
           HR_max =HR_nom*(1 + eta_HR*(1 - phi0));
           HR =HR_nom*(1 + eta_HR*(phi - phi0));
+        //   HR =HR_nom*(1 + eta_HR*(phi_avg - phi0));
 
         end HeartRate_HRMinMax;
 
@@ -3723,6 +3729,15 @@ type"),       Text(
                 extent={{-10,-10},{10,10}},
                 rotation=270,
                 origin={-60,-18})));
+          Physiolibrary.Blocks.Factors.Normalization normalization(enabled=true)
+            annotation (Placement(transformation(extent={{-10,10},{10,30}})));
+          Physiolibrary.Types.RealIO.FractionInput conductanceFraction if
+            UseCondFracInput "Variable change to baseline conductance"
+            annotation (Placement(transformation(extent={{-120,0},{-80,40}})));
+          Physiolibrary.Types.Constants.FractionConst conductance0(k=1) if not
+            UseCondFracInput "Normal conductance fraction"
+            annotation (Placement(transformation(extent={{-90,26},{-82,34}})));
+          parameter Boolean UseCondFracInput=false "Use conductance modifier input";
         equation
           volume =c_pa.volume + c_pv.volume - deadVolume;
 
@@ -3740,8 +3755,6 @@ type"),       Text(
             annotation (Line(points={{68,-42},{-8,-42},{-8,-100}}, color={0,0,127}));
           connect(hydraulicConductance.y, phi_factor.u)
             annotation (Line(points={{-19,80},{0,80},{0,50}}, color={0,0,127}));
-          connect(phi_factor.y, r_pa.cond)
-            annotation (Line(points={{0,30},{0,6}}, color={0,0,127}));
           connect(adenosine, phi_factor.phi)
             annotation (Line(points={{-100,40},{-10,40}}, color={0,0,127}));
           connect(fraction.y, phi_factor.phi) annotation (Line(points={{-81,50},{-54,50},
@@ -3762,6 +3775,14 @@ type"),       Text(
               points={{-60,-8},{-60,0},{-10,0}},
               color={0,0,0},
               thickness=1));
+          connect(phi_factor.y, normalization.yBase)
+            annotation (Line(points={{0,30},{0,22}}, color={0,0,127}));
+          connect(normalization.y, r_pa.cond)
+            annotation (Line(points={{0,16},{0,6}}, color={0,0,127}));
+          connect(conductanceFraction, normalization.u)
+            annotation (Line(points={{-100,20},{-8,20}}, color={0,0,127}));
+          connect(conductance0.y, normalization.u) annotation (Line(points={{-81,30},{-54,
+                  30},{-54,20},{-8,20}}, color={0,0,127}));
           annotation (Documentation(info="<html>
 <p><b>Convention</b>:</p>
 <p><br>The parameters are UPPERCASE, similarly to the Matlab source code.</p>
@@ -3795,6 +3816,7 @@ type"),       Text(
           extends PulmonaryTriSeg(
             deadVolume=0,
             redeclare Basic.Resistor_NonLinear r_pa(
+              useConductanceInput=false,
               R_nom_fixed=settings.pulm_R,
               Q_nom=settings.pulm_CO_target,
               useNonlinearResistance=true,
@@ -7617,9 +7639,11 @@ type"),       Text(
                   iconTransformation(extent={{80,-100},{120,-60}})));
             Integer beats(start = 0);
             parameter Boolean usePhiInput = false;
+            Modelica.SIunits.Time time0;
           equation
 
-            t0 = cardiac_cycle / frequency;
+           // t0 = cardiac_cycle / frequency_avg;
+            t0 = time - time0;
             der(cardiac_cycle) = frequency;
 
             when beat then
@@ -7628,6 +7652,7 @@ type"),       Text(
               t0_last = pre(t0);
               HR_true = 1/max(1e-3, t0_last);
               beats = pre(beats) + 1;
+              time0 = time;
             end when;
 
           end SA_node;
@@ -50651,16 +50676,31 @@ P_hs_plus_dist"),
       model CVS_tiltable
         import ADAN_main;
         extends ADAN_main.SystemicTree.CardiovascularSystem(
-       SystemicComponent(UseTiltInput=true));
+       SystemicComponent(UseTiltInput=true), pulmonaryComponent(
+              UseCondFracInput=true, r_pa(useConductanceInput=true)));
 
         replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
           height=Modelica.Constants.pi/3,
           startTime=0,
           duration=1)   constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-100,22},{-80,42}})));
+        Modelica.Blocks.Math.Gain gain(k=-0.2/(Modelica.Constants.pi/3))
+          annotation (Placement(transformation(extent={{-102,-54},{-82,-34}})));
+        Modelica.Blocks.Math.Add add
+          annotation (Placement(transformation(extent={{-66,-60},{-46,-40}})));
+        Modelica.Blocks.Sources.Constant const(k=1) annotation (Placement(
+              transformation(extent={{-120,-84},{-100,-64}})));
       equation
         connect(Tilt_ramp.y, SystemicComponent.tilt_input) annotation (Line(
               points={{-79,32},{-22,32},{-22,20}}, color={0,0,127}));
+        connect(Tilt_ramp.y, gain.u) annotation (Line(points={{-79,32},{-74,32},
+                {-74,-30},{-102,-30},{-102,-44},{-104,-44}}, color={0,0,127}));
+        connect(gain.y, add.u1)
+          annotation (Line(points={{-81,-44},{-68,-44}}, color={0,0,127}));
+        connect(const.y, add.u2) annotation (Line(points={{-99,-74},{-74,-74},{
+                -74,-56},{-68,-56}}, color={0,0,127}));
+        connect(add.y, pulmonaryComponent.conductanceFraction)
+          annotation (Line(points={{-45,-50},{-34,-50}}, color={0,0,127}));
         annotation (experiment(
             StopTime=120,
             Interval=0.01,
@@ -57426,6 +57466,45 @@ P_hs_plus_dist"),
             Tolerance=1e-07,
             __Dymola_Algorithm="Cvode"));
       end CVS_SATejection;
+
+      model CorviaShunt
+        extends CardiovascularSystem(useAutonomousPhi(y=time > 40));
+        replaceable Physiolibrary.Hydraulic.Components.Resistor
+          r_SystemicVenousInflow(useConductanceInput=true, Resistance=settings.heart_R_RA)
+          constrainedby Physiolibrary.Hydraulic.Components.Resistor
+          "Resistance of the inflow to the atria"
+          annotation (Placement(transformation(extent={{-10,-10},{10,10}},
+              rotation=180,
+              origin={8,-76})));
+        replaceable Modelica.Blocks.Sources.Ramp shuntConductance(
+          offset=0,
+          startTime=20,
+          height=3.7503078792283e-08,
+          duration=1) constrainedby Modelica.Blocks.Sources.Ramp
+          annotation (Placement(transformation(extent={{-64,-100},{-44,-80}})));
+        Physiolibrary.Types.Constants.HydraulicConductanceConst
+          hydraulicConductance(k(displayUnit="l/(mmHg.min)") =
+            3.7503078792283e-08)
+          annotation (Placement(transformation(extent={{-62,-64},{-54,-56}})));
+      equation
+        connect(r_SystemicVenousInflow.q_in, SystemicComponent.port_b)
+          annotation (Line(
+            points={{18,-76},{18,28}},
+            color={0,0,0},
+            thickness=1));
+        connect(pulmonaryComponent.port_b, r_SystemicVenousInflow.q_out)
+          annotation (Line(
+            points={{-14,-52},{-14,-76},{-2,-76}},
+            color={0,0,0},
+            thickness=1));
+        connect(shuntConductance.y, r_SystemicVenousInflow.cond) annotation (
+            Line(points={{-43,-90},{8,-90},{8,-82}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=40,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end CorviaShunt;
     end Experiments;
 
   annotation(preferredView="info",
