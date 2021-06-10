@@ -333,6 +333,39 @@ def calculateQ_MV(q, time, interval):
             break
     
     return (q[max_index], m)
+
+def calculateEA(q_mv,cc, time, interval, A_length = 0.2):
+    """ Returns tuple of passive and atrial kick peaks mitral flow heart filling rate
+    assumes the passive peak is larger
+
+    q : flow signal
+    cc : cardiac cycle phase to get the systole from. Cardiac cycle starts with atrial contraction.
+    time : time set
+    interval : guess range interval in which to search. May overflow during search, so leave at least one beat buffer.
+
+    returns
+    """
+    
+    # find begging of the cardiac cycle - that is the beggingin of atrial systole
+    A_start_i = numpy.argmax(cc[interval]) + interval[0]
+    
+    # find index of time + 0.2
+    A_end_i = numpy.argmax(time > time[A_start_i] + A_length)
+
+    # find the max peak in the interval - that is the E peak
+    # E_max_i = numpy.argmax(q_mv[interval]) + interval[0]
+    E_max = numpy.max(q_mv[interval])
+
+    # E wave
+    A = numpy.max(q_mv[A_start_i:A_end_i])
+
+    # ratio
+    if A != 0:
+        EA = E_max/A
+    else:
+        EA = 0
+
+    return (E_max, A, EA)
     
     
 

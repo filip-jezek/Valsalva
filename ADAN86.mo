@@ -830,8 +830,8 @@ type"),       Text(
         parameter Real uMin=-uMax "Lower limits of input signals";
         Modelica.Blocks.Math.Gain         gain(k=phi_gain)
           annotation (Placement(transformation(extent={{-90,-10},{-70,10}})));
-        Modelica.Blocks.Sources.Constant const_shiftOffset(k=const_offset) if
-                       not UseAdditionalInput
+        Modelica.Blocks.Sources.Constant const_shiftOffset(k=const_offset)
+                    if not UseAdditionalInput
           annotation (Placement(transformation(extent={{-98,24},{-82,38}})));
         parameter Real phi0=0.25 "Default phi0";
         parameter Real phi_gain=1 "Phi Gain multiplier";
@@ -1885,13 +1885,13 @@ type"),       Text(
           // The T0 signal is not precise, as the valves might be chattering
           // the CO calculation threats with division by zero, so we better start after time = 0
           T0_cycle = time;
-          reinit(CO_acc, 0);
-          CO = max(0, CO_acc/(time - pre(T0_cycle)));
+          CO = CO_acc/max(time - pre(T0_cycle), -1e-3);
           Pout_min = pre(BP_min);
           reinit(BP_min, Pmax);
           Pout_pulse = Pout_max - Pout_min;
           Pout_max = pre(BP_max);
           reinit(BP_max, 0);
+          reinit(CO_acc, 0);
         end when;
 
       end IdealValveResistanceWithMeasurements;
@@ -3712,8 +3712,8 @@ type"),       Text(
           Physiolibrary.Types.RealIO.FractionInput adenosine if UseAdenosineInput
             "Adenosine dose"
             annotation (Placement(transformation(extent={{-120,20},{-80,60}})));
-          Physiolibrary.Types.Constants.FractionConst fraction(k=0) if
-                                                                  not UseAdenosineInput
+          Physiolibrary.Types.Constants.FractionConst fraction(k=0)
+                                                               if not UseAdenosineInput
             annotation (Placement(transformation(extent={{-90,46},{-82,54}})));
 
           replaceable Physiolibrary.Hydraulic.Components.Resistor R_pv_visc(
@@ -3733,8 +3733,8 @@ type"),       Text(
                 origin={-60,-18})));
           Physiolibrary.Blocks.Factors.Normalization normalization(enabled=true)
             annotation (Placement(transformation(extent={{-10,10},{10,30}})));
-          Physiolibrary.Types.RealIO.FractionInput conductanceFraction if
-            UseCondFracInput "Variable change to baseline conductance"
+          Physiolibrary.Types.RealIO.FractionInput conductanceFraction
+         if UseCondFracInput "Variable change to baseline conductance"
             annotation (Placement(transformation(extent={{-120,0},{-80,40}})));
           Physiolibrary.Types.Constants.FractionConst conductance0(k=1) if not
             UseCondFracInput "Normal conductance fraction"
@@ -3922,8 +3922,8 @@ type"),       Text(
           Physiolibrary.Types.RealIO.FractionInput adenosine if UseAdenosineInput
             "Adenosine dose"
             annotation (Placement(transformation(extent={{-120,20},{-80,60}})));
-          Physiolibrary.Types.Constants.FractionConst fraction(k=0) if
-                                                                  not UseAdenosineInput
+          Physiolibrary.Types.Constants.FractionConst fraction(k=0)
+                                                               if not UseAdenosineInput
             annotation (Placement(transformation(extent={{-90,46},{-82,54}})));
 
           replaceable Physiolibrary.Hydraulic.Components.Resistor R_pv_visc(
@@ -7632,7 +7632,7 @@ type"),       Text(
             Modelica.Blocks.Interfaces.RealOutput t0 "time since start of cardiac cycle" annotation (Placement(transformation(
                     rotation=0, extent={{90,-10},{110,10}}), iconTransformation(extent={{80,60},
                       {120,100}})));
-            Physiolibrary.Types.Time t0_last "length of the last cardiac cycle";
+            Physiolibrary.Types.Time t0_last(start = 60/64) "length of the last cardiac cycle";
             Physiolibrary.Types.Frequency HR_true(start = 1) "Heart rate calculated from true systolic intervals";
             Physiolibrary.Types.RealIO.FrequencyInput frequency annotation (Placement(
                   transformation(rotation=0, extent={{-110,-10},{-90,10}})));
@@ -7648,14 +7648,22 @@ type"),       Text(
                   iconTransformation(extent={{80,-100},{120,-60}})));
             Integer beats(start = 0);
             parameter Boolean usePhiInput = false;
-            Modelica.Units.SI.Time time0;
+            Modelica.Units.SI.Time time0(start = -1);
           equation
 
            // t0 = cardiac_cycle / frequency_avg;
             t0 = time - time0;
             der(cardiac_cycle) = frequency;
 
-            when beat then
+            when initial() then
+              // at given frequency and cardiac cycle
+
+              // thus implying t0
+              time0 = time - t0_last;
+              beats = 0;
+              HR_true = frequency;
+              t0_last = 1/frequency;
+            elsewhen beat then
               reinit(cardiac_cycle, 0);
               // t0 is zero now
               t0_last = pre(t0);
@@ -8568,8 +8576,8 @@ type"),       Text(
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a pv
             annotation (Placement(transformation(extent={{90,-70},{110,-50}}),
                 iconTransformation(extent={{90,-44},{110,-24}})));
-          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input if
-            UseThoracic_PressureInput                                                                   annotation (Placement(
+          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input
+         if UseThoracic_PressureInput                                                                   annotation (Placement(
                 transformation(extent={{-20,-20},{20,20}},
                 rotation=90,
                 origin={0,-100}),                             iconTransformation(extent={{-20,
@@ -8582,8 +8590,8 @@ type"),       Text(
                 iconTransformation(extent={{-110,-44},{-90,-24}})));
 
           Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit="1/min")=
-                 HR) if
-               not UseFrequencyInput
+                 HR)
+            if not UseFrequencyInput
             annotation (Placement(transformation(extent={{-96,-4},{-88,4}})));
           Physiolibrary.Types.Constants.PressureConst P0(k=0) if not
             UseThoracic_PressureInput
@@ -10918,8 +10926,8 @@ compliance
                     "Calculated parameters"));
 
             parameter Physiolibrary.Types.Volume zpv = l*Modelica.Constants.pi*(r^2) "Zero-pressure volume" annotation (Dialog(tab = "General", group = "Calculated parameters"));
-            Physiolibrary.Types.RealIO.FractionOutput distentionFraction = sqrt(max(volume, 0))/sqrt(distentionBase) if
-              UseDistentionOutput "Outputs distention from default, for usage by a baroreceptor" annotation (Placement(transformation(extent={{76,10},{96,
+            Physiolibrary.Types.RealIO.FractionOutput distentionFraction = sqrt(max(volume, 0))/sqrt(distentionBase)
+           if UseDistentionOutput "Outputs distention from default, for usage by a baroreceptor" annotation (Placement(transformation(extent={{76,10},{96,
                       30}}), iconTransformation(extent={{-20,-20},{20,20}},
                   rotation=90,
                   origin={0,40})));
@@ -16570,8 +16578,8 @@ P_hs_plus_dist"),
               transformation(extent={{-340,-68},{-300,-28}}),
                                                             iconTransformation(extent={{20,-100},
                     {60,-60}})));
-          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input=P_th if
-               UseThoracic_PressureInput annotation (Placement(transformation(
+          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input=P_th
+            if UseThoracic_PressureInput annotation (Placement(transformation(
                   extent={{-340,-110},{-300,-70}}), iconTransformation(extent={
                     {-100,-100},{-60,-60}})));
           Physiolibrary.Types.RealIO.PressureInput Outer_pressure_input = outer_pressure if UseOuter_PressureInput annotation (Placement(
@@ -16589,17 +16597,17 @@ P_hs_plus_dist"),
         //                                                     iconTransformation(extent={{130,162},
         //             {150,182}})));
 
-          Physiolibrary.Types.RealIO.FractionInput exercise_input=Exercise if            UseExerciseInput
+          Physiolibrary.Types.RealIO.FractionInput exercise_input=Exercise            if UseExerciseInput
             annotation (Placement(transformation(extent={{-200,-110},{-160,-70}}),
                 iconTransformation(extent={{-40,60},{0,100}})));
           outer Settings settings annotation (Placement(transformation(extent={{
                     -318,180},{-298,200}})));
 
-          Subsystems.Baroreflex.Baroreflex_system baroreflex_system if
-            UseBaroreflexOutput                                     annotation (
+          Subsystems.Baroreflex.Baroreflex_system baroreflex_system
+         if UseBaroreflexOutput                                     annotation (
               Placement(transformation(rotation=0, extent={{-242,142},{-222,162}})));
-          Physiolibrary.Types.RealIO.FractionOutput  phi_baroreflex if
-            UseBaroreflexOutput                         annotation (Placement(
+          Physiolibrary.Types.RealIO.FractionOutput  phi_baroreflex
+         if UseBaroreflexOutput                         annotation (Placement(
                 transformation(extent={{-192,138},{-172,158}}),
                                                             iconTransformation(extent={{-24,164},
                     {-4,184}})));
@@ -17564,8 +17572,8 @@ P_hs_plus_dist"),
             vertebral_L2.p,
             vertebral_R272.p,
             splanchnic_tissue.p,
-            cardiac_tissue.p} if
-            useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
+            cardiac_tissue.p}
+         if useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
                     336,202}}), iconTransformation(extent={{148,166},{168,186}})));
         equation
 
@@ -18934,8 +18942,8 @@ P_hs_plus_dist"),
             vertebral_L2.p,
             vertebral_R272.p,
             splanchnic_tissue.p,
-            cardiac_tissue.p} if
-            useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
+            cardiac_tissue.p}
+         if useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
                     336,202}}), iconTransformation(extent={{148,166},{168,186}})));
         equation
 
@@ -26586,8 +26594,8 @@ P_hs_plus_dist"),
             import ADAN_main;
             import ADAN_main;
             extends
-              ADAN_main.Components.Subsystems.Systemic.ADAN86ArterialTree.arteries_ADAN86
-              (redeclare ADAN_main.Components.Obsolete.pv_jII_type_baroreceptor
+              ADAN_main.Components.Subsystems.Systemic.ADAN86ArterialTree.arteries_ADAN86(
+               redeclare ADAN_main.Components.Obsolete.pv_jII_type_baroreceptor
                 aortic_arch_C46, redeclare
                 ADAN_main.Components.Obsolete.pv_type_baroreceptor
                 internal_carotid_R8_A);
@@ -28441,6 +28449,8 @@ P_hs_plus_dist"),
             // adjustment to fit within the infrastructure
             parameter Real Ra = 0, Rv = 0, thoracic_pressure_ratio = 0, I = 0, C = 0, zpv = 0, nominal_pressure = 0;
             parameter Boolean UseOuter_thoracic_pressure = false;
+            parameter Real phi_delayed = 0 "A dummy parameter to allow inheritance from unrelated parent";
+
             Pressure p = P_CKIDNEY;
             Pressure p_C = P_GLOMER;
             VolumeFlowRate q_in = F_K1;
@@ -28987,8 +28997,8 @@ P_hs_plus_dist"),
 
           Physiolibrary.Types.Volume volume = PA.volume + PV.volume + coronaryLayer_SubEndocardium.volume + coronaryLayer_Mid.volume + coronaryLayer_SubEpicardium.volume;
           parameter Modelica.Units.SI.Time tau=4;
-          Physiolibrary.Types.RealIO.PressureInput externalPressure if
-            useExternalPressureInput annotation (Placement(transformation(
+          Physiolibrary.Types.RealIO.PressureInput externalPressure
+         if useExternalPressureInput annotation (Placement(transformation(
                 extent={{20,-20},{-20,20}},
                 rotation=270,
                 origin={-20,-100})));
@@ -36983,7 +36993,7 @@ P_hs_plus_dist"),
 
       Physiolibrary.Types.HydraulicElastance E;
 
-      Physiolibrary.Types.RealIO.FractionInput phi=f if   useVariableContractility annotation (Placement(
+      Physiolibrary.Types.RealIO.FractionInput phi=f   if useVariableContractility annotation (Placement(
             transformation(extent={{-120,-60},{-80,-20}}),
                                                         iconTransformation(extent={{-120,
                 -100},{-80,-60}})));
@@ -40611,7 +40621,7 @@ P_hs_plus_dist"),
       Real brachial_pressure_int "integration of pressure to find the true mean";
         output Physiolibrary.Types.Pressure ascending_aorta = SystemicComponent.ascending_aorta_A.p1 "PRessure in ascending aorta";
         output Physiolibrary.Types.Pressure renal_capillary=SystemicComponent.renal_L166.p_C;
-        output Physiolibrary.Types.VolumeFlowRate CO(displayUnit = "l/min") = heartComponent.aorticValve.CO;
+        Physiolibrary.Types.VolumeFlowRate CO(displayUnit = "l/min") = heartComponent.aorticValve.CO;
         output Physiolibrary.Types.Pressure carotid_pressure=SystemicComponent.common_carotid_L48_D.p_out_hs;
         output Physiolibrary.Types.Pressure femoral_pressure=SystemicComponent.femoral_L200.p_out_hs;
         output Physiolibrary.Types.Pressure P_LV = heartComponent.ventricles.P_LV
@@ -40620,12 +40630,13 @@ P_hs_plus_dist"),
         output Physiolibrary.Types.Volume EDV;
         output Physiolibrary.Types.Volume ESV;
         output Physiolibrary.Types.Fraction phi_baro= switch1.u1;
-      output Physiolibrary.Types.Volume SV = CO/heartRate.HR;
-      output Physiolibrary.Types.Frequency HR = heartComponent.sa_node.HR_true;
+        output Physiolibrary.Types.Volume SV = EDV - ESV "Stroke volume"; // the formulation of SV = CO/heartComponent.sa_node.HR_true; was causing troubles to CO, keeping it pinned to zero all the time! (Dymola 2022)
+        output Physiolibrary.Types.Frequency HR = heartComponent.sa_node.HR_true;
+        output Real cardiac_cycle = heartComponent.sa_node.cardiac_cycle "Cardiac cycle phase";
 
       Real CI = CO*1000*60/settings.BSA "Cardiac index l/min/m2";
       Physiolibrary.Types.Power CardiacPowerBrachial = brachial_pressure_mean*CO;
-      Physiolibrary.Types.PowerPerMass CardiacPowerIndex = brachial_pressure_mean*CO/settings.BSA;
+      // Physiolibrary.Types.PowerPerMass CardiacPowerIndex = brachial_pressure_mean*CO/settings.BSA;
         output Modelica.Units.SI.Time TEjection=heartComponent.aorticValve.Ts;
         output Modelica.Units.SI.Time TFilling=heartComponent.mitralValve.Ts;
         output Physiolibrary.Types.Pressure thoracic_pressure=SystemicComponent.P_th;
@@ -46547,8 +46558,8 @@ P_hs_plus_dist"),
               heart_vntr_TS_maxAct=settings.heart_vntr_TS_maxAct,
               heart_vntr_TR=settings.heart_vntr_TR,
               heart_vntr_TR_maxAct=settings.heart_vntr_TR_maxAct,
-              heart_vntr_D_A_maxAct=settings.heart_vntr_D_A_maxAct)) if
-                                                                      true
+              heart_vntr_D_A_maxAct=settings.heart_vntr_D_A_maxAct))
+                                                                   if true
             annotation (Placement(transformation(extent={{-80,40},{-60,60}})));
 
           Tilt.CVS_tiltable olufsenTriSeg_tiltable(settings(
@@ -46612,8 +46623,8 @@ P_hs_plus_dist"),
               heart_vntr_TS_maxAct=settings.heart_vntr_TS_maxAct,
               heart_vntr_TR=settings.heart_vntr_TR,
               heart_vntr_TR_maxAct=settings.heart_vntr_TR_maxAct,
-              heart_vntr_D_A_maxAct=settings.heart_vntr_D_A_maxAct)) if
-                                                                      true
+              heart_vntr_D_A_maxAct=settings.heart_vntr_D_A_maxAct))
+                                                                   if true
             annotation (Placement(transformation(extent={{-20,40},{0,60}})));
 
           Valsalva.CVS_valsalva olufsenTriSeg_valsalva(settings(
@@ -46677,8 +46688,8 @@ P_hs_plus_dist"),
               heart_vntr_TS_maxAct=settings.heart_vntr_TS_maxAct,
               heart_vntr_TR=settings.heart_vntr_TR,
               heart_vntr_TR_maxAct=settings.heart_vntr_TR_maxAct,
-              heart_vntr_D_A_maxAct=settings.heart_vntr_D_A_maxAct)) if
-                                                                      true
+              heart_vntr_D_A_maxAct=settings.heart_vntr_D_A_maxAct))
+                                                                   if true
             annotation (Placement(transformation(extent={{-80,-20},{-60,0}})));
 
           // used regex find '(\w+)=we' and replace with \1=settings.\1
@@ -46743,8 +46754,8 @@ P_hs_plus_dist"),
               heart_vntr_TS_maxAct=settings.heart_vntr_TS_maxAct,
               heart_vntr_TR=settings.heart_vntr_TR,
               heart_vntr_TR_maxAct=settings.heart_vntr_TR_maxAct,
-              heart_vntr_D_A_maxAct=settings.heart_vntr_D_A_maxAct)) if
-                                                                      true
+              heart_vntr_D_A_maxAct=settings.heart_vntr_D_A_maxAct))
+                                                                   if true
             annotation (Placement(transformation(extent={{40,40},{60,60}})));
 
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
@@ -48313,8 +48324,7 @@ P_hs_plus_dist"),
 
       model Optimized_ss_baro_init "Steady state initialization from 2020-09-14 10:44:32.920763 at time 179.92"
           extends
-            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized5
-            (
+            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized5(
             SystemicComponent(
               baroreflex_system(
                 baroreflex(phi_mean(start=0.24930115, fixed=true), phi(start=
@@ -49142,8 +49152,8 @@ P_hs_plus_dist"),
 
         model OlufsenTriSeg_optimized1_init "Steady state initialization from 2021-05-06 21:29:10.433709 at time 599.62"
           extends
-            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized1
-            ( SystemicComponent(
+            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized1(
+              SystemicComponent(
                 baroreflex_system(
                   baroreflex(phi_mean(start = 0.2504567, fixed = true), phi(start = 0.24661149, fixed = true)),
                   baroreceptor_aortic(fbr_int(start = 14.02404, fixed = true), epsilon(start = 1.5292943, fixed = true), s(start = 0.8019683, fixed = true)),
@@ -49385,8 +49395,7 @@ P_hs_plus_dist"),
 
       model OlufsenTriSeg_optimized2_init "Steady state initialization from 2021-05-14 13:57:18.502322 at time 299.5"
         extends
-            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized2
-            (
+            ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized2(
             SystemicComponent(
               baroreflex_system(
                 baroreflex(phi_mean(start = 0.25164273, fixed = true), phi(start = 0.24665853, fixed = true), f1_adj(start = 0.0030635502, fixed = true)),
@@ -49609,7 +49618,9 @@ P_hs_plus_dist"),
               tricuspidValve(open(start = true, fixed = true)),
               pulmonaryValve(open(start = false, fixed = true), BP_max(start = 0.0, fixed = true), BP_min(start = 26600.0, fixed = true), CO_acc(start = 0.0, fixed = true)),
               mitralValve(open(start = true, fixed = true), BP_max(start = 1006.6066, fixed = true), BP_min(start = 1001.3948, fixed = true), CO_acc(start = 7.4347015e-05, fixed = true)),
-              aorticValve(open(start = false, fixed = true), BP_max(start = 15195.577, fixed = true), BP_min(start = 11786.38, fixed = true), CO_acc(start = 9.2221075e-05, fixed = true)),
+              aorticValve(open(start = false, fixed = true),
+                calculateAdditionalMetrics=true,             BP_max(start = 15195.577, fixed = true), BP_min(start = 11786.38, fixed = true),
+                CO_acc(start=9.2221075e-05, fixed=true)),
               ventricles(
                 LV_wall(ym(start = 3.4203827, fixed = true), SL(start = 2.0219047, fixed = true)),
                 SEP_wall(SL(start = 2.0704916, fixed = true)),
@@ -49627,6 +49638,11 @@ P_hs_plus_dist"),
               V_PV_init=0,
               baro_tau_s=93,
               baro_f1=3.5e-03));
+          annotation (experiment(
+              StopTime=5,
+              Interval=0.01,
+              Tolerance=1e-08,
+              __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_optimized2_init;
 
       end SteadyState;
@@ -50022,12 +50038,15 @@ P_hs_plus_dist"),
 
       model CVS_baseline "Just a baseline wrapper"
         import ADAN_main;
-        extends ADAN_main.SystemicTree.CardiovascularSystem;
+        extends ADAN_main.SystemicTree.CardiovascularSystem(
+          heartComponent(valveInertia_Mitral(enabled=false)),
+          settings(heart_vntr_TS=0.1, heart_atr_TS=0.08),
+          useAutonomousPhi(y=false));
       //   (settings(heart_I_A(displayUnit="Pa.s2/m3"),
       //                                         baro_tau_s(displayUnit="s") = 30),
       //       useAutonomousPhi(y=false));
         annotation (experiment(
-            StopTime=60,
+            StopTime=10,
             Interval=0.01,
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"),
@@ -56070,7 +56089,9 @@ P_hs_plus_dist"),
                 ADAN_main.Components.Subsystems.Systemic.Organs.Renal.Renal_P_Int_i
                 renal_R178(P_int=simplestLymphaticDynamicSpeedUp.p_isf, volume(start=0.00001,
                     fixed=true))),
-            settings(baro_tau_s=10, baro_fsn=0.0372),
+            settings(baro_tau_s=10,
+              baro_fsn=0.0372,
+              baro_f1=3.8e-03),
             useAutonomousPhi(y=true));
 
            Real eGFR = SystemicComponent.renal_L166.GFR_surf*2;
