@@ -61,28 +61,28 @@ def getObjectives(vars_set):
     CO_min = 15.5*lpm2SI
     # Ppa_target = 34*mmHg2SI # (Kovacs Eur Respir J 2009)
     Ppv_target = 12*mmHg2SI # (Kovacs Eur Respir J 2009)
-    Ppv_target = numpy.mean(vars_set['CO'][interval])*60*1e3*1.2 # Eisman 2018 (PMID 29695381) shows a relation CO to PCWP of 1.2 mmHg/(L/min) in healthy control
+    co = fun_lib.calculateAlternativeCO(vars_set, interval)
+    Ppv_target =co*60*1e3*1.2 # Eisman 2018 (PMID 29695381) shows a relation CO to PCWP of 1.2 mmHg/(L/min) in healthy control
     Ppas_target = 34*mmHg2SI # (Kovacs Eur Respir J 2009)
     
     Ppad_target = 15*mmHg2SI # (Kovacs Eur Respir J 2009)
-
-    
 
     # build costs
     ov = [  ('BPs', max(vars_set['brachial_pressure'][interval])/mmHg2SI, 194.4, None, 3),
             ('BPd', min(vars_set['brachial_pressure'][interval])/mmHg2SI, 81.16, None, 10),
             # ('EDV', max(vars_set['V_LV'][interval]), EDV_target, None, 1),
             # ('ESV', min(vars_set['V_LV'][interval]), ESV_target, None, 1e-3),
-            ('CO', numpy.mean(vars_set['CO'][interval])/lpm2SI, 16.17, None, 0.1),
+            ('CO', co/lpm2SI, 16.17, None, 0.1),
             ('Ts', max(vars_set['TEjection'][interval]), 0.196, None, .05),
             # ('Td', max(vars_set['TFilling'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
-            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), None, [0.8, 0.9], .03),
+            ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), 0.78, None, .1),
             # ('HR', numpy.mean(vars_set['HR'][interval])*60, 154, None, 0, 60),
             # ('Ppa', numpy.mean(vars_set['P_pa'][interval]), Ppa_targ)et, None, .1),
             # ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, .1),
             # ('Ppa_s', numpy.max(vars_set['P_pa'][interval]), Ppas_target, None, 0.1, 1/mmHg2SI),
             # ('Ppa_d', numpy.min(vars_set['P_pa'][interval]), Ppad_target, None, 0.1, 1/mmHg2SI),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval])/mmHg2SI, Ppv_target, None, 2),
+            ('Pcap', numpy.mean(vars_set['SystemicComponent.posterior_tibial_T4_L214.p_C'][interval])/mmHg2SI, None, [20, 40], 10),
         ]
     
     # make it a dict?
