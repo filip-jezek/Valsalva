@@ -4091,6 +4091,7 @@ type"),       Text(
             Physiolibrary.Types.HydraulicElastance E=contractilityFraction*D;
 
             Physiolibrary.Types.Volume volume(start=100e-6);// = _VLA*Constants.ml2SI;
+            parameter Physiolibrary.Types.Volume zpv = 0 "Zero pressure volume";
             parameter Physiolibrary.Types.Volume volume_min=5e-06  "Volume limiter for external pressures";
 
             Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input  annotation (Placement(
@@ -4124,7 +4125,7 @@ type"),       Text(
 
             if enabled then
               der(volume) =port_a.q;
-              port_a.pressure =E*volume + P_c +
+              port_a.pressure =E*(volume - zpv) + P_c +
                 thoracic_pressure_inside;
             else
               der(volume) = 0;
@@ -28441,6 +28442,7 @@ P_hs_plus_dist"),
             // adjustment to fit within the infrastructure
             parameter Real Ra = 0, Rv = 0, thoracic_pressure_ratio = 0, I = 0, C = 0, zpv = 0, nominal_pressure = 0;
             parameter Boolean UseOuter_thoracic_pressure = false;
+            parameter Real phi_delayed = 0 "a  dummy parameter to allow inheritance from unrelated parent";
             Pressure p = P_CKIDNEY;
             Pressure p_C = P_GLOMER;
             VolumeFlowRate q_in = F_K1;
@@ -28453,7 +28455,7 @@ P_hs_plus_dist"),
             constant Real C2SI(unit="m3/Pa") = ml2SI/mmHg2SI;
             constant Real R2SI(unit="Pa.s/m3") = mmHg2SI*1.0/ml2SI;
             // INPUT PARAMETERS
-              parameter Modelica.Units.SI.Area BSA=1.73;
+            parameter Modelica.Units.SI.Area BSA=1.73;
             parameter Real halving = 0.5 "halving of volumes to divide for two kidneys";
 
             // Adjustble Parameters
@@ -28488,8 +28490,8 @@ P_hs_plus_dist"),
             parameter HydraulicCompliance C_VKIDNEY=0.002*BVo/(10*mmHg2SI) "assumes 0.002 of BV at 10 mmHg";
             parameter Pressure PI_i=3733.02684762
                                                "Onkotic pressure";
-              parameter Modelica.Units.SI.Time tau_R_K_afferent=60
-                "Time constant in seconds";
+            parameter Modelica.Units.SI.Time tau_R_K_afferent=60
+              "Time constant in seconds";
 
             parameter Real D0=10 "TODO";
             parameter Boolean leakUrine = false "If true, leaks the urine from the organism. Total volume decreases then!!";
@@ -50044,7 +50046,10 @@ P_hs_plus_dist"),
       end CVS_baseline_fastBaro;
 
       model test
-        extends CVS_baseline(useAutonomousPhi(y=false));
+        extends CVS_baseline(useAutonomousPhi(y=false), heartComponent(
+            la(zpv=0),
+            resistor1(enable=true),
+            valveInertia_Mitral(enabled=false)));
         Components.Subsystems.Heart.Data.EDPVRnorm
                        EDPVRnorm_V(
           V_m=0.00015,
@@ -50057,6 +50062,11 @@ P_hs_plus_dist"),
       equation
         connect(useAutonomousPhi1.y, EDPVRnorm_V.volume)
           annotation (Line(points={{19,-76},{46,-76}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=20,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
       end test;
     end Baseline;
 

@@ -1,7 +1,7 @@
 %% plots the Exercise results
 % import the dymload util
 addpath('c:\Program Files\Dymola 2021\Mfiles\dymtools\')
-
+system("c:\Program Files\Dymola 2021x\bin\dsres2sdf.exe imp_stepEx_normal")
 datafile = '../../Results2/imp_stepEx_normal.sdf';
 hi = h5info(datafile)
 %%
