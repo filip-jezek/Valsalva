@@ -7,5 +7,5 @@ settings.eta_vc,0.2201054,0.07372455,1,0.01
 settings.tissues_eta_Ra,1.245225,0.1,4,0.1
 settings.tissues_eta_Rv,0.0,0,4,0.1
 settings.tissues_eta_C,0.5058013,0.01,1,0.01
-settings.tissues_chi_R,20.0,0.01,30,1
+settings.tissues_chi_R,20.0,0.01,50,1
 settings.tissue_chi_C,0.09,-10,10,0.01

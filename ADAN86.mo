@@ -184,8 +184,6 @@ package ADAN_main
         annotation(Dialog(group = "General"));
       parameter Volume V_PV_init(min = -10e-3)=0                           "Volume adjustment"
         annotation(Dialog(group = "General"));
-      parameter Fraction chi_phi=1   "Exercise level"  annotation (Dialog(group="Exercise"));
-
       // HEART
       // general
       parameter Physiolibrary.Types.HydraulicResistance heart_R_vlv=133322.387415
@@ -400,6 +398,7 @@ package ADAN_main
       parameter Real blood_rho(unit = "J.s2.m-5") = 1050 annotation (Dialog(tab = "Systemic", group = "Vessel parameter computations"));
 
         // EXERCISE PARAMS
+      parameter Fraction chi_phi=1   "Exercise level"  annotation (Dialog(tab="Exercise"));
 
       parameter Physiolibrary.Types.Fraction tissues_chi_Ra=13.625
         "Exercise effect factor on arterial tissue resistance"
@@ -51410,9 +51409,10 @@ P_hs_plus_dist"),
             startTime=0),
           useAutonomousPhi(y=false),
           settings(
-            tissues_chi_Ra(displayUnit="1") = 25,
-            tissues_chi_Rv(displayUnit="1") = 25,
-            tissues_chi_C=0.3),
+            tissues_chi_Ra =          1.331250e+01,
+            tissues_chi_Rv =          5.062500e+00,
+            tissues_chi_C =          5.625000e-02,
+            pulm_q_nom_maxq =          2.000001e-04),
           heartComponent(aorticValve(_Ron(displayUnit="(mmHg.s)/ml")=
                 1333223.87415)));
 
@@ -51545,7 +51545,7 @@ P_hs_plus_dist"),
             ulnar_T2_R42(UseExercise=true),
             radial_T1_R44(UseExercise=true),
             ulnar_T2_L90(UseExercise=true),
-            radial_T1_L92(UseExercise=true)), Exercise(height=1));
+            radial_T1_L92(UseExercise=true)), settings(chi_phi=1));
       end CVS_exercise_max;
     end Exercise;
 

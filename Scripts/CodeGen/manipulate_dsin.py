@@ -453,7 +453,7 @@ Algorithm{
   NeighborhoodTopology = vonNeumann;
   NeighborhoodSize = 5;
   NumberOfParticle = 16;
-  NumberOfGeneration = 20;
+  NumberOfGeneration = 16;
   Seed = 1;
   CognitiveAcceleration = 2.8;
   SocialAcceleration = 1.3;
@@ -584,19 +584,19 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
 overwriteOptParamFile = True
 overWriteDsinTemplate = True
 
-DSFILEIN = None
-OPTOUTPUTFILEIN = 'OutputListingMain.txt'
+# DSFILEIN = None
+# OPTOUTPUTFILEIN = 'OutputListingMain.txt'
 
-# DSFILEIN = 'dsin.txt'
-# OPTOUTPUTFILEIN = None
+DSFILEIN = 'dsin.txt'
+OPTOUTPUTFILEIN = None
 
-USEPSO = True
+USEPSO =  True
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
-    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
-    writeInitStatesFromDsin(dsFileIn="dsin.txt")
+    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
+    # writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')
     print('Done, Johne')

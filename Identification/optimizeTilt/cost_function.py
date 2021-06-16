@@ -52,10 +52,12 @@ def getObjectives(vars_set):
     t = vars_set['time'][-1]
     interval = fun_lib.findInterval(t-5, t, vars_set['time'])
 
+    co = fun_lib.calculateAlternativeCO(vars_set, interval)
+
     # build costs
     ov = [  ('BPs', max(vars_set['brachial_pressure'][interval])/mmHg2SI, 122.4, None, 5),
             ('BPd', min(vars_set['brachial_pressure'][interval])/mmHg2SI, 86.4, None, 5),
-            ('CO', fun_lib.avg(vars_set['CO'], interval)/lpm2SI, 4.608, None, .1),
+            ('CO', co/lpm2SI, 4.608, None, .1),
             ('HR', fun_lib.avg(vars_set['HR'], interval)/bpm2SI, 78.12, None, 2)]
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], tolerance = o[4]), ov))
