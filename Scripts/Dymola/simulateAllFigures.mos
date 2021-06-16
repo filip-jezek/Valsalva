@@ -2,15 +2,15 @@
 
 experimentSetupOutput(events=true,equidistant=true);
 
-simulateModel("ADAN_main.SystemicTree.CardiovascularSystem , stopTime=30, numberOfIntervals=0, outputInterval=0.005, method="Cvode", tolerance=1e-06, resultFile="CardiovascularSystem.mat");
-simulateModel("ADAN_main.SystemicTree.Tilt.CVS_tiltable , stopTime=300, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_tiltable.mat");
-simulateModel("ADAN_main.SystemicTree.Valsalva.CVS_valsalva , stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_valsalva.mat");
-simulateModel("ADAN_main.SystemicTree.Exercise.CVS_Exercise_stepping , stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_stepEx_normal.mat");
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_avSt_fastBaro", stopTime=420, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_avSt.mat");
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_avRe_fastBaro", stopTime=420, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_avRe.mat");
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_arSt_fastBaro", stopTime=420, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_arst.mat");
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.CVS_VMNoBaro", stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_VMNoBaro.mat");
-simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_noBaro", stopTime=300, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_TiltNoBaro.mat");
+simulateModel("ADAN_main.SystemicTree.CardiovascularSystem" , stopTime=30, numberOfIntervals=0, outputInterval=0.005, method="Cvode", tolerance=1e-06, resultFile="CardiovascularSystem");
+simulateModel("ADAN_main.SystemicTree.Tilt.CVS_tiltable" , stopTime=300, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_tiltable");
+simulateModel("ADAN_main.SystemicTree.Valsalva.CVS_valsalva" , stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_valsalva");
+simulateModel("ADAN_main.SystemicTree.Exercise.CVS_Exercise_stepping" , stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_stepEx_normal");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_avSt_fastBaro", stopTime=420, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_avSt");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_avRe_fastBaro", stopTime=420, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_avRe");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_arSt_fastBaro", stopTime=420, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_arst");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.CVS_VMNoBaro", stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_VMNoBaro");
+simulateModel("ADAN_main.SystemicTree.Variations.Impairments.TiltNoBaro.imp_noBaro", stopTime=300, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_TiltNoBaro");
 
 // simulate for fig11
 
@@ -24,5 +24,5 @@ simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.Tilted60
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.ExStepping.Tilted60_noVCLin", stopTime=450, numberOfIntervals=500, method="Cvode", tolerance=1e-06, resultFile="ExStep_Tilted60_noVCLin");
 
 experimentSetupOutput(events=false,equidistant=true);
-simulateModel("ADAN_main.SystemicTree.Experiments.Hemorrhage", stopTime=6000, numberOfIntervals=0, outputInterval=0.2, method="Cvode", tolerance=1e-06, resultFile="Hemorrhage.mat");
-simulateModel("ADAN_main.SystemicTree.Experiments.Hemorrhage_noBaro", stopTime=6000, numberOfIntervals=0, outputInterval=0.2, method="Cvode", tolerance=1e-06, resultFile="Hemorrhage_noBaro.mat");
+simulateModel("ADAN_main.SystemicTree.Experiments.Hemorrhage", stopTime=6000, numberOfIntervals=0, outputInterval=0.2, method="Cvode", tolerance=1e-06, resultFile="Hemorrhage");
+simulateModel("ADAN_main.SystemicTree.Experiments.Hemorrhage_noBaro", stopTime=6000, numberOfIntervals=0, outputInterval=0.2, method="Cvode", tolerance=1e-06, resultFile="Hemorrhage_noBaro");
