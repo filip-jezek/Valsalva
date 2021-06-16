@@ -82,7 +82,7 @@ def getObjectives(vars_set):
             # ('Ppa_s', numpy.max(vars_set['P_pa'][interval]), Ppas_target, None, 0.1, 1/mmHg2SI),
             # ('Ppa_d', numpy.min(vars_set['P_pa'][interval]), Ppad_target, None, 0.1, 1/mmHg2SI),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval])/mmHg2SI, Ppv_target, None, 2),
-            ('Pcap', numpy.mean(vars_set['SystemicComponent.posterior_tibial_T4_L214.p_C'][interval])/mmHg2SI, None, [20, 40], 10),
+            ('Pcap', numpy.mean(vars_set['SystemicComponent.posterior_tibial_T4_L214.p_C'][interval])/mmHg2SI, None, [10, 40], 10),
         ]
     
     # make it a dict?

@@ -1,5 +1,5 @@
 # name, value, [min, max, step]
-settings.tissues_chi_R,16.0,1.0,30.0,1.0
-settings.tissue_chi_C,20.0,0.1,60.0,1.0
-settings.pulm_q_nom_maxq,495.8e-6,300e-6, 1000e-6, 10e-6
-settings.veins_chi_pump, 0, -1, 1, 0.1
+settings.tissues_chi_R,20.0,1.0,30.0,1.0
+settings.tissue_chi_C,0.09,0.1,60.0,1.0
+settings.pulm_q_nom_maxq,0.00033333333333333,300e-6, 1000e-6, 10e-6
+settings.veins_chi_pump,0.0, -1, 1, 0.1

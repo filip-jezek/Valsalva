@@ -366,7 +366,17 @@ def calculateEA(q_mv,cc, time, interval, A_length = 0.2):
         EA = 0
 
     return (E_max, A, EA)
-    
+
+def calculateAlternativeCO(vars_set, interval):
+    """ Workaround for when the CO is not available"""
+
+    if 'CO' not in vars_set or (vars_set['CO'][interval]).all() == 0:
+        co = (numpy.max(vars_set['V_LV'][interval]) - numpy.min(vars_set['V_LV'][interval]))*numpy.mean(vars_set['HR'][interval])
+    else:
+        co = numpy.mean(vars_set['CO'][interval])
+
+    return co
+
     
 
 def getOddWindow(time, dt):
