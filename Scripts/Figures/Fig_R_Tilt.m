@@ -2,7 +2,7 @@
 % import the dymload util
 addpath('c:\Program Files\Dymola 2021\Mfiles\dymtools\')
 
-datafile = '../../Results2/imp_tiltBase.mat';
+datafile = '../../Results2/CVS_tiltable.mat';
 dl = dymload(datafile)
 %%
 mmHg2SI = 133.322;

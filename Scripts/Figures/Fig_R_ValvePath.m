@@ -1,5 +1,8 @@
 %% plots the baseline results
 dl_n = '../../Results2/CardiovascularSystem.mat'
+
+system("c:\Program Files\Dymola 2021x\bin\dsres2sdf.exe ../../Results2/imp_avSt.mat")
+system("c:\Program Files\Dymola 2021x\bin\dsres2sdf.exe ../../Results2/imp_avRe.mat")
 dl_avst = '../../Results2/imp_avSt.sdf'
 dl_avre = '../../Results2/imp_avRe.sdf'
 % import the dymload util

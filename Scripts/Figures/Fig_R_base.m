@@ -61,6 +61,8 @@ plot(t(i_int), vla(i_int), 'r');
 set(gca,'xtickMode', 'auto')
 ylim([0, 150]);
 xlim([0 td])
+leg = legend('V LV', 'V LA');
+leg.ItemTokenSize = [10, 2];
 xlabel('t (s)');
 ylabel('Volume (ml)')
 % pos = get(s1, 'Position');
@@ -87,7 +89,7 @@ plot(t(i_int), vra(i_int), 'r', 'LineWidth', 1);
 set(gca,'xtickMode', 'auto', 'ytick', [])
 ylim([0, 150]);
 xlim([0 td])
-leg = legend('V LV', 'V LA');
+leg = legend('V RV', 'V RA');
 leg.ItemTokenSize = [10, 2];
 xlabel('t (s)');
 % pos = get(s1, 'Position');
