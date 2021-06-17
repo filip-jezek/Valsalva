@@ -590,7 +590,7 @@ overWriteDsinTemplate = True
 DSFILEIN = 'dsin.txt'
 OPTOUTPUTFILEIN = None
 
-USEPSO =  True
+USEPSO =  False
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')

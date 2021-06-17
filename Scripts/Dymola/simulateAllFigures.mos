@@ -3,7 +3,7 @@
 experimentSetupOutput(events=true,equidistant=true);
 
 simulateModel("ADAN_main.SystemicTree.CardiovascularSystem" , stopTime=30, numberOfIntervals=0, outputInterval=0.005, method="Cvode", tolerance=1e-06, resultFile="CardiovascularSystem");
-simulateModel("ADAN_main.SystemicTree.Tilt.CVS_tiltable" , stopTime=300, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_tiltable");
+simulateModel("ADAN_main.SystemicTree.Tilt.CVS_tiltable" , stopTime=300, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="CVS_tiltable");
 simulateModel("ADAN_main.SystemicTree.Valsalva.CVS_valsalva" , stopTime=60, numberOfIntervals=0, outputInterval=0.01, method="Cvode", tolerance=1e-06, resultFile="CVS_valsalva");
 simulateModel("ADAN_main.SystemicTree.Exercise.CVS_Exercise_stepping" , stopTime=450, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_stepEx_normal");
 simulateModel("ADAN_main.SystemicTree.Variations.Impairments.Normal.imp_avSt_fastBaro", stopTime=420, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-06, resultFile="imp_avSt");

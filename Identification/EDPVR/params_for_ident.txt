@@ -1,5 +1,5 @@
 # name, value, [min, max, step]
-k_passive,21.875,10,500,5
-SLcollagen,1.94375,0.1,10,0.1
-PConcollagen,19.23125,0.001,1,0.001
-PExpcollagen,2.925,1.0,200.0,1
+settings.heart_vntr_k_passive,10.0,5,500,1
+settings.heart_vntr_SLcollagen,2.1,0.1,100,0.1
+settings.heart_vntr_PConcollagen,20.0,0.001,500,0.1
+settings.heart_vntr_PExpcollagen,3.25,1.0,200.0,0.1
