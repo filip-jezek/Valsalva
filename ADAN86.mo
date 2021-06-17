@@ -272,9 +272,8 @@ package ADAN_main
       parameter Real heart_vntr_L0=1.814 "zero tension sarcomere length [um]" annotation(Dialog(tab = "Heart", group = "TriSegOttesen ventricles"));
       parameter Real heart_vntr_SLcollagen=1.94 "minimal length to apply collagen force [um]" annotation(Dialog(tab = "Heart", group = "TriSegOttesen ventricles"));
       parameter Real heart_vntr_SLrest=1.51 "Resting sarcomere length [um]" annotation(Dialog(tab = "Heart", group = "TriSegOttesen ventricles"));
-      parameter Real heart_vntr_PConcollagen=19.0;
-      parameter Real heart_vntr_PExpcollagen=2.93;
-
+      parameter Real heart_vntr_PConcollagen=19.0 annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
+      parameter Real heart_vntr_PExpcollagen=2.93 annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
 
       // SYSTEMIC
       // general
@@ -282,10 +281,6 @@ package ADAN_main
         "fraction of thoracic pressure in the abdominal cavity"
           annotation(Dialog(tab="Systemic",   group="General"));
 
-      parameter Physiolibrary.Types.HydraulicResistance syst_TPR=119990148.6735
-        "Systemic total peripheral resistance";
-      parameter Physiolibrary.Types.Fraction syst_TR_frac=5.33333
-        "Tissue resistance Ra to Rv ratio, affecting intra tissue pressure";
       parameter Boolean systemic_limitExternalPressure=true
         "Limit Pext in large arteries, tissues and veins, when they are already empty"                               annotation(choices(checkBox=true), Dialog(tab=
               "Systemic",                                                                                                                                                        group="General"),
@@ -307,6 +302,10 @@ package ADAN_main
         syst_tissues_hydrostaticLevel_correction=1
         "Lenghten the body to observe some reaction to tilt"
           annotation(Dialog(tab="Systemic",   group="Tissues"));
+      parameter Physiolibrary.Types.HydraulicResistance syst_TPR=119990148.6735
+        "Systemic total peripheral resistance"       annotation(Dialog(tab="Systemic",   group="Tissues"));
+      parameter Physiolibrary.Types.Fraction syst_TR_frac=5.33333
+        "Tissue resistance Ra to Rv ratio, affecting intra tissue pressure"       annotation(Dialog(tab="Systemic",   group="Tissues"));
 
       final parameter Physiolibrary.Types.Pressure tissues_Pa_nom=syst_TR_frac*(
           tissues_P_nom - tissues_Pv_nom) + tissues_P_nom
@@ -372,7 +371,7 @@ package ADAN_main
 
       parameter Fraction veins_gamma=0.5    "Fraction of minimal collapsing diameter to nominal diameter"    annotation(Dialog(tab = "Systemic", group = "Veins"));
       parameter Fraction veins_alpha=5   "ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter"    annotation(Dialog(tab = "Systemic", group = "Veins"));
-      parameter Real veins_phi_no =  0.2 "Offset of nonlinear phi adjustment, i.e. largest phi, that produces zero activation";
+      parameter Real veins_phi_no =  0.2 "Offset of nonlinear phi adjustment, i.e. largest phi, that produces zero activation" annotation(Dialog(tab = "Systemic", group = "Veins"));
 
       parameter Boolean veins_delayed_activation = true annotation(choices(checkBox=true), Dialog(tab = "Systemic", group = "Veins"));
       parameter Time veins_activation_tau(displayUnit="s")=0.1
@@ -447,7 +446,6 @@ package ADAN_main
         annotation(Dialog(tab = "Baroreflex", group = "Efferent baroreflex"));
       parameter Real baro_f1 = 0.0031 "decrease factor of the phi"
         annotation(Dialog(tab = "Baroreflex", group = "Efferent baroreflex"));
-
 
       // PULMONARY
       parameter Physiolibrary.Types.VolumeFlowRate pulm_CO_target=8.0833333333333e-05
@@ -48730,141 +48728,141 @@ P_hs_plus_dist"),
                 vertebral_L2(volume(start = 6.324332e-05, fixed = true), phi_delayed(start = 0.25378594, fixed = true)),
                 vertebral_R272(volume(start = 6.324797e-05, fixed = true), phi_delayed(start = 0.25378594, fixed = true)),
                 superior_vena_cava_C2(volume(start = 4.220106e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 superior_vena_cava_C88(volume(start = 7.276236e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 inferior_vena_cava_C8(volume(start = 6.3323146e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 hepatic_vein_T1_C10(volume(start = 2.4832575e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 inferior_vena_cava_C12(volume(start = 1.721682e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 inferior_vena_cava_C16(volume(start = 1.356269e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 renal_vein_T1_R18(volume(start = 3.9994206e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 inferior_vena_cava_C20(volume(start = 9.463241e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 renal_vein_T1_L22(volume(start = 3.535526e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 inferior_vena_cava_C24(volume(start = 3.7881873e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 common_iliac_vein_L56(volume(start = 9.335072e-06, fixed = true), open(start = true, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 common_iliac_vein_R26(volume(start = 8.577576e-06, fixed = true), open(start = true, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 external_iliac_vein_R28(volume(start = 1.2516608e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 internal_iliac_vein_T1_R30(volume(start = 5.3659746e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 external_iliac_vein_R32(volume(start = 1.4586541e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 femoral_vein_R34(volume(start = 6.3428143e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 femoral_vein_R38(volume(start = 5.0398216e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 profunda_femoris_vein_T2_R40(volume(start = 1.4287033e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 femoral_vein_R42(volume(start = 3.5915946e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 femoral_vein_R46(volume(start = 1.978256e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 popliteal_vein_R48(volume(start = 8.087784e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 anterior_tibial_vein_T4_R50(volume(start = 2.8893216e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 popliteal_vein_R52(volume(start = 1.799751e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 posterior_tibial_vein_T6_R54(volume(start = 3.7113025e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 external_iliac_vein_L58(volume(start = 1.2536291e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 internal_iliac_vein_T1_L60(volume(start = 5.521543e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 external_iliac_vein_L62(volume(start = 1.4323126e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 femoral_vein_L64(volume(start = 7.4169236e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 femoral_vein_L68(volume(start = 5.040843e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 profunda_femoris_vein_T2_L70(volume(start = 1.4287143e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 femoral_vein_L72(volume(start = 3.5916506e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 femoral_vein_L76(volume(start = 1.9782692e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 popliteal_vein_L78(volume(start = 8.087087e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 anterior_tibial_vein_T4_L80(volume(start = 2.889313e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 popliteal_vein_L82(volume(start = 1.7995998e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 posterior_tibial_vein_T6_L84(volume(start = 3.7111809e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachiocephalic_vein_R90(volume(start = 8.56433e-06, fixed = true), open(start = true, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachiocephalic_vein_L124(volume(start = 1.6076916e-05, fixed = true), open(start = true, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 vertebral_vein_R92(volume(start = 5.580061e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachiocephalic_vein_R94(volume(start = 1.941929e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 subclavian_vein_R96(volume(start = 9.445688e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 internal_jugular_vein_R122(volume(start = 3.7437676e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 external_jugular_vein_R98(volume(start = 2.7481374e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 subclavian_vein_R100(volume(start = 3.8673534e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 axillary_vein_R102(volume(start = 1.3634191e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachial_vein_R104(volume(start = 2.9135247e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachial_vein_R114(volume(start = 2.6622365e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachial_vein_R108(volume(start = 4.070048e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 ulnar_vein_T7_R110(volume(start = 3.7959562e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachial_vein_R118(volume(start = 2.5970394e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 radial_vein_T3_R120(volume(start = 2.5086317e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 vertebral_vein_L126(volume(start = 5.2267933e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachiocephalic_vein_L128(volume(start = 9.829428e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 subclavian_vein_L130(volume(start = 8.413075e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 internal_jugular_vein_L156(volume(start = 2.2799617e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 external_jugular_vein_L132(volume(start = 2.7001201e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 subclavian_vein_L134(volume(start = 3.7749803e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 axillary_vein_L136(volume(start = 1.3812472e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachial_vein_L138(volume(start = 2.922691e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachial_vein_L148(volume(start = 2.6908028e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachial_vein_L142(volume(start = 4.0825245e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 ulnar_vein_T7_L144(volume(start = 3.8003539e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachial_vein_L152(volume(start = 2.626265e-07, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 radial_vein_T3_L154(volume(start = 2.53239e-06, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 mesenteric_artery(q_in(start = 9.368483e-06, fixed = true), volume(start = 6.631462e-06, fixed = true)),
                 splanchnic_tissue(volume(start = 0.00024702842, fixed = true), phi_delayed(start = 0.25378594, fixed = true)),
                 splanchnic_vein(volume(start = 2.0766065e-05, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 coronary_arteries(q_in(start = 3.040544e-06, fixed = true), volume(start = 3.726891e-08, fixed = true)),
                 cardiac_tissue(volume(start = 0.000112328176, fixed = true), phi_delayed(start = 0.25378594, fixed = true)),
                 coronary_veins(volume(start = 5.926006e-08, fixed = true),
-                  compliant_vessel(A(start = 0.06723232, fixed = true))),
+                  compliant_vessel(A(start = 0.06723232, fixed = false))),
                 brachial_L82_HeartLevel(q_in(start = 3.722948e-06, fixed = true), volume(start = 2.9958835e-06, fixed = true))),
               heartComponent(
                 tricuspidValve(open(start = true, fixed = true)),
