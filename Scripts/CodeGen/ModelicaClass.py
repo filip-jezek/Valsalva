@@ -57,8 +57,12 @@ class ModelicaClass:
             if self.properties is not None:
                 if 'guess' in self.properties: 
                     fixed = 'false'
-                if 'bool' in self.properties:
+                elif 'bool' in self.properties:
                     val = 'true' if self.start_val == 1 else 'false'
+                elif '__V_PV_init' in self.properties:
+                    val = "%e + V_PV_init" % self.start_val
+                elif 'param' in self.properties:
+                    return '%s = %s' % (self.name, val)
 
             return '%s(start = %s, fixed = %s)' % (self.name, val, fixed)
         else :

@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(10635,109)
+char initialName(10264,109)
 settings.phi0
 settings.height
 settings.weight
@@ -113,7 +113,6 @@ settings.BMI
 settings.BSA
 settings.initByPressure
 settings.V_PV_init
-settings.chi_phi
 settings.heart_R_vlv
 settings.heart_R_LA
 settings.heart_R_RA
@@ -145,13 +144,13 @@ settings.heart_vntr_SLrest
 settings.heart_vntr_PConcollagen
 settings.heart_vntr_PExpcollagen
 settings.syst_abd_P_th_ratio
-settings.syst_TPR
-settings.syst_TR_frac
 settings.systemic_limitExternalPressure
 settings.syst_art_k_E
 settings.syst_art_UseVasoconstrictionEffect
 settings.eta_vc
 settings.syst_tissues_hydrostaticLevel_correction
+settings.syst_TPR
+settings.syst_TR_frac
 settings.tissues_Pa_nom
 settings.tissues_P_nom
 settings.tissues_Pv_nom
@@ -166,10 +165,6 @@ settings.tissues_UseStraighteningReaction2Phi
 settings.tissues_V_max_breakPoint_Frac
 settings.tissues_eta_C
 settings.tissues_gamma
-settings.tissues_chi_R
-settings.tissue_chi_C
-settings.veins_chi_pump
-settings.eta_adenosine
 settings.veins_UseNonLinearVeins
 settings.veins_linearE_rel
 settings.veins_linearV0_rel
@@ -190,13 +185,12 @@ settings.vessel_c
 settings.vessel_d
 settings.blood_mu
 settings.blood_rho
-settings.hideSystemic
-settings.hidePulmonary
-settings.hideHeart
-settings.hideLevel0
-settings.hideLevel1
-settings.EvaluateFunctionalParams
-settings.dummy
+settings.chi_phi
+settings.tissues_chi_Ra
+settings.tissues_chi_Rv
+settings.tissues_chi_C
+settings.veins_chi_pump
+settings.eta_adenosine
 settings.baro_hr_delay
 settings.baro_useAbsolutePressureTerm
 settings.baro_d0
@@ -220,6 +214,13 @@ settings.pulm_q_nom_maxq
 settings.pulm_R_exp
 settings.pulm_PV_R_vis
 settings.pulm_tp_pleural_frac
+settings.hideSystemic
+settings.hidePulmonary
+settings.hideHeart
+settings.hideLevel0
+settings.hideLevel1
+settings.EvaluateFunctionalParams
+settings.dummy
 settings.experimental_zpv_factor
 settings.experimental_C_factor
 settings.experimental_L0
@@ -238,7 +239,6 @@ exercise.settings.HR_nominal
 exercise.settings.HR_max
 exercise.settings.BMI
 exercise.settings.V_PV_init
-exercise.settings.chi_phi
 exercise.settings.heart_R_vlv
 exercise.settings.heart_R_LA
 exercise.settings.heart_R_A_vis
@@ -269,11 +269,11 @@ exercise.settings.heart_vntr_SLrest
 exercise.settings.heart_vntr_PConcollagen
 exercise.settings.heart_vntr_PExpcollagen
 exercise.settings.syst_abd_P_th_ratio
-exercise.settings.syst_TPR
-exercise.settings.syst_TR_frac
 exercise.settings.syst_art_k_E
 exercise.settings.eta_vc
 exercise.settings.syst_tissues_hydrostaticLevel_correction
+exercise.settings.syst_TPR
+exercise.settings.syst_TR_frac
 exercise.settings.tissues_SV_nom
 exercise.settings.tissues_CO_nom
 exercise.settings.tissues_eta_Ra
@@ -281,10 +281,6 @@ exercise.settings.tissues_eta_Rv
 exercise.settings.tissues_UseStraighteningReaction2Phi
 exercise.settings.tissues_V_max_breakPoint_Frac
 exercise.settings.tissues_eta_C
-exercise.settings.tissues_chi_R
-exercise.settings.tissue_chi_C
-exercise.settings.veins_chi_pump
-exercise.settings.eta_adenosine
 exercise.settings.veins_linearE_rel
 exercise.settings.veins_linearV0_rel
 exercise.settings.veins_UsePhiEffect
@@ -302,13 +298,12 @@ exercise.settings.vessel_c
 exercise.settings.vessel_d
 exercise.settings.blood_mu
 exercise.settings.blood_rho
-exercise.settings.hideSystemic
-exercise.settings.hidePulmonary
-exercise.settings.hideHeart
-exercise.settings.hideLevel0
-exercise.settings.hideLevel1
-exercise.settings.EvaluateFunctionalParams
-exercise.settings.dummy
+exercise.settings.chi_phi
+exercise.settings.tissues_chi_Ra
+exercise.settings.tissues_chi_Rv
+exercise.settings.tissues_chi_C
+exercise.settings.veins_chi_pump
+exercise.settings.eta_adenosine
 exercise.settings.baro_hr_delay
 exercise.settings.baro_d0
 exercise.settings.baro_tau_s
@@ -330,6 +325,13 @@ exercise.settings.pulm_q_nom_maxq
 exercise.settings.pulm_R_exp
 exercise.settings.pulm_PV_R_vis
 exercise.settings.pulm_tp_pleural_frac
+exercise.settings.hideSystemic
+exercise.settings.hidePulmonary
+exercise.settings.hideHeart
+exercise.settings.hideLevel0
+exercise.settings.hideLevel1
+exercise.settings.EvaluateFunctionalParams
+exercise.settings.dummy
 exercise.settings.experimental_zpv_factor
 exercise.settings.experimental_C_factor
 exercise.settings.experimental_L0
@@ -2866,11 +2868,13 @@ exercise.heartComponent.ventricles.SEP_wall.vmax
 exercise.heartComponent.ventricles.RV_wall.LSEiso
 exercise.heartComponent.ventricles.RV_wall.contractilityFraction
 exercise.heartComponent.ventricles.RV_wall.vmax
+exercise.heartComponent.ra.zpv
 exercise.heartComponent.ra.volume_min
 exercise.heartComponent.ra.contractilityFraction
 exercise.heartComponent.ra.enableCollagen
 exercise.heartComponent.ra.V0_col
 exercise.heartComponent.ra.s
+exercise.heartComponent.la.zpv
 exercise.heartComponent.la.volume_min
 exercise.heartComponent.la.contractilityFraction
 exercise.heartComponent.la.enableCollagen
@@ -2951,6 +2955,7 @@ exercise.brachial_pressure_systolic
 exercise.brachial_pressure_diastolic
 exercise.ascending_aorta
 exercise.renal_capillary
+exercise.exercised_capillary
 exercise.CO
 exercise.carotid_pressure
 exercise.femoral_pressure
@@ -2997,6 +3002,7 @@ exercise.internal.brachial_pressure_systolic
 exercise.internal.brachial_pressure_diastolic
 exercise.internal.ascending_aorta
 exercise.internal.renal_capillary
+exercise.internal.exercised_capillary
 exercise.internal.CO
 exercise.internal.carotid_pressure
 exercise.internal.femoral_pressure
@@ -3290,71 +3296,6 @@ exercise.fmi_xVrs[265]
 exercise.fmi_xVrs[266]
 exercise.fmi_xVrs[267]
 exercise.fmi_xVrs[268]
-exercise.fmi_xVrs[269]
-exercise.fmi_xVrs[270]
-exercise.fmi_xVrs[271]
-exercise.fmi_xVrs[272]
-exercise.fmi_xVrs[273]
-exercise.fmi_xVrs[274]
-exercise.fmi_xVrs[275]
-exercise.fmi_xVrs[276]
-exercise.fmi_xVrs[277]
-exercise.fmi_xVrs[278]
-exercise.fmi_xVrs[279]
-exercise.fmi_xVrs[280]
-exercise.fmi_xVrs[281]
-exercise.fmi_xVrs[282]
-exercise.fmi_xVrs[283]
-exercise.fmi_xVrs[284]
-exercise.fmi_xVrs[285]
-exercise.fmi_xVrs[286]
-exercise.fmi_xVrs[287]
-exercise.fmi_xVrs[288]
-exercise.fmi_xVrs[289]
-exercise.fmi_xVrs[290]
-exercise.fmi_xVrs[291]
-exercise.fmi_xVrs[292]
-exercise.fmi_xVrs[293]
-exercise.fmi_xVrs[294]
-exercise.fmi_xVrs[295]
-exercise.fmi_xVrs[296]
-exercise.fmi_xVrs[297]
-exercise.fmi_xVrs[298]
-exercise.fmi_xVrs[299]
-exercise.fmi_xVrs[300]
-exercise.fmi_xVrs[301]
-exercise.fmi_xVrs[302]
-exercise.fmi_xVrs[303]
-exercise.fmi_xVrs[304]
-exercise.fmi_xVrs[305]
-exercise.fmi_xVrs[306]
-exercise.fmi_xVrs[307]
-exercise.fmi_xVrs[308]
-exercise.fmi_xVrs[309]
-exercise.fmi_xVrs[310]
-exercise.fmi_xVrs[311]
-exercise.fmi_xVrs[312]
-exercise.fmi_xVrs[313]
-exercise.fmi_xVrs[314]
-exercise.fmi_xVrs[315]
-exercise.fmi_xVrs[316]
-exercise.fmi_xVrs[317]
-exercise.fmi_xVrs[318]
-exercise.fmi_xVrs[319]
-exercise.fmi_xVrs[320]
-exercise.fmi_xVrs[321]
-exercise.fmi_xVrs[322]
-exercise.fmi_xVrs[323]
-exercise.fmi_xVrs[324]
-exercise.fmi_xVrs[325]
-exercise.fmi_xVrs[326]
-exercise.fmi_xVrs[327]
-exercise.fmi_xVrs[328]
-exercise.fmi_xVrs[329]
-exercise.fmi_xVrs[330]
-exercise.fmi_xVrs[331]
-exercise.fmi_xVrs[332]
-exercise.fmi_xVrs[333]
 exercise.fmi_dxVrs[1]
 exercise.fmi_dxVrs[2]
 exercise.fmi_dxVrs[3]
@@ -3623,71 +3564,6 @@ exercise.fmi_dxVrs[265]
 exercise.fmi_dxVrs[266]
 exercise.fmi_dxVrs[267]
 exercise.fmi_dxVrs[268]
-exercise.fmi_dxVrs[269]
-exercise.fmi_dxVrs[270]
-exercise.fmi_dxVrs[271]
-exercise.fmi_dxVrs[272]
-exercise.fmi_dxVrs[273]
-exercise.fmi_dxVrs[274]
-exercise.fmi_dxVrs[275]
-exercise.fmi_dxVrs[276]
-exercise.fmi_dxVrs[277]
-exercise.fmi_dxVrs[278]
-exercise.fmi_dxVrs[279]
-exercise.fmi_dxVrs[280]
-exercise.fmi_dxVrs[281]
-exercise.fmi_dxVrs[282]
-exercise.fmi_dxVrs[283]
-exercise.fmi_dxVrs[284]
-exercise.fmi_dxVrs[285]
-exercise.fmi_dxVrs[286]
-exercise.fmi_dxVrs[287]
-exercise.fmi_dxVrs[288]
-exercise.fmi_dxVrs[289]
-exercise.fmi_dxVrs[290]
-exercise.fmi_dxVrs[291]
-exercise.fmi_dxVrs[292]
-exercise.fmi_dxVrs[293]
-exercise.fmi_dxVrs[294]
-exercise.fmi_dxVrs[295]
-exercise.fmi_dxVrs[296]
-exercise.fmi_dxVrs[297]
-exercise.fmi_dxVrs[298]
-exercise.fmi_dxVrs[299]
-exercise.fmi_dxVrs[300]
-exercise.fmi_dxVrs[301]
-exercise.fmi_dxVrs[302]
-exercise.fmi_dxVrs[303]
-exercise.fmi_dxVrs[304]
-exercise.fmi_dxVrs[305]
-exercise.fmi_dxVrs[306]
-exercise.fmi_dxVrs[307]
-exercise.fmi_dxVrs[308]
-exercise.fmi_dxVrs[309]
-exercise.fmi_dxVrs[310]
-exercise.fmi_dxVrs[311]
-exercise.fmi_dxVrs[312]
-exercise.fmi_dxVrs[313]
-exercise.fmi_dxVrs[314]
-exercise.fmi_dxVrs[315]
-exercise.fmi_dxVrs[316]
-exercise.fmi_dxVrs[317]
-exercise.fmi_dxVrs[318]
-exercise.fmi_dxVrs[319]
-exercise.fmi_dxVrs[320]
-exercise.fmi_dxVrs[321]
-exercise.fmi_dxVrs[322]
-exercise.fmi_dxVrs[323]
-exercise.fmi_dxVrs[324]
-exercise.fmi_dxVrs[325]
-exercise.fmi_dxVrs[326]
-exercise.fmi_dxVrs[327]
-exercise.fmi_dxVrs[328]
-exercise.fmi_dxVrs[329]
-exercise.fmi_dxVrs[330]
-exercise.fmi_dxVrs[331]
-exercise.fmi_dxVrs[332]
-exercise.fmi_dxVrs[333]
 exercise.fmi_yVrs[1]
 exercise.fmi_yVrs[2]
 exercise.fmi_yVrs[3]
@@ -3719,6 +3595,7 @@ exercise.fmi_yVrs[28]
 exercise.fmi_yVrs[29]
 exercise.fmi_yVrs[30]
 exercise.fmi_yVrs[31]
+exercise.fmi_yVrs[32]
 tilt.tau
 tilt.settings.phi0
 tilt.settings.height
@@ -3727,7 +3604,6 @@ tilt.settings.HR_nominal
 tilt.settings.HR_max
 tilt.settings.BMI
 tilt.settings.V_PV_init
-tilt.settings.chi_phi
 tilt.settings.heart_R_vlv
 tilt.settings.heart_R_LA
 tilt.settings.heart_R_A_vis
@@ -3758,11 +3634,11 @@ tilt.settings.heart_vntr_SLrest
 tilt.settings.heart_vntr_PConcollagen
 tilt.settings.heart_vntr_PExpcollagen
 tilt.settings.syst_abd_P_th_ratio
-tilt.settings.syst_TPR
-tilt.settings.syst_TR_frac
 tilt.settings.syst_art_k_E
 tilt.settings.eta_vc
 tilt.settings.syst_tissues_hydrostaticLevel_correction
+tilt.settings.syst_TPR
+tilt.settings.syst_TR_frac
 tilt.settings.tissues_SV_nom
 tilt.settings.tissues_CO_nom
 tilt.settings.tissues_eta_Ra
@@ -3770,10 +3646,6 @@ tilt.settings.tissues_eta_Rv
 tilt.settings.tissues_UseStraighteningReaction2Phi
 tilt.settings.tissues_V_max_breakPoint_Frac
 tilt.settings.tissues_eta_C
-tilt.settings.tissues_chi_R
-tilt.settings.tissue_chi_C
-tilt.settings.veins_chi_pump
-tilt.settings.eta_adenosine
 tilt.settings.veins_linearE_rel
 tilt.settings.veins_linearV0_rel
 tilt.settings.veins_UsePhiEffect
@@ -3791,13 +3663,12 @@ tilt.settings.vessel_c
 tilt.settings.vessel_d
 tilt.settings.blood_mu
 tilt.settings.blood_rho
-tilt.settings.hideSystemic
-tilt.settings.hidePulmonary
-tilt.settings.hideHeart
-tilt.settings.hideLevel0
-tilt.settings.hideLevel1
-tilt.settings.EvaluateFunctionalParams
-tilt.settings.dummy
+tilt.settings.chi_phi
+tilt.settings.tissues_chi_Ra
+tilt.settings.tissues_chi_Rv
+tilt.settings.tissues_chi_C
+tilt.settings.veins_chi_pump
+tilt.settings.eta_adenosine
 tilt.settings.baro_hr_delay
 tilt.settings.baro_d0
 tilt.settings.baro_tau_s
@@ -3819,6 +3690,13 @@ tilt.settings.pulm_q_nom_maxq
 tilt.settings.pulm_R_exp
 tilt.settings.pulm_PV_R_vis
 tilt.settings.pulm_tp_pleural_frac
+tilt.settings.hideSystemic
+tilt.settings.hidePulmonary
+tilt.settings.hideHeart
+tilt.settings.hideLevel0
+tilt.settings.hideLevel1
+tilt.settings.EvaluateFunctionalParams
+tilt.settings.dummy
 tilt.settings.experimental_zpv_factor
 tilt.settings.experimental_C_factor
 tilt.settings.experimental_L0
@@ -6355,11 +6233,13 @@ tilt.heartComponent.ventricles.SEP_wall.vmax
 tilt.heartComponent.ventricles.RV_wall.LSEiso
 tilt.heartComponent.ventricles.RV_wall.contractilityFraction
 tilt.heartComponent.ventricles.RV_wall.vmax
+tilt.heartComponent.ra.zpv
 tilt.heartComponent.ra.volume_min
 tilt.heartComponent.ra.contractilityFraction
 tilt.heartComponent.ra.enableCollagen
 tilt.heartComponent.ra.V0_col
 tilt.heartComponent.ra.s
+tilt.heartComponent.la.zpv
 tilt.heartComponent.la.volume_min
 tilt.heartComponent.la.contractilityFraction
 tilt.heartComponent.la.enableCollagen
@@ -6446,6 +6326,7 @@ tilt.brachial_pressure_systolic
 tilt.brachial_pressure_diastolic
 tilt.ascending_aorta
 tilt.renal_capillary
+tilt.exercised_capillary
 tilt.CO
 tilt.carotid_pressure
 tilt.femoral_pressure
@@ -6492,6 +6373,7 @@ tilt.internal.brachial_pressure_systolic
 tilt.internal.brachial_pressure_diastolic
 tilt.internal.ascending_aorta
 tilt.internal.renal_capillary
+tilt.internal.exercised_capillary
 tilt.internal.CO
 tilt.internal.carotid_pressure
 tilt.internal.femoral_pressure
@@ -6784,71 +6666,6 @@ tilt.fmi_xVrs[264]
 tilt.fmi_xVrs[265]
 tilt.fmi_xVrs[266]
 tilt.fmi_xVrs[267]
-tilt.fmi_xVrs[268]
-tilt.fmi_xVrs[269]
-tilt.fmi_xVrs[270]
-tilt.fmi_xVrs[271]
-tilt.fmi_xVrs[272]
-tilt.fmi_xVrs[273]
-tilt.fmi_xVrs[274]
-tilt.fmi_xVrs[275]
-tilt.fmi_xVrs[276]
-tilt.fmi_xVrs[277]
-tilt.fmi_xVrs[278]
-tilt.fmi_xVrs[279]
-tilt.fmi_xVrs[280]
-tilt.fmi_xVrs[281]
-tilt.fmi_xVrs[282]
-tilt.fmi_xVrs[283]
-tilt.fmi_xVrs[284]
-tilt.fmi_xVrs[285]
-tilt.fmi_xVrs[286]
-tilt.fmi_xVrs[287]
-tilt.fmi_xVrs[288]
-tilt.fmi_xVrs[289]
-tilt.fmi_xVrs[290]
-tilt.fmi_xVrs[291]
-tilt.fmi_xVrs[292]
-tilt.fmi_xVrs[293]
-tilt.fmi_xVrs[294]
-tilt.fmi_xVrs[295]
-tilt.fmi_xVrs[296]
-tilt.fmi_xVrs[297]
-tilt.fmi_xVrs[298]
-tilt.fmi_xVrs[299]
-tilt.fmi_xVrs[300]
-tilt.fmi_xVrs[301]
-tilt.fmi_xVrs[302]
-tilt.fmi_xVrs[303]
-tilt.fmi_xVrs[304]
-tilt.fmi_xVrs[305]
-tilt.fmi_xVrs[306]
-tilt.fmi_xVrs[307]
-tilt.fmi_xVrs[308]
-tilt.fmi_xVrs[309]
-tilt.fmi_xVrs[310]
-tilt.fmi_xVrs[311]
-tilt.fmi_xVrs[312]
-tilt.fmi_xVrs[313]
-tilt.fmi_xVrs[314]
-tilt.fmi_xVrs[315]
-tilt.fmi_xVrs[316]
-tilt.fmi_xVrs[317]
-tilt.fmi_xVrs[318]
-tilt.fmi_xVrs[319]
-tilt.fmi_xVrs[320]
-tilt.fmi_xVrs[321]
-tilt.fmi_xVrs[322]
-tilt.fmi_xVrs[323]
-tilt.fmi_xVrs[324]
-tilt.fmi_xVrs[325]
-tilt.fmi_xVrs[326]
-tilt.fmi_xVrs[327]
-tilt.fmi_xVrs[328]
-tilt.fmi_xVrs[329]
-tilt.fmi_xVrs[330]
-tilt.fmi_xVrs[331]
-tilt.fmi_xVrs[332]
 tilt.fmi_dxVrs[1]
 tilt.fmi_dxVrs[2]
 tilt.fmi_dxVrs[3]
@@ -7116,71 +6933,6 @@ tilt.fmi_dxVrs[264]
 tilt.fmi_dxVrs[265]
 tilt.fmi_dxVrs[266]
 tilt.fmi_dxVrs[267]
-tilt.fmi_dxVrs[268]
-tilt.fmi_dxVrs[269]
-tilt.fmi_dxVrs[270]
-tilt.fmi_dxVrs[271]
-tilt.fmi_dxVrs[272]
-tilt.fmi_dxVrs[273]
-tilt.fmi_dxVrs[274]
-tilt.fmi_dxVrs[275]
-tilt.fmi_dxVrs[276]
-tilt.fmi_dxVrs[277]
-tilt.fmi_dxVrs[278]
-tilt.fmi_dxVrs[279]
-tilt.fmi_dxVrs[280]
-tilt.fmi_dxVrs[281]
-tilt.fmi_dxVrs[282]
-tilt.fmi_dxVrs[283]
-tilt.fmi_dxVrs[284]
-tilt.fmi_dxVrs[285]
-tilt.fmi_dxVrs[286]
-tilt.fmi_dxVrs[287]
-tilt.fmi_dxVrs[288]
-tilt.fmi_dxVrs[289]
-tilt.fmi_dxVrs[290]
-tilt.fmi_dxVrs[291]
-tilt.fmi_dxVrs[292]
-tilt.fmi_dxVrs[293]
-tilt.fmi_dxVrs[294]
-tilt.fmi_dxVrs[295]
-tilt.fmi_dxVrs[296]
-tilt.fmi_dxVrs[297]
-tilt.fmi_dxVrs[298]
-tilt.fmi_dxVrs[299]
-tilt.fmi_dxVrs[300]
-tilt.fmi_dxVrs[301]
-tilt.fmi_dxVrs[302]
-tilt.fmi_dxVrs[303]
-tilt.fmi_dxVrs[304]
-tilt.fmi_dxVrs[305]
-tilt.fmi_dxVrs[306]
-tilt.fmi_dxVrs[307]
-tilt.fmi_dxVrs[308]
-tilt.fmi_dxVrs[309]
-tilt.fmi_dxVrs[310]
-tilt.fmi_dxVrs[311]
-tilt.fmi_dxVrs[312]
-tilt.fmi_dxVrs[313]
-tilt.fmi_dxVrs[314]
-tilt.fmi_dxVrs[315]
-tilt.fmi_dxVrs[316]
-tilt.fmi_dxVrs[317]
-tilt.fmi_dxVrs[318]
-tilt.fmi_dxVrs[319]
-tilt.fmi_dxVrs[320]
-tilt.fmi_dxVrs[321]
-tilt.fmi_dxVrs[322]
-tilt.fmi_dxVrs[323]
-tilt.fmi_dxVrs[324]
-tilt.fmi_dxVrs[325]
-tilt.fmi_dxVrs[326]
-tilt.fmi_dxVrs[327]
-tilt.fmi_dxVrs[328]
-tilt.fmi_dxVrs[329]
-tilt.fmi_dxVrs[330]
-tilt.fmi_dxVrs[331]
-tilt.fmi_dxVrs[332]
 tilt.fmi_yVrs[1]
 tilt.fmi_yVrs[2]
 tilt.fmi_yVrs[3]
@@ -7212,6 +6964,7 @@ tilt.fmi_yVrs[28]
 tilt.fmi_yVrs[29]
 tilt.fmi_yVrs[30]
 tilt.fmi_yVrs[31]
+tilt.fmi_yVrs[32]
 valsalva.tau
 valsalva.settings.phi0
 valsalva.settings.height
@@ -7220,7 +6973,6 @@ valsalva.settings.HR_nominal
 valsalva.settings.HR_max
 valsalva.settings.BMI
 valsalva.settings.V_PV_init
-valsalva.settings.chi_phi
 valsalva.settings.heart_R_vlv
 valsalva.settings.heart_R_LA
 valsalva.settings.heart_R_A_vis
@@ -7251,11 +7003,11 @@ valsalva.settings.heart_vntr_SLrest
 valsalva.settings.heart_vntr_PConcollagen
 valsalva.settings.heart_vntr_PExpcollagen
 valsalva.settings.syst_abd_P_th_ratio
-valsalva.settings.syst_TPR
-valsalva.settings.syst_TR_frac
 valsalva.settings.syst_art_k_E
 valsalva.settings.eta_vc
 valsalva.settings.syst_tissues_hydrostaticLevel_correction
+valsalva.settings.syst_TPR
+valsalva.settings.syst_TR_frac
 valsalva.settings.tissues_SV_nom
 valsalva.settings.tissues_CO_nom
 valsalva.settings.tissues_eta_Ra
@@ -7263,10 +7015,6 @@ valsalva.settings.tissues_eta_Rv
 valsalva.settings.tissues_UseStraighteningReaction2Phi
 valsalva.settings.tissues_V_max_breakPoint_Frac
 valsalva.settings.tissues_eta_C
-valsalva.settings.tissues_chi_R
-valsalva.settings.tissue_chi_C
-valsalva.settings.veins_chi_pump
-valsalva.settings.eta_adenosine
 valsalva.settings.veins_linearE_rel
 valsalva.settings.veins_linearV0_rel
 valsalva.settings.veins_UsePhiEffect
@@ -7284,13 +7032,12 @@ valsalva.settings.vessel_c
 valsalva.settings.vessel_d
 valsalva.settings.blood_mu
 valsalva.settings.blood_rho
-valsalva.settings.hideSystemic
-valsalva.settings.hidePulmonary
-valsalva.settings.hideHeart
-valsalva.settings.hideLevel0
-valsalva.settings.hideLevel1
-valsalva.settings.EvaluateFunctionalParams
-valsalva.settings.dummy
+valsalva.settings.chi_phi
+valsalva.settings.tissues_chi_Ra
+valsalva.settings.tissues_chi_Rv
+valsalva.settings.tissues_chi_C
+valsalva.settings.veins_chi_pump
+valsalva.settings.eta_adenosine
 valsalva.settings.baro_hr_delay
 valsalva.settings.baro_d0
 valsalva.settings.baro_tau_s
@@ -7312,6 +7059,13 @@ valsalva.settings.pulm_q_nom_maxq
 valsalva.settings.pulm_R_exp
 valsalva.settings.pulm_PV_R_vis
 valsalva.settings.pulm_tp_pleural_frac
+valsalva.settings.hideSystemic
+valsalva.settings.hidePulmonary
+valsalva.settings.hideHeart
+valsalva.settings.hideLevel0
+valsalva.settings.hideLevel1
+valsalva.settings.EvaluateFunctionalParams
+valsalva.settings.dummy
 valsalva.settings.experimental_zpv_factor
 valsalva.settings.experimental_C_factor
 valsalva.settings.experimental_L0
@@ -9846,11 +9600,13 @@ valsalva.heartComponent.ventricles.SEP_wall.vmax
 valsalva.heartComponent.ventricles.RV_wall.LSEiso
 valsalva.heartComponent.ventricles.RV_wall.contractilityFraction
 valsalva.heartComponent.ventricles.RV_wall.vmax
+valsalva.heartComponent.ra.zpv
 valsalva.heartComponent.ra.volume_min
 valsalva.heartComponent.ra.contractilityFraction
 valsalva.heartComponent.ra.enableCollagen
 valsalva.heartComponent.ra.V0_col
 valsalva.heartComponent.ra.s
+valsalva.heartComponent.la.zpv
 valsalva.heartComponent.la.volume_min
 valsalva.heartComponent.la.contractilityFraction
 valsalva.heartComponent.la.enableCollagen
@@ -9969,6 +9725,7 @@ valsalva.brachial_pressure_systolic
 valsalva.brachial_pressure_diastolic
 valsalva.ascending_aorta
 valsalva.renal_capillary
+valsalva.exercised_capillary
 valsalva.CO
 valsalva.carotid_pressure
 valsalva.femoral_pressure
@@ -10015,6 +9772,7 @@ valsalva.internal.brachial_pressure_systolic
 valsalva.internal.brachial_pressure_diastolic
 valsalva.internal.ascending_aorta
 valsalva.internal.renal_capillary
+valsalva.internal.exercised_capillary
 valsalva.internal.CO
 valsalva.internal.carotid_pressure
 valsalva.internal.femoral_pressure
@@ -10307,71 +10065,6 @@ valsalva.fmi_xVrs[264]
 valsalva.fmi_xVrs[265]
 valsalva.fmi_xVrs[266]
 valsalva.fmi_xVrs[267]
-valsalva.fmi_xVrs[268]
-valsalva.fmi_xVrs[269]
-valsalva.fmi_xVrs[270]
-valsalva.fmi_xVrs[271]
-valsalva.fmi_xVrs[272]
-valsalva.fmi_xVrs[273]
-valsalva.fmi_xVrs[274]
-valsalva.fmi_xVrs[275]
-valsalva.fmi_xVrs[276]
-valsalva.fmi_xVrs[277]
-valsalva.fmi_xVrs[278]
-valsalva.fmi_xVrs[279]
-valsalva.fmi_xVrs[280]
-valsalva.fmi_xVrs[281]
-valsalva.fmi_xVrs[282]
-valsalva.fmi_xVrs[283]
-valsalva.fmi_xVrs[284]
-valsalva.fmi_xVrs[285]
-valsalva.fmi_xVrs[286]
-valsalva.fmi_xVrs[287]
-valsalva.fmi_xVrs[288]
-valsalva.fmi_xVrs[289]
-valsalva.fmi_xVrs[290]
-valsalva.fmi_xVrs[291]
-valsalva.fmi_xVrs[292]
-valsalva.fmi_xVrs[293]
-valsalva.fmi_xVrs[294]
-valsalva.fmi_xVrs[295]
-valsalva.fmi_xVrs[296]
-valsalva.fmi_xVrs[297]
-valsalva.fmi_xVrs[298]
-valsalva.fmi_xVrs[299]
-valsalva.fmi_xVrs[300]
-valsalva.fmi_xVrs[301]
-valsalva.fmi_xVrs[302]
-valsalva.fmi_xVrs[303]
-valsalva.fmi_xVrs[304]
-valsalva.fmi_xVrs[305]
-valsalva.fmi_xVrs[306]
-valsalva.fmi_xVrs[307]
-valsalva.fmi_xVrs[308]
-valsalva.fmi_xVrs[309]
-valsalva.fmi_xVrs[310]
-valsalva.fmi_xVrs[311]
-valsalva.fmi_xVrs[312]
-valsalva.fmi_xVrs[313]
-valsalva.fmi_xVrs[314]
-valsalva.fmi_xVrs[315]
-valsalva.fmi_xVrs[316]
-valsalva.fmi_xVrs[317]
-valsalva.fmi_xVrs[318]
-valsalva.fmi_xVrs[319]
-valsalva.fmi_xVrs[320]
-valsalva.fmi_xVrs[321]
-valsalva.fmi_xVrs[322]
-valsalva.fmi_xVrs[323]
-valsalva.fmi_xVrs[324]
-valsalva.fmi_xVrs[325]
-valsalva.fmi_xVrs[326]
-valsalva.fmi_xVrs[327]
-valsalva.fmi_xVrs[328]
-valsalva.fmi_xVrs[329]
-valsalva.fmi_xVrs[330]
-valsalva.fmi_xVrs[331]
-valsalva.fmi_xVrs[332]
 valsalva.fmi_dxVrs[1]
 valsalva.fmi_dxVrs[2]
 valsalva.fmi_dxVrs[3]
@@ -10639,71 +10332,6 @@ valsalva.fmi_dxVrs[264]
 valsalva.fmi_dxVrs[265]
 valsalva.fmi_dxVrs[266]
 valsalva.fmi_dxVrs[267]
-valsalva.fmi_dxVrs[268]
-valsalva.fmi_dxVrs[269]
-valsalva.fmi_dxVrs[270]
-valsalva.fmi_dxVrs[271]
-valsalva.fmi_dxVrs[272]
-valsalva.fmi_dxVrs[273]
-valsalva.fmi_dxVrs[274]
-valsalva.fmi_dxVrs[275]
-valsalva.fmi_dxVrs[276]
-valsalva.fmi_dxVrs[277]
-valsalva.fmi_dxVrs[278]
-valsalva.fmi_dxVrs[279]
-valsalva.fmi_dxVrs[280]
-valsalva.fmi_dxVrs[281]
-valsalva.fmi_dxVrs[282]
-valsalva.fmi_dxVrs[283]
-valsalva.fmi_dxVrs[284]
-valsalva.fmi_dxVrs[285]
-valsalva.fmi_dxVrs[286]
-valsalva.fmi_dxVrs[287]
-valsalva.fmi_dxVrs[288]
-valsalva.fmi_dxVrs[289]
-valsalva.fmi_dxVrs[290]
-valsalva.fmi_dxVrs[291]
-valsalva.fmi_dxVrs[292]
-valsalva.fmi_dxVrs[293]
-valsalva.fmi_dxVrs[294]
-valsalva.fmi_dxVrs[295]
-valsalva.fmi_dxVrs[296]
-valsalva.fmi_dxVrs[297]
-valsalva.fmi_dxVrs[298]
-valsalva.fmi_dxVrs[299]
-valsalva.fmi_dxVrs[300]
-valsalva.fmi_dxVrs[301]
-valsalva.fmi_dxVrs[302]
-valsalva.fmi_dxVrs[303]
-valsalva.fmi_dxVrs[304]
-valsalva.fmi_dxVrs[305]
-valsalva.fmi_dxVrs[306]
-valsalva.fmi_dxVrs[307]
-valsalva.fmi_dxVrs[308]
-valsalva.fmi_dxVrs[309]
-valsalva.fmi_dxVrs[310]
-valsalva.fmi_dxVrs[311]
-valsalva.fmi_dxVrs[312]
-valsalva.fmi_dxVrs[313]
-valsalva.fmi_dxVrs[314]
-valsalva.fmi_dxVrs[315]
-valsalva.fmi_dxVrs[316]
-valsalva.fmi_dxVrs[317]
-valsalva.fmi_dxVrs[318]
-valsalva.fmi_dxVrs[319]
-valsalva.fmi_dxVrs[320]
-valsalva.fmi_dxVrs[321]
-valsalva.fmi_dxVrs[322]
-valsalva.fmi_dxVrs[323]
-valsalva.fmi_dxVrs[324]
-valsalva.fmi_dxVrs[325]
-valsalva.fmi_dxVrs[326]
-valsalva.fmi_dxVrs[327]
-valsalva.fmi_dxVrs[328]
-valsalva.fmi_dxVrs[329]
-valsalva.fmi_dxVrs[330]
-valsalva.fmi_dxVrs[331]
-valsalva.fmi_dxVrs[332]
 valsalva.fmi_yVrs[1]
 valsalva.fmi_yVrs[2]
 valsalva.fmi_yVrs[3]
@@ -10735,11 +10363,12 @@ valsalva.fmi_yVrs[28]
 valsalva.fmi_yVrs[29]
 valsalva.fmi_yVrs[30]
 valsalva.fmi_yVrs[31]
+valsalva.fmi_yVrs[32]
 steps
 endTime
 stepInterval
 
-double initialValue(10635,6)
+double initialValue(10264,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -10760,11 +10389,9 @@ double initialValue(10635,6)
   1   281   # settings.initByPressure
  -1       0                 -1.0000000000000000E-02 1.0000000000000000E+100
   1   280   # settings.V_PV_init
- -1  6.9999999999999996E-01       0                       0                
-  1   280   # settings.chi_phi
- -1  8.0067790000000002E+05       0                 1.0000000000000000E+100
+ -1  7.7235150000000000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
- -1  1.9925340000000000E+06       0                 1.0000000000000000E+100
+ -1  1.6550680000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.heart_R_RA
@@ -10780,15 +10407,15 @@ double initialValue(10635,6)
   1   280   # settings.heart_vntr_D_0
  -1 %settings.heart_vntr_D_0_maxAct% 0.0 0.0
   1   280   # settings.heart_vntr_D_0_maxAct
- -1  1.3016579999999999E+03       0                       0                
+ -1  1.2985329999999999E+03       0                       0                
   1   280   # settings.heart_vntr_D_A
  -1 %settings.heart_vntr_D_A_maxAct% 0.0 0.0
   1   280   # settings.heart_vntr_D_A_maxAct
- -1  3.3906249999999999E-01       0                       0                
+ -1  3.2468750000000002E-01       0                       0                
   1   280   # settings.heart_vntr_TS
  -1 %settings.heart_vntr_TS_maxAct% 0.0 0.0
   1   280   # settings.heart_vntr_TS_maxAct
- -1  3.7312499999999998E-01       0                       0                
+ -1  4.0312500000000001E-01       0                       0                
   1   280   # settings.heart_vntr_TR
  -1 %settings.heart_vntr_TR_maxAct% 0.0 0.0
   1   280   # settings.heart_vntr_TR_maxAct
@@ -10796,9 +10423,9 @@ double initialValue(10635,6)
   1   280   # settings.heart_vntr_Tact
  -1  8.0000000000000002E-02       0                       0                
   1   280   # settings.heart_vntr_Tact_maxAct
- -1  2.8665840000000000E+07       0                       0                
+ -1  2.6513640000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_0
- -1  6.2375240000000000E+07       0                       0                
+ -1  7.6213570000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_A
  -1  8.0000000000000002E-02       0                       0                
   1   280   # settings.heart_atr_TS
@@ -10808,26 +10435,22 @@ double initialValue(10635,6)
   1   280   # settings.heart_vntr_xi_Vw
  -1       1                       0                       0                
   1   280   # settings.heart_vntr_xi_AmRef
- -1      10                       0                       0                
+ -1       5                       0                       0                
   1   280   # settings.heart_vntr_k_passive
  -1  1.8999999999999999E+00       0                       0                
   1   280   # settings.heart_vntr_Lsref
  -1  1.6000000000000001E+00       0                       0                
   1   280   # settings.heart_vntr_L0
- -1  2.1000000000000001E+00       0                       0                
+ -1  2.0874999999999999E+00       0                       0                
   1   280   # settings.heart_vntr_SLcollagen
  -1  1.5100000000000000E+00       0                       0                
   1   280   # settings.heart_vntr_SLrest
- -1      20                       0                       0                
+ -1  2.6428120000000000E+01       0                       0                
   1   280   # settings.heart_vntr_PConcollagen
- -1  3.2500000000000000E+00       0                       0                
+ -1  2.4812500000000002E+00       0                       0                
   1   280   # settings.heart_vntr_PExpcollagen
  -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
- -1  1.2913400000000000E+08       0                 1.0000000000000000E+100
-  1   280   # settings.syst_TPR
- -1  6.0729439999999997E+00       0                       0                
-  1   280   # settings.syst_TR_frac
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
  -1  4.4029570000000001E-01       0                       0                
@@ -10838,6 +10461,10 @@ double initialValue(10635,6)
   1   280   # settings.eta_vc
  -1       1                       0                       0                
   1   280   # settings.syst_tissues_hydrostaticLevel_correction
+ -1  1.2873330000000000E+08       0                 1.0000000000000000E+100
+  1   280   # settings.syst_TPR
+ -1  5.2277100000000001E+00       0                       0                
+  1   280   # settings.syst_TR_frac
   0       0                       0                       0                
   6   256   # settings.tissues_Pa_nom
  -1  2.6664477483000001E+03       0                       0                
@@ -10866,14 +10493,6 @@ double initialValue(10635,6)
   1   280   # settings.tissues_eta_C
  -1  5.0000000000000000E-01       0                       0                
   1   280   # settings.tissues_gamma
- -1 %settings.tissues_chi_R% 0.0 0.0
-  1   280   # settings.tissues_chi_R
- -1 %settings.tissue_chi_C% 0.0 0.0
-  1   280   # settings.tissue_chi_C
- -1       0                       0                       0                
-  1   280   # settings.veins_chi_pump
- -1       0                       0                       0                
-  1   280   # settings.eta_adenosine
  -1       1                       0                       0                
   1   281   # settings.veins_UseNonLinearVeins
  -1     765                       0                       0                
@@ -10892,7 +10511,7 @@ double initialValue(10635,6)
   1   280   # settings.veins_alpha
  -1  2.0000000000000001E-01       0                       0                
   1   280   # settings.veins_phi_no
- -1       1                       0                       0                
+ -1       0                       0                       0                
   1   281   # settings.veins_delayed_activation
  -1       1                       0                       0                
   1   280   # settings.veins_activation_tau
@@ -10914,20 +10533,18 @@ double initialValue(10635,6)
   1   280   # settings.blood_mu
  -1    1050                       0                       0                
   1   280   # settings.blood_rho
+ -1  6.9999999999999996E-01       0                       0                
+  1   280   # settings.chi_phi
+ -1 %settings.tissues_chi_Ra% 0.0 0.0
+  1   280   # settings.tissues_chi_Ra
+ -1 %settings.tissues_chi_Rv% 0.0 0.0
+  1   280   # settings.tissues_chi_Rv
+ -1 %settings.tissues_chi_C% 0.0 0.0
+  1   280   # settings.tissues_chi_C
  -1       0                       0                       0                
-  1   281   # settings.hideSystemic
+  1   280   # settings.veins_chi_pump
  -1       0                       0                       0                
-  1   281   # settings.hidePulmonary
- -1       0                       0                       0                
-  1   281   # settings.hideHeart
- -1       0                       0                       0                
-  1   281   # settings.hideLevel0
- -1       0                       0                       0                
-  1   281   # settings.hideLevel1
- -1       1                       0                       0                
-  1   281   # settings.EvaluateFunctionalParams
- -1       2                       0                       0                
-  1   280   # settings.dummy
+  1   280   # settings.eta_adenosine
  -1       0                       0                       0                
   1   280   # settings.baro_hr_delay
  -1       0                       0                       0                
@@ -10958,13 +10575,13 @@ double initialValue(10635,6)
   1   280   # settings.pulm_CO_target
  -1  3.1942059999999999E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1  1.4351890000000000E-08       0                       0                
+ -1  1.6351890000000001E-08       0                       0                
   1   280   # settings.pulm_C_PA
  -1  1.3332238741500000E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
- -1  9.7961500000000000E+06       0                 1.0000000000000000E+100
+ -1  1.0197530000000000E+07       0                 1.0000000000000000E+100
   1   280   # settings.pulm_R
  -1  3.3333333333333002E-04       0                       0                
   1   280   # settings.pulm_q_nom_maxq
@@ -10974,6 +10591,20 @@ double initialValue(10635,6)
   1   280   # settings.pulm_PV_R_vis
  -1       1                       0                       0                
   1   280   # settings.pulm_tp_pleural_frac
+ -1       0                       0                       0                
+  1   281   # settings.hideSystemic
+ -1       0                       0                       0                
+  1   281   # settings.hidePulmonary
+ -1       0                       0                       0                
+  1   281   # settings.hideHeart
+ -1       0                       0                       0                
+  1   281   # settings.hideLevel0
+ -1       0                       0                       0                
+  1   281   # settings.hideLevel1
+ -1       1                       0                       0                
+  1   281   # settings.EvaluateFunctionalParams
+ -1       2                       0                       0                
+  1   280   # settings.dummy
  -1  5.0000000000000000E-01       0                       0                
   1   280   # settings.experimental_zpv_factor
  -1       1                       0                       0                
@@ -11010,8 +10641,6 @@ double initialValue(10635,6)
   6   256   # exercise.settings.BMI
   0       0                 -1.0000000000000000E-02 1.0000000000000000E+100
   6   256   # exercise.settings.V_PV_init
-  0       0                       0                       0                
-  6   256   # exercise.settings.chi_phi
   0       0                       0                 1.0000000000000000E+100
   6   256   # exercise.settings.heart_R_vlv
   0       0                       0                 1.0000000000000000E+100
@@ -11042,16 +10671,16 @@ double initialValue(10635,6)
   6   256   # exercise.settings.heart_vntr_TR_maxAct
   0       0                       0                       0                
   6   256   # exercise.settings.heart_vntr_Tact
- -1  8.0000000000000002E-02       0                       0                
-  1   280   # exercise.settings.heart_vntr_Tact_maxAct
+  0       0                       0                       0                
+  6   256   # exercise.settings.heart_vntr_Tact_maxAct
   0       0                       0                       0                
   6   256   # exercise.settings.heart_atr_D_0
   0       0                       0                       0                
   6   256   # exercise.settings.heart_atr_D_A
- -1  8.0000000000000002E-02       0                       0                
-  1   280   # exercise.settings.heart_atr_TS
- -1  2.6312500000000000E-01       0                       0                
-  1   280   # exercise.settings.heart_atr_TR
+  0       0                       0                       0                
+  6   256   # exercise.settings.heart_atr_TS
+  0       0                       0                       0                
+  6   256   # exercise.settings.heart_atr_TR
   0       0                       0                       0                
   6   256   # exercise.settings.heart_vntr_xi_Vw
   0       0                       0                       0                
@@ -11066,22 +10695,22 @@ double initialValue(10635,6)
   6   256   # exercise.settings.heart_vntr_SLcollagen
   0       0                       0                       0                
   6   256   # exercise.settings.heart_vntr_SLrest
- -1      20                       0                       0                
-  1   280   # exercise.settings.heart_vntr_PConcollagen
- -1  3.2500000000000000E+00       0                       0                
-  1   280   # exercise.settings.heart_vntr_PExpcollagen
+  0       0                       0                       0                
+  6   256   # exercise.settings.heart_vntr_PConcollagen
+  0       0                       0                       0                
+  6   256   # exercise.settings.heart_vntr_PExpcollagen
   0       0                       0                       0                
   6   256   # exercise.settings.syst_abd_P_th_ratio
-  0       0                       0                 1.0000000000000000E+100
-  6   256   # exercise.settings.syst_TPR
-  0       0                       0                       0                
-  6   256   # exercise.settings.syst_TR_frac
   0       0                       0                       0                
   6   256   # exercise.settings.syst_art_k_E
   0       0                       0                       0                
   6   256   # exercise.settings.eta_vc
   0       0                       0                       0                
   6   256   # exercise.settings.syst_tissues_hydrostaticLevel_correction
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # exercise.settings.syst_TPR
+  0       0                       0                       0                
+  6   256   # exercise.settings.syst_TR_frac
   0       0                       0                 1.0000000000000000E+100
   6   256   # exercise.settings.tissues_SV_nom
   0       0                       0                       0                
@@ -11096,14 +10725,6 @@ double initialValue(10635,6)
   6   256   # exercise.settings.tissues_V_max_breakPoint_Frac
   0       0                       0                       0                
   6   256   # exercise.settings.tissues_eta_C
-  0       0                       0                       0                
-  6   256   # exercise.settings.tissues_chi_R
-  0       0                       0                       0                
-  6   256   # exercise.settings.tissue_chi_C
-  0       0                       0                       0                
-  6   256   # exercise.settings.veins_chi_pump
-  0       0                       0                       0                
-  6   256   # exercise.settings.eta_adenosine
  -1     765                       0                       0                
   1   280   # exercise.settings.veins_linearE_rel
  -1  7.9300000000000004E-01       0                       0                
@@ -11138,20 +10759,18 @@ double initialValue(10635,6)
   1   280   # exercise.settings.blood_mu
  -1    1050                       0                       0                
   1   280   # exercise.settings.blood_rho
- -1       0                       0                       0                
-  1   281   # exercise.settings.hideSystemic
- -1       0                       0                       0                
-  1   281   # exercise.settings.hidePulmonary
- -1       0                       0                       0                
-  1   281   # exercise.settings.hideHeart
- -1       0                       0                       0                
-  1   281   # exercise.settings.hideLevel0
- -1       0                       0                       0                
-  1   281   # exercise.settings.hideLevel1
- -1       1                       0                       0                
-  1   281   # exercise.settings.EvaluateFunctionalParams
- -1       2                       0                       0                
-  1   280   # exercise.settings.dummy
+  0       0                       0                       0                
+  6   256   # exercise.settings.chi_phi
+  0       0                       0                       0                
+  6   256   # exercise.settings.tissues_chi_Ra
+  0       0                       0                       0                
+  6   256   # exercise.settings.tissues_chi_Rv
+  0       0                       0                       0                
+  6   256   # exercise.settings.tissues_chi_C
+  0       0                       0                       0                
+  6   256   # exercise.settings.veins_chi_pump
+  0       0                       0                       0                
+  6   256   # exercise.settings.eta_adenosine
  -1       0                       0                       0                
   1   280   # exercise.settings.baro_hr_delay
  -1  1.5000000000000000E+00       0                       0                
@@ -11194,6 +10813,20 @@ double initialValue(10635,6)
   6   256   # exercise.settings.pulm_PV_R_vis
   0       0                       0                       0                
   6   256   # exercise.settings.pulm_tp_pleural_frac
+ -1       0                       0                       0                
+  1   281   # exercise.settings.hideSystemic
+ -1       0                       0                       0                
+  1   281   # exercise.settings.hidePulmonary
+ -1       0                       0                       0                
+  1   281   # exercise.settings.hideHeart
+ -1       0                       0                       0                
+  1   281   # exercise.settings.hideLevel0
+ -1       0                       0                       0                
+  1   281   # exercise.settings.hideLevel1
+ -1       1                       0                       0                
+  1   281   # exercise.settings.EvaluateFunctionalParams
+ -1       2                       0                       0                
+  1   280   # exercise.settings.dummy
  -1  5.0000000000000000E-01       0                       0                
   1   280   # exercise.settings.experimental_zpv_factor
  -1       1                       0                       0                
@@ -16266,6 +15899,8 @@ double initialValue(10635,6)
   1   280   # exercise.heartComponent.ventricles.RV_wall.contractilityFraction
  -1       7                       0                       0                
   1   280   # exercise.heartComponent.ventricles.RV_wall.vmax
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # exercise.heartComponent.ra.zpv
  -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
   1   280   # exercise.heartComponent.ra.volume_min
  -1       1                       0                       0                
@@ -16276,6 +15911,8 @@ double initialValue(10635,6)
   1   280   # exercise.heartComponent.ra.V0_col
  -1      10                       0                       0                
   1   280   # exercise.heartComponent.ra.s
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # exercise.heartComponent.la.zpv
  -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
   1   280   # exercise.heartComponent.la.volume_min
  -1       1                       0                       0                
@@ -16437,6 +16074,8 @@ double initialValue(10635,6)
   0       0                       0                       0                
   6   320   # exercise.renal_capillary
   0       0                       0                       0                
+  6   320   # exercise.exercised_capillary
+  0       0                       0                       0                
   6   320   # exercise.CO
   0       0                       0                       0                
   6   320   # exercise.carotid_pressure
@@ -16528,6 +16167,8 @@ double initialValue(10635,6)
   6  1344   # exercise.internal.ascending_aorta
   0       0                       0                       0                
   6  1344   # exercise.internal.renal_capillary
+  0       0                       0                       0                
+  6  1344   # exercise.internal.exercised_capillary
   0       0                       0                       0                
   6  1344   # exercise.internal.CO
   0       0                       0                       0                
@@ -17114,136 +16755,6 @@ double initialValue(10635,6)
   1  1306   # exercise.fmi_xVrs[267]
  -1  3.3554699000000000E+07       0                       0                
   1  1306   # exercise.fmi_xVrs[268]
- -1  3.3554700000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[269]
- -1  3.3554701000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[270]
- -1  3.3554702000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[271]
- -1  3.3554703000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[272]
- -1  3.3554704000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[273]
- -1  3.3554705000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[274]
- -1  3.3554706000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[275]
- -1  3.3554707000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[276]
- -1  3.3554708000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[277]
- -1  3.3554709000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[278]
- -1  3.3554710000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[279]
- -1  3.3554711000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[280]
- -1  3.3554712000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[281]
- -1  3.3554713000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[282]
- -1  3.3554714000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[283]
- -1  3.3554715000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[284]
- -1  3.3554716000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[285]
- -1  3.3554717000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[286]
- -1  3.3554718000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[287]
- -1  3.3554719000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[288]
- -1  3.3554720000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[289]
- -1  3.3554721000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[290]
- -1  3.3554722000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[291]
- -1  3.3554723000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[292]
- -1  3.3554724000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[293]
- -1  3.3554725000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[294]
- -1  3.3554726000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[295]
- -1  3.3554727000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[296]
- -1  3.3554728000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[297]
- -1  3.3554729000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[298]
- -1  3.3554730000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[299]
- -1  3.3554731000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[300]
- -1  3.3554732000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[301]
- -1  3.3554733000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[302]
- -1  3.3554734000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[303]
- -1  3.3554735000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[304]
- -1  3.3554736000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[305]
- -1  3.3554737000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[306]
- -1  3.3554738000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[307]
- -1  3.3554739000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[308]
- -1  3.3554740000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[309]
- -1  3.3554741000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[310]
- -1  3.3554742000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[311]
- -1  3.3554743000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[312]
- -1  3.3554744000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[313]
- -1  3.3554745000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[314]
- -1  3.3554746000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[315]
- -1  3.3554747000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[316]
- -1  3.3554748000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[317]
- -1  3.3554749000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[318]
- -1  3.3554750000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[319]
- -1  3.3554751000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[320]
- -1  3.3554752000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[321]
- -1  3.3554753000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[322]
- -1  3.3554754000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[323]
- -1  3.3554755000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[324]
- -1  3.3554756000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[325]
- -1  3.3554757000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[326]
- -1  3.3554758000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[327]
- -1  3.3554759000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[328]
- -1  3.3554760000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[329]
- -1  3.3554761000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[330]
- -1  3.3554762000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[331]
- -1  3.3554763000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[332]
- -1  3.3554764000000000E+07       0                       0                
-  1  1306   # exercise.fmi_xVrs[333]
  -1  5.8720256000000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[1]
  -1  5.8720256100000000E+08       0                       0                
@@ -17746,7 +17257,7 @@ double initialValue(10635,6)
   1  1306   # exercise.fmi_dxVrs[250]
  -1  5.8720281000000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[251]
- -1  5.8720281100000000E+08       0                       0                
+ -1  3.1876735500000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[252]
  -1  5.8720281200000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[253]
@@ -17780,136 +17291,6 @@ double initialValue(10635,6)
   1  1306   # exercise.fmi_dxVrs[267]
  -1  5.8720282700000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[268]
- -1  5.8720282800000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[269]
- -1  5.8720282900000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[270]
- -1  5.8720283000000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[271]
- -1  5.8720283100000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[272]
- -1  5.8720283200000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[273]
- -1  5.8720283300000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[274]
- -1  5.8720283400000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[275]
- -1  5.8720283500000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[276]
- -1  5.8720283600000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[277]
- -1  5.8720283700000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[278]
- -1  5.8720283800000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[279]
- -1  5.8720283900000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[280]
- -1  5.8720284000000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[281]
- -1  5.8720284100000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[282]
- -1  5.8720284200000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[283]
- -1  5.8720284300000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[284]
- -1  5.8720284400000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[285]
- -1  5.8720284500000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[286]
- -1  5.8720284600000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[287]
- -1  5.8720284700000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[288]
- -1  5.8720284800000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[289]
- -1  5.8720284900000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[290]
- -1  5.8720285000000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[291]
- -1  5.8720285100000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[292]
- -1  5.8720285200000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[293]
- -1  5.8720285300000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[294]
- -1  5.8720285400000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[295]
- -1  5.8720285500000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[296]
- -1  5.8720285600000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[297]
- -1  5.8720285700000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[298]
- -1  5.8720285800000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[299]
- -1  5.8720285900000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[300]
- -1  5.8720286000000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[301]
- -1  5.8720286100000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[302]
- -1  5.8720286200000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[303]
- -1  5.8720286300000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[304]
- -1  5.8720286400000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[305]
- -1  5.8720286500000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[306]
- -1  5.8720286600000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[307]
- -1  5.8720286700000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[308]
- -1  5.8720286800000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[309]
- -1  5.8720286900000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[310]
- -1  5.8720287000000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[311]
- -1  5.8720287100000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[312]
- -1  5.8720287200000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[313]
- -1  5.8720287300000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[314]
- -1  5.8720287400000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[315]
- -1  5.8720287500000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[316]
- -1  5.8720287600000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[317]
- -1  3.1876742100000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[318]
- -1  5.8720287800000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[319]
- -1  5.8720287900000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[320]
- -1  5.8720288000000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[321]
- -1  5.8720288100000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[322]
- -1  5.8720288200000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[323]
- -1  5.8720288300000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[324]
- -1  5.8720288400000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[325]
- -1  5.8720288500000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[326]
- -1  5.8720288600000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[327]
- -1  5.8720288700000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[328]
- -1  5.8720288800000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[329]
- -1  5.8720288900000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[330]
- -1  5.8720289000000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[331]
- -1  5.8720289100000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[332]
- -1  5.8720289200000000E+08       0                       0                
-  1  1306   # exercise.fmi_dxVrs[333]
  -1  3.3554432000000000E+08       0                       0                
   1  1306   # exercise.fmi_yVrs[1]
  -1  3.3554432100000000E+08       0                       0                
@@ -17948,17 +17329,17 @@ double initialValue(10635,6)
   1  1306   # exercise.fmi_yVrs[18]
  -1  3.3554433800000000E+08       0                       0                
   1  1306   # exercise.fmi_yVrs[19]
- -1  6.7108883000000000E+07       0                       0                
+ -1  3.3554433900000000E+08       0                       0                
   1  1306   # exercise.fmi_yVrs[20]
- -1  3.3554434000000000E+08       0                       0                
+ -1  6.7108884000000000E+07       0                       0                
   1  1306   # exercise.fmi_yVrs[21]
  -1  3.3554434100000000E+08       0                       0                
   1  1306   # exercise.fmi_yVrs[22]
  -1  3.3554434200000000E+08       0                       0                
   1  1306   # exercise.fmi_yVrs[23]
- -1  6.7108887000000000E+07       0                       0                
+ -1  3.3554434300000000E+08       0                       0                
   1  1306   # exercise.fmi_yVrs[24]
- -1  3.3554434400000000E+08       0                       0                
+ -1  6.7108888000000000E+07       0                       0                
   1  1306   # exercise.fmi_yVrs[25]
  -1  3.3554434500000000E+08       0                       0                
   1  1306   # exercise.fmi_yVrs[26]
@@ -17972,6 +17353,8 @@ double initialValue(10635,6)
   1  1306   # exercise.fmi_yVrs[30]
  -1  3.3554435000000000E+08       0                       0                
   1  1306   # exercise.fmi_yVrs[31]
+ -1  3.3554435100000000E+08       0                       0                
+  1  1306   # exercise.fmi_yVrs[32]
  -1  1.0000000000000000E-03       0                       0                
   1   280   # tilt.tau
   0       0                       0                       0                
@@ -17988,8 +17371,6 @@ double initialValue(10635,6)
   6   256   # tilt.settings.BMI
   0       0                 -1.0000000000000000E-02 1.0000000000000000E+100
   6   256   # tilt.settings.V_PV_init
-  0       0                       0                       0                
-  6   256   # tilt.settings.chi_phi
   0       0                       0                 1.0000000000000000E+100
   6   256   # tilt.settings.heart_R_vlv
   0       0                       0                 1.0000000000000000E+100
@@ -18020,16 +17401,16 @@ double initialValue(10635,6)
   6   256   # tilt.settings.heart_vntr_TR_maxAct
   0       0                       0                       0                
   6   256   # tilt.settings.heart_vntr_Tact
- -1  8.0000000000000002E-02       0                       0                
-  1   280   # tilt.settings.heart_vntr_Tact_maxAct
+  0       0                       0                       0                
+  6   256   # tilt.settings.heart_vntr_Tact_maxAct
   0       0                       0                       0                
   6   256   # tilt.settings.heart_atr_D_0
   0       0                       0                       0                
   6   256   # tilt.settings.heart_atr_D_A
- -1  8.0000000000000002E-02       0                       0                
-  1   280   # tilt.settings.heart_atr_TS
- -1  2.6312500000000000E-01       0                       0                
-  1   280   # tilt.settings.heart_atr_TR
+  0       0                       0                       0                
+  6   256   # tilt.settings.heart_atr_TS
+  0       0                       0                       0                
+  6   256   # tilt.settings.heart_atr_TR
   0       0                       0                       0                
   6   256   # tilt.settings.heart_vntr_xi_Vw
   0       0                       0                       0                
@@ -18044,22 +17425,22 @@ double initialValue(10635,6)
   6   256   # tilt.settings.heart_vntr_SLcollagen
   0       0                       0                       0                
   6   256   # tilt.settings.heart_vntr_SLrest
- -1      20                       0                       0                
-  1   280   # tilt.settings.heart_vntr_PConcollagen
- -1  3.2500000000000000E+00       0                       0                
-  1   280   # tilt.settings.heart_vntr_PExpcollagen
+  0       0                       0                       0                
+  6   256   # tilt.settings.heart_vntr_PConcollagen
+  0       0                       0                       0                
+  6   256   # tilt.settings.heart_vntr_PExpcollagen
   0       0                       0                       0                
   6   256   # tilt.settings.syst_abd_P_th_ratio
-  0       0                       0                 1.0000000000000000E+100
-  6   256   # tilt.settings.syst_TPR
-  0       0                       0                       0                
-  6   256   # tilt.settings.syst_TR_frac
   0       0                       0                       0                
   6   256   # tilt.settings.syst_art_k_E
   0       0                       0                       0                
   6   256   # tilt.settings.eta_vc
   0       0                       0                       0                
   6   256   # tilt.settings.syst_tissues_hydrostaticLevel_correction
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # tilt.settings.syst_TPR
+  0       0                       0                       0                
+  6   256   # tilt.settings.syst_TR_frac
   0       0                       0                 1.0000000000000000E+100
   6   256   # tilt.settings.tissues_SV_nom
   0       0                       0                       0                
@@ -18074,14 +17455,6 @@ double initialValue(10635,6)
   6   256   # tilt.settings.tissues_V_max_breakPoint_Frac
   0       0                       0                       0                
   6   256   # tilt.settings.tissues_eta_C
-  0       0                       0                       0                
-  6   256   # tilt.settings.tissues_chi_R
-  0       0                       0                       0                
-  6   256   # tilt.settings.tissue_chi_C
-  0       0                       0                       0                
-  6   256   # tilt.settings.veins_chi_pump
-  0       0                       0                       0                
-  6   256   # tilt.settings.eta_adenosine
  -1     765                       0                       0                
   1   280   # tilt.settings.veins_linearE_rel
  -1  7.9300000000000004E-01       0                       0                
@@ -18116,20 +17489,18 @@ double initialValue(10635,6)
   1   280   # tilt.settings.blood_mu
  -1    1050                       0                       0                
   1   280   # tilt.settings.blood_rho
- -1       0                       0                       0                
-  1   281   # tilt.settings.hideSystemic
- -1       0                       0                       0                
-  1   281   # tilt.settings.hidePulmonary
- -1       0                       0                       0                
-  1   281   # tilt.settings.hideHeart
- -1       0                       0                       0                
-  1   281   # tilt.settings.hideLevel0
- -1       0                       0                       0                
-  1   281   # tilt.settings.hideLevel1
- -1       1                       0                       0                
-  1   281   # tilt.settings.EvaluateFunctionalParams
- -1       2                       0                       0                
-  1   280   # tilt.settings.dummy
+  0       0                       0                       0                
+  6   256   # tilt.settings.chi_phi
+  0       0                       0                       0                
+  6   256   # tilt.settings.tissues_chi_Ra
+  0       0                       0                       0                
+  6   256   # tilt.settings.tissues_chi_Rv
+  0       0                       0                       0                
+  6   256   # tilt.settings.tissues_chi_C
+  0       0                       0                       0                
+  6   256   # tilt.settings.veins_chi_pump
+  0       0                       0                       0                
+  6   256   # tilt.settings.eta_adenosine
  -1       0                       0                       0                
   1   280   # tilt.settings.baro_hr_delay
  -1  1.5000000000000000E+00       0                       0                
@@ -18172,6 +17543,20 @@ double initialValue(10635,6)
   6   256   # tilt.settings.pulm_PV_R_vis
   0       0                       0                       0                
   6   256   # tilt.settings.pulm_tp_pleural_frac
+ -1       0                       0                       0                
+  1   281   # tilt.settings.hideSystemic
+ -1       0                       0                       0                
+  1   281   # tilt.settings.hidePulmonary
+ -1       0                       0                       0                
+  1   281   # tilt.settings.hideHeart
+ -1       0                       0                       0                
+  1   281   # tilt.settings.hideLevel0
+ -1       0                       0                       0                
+  1   281   # tilt.settings.hideLevel1
+ -1       1                       0                       0                
+  1   281   # tilt.settings.EvaluateFunctionalParams
+ -1       2                       0                       0                
+  1   280   # tilt.settings.dummy
  -1  5.0000000000000000E-01       0                       0                
   1   280   # tilt.settings.experimental_zpv_factor
  -1       1                       0                       0                
@@ -23214,7 +22599,7 @@ double initialValue(10635,6)
   1   280   # tilt.heartComponent.aorticValve._Goff
  -1       0                       0                 1.0000000000000000E+100
   1   280   # tilt.heartComponent.aorticValve.Pknee
- -1  6.9887980000000005E+05       0                 1.0000000000000000E+100
+ -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
   1   280   # tilt.heartComponent.aorticValve._Ron
  -1   39996                       0                       0                
   1   280   # tilt.heartComponent.aorticValve.Pmax
@@ -23244,6 +22629,8 @@ double initialValue(10635,6)
   1   280   # tilt.heartComponent.ventricles.RV_wall.contractilityFraction
  -1       7                       0                       0                
   1   280   # tilt.heartComponent.ventricles.RV_wall.vmax
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # tilt.heartComponent.ra.zpv
  -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
   1   280   # tilt.heartComponent.ra.volume_min
  -1       1                       0                       0                
@@ -23254,6 +22641,8 @@ double initialValue(10635,6)
   1   280   # tilt.heartComponent.ra.V0_col
  -1      10                       0                       0                
   1   280   # tilt.heartComponent.ra.s
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # tilt.heartComponent.la.zpv
  -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
   1   280   # tilt.heartComponent.la.volume_min
  -1       1                       0                       0                
@@ -23427,6 +22816,8 @@ double initialValue(10635,6)
   0       0                       0                       0                
   6   320   # tilt.renal_capillary
   0       0                       0                       0                
+  6   320   # tilt.exercised_capillary
+  0       0                       0                       0                
   6   320   # tilt.CO
   0       0                       0                       0                
   6   320   # tilt.carotid_pressure
@@ -23518,6 +22909,8 @@ double initialValue(10635,6)
   6  1344   # tilt.internal.ascending_aorta
   0       0                       0                       0                
   6  1344   # tilt.internal.renal_capillary
+  0       0                       0                       0                
+  6  1344   # tilt.internal.exercised_capillary
   0       0                       0                       0                
   6  1344   # tilt.internal.CO
   0       0                       0                       0                
@@ -24102,136 +23495,6 @@ double initialValue(10635,6)
   1  1306   # tilt.fmi_xVrs[266]
  -1  3.3554698000000000E+07       0                       0                
   1  1306   # tilt.fmi_xVrs[267]
- -1  3.3554699000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[268]
- -1  3.3554700000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[269]
- -1  3.3554701000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[270]
- -1  3.3554702000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[271]
- -1  3.3554703000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[272]
- -1  3.3554704000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[273]
- -1  3.3554705000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[274]
- -1  3.3554706000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[275]
- -1  3.3554707000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[276]
- -1  3.3554708000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[277]
- -1  3.3554709000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[278]
- -1  3.3554710000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[279]
- -1  3.3554711000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[280]
- -1  3.3554712000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[281]
- -1  3.3554713000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[282]
- -1  3.3554714000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[283]
- -1  3.3554715000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[284]
- -1  3.3554716000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[285]
- -1  3.3554717000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[286]
- -1  3.3554718000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[287]
- -1  3.3554719000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[288]
- -1  3.3554720000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[289]
- -1  3.3554721000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[290]
- -1  3.3554722000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[291]
- -1  3.3554723000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[292]
- -1  3.3554724000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[293]
- -1  3.3554725000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[294]
- -1  3.3554726000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[295]
- -1  3.3554727000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[296]
- -1  3.3554728000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[297]
- -1  3.3554729000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[298]
- -1  3.3554730000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[299]
- -1  3.3554731000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[300]
- -1  3.3554732000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[301]
- -1  3.3554733000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[302]
- -1  3.3554734000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[303]
- -1  3.3554735000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[304]
- -1  3.3554736000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[305]
- -1  3.3554737000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[306]
- -1  3.3554738000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[307]
- -1  3.3554739000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[308]
- -1  3.3554740000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[309]
- -1  3.3554741000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[310]
- -1  3.3554742000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[311]
- -1  3.3554743000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[312]
- -1  3.3554744000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[313]
- -1  3.3554745000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[314]
- -1  3.3554746000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[315]
- -1  3.3554747000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[316]
- -1  3.3554748000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[317]
- -1  3.3554749000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[318]
- -1  3.3554750000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[319]
- -1  3.3554751000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[320]
- -1  3.3554752000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[321]
- -1  3.3554753000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[322]
- -1  3.3554754000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[323]
- -1  3.3554755000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[324]
- -1  3.3554756000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[325]
- -1  3.3554757000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[326]
- -1  3.3554758000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[327]
- -1  3.3554759000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[328]
- -1  3.3554760000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[329]
- -1  3.3554761000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[330]
- -1  3.3554762000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[331]
- -1  3.3554763000000000E+07       0                       0                
-  1  1306   # tilt.fmi_xVrs[332]
  -1  5.8720256000000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[1]
  -1  5.8720256100000000E+08       0                       0                
@@ -24734,7 +23997,7 @@ double initialValue(10635,6)
   1  1306   # tilt.fmi_dxVrs[250]
  -1  5.8720281000000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[251]
- -1  5.8720281100000000E+08       0                       0                
+ -1  3.1876735500000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[252]
  -1  5.8720281200000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[253]
@@ -24766,136 +24029,6 @@ double initialValue(10635,6)
   1  1306   # tilt.fmi_dxVrs[266]
  -1  5.8720282600000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[267]
- -1  5.8720282700000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[268]
- -1  5.8720282800000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[269]
- -1  5.8720282900000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[270]
- -1  5.8720283000000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[271]
- -1  5.8720283100000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[272]
- -1  5.8720283200000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[273]
- -1  5.8720283300000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[274]
- -1  5.8720283400000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[275]
- -1  5.8720283500000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[276]
- -1  5.8720283600000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[277]
- -1  5.8720283700000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[278]
- -1  5.8720283800000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[279]
- -1  5.8720283900000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[280]
- -1  5.8720284000000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[281]
- -1  5.8720284100000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[282]
- -1  5.8720284200000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[283]
- -1  5.8720284300000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[284]
- -1  5.8720284400000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[285]
- -1  5.8720284500000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[286]
- -1  5.8720284600000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[287]
- -1  5.8720284700000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[288]
- -1  5.8720284800000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[289]
- -1  5.8720284900000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[290]
- -1  5.8720285000000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[291]
- -1  5.8720285100000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[292]
- -1  5.8720285200000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[293]
- -1  5.8720285300000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[294]
- -1  5.8720285400000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[295]
- -1  5.8720285500000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[296]
- -1  5.8720285600000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[297]
- -1  5.8720285700000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[298]
- -1  5.8720285800000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[299]
- -1  5.8720285900000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[300]
- -1  5.8720286000000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[301]
- -1  5.8720286100000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[302]
- -1  5.8720286200000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[303]
- -1  5.8720286300000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[304]
- -1  5.8720286400000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[305]
- -1  5.8720286500000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[306]
- -1  5.8720286600000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[307]
- -1  5.8720286700000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[308]
- -1  5.8720286800000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[309]
- -1  5.8720286900000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[310]
- -1  5.8720287000000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[311]
- -1  5.8720287100000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[312]
- -1  5.8720287200000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[313]
- -1  5.8720287300000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[314]
- -1  5.8720287400000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[315]
- -1  5.8720287500000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[316]
- -1  5.8720287600000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[317]
- -1  3.1876742100000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[318]
- -1  5.8720287800000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[319]
- -1  5.8720287900000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[320]
- -1  5.8720288000000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[321]
- -1  5.8720288100000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[322]
- -1  5.8720288200000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[323]
- -1  5.8720288300000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[324]
- -1  5.8720288400000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[325]
- -1  5.8720288500000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[326]
- -1  5.8720288600000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[327]
- -1  5.8720288700000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[328]
- -1  5.8720288800000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[329]
- -1  5.8720288900000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[330]
- -1  5.8720289000000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[331]
- -1  5.8720289100000000E+08       0                       0                
-  1  1306   # tilt.fmi_dxVrs[332]
  -1  3.3554432000000000E+08       0                       0                
   1  1306   # tilt.fmi_yVrs[1]
  -1  3.3554432100000000E+08       0                       0                
@@ -24934,17 +24067,17 @@ double initialValue(10635,6)
   1  1306   # tilt.fmi_yVrs[18]
  -1  3.3554433800000000E+08       0                       0                
   1  1306   # tilt.fmi_yVrs[19]
- -1  6.7108883000000000E+07       0                       0                
+ -1  3.3554433900000000E+08       0                       0                
   1  1306   # tilt.fmi_yVrs[20]
- -1  3.3554434000000000E+08       0                       0                
+ -1  6.7108884000000000E+07       0                       0                
   1  1306   # tilt.fmi_yVrs[21]
  -1  3.3554434100000000E+08       0                       0                
   1  1306   # tilt.fmi_yVrs[22]
  -1  3.3554434200000000E+08       0                       0                
   1  1306   # tilt.fmi_yVrs[23]
- -1  6.7108887000000000E+07       0                       0                
+ -1  3.3554434300000000E+08       0                       0                
   1  1306   # tilt.fmi_yVrs[24]
- -1  3.3554434400000000E+08       0                       0                
+ -1  6.7108888000000000E+07       0                       0                
   1  1306   # tilt.fmi_yVrs[25]
  -1  3.3554434500000000E+08       0                       0                
   1  1306   # tilt.fmi_yVrs[26]
@@ -24958,6 +24091,8 @@ double initialValue(10635,6)
   1  1306   # tilt.fmi_yVrs[30]
  -1  3.3554435000000000E+08       0                       0                
   1  1306   # tilt.fmi_yVrs[31]
+ -1  3.3554435100000000E+08       0                       0                
+  1  1306   # tilt.fmi_yVrs[32]
  -1  1.0000000000000000E-03       0                       0                
   1   280   # valsalva.tau
   0       0                       0                       0                
@@ -24974,8 +24109,6 @@ double initialValue(10635,6)
   6   256   # valsalva.settings.BMI
   0       0                 -1.0000000000000000E-02 1.0000000000000000E+100
   6   256   # valsalva.settings.V_PV_init
-  0       0                       0                       0                
-  6   256   # valsalva.settings.chi_phi
   0       0                       0                 1.0000000000000000E+100
   6   256   # valsalva.settings.heart_R_vlv
   0       0                       0                 1.0000000000000000E+100
@@ -25006,16 +24139,16 @@ double initialValue(10635,6)
   6   256   # valsalva.settings.heart_vntr_TR_maxAct
   0       0                       0                       0                
   6   256   # valsalva.settings.heart_vntr_Tact
- -1  8.0000000000000002E-02       0                       0                
-  1   280   # valsalva.settings.heart_vntr_Tact_maxAct
+  0       0                       0                       0                
+  6   256   # valsalva.settings.heart_vntr_Tact_maxAct
   0       0                       0                       0                
   6   256   # valsalva.settings.heart_atr_D_0
   0       0                       0                       0                
   6   256   # valsalva.settings.heart_atr_D_A
- -1  8.0000000000000002E-02       0                       0                
-  1   280   # valsalva.settings.heart_atr_TS
- -1  2.6312500000000000E-01       0                       0                
-  1   280   # valsalva.settings.heart_atr_TR
+  0       0                       0                       0                
+  6   256   # valsalva.settings.heart_atr_TS
+  0       0                       0                       0                
+  6   256   # valsalva.settings.heart_atr_TR
   0       0                       0                       0                
   6   256   # valsalva.settings.heart_vntr_xi_Vw
   0       0                       0                       0                
@@ -25030,22 +24163,22 @@ double initialValue(10635,6)
   6   256   # valsalva.settings.heart_vntr_SLcollagen
   0       0                       0                       0                
   6   256   # valsalva.settings.heart_vntr_SLrest
- -1      20                       0                       0                
-  1   280   # valsalva.settings.heart_vntr_PConcollagen
- -1  3.2500000000000000E+00       0                       0                
-  1   280   # valsalva.settings.heart_vntr_PExpcollagen
+  0       0                       0                       0                
+  6   256   # valsalva.settings.heart_vntr_PConcollagen
+  0       0                       0                       0                
+  6   256   # valsalva.settings.heart_vntr_PExpcollagen
   0       0                       0                       0                
   6   256   # valsalva.settings.syst_abd_P_th_ratio
-  0       0                       0                 1.0000000000000000E+100
-  6   256   # valsalva.settings.syst_TPR
-  0       0                       0                       0                
-  6   256   # valsalva.settings.syst_TR_frac
   0       0                       0                       0                
   6   256   # valsalva.settings.syst_art_k_E
   0       0                       0                       0                
   6   256   # valsalva.settings.eta_vc
   0       0                       0                       0                
   6   256   # valsalva.settings.syst_tissues_hydrostaticLevel_correction
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # valsalva.settings.syst_TPR
+  0       0                       0                       0                
+  6   256   # valsalva.settings.syst_TR_frac
   0       0                       0                 1.0000000000000000E+100
   6   256   # valsalva.settings.tissues_SV_nom
   0       0                       0                       0                
@@ -25060,14 +24193,6 @@ double initialValue(10635,6)
   6   256   # valsalva.settings.tissues_V_max_breakPoint_Frac
   0       0                       0                       0                
   6   256   # valsalva.settings.tissues_eta_C
-  0       0                       0                       0                
-  6   256   # valsalva.settings.tissues_chi_R
-  0       0                       0                       0                
-  6   256   # valsalva.settings.tissue_chi_C
-  0       0                       0                       0                
-  6   256   # valsalva.settings.veins_chi_pump
-  0       0                       0                       0                
-  6   256   # valsalva.settings.eta_adenosine
  -1     765                       0                       0                
   1   280   # valsalva.settings.veins_linearE_rel
  -1  7.9300000000000004E-01       0                       0                
@@ -25102,20 +24227,18 @@ double initialValue(10635,6)
   1   280   # valsalva.settings.blood_mu
  -1    1050                       0                       0                
   1   280   # valsalva.settings.blood_rho
- -1       0                       0                       0                
-  1   281   # valsalva.settings.hideSystemic
- -1       0                       0                       0                
-  1   281   # valsalva.settings.hidePulmonary
- -1       0                       0                       0                
-  1   281   # valsalva.settings.hideHeart
- -1       0                       0                       0                
-  1   281   # valsalva.settings.hideLevel0
- -1       0                       0                       0                
-  1   281   # valsalva.settings.hideLevel1
- -1       1                       0                       0                
-  1   281   # valsalva.settings.EvaluateFunctionalParams
- -1       2                       0                       0                
-  1   280   # valsalva.settings.dummy
+  0       0                       0                       0                
+  6   256   # valsalva.settings.chi_phi
+  0       0                       0                       0                
+  6   256   # valsalva.settings.tissues_chi_Ra
+  0       0                       0                       0                
+  6   256   # valsalva.settings.tissues_chi_Rv
+  0       0                       0                       0                
+  6   256   # valsalva.settings.tissues_chi_C
+  0       0                       0                       0                
+  6   256   # valsalva.settings.veins_chi_pump
+  0       0                       0                       0                
+  6   256   # valsalva.settings.eta_adenosine
  -1       0                       0                       0                
   1   280   # valsalva.settings.baro_hr_delay
  -1  1.5000000000000000E+00       0                       0                
@@ -25158,6 +24281,20 @@ double initialValue(10635,6)
   6   256   # valsalva.settings.pulm_PV_R_vis
   0       0                       0                       0                
   6   256   # valsalva.settings.pulm_tp_pleural_frac
+ -1       0                       0                       0                
+  1   281   # valsalva.settings.hideSystemic
+ -1       0                       0                       0                
+  1   281   # valsalva.settings.hidePulmonary
+ -1       0                       0                       0                
+  1   281   # valsalva.settings.hideHeart
+ -1       0                       0                       0                
+  1   281   # valsalva.settings.hideLevel0
+ -1       0                       0                       0                
+  1   281   # valsalva.settings.hideLevel1
+ -1       1                       0                       0                
+  1   281   # valsalva.settings.EvaluateFunctionalParams
+ -1       2                       0                       0                
+  1   280   # valsalva.settings.dummy
  -1  5.0000000000000000E-01       0                       0                
   1   280   # valsalva.settings.experimental_zpv_factor
  -1       1                       0                       0                
@@ -30196,7 +29333,7 @@ double initialValue(10635,6)
   1   280   # valsalva.heartComponent.aorticValve._Goff
  -1       0                       0                 1.0000000000000000E+100
   1   280   # valsalva.heartComponent.aorticValve.Pknee
- -1  6.9887980000000005E+05       0                 1.0000000000000000E+100
+ -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
   1   280   # valsalva.heartComponent.aorticValve._Ron
  -1   39996                       0                       0                
   1   280   # valsalva.heartComponent.aorticValve.Pmax
@@ -30226,6 +29363,8 @@ double initialValue(10635,6)
   1   280   # valsalva.heartComponent.ventricles.RV_wall.contractilityFraction
  -1       7                       0                       0                
   1   280   # valsalva.heartComponent.ventricles.RV_wall.vmax
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # valsalva.heartComponent.ra.zpv
  -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
   1   280   # valsalva.heartComponent.ra.volume_min
  -1       1                       0                       0                
@@ -30236,6 +29375,8 @@ double initialValue(10635,6)
   1   280   # valsalva.heartComponent.ra.V0_col
  -1      10                       0                       0                
   1   280   # valsalva.heartComponent.ra.s
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # valsalva.heartComponent.la.zpv
  -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
   1   280   # valsalva.heartComponent.la.volume_min
  -1       1                       0                       0                
@@ -30473,6 +29614,8 @@ double initialValue(10635,6)
   0       0                       0                       0                
   6   320   # valsalva.renal_capillary
   0       0                       0                       0                
+  6   320   # valsalva.exercised_capillary
+  0       0                       0                       0                
   6   320   # valsalva.CO
   0       0                       0                       0                
   6   320   # valsalva.carotid_pressure
@@ -30564,6 +29707,8 @@ double initialValue(10635,6)
   6  1344   # valsalva.internal.ascending_aorta
   0       0                       0                       0                
   6  1344   # valsalva.internal.renal_capillary
+  0       0                       0                       0                
+  6  1344   # valsalva.internal.exercised_capillary
   0       0                       0                       0                
   6  1344   # valsalva.internal.CO
   0       0                       0                       0                
@@ -31148,136 +30293,6 @@ double initialValue(10635,6)
   1  1306   # valsalva.fmi_xVrs[266]
  -1  3.3554698000000000E+07       0                       0                
   1  1306   # valsalva.fmi_xVrs[267]
- -1  3.3554699000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[268]
- -1  3.3554700000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[269]
- -1  3.3554701000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[270]
- -1  3.3554702000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[271]
- -1  3.3554703000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[272]
- -1  3.3554704000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[273]
- -1  3.3554705000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[274]
- -1  3.3554706000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[275]
- -1  3.3554707000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[276]
- -1  3.3554708000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[277]
- -1  3.3554709000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[278]
- -1  3.3554710000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[279]
- -1  3.3554711000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[280]
- -1  3.3554712000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[281]
- -1  3.3554713000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[282]
- -1  3.3554714000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[283]
- -1  3.3554715000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[284]
- -1  3.3554716000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[285]
- -1  3.3554717000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[286]
- -1  3.3554718000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[287]
- -1  3.3554719000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[288]
- -1  3.3554720000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[289]
- -1  3.3554721000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[290]
- -1  3.3554722000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[291]
- -1  3.3554723000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[292]
- -1  3.3554724000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[293]
- -1  3.3554725000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[294]
- -1  3.3554726000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[295]
- -1  3.3554727000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[296]
- -1  3.3554728000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[297]
- -1  3.3554729000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[298]
- -1  3.3554730000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[299]
- -1  3.3554731000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[300]
- -1  3.3554732000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[301]
- -1  3.3554733000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[302]
- -1  3.3554734000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[303]
- -1  3.3554735000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[304]
- -1  3.3554736000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[305]
- -1  3.3554737000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[306]
- -1  3.3554738000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[307]
- -1  3.3554739000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[308]
- -1  3.3554740000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[309]
- -1  3.3554741000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[310]
- -1  3.3554742000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[311]
- -1  3.3554743000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[312]
- -1  3.3554744000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[313]
- -1  3.3554745000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[314]
- -1  3.3554746000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[315]
- -1  3.3554747000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[316]
- -1  3.3554748000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[317]
- -1  3.3554749000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[318]
- -1  3.3554750000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[319]
- -1  3.3554751000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[320]
- -1  3.3554752000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[321]
- -1  3.3554753000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[322]
- -1  3.3554754000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[323]
- -1  3.3554755000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[324]
- -1  3.3554756000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[325]
- -1  3.3554757000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[326]
- -1  3.3554758000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[327]
- -1  3.3554759000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[328]
- -1  3.3554760000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[329]
- -1  3.3554761000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[330]
- -1  3.3554762000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[331]
- -1  3.3554763000000000E+07       0                       0                
-  1  1306   # valsalva.fmi_xVrs[332]
  -1  5.8720256000000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[1]
  -1  5.8720256100000000E+08       0                       0                
@@ -31780,7 +30795,7 @@ double initialValue(10635,6)
   1  1306   # valsalva.fmi_dxVrs[250]
  -1  5.8720281000000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[251]
- -1  5.8720281100000000E+08       0                       0                
+ -1  3.1876735500000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[252]
  -1  5.8720281200000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[253]
@@ -31812,136 +30827,6 @@ double initialValue(10635,6)
   1  1306   # valsalva.fmi_dxVrs[266]
  -1  5.8720282600000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[267]
- -1  5.8720282700000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[268]
- -1  5.8720282800000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[269]
- -1  5.8720282900000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[270]
- -1  5.8720283000000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[271]
- -1  5.8720283100000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[272]
- -1  5.8720283200000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[273]
- -1  5.8720283300000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[274]
- -1  5.8720283400000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[275]
- -1  5.8720283500000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[276]
- -1  5.8720283600000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[277]
- -1  5.8720283700000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[278]
- -1  5.8720283800000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[279]
- -1  5.8720283900000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[280]
- -1  5.8720284000000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[281]
- -1  5.8720284100000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[282]
- -1  5.8720284200000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[283]
- -1  5.8720284300000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[284]
- -1  5.8720284400000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[285]
- -1  5.8720284500000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[286]
- -1  5.8720284600000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[287]
- -1  5.8720284700000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[288]
- -1  5.8720284800000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[289]
- -1  5.8720284900000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[290]
- -1  5.8720285000000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[291]
- -1  5.8720285100000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[292]
- -1  5.8720285200000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[293]
- -1  5.8720285300000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[294]
- -1  5.8720285400000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[295]
- -1  5.8720285500000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[296]
- -1  5.8720285600000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[297]
- -1  5.8720285700000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[298]
- -1  5.8720285800000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[299]
- -1  5.8720285900000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[300]
- -1  5.8720286000000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[301]
- -1  5.8720286100000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[302]
- -1  5.8720286200000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[303]
- -1  5.8720286300000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[304]
- -1  5.8720286400000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[305]
- -1  5.8720286500000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[306]
- -1  5.8720286600000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[307]
- -1  5.8720286700000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[308]
- -1  5.8720286800000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[309]
- -1  5.8720286900000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[310]
- -1  5.8720287000000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[311]
- -1  5.8720287100000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[312]
- -1  5.8720287200000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[313]
- -1  5.8720287300000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[314]
- -1  5.8720287400000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[315]
- -1  5.8720287500000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[316]
- -1  5.8720287600000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[317]
- -1  3.1876742100000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[318]
- -1  5.8720287800000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[319]
- -1  5.8720287900000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[320]
- -1  5.8720288000000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[321]
- -1  5.8720288100000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[322]
- -1  5.8720288200000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[323]
- -1  5.8720288300000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[324]
- -1  5.8720288400000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[325]
- -1  5.8720288500000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[326]
- -1  5.8720288600000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[327]
- -1  5.8720288700000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[328]
- -1  5.8720288800000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[329]
- -1  5.8720288900000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[330]
- -1  5.8720289000000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[331]
- -1  5.8720289100000000E+08       0                       0                
-  1  1306   # valsalva.fmi_dxVrs[332]
  -1  3.3554432000000000E+08       0                       0                
   1  1306   # valsalva.fmi_yVrs[1]
  -1  3.3554432100000000E+08       0                       0                
@@ -31988,9 +30873,9 @@ double initialValue(10635,6)
   1  1306   # valsalva.fmi_yVrs[22]
  -1  3.3554434200000000E+08       0                       0                
   1  1306   # valsalva.fmi_yVrs[23]
- -1  6.7108887000000000E+07       0                       0                
+ -1  3.3554434300000000E+08       0                       0                
   1  1306   # valsalva.fmi_yVrs[24]
- -1  3.3554434400000000E+08       0                       0                
+ -1  6.7108888000000000E+07       0                       0                
   1  1306   # valsalva.fmi_yVrs[25]
  -1  3.3554434500000000E+08       0                       0                
   1  1306   # valsalva.fmi_yVrs[26]
@@ -32004,6 +30889,8 @@ double initialValue(10635,6)
   1  1306   # valsalva.fmi_yVrs[30]
  -1  3.3554435000000000E+08       0                       0                
   1  1306   # valsalva.fmi_yVrs[31]
+ -1  3.3554435100000000E+08       0                       0                
+  1  1306   # valsalva.fmi_yVrs[32]
   0       0                       0                       0                
   6   256   # steps
  -1     120                       0                       0                
@@ -32056,7 +30943,7 @@ double initialValue(10635,6)
 #   Which variables will be important for initialization and continue
 #   is indicated by value in column 6 & dsStartMasks.
 #
-char initialDescription(10635,186)
+char initialDescription(10264,186)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -32067,7 +30954,6 @@ maximal heart rate [Hz|1/min]
 Du Bois formula for body surface area
 Use nominal pressure to initialize vessel volume. False to use volume directly [:#(type=Boolean)]
 Volume adjustment [m3|ml]
-Maximal sympathetic activation during exercise [1|%]
 Open valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
 Resistance of left atrium [(Pa.s)/m3|(mmHg.s)/ml]
 Resistance of the right atrium [(Pa.s)/m3|(dyn.s)/cm5]
@@ -32099,13 +30985,13 @@ Resting sarcomere length [um] []
 
 
 fraction of thoracic pressure in the abdominal cavity [1|%]
-Systemic total peripheral resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Limit Pext in large arteries, tissues and veins, when they are already empty [:#(type=Boolean)]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
 Change compliance of large arteries by phi and exercise [:#(type=Boolean)]
 Effect fraction of arterial vasoconstriction on arterial compliance [1|%]
 Lenghten the body to observe some reaction to tilt [1|%]
+Systemic total peripheral resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Nominal arterial pressure for initialization and calculation of arterioles resistance [Pa|mmHg]
 Tissues and small arteries and veins nominal pressure. Used for calculation of arteriole and venule resistances and tissues compliance [Pa|mmHg]
 Venous pressure used for initialization and calculation of tissue venules resistances [Pa|mmHg]
@@ -32120,10 +31006,6 @@ Use V_n dependency on phi (instead of V_u and V_max as used in Pstras) [:#(type=
 Fraction of V_Max, that sets the point for changing exponential to linear PV characteristics. E.g. V_max = 500ml, frac = 1% > exponential up to 495ml, linear after [1|%]
 Effect of sympathetic activation (phi) on tissue's compliance [1|%]
 Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv) [1|%]
-Exercise effect factor on tissue resistance [1|1]
-Effect of exercise induced relaxation on tissue compliance [1|%]
-Pumping factor simulating contraction of large veins [1|%]
-Effect of adenosine on total peripheral resistance [1|%]
 Use nonlinear compliance model in all large veins [:#(type=Boolean)]
 Venous linear compliance relative to v0 [Pa/m6], only if using linear veins [Pa]
 Venous zero pressure volume [m3], only if using linear veins [1]
@@ -32144,13 +31026,12 @@ Ignore viscoelastic resistance in all large veins (negligible, but computation-h
 [m-1]
 [J.s.m-3]
 [J.s2.m-5]
-Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output from pulmonary circulation, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
-Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
-Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
-Dummy parameter not bound anywhere
+Exercise level [1|%]
+Exercise effect factor on arterial tissue resistance [1|1]
+Exercise effect factor on venous tissue resistance [1|%]
+Effect of exercise induced relaxation on tissue compliance [1|%]
+Pumping factor simulating contraction of large veins [1|%]
+Effect of adenosine on total peripheral resistance [1|%]
 Delay between phi and HR [s|min]
 Use absolute distention term instead being relative to pulse pressure only [:#(type=Boolean)]
 Relative absolute term multiplicator - not used in pure pulse-pressure- sensitive abroreflex
@@ -32174,6 +31055,13 @@ Flow at which the resistance is halved [m3/s|l/min]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp). Not used when pulm_q_nom_maxq is used
 Pulmonary veins viscoelastic resistance [(Pa.s)/m3|(mmHg.min)/ml]
 Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
+Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from pulmonary circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
+Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
+Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
+Dummy parameter not bound anywhere
 A fraction of venous nominal diameter which creates ZPV for linear veins [1|%]
 A fraction of nominal C [1|%]
 
@@ -32192,7 +31080,6 @@ Resting heart rate (at phi0) [s-1|1/min]
 maximal heart rate [s-1|1/min]
 [kg/m2]
 Volume adjustment [m3|ml]
-Maximal sympathetic activation during exercise [1|%]
 Open valve resistance [(Pa.s)/m3]
 Resistance of left atrium [(Pa.s)/m3]
 Viscoelastic resistance of the atria [(Pa.s)/m3]
@@ -32223,11 +31110,11 @@ Resting sarcomere length [um] []
 
 
 fraction of thoracic pressure in the abdominal cavity [1|%]
-Systemic total peripheral resistance [(Pa.s)/m3]
-Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
 Effect fraction of arterial vasoconstriction on arterial compliance [1|%]
 Lenghten the body to observe some reaction to tilt [1|%]
+Systemic total peripheral resistance [(Pa.s)/m3]
+Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance [m3|ml]
 Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances. [m3/s|ml/min]
 Factor affecting arterioles resistance in tissues [1|%]
@@ -32235,10 +31122,6 @@ Exponential factor affecting venules resistance [1|%]
 Use V_n dependency on phi (instead of V_u and V_max as used in Pstras) [:#(type=Boolean)]
 Fraction of V_Max, that sets the point for changing exponential to linear PV characteristics. E.g. V_max = 500ml, frac = 1% > exponential up to 495ml, linear after [1|%]
 Effect of sympathetic activation (phi) on tissue's compliance [1|%]
-Exercise effect factor on tissue resistance [1|1]
-Effect of exercise induced relaxation on tissue compliance [1|%]
-Pumping factor simulating contraction of large veins [1|%]
-Effect of adenosine on total peripheral resistance [1|%]
 Venous linear compliance relative to v0 [Pa/m6], only if using linear veins [Pa]
 Venous zero pressure volume [m3], only if using linear veins
 Use venoconstriction in all large veins [:#(type=Boolean)]
@@ -32256,13 +31139,12 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 [m-1]
 [J.s.m-3]
 [J.s2.m-5]
-Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output from pulmonary circulation, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
-Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
-Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
-Dummy parameter not bound anywhere
+Exercise level [1|%]
+Exercise effect factor on arterial tissue resistance [1|1]
+Exercise effect factor on venous tissue resistance [1|%]
+Effect of exercise induced relaxation on tissue compliance [1|%]
+Pumping factor simulating contraction of large veins [1|%]
+Effect of adenosine on total peripheral resistance [1|%]
 Delay between phi and HR [s|min]
 Relative absolute term multiplicator - not used in pure pulse-pressure- sensitive abroreflex
 Time constant of baroreflex moving setpoint [s|s]
@@ -32284,6 +31166,13 @@ Flow at which the resistance is halved [m3/s|l/min]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp). Not used when pulm_q_nom_maxq is used
 Pulmonary veins viscoelastic resistance [(Pa.s)/m3]
 Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
+Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from pulmonary circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
+Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
+Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
+Dummy parameter not bound anywhere
 A fraction of venous nominal diameter which creates ZPV for linear veins [|%]
 A fraction of nominal C [|%]
 
@@ -34820,11 +33709,13 @@ Sarcomere shortening velocity with zero load micron/sec
 Length of isometrically stressed series elastic element [micron] []
 [|%]
 Sarcomere shortening velocity with zero load micron/sec
+Zero pressure volume [m3|ml]
 Volume limiter for external pressures [m3|ml]
 [|%]
 Enab;e nonlinear collagen force, effectively limiting atrial volume [:#(type=Boolean)]
 minimal volume to produce collagen pressure [m3|ml]
 exponential steepness of stiffness
+Zero pressure volume [m3|ml]
 Volume limiter for external pressures [m3|ml]
 [|%]
 Enab;e nonlinear collagen force, effectively limiting atrial volume [:#(type=Boolean)]
@@ -34905,6 +33796,7 @@ Output y = offset for time < startTime [s]
 [Pa]
 PRessure in ascending aorta [Pa]
 [Pa]
+[Pa]
 [m3/s|l/min]
 [Pa]
 [Pa]
@@ -34951,6 +33843,7 @@ relative tolerance for the internal solver of the fmu
 [Pa]
 [Pa]
 [Pa]
+[Pa]
 [m3/s]
 [Pa]
 [Pa]
@@ -34976,135 +33869,6 @@ relative tolerance for the internal solver of the fmu
 
 [Pa]
 [Pa]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
@@ -35681,7 +34445,6 @@ Resting heart rate (at phi0) [s-1|1/min]
 maximal heart rate [s-1|1/min]
 [kg/m2]
 Volume adjustment [m3|ml]
-Maximal sympathetic activation during exercise [1|%]
 Open valve resistance [(Pa.s)/m3]
 Resistance of left atrium [(Pa.s)/m3]
 Viscoelastic resistance of the atria [(Pa.s)/m3]
@@ -35712,11 +34475,11 @@ Resting sarcomere length [um] []
 
 
 fraction of thoracic pressure in the abdominal cavity [1|%]
-Systemic total peripheral resistance [(Pa.s)/m3]
-Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
 Effect fraction of arterial vasoconstriction on arterial compliance [1|%]
 Lenghten the body to observe some reaction to tilt [1|%]
+Systemic total peripheral resistance [(Pa.s)/m3]
+Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance [m3|ml]
 Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances. [m3/s|ml/min]
 Factor affecting arterioles resistance in tissues [1|%]
@@ -35724,10 +34487,6 @@ Exponential factor affecting venules resistance [1|%]
 Use V_n dependency on phi (instead of V_u and V_max as used in Pstras) [:#(type=Boolean)]
 Fraction of V_Max, that sets the point for changing exponential to linear PV characteristics. E.g. V_max = 500ml, frac = 1% > exponential up to 495ml, linear after [1|%]
 Effect of sympathetic activation (phi) on tissue's compliance [1|%]
-Exercise effect factor on tissue resistance [1|1]
-Effect of exercise induced relaxation on tissue compliance [1|%]
-Pumping factor simulating contraction of large veins [1|%]
-Effect of adenosine on total peripheral resistance [1|%]
 Venous linear compliance relative to v0 [Pa/m6], only if using linear veins [Pa]
 Venous zero pressure volume [m3], only if using linear veins
 Use venoconstriction in all large veins [:#(type=Boolean)]
@@ -35745,13 +34504,12 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 [m-1]
 [J.s.m-3]
 [J.s2.m-5]
-Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output from pulmonary circulation, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
-Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
-Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
-Dummy parameter not bound anywhere
+Exercise level [1|%]
+Exercise effect factor on arterial tissue resistance [1|1]
+Exercise effect factor on venous tissue resistance [1|%]
+Effect of exercise induced relaxation on tissue compliance [1|%]
+Pumping factor simulating contraction of large veins [1|%]
+Effect of adenosine on total peripheral resistance [1|%]
 Delay between phi and HR [s|min]
 Relative absolute term multiplicator - not used in pure pulse-pressure- sensitive abroreflex
 Time constant of baroreflex moving setpoint [s|s]
@@ -35773,6 +34531,13 @@ Flow at which the resistance is halved [m3/s|l/min]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp). Not used when pulm_q_nom_maxq is used
 Pulmonary veins viscoelastic resistance [(Pa.s)/m3]
 Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
+Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from pulmonary circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
+Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
+Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
+Dummy parameter not bound anywhere
 A fraction of venous nominal diameter which creates ZPV for linear veins [|%]
 A fraction of nominal C [|%]
 
@@ -38309,11 +37074,13 @@ Sarcomere shortening velocity with zero load micron/sec
 Length of isometrically stressed series elastic element [micron] []
 [|%]
 Sarcomere shortening velocity with zero load micron/sec
+Zero pressure volume [m3|ml]
 Volume limiter for external pressures [m3|ml]
 [|%]
 Enab;e nonlinear collagen force, effectively limiting atrial volume [:#(type=Boolean)]
 minimal volume to produce collagen pressure [m3|ml]
 exponential steepness of stiffness
+Zero pressure volume [m3|ml]
 Volume limiter for external pressures [m3|ml]
 [|%]
 Enab;e nonlinear collagen force, effectively limiting atrial volume [:#(type=Boolean)]
@@ -38400,6 +37167,7 @@ Constant output value
 [Pa]
 PRessure in ascending aorta [Pa]
 [Pa]
+[Pa]
 [m3/s|l/min]
 [Pa]
 [Pa]
@@ -38446,6 +37214,7 @@ relative tolerance for the internal solver of the fmu
 [Pa]
 [Pa]
 [Pa]
+[Pa]
 [m3/s]
 [Pa]
 [Pa]
@@ -38471,135 +37240,6 @@ relative tolerance for the internal solver of the fmu
 
 [Pa]
 [Pa]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
@@ -39174,7 +37814,6 @@ Resting heart rate (at phi0) [s-1|1/min]
 maximal heart rate [s-1|1/min]
 [kg/m2]
 Volume adjustment [m3|ml]
-Maximal sympathetic activation during exercise [1|%]
 Open valve resistance [(Pa.s)/m3]
 Resistance of left atrium [(Pa.s)/m3]
 Viscoelastic resistance of the atria [(Pa.s)/m3]
@@ -39205,11 +37844,11 @@ Resting sarcomere length [um] []
 
 
 fraction of thoracic pressure in the abdominal cavity [1|%]
-Systemic total peripheral resistance [(Pa.s)/m3]
-Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
 Effect fraction of arterial vasoconstriction on arterial compliance [1|%]
 Lenghten the body to observe some reaction to tilt [1|%]
+Systemic total peripheral resistance [(Pa.s)/m3]
+Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
 Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance [m3|ml]
 Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances. [m3/s|ml/min]
 Factor affecting arterioles resistance in tissues [1|%]
@@ -39217,10 +37856,6 @@ Exponential factor affecting venules resistance [1|%]
 Use V_n dependency on phi (instead of V_u and V_max as used in Pstras) [:#(type=Boolean)]
 Fraction of V_Max, that sets the point for changing exponential to linear PV characteristics. E.g. V_max = 500ml, frac = 1% > exponential up to 495ml, linear after [1|%]
 Effect of sympathetic activation (phi) on tissue's compliance [1|%]
-Exercise effect factor on tissue resistance [1|1]
-Effect of exercise induced relaxation on tissue compliance [1|%]
-Pumping factor simulating contraction of large veins [1|%]
-Effect of adenosine on total peripheral resistance [1|%]
 Venous linear compliance relative to v0 [Pa/m6], only if using linear veins [Pa]
 Venous zero pressure volume [m3], only if using linear veins
 Use venoconstriction in all large veins [:#(type=Boolean)]
@@ -39238,13 +37873,12 @@ Venous diameter enlargement to correspond to the arterial side [1|%]
 [m-1]
 [J.s.m-3]
 [J.s2.m-5]
-Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output from pulmonary circulation, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
-Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
-Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
-Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
-Dummy parameter not bound anywhere
+Exercise level [1|%]
+Exercise effect factor on arterial tissue resistance [1|1]
+Exercise effect factor on venous tissue resistance [1|%]
+Effect of exercise induced relaxation on tissue compliance [1|%]
+Pumping factor simulating contraction of large veins [1|%]
+Effect of adenosine on total peripheral resistance [1|%]
 Delay between phi and HR [s|min]
 Relative absolute term multiplicator - not used in pure pulse-pressure- sensitive abroreflex
 Time constant of baroreflex moving setpoint [s|s]
@@ -39266,6 +37900,13 @@ Flow at which the resistance is halved [m3/s|l/min]
 Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp). Not used when pulm_q_nom_maxq is used
 Pulmonary veins viscoelastic resistance [(Pa.s)/m3]
 Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
+Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from pulmonary circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
+Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
+Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
+Dummy parameter not bound anywhere
 A fraction of venous nominal diameter which creates ZPV for linear veins [|%]
 A fraction of nominal C [|%]
 
@@ -41800,11 +40441,13 @@ Sarcomere shortening velocity with zero load micron/sec
 Length of isometrically stressed series elastic element [micron] []
 [|%]
 Sarcomere shortening velocity with zero load micron/sec
+Zero pressure volume [m3|ml]
 Volume limiter for external pressures [m3|ml]
 [|%]
 Enab;e nonlinear collagen force, effectively limiting atrial volume [:#(type=Boolean)]
 minimal volume to produce collagen pressure [m3|ml]
 exponential steepness of stiffness
+Zero pressure volume [m3|ml]
 Volume limiter for external pressures [m3|ml]
 [|%]
 Enab;e nonlinear collagen force, effectively limiting atrial volume [:#(type=Boolean)]
@@ -41923,6 +40566,7 @@ Gain of input signal 2
 [Pa]
 PRessure in ascending aorta [Pa]
 [Pa]
+[Pa]
 [m3/s|l/min]
 [Pa]
 [Pa]
@@ -41969,6 +40613,7 @@ relative tolerance for the internal solver of the fmu
 [Pa]
 [Pa]
 [Pa]
+[Pa]
 [m3/s]
 [Pa]
 [Pa]
@@ -41994,135 +40639,6 @@ relative tolerance for the internal solver of the fmu
 
 [Pa]
 [Pa]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
-[:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
