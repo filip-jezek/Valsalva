@@ -50446,7 +50446,7 @@ P_hs_plus_dist"),
         model CVS_StepVolumeOverload "Step-up volume overload test"
           extends ADAN_main.SystemicTree.Identification.Results.CVS_EDPVR(
                                                             settings(V_PV_init=
-                  -0.0003), useAutonomousPhi(y=true));
+                  -0.0003), useAutonomousPhi(y=false));
           Physiolibrary.Hydraulic.Sources.UnlimitedPump
                                                   unlimitedPump(useSolutionFlowInput=true,
               SolutionFlow(displayUnit="ml/min") = 1e-06)
