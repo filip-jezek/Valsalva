@@ -351,21 +351,29 @@ def calculateEA(q_mv,cc, time, interval, A_length = 0.2):
     
     # find index of time + 0.2
     A_end_i = numpy.argmax(time > time[A_start_i] + A_length)
+    A_i = numpy.argmax(q_mv[A_start_i:A_end_i]) + A_start_i
+    A = q_mv[A_i]
+    # find the saddle - its between start of the cycle and maximal A flow
+    q_sad = numpy.min(q_mv[A_start_i:A_i])
 
     # find the max peak in the interval - that is the E peak
     # E_max_i = numpy.argmax(q_mv[interval]) + interval[0]
-    E_max = numpy.max(q_mv[interval])
+    E = numpy.max(q_mv[interval])
 
-    # E wave
-    A = numpy.max(q_mv[A_start_i:A_end_i])
+
 
     # ratio
     if A != 0:
-        EA = E_max/A
+        EA = E/A
     else:
         EA = 0
+    
+    if q_sad != 0:
+        As = A/q_sad
+    else:
+        As = 0
 
-    return (E_max, A, EA)
+    return (EA, As)
 
 def calculateAlternativeCO(vars_set, interval):
     """ Workaround for when the CO is not available"""

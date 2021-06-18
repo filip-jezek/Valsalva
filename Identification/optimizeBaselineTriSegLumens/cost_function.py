@@ -91,7 +91,7 @@ def getObjectives(vars_set):
     intervalQMV = fun_lib.findInterval(time[-1] - 2, time[-1] -1, time)
     # (q_mv_Ppassive, q_mv_Patrial) = fun_lib.calculateQ_MV(vars_set['q_mv'], time, intervalQMV)
     # (q_mv_Ppassive, q_mv_Patrial) = fun_lib.calculateQ_MV(vars_set['q_mv'], time, intervalQMV)
-    (q_mv_Ppassive, q_mv_Patrial, ea) = fun_lib.calculateEA(vars_set['q_mv'],vars_set['cardiac_cycle'], time, intervalQMV)
+    (E_A, A_s) = fun_lib.calculateEA(vars_set['q_mv'],vars_set['cardiac_cycle'], time, intervalQMV)
     # vla_peak_frac = q_mv_Ppassive/q_mv_Patrial
     # (atrial_kick, q_mv_saddle) = fun_lib.calculateQdot_mv(vars_set['V_LV'], vars_set['q_mv'], time, intervalQMV)
     # peak pressure drop on aortic valve
@@ -109,12 +109,13 @@ def getObjectives(vars_set):
     # build costs
     ov = [  ('BPs', max(vars_set['brachial_pressure'][interval])/mmHg2SI, 120, None, 1),
             ('BPd', min(vars_set['brachial_pressure'][interval])/mmHg2SI, 80, None, 1),
-            ('EDV', numpy.max(vars_set['V_LV'][interval])/ml2SI, 150, None, 3),
+            ('EDV', numpy.max(vars_set['V_LV'][interval])/ml2SI, 150, None, 5),
             ('ESV', numpy.min(vars_set['V_LV'][interval])/ml2SI, 60, None, 3),
             ('ESV_la', numpy.min(vars_set['V_la'][interval])/ml2SI, 12, None, 5),
             ('EDV_la', numpy.max(vars_set['V_la'][interval])/ml2SI, 41, None, 5),
             ('dp_av', dp_av/mmHg2SI, None, [-5, 5], 0.1),
-            ('E/A', ea, 1.7, None, 0.5),
+            ('E/A', E_A, 1.7, None, 0.5),
+            ('E/S', A_s, 2, None, 1.5),
             # ('Q_MV_f', vla_peak_frac*1, None, [1.5, 2], 0),
             # ('Qdot_mv', atrial_kick*1, None, [0.2, 0.3], 0),
             # ('q_mv_sad', q_mv_saddle*100, None, [0, q_mv_Patrial*20], 0),

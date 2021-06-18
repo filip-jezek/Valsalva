@@ -21,8 +21,9 @@ base_model_full_path = 'ADAN_main.SystemicTree.Identification.Results.OlufsenTri
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
-steadyStateAt = 1199.5
-mat_file_path = 'settings.baro_f1 = 0.00346.mat' # or none to detect automatically
+steadyStateAt = 600
+resetVPV = True
+mat_file_path = 'settings.baro_f1 = 0.003425.mat' # or none to detect automatically
 
 # get the main and path
 if '.' in base_model_full_path:
@@ -42,6 +43,10 @@ lines = (line for line in m if line[0].rsplit('.', 1)[-1] not in exclude_filter)
 # Build modelica Object Tree
 mc_tree = mc.ModelicaClass.BuildObjectTree(lines, root=base_model)
 
+if resetVPV:
+    mc_tree.buildChildTree([['settings.V_PV_init', 'param']])
+    vpvn = mc_tree.findNode('settings.V_PV_init')
+    vpvn.start_val = 0
 
 if mat_file_path is None:
     mat_file_path = relative_folder + base_model + '.mat'
