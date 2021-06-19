@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(10264,109)
+char initialName(10263,109)
 settings.phi0
 settings.height
 settings.weight
@@ -2947,7 +2947,6 @@ exercise.condHeartPhi.phi_gain
 exercise.condHeartPhi.add3_1.k1
 exercise.condHeartPhi.add3_1.k2
 exercise.Exercise.duration
-exercise.Exercise.offset
 exercise.Exercise.startTime
 exercise.brachial_pressure
 exercise.brachial_pressure_mean
@@ -10368,7 +10367,7 @@ steps
 endTime
 stepInterval
 
-double initialValue(10264,6)
+double initialValue(10263,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -16011,7 +16010,7 @@ double initialValue(10264,6)
   1   280   # exercise.phi_fixed.period
  -1       1                       0                       0                
   1   282   # exercise.phi_fixed.nperiod
- -1       0                       0                       0                
+ -1      30                       0                       0                
   1   280   # exercise.phi_fixed.startTime
  -1       0                       0                       0                
   1   281   # exercise.condHRPhi.disconnected
@@ -16057,9 +16056,7 @@ double initialValue(10264,6)
   1   280   # exercise.condHeartPhi.add3_1.k2
  -1       1                       0                 1.0000000000000000E+100
   1   280   # exercise.Exercise.duration
- -1       0                       0                       0                
-  1   280   # exercise.Exercise.offset
- -1       0                       0                       0                
+ -1      30                       0                       0                
   1   280   # exercise.Exercise.startTime
   0       0                       0                       0                
   6   320   # exercise.brachial_pressure
@@ -16129,7 +16126,7 @@ double initialValue(10264,6)
   1   281   # exercise.fmi_loggingOn
  -1       0                       0                       0                
   1   280   # exercise.fmi_StartTime
- -1      30                       0                       0                
+ -1      60                       0                       0                
   1   280   # exercise.fmi_StopTime
   0       0                       0                       0                
   6   256   # exercise.fmi_NumberOfSteps
@@ -30943,7 +30940,7 @@ double initialValue(10264,6)
 #   Which variables will be important for initialization and continue
 #   is indicated by value in column 6 & dsStartMasks.
 #
-char initialDescription(10264,186)
+char initialDescription(10263,186)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -33788,7 +33785,6 @@ Phi Gain multiplier
 Gain of input signal 1
 Gain of input signal 2
 Duration of ramp (= 0.0 gives a Step) [s]
-Offset of output signal y
 Output y = offset for time < startTime [s]
 [Pa]
 [Pa]
