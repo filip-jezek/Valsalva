@@ -41,7 +41,7 @@ def plotObjectives(vars_set, interval, objectives):
 
 def getObjectives(vars_set):
 
-    fun_lib.checkSimulationLength(vars_set['time'][-1],20, penalty=1000)
+    fun_lib.checkSimulationLength(vars_set['time'][-1],60, penalty=1000)
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
     # Pa = vars_set['Pa']
@@ -51,8 +51,8 @@ def getObjectives(vars_set):
     # HR is system input (change in phi) from 70 to 89
 
     # t = vars_set['time'][-1]
-    t = 20
-    interval = fun_lib.findInterval(t-5, t, vars_set['time'])
+    t = 30
+    interval = fun_lib.findInterval(t-3, t, vars_set['time'])
 
     BPs_target = 194.4*mmHg2SI
     BPd_target = 88*mmHg2SI
@@ -67,19 +67,23 @@ def getObjectives(vars_set):
     
     Ppad_target = 15*mmHg2SI # (Kovacs Eur Respir J 2009)
 
+    tm = 60
+    intervalm = fun_lib.findInterval(tm-3, tm, vars_set['time'])
+    co_max = fun_lib.calculateAlternativeCO(vars_set, intervalm)
     # build costs
     ov = [  ('BPs', max(vars_set['brachial_pressure'][interval])/mmHg2SI, 194.4, None, 3),
             ('BPd', min(vars_set['brachial_pressure'][interval])/mmHg2SI, 81.16, None, 10),
             # ('EDV', max(vars_set['V_LV'][interval]), EDV_target, None, 1),
             # ('ESV', min(vars_set['V_LV'][interval]), ESV_target, None, 1e-3),
             ('CO', co/lpm2SI, 16.17, None, 0.1),
+            ('CO_max', co_max/lpm2SI, 20.6, None, 1),
             ('Ts', max(vars_set['TEjection'][interval]), 0.196, None, .05),
             # ('Td', max(vars_set['TFilling'][interval]), 0.18, [0.18*0.5, 0.18*1.5], 1e-4),
             ('EF', fun_lib.calculateEF(vars_set['V_LV'][interval]), 0.78, None, .1),
             # ('HR', numpy.mean(vars_set['HR'][interval])*60, 154, None, 0, 60),
             # ('Ppa', numpy.mean(vars_set['P_pa'][interval]), Ppa_targ)et, None, .1),
             # ('Ppv', numpy.mean(vars_set['P_pv'][interval]), Ppv_target, None, .1),
-            # ('Ppa_s', numpy.max(vars_set['P_pa'][interval]), Ppas_target, None, 0.1, 1/mmHg2SI),
+            ('Ppa_s', numpy.max(vars_set['P_pa'][interval]), Ppas_target, None, 10),
             # ('Ppa_d', numpy.min(vars_set['P_pa'][interval]), Ppad_target, None, 0.1, 1/mmHg2SI),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval])/mmHg2SI, Ppv_target, None, 2),
             ('Pcap', numpy.mean(vars_set['exercised_capillary'][interval])/mmHg2SI, None, [10, 40], 10),
