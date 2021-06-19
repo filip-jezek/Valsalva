@@ -51813,11 +51813,6 @@ P_hs_plus_dist"),
             offset=settings.chi_phi*(1 - settings.phi0) + settings.phi0,
             startTime=30),
           useAutonomousPhi(y=false),
-          settings(
-            tissues_chi_Ra =          1.331250e+01,
-            tissues_chi_Rv =          5.062500e+00,
-            tissues_chi_C =          5.625000e-02,
-            pulm_q_nom_maxq =          2.000001e-04),
           heartComponent(aorticValve(_Ron(displayUnit="(mmHg.s)/ml")=
                 1333223.87415)));
 
@@ -51919,7 +51914,7 @@ P_hs_plus_dist"),
             increment=0.1,
             maxVal=1),
           useAutonomousPhi(y=true),
-          phi_fixed(nperiod=0));
+          phi_fixed(nperiod=0, offset=settings.phi0));
         Modelica.Blocks.Math.Add add
           annotation (Placement(transformation(extent={{-18,38},{2,58}})));
         Modelica.Blocks.Math.Gain gain(k=0.75)
@@ -56635,7 +56630,7 @@ P_hs_plus_dist"),
 
         model CVS_ExStepping "Gradually increased exercise"
           extends Exercise.CVS_Exercise_stepping(settings(
-              veins_delayed_activation=true,
+              veins_delayed_activation=false,
               veins_activation_tau=0.1,
               veins_relaxation_tau=0.1));
         end CVS_ExStepping;
