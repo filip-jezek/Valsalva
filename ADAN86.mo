@@ -830,8 +830,8 @@ type"),       Text(
         parameter Real uMin=-uMax "Lower limits of input signals";
         Modelica.Blocks.Math.Gain         gain(k=phi_gain)
           annotation (Placement(transformation(extent={{-90,-10},{-70,10}})));
-        Modelica.Blocks.Sources.Constant const_shiftOffset(k=const_offset)
-                    if not UseAdditionalInput
+        Modelica.Blocks.Sources.Constant const_shiftOffset(k=const_offset) if
+                       not UseAdditionalInput
           annotation (Placement(transformation(extent={{-98,24},{-82,38}})));
         parameter Real phi0=0.25 "Default phi0";
         parameter Real phi_gain=1 "Phi Gain multiplier";
@@ -3712,8 +3712,8 @@ type"),       Text(
           Physiolibrary.Types.RealIO.FractionInput adenosine if UseAdenosineInput
             "Adenosine dose"
             annotation (Placement(transformation(extent={{-120,20},{-80,60}})));
-          Physiolibrary.Types.Constants.FractionConst fraction(k=0)
-                                                               if not UseAdenosineInput
+          Physiolibrary.Types.Constants.FractionConst fraction(k=0) if
+                                                                  not UseAdenosineInput
             annotation (Placement(transformation(extent={{-90,46},{-82,54}})));
 
           replaceable Physiolibrary.Hydraulic.Components.Resistor R_pv_visc(
@@ -3733,8 +3733,8 @@ type"),       Text(
                 origin={-60,-18})));
           Physiolibrary.Blocks.Factors.Normalization normalization(enabled=true)
             annotation (Placement(transformation(extent={{-10,10},{10,30}})));
-          Physiolibrary.Types.RealIO.FractionInput conductanceFraction
-         if UseCondFracInput "Variable change to baseline conductance"
+          Physiolibrary.Types.RealIO.FractionInput conductanceFraction if
+            UseCondFracInput "Variable change to baseline conductance"
             annotation (Placement(transformation(extent={{-120,0},{-80,40}})));
           Physiolibrary.Types.Constants.FractionConst conductance0(k=1) if not
             UseCondFracInput "Normal conductance fraction"
@@ -3922,8 +3922,8 @@ type"),       Text(
           Physiolibrary.Types.RealIO.FractionInput adenosine if UseAdenosineInput
             "Adenosine dose"
             annotation (Placement(transformation(extent={{-120,20},{-80,60}})));
-          Physiolibrary.Types.Constants.FractionConst fraction(k=0)
-                                                               if not UseAdenosineInput
+          Physiolibrary.Types.Constants.FractionConst fraction(k=0) if
+                                                                  not UseAdenosineInput
             annotation (Placement(transformation(extent={{-90,46},{-82,54}})));
 
           replaceable Physiolibrary.Hydraulic.Components.Resistor R_pv_visc(
@@ -8578,8 +8578,8 @@ type"),       Text(
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a pv
             annotation (Placement(transformation(extent={{90,-70},{110,-50}}),
                 iconTransformation(extent={{90,-44},{110,-24}})));
-          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input
-         if UseThoracic_PressureInput                                                                   annotation (Placement(
+          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input if
+            UseThoracic_PressureInput                                                                   annotation (Placement(
                 transformation(extent={{-20,-20},{20,20}},
                 rotation=90,
                 origin={0,-100}),                             iconTransformation(extent={{-20,
@@ -8592,8 +8592,8 @@ type"),       Text(
                 iconTransformation(extent={{-110,-44},{-90,-24}})));
 
           Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit="1/min")=
-                 HR)
-            if not UseFrequencyInput
+                 HR) if
+               not UseFrequencyInput
             annotation (Placement(transformation(extent={{-96,-4},{-88,4}})));
           Physiolibrary.Types.Constants.PressureConst P0(k=0) if not
             UseThoracic_PressureInput
@@ -10928,8 +10928,8 @@ compliance
                     "Calculated parameters"));
 
             parameter Physiolibrary.Types.Volume zpv = l*Modelica.Constants.pi*(r^2) "Zero-pressure volume" annotation (Dialog(tab = "General", group = "Calculated parameters"));
-            Physiolibrary.Types.RealIO.FractionOutput distentionFraction = sqrt(max(volume, 0))/sqrt(distentionBase)
-           if UseDistentionOutput "Outputs distention from default, for usage by a baroreceptor" annotation (Placement(transformation(extent={{76,10},{96,
+            Physiolibrary.Types.RealIO.FractionOutput distentionFraction = sqrt(max(volume, 0))/sqrt(distentionBase) if
+              UseDistentionOutput "Outputs distention from default, for usage by a baroreceptor" annotation (Placement(transformation(extent={{76,10},{96,
                       30}}), iconTransformation(extent={{-20,-20},{20,20}},
                   rotation=90,
                   origin={0,40})));
@@ -16580,8 +16580,8 @@ P_hs_plus_dist"),
               transformation(extent={{-340,-68},{-300,-28}}),
                                                             iconTransformation(extent={{20,-100},
                     {60,-60}})));
-          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input=P_th
-            if UseThoracic_PressureInput annotation (Placement(transformation(
+          Physiolibrary.Types.RealIO.PressureInput thoracic_pressure_input=P_th if
+               UseThoracic_PressureInput annotation (Placement(transformation(
                   extent={{-340,-110},{-300,-70}}), iconTransformation(extent={
                     {-100,-100},{-60,-60}})));
           Physiolibrary.Types.RealIO.PressureInput Outer_pressure_input = outer_pressure if UseOuter_PressureInput annotation (Placement(
@@ -16599,17 +16599,17 @@ P_hs_plus_dist"),
         //                                                     iconTransformation(extent={{130,162},
         //             {150,182}})));
 
-          Physiolibrary.Types.RealIO.FractionInput exercise_input=Exercise            if UseExerciseInput
+          Physiolibrary.Types.RealIO.FractionInput exercise_input=Exercise if            UseExerciseInput
             annotation (Placement(transformation(extent={{-200,-110},{-160,-70}}),
                 iconTransformation(extent={{-40,60},{0,100}})));
           outer Settings settings annotation (Placement(transformation(extent={{
                     -318,180},{-298,200}})));
 
-          Subsystems.Baroreflex.Baroreflex_system baroreflex_system
-         if UseBaroreflexOutput                                     annotation (
+          Subsystems.Baroreflex.Baroreflex_system baroreflex_system if
+            UseBaroreflexOutput                                     annotation (
               Placement(transformation(rotation=0, extent={{-242,142},{-222,162}})));
-          Physiolibrary.Types.RealIO.FractionOutput  phi_baroreflex
-         if UseBaroreflexOutput                         annotation (Placement(
+          Physiolibrary.Types.RealIO.FractionOutput  phi_baroreflex if
+            UseBaroreflexOutput                         annotation (Placement(
                 transformation(extent={{-192,138},{-172,158}}),
                                                             iconTransformation(extent={{-24,164},
                     {-4,184}})));
@@ -17574,8 +17574,8 @@ P_hs_plus_dist"),
             vertebral_L2.p,
             vertebral_R272.p,
             splanchnic_tissue.p,
-            cardiac_tissue.p}
-         if useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
+            cardiac_tissue.p} if
+            useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
                     336,202}}), iconTransformation(extent={{148,166},{168,186}})));
         equation
 
@@ -18944,8 +18944,8 @@ P_hs_plus_dist"),
             vertebral_L2.p,
             vertebral_R272.p,
             splanchnic_tissue.p,
-            cardiac_tissue.p}
-         if useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
+            cardiac_tissue.p} if
+            useCapillaryPressureOutputs annotation (Placement(transformation(extent={{316,182},{
                     336,202}}), iconTransformation(extent={{148,166},{168,186}})));
         equation
 
@@ -28999,8 +28999,8 @@ P_hs_plus_dist"),
 
           Physiolibrary.Types.Volume volume = PA.volume + PV.volume + coronaryLayer_SubEndocardium.volume + coronaryLayer_Mid.volume + coronaryLayer_SubEpicardium.volume;
           parameter Modelica.Units.SI.Time tau=4;
-          Physiolibrary.Types.RealIO.PressureInput externalPressure
-         if useExternalPressureInput annotation (Placement(transformation(
+          Physiolibrary.Types.RealIO.PressureInput externalPressure if
+            useExternalPressureInput annotation (Placement(transformation(
                 extent={{20,-20},{-20,20}},
                 rotation=270,
                 origin={-20,-100})));
@@ -36995,7 +36995,7 @@ P_hs_plus_dist"),
 
       Physiolibrary.Types.HydraulicElastance E;
 
-      Physiolibrary.Types.RealIO.FractionInput phi=f   if useVariableContractility annotation (Placement(
+      Physiolibrary.Types.RealIO.FractionInput phi=f if   useVariableContractility annotation (Placement(
             transformation(extent={{-120,-60},{-80,-20}}),
                                                         iconTransformation(extent={{-120,
                 -100},{-80,-60}})));
@@ -51501,7 +51501,7 @@ P_hs_plus_dist"),
         import ADAN_main;
         extends ADAN_main.SystemicTree.CardiovascularSystem(
        SystemicComponent(UseTiltInput=true), pulmonaryComponent(
-              UseCondFracInput=true, r_pa(useConductanceInput=true)),
+              UseCondFracInput=false,r_pa(useConductanceInput=true)),
           settings(veins_relaxation_tau=1));
 
         replaceable Modelica.Blocks.Sources.Ramp Tilt_ramp(
@@ -51574,6 +51574,15 @@ P_hs_plus_dist"),
       model CVS_tiltable_noBaro
         extends CVS_tiltable(useAutonomousPhi(y=false));
       end CVS_tiltable_noBaro;
+
+      model CVS_HUT "For plots"
+        extends CVS_tiltable(Tilt_ramp(duration=1, startTime=10));
+        annotation (experiment(
+            StopTime=130,
+            Interval=0.02,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"));
+      end CVS_HUT;
     end Tilt;
 
     package Exercise
@@ -53132,10 +53141,10 @@ P_hs_plus_dist"),
             end imp_noValves;
 
             model imp_arSt_fastBaro
-              extends imp_base(settings(syst_art_k_E=0.8, baro_tau_s=10));
+              extends imp_base(settings(syst_art_k_E=0.88, baro_tau_s=10));
             annotation (experiment(
                 StopTime=400,
-                Interval=0.01,
+                Interval=0.02,
                 Tolerance=1e-06,
                 __Dymola_Algorithm="Cvode"));
             end imp_arSt_fastBaro;
@@ -53887,7 +53896,12 @@ P_hs_plus_dist"),
             end imp_noValves;
 
             model imp_arSt
-              extends imp_base(settings(syst_art_k_E=0.8));
+              extends imp_base(settings(syst_art_k_E=0.8,baro_tau_s = 10));
+            annotation (experiment(
+                StopTime=400,
+                Interval=0.02,
+                Tolerance=1e-06,
+                __Dymola_Algorithm="Cvode"));
             end imp_arSt;
 
             model imp_arSt_ss

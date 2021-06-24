@@ -1,6 +1,6 @@
 %% plots the baseline results
-dl_vm = '../../Results2/CVS_VMNoBaro.mat'
-dl_ti = '../../Results2/CVS_TiltNoBaro.mat'
+dl_vm = '../../Results/CVS_VMNoBaro.mat'
+dl_ti = '../../Results/CVS_TiltNoBaro.mat'
 % c:\Program Files\Dymola 2021x\bin\dsres2sdf.exe dl_n
 % import the dymload util
 addpath('c:\Program Files\Dymola 2021\Mfiles\dymtools\')
@@ -8,9 +8,15 @@ dl_vm = dymload(dl_vm);
 dl_ti = dymload(dl_ti);
 
 %%
+color_b = [28, 108, 200]/255;
+color_r = [238, 46, 47]/255;
+color_g = [0, 140, 72]/255;
+color_m = [226, 113, 199]/255;
+color_lb = [182, 226, 255]/255;
 mmHg2SI = 133.322;
 ml2SI = 1e-6;
 bpm2SI = 1/60;
+mlPmin2SI = 1/1000/60;
 %%
 cutofftime = 5;
 decimateFactor = 10
@@ -46,28 +52,29 @@ co_ti(time_ti < cutofftime) = co_ti(find(time_ti >= cutofftime, 1));
 
 %%
 fig1 = figure(1);clf;
-set(gcf, 'DefaultAxesFontSize', 10, 'defaultLineLineWidth',1.0);
+set(gcf, 'DefaultAxesFontSize', 8, 'defaultLineLineWidth',1.0);
 
 s_a1 = subplot(2, 1, 1);
 hold on;
 title('A: VM with impaired baroreflex');
 % title('\fontsize{16}A: \fontsize{12}VM with impaired baroreflex');
 % plot(time_vm, pb_vm, 'b', 'LineWidth', 0.5)
-fill([time_vm; flipud(time_vm)], [pbs_vm; flipud(pbd_vm)], [182/255, 226/255, 1],'EdgeColor',[182/255, 226/255, 1])
-plot(time_vm, pbm_vm, 'b', 'LineWidth', 1)
+fill([time_vm; flipud(time_vm)], [pbs_vm; flipud(pbd_vm)], color_lb,'EdgeColor',[182/255, 226/255, 1])
+plot(time_vm, pbm_vm, 'Color', color_b,'LineWidth', 1)
 xlim([0,60])
 ylim([20, 140])
 xlabel('t (s)')
 ylabel('Pressure (mmHg)')
 
 yyaxis right;
-plot(time_vm, co_vm,'m--', 'LineWidth', 1.5)
+plot(time_vm, co_vm,'--','Color', color_m, 'LineWidth', 1.5)
 ylim([0 8])
 s_a1.YAxis(2).Color = [0.4940, 0.1840, 0.5560];
 % set(gca,'ytick',[])
 ylabel('CO (L/min)')
 leg = legend('PA (mmHg)', 'PA mean', 'CO (L/min)', 'Location', 'SouthWest');
 leg.ItemTokenSize = [10, 2];
+g = gca; g.YAxis(2).Color = color_m;
 
 s_a2 = subplot(2, 1, 2);
 hold on;
@@ -75,19 +82,18 @@ hold on;
 title('B: Tilt with impaired baroreflex');
 % plot(time_ti, pb_ti, 'b', 'LineWidth', 0.5)
 
-fill([time_ti; flipud(time_ti)], [pbs_ti; flipud(pbd_ti)], [182/255, 226/255, 1],'EdgeColor',[182/255, 226/255, 1])
-plot(time_ti, pbm_ti, 'b', 'LineWidth', 1.5)
+fill([time_ti; flipud(time_ti)], [pbs_ti; flipud(pbd_ti)], color_lb,'EdgeColor',[182/255, 226/255, 1])
+plot(time_ti, pbm_ti, 'Color', color_b,'LineWidth', 1.5)
 xlim([min(time_ti), max(time_ti)])
-ylim([20, 140])
+ylim([60, 120])
 xlabel('t (s)')
 % set(gca,'ytick',[])
 ylabel('Pressure (mmHg)')
 
-
 yyaxis right;
-plot(time_ti, co_ti,'m--' , 'LineWidth', 1.5)
+plot(time_ti, co_ti,'--' ,'Color', color_m, 'LineWidth', 1.5)
 ylim([0 8])
-s_a2.YAxis(2).Color = [0.4940, 0.1840, 0.5560];
+s_a2.YAxis(2).Color = color_m;
 ylabel('CO (L/min)')
 
 leg = legend('PA (mmHg)', 'PA mean', 'CO (L/min)', 'Location', 'SouthEast');

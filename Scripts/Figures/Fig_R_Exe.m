@@ -1,17 +1,23 @@
 %% plots the Exercise results
 % import the dymload util
 addpath('c:\Program Files\Dymola 2021\Mfiles\dymtools\')
-system("c:\Program Files\Dymola 2021x\bin\dsres2sdf.exe imp_stepEx_normal")
-datafile = '../../Results2/imp_stepEx_normal.sdf';
-hi = h5info(datafile)
-%%
+% system("c:\Program Files\Dymola 2021x\bin\dsres2sdf.exe imp_stepEx_normal")
+datafile = '../../Results/imp_stepEx_normal.mat';
+
+%% color defiinitons
+color_b = [28, 108, 200]/255;
+color_r = [238, 46, 47]/255;
+color_g = [0, 140, 72]/255;
+color_m = [226, 113, 199]/255;
+color_lb = [182, 226, 255]/255;
+color_s = [0.8, 0.8, 0.8];
 mmHg2SI = 133.322;
 ml2SI = 1e-6;
 bpm2SI = 1/60;
-mlPmin2SI = 1/1000/60;
+%%
 
-dl = datafile
-time = h5read(dl, '/Time');
+dl = dymload(datafile)
+time = dymget(dl, 'Time');
 t_interval = [0, 60]; % interval in seconds
 td = t_interval(2) - t_interval(1);
 % i_int = [find(t >= t_interval(1), 1), find(t >= t_interval(2), 1)-1];
@@ -25,53 +31,53 @@ safezone = 400;
 % end
 %% EXERCISE VALUES
 t = time;
-pb = h5read(dl, '/brachial_pressure')/mmHg2SI;
+pb = dymget(dl, 'brachial_pressure')/mmHg2SI;
 
-pbs = h5read(dl, '/brachial_pressure_systolic')/mmHg2SI;
+pbs = dymget(dl, 'brachial_pressure_systolic')/mmHg2SI;
 pbs(1:safezone) = pbs(safezone);
-pbd = h5read(dl, '/brachial_pressure_diastolic')/mmHg2SI;
+pbd = dymget(dl, 'brachial_pressure_diastolic')/mmHg2SI;
 pbd(1:safezone) = pbd(safezone);
-pbm = h5read(dl, '/brachial_pressure_mean')/mmHg2SI;
+pbm = dymget(dl, 'brachial_pressure_mean')/mmHg2SI;
 pbm(1:safezone) = pbm(safezone);
-psa = h5read(dl, '/heartComponent/sa/pressure')/mmHg2SI;
+psa = dymget(dl, 'heartComponent.sa.pressure')/mmHg2SI;
 
-hr = h5read(dl, '/HR')/bpm2SI;
-lsv = h5read(dl, '/SV')/ml2SI;
-% rsv = h5read(dl, '/heartComponent/pulmonaryValve/SV')/ml2SI;
-plv = h5read(dl, '/P_LV')/mmHg2SI;
-prv = h5read(dl, '/heartComponent/ventricles/P_RV')/mmHg2SI;
-vlv = h5read(dl, '/heartComponent/ventricles/V_LV')/ml2SI;
-vrv = h5read(dl, '/heartComponent/ventricles/V_RV')/ml2SI;
-vla = h5read(dl, '/V_la')/ml2SI;
+hr = dymget(dl, 'HR')/bpm2SI;
+lsv = dymget(dl, 'SV')/ml2SI;
+% rsv = dymget(dl, 'heartComponent/pulmonaryValve/SV')/ml2SI;
+plv = dymget(dl, 'P_LV')/mmHg2SI;
+prv = dymget(dl, 'heartComponent.ventricles.P_RV')/mmHg2SI;
+vlv = dymget(dl, 'heartComponent.ventricles.V_LV')/ml2SI;
+vrv = dymget(dl, 'heartComponent.ventricles.V_RV')/ml2SI;
+vla = dymget(dl, 'V_la')/ml2SI;
 
-pla = h5read(dl, '/P_LA')/mmHg2SI;
+pla = dymget(dl, 'P_LA')/mmHg2SI;
 
-psv = h5read(dl, '/P_sv')/mmHg2SI;
-ppv = h5read(dl, '/P_pv')/mmHg2SI;
-ppa = h5read(dl, '/heartComponent/pa/pressure')/mmHg2SI;
+psv = dymget(dl, 'P_sv')/mmHg2SI;
+ppv = dymget(dl, 'P_pv')/mmHg2SI;
+ppa = dymget(dl, 'heartComponent.pa.pressure')/mmHg2SI;
 
-pra = h5read(dl, '/heartComponent/tricuspidValve/q_in/pressure')/mmHg2SI;
-vra = h5read(dl, '/heartComponent/ra/volume')/ml2SI;
+pra = dymget(dl, 'heartComponent.tricuspidValve.q_in.pressure')/mmHg2SI;
+vra = dymget(dl, 'heartComponent.ra.volume')/ml2SI;
 
 
-tp = h5read(dl, '/thoracic_pressure')/mmHg2SI;
-pdv = h5read(dl, '/SystemicComponent/femoral_vein_R34/port_a/pressure')/mmHg2SI;
-psv = h5read(dl, '/P_sv')/mmHg2SI - tp;
-ppv = h5read(dl, '/P_pv')/mmHg2SI - tp;
-el = h5read(dl, '/Exercise/y_')*100;
-qmv = h5read(dl, '/q_mv')/ml2SI/1000*60;
+tp = dymget(dl, 'thoracic_pressure')/mmHg2SI;
+pdv = dymget(dl, 'SystemicComponent.femoral_vein_R34.port_a.pressure')/mmHg2SI;
+psv = dymget(dl, 'P_sv')/mmHg2SI - tp(1);
+ppv = dymget(dl, 'P_pv')/mmHg2SI - tp(1);
+el = dymget(dl, 'Exercise.y_')*100;
+qmv = dymget(dl, 'q_mv')/ml2SI/1000*60;
 
-pow_lv = h5read(dl, '/heartComponent/ventricles/power_LV');
-pow_rv = h5read(dl, '/heartComponent/ventricles/power_RV');
+pow_lv = dymget(dl, 'heartComponent.ventricles.power_LV');
+pow_rv = dymget(dl, 'heartComponent.ventricles.power_RV');
 
-co = h5read(dl, '/CO')/mlPmin2SI;
-q_ex = h5read(dl, '/q_exercised_avg')/mlPmin2SI;
+co = dymget(dl, 'CO')/mlPmin2SI;
+q_ex = dymget(dl, 'q_exercised_avg')/mlPmin2SI;
 
 %% READ NORMAL FOR COMPARISON
-datafile_n = '../../Results2/CardiovascularSystem.mat'
+datafile_n = '../../Results/CardiovascularSystem.mat'
 dl_n = dymload(datafile_n)
 time_n = dymget(dl_n, 'Time');
-t_interval_n = [58.13, 58.13 + 1.6]; % interval in seconds
+t_interval_n = [28.13, 28.13 + 1.6]; % interval in seconds
 td_n = t_interval_n(2) - t_interval_n(1)
 % i_int = [find(t >= t_interval(1), 1), find(t >= t_interval(2), 1)-1];
 i_int_n = (time_n >= t_interval_n(1) & time_n <= t_interval_n(2));
@@ -119,7 +125,7 @@ for i = 1:size(diffs)
     i_e = find(time > time(diffs(i)) + te, 1);
 %     t = time - time(i_s);
     i_int = [i_s:i_e];
-    if i == 9
+    if i == 7
         t = time - time(i_s);
         i_int90 = i_int;
     end
@@ -145,15 +151,15 @@ plot([0:10:100], q_ex_s, 'r*-')
 
 %% DRAW
 fig1 = figure(1);clf;
-set(gcf, 'DefaultAxesFontSize', 10);
+set(gcf, 'DefaultAxesFontSize', 8);
 
 s_a1 = subplot(4, 2, 1);
 hold on;
-title('A: Systemic pressures and volumes');
-plot(t(i_int90), plv(i_int90), 'k', 'LineWidth', 1);
-plot(t(i_int90), psa(i_int90), 'r', 'LineWidth', 1);
-plot(t(i_int90), pb(i_int90), 'b', 'LineWidth', 1);
-plot(t(i_int90), pla(i_int90), 'm', 'LineWidth', 1);
+title('A: Systemic pressures and volumes at 70% exercise');
+plot(t(i_int90), plv(i_int90), 'Color', color_g, 'LineWidth', 1);
+plot(t(i_int90), psa(i_int90), 'Color', color_r, 'LineWidth', 1);
+plot(t(i_int90), pb(i_int90), 'Color', color_b, 'LineWidth', 1);
+plot(t(i_int90), pla(i_int90), 'Color', color_s, 'LineWidth', 1);
 set(gca,'xtick',[])
 leg = legend('P LV', 'P Asc Aor', 'PA (brach art)', 'P LA', 'Location', 'SouthEast')
 leg.ItemTokenSize = [10, 150];
@@ -165,12 +171,12 @@ xlim([0 td])
     
 % volumes
 s_a2 = subplot(4, 2, 3);hold on;
-plot(t(i_int90), vlv(i_int90), 'b', 'LineWidth', 1);
-plot(t(i_int90), vla(i_int90), 'r', 'LineWidth', 1);
+plot(t(i_int90), vlv(i_int90), 'Color', color_b, 'LineWidth', 1);
+plot(t(i_int90), vla(i_int90), 'Color', color_r, 'LineWidth', 1);
 leg = legend('V LV', 'V LA');
 leg.ItemTokenSize = [10, 2];
 set(gca,'xtickMode', 'auto')
-ylim([0, 250]);
+ylim([0, 200]);
 xlim([0 td])
 xlabel('t (s)');
 ylabel('Volume (ml)')
@@ -183,14 +189,15 @@ s_a1.Clipping = 'off';
 s_b1 = subplot(4, 2, 2);cla;
 hold on;
 title('B: Pulmonary and venous pressures');
-plot(t(i_int90), psv(i_int90), 'b', 'LineWidth', 1);
-plot(t(i_int90), ppv(i_int90), 'r', 'LineWidth', 1);
-plot(t_n(i_int_n), psv_n(i_int_n), 'b:', 'LineWidth', 1);
-plot(t_n(i_int_n), ppv_n(i_int_n), 'r:', 'LineWidth', 1);
+plot(t_n(i_int_n), psv_n(i_int_n), 'b:','Color', color_b, 'LineWidth', 1);
+plot(t_n(i_int_n), ppv_n(i_int_n), ':','Color', color_r, 'LineWidth', 1);
+
+plot(t(i_int90), psv(i_int90), 'Color', color_b, 'LineWidth', 1);
+plot(t(i_int90), ppv(i_int90), 'Color', color_r, 'LineWidth', 1);
 s_b1.Clipping = 'off';
 % set(gca,'xtick',[], 'ytick', [])
 set(gca,'xtick',[], 'ytick', [5, 10, 15])
-leg = legend('P SV E', 'P PV E', 'P SV N', 'P PV N')
+leg = legend('P SV N', 'P PV N', 'P SV 70% E', 'P PV 70% E')
 leg.ItemTokenSize = [10, 2];
 ylim([0, 20])
 ylabel('Pressure [mmHg]')
@@ -198,13 +205,14 @@ xlim([0 td])
 
 % Pulmonary arterial pressures
 s_b2 = subplot(4, 2, 4);hold on;
-plot(t(i_int90), ppa(i_int90), 'b', 'LineWidth', 1);
-plot(t_n(i_int_n), ppa_n(i_int_n), 'b:', 'LineWidth', 1);
+plot(t_n(i_int_n), ppa_n(i_int_n), ':','Color', color_b, 'LineWidth', 1);
+
+plot(t(i_int90), ppa(i_int90), 'Color', color_b, 'LineWidth', 1);
 % set(gca,'xtickMode', 'auto', 'ytick', [])
-ylim([0, 30]);
+ylim([0, 40]);
 ylabel('Pressure [mmHg]')
 xlim([0 td])
-leg = legend('PPA E', 'PPA N')
+leg = legend('PPA N', 'PPA 70% E')
 leg.ItemTokenSize = [10, 2];
 xlabel('t (s)');
 
@@ -215,8 +223,8 @@ xlabel('t (s)');
 % C
 s_c = subplot(2, 2, 3);cla;hold on;
 title('C: Ventricle power during step-up exercise')
-plot([0:10:100], pow_lvs, 'b*-', 'LineWidth', 1)
-plot([0:10:100], pow_rvs, 'r*-', 'LineWidth', 1)
+plot([0:10:100], pow_lvs, '*-', 'Color', color_b,'LineWidth', 1)
+plot([0:10:100], pow_rvs, '*-', 'Color', color_r, 'LineWidth', 1)
 legend('LV', 'RV', 'Location', 'NorthWest')
 xlabel('Exercise [% of max]');
 ylabel('Power [W]');
@@ -226,8 +234,8 @@ s_d = subplot(2, 2, 4);cla;hold on;
 title('D: Cardiac output during step-up exercise')
 % plot(vra(i_int), pra(i_int));
 % plot(vla(i_int), pla(i_int));
-plot([0:10:100], co_s, 'b*-', 'LineWidth', 1)
-plot([0:10:100], q_ex_s, 'r*-', 'LineWidth', 1)
+plot([0:10:100], co_s, '*-', 'Color', color_m, 'LineWidth', 1)
+plot([0:10:100], q_ex_s, '*--', 'Color', color_m, 'LineWidth', 1)
 xlabel('Exercise (% of max)');
 ylabel('Blood flow (L/min)');
 leg = legend('Cardiac output', 'Flow through exercising tissues', 'Location', 'SouthEast')
