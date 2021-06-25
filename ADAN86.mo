@@ -51277,10 +51277,10 @@ P_hs_plus_dist"),
               Tilt_ramp(duration=0, startTime=800),Tilt_LegRaise(startTime=30));
         end SupineToSemirecumberentWithSemiExtendedLegs;
 
-        model OlufsenTriSeg_tiltable_sitAndValsalva
+        model CVS_tiltable_SitValsalva
           "tilting to sitting position, followed by valsalva"
-          extends CVS_tiltable(
-            SystemicComponent(
+          extends CVS_tiltable_StandValsalva(
+              SystemicComponent(
               UseThoracic_PressureInput=true,
               femoral_R226(sinAlpha=0),
               popliteal_R228(sinAlpha=0),
@@ -51291,41 +51291,9 @@ P_hs_plus_dist"),
               popliteal_vein_R48(sinAlpha=0),
               femoral_vein_L76(sinAlpha=0),
               popliteal_vein_L78(sinAlpha=0),
-              femoral_vein_L72(sinAlpha=0)),
-            Tilt_ramp(height=0, startTime=10),
-            heartComponent(UseThoracic_PressureInput=true),
-            pulmonaryComponent(UseThoracic_PressureInput=true));
-        replaceable
-        Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
-            nperiod=-1,
-            amplitude=40*133.32,
-            rising=0.1,
-            width=14.8,
-            falling=0.1,
-            period=60,
-            startTime=20)   constrainedby Modelica.Blocks.Sources.Trapezoid
-            annotation (Placement(transformation(extent={{-124,-24},{-104,-4}})));
-          Components.Signals.ConditionalConnection condTP_EP1(
-            disconnected=false,
-            disconnectedValue=0,
-            phi_gain=settings.pulm_tp_pleural_frac,
-            const_offset=0) "Thoracic pressure effect on extra-pleural circulatory"
-            annotation (Placement(transformation(extent={{-95,-19.3333},{-81,
-                    -7.3333}})));
-        equation
-          connect(condTP_EP1.y, SystemicComponent.thoracic_pressure_input)
-            annotation (Line(points={{-80.3,-14},{-72,-14},{-72,20},{-34,20}},
-                color={0,0,127}));
-          connect(heartComponent.thoracic_pressure_input, SystemicComponent.thoracic_pressure_input)
-            annotation (Line(points={{-26,-32},{-72,-32},{-72,20},{-34,20}},
-                color={0,0,127}));
-          connect(pulmonaryComponent.thoracic_pressure, SystemicComponent.thoracic_pressure_input)
-            annotation (Line(points={{-24,-62},{-72,-62},{-72,20},{-34,20}},
-                color={0,0,127}));
-          connect(condTP_EP1.u, thoracic_pressure_ramp.y) annotation (Line(
-                points={{-96.4,-14},{-100,-14},{-100,-14},{-103,-14}}, color={0,
-                  0,127}));
-        end OlufsenTriSeg_tiltable_sitAndValsalva;
+              femoral_vein_L72(sinAlpha=0)));
+
+        end CVS_tiltable_SitValsalva;
 
         model base
           extends Obsolete.partialCVS_leveled(
@@ -51495,6 +51463,46 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end TriSeg_OptimizedBaseline;
+
+        model CVS_tiltable_StandValsalva
+          "tilting to sitting position, followed by valsalva"
+          extends CVS_tiltable(
+            SystemicComponent(
+              UseThoracic_PressureInput=true),
+            Tilt_ramp(height=Modelica.Constants.pi/2, startTime=0),
+            heartComponent(UseThoracic_PressureInput=true),
+            pulmonaryComponent(UseThoracic_PressureInput=true));
+        replaceable
+        Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
+            nperiod=-1,
+            amplitude=40*133.32,
+            rising=0.1,
+            width=14.8,
+            falling=0.1,
+            period=60,
+            startTime=20)   constrainedby Modelica.Blocks.Sources.Trapezoid
+            annotation (Placement(transformation(extent={{-124,-24},{-104,-4}})));
+          Components.Signals.ConditionalConnection condTP_EP1(
+            disconnected=false,
+            disconnectedValue=0,
+            phi_gain=settings.pulm_tp_pleural_frac,
+            const_offset=0) "Thoracic pressure effect on extra-pleural circulatory"
+            annotation (Placement(transformation(extent={{-95,-19.3333},{-81,
+                    -7.3333}})));
+        equation
+          connect(condTP_EP1.y, SystemicComponent.thoracic_pressure_input)
+            annotation (Line(points={{-80.3,-14},{-72,-14},{-72,20},{-34,20}},
+                color={0,0,127}));
+          connect(heartComponent.thoracic_pressure_input, SystemicComponent.thoracic_pressure_input)
+            annotation (Line(points={{-26,-32},{-72,-32},{-72,20},{-34,20}},
+                color={0,0,127}));
+          connect(pulmonaryComponent.thoracic_pressure, SystemicComponent.thoracic_pressure_input)
+            annotation (Line(points={{-24,-62},{-72,-62},{-72,20},{-34,20}},
+                color={0,0,127}));
+          connect(condTP_EP1.u, thoracic_pressure_ramp.y) annotation (Line(
+                points={{-96.4,-14},{-100,-14},{-100,-14},{-103,-14}}, color={0,
+                  0,127}));
+        end CVS_tiltable_StandValsalva;
       end Experiments;
 
       model CVS_tiltable
