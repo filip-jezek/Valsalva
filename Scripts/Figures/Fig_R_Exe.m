@@ -70,8 +70,8 @@ qmv = dymget(dl, 'q_mv')/ml2SI/1000*60;
 pow_lv = dymget(dl, 'heartComponent.ventricles.power_LV');
 pow_rv = dymget(dl, 'heartComponent.ventricles.power_RV');
 
-co = dymget(dl, 'CO')/mlPmin2SI;
-q_ex = dymget(dl, 'q_exercised_avg')/mlPmin2SI;
+co = dymget(dl, 'CO')/ml2SI/1000*60;;
+q_ex = dymget(dl, 'q_exercised_avg')/ml2SI/1000*60;
 
 %% READ NORMAL FOR COMPARISON
 datafile_n = '../../Results/CardiovascularSystem.mat'
@@ -125,7 +125,7 @@ for i = 1:size(diffs)
     i_e = find(time > time(diffs(i)) + te, 1);
 %     t = time - time(i_s);
     i_int = [i_s:i_e];
-    if i == 7
+    if i == 7 + 1
         t = time - time(i_s);
         i_int90 = i_int;
     end
@@ -155,11 +155,11 @@ set(gcf, 'DefaultAxesFontSize', 8);
 
 s_a1 = subplot(4, 2, 1);
 hold on;
-title('A: Systemic pressures and volumes at 70% exercise');
-plot(t(i_int90), plv(i_int90), 'Color', color_g, 'LineWidth', 1);
+title('A: Systemic and LH pressures and volumes at 70% exercise');
+plot(t(i_int90), plv(i_int90), 'Color', color_b, 'LineWidth', 1);
 plot(t(i_int90), psa(i_int90), 'Color', color_r, 'LineWidth', 1);
-plot(t(i_int90), pb(i_int90), 'Color', color_b, 'LineWidth', 1);
-plot(t(i_int90), pla(i_int90), 'Color', color_s, 'LineWidth', 1);
+plot(t(i_int90), pb(i_int90), 'Color', [0 0 0], 'LineWidth', 1);
+plot(t(i_int90), pla(i_int90), 'Color', color_m, 'LineWidth', 1);
 set(gca,'xtick',[])
 leg = legend('P LV', 'P Asc Aor', 'PA (brach art)', 'P LA', 'Location', 'SouthEast')
 leg.ItemTokenSize = [10, 150];
@@ -172,14 +172,14 @@ xlim([0 td])
 % volumes
 s_a2 = subplot(4, 2, 3);hold on;
 plot(t(i_int90), vlv(i_int90), 'Color', color_b, 'LineWidth', 1);
-plot(t(i_int90), vla(i_int90), 'Color', color_r, 'LineWidth', 1);
+plot(t(i_int90), vla(i_int90), 'Color', color_m, 'LineWidth', 1);
 leg = legend('V LV', 'V LA');
 leg.ItemTokenSize = [10, 2];
 set(gca,'xtickMode', 'auto')
 ylim([0, 200]);
 xlim([0 td])
 xlabel('t (s)');
-ylabel('Volume (ml)')
+ylabel('Volume (mL)')
 s_a1.Clipping = 'off';
 % pos = get(s1, 'Position');
 % set(s1, 'Position', [0.05, 0.5, 0.9,0.4])
@@ -197,10 +197,10 @@ plot(t(i_int90), ppv(i_int90), 'Color', color_r, 'LineWidth', 1);
 s_b1.Clipping = 'off';
 % set(gca,'xtick',[], 'ytick', [])
 set(gca,'xtick',[], 'ytick', [5, 10, 15])
-leg = legend('P SV N', 'P PV N', 'P SV 70% E', 'P PV 70% E')
+leg = legend('P VC N', 'P PV N', 'P VC 70% E', 'P PV 70% E')
 leg.ItemTokenSize = [10, 2];
 ylim([0, 20])
-ylabel('Pressure [mmHg]')
+ylabel('Pressure (mmHg)')
 xlim([0 td])
 
 % Pulmonary arterial pressures
@@ -210,7 +210,7 @@ plot(t_n(i_int_n), ppa_n(i_int_n), ':','Color', color_b, 'LineWidth', 1);
 plot(t(i_int90), ppa(i_int90), 'Color', color_b, 'LineWidth', 1);
 % set(gca,'xtickMode', 'auto', 'ytick', [])
 ylim([0, 40]);
-ylabel('Pressure [mmHg]')
+ylabel('Pressure (mmHg)')
 xlim([0 td])
 leg = legend('PPA N', 'PPA 70% E')
 leg.ItemTokenSize = [10, 2];
@@ -226,8 +226,8 @@ title('C: Ventricle power during step-up exercise')
 plot([0:10:100], pow_lvs, '*-', 'Color', color_b,'LineWidth', 1)
 plot([0:10:100], pow_rvs, '*-', 'Color', color_r, 'LineWidth', 1)
 legend('LV', 'RV', 'Location', 'NorthWest')
-xlabel('Exercise [% of max]');
-ylabel('Power [W]');
+xlabel('Exercise (% of max)');
+ylabel('Power (W)');
 
 % D
 s_d = subplot(2, 2, 4);cla;hold on;

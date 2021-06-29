@@ -80,7 +80,7 @@ plot(vlv_avst(i_int_avst), plv_avst(i_int_avst), 'Color',color_r,  'LineWidth', 
 xlim([20, 200])
 ylim([0, 150])
 ylabel('Pressure (mmHg)')
-xlabel('Volume (ml)')
+xlabel('Volume (mL)')
 % yyaxis right
 % ylabel('W')
 % ylim([0, 3.6])
@@ -118,7 +118,7 @@ plot(vlv_avre(i_int_avre), plv_avre(i_int_avre), 'Color',color_r,  'LineWidth', 
 xlim([20, 200])
 ylim([0, 150])
 ylabel('Pressure (mmHg)')
-xlabel('Volume (ml)')
+xlabel('Volume (mL)')
 % yyaxis right
 % ylabel('W')
 % ylim([0, 3.6])
@@ -200,7 +200,7 @@ leg.ItemTokenSize = [10, 10];
 xlim([20, 200])
 ylim([0, 150])
 ylabel('Pressure (mmHg)')
-xlabel('Volume (ml)')
+xlabel('Volume (mL)')
 
 s_a1 = subplot(3, 2, 6);cla;hold on;
 title('F: Arterial pressure of Art. stiffening', 'FontSize', fs + 2);
@@ -217,7 +217,7 @@ plot(t_arst(i_int_arst), pbm_arst(i_int_arst), '--', 'Color',color_r,'LineWidth'
 
 leg = legend('PA N', 'PA mean N', 'PA ArSt', 'PA mean ArSt', 'Location', 'SouthWest')
 leg.ItemTokenSize = [10, 10];
-ylabel('Pressure [mmHg]')
+ylabel('Pressure (mmHg)')
 xlabel('t (s)')
 xlim([0, d]);
 

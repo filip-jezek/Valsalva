@@ -49,7 +49,7 @@ s_a1 = subplot(4, 2, 1);
 
 hold on;
 % title('A: Left ventricular pressures and volumes', 'HorizontalAlignment', 'left', 'VerticalAlignment', 'top');
-title('A: Left ventricular pressures and volumes');
+title('A: Left heart pressures and volumes');
 plot(t(i_int), pla(i_int), 'Color', color_m, 'LineWidth', 1);
 plot(t(i_int), plv(i_int), 'Color', color_b, 'LineWidth', 1);
 plot(t(i_int), psa(i_int), 'Color', color_r, 'LineWidth', 1);
@@ -65,7 +65,7 @@ xlim([0 td])
 %%    
 % volumes
 s_a2 = subplot(4, 2, 3);cla;hold on;
-plot(t(i_int), vla(i_int), 'Color', color_r);
+plot(t(i_int), vla(i_int), 'Color', color_m);
 plot(t(i_int), vlv(i_int), 'Color', color_b);
 set(gca,'xtickMode', 'auto')
 ylim([0, 160]);
@@ -73,29 +73,29 @@ xlim([0 td])
 leg = legend('V LA', 'V LV');
 leg.ItemTokenSize = [10, 2];
 xlabel('t (s)');
-ylabel('Volume (ml)')
+ylabel('Volume (mL)')
 % pos = get(s1, 'Position');
 % set(s1, 'Position', [0.05, 0.5, 0.9,0.4])
 % set(s2, 'Position', [0.05, 0.05, 0.9,0.4])
 
 % B
 s_b1 = subplot(4, 2, 2);cla;hold on;
-title('B: Right ventricular pressures and volumes');
+title('B: Right heart pressures and volumes');
 plot(t(i_int), pra(i_int), 'Color', color_m, 'LineWidth', 1);
 plot(t(i_int), prv(i_int), 'Color', color_b, 'LineWidth', 1);
 plot(t(i_int), ppa(i_int), 'Color', color_r, 'LineWidth', 1);
 % set(gca,'xtick',[], 'ytick', [])
 set(gca,'xtick',[])
-leg = legend('P RA','P RV', 'P Pulm Ar');
+leg = legend('P RA','P RV', 'P Pulm Art');
 leg.ItemTokenSize = [10, 2];
 % ylim([0, 120])
 xlim([0 td])
 % volumes
 s_b2 = subplot(4, 2, 4);cla;hold on;
-plot(t(i_int), vra(i_int), 'Color', color_r, 'LineWidth', 1);
+plot(t(i_int), vra(i_int), 'Color', color_m, 'LineWidth', 1);
 plot(t(i_int), vrv(i_int), 'Color', color_b, 'LineWidth', 1);
-set(gca,'xtickMode', 'auto', 'ytick', [])
-ylim([0, 150]);
+set(gca,'xtickMode', 'auto')
+ylim([0, 160]);
 xlim([0 td])
 leg = legend('V RA', 'V RV');
 leg.ItemTokenSize = [10, 2];
@@ -103,7 +103,7 @@ xlabel('t (s)');
 
 %% C
 s_c = subplot(2, 2, 3);cla;hold on;
-title('C: LV valvular flow profiles')
+title('C: Valvular flow profiles')
 
 
 % fill_pivot = find(i_int > 0, 1) + 65;
@@ -122,7 +122,7 @@ leg = legend('Mitral valve', 'Aortic valve');
 leg.ItemTokenSize = [10, 2];
 
 xlabel('t (s)');
-ylabel('Flow [L/min]');
+ylabel('Flow (L/min)');
 
 %% D
 % 
@@ -130,7 +130,7 @@ ylabel('Flow [L/min]');
 % % plot(vla(i_int), pla(i_int));
 % plot(vrv(i_int), prv(i_int), 'r', 'LineWidth', 1);
 % plot(vlv(i_int), plv(i_int), 'b', 'LineWidth', 1);
-% xlabel('Volume (ml)');
+% xlabel('Volume (mL)');
 % ylabel('Pressure (mmHg)');
 
 %% load the EDPVR volume loading
@@ -164,16 +164,16 @@ plot(lvvol(i5), edpvr(i5), 'Color', color_g, 'LineWidth', 1.5);
 % plot(vlv(i_int), plv(i_int), 'b', 'LineWidth', 1);
 
 leg = legend( ...
-    ['LV, ', num2str(vol(i1(1))), ' ml'], ...
+    ['LV, ', num2str(vol(i1(1))), ' mL'], ...
     'LV normal', ...
-    ['LV, ', num2str(vol(i3(1))), ' ml'], ...
-    ['LV, ', num2str(vol(i4(1))), ' ml'], ...
-    ['LV, ', num2str(vol(i5(1))), ' ml'], ...
-    'RV',...
+    ['LV, ', num2str(vol(i3(1))), ' mL'], ...
+    ['LV, ', num2str(vol(i4(1))), ' mL'], ...
+    ['LV, ', num2str(vol(i5(1))), ' mL'], ...
+    'RV normal',...
     'EDPVR');
 leg.ItemTokenSize = [10, 2];
 
-xlabel('Volume (ml)');
+xlabel('Volume (mL)');
 ylabel('Pressure (mmHg)');
 ylim([-5, 135])
 

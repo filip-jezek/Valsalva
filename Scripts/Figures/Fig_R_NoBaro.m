@@ -79,7 +79,7 @@ g = gca; g.YAxis(2).Color = color_m;
 s_a2 = subplot(2, 1, 2);
 hold on;
 % title('\fontsize{16}B: \fontsize{12}Tilt with impaired baroreflex');
-title('B: Tilt with impaired baroreflex');
+title('B: HUT with impaired baroreflex');
 % plot(time_ti, pb_ti, 'b', 'LineWidth', 0.5)
 
 fill([time_ti; flipud(time_ti)], [pbs_ti; flipud(pbd_ti)], color_lb,'EdgeColor',[182/255, 226/255, 1])
@@ -113,8 +113,10 @@ h = 0.4
 % set(s_a1, 'Position', [0.08, 0.17, w, h])
 % set(s_a2, 'Position', [0.5, 0.17, w, h])
 % column alignment
-set(s_a1, 'Position', [0.08, 0.17 + h, w, h])
-set(s_a2, 'Position', [0.08, 0.17, w, h])
+
+
+% set(s_a1, 'Position', [0.08, 0.17 + h, w, h])
+% set(s_a2, 'Position', [0.08, 0.17, w, h])
 
 % s_a1.Title.Units = 'normalized';
 % s_a1.Title.HorizontalAlignment = 'left';
@@ -125,7 +127,6 @@ set(s_a2, 'Position', [0.08, 0.17, w, h])
 % s_a2.Title.HorizontalAlignment = 'left';
 % s_a2.Title.VerticalAlignment = 'bottom';
 % s_a2.Title.Position = [0, 1.02, 0];
-
 %%
 exportgraphics(gcf,'fig_R_NoBaro.png','Resolution',300)
 exportgraphics(gcf,'fig_R_NoBaro.pdf', 'ContentType','vector')

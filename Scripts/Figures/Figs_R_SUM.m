@@ -104,7 +104,7 @@ plot(t_bl(i_int_bl), B1_vlv(i_int_bl), ':', 'LineWidth', 1, 'Color', color_r);
 g = gca; g.YAxis(2).Color = [0,0,0];
 ylim([0, 160]);
 yticks([0, 50, 100])
-ylabel('Volume (ml)');
+ylabel('Volume (mL)');
 
 leg = legend('P PV', 'P LA', 'P LV','P Asc Aor', 'V LA*', 'V LV*', 'Location', 'East');
 leg.ItemTokenSize = [10, 2];
@@ -121,15 +121,16 @@ set(gcf, 'Units', 'Centimeters', 'Position', [0, 0, tw, th])
 hold on;
 
 % volumes
-plot(B1_vrv(i_int_bl), B1_prv(i_int_bl), 'LineWidth', 1, 'Color', color_b);
-plot(B1_vlv(i_int_bl), B1_plv(i_int_bl), 'LineWidth', 1, 'Color', color_r);
+plot(B1_vlv(i_int_bl), B1_plv(i_int_bl), 'LineWidth', 1, 'Color', color_b);
+plot(B1_vrv(i_int_bl), B1_prv(i_int_bl), 'LineWidth', 1, 'Color', color_r);
+
 % plot(vla(i_int_bl), pla(i_int_bl), 'LineWidth', 1, 'Color', color_g);
 % plot(vra(i_int_bl), pra(i_int_bl), 'LineWidth', 1, 'Color', color_m);
 ylim([0, 120]);
 xlim([40 160])
 ylabel('Pressure (mmHg)');
-xlabel('Volume (ml)')
-leg = legend('RV', 'LV', 'Location', 'best');
+xlabel('Volume (mL)')
+leg = legend('LV', 'RV', 'Location', 'best');
 leg.ItemTokenSize = [10, 2];
 
 exportgraphics(gcf,'fig_R_SUM_A3.pdf', 'ContentType','vector')
@@ -288,7 +289,7 @@ p_m = fill([time(x:end); flipud(time(x:end))]/60, [pbs(x:end); flipud(pbd(x:end)
 pbpm = plot(t(x:end)/60, pbm(x:end), 'LineWidth', 1, 'Color', color_b);
 phr = plot(t(x:end)/60, hr(x:end), 'LineWidth', 1, 'Color', color_r);
 
-leg = legend('PA (mmHg)', 'PA mean (mmHg)', 'HR (BPM)', 'Location', 'northeast');
+leg = legend('PA (mmHg)', 'PA mean (mmHg)', 'HR (bpm)', 'Location', 'northeast');
 leg.ItemTokenSize = [10, 10];
 ylim([60, 140])
 yticks([60, 80, 100, 120])
