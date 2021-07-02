@@ -17,13 +17,13 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'ADAN_main.SystemicTree.Identification.Results.OlufsenTriSeg_optimized2'
+base_model_full_path = 'CVS_renalRegulation_HFrEF_15'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
-steadyStateAt = 600
+steadyStateAt = 1198
 resetVPV = True
-mat_file_path = 'settings.baro_f1 = 0.003425.mat' # or none to detect automatically
+mat_file_path = 'CVS_renalRegulation_HFrEF_15.mat' # or none to detect automatically
 
 # get the main and path
 if '.' in base_model_full_path:
