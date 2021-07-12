@@ -8,22 +8,22 @@ import os
 # imp_coeff = 1
 
 experiment_type = 'CHF_baro'
-exp_range = range(15, 100,10)
+exp_range = range(5, 100,5)
 imp_coeff = 1
 
-experiment_type = 'HFpEFDilated_baro'
-exp_range = range(100, 190,10)
-imp_coeff = 1
+# experiment_type = 'HFpEFDilated_baro'
+# exp_range = range(100, 190,10)
+# imp_coeff = 1
 
-experiment_type = 'HFpEF_baro'
-exp_range = range(4700, 5000,100)
-imp_coeff = 1/100
+# experiment_type = 'HFpEF_baro'
+# exp_range = range(4700, 5000,100)
+# imp_coeff = 1/100
 
 # experiment_type = 'HFpEF_baroInitVol1000'
 # exp_range = range(2600, 2700,100)
 # imp_coeff = 1/100
 
-filePattern = R"E:\Data\CVS_renalRegulation_%s_%0d.mat"
+filePattern = R"CVS_renalRegulation_%s_%0d.mat"
 # filePattern = R"D:\Data\CVS_renalRegulation_CHF_%0d.mat"
 # filename = R"c:\home\UMICH\Valsalva\Results2\CardiovascularSystem.mat"
 
@@ -32,8 +32,8 @@ mmHg2SI = 133.322
 L2SI = 1e-3
 LpD2SI = 1/(1000*60*60*24)
 
-bpm_base = 95*mmHg2SI
-startTime = 60
+bpm_base = 99*mmHg2SI
+startTime = 600
 
 
 s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {EDV}, {BPM}, {Qlymph}, {Vint_r},{Vint_excess}, {ESP}, {EDP}, {comp}\n'
@@ -86,10 +86,10 @@ with open(outputFile, 'a') as file:
 
         mean_rng = range(i_0 - int(np.floor(i_dt/2)), i_0 + int(np.floor(i_dt/2))) # use left and right helf interval for calculating a mean value
         gfr_m = np.mean(datafile.data('eGFR_m')[mean_rng])
-        p_int_m = np.mean(datafile.data('simplestLymphatic.p_int')[mean_rng])/mmHg2SI
-        vi_r =  np.mean(datafile.data('simplestLymphatic.Vr')[mean_rng])
-        vi_e = np.mean(datafile.data('simplestLymphatic.V_excess')[mean_rng])/L2SI
-        lymph_q = np.mean(datafile.data('simplestLymphatic.lymph_flow')[mean_rng])/LpD2SI
+        p_int_m = np.mean(datafile.data('simplestLymphaticDynamicSpeedUp.p_isf')[mean_rng])/mmHg2SI
+        vi_r =  np.mean(datafile.data('simplestLymphaticDynamicSpeedUp.Vr')[mean_rng])
+        vi_e = np.mean(datafile.data('simplestLymphaticDynamicSpeedUp.V_excess')[mean_rng])/L2SI
+        lymph_q = np.mean(datafile.data('simplestLymphaticDynamicSpeedUp.lymph_flow')[mean_rng])/LpD2SI
         pcwp = np.mean(datafile.data('P_pv')[mean_rng])/mmHg2SI
         # edp = np.max()
 
@@ -101,8 +101,8 @@ with open(outputFile, 'a') as file:
             esv = 'NA'
         
         try:
-            edp = np.max(datafile.data('P_MV_c')[mean_rng])/mmHg2SI
-            esp = np.min(datafile.data('P_MV_o')[mean_rng])/mmHg2SI
+            edp = np.max(datafile.data('EDP')[mean_rng])/mmHg2SI
+            esp = np.min(datafile.data('ESP')[mean_rng])/mmHg2SI
         except KeyError:
             edp = 'NA'
             esp = 'NA'
