@@ -117,10 +117,17 @@ def getValsFromDsin(lines:Iterable[Text], keys: Iterable[Text]):
                 value_type_code = lin.split()[1]
                 if value_type_code == '280':
                     value_type = 'stateInit'
+                elif value_type_code == '272':
+                    # a weird one, but still
+                    value_type = 'stateInit2'
+                elif value_type_code == '328':
+                    value_type = 'discrete'
                 elif value_type_code in ['361', '353']:
                     value_type = 'bool'
                 elif value_type_code == '288':
                     value_type = 'guess'
+                elif value_type_code == '264':
+                    value_type = 'discreteInit'
                 else:
                     value_type = value_type_code
                 params[key] = (values[1], value_type)
@@ -376,7 +383,7 @@ def getInputParams(dsFileIn='dsin.txt', filter = '', types = (280, 272), accept 
     
     return tunable_params
 
-def writeInitStatesFromDsin(dsFileIn = 'dsin.txt', filter = '', outputFile = 'states.csv', accept = [2, 6], types = (280, 272, 361, 353)):
+def writeInitStatesFromDsin(dsFileIn = 'dsin.txt', filter = '', outputFile = 'states.csv', accept = [2, 6], types = (280, 264, 272, 328, 361, 353)):
     initStates = getInputParams(dsFileIn, filter = filter, accept = accept, types = types)
 
     with open(dsFileIn) as file:
@@ -595,8 +602,8 @@ USEPSO =  False
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
-    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
-    # writeInitStatesFromDsin(dsFileIn="dsin.txt")
+    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
+    writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')
     print('Done, Johne')
