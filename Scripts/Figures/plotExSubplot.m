@@ -16,16 +16,7 @@ end;
 % figure(3); clf;hold on;
 %%
 dl = dymload(char(filename));
-%% color defiinitons
-color_b = [28, 108, 200]/255;
-color_r = [238, 46, 47]/255;
-color_g = [0, 140, 72]/255;
-color_m = [226, 113, 199]/255;
-color_lb = [182, 226, 255]/255;
-mmHg2SI = 133.322;
-ml2SI = 1e-6;
-bpm2SI = 1/60;
-mlPmin2SI = 1/1000/60;
+color_schema;
 
 time = dymget(dl, 'Time');
 % t_interval_n = [58.13, 58.13 + 1.6]; % interval in seconds
@@ -38,6 +29,7 @@ pa_m = dymget(dl, 'brachial_pressure_mean')/mmHg2SI;
 pa_s = dymget(dl, 'brachial_pressure_systolic')/mmHg2SI;
 pa_d = dymget(dl, 'brachial_pressure_diastolic')/mmHg2SI;
 pw = dymget(dl, 'P_pv')/mmHg2SI;
+pvc = dymget(dl, 'P_sv')/mmHg2SI;
 
 el = dymget(dl, 'Exercise.y_')*100;
 
@@ -47,11 +39,18 @@ vlv = dymget(dl, 'V_LV')/ml2SI;
 
 co = dymget(dl, 'CO')/mlPmin2SI;
 q_ex = dymget(dl, 'q_exercised_avg')/mlPmin2SI;
+
+try
+    % try corvia data
+    q_corv = - dymget(dl, 'r_SystemicVenousInflow.volumeFlowRate')/mlPmin2SI;
+catch KE
+    q_corv = zeros(size(time));
+end
 %%
-ts = 35
-te = 36.6
+ts = 35;
+te = 36.6;
 td = te - ts;
-diffs = [1; find( diff(el) > 0)]
+diffs = [1; find( diff(el) > 0)];
 
 set_ef = [];
 set_edv = [];
@@ -60,10 +59,13 @@ set_pa_m = [];
 set_pa_s = [];
 set_pa_d = [];
 set_vlv = [];
+set_pw = [];
+set_pvc = [];
+set_q_corv = [];
 % set_pow_rv = [];
 set_co = [];
 set_q_ex = [];
-set_pw = [];
+
 
 for i = 1:size(diffs)
 %      i = 9
@@ -91,10 +93,17 @@ for i = 1:size(diffs)
 %     pow_rvs = [pow_rvs , pow_rv(i_s)];
     set_co = [set_co, mean(co(i_int))];
     set_q_ex = [set_q_ex, mean(q_ex(i_int))];
+    set_q_corv = [set_q_corv, mean(q_corv(i_int))];
+    set_pvc = [set_pvc, mean(pvc(i_int))];
 end
 
 s.ef = set_ef;
 s.pow_lv = set_pow_lvs;
+s.q_c = set_q_corv;
+s.pvc = set_pvc;
+s.pcwp = set_pw;
+s.co = set_co;
+s.pa = set_pa_m
 % plot([0:10:100], edv, 'b*-')
 % plot([0:10:100], pow_rvs, 'r*-')
 % plot([0:10:100], pow_lvs, 'b*-')
@@ -103,7 +112,7 @@ s.pow_lv = set_pow_lvs;
 % plot([0:10:100], set_q_ex, 'r*-')
 %%
 hold on;
-title(tit)
+title(tit, 'interpreter', 'None')
 t_ax = [0:10:100];
 gf = fill([t_ax, fliplr(t_ax)], [set_pa_s, fliplr(set_pa_d)], color_lb,'EdgeColor',color_lb);
 
@@ -117,9 +126,9 @@ ylabel('Pressure (mmHg)')
 yyaxis right;
 gco = plot(t_ax, set_q_ex, 'x:', 'LineWidth', 1, 'Color', color_m);
 gqe = plot(t_ax, set_co, 'x-', 'LineWidth', 1, 'Color', color_m);
-ylim([0, 30])
+ylim([0, 30]);
 g = gca; g.YAxis(2).Color = color_m;
-g.TickLength = [0.05, 0.05]
+g.TickLength = [0.05, 0.05];
 
 xlabel('Exercise (% of max)');
 ylabel('Blood flow (L/min)');
@@ -128,3 +137,4 @@ if drawLegend
     leg = legend([gf, gpm, gco, gqe], 'PA', 'PA mean', 'CO', 'Q Ex','Location', 'NorthEast', 'Orientation', 'Horizontal');
     leg.ItemTokenSize = [20, 150];
 end
+s.t_ax = t_ax;
