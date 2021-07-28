@@ -8612,6 +8612,16 @@ type"),       Text(
               LV_SLcollagen_f=0.86,
               LV_stiff=20.0);
           end TestEDPVR_fit_HFpEF3;
+
+          model TestEDPVR_fit_scaled "With scaled ventricles"
+            extends TestEDPVR_fit(ventricles(
+                LV_wall(Vw=ventricles.settings.heart_vntr_xi_Vw*89*1.4, Amref=
+                      ventricles.settings.heart_vntr_xi_AmRef*86*1.2),
+                SEP_wall(Vw=ventricles.settings.heart_vntr_xi_Vw*34*1.4, Amref=
+                      ventricles.settings.heart_vntr_xi_AmRef*39*1.2),
+                RV_wall(Vw=ventricles.settings.heart_vntr_xi_Vw*27*1.4, Amref=
+                      ventricles.settings.heart_vntr_xi_AmRef*110*1.2)));
+          end TestEDPVR_fit_scaled;
         end Testers;
 
         partial model partialHeart
@@ -28855,9 +28865,8 @@ P_hs_plus_dist"),
           parameter Integer nc = 0 "number of capillaries";
           import Physiolibrary.Types.*;
            // annotation(Dialog(connectorSizing = true));
-           RealIO.PressureInput capillaryPressures[nc] annotation (Placement(transformation(extent={{-110,
-                    -10},{-90,10}}),
-                                 iconTransformation(extent={{-110,-10},{-90,10}})));
+           RealIO.PressureInput capillaryPressures[nc] annotation (Placement(transformation(extent={{-106,6},
+                    {-86,26}}),  iconTransformation(extent={{-106,6},{-86,26}})));
 
         //   Real capillaryPressures[:] = {1412, 12412};
         //   Pressure capillaryPressures_mean[nc](each start = 2664);
@@ -28865,7 +28874,7 @@ P_hs_plus_dist"),
           RealIO.PressureInput p_vc "vena cava pressure"
                                                         annotation (Placement(transformation(extent={{-102,
                     -92},{-82,-72}}),
-                                iconTransformation(extent={{-110,-110},{-90,-90}})));
+                                iconTransformation(extent={{106,6},{86,26}})));
 
           output VolumeFlowRate lymph_flow = J1_s  "normal Lymphatic flow per day is 5.787037037037e-08";
           parameter Modelica.Units.SI.Time tau=10;
@@ -28903,7 +28912,7 @@ P_hs_plus_dist"),
 
           parameter Fraction reintroduceFraction = 0;
           RealIO.VolumeFlowRateOutput lymph_diff = if timeSpedUp > lymphaticsSettleTime then (J1_s - J3 - reintroduceFraction*lymphDrain)*speedUpFact else 0 annotation (Placement(transformation(extent={{80,-100},
-                    {100,-80}}),iconTransformation(extent={{92,-110},{112,-90}})));
+                    {100,-80}}),iconTransformation(extent={{92,-46},{112,-26}})));
 
 
 
@@ -29005,7 +29014,62 @@ P_hs_plus_dist"),
                 color={0,0,127}));
           connect(speedUpFact, add.y)
             annotation (Line(points={{16,0},{39,0}}, color={0,0,127}));
-          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                graphics={
+                Rectangle(
+                  extent={{-102,102},{100,-38}},
+                  lineColor={0,0,0},
+                  lineThickness=0.5,
+                  fillColor={142,201,255},
+                  fillPattern=FillPattern.Solid),
+                Ellipse(
+                  extent={{-60,58},{-20,20}},
+                  lineColor={0,0,0},
+                  fillColor={244,125,35},
+                  fillPattern=FillPattern.Solid,
+                  lineThickness=0.5),
+                Ellipse(
+                  extent={{26,60},{66,22}},
+                  lineColor={0,0,0},
+                  fillColor={243,201,132},
+                  fillPattern=FillPattern.Solid,
+                  lineThickness=0.5),
+                Line(
+                  points={{-100,58},{-62,40}},
+                  color={0,0,0},
+                  thickness=0.5),
+                Line(
+                  points={{-100,40},{-62,40}},
+                  color={0,0,0},
+                  thickness=0.5),
+                Line(
+                  points={{-100,20},{-62,40}},
+                  color={0,0,0},
+                  thickness=0.5),
+                Line(
+                  points={{-14,40},{16,40}},
+                  color={0,0,0},
+                  thickness=0.5),
+                Text(
+                  extent={{-56,-2},{-24,16}},
+                  textColor={0,0,0},
+                  textString="ISF"),
+                Text(
+                  extent={{4,-10},{50,20}},
+                  textColor={0,0,0},
+                  textString="LYMPH"),
+                Line(
+                  points={{70,40},{94,40}},
+                  color={0,0,0},
+                  thickness=0.5),
+                Text(
+                  extent={{-198,-18},{-104,94}},
+                  textColor={0,0,0},
+                  textString="CAP"),
+                Text(
+                  extent={{92,10},{186,70}},
+                  textColor={0,0,0},
+                  textString="VC")}),                                    Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end SimplestLymphaticDynamicSpeedUp;
       end Lymphatic;
@@ -40848,6 +40912,8 @@ P_hs_plus_dist"),
         output Physiolibrary.Types.Fraction phi_baro= switch1.u1;
         output Physiolibrary.Types.Volume SV "Stroke volume"; // the formulation of SV = CO/heartComponent.sa_node.HR_true; was causing troubles to CO, keeping it pinned to zero all the time! (Dymola 2022)
         Physiolibrary.Types.Volume SV_i(displayUnit = "ml");
+        output Physiolibrary.Types.Volume SRV "Stroke volume of the right ventricle"; // the formulation of SV = CO/heartComponent.sa_node.HR_true; was causing troubles to CO, keeping it pinned to zero all the time! (Dymola 2022)
+        Physiolibrary.Types.Volume SRV_i(displayUnit = "ml");
       output Physiolibrary.Types.Frequency HR = heartComponent.sa_node.HR_true;
         output Real cardiac_cycle = heartComponent.sa_node.cardiac_cycle
           "Cardiac cycle phase";
@@ -41049,12 +41115,15 @@ P_hs_plus_dist"),
       //        + SystemicComponent.splanchnic_tissue.linearOverflow "Numerical imprecision";
       equation
         der(SV_i) = -heartComponent.sa.q;
+        der(SRV_i) = -heartComponent.pa.q;
         der(brachial_pressure_systolic_i)*tau = max(brachial_pressure  - brachial_pressure_systolic_i, 0);
         der(brachial_pressure_diastolic_i)*tau = min(brachial_pressure  - brachial_pressure_diastolic_i, 0);
 
         when heartComponent.sa_node.beat then
           SV = SV_i;
           reinit(SV_i, 0);
+          SRV = SRV_i;
+          reinit(SRV_i, 0);
           CO = SV*HR;
         end when;
 
@@ -46660,6 +46729,17 @@ P_hs_plus_dist"),
         model CVS_reoptimizeBaseline7
           extends Results.CVS_EDPVR(useAutonomousPhi(y=false));
         end CVS_reoptimizeBaseline7;
+
+        model HFpEf7 "Identification of HFpEF patient n. 7"
+          extends Exercise.CVS_exercise(settings(
+              height=1.7,
+              weight=80,
+              age=65,
+              HR_nominal=1.2,
+              heart_vntr_xi_Vw=0.01*(100/123)),
+            Exercise(startTime=20),
+            phi_fixed(startTime=20));
+        end HFpEf7;
       end SingleModelRun;
 
       package Results
@@ -53353,7 +53433,8 @@ P_hs_plus_dist"),
                 baroreflex(phi(fixed=false)))),
           pulmonaryComponent(UseThoracic_PressureInput=true),
           heartComponent(UseThoracic_PressureInput=true, aorticValve(
-                useChatteringProtection=true)),
+                useChatteringProtection=true),
+            pulmonaryValve(calculateAdditionalMetrics=true)),
           settings(dummy=2));
 
       // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
@@ -57742,9 +57823,11 @@ P_hs_plus_dist"),
         equation
           der(eGFR_m)*tau_gfr = eGFR - eGFR_m;
           connect(SystemicComponent.capillaryPressures, simplestLymphaticDynamicSpeedUp.capillaryPressures)
-            annotation (Line(points={{-10.2,45.6},{-10.2,60},{40,60}}, color={0,0,127}));
+            annotation (Line(points={{-10.2,45.6},{-10.2,61.6},{40.4,61.6}},
+                                                                       color={0,0,127}));
           connect(pressureMeasure.pressure, simplestLymphaticDynamicSpeedUp.p_vc)
-            annotation (Line(points={{26,40},{34,40},{34,50},{40,50}}, color={0,0,127}));
+            annotation (Line(points={{26,40},{66,40},{66,61.6},{59.6,61.6}},
+                                                                       color={0,0,127}));
           connect(SystemicComponent.port_b, pressureMeasure.q_in) annotation (
               Line(
               points={{18,28},{18,38},{16,38}},

@@ -140,7 +140,7 @@ yl2 = ylabel('P (mmHg)')
 ylabel_pos2=get(yl2,'Pos')
 set(yl2,'Pos',[ylabel_xpos(1) ylabel_pos2(2) ylabel_pos2(3)])
 xlabel('t (s)')
-leg = legend('P Thor.', 'P DV', 'TP SV', 'TP PV', 'Location', 'NorthWest');
+leg = legend('P Thor.', 'P DV', 'TP VC', 'TP PV', 'Location', 'NorthWest');
 leg.ItemTokenSize = [10, 2];
 
 drawnow()

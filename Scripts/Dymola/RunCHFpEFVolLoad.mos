@@ -1,47 +1,53 @@
-﻿// Runs a volume loading scenario to find volume compensating given heart failure
-// be careful about too large files, the simulation output processing is limited to 2GB
+﻿// 5
+simplestLymphaticDynamicSpeedUp.drain_q = 1.66667e-07/2;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Reinfusion", stopTime=600, numberOfIntervals=0, outputInterval=0.04, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_HFrEF_15_Reinfusion_5");
+// 10
+simplestLymphaticDynamicSpeedUp.drain_q = 1.66667e-07;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Reinfusion", stopTime=600, numberOfIntervals=0, outputInterval=0.04, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_HFrEF_15_Reinfusion_10");
+// 20
+simplestLymphaticDynamicSpeedUp.drain_q = 1.66667e-07*2;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Reinfusion", stopTime=600, numberOfIntervals=0, outputInterval=0.04, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_HFrEF_15_Reinfusion_20");
+// 40
+simplestLymphaticDynamicSpeedUp.drain_q = 1.66667e-07*4;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Reinfusion", stopTime=600, numberOfIntervals=0, outputInterval=0.04, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_HFrEF_15_Reinfusion_40");
+// 80
+simplestLymphaticDynamicSpeedUp.drain_q = 1.66667e-07*8;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Reinfusion", stopTime=600, numberOfIntervals=0, outputInterval=0.04, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_HFrEF_15_Reinfusion_80");
+// 160
+simplestLymphaticDynamicSpeedUp.drain_q = 1.66667e-07*16;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Reinfusion", stopTime=600, numberOfIntervals=0, outputInterval=0.04, method="Cvode", tolerance=1e-06, resultFile="CVS_renalRegulation_HFrEF_15_Reinfusion_160");
 
-cd E:\data\
-Advanced.SparseActivate = true;
-Advanced.NumberOfCores = 4;
 
-experimentSetupOutput(events=false,equidistant=true);
 
-totalTime = 0;
-for i in 95:-10:10 loop
-  // LVfunctionFraction = Real(i/100);
-  // LVfunctionFraction = 10;  
-  stopTimeAdj = min((10 + (100 - i)*1), 60)*60;
-  // Total maximal volume increase
-  // (stopTimeAdj - 120)*0.25/1000;
-  totalTime = totalTime + stopTimeAdj;
-  "Simulation time " + String(stopTimeAdj/60) + " min at max vol " + String((stopTimeAdj - 120)*1/1000) + " L";  
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Drain", stopTime=10, numberOfIntervals=0, outputInterval=0.02, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFrEF_15_Drain_0");
 
-simulateExtendedModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_CHF_baro", 
-stopTime=stopTimeAdj, 
-numberOfIntervals=0, outputInterval=0.04, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_CHF_baro_" + String(i),
-initialNames = {"LVfunctionFraction"},
-initialValues = {i/100}, autoLoad=false);
-end for;
-
-for i in 100:10:200 loop
-  stopTimeAdj = min((10 + (i)*1), 120)*60;
-  // Total maximal volu
-  
-simulateExtendedModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_HFdilated_baro", 
-stopTime=stopTimeAdj, 
-numberOfIntervals=0, outputInterval=0.1, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFpEFDilated_baro_" + String(i),
-initialNames = {"AmRefFactor", "initVol"},
-initialValues = {i/100, 0.0}, autoLoad=false);
-end for;
-
-for i in 2700:200:5000 loop
-  stopTimeAdj = min((10 + (i)*1), 120)*60;
-  // Total maximal volu
-  
-simulateExtendedModel("ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_HFpEF_baro", 
-stopTime=stopTimeAdj, 
-numberOfIntervals=0, outputInterval=0.1, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFpEF_baro_" + String(i),
-initialNames = {"stiffeningFactor", "initVol"},
-initialValues = {i/100, 1e-3}, autoLoad=false);
-end for;
+timeafter = 600;
+// speedup = 60x
+// 1h
+simplestLymphaticDynamicSpeedUp.drain_length = 3600;
+simtime = simplestLymphaticDynamicSpeedUp.drain_length/60 + timeafter;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Drain", stopTime=simtime, numberOfIntervals=0, outputInterval=0.06, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFrEF_15_Drain_1h");
+// 2h
+simplestLymphaticDynamicSpeedUp.drain_length = 3600*2;
+simtime = simplestLymphaticDynamicSpeedUp.drain_length/60 + timeafter;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Drain", stopTime=simtime, numberOfIntervals=0, outputInterval=0.06, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFrEF_15_Drain_2h");
+// 4h
+simplestLymphaticDynamicSpeedUp.drain_length = 3600*4;
+simtime = simplestLymphaticDynamicSpeedUp.drain_length/60 + timeafter;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Drain", stopTime=simtime, numberOfIntervals=0, outputInterval=0.06, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFrEF_15_Drain_4h");
+// 6h
+simplestLymphaticDynamicSpeedUp.drain_length = 3600*6;
+simtime = simplestLymphaticDynamicSpeedUp.drain_length/60 + timeafter;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Drain", stopTime=simtime, numberOfIntervals=0, outputInterval=0.06, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFrEF_15_Drain_6h");
+// 8h
+simplestLymphaticDynamicSpeedUp.drain_length = 3600*8;
+simtime = simplestLymphaticDynamicSpeedUp.drain_length/60 + timeafter;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Drain", stopTime=simtime, numberOfIntervals=0, outputInterval=0.06, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFrEF_15_Drain_8h");
+// 10h
+simplestLymphaticDynamicSpeedUp.drain_length = 3600*10;
+simtime = simplestLymphaticDynamicSpeedUp.drain_length/60 + timeafter;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Drain", stopTime=simtime, numberOfIntervals=0, outputInterval=0.06, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFrEF_15_Drain_10h");
+// 12h
+simplestLymphaticDynamicSpeedUp.drain_length = 3600*12;
+simtime = simplestLymphaticDynamicSpeedUp.drain_length/60 + timeafter;
+simulateModel("NXT_Lymphatics.CVS_renalRegulation_HFrEF_15_Drain", stopTime=simtime, numberOfIntervals=0, outputInterval=0.06, method="Cvode", tolerance=1e-07, resultFile="CVS_renalRegulation_HFrEF_15_Drain_12h");
