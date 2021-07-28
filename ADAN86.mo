@@ -8454,31 +8454,38 @@ type"),       Text(
             output Physiolibrary.Types.Pressure EDP_err = if EDPVRnorm_V.EDP > 0 then (EDPVRnorm_V.EDP - ventricles.P_LV)^2 else 0;
             Real err;
             inner Settings            settings(
-              heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 7.396880e+03,
-              heart_vntr_D_0_maxAct=1.049063e-03,
-              heart_vntr_TS_maxAct(displayUnit="s") = 3.477405e-02,
-              heart_vntr_TR_maxAct(displayUnit="s") = 1.459769e-01,
-              eta_vc=1.651054e-01,
-              tissues_eta_Ra=1.145225e+00,
-              tissues_eta_Rv=4.625000e-01,
-              tissues_eta_C=4.608013e-01,
-              tissues_chi_Ra(displayUnit="1") = 5.000000e+01,
-              tissues_chi_C=4.575000e-01,
-              V_PV_init=0,
-              heart_R_LA(displayUnit="(mmHg.s)/ml") = 1.992534e+06,
-              heart_R_vlv(displayUnit="(mmHg.s)/ml") = 8.006779e+05,
-              heart_vntr_D_0=7.479470e+00,
-              heart_vntr_D_A=1.301658e+03,
-              heart_vntr_TS=3.390625e-01,
-              heart_vntr_TR(displayUnit="s") = 3.731250e-01,
-              heart_atr_D_0=2.866584e+07,
-              heart_atr_D_A=6.237524e+07,
-              syst_TPR=1.291340e+08,
-              syst_TR_frac(displayUnit="1") = 6.072944e+00,
-              pulm_C_PA=1.435189e-08,
-              pulm_R(displayUnit="(Pa.s)/m3") = 9.796150e+06,
-              heart_atr_TS=0.08,
+              initByPressure=false,
+              veins_delayed_activation=false,
               baro_tau_s(displayUnit="s") = 93,
+              heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 4.600005e+03,
+              heart_vntr_D_0_maxAct=1.225000e-03,
+              heart_vntr_TS_maxAct(displayUnit="s") = 1.047740e-01,
+              heart_vntr_TR_maxAct(displayUnit="s") = 7.597690e-02,
+              eta_vc=2.101054e-01,
+              tissues_eta_Ra=3.145225e+00,
+              tissues_eta_Rv=2.806250e+00,
+              tissues_eta_C=5.708013e-01,
+              tissues_chi_Ra(displayUnit="1") = 2.481250e+01,
+              tissues_chi_Rv=1.384375e+01,
+              tissues_chi_C=-3.125000e-02,
+              V_PV_init=0,
+              heart_R_LA(displayUnit="(mmHg.s)/ml") = 1.655068e+06,
+              heart_R_vlv(displayUnit="(mmHg.s)/ml") = 7.723515e+05,
+              heart_vntr_D_0=7.479470e+00,
+              heart_vntr_D_A=1.298533e+03,
+              heart_vntr_TS=3.246875e-01,
+              heart_vntr_TR(displayUnit="s") = 4.031250e-01,
+              heart_atr_D_0=2.651364e+07,
+              heart_atr_D_A=7.621357e+07,
+              syst_TPR=1.287333e+08,
+              syst_TR_frac(displayUnit="1") = 5.227710e+00,
+              pulm_C_PA=1.635189e-08,
+              pulm_R(displayUnit="(Pa.s)/m3") = 1.019753e+07,
+              heart_vntr_k_passive=5.000000e+00,
+              heart_vntr_SLcollagen=2.087500e+00,
+              heart_vntr_PConcollagen=2.642812e+01,
+              heart_vntr_PExpcollagen=2.481250e+00,
+              heart_atr_TS=0.08,
               baro_f1=3.5e-03,
               dummy=2,
               baro_fsn(displayUnit="1/min") = 0.0355333333,
@@ -8487,11 +8494,9 @@ type"),       Text(
               chi_phi=0.7,
               heart_R_RA(displayUnit="(dyn.s)/cm5") = settings.heart_R_LA,
               pulm_q_nom_maxq(displayUnit="l/min") = 0.00033333333333333,
-              initByPressure=false,
               veins_UseNonLinearVeins=true,
               veins_linearE_rel=765,
               veins_linearV0_rel=0.793,
-              veins_delayed_activation=true,
               veins_activation_tau=1,
               heart_vntr_Tact_maxAct=8.000000e-02,
               heart_vntr_Lsref=1.9,
@@ -8518,11 +8523,7 @@ type"),       Text(
               tissues_ZPV_nom=0.00210124,
               tissues_gamma=0.5,
               tissues_tau_R(displayUnit="s") = 0,
-              veins_C_phi=0.09,
-              heart_vntr_PConcollagen=20.0,
-              heart_vntr_PExpcollagen=3.25,
-              heart_vntr_SLcollagen=2.1,
-              heart_vntr_k_passive=10.0)
+              veins_C_phi=0.09)
               annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
           equation
             der(err) = EDP_err;
@@ -8564,6 +8565,16 @@ type"),       Text(
                 Tolerance=1e-06,
                 __Dymola_Algorithm="Cvode"));
           end TestEDPVR_fit;
+
+          model TestEDPVR_fit_scaled "With scaled ventricles"
+            extends TestEDPVR_fit(ventricles(
+                LV_wall(Vw=ventricles.settings.heart_vntr_xi_Vw*89*1.4, Amref=
+                      ventricles.settings.heart_vntr_xi_AmRef*86*1.2),
+                SEP_wall(Vw=ventricles.settings.heart_vntr_xi_Vw*34*1.4, Amref=
+                      ventricles.settings.heart_vntr_xi_AmRef*39*1.2),
+                RV_wall(Vw=ventricles.settings.heart_vntr_xi_Vw*27*1.4, Amref=
+                      ventricles.settings.heart_vntr_xi_AmRef*110*1.2)));
+          end TestEDPVR_fit_scaled;
         end Testers;
 
         partial model partialHeart
@@ -46657,6 +46668,17 @@ P_hs_plus_dist"),
         model CVS_reoptimizeBaseline7
           extends Results.CVS_EDPVR(useAutonomousPhi(y=false));
         end CVS_reoptimizeBaseline7;
+
+        model HFpEf7 "Identification of HFpEF patient n. 7"
+          extends Exercise.CVS_exercise(settings(
+              height=1.7,
+              weight=80,
+              age=65,
+              HR_nominal=1.2,
+              heart_vntr_xi_Vw=0.01*(100/123)),
+            Exercise(startTime=20),
+            phi_fixed(startTime=20));
+        end HFpEf7;
       end SingleModelRun;
 
       package Results
@@ -58041,8 +58063,8 @@ P_hs_plus_dist"),
         model CVS_renalRegulation_HFrEF_15_ss
           "Steady state initialization from 2021-07-12 10:03:33.934081 at time 800.0"
           extends
-            ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_HFrEF_15
-            ( SystemicComponent(
+            ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_HFrEF_15(
+              SystemicComponent(
                 baroreflex_system(
                   baroreflex(phi_mean(start = 0.40002874, fixed = true), phi(start = 0.3972208, fixed = true), f1_adj(start = 0.0069169486, fixed = true)),
                   baroreceptor_aortic(fbr_auc(start = 0.5277771, fixed = true), fbr_int(start = 5.3820257, fixed = true), epsilon(start = 1.4875317, fixed = true), s(start = 0.90904397, fixed = true)),
