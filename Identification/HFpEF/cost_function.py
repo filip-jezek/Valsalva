@@ -43,9 +43,9 @@ def plotObjectives(vars_set, interval, objectives):
 
 
 def getObjectives(vars_set):
-
+    vars_set['__draw_plots'] = False
     
-    fun_lib.checkSimulationLength(vars_set['time'][-1],10, penalty=1000)
+    fun_lib.checkSimulationLength(vars_set['time'][-1],20, penalty=1000)
     # we have 3 intervals
     # baseline resting volumes and CO
     # baseline resting pressures and CO
@@ -86,7 +86,7 @@ def getObjectives(vars_set):
     # interval for averaging
     interval_ex = fun_lib.findInterval(time[0] + steady2-3, time[0] + steady2, time)
     # to observe how much the baseline fluctuates
-    steady_interval = fun_lib.findInterval(time[-1] - 30, time[-1] -5, time)
+    # steady_interval = fun_lib.findInterval(time[-1] - 30, time[-1] -5, time)
 
     # mitral valve flow ratio spontaneous:atrial contraction is about 2:1 
     # vla_1st_Peak_i = fun_lib.findInterval(39.8, 40, time)
@@ -125,20 +125,22 @@ def getObjectives(vars_set):
             ('Ppas', numpy.max(vars_set['P_pa'][interval])/mmHg2SI, 29, None, 5),
             ('Ppad', numpy.min(vars_set['P_pa'][interval])/mmHg2SI, 14, None, 5),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval])/mmHg2SI, 13, None, 1),
-            ('EDP_RV', numpy.max(vars_set['heartComponent.ventricles.P_RV'][interval])/mmHg2SI, 32, None, 5),
-            ('EDP_RV', numpy.min(vars_set['heartComponent.ventricles.P_RV'][interval])/mmHg2SI, 4, None, 1),
+            ('P_SRV', numpy.max(vars_set['heartComponent.ventricles.P_RV'][interval])/mmHg2SI, 32, None, 5),
+            ('P_sv', numpy.min(vars_set['P_sv'][interval])/mmHg2SI, 4, None, 1),
+            
             # 20W exercise
             ('BPs_Ex', max(vars_set['brachial_pressure'][interval_ex])/mmHg2SI, 159, None, 1),
             ('BPd_Ex', min(vars_set['brachial_pressure'][interval_ex])/mmHg2SI, 82, None, 1),
             ('Ppas_Ex', numpy.max(vars_set['P_pa'][interval_ex])/mmHg2SI, 42, None, 5),
             ('Ppad_Ex', numpy.min(vars_set['P_pa'][interval_ex])/mmHg2SI, 26, None, 5),
             ('Ppv_Ex', numpy.mean(vars_set['P_pv'][interval_ex])/mmHg2SI, 23, None, 1),
-            ('EDP_RV_Ex', numpy.max(vars_set['heartComponent.ventricles.P_RV'][interval_ex])/mmHg2SI, 45, None, 5),
-            ('EDP_RV_Ex', numpy.min(vars_set['heartComponent.ventricles.P_RV'][interval_ex])/mmHg2SI, 6, None, 1),
+            ('SP_RV_Ex', numpy.max(vars_set['heartComponent.ventricles.P_RV'][interval_ex])/mmHg2SI, 45, None, 5),
+            ('DP_RV_Ex', numpy.min(vars_set['P_sv'][interval_ex])/mmHg2SI, 6, None, 1),
             ('CO_Ex', numpy.mean(vars_set['CO'][interval_ex]) /lpm2SI, 11.5, None, 2),
           
-            # general assumptions
-            ('PWV', pwv, None, [8, 50], 1)            ]
+            # # general assumptions
+            ('PWV', pwv, None, [8, 50], 0)            
+            ]
 
     objectives=list(map(lambda o: fun_lib.ObjectiveVar(o[0], value = o[1], targetValue = o[2], limit=o[3], tolerance=o[4], k_p=1), ov))
 
