@@ -12261,9 +12261,9 @@ double initialValue(12138,6)
   6   256   # settings.BSA
   0       0                       0                       0                
   6   257   # settings.initByPressure
- -1 %settings.V_PV_init% -0.01 1e+100
+ -1 1.987499E-4 -0.01 1e+100
   1   280   # settings.V_PV_init
- -1 %settings.heart_R_vlv% 0.0 1e+100
+ -1 95217.63 0.0 1e+100
   1   280   # settings.heart_R_vlv
  -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_AV
@@ -12283,7 +12283,7 @@ double initialValue(12138,6)
   1   280   # settings.heart_vntr_D_0
  -1  1.2250000000000000E-03       0                       0                
   1   280   # settings.heart_vntr_D_0_maxAct
- -1 %settings.heart_vntr_D_A% 0.0 0.0
+ -1 1430.4132 0.0 0.0
   1   280   # settings.heart_vntr_D_A
  -1  4.6000050000000001E+03       0                       0                
   1   280   # settings.heart_vntr_D_A_maxAct
@@ -12309,7 +12309,7 @@ double initialValue(12138,6)
   1   280   # settings.heart_atr_TR
  -1  8.1300813008130079E-01       0                       0                
   1   280   # settings.heart_vntr_xi_Vw
- -1 %settings.heart_vntr_xi_AmRef% 0.0 0.0
+ -1 0.83562505 0.0 0.0
   1   280   # settings.heart_vntr_xi_AmRef
  -1       5                       0                       0                
   1   280   # settings.heart_vntr_k_passive
@@ -12329,7 +12329,7 @@ double initialValue(12138,6)
   1   280   # settings.syst_abd_P_th_ratio
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
- -1 %settings.syst_art_k_E% 0.0 0.0
+ -1 1.0020165 0.0 0.0
   1   280   # settings.syst_art_k_E
   0       1                       0                       0                
   6   257   # settings.syst_art_UseVasoconstrictionEffect
@@ -12337,9 +12337,9 @@ double initialValue(12138,6)
   1   280   # settings.eta_vc
  -1       1                       0                       0                
   1   280   # settings.syst_tissues_hydrostaticLevel_correction
- -1 %settings.syst_TPR% 0.0 1e+100
+ -1 4.20233024E8 0.0 1e+100
   1   280   # settings.syst_TPR
- -1 %settings.syst_TR_frac% 0.0 0.0
+ -1 5.958773 0.0 0.0
   1   280   # settings.syst_TR_frac
   0       0                       0                       0                
   6   256   # settings.tissues_Pa_nom
@@ -12409,7 +12409,7 @@ double initialValue(12138,6)
   1   280   # settings.blood_mu
  -1    1050                       0                       0                
   1   280   # settings.blood_rho
- -1 %settings.chi_phi% 0.0 0.0
+ -1 0.255 0.0 0.0
   1   280   # settings.chi_phi
  -1  2.4812500000000000E+01       0                       0                
   1   280   # settings.tissues_chi_Ra
@@ -12451,7 +12451,7 @@ double initialValue(12138,6)
   1   280   # settings.pulm_CO_target
  -1  3.1942059999999999E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1 %settings.pulm_C_PA% 0.0 0.0
+ -1 1.6351982E-9 0.0 0.0
   1   280   # settings.pulm_C_PA
  -1  1.3332238741500000E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom

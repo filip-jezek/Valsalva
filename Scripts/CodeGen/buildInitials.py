@@ -17,13 +17,13 @@ import ModelicaClass as mc
 import os
 import datetime
 
-base_model_full_path = 'ADAN_main.SystemicTree.Variations.Renals.CVS_renalRegulation_HFrEF_15'
+base_model_full_path = 'ADAN_main.SystemicTree.Variations.Renals.CVS_HFpEF_2'
 relative_folder = ''
 exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
-steadyStateAt = 800
+steadyStateAt = 1200
 resetVPV = True
-mat_file_path = 'settings.V_PV_init = 0.0021.mat' # or none to detect automatically
+mat_file_path = 'HFpEF2\\settings.V_PV_init = 0.00080.mat' # or none to detect automatically
 
 # get the main and path
 if '.' in base_model_full_path:
