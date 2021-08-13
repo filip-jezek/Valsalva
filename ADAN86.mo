@@ -3545,17 +3545,31 @@ type"),       Text(
           Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b port_b
             annotation (Placement(transformation(extent={{90,-10},{110,10}}),
                 iconTransformation(extent={{90,-10},{110,10}})));
+          parameter Boolean UsePhi_Input = false annotation(choices(checkBox=true));
           parameter Boolean UseThoracic_PressureInput=true    annotation(choices(checkBox=true));
           parameter Physiolibrary.Types.Volume deadVolume = 1e-3 "Additional buffer for pulmonary venous pool to apply volume additions or subtractions without running to negative volumes. Gets subtracked from the total blood volume eventually.";
           Physiolibrary.Types.Pressure _thoracic_pressure;
           Physiolibrary.Types.Volume volume;
           outer Settings settings annotation (Placement(transformation(extent={
                     {-100,80},{-80,100}})));
+          Physiolibrary.Types.Constants.FractionConst phi0(k(displayUnit="(mmHg.s)/ml")=
+                 settings.phi0) if not UsePhi_Input
+            annotation (Placement(transformation(extent={{-90,56},{-82,64}})));
+          Physiolibrary.Types.RealIO.FractionInput phi_input if UsePhi_Input annotation (Placement(
+              transformation(extent={{-120,40},{-80,80}}),  iconTransformation(extent={{80,-100},
+                    {120,-60}})));
+        protected
+          Physiolibrary.Types.RealIO.FractionInput phi_input1
+            annotation (Placement(transformation(extent={{-72,58},{-68,62}})));
         equation
           if not UseThoracic_PressureInput then
             _thoracic_pressure = 0;
           end if;
 
+          connect(phi_input, phi_input1)
+            annotation (Line(points={{-100,60},{-70,60}},   color={0,0,127}));
+          connect(phi0.y, phi_input1)
+            annotation (Line(points={{-81,60},{-70,60}},   color={0,0,127}));
         end partialPulmonary;
 
         model Pulmonary_ADAN86
@@ -3744,6 +3758,9 @@ type"),       Text(
             UseCondFracInput "Normal conductance fraction"
             annotation (Placement(transformation(extent={{-90,26},{-82,34}})));
           parameter Boolean UseCondFracInput=false "Use conductance modifier input";
+          Physiolibrary.Blocks.Factors.ProportionalFactor proportionalFactor(u0
+              =settings.phi0)
+            annotation (Placement(transformation(extent={{-10,50},{10,70}})));
         equation
           volume =c_pa.volume + c_pv.volume - deadVolume;
 
@@ -3759,8 +3776,6 @@ type"),       Text(
             annotation (Line(points={{-52,-42},{-8,-42},{-8,-100}}, color={0,0,127}));
           connect(c_pv.externalPressure, thoracic_pressure)
             annotation (Line(points={{68,-42},{-8,-42},{-8,-100}}, color={0,0,127}));
-          connect(hydraulicConductance.y, phi_factor.u)
-            annotation (Line(points={{-19,80},{0,80},{0,50}}, color={0,0,127}));
           connect(adenosine, phi_factor.phi)
             annotation (Line(points={{-100,40},{-10,40}}, color={0,0,127}));
           connect(fraction.y, phi_factor.phi) annotation (Line(points={{-81,50},{-54,50},
@@ -3789,6 +3804,12 @@ type"),       Text(
             annotation (Line(points={{-100,20},{-8,20}}, color={0,0,127}));
           connect(conductance0.y, normalization.u) annotation (Line(points={{-81,30},{-54,
                   30},{-54,20},{-8,20}}, color={0,0,127}));
+          connect(hydraulicConductance.y, proportionalFactor.yBase) annotation
+            (Line(points={{-19,80},{0,80},{0,62}}, color={0,0,127}));
+          connect(proportionalFactor.y, phi_factor.u)
+            annotation (Line(points={{0,56},{0,50}}, color={0,0,127}));
+          connect(phi_input1, proportionalFactor.u)
+            annotation (Line(points={{-70,60},{-8,60}}, color={0,0,127}));
           annotation (Documentation(info="<html>
 <p><b>Convention</b>:</p>
 <p><br>The parameters are UPPERCASE, similarly to the Matlab source code.</p>
@@ -4008,7 +4029,8 @@ type"),       Text(
               annotation (Placement(transformation(extent={{-120,70},{-80,110}}),
                   iconTransformation(extent={{-120,60},{-80,100}})));
             Physiolibrary.Types.Fraction phi_;
-            Modelica.Blocks.Interfaces.RealInput t0 "Start time of current cardiac cycle"
+            Modelica.Blocks.Interfaces.RealInput t0
+              "Start time of current cardiac cycle"
               annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
                   iconTransformation(extent={{-120,-20},{-80,20}})));
             parameter Modelica.Units.SI.Time t0_delay=0
@@ -4074,15 +4096,23 @@ type"),       Text(
                     thickness=0.5)}));
           end partialDriving;
 
-          model AtriumSimple "Simple atrium with external driving function"
+          partial model partialAtrium
             Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_a
               annotation (Placement(transformation(extent={{-10,-90},{10,-70}})));
+
+                        parameter Boolean enabled = true "Atria enabled. False means thay are disabled and are therefore not filling nor pulsing"
+           annotation(choices(checkBox=true));
+
+            annotation (Icon(graphics={            Bitmap(extent={{-100,100},{100,-100}},
+                               fileName=
+                        "modelica://Physiolibrary/Resources/Icons/sequerestedVolume.png")}));
+          end partialAtrium;
+
+          model AtriumSimple "Simple atrium with external driving function"
+            extends partialAtrium;
             Modelica.Blocks.Interfaces.RealInput     D
               "Driving function fro activation of the atrial muscles"
               annotation (Placement(transformation(extent={{-114,-10},{-94,10}})));
-
-          parameter Boolean enabled = true "Atria enabled. False means thay are disabled and are therefore not filling nor pulsing"
-           annotation(choices(checkBox=true));
 
           //  parameter Real Emin = 0.05 "tats 25%";
           //  parameter Real Emax = 0.15;
@@ -4137,25 +4167,18 @@ type"),       Text(
             end if;
 
             annotation (Icon(coordinateSystem(preserveAspectRatio=false),
-                  graphics={                       Bitmap(extent={{-100,100},
-                        {100,-100}},
-                               fileName=
-                        "modelica://Physiolibrary/Resources/Icons/sequerestedVolume.png"),
+                  graphics={
                     Rectangle(extent={{-100,100},{100,-100}}, lineColor={28,
                         108,200})}),                                       Diagram(
                   coordinateSystem(preserveAspectRatio=false)));
           end AtriumSimple;
 
           model Atrium
-            Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_a
-              annotation (Placement(transformation(extent={{-10,-90},{10,-70}})));
+            extends partialAtrium;
             Physiolibrary.Types.RealIO.FractionInput cardiac_cycle
               "Time from start of the cycle" annotation (Placement(transformation(extent={
                       {-114,-10},{-94,10}}), iconTransformation(extent={{-120,
                       -20},{-80,20}})));
-
-          parameter Boolean enabled = true "Atria enabled. False means thay are disabled and are therefore not filling nor pulsing"
-           annotation(choices(checkBox=true));
 
           parameter Physiolibrary.Types.Time Tact= 0
                                                   annotation (Evaluate = false);
@@ -4167,8 +4190,9 @@ type"),       Text(
           //  % Emin = 0.05 ;
           //  % Emax = 0.15 ;
            parameter Real sigma_a = 0.125;
+            parameter Real stiffness_scaling=1 "arbitrary scaling the atrial stiffness";
             Real act=exp(-(atriaCycle/sigma_a)^2);
-            Real _E = (Emin + Emax*act);
+            Real _E = stiffness_scaling*(Emin + Emax*act);
             Physiolibrary.Types.HydraulicElastance E=_E/Constants.ml_per_mmhg2SI;
 
             Physiolibrary.Types.Volume volume(start=100e-6);// = _VLA*Constants.ml2SI;
@@ -6207,14 +6231,14 @@ type"),       Text(
               extends
                 ADAN_main.Components.Subsystems.Heart.Auxiliary.partialDriving;
 
-              parameter Modelica.Units.SI.Time tauR=0.048;
-              Real x=min(8, max(0, t0/tauR));
+              parameter Modelica.Units.SI.Time tauR0=0.048;
+              Real x=min(8, max(0, t0/tauR0));
               Real Fr = 0.02*(x^3)*((8-x)^2)*exp(-x);
               parameter Physiolibrary.Types.Fraction phi_effect_Ca = 0;
               Physiolibrary.Types.Fraction phi_effect = (1 + phi_effect_Ca*(phi_ - phi0));
 
             equation
-              D = Fr*phi_effect;
+              D =Fr/tauR0*phi_effect;
 
               annotation (Icon(graphics={Text(
                       extent={{-60,-100},{80,-40}},
@@ -6224,6 +6248,32 @@ type"),       Text(
                       fillPattern=FillPattern.Solid,
                       textString="Lumens")}));
             end Driving_Lumens;
+
+            model Driving_LumensExercise
+              "Lumens driving with scaling of taus by HR"
+              extends ADAN_main.Components.Subsystems.Heart.Auxiliary.partialDriving;
+
+              parameter Modelica.Units.SI.Time tauR0=0.048;
+              Modelica.Units.SI.Time tauR = tauR0/frequency;
+              Real x=min(8, max(0, t0/tauR));
+              Real Fr = 0.02*(x^3)*((8-x)^2)*exp(-x);
+              parameter Physiolibrary.Types.Fraction phi_effect_Ca = 0;
+              Physiolibrary.Types.Fraction phi_effect = (1 + phi_effect_Ca*(phi_ - phi0));
+
+              Modelica.Blocks.Interfaces.RealInput frequency "Current HR" annotation (
+                  Placement(transformation(extent={{-120,-120},{-80,-80}}),
+                    iconTransformation(extent={{-120,-120},{-80,-80}})));
+            equation
+              D =Fr/tauR*phi_effect;
+
+              annotation (Icon(graphics={Text(
+                      extent={{-60,-100},{80,-40}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="Lumens")}));
+            end Driving_LumensExercise;
 
             model Driving_Olufsen "Outputs an activation fraction empirically constructed after Olufsen and Ottesen from systolic contraction and systolic relaxation. This enables detailed control of the systolic timing."
               extends
@@ -6626,6 +6676,122 @@ type"),       Text(
                 SL(start = 2.2));
             end VentricleWall_Calcium_Rat;
 
+            model VentricleWall_LumensOriginal
+              "As close to original Lumens model as possible, with exercise capabilities"
+              extends partialVentricleWall;
+              Real sinalpha = Tx/Tm;
+              Modelica.Units.SI.Angle alpha=asin(sinalpha);
+
+              // Inlcuded in the base class:
+              //   input Real xm;
+              //   input Real ym;
+              //   Modelica.Blocks.Interfaces.RealInput Ca_i "Connector of Calcium input signal"
+              //     annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+              //         iconTransformation(extent={{-120,-20},{-80,20}})));
+              //
+              //   parameter Real Vw "Heart wall volumes (mL)";
+              //   parameter Real Amref "midwall reference surface area, cm^2";
+              //   Real Tm;
+              //   Real Tx=Tm*2*xm*ym/(xm^2 + ym^2);
+              //   Real Ty=Tm*(-xm^2 + ym^2)/(xm^2 + ym^2);
+              // // ventricular mechanics
+              // Real Vm=(Modelica.Constants.pi/6)*xm*(xm^2 + 3*ym^2);
+              // Real Am=Modelica.Constants.pi*(xm^2 + ym^2);
+              // Real Cm=2*xm/(xm^2 + ym^2);
+              //
+              // Real z=3*Cm*Vw/(2*Am);
+              // Real epsf=(1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4;
+              // Real SLo(nominal=1e-6) = Lsref*exp(epsf);
+              // Real SL(nominal=1e-6, start=2.3) "sarcomere length, um";
+              // parameter Real k_passive=50 "mN / mm^2 / micro";
+              // parameter Real L0=0.907 "micron";
+
+              // Triseg parameters
+              parameter Real Lsref=1.9 "Resting SL, micron";
+              parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
+              parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
+              parameter Real sigma_act0=7.5*96 "mmHg ";
+              Real sigma_act = sigma_act0*(1 + inotropy_factor*phi_input);
+              // not used in the current version. Using k_passive instead
+            //  parameter Real sigma_pas=7.5*7 "mmHg";
+              parameter Real SLrest=1.51 "microns";
+
+              // time constants
+              parameter Modelica.Units.SI.Time tauD0=0.032
+                "Factor scaling contraction decay time";
+              Modelica.Units.SI.Time tauD=tauD0/frequency
+                "Factor scaling contraction decay time";
+
+            //   parameter Modelica.Units.SI.Time tauR=0.048
+            //     "Factor scaling contraction rise time";
+              parameter Modelica.Units.SI.Time tauSC0=0.425
+                "Factor scaling duration of contraction";
+            Modelica.Units.SI.Time tauSC=tauSC0/frequency
+                "Factor scaling duration of contraction";
+              parameter Real Crest0=0.02 "Diastolic resting level of activation";
+              Real Crest=Crest0/(1 + calcium_factor*phi_input);
+              parameter Real inotropy_factor = 2.5;
+              parameter Real calcium_factor = 5;
+
+              Real CL=tanh(4*(SL - SLrest)^2) "increase of activation with sarcomere length";
+              Real T=tauSC*(0.29 + 0.3*SL) "decrease of activation duration with decrease of sarcomere length";
+
+              Real C(fixed = false) "activation function, related to intracellular calcium conncentration";
+              Real dC=CL*D + (Crest - C)/(1 + exp((T - cardiacCycle/frequency)/tauD))/tauD;
+              // Sliding velocities -- Eq. (B2) Lumens et al.
+              Real dSL=((SLo - SL)/LSEiso - 1)*vmax;
+
+              // Collagen force
+              parameter Real SLcollagen=2.25;
+              // threshold for collagen activation, microns
+              parameter Real PConcollagen=0.01;
+              // contriubtion of collagen (??)
+              parameter Real PExpcollagen=70;
+              // expresion of collagen (??), unitless
+
+              // Collagen force
+              Real sigma_collagen=22*max(0, SLo - 1.8)^3;
+
+              // Passive forces (Lumens) do not really work here atm so we are using DAB variant
+              // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
+              Real sigmapas=22*(SLo - 1.6) + sigma_collagen;
+              // Active forces could not go negative
+              Real sigmaact=sigma_act0*(1 + phi_input*inotropy_factor)*C*(SL - SLrest)*(SLo -
+                  SL)/LSEiso;
+              // Total forces
+              Real sigmaM=sigmaact + sigmapas;
+              // equilibrium of forces at junction circle already in base class
+
+
+              Physiolibrary.Types.RealIO.FractionInput phi_input
+                annotation (Placement(transformation(extent={{-20,-20},{20,20}},
+                    rotation=270,
+                    origin={0,100}),
+                    iconTransformation(extent={{-20,-20},{20,20}},
+                    rotation=270,
+                    origin={0,100})));
+            equation
+
+              der(C) = dC;
+            //   C = drivingInput;
+              der(SL) = dSL;
+
+              Tm = (Vw*sigmaM/(2*Am))*(1 + (z^2)/3 + (z^4)/5);
+              // Tx and Ty are defined in the parent base class
+              // Real Tx =  Tm*2*xm*ym/(xm^2 + ym^2);
+              // Real Ty =  Tm*(-xm^2 + ym^2)/(xm^2 + ym^2);
+
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={Text(
+                      extent={{-80,-20},{64,40}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="L")}),                                     Diagram(
+                    coordinateSystem(preserveAspectRatio=false)));
+            end VentricleWall_LumensOriginal;
+
             model VentricleWall_Lumens
               "As close to original Lumens model as possible, with exception of passive force."
               extends partialVentricleWall;
@@ -6653,6 +6819,9 @@ type"),       Text(
               // Real epsf=(1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4;
               // Real SLo(nominal=1e-6) = Lsref*exp(epsf);
               // Real SL(nominal=1e-6, start=2.3) "sarcomere length, um";
+              // parameter Real k_passive=50 "mN / mm^2 / micro";
+              // parameter Real L0=0.907 "micron";
+
 
               // Triseg parameters
               parameter Real Lsref=1.9 "Resting SL, micron";
@@ -6666,8 +6835,8 @@ type"),       Text(
               // same parameters as in driving function. Change with care.
               parameter Modelica.Units.SI.Time tauD=0.032
                 "Factor scaling contraction decay time";
-              parameter Modelica.Units.SI.Time tauR=0.048
-                "Factor scaling contraction rise time";
+            //   parameter Modelica.Units.SI.Time tauR=0.048
+            //     "Factor scaling contraction rise time";
               parameter Modelica.Units.SI.Time tauSC=0.425
                 "Factor scaling duration of contraction";
               parameter Real Crest=0.02 "Diastolic resting level of activation";
@@ -6675,7 +6844,7 @@ type"),       Text(
               Real CL=tanh(4*(SL - SLrest)^2) "increase of activation with sarcomere length";
               Real T=tauSC*(0.29 + 0.3*SL) "decrease of activation duration with decrease of sarcomere length";
               Real C(fixed = false) "activation function, related to intracellular calcium conncentration";
-              Real dC=CL*D/tauR + (Crest - C)/(1 + exp((T - cardiacCycle/
+              Real dC=CL*D + (Crest - C)/(1 + exp((T - cardiacCycle/
                   frequency)/tauD))/tauD;
               // Sliding velocities -- Eq. (B2) Lumens et al.
               Real dSL=((SLo - SL)/LSEiso - 1)*vmax;
@@ -6688,8 +6857,6 @@ type"),       Text(
               parameter Real PExpcollagen=70;
               // expresion of collagen (??), unitless
 
-              parameter Real k_passive=50 "mN / mm^2 / micro";
-              parameter Real L0=0.907 "micron";
 
               // Collagen force
               Real sigma_collagen=if (SLo > SLcollagen) then PConcollagen*(exp(PExpcollagen*
@@ -7094,7 +7261,7 @@ type"),       Text(
               outer Settings settings annotation (Placement(transformation(
                       extent={{-100,80},{-80,100}})));
               replaceable model VentricleWall = VentricleWall_Calcium constrainedby
-                partialVentricleWall;
+                partialVentricleWall annotation (choicesAllMatching=true);
 
               replaceable VentricleWall LV_wall   annotation (Placement(transformation(extent={{-10,30},{10,50}})));
               replaceable VentricleWall SEP_wall
@@ -7313,6 +7480,61 @@ type"),       Text(
                       textString="L")}),                                     Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end Ventricles_Lumens;
+
+            model Ventricles_LumensOriginal
+              "Original Lumens implementation including simple exercise"
+              extends partialVentricles_TS(
+                redeclare replaceable Driving_LumensExercise
+                                                     calciumMechanics(
+                  usePhiInput=false,
+                  phi0=settings.phi0,
+                  t0_delay=0.1),
+                redeclare replaceable model VentricleWall =
+                    VentricleWall_LumensOriginal,
+                 LV_wall(xm=xm_LV, ym=ym,
+                  Vw=80,
+                  Amref=0.975*80,
+                  phi0=settings.phi0),
+                SEP_wall(xm=xm_SEP, ym=ym,
+                  Vw=38,
+                  Amref=0.975*45,
+                  phi0=settings.phi0),
+                RV_wall(xm=xm_RV, ym=ym,
+                  Vw=28,
+                  Amref=1.12*100,
+                  phi0=settings.phi0));
+
+              Real ptrans_LV=2*LV_wall.Tx/ym;
+              Real ptrans_RV=2*RV_wall.Tx/ym;
+
+              Real xm_LV(start=-4.6627) "LV heart geometry variable, cm";
+              Real xm_SEP(start=2.90348) "septum heart geometry variable, cm";
+              Real xm_RV(start=6.26344) "RV heart geometry variable, cm";
+              Real ym(start=3.50013) "Heart geometry variable, cm";
+
+              // Init of the rest of the circulatory
+              // V_SV start( 1423.2186 ),
+              // V_PV start( 160.54788 ),
+              // V_SA start( 173.32166 ),
+              // V_PA start( 64.736908 ),
+              // V_Ao start( 83.768949 ),
+              // V_RA start( 8.414623 ),
+              // V_LA start( 39.666051 ),
+              Real e;
+              parameter Real eps=1e-6;
+
+              Real Tysq=-1/ym;
+            equation
+              connect(phi_input, LV_wall.phi_input)
+                annotation (Line(points={{0,100},{0,50}}, color={0,0,127}));
+              connect(phi_input, SEP_wall.phi_input)
+                annotation (Line(points={{0,100},{0,10}}, color={0,0,127}));
+              connect(phi_input, RV_wall.phi_input)
+                annotation (Line(points={{0,100},{0,-30}}, color={0,0,127}));
+              connect(frequency, calciumMechanics.frequency) annotation (Line(
+                    points={{-100,-40},{-72,-40},{-72,-10},{-62,-10}}, color={0,
+                      0,127}));
+            end Ventricles_LumensOriginal;
 
             model Ventricles_Lumens_Simple "Simplified Lumens ventricles"
               extends Ventricles_Lumens(
@@ -9795,10 +10017,16 @@ Kalecky")}), experiment(
             ventricles(V_LV(start=0.00015), V_RV(start=0.00015)) constrainedby
             Auxiliary.TriSegMechanics_components.partialVentricles_TS
             annotation (Placement(transformation(extent={{0,-20},{20,0}})));
-          Auxiliary.AtriumSimple ra(enabled=true)
-            annotation (Placement(transformation(extent={{-10,26},{-30,6}})));
-          Auxiliary.AtriumSimple la(enabled=true)
-            annotation (Placement(transformation(extent={{70,-38},{50,-18}})));
+          replaceable
+          Auxiliary.AtriumSimple ra(enabled=true) constrainedby
+            Auxiliary.partialAtrium
+            annotation (Placement(transformation(extent={{-10,26},{-30,6}})),
+              choicesAllMatching=true);
+          replaceable
+          Auxiliary.AtriumSimple la(enabled=true) constrainedby
+            Auxiliary.partialAtrium
+            annotation (Placement(transformation(extent={{70,-38},{50,-18}})),
+              choicesAllMatching=true);
 
         Physiolibrary.Types.Volume volume;
           Basic.IdealValve_deactivable idealValve_deactivable annotation (
@@ -9825,18 +10053,6 @@ Kalecky")}), experiment(
                 origin={60,-48})));
           Auxiliary.SA_node sa_node annotation (Placement(transformation(
                   rotation=0, extent={{-88,22},{-68,42}})));
-          Auxiliary.TriSegMechanics_components.Driving_Olufsen calciumMechanics(
-            usePhiInput=false,
-            TS=settings.heart_atr_TS,
-            TS_maxAct=settings.heart_atr_TS,
-            TR=settings.heart_atr_TR,
-            TR_maxAct=settings.heart_atr_TR,
-            phi0=settings.phi0,
-            D_A=settings.heart_atr_D_A,
-            D_A_maxAct=settings.heart_atr_D_A,
-            D_0=settings.heart_vntr_D_0,
-            D_0_maxAct=settings.heart_vntr_D_0_maxAct)
-            annotation (Placement(transformation(extent={{-54,22},{-34,42}})));
           Auxiliary.PericardiumPressure pericardium(
             heartVolume=volume,
             enabled=true,
@@ -9937,18 +10153,6 @@ Kalecky")}), experiment(
               points={{60,-56},{60,-60},{70,-60}},
               color={0,0,0},
               thickness=1));
-          connect(sa_node.t0, calciumMechanics.t0)
-            annotation (Line(points={{-68,40},{-62,40},{-62,32},{-54,32}},
-                                                         color={0,0,127}));
-          connect(ventricles.phi_input, calciumMechanics.phiInput) annotation (
-              Line(points={{10,0},{10,80},{-54,80},{-54,40}},
-                                                            color={0,0,127}));
-          connect(calciumMechanics.D, ra.D) annotation (Line(points={{-33,32},{0,32},{0,
-                  16},{-9.6,16}},             color={0,140,72},
-              thickness=0.5));
-          connect(calciumMechanics.D, la.D) annotation (Line(points={{-33,32},{78,32},{78,
-                  -28},{70.4,-28}},            color={0,140,72},
-              thickness=0.5));
           connect(sa_node.cardiac_cycle, ventricles.cardiac_cycle) annotation (Line(
               points={{-68,32},{-66,32},{-66,-20},{0,-20}},
               color={244,125,35},
@@ -9965,8 +10169,6 @@ Kalecky")}), experiment(
               thickness=0.5));
           connect(ventricles.frequency, sa_node.frequency) annotation (Line(points={{0,-14},
                   {-96,-14},{-96,32},{-88,32}},      color={0,0,127}));
-          connect(ventricles.t0, calciumMechanics.t0) annotation (Line(points={{0,-8},{
-                  -60,-8},{-60,32},{-54,32}}, color={0,0,127}));
           connect(mitralValve.cardiac_cycle, aorticValve.cardiac_cycle) annotation (
               Line(
               points={{40,-50},{-10,-50}},
@@ -10004,6 +10206,30 @@ Kalecky")}), experiment(
             pulmonaryValve(_Ron=settings.heart_R_vlv),
             mitralValve(_Ron=settings.heart_R_vlv),
             aorticValve(_Ron=settings.heart_R_vlv));
+          Auxiliary.TriSegMechanics_components.Driving_Olufsen calciumMechanics(
+            usePhiInput=false,
+            TS=settings.heart_atr_TS,
+            TS_maxAct=settings.heart_atr_TS,
+            TR=settings.heart_atr_TR,
+            TR_maxAct=settings.heart_atr_TR,
+            phi0=settings.phi0,
+            D_A=settings.heart_atr_D_A,
+            D_A_maxAct=settings.heart_atr_D_A,
+            D_0=settings.heart_vntr_D_0,
+            D_0_maxAct=settings.heart_vntr_D_0_maxAct)
+            annotation (Placement(transformation(extent={{-54,22},{-34,42}})));
+        equation
+          connect(sa_node.t0,calciumMechanics. t0)
+            annotation (Line(points={{-68,40},{-62,40},{-62,32},{-54,32}},
+                                                         color={0,0,127}));
+          connect(ventricles.t0,calciumMechanics. t0) annotation (Line(points={{0,-8},{
+                  -60,-8},{-60,32},{-54,32}}, color={0,0,127}));
+          connect(calciumMechanics.D, ra.D) annotation (Line(points={{-33,32},{
+                  0,32},{0,16},{-9.6,16}},    color={0,140,72},
+              thickness=0.5));
+          connect(calciumMechanics.D, la.D) annotation (Line(points={{-33,32},{
+                  78,32},{78,-28},{70.4,-28}}, color={0,140,72},
+              thickness=0.5));
         end Heart_TriSegMechanics_Lumens;
 
         model Heart_TriSegMechanics_Simple
@@ -10013,9 +10239,32 @@ Kalecky")}), experiment(
             redeclare replaceable
               Auxiliary.TriSegMechanics_components.Ventricles_LumensSimple ventricles
               constrainedby
-              Auxiliary.TriSegMechanics_components.partialVentricles_TS,
-            calciumMechanics(D_0=settings.heart_atr_D_0, D_0_maxAct=settings.heart_atr_D_0));
+              Auxiliary.TriSegMechanics_components.partialVentricles_TS);
 
+          Auxiliary.TriSegMechanics_components.Driving_Olufsen calciumMechanics(
+            usePhiInput=false,
+            TS=settings.heart_atr_TS,
+            TS_maxAct=settings.heart_atr_TS,
+            TR=settings.heart_atr_TR,
+            TR_maxAct=settings.heart_atr_TR,
+            phi0=settings.phi0,
+            D_A=settings.heart_atr_D_A,
+            D_A_maxAct=settings.heart_atr_D_A,
+            D_0=settings.heart_vntr_D_0,
+            D_0_maxAct=settings.heart_vntr_D_0_maxAct)
+            annotation (Placement(transformation(extent={{-54,22},{-34,42}})));
+        equation
+          connect(sa_node.t0,calciumMechanics. t0)
+            annotation (Line(points={{-68,40},{-62,40},{-62,32},{-54,32}},
+                                                         color={0,0,127}));
+          connect(ventricles.t0,calciumMechanics. t0) annotation (Line(points={{0,-8},{
+                  -60,-8},{-60,32},{-54,32}}, color={0,0,127}));
+          connect(calciumMechanics.D, ra.D) annotation (Line(points={{-33,32},{
+                  0,32},{0,16},{-9.6,16}},    color={0,140,72},
+              thickness=0.5));
+          connect(calciumMechanics.D, la.D) annotation (Line(points={{-33,32},{
+                  78,32},{78,-28},{70.4,-28}}, color={0,140,72},
+              thickness=0.5));
         end Heart_TriSegMechanics_Simple;
 
         model Heart_TriSegMechanics_Rat
@@ -10790,6 +11039,43 @@ Kalecky")}), experiment(
 compliance
 %class_name")}));
         end Heart_4chambers_valves;
+
+        model Heart_TriSegMechanics_LumensExercise
+          "TriSeg with original Lumen's calcium mechanics heuristic approximation, extended with exercise input"
+          extends Heart_TriSegMechanics(
+            r_PulmonaryVenousInflow(Resistance=settings.heart_R_LA),
+            r_SystemicVenousInflow(Resistance=settings.heart_R_RA),
+            redeclare Auxiliary.TriSegMechanics_components.Ventricles_LumensOriginal
+              ventricles(redeclare model VentricleWall =
+                  ADAN_main.Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWall_LumensOriginal,
+                calciumMechanics(usePhiInput=false, t0_delay=0.1)),
+            class_name="Lumens orig",
+            tricuspidValve(_Ron=settings.heart_R_vlv),
+            pulmonaryValve(_Ron=settings.heart_R_vlv),
+            mitralValve(_Ron=settings.heart_R_vlv),
+            aorticValve(_Ron=settings.heart_R_vlv),
+            pericardium(enabled=false),
+            redeclare Auxiliary.Atrium ra(
+              Tact(displayUnit="s") = 0.015,
+              Emin=0.05*1.5,
+              sigma_a=0.1),
+            redeclare Auxiliary.Atrium la(
+              Tact(displayUnit="s") = 0.015,
+              Emin=0.05*1.5,
+              sigma_a=0.1,
+              stiffness_scaling=3));
+        equation
+          connect(sa_node.cardiac_cycle, ra.cardiac_cycle) annotation (Line(
+              points={{-68,32},{-10,32},{-10,16}},
+              color={244,125,35},
+              thickness=0.5));
+          connect(sa_node.cardiac_cycle, la.cardiac_cycle) annotation (Line(
+              points={{-68,32},{82,32},{82,-28},{70,-28}},
+              color={244,125,35},
+              thickness=0.5));
+          connect(sa_node.t0, ventricles.t0) annotation (Line(points={{-68,40},
+                  {-58,40},{-58,-8},{0,-8}}, color={0,0,127}));
+        end Heart_TriSegMechanics_LumensExercise;
       end Heart;
 
       package Systemic
@@ -16682,6 +16968,12 @@ P_hs_plus_dist"),
                     {-4,184}})));
           Physiolibrary.Types.RealIO.FractionInput adenosineInput = adenosine if UseAdenosineInput "Adenosine input"
             annotation (Placement(transformation(extent={{-340,20},{-300,60}})));
+          Physiolibrary.Types.Constants.FractionConst phi0(k(displayUnit=
+                  "(mmHg.s)/ml") = settings.phi0) if not UsePhi_Input
+            annotation (Placement(transformation(extent={{-310,-14},{-302,-6}})));
+        protected
+          Physiolibrary.Types.RealIO.FractionInput phi_input1 annotation (
+              Placement(transformation(extent={{-282,-12},{-278,-8}})));
         equation
           if not UseThoracic_PressureInput then
             P_th = 0;
@@ -16704,6 +16996,10 @@ P_hs_plus_dist"),
           connect(baroreflex_system.phiOutput, phi_baroreflex) annotation (Line(
                 points={{-222,152},{-190,152},{-190,148},{-182,148}}, color={0,
                   0,127}));
+          connect(phi_input, phi_input1)
+            annotation (Line(points={{-320,-10},{-280,-10}}, color={0,0,127}));
+          connect(phi0.y, phi_input1)
+            annotation (Line(points={{-301,-10},{-280,-10}}, color={0,0,127}));
             annotation (Diagram(coordinateSystem(extent={{-320,-100},{440,200}})),
                 Icon(coordinateSystem(extent={{-320,-100},{440,200}}), graphics={
                           Bitmap(extent={{-320,-100},{440,200}}, fileName=
@@ -19998,26 +20294,29 @@ P_hs_plus_dist"),
         model Systemic_TriSeg "Reimplementation of CardiovascularMechanics model"
           extends partialSystemic(
             final UseTiltInput=false,
-            final UsePhi_Input=false,
+            UsePhi_Input=true,
             final UseOuter_PressureInput=false,
             final UseBaroreflexOutput=false);
           import ADAN_main.Components.Constants.*;
 
           Physiolibrary.Hydraulic.Components.Resistor r_ao(Resistance=R_Ao)
             annotation (Placement(transformation(extent={{-280,70},{-260,90}})));
-          Physiolibrary.Hydraulic.Components.Resistor r_sa(Resistance=R_SA)
+          Physiolibrary.Hydraulic.Components.Resistor r_sa(useConductanceInput=
+                true,                                      Resistance=R_SA)
             annotation (Placement(transformation(extent={{-220,70},{-200,90}})));
           Physiolibrary.Hydraulic.Components.ElasticVessel c_ao(volume_start=
                 6e-05,                                          Compliance=C_Ao)
             annotation (Placement(transformation(extent={{-310,10},{-290,30}})));
           Physiolibrary.Hydraulic.Components.ElasticVessel c_sa(
-            volume_start=0.0003,                                Compliance=C_SA,
+            volume_start=0.0003,
+            useComplianceInput=true,                            Compliance=C_SA,
               ExternalPressure(displayUnit="Pa"))
-            annotation (Placement(transformation(extent={{-250,10},{-230,30}})));
+            annotation (Placement(transformation(extent={{-210,10},{-190,30}})));
           Physiolibrary.Hydraulic.Components.ElasticVessel c_sv(
-            volume_start=0.00134,                               Compliance=C_SV,
+            volume_start=0.00134,
+            useComplianceInput=true,                            Compliance=C_SV,
               ExternalPressure(displayUnit="Pa"))
-            annotation (Placement(transformation(extent={{-190,10},{-170,30}})));
+            annotation (Placement(transformation(extent={{-150,8},{-130,28}})));
 
 
           parameter Real _CO_target=4850 "mL/min";
@@ -20056,6 +20355,27 @@ P_hs_plus_dist"),
                 origin={-240,50})));
 
         Physiolibrary.Types.Volume volume;
+          Physiolibrary.Types.Constants.HydraulicComplianceConst c_sv0(k=C_SV)
+            annotation (Placement(transformation(extent={{-120,50},{-128,58}})));
+          Physiolibrary.Types.Constants.HydraulicComplianceConst c_sa0(k=C_SA)
+            annotation (Placement(transformation(extent={{-184,50},{-192,58}})));
+          Physiolibrary.Blocks.Factors.InverseProportionalFactor
+            inverseProportionalFactor(scalingFactor=3) annotation (Placement(
+                transformation(extent={{-190,28},{-210,48}})));
+          Physiolibrary.Blocks.Factors.InverseProportionalFactor
+            inverseProportionalFactor1(scalingFactor=2) annotation (Placement(
+                transformation(extent={{-130,28},{-150,48}})));
+          Physiolibrary.Types.Constants.HydraulicResistanceConst r_sa0(k(
+                displayUnit="(mmHg.s)/ml") = R_SA) annotation (Placement(
+                transformation(extent={{-184,130},{-192,138}})));
+          Physiolibrary.Blocks.Factors.InverseProportionalFactor
+            inverseProportionalFactor2(scalingFactor=2) annotation (Placement(
+                transformation(extent={{-200,110},{-220,130}})));
+          Physiolibrary.Blocks.Math.Reciprocal rec annotation (Placement(
+                transformation(
+                extent={{-6,-6},{6,6}},
+                rotation=270,
+                origin={-210,102})));
         equation
           volume =c_ao.volume + c_sa.volume + c_sv.volume;
 
@@ -20072,7 +20392,7 @@ P_hs_plus_dist"),
               color={0,0,0},
               thickness=1));
           connect(c_sv.q_in, r_sa.q_out) annotation (Line(
-              points={{-180,20},{-180,80},{-200,80}},
+              points={{-140,18},{-160,18},{-160,80},{-200,80}},
               color={0,0,0},
               thickness=1));
           connect(c_ao.q_in, r_tAo.q_out) annotation (Line(
@@ -20084,13 +20404,36 @@ P_hs_plus_dist"),
               color={0,0,0},
               thickness=1));
           connect(c_sa.q_in, r_tsa.q_out) annotation (Line(
-              points={{-240,20},{-240,40}},
+              points={{-200,20},{-240,20},{-240,40}},
               color={0,0,0},
               thickness=1));
           connect(r_tsa.q_in, r_sa.q_in) annotation (Line(
               points={{-240,60},{-240,80},{-220,80}},
               color={0,0,0},
               thickness=1));
+          connect(c_sa.compliance, inverseProportionalFactor.y)
+            annotation (Line(points={{-200,28},{-200,34}}, color={0,0,127}));
+          connect(c_sa0.y, inverseProportionalFactor.yBase) annotation (Line(
+                points={{-193,54},{-200,54},{-200,40}}, color={0,0,127}));
+          connect(c_sv.compliance, inverseProportionalFactor1.y)
+            annotation (Line(points={{-140,26},{-140,34}}, color={0,0,127}));
+          connect(c_sv0.y, inverseProportionalFactor1.yBase) annotation (Line(
+                points={{-129,54},{-140,54},{-140,40}}, color={0,0,127}));
+          connect(r_sa0.y, inverseProportionalFactor2.yBase) annotation (Line(
+                points={{-193,134},{-210,134},{-210,122}}, color={0,0,127}));
+          connect(inverseProportionalFactor2.y, rec.u) annotation (Line(points=
+                  {{-210,116},{-210,109.2}}, color={0,0,127}));
+          connect(rec.y, r_sa.cond)
+            annotation (Line(points={{-210,95.4},{-210,86}}, color={0,0,127}));
+          connect(inverseProportionalFactor.u, inverseProportionalFactor2.u)
+            annotation (Line(points={{-192,38},{-180,38},{-180,120},{-202,120}},
+                color={0,0,127}));
+          connect(inverseProportionalFactor.u, inverseProportionalFactor1.u)
+            annotation (Line(points={{-192,38},{-180,38},{-180,-10},{-120,-10},
+                  {-120,38},{-132,38}}, color={0,0,127}));
+          connect(phi_input1, inverseProportionalFactor1.u) annotation (Line(
+                points={{-280,-10},{-120,-10},{-120,38},{-132,38}}, color={0,0,
+                  127}));
         end Systemic_TriSeg;
 
         model Systemic_CutOff "A cut-off circulation with no throughput"
@@ -36346,7 +36689,7 @@ P_hs_plus_dist"),
               tauD=tauD,
               tauR=tauR,
               tauSC=tauSC),
-            calciumMechanics(tauR=tauR))),
+            calciumMechanics(tauR0=tauR))),
         condHeartPhi(disconnected=false));
       parameter Modelica.Units.SI.Time tauD=0.032
         "Factor scaling contraction decay time";
@@ -39167,8 +39510,11 @@ P_hs_plus_dist"),
 
     package Exercise
       model partialCVS
+        replaceable
         Components.Subsystems.Heart.Heart_TriSegMechanics heart_TriSegMechanics
-          annotation (Placement(transformation(extent={{8,-10},{-12,10}})));
+          constrainedby Components.Subsystems.Heart.partialHeart
+          annotation (Placement(transformation(extent={{8,-10},{-12,10}})),
+            choicesAllMatching=true);
         Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg
           annotation (Placement(transformation(extent={{4,-58},{-16,-38}})));
         Components.Subsystems.Systemic.Systemic_TriSeg systemic_TriSeg
@@ -39201,20 +39547,74 @@ P_hs_plus_dist"),
       model SimpleExercise
         extends partialCVS(
           systemic_TriSeg(
+            UseExerciseInput=false,
             _C_Ao=0.65,
             _C_SA=1.65,
             _C_SV=1.4*250,
             _R_Ao=0.01,
             _R_SA=0.965,
             _R_tAo=0.0020,
-            _R_tSA=0.05),
+            _R_tSA=0.05,
+            c_sa(volume_start=0.0002),
+            c_sv(volume_start=0.001175),
+            c_sa0(k=1.2376016001453e-08),
+            r_ao(Resistance(displayUnit="(Pa.s)/m3")),
+            r_tsa(Resistance(displayUnit="(Pa.s)/m3")),
+            r_tAo(Resistance(displayUnit="(Pa.s)/m3"))),
           pulmonaryTriSeg(
-            c_pv(Compliance=1.8751539396141e-07),
+            UsePhi_Input=true,
+            deadVolume=0,
+            c_pv(
+              volume_start(displayUnit="m3") = 65e-6 + settings.V_PV_init,
+              ZeroPressureVolume=0,
+              Compliance=1.8751539396141e-07,
+              useExternalPressureInput=false),
             c_pa(Compliance=4.0503325095665e-08),
-            r_pa(useConductanceInput=false, Resistance=6666119.37075),
+            r_pa(useConductanceInput=true, Resistance=6666119.37075),
             R_pa_visc(enable=false),
-            R_pv_visc(enable=false)),
-          heart_TriSegMechanics(UseThoracic_PressureInput=false));
+            R_pv_visc(enable=false),
+            proportionalFactor(scalingFactor=0.5, u0=0)),
+          redeclare Components.Subsystems.Heart.Heart_TriSegMechanics_LumensExercise
+            heart_TriSegMechanics(UseThoracic_PressureInput=false,
+            class_name="L EX",
+            ventricles(
+              V_LV(start=0.00015),
+              V_RV(start=0.00015),
+              LV_wall(SL(start=2.2)),
+              SEP_wall(SL(start=2.2)),
+              RV_wall(SL(start=2.2))),
+            resistor(enable=false),
+            resistor1(enable=false)));
+        inner Components.Settings settings(
+          phi0=0,
+          heart_R_vlv(displayUnit="(mmHg.s)/ml") = 1.33322387415e+14,
+          heart_R_AV(displayUnit="(mmHg.s)/ml"),
+          heart_R_LA(displayUnit="(mmHg.s)/ml") = 3199737.29796)
+          annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+        Modelica.Blocks.Sources.Ramp exercise(height=0, duration=0)
+          annotation (Placement(transformation(extent={{-60,80},{-40,100}})));
+        Components.Subsystems.Baroreflex.HeartRate_simple heartRate_simple(H0(
+              displayUnit="Hz") = 1e-6,
+            H1(displayUnit="1/min") = 1.9)
+          annotation (Placement(transformation(extent={{36,-4},{28,4}})));
+
+      Physiolibrary.Types.Volume volume_total = pulmonaryTriSeg.volume + systemic_TriSeg.volume + heart_TriSegMechanics.volume;
+      equation
+        connect(heart_TriSegMechanics.frequency_input, heartRate_simple.HR)
+          annotation (Line(points={{8,0},{27.92,0}}, color={0,0,127}));
+        connect(heartRate_simple.phi, exercise.y) annotation (Line(points={{36,0},{60,
+                0},{60,90},{-39,90}}, color={0,0,127}));
+        connect(heart_TriSegMechanics.phi, exercise.y)
+          annotation (Line(points={{8,6},{60,6},{60,90},{-39,90}}, color={0,0,127}));
+        connect(systemic_TriSeg.phi_input, exercise.y) annotation (Line(points={{0,44},
+                {-8,44},{-8,90},{-39,90}}, color={0,0,127}));
+        connect(pulmonaryTriSeg.phi_input, exercise.y) annotation (Line(points={{-16,-56},
+                {-8,-56},{-8,90},{-39,90}}, color={0,0,127}));
+        annotation (experiment(
+            StopTime=20,
+            __Dymola_NumberOfIntervals=5000,
+            Tolerance=1e-08,
+            __Dymola_Algorithm="Cvode"));
       end SimpleExercise;
     end Exercise;
   end SimpleCirculation;
