@@ -1,10 +1,12 @@
 # name, value, [min, max, step]
-settings.pulm_C_PA,1.635189e-08,1.6351890000000001e-09,3.1068591000000004e-08,1.635189e-10
-settings.heart_vntr_xi_AmRef,1.0,0.09999999999999998,1.9,0.01
-settings.syst_TPR,128733300.0,12873330.0,244593270.0,1287333.0
-settings.syst_TR_frac,5.22771,0.5227709999999997,9.932649000000001,0.0522771
-settings.heart_vntr_D_A,1298.533,129.8533,2467.2127,12.98533
-settings.syst_art_k_E,0.4402957,0.04402957000000002,0.83656183,0.004402957
+pulmonaryTriSeg.c_pa.Compliance,4.05033e-08
+settings.heart_vntr_xi_AmRef,1.0
+systemic_TriSeg._R_SA,0.965
+sigma_act0,720
+systemic_TriSeg._C_Ao,0.65
 settings.V_PV_init,0.0,-1.0,1.0,10e-6
-settings.chi_phi,0.7,0.01,0.7,0.01
-settings.heart_R_vlv,772351.5,95116.35,1849586.65,7723.515
+settings.chi_phi,1
+inotropy_factor
+pulmonaryR_factor
+venoconstrictionFactor
+vasodilatationFactor
