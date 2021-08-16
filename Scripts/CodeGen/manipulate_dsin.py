@@ -206,6 +206,9 @@ def getInitParams(dsFileIn='dsin.txt', OptOutputFileIn = 'OutputListingMain.txt'
                     op = OptimParam(s[0])
                 ops[s[0]] = op
         
+        if not updateStartValues:
+            return ops
+
         if dsFileIn is not None:
             with open(dsFileIn) as fil:
                 lines_all = fil.readlines()
@@ -214,7 +217,7 @@ def getInitParams(dsFileIn='dsin.txt', OptOutputFileIn = 'OutputListingMain.txt'
                     ops[k].value = v[0]
 
         
-        if OptOutputFileIn is not None:
+        if OPTOUTPUTFILEIN is not None:
             (params, _, _, _) = readOutputListing(OptOutputFileIn)
             for par in params:
                 if par[0] not in ops:
@@ -557,8 +560,8 @@ def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False
 
     if minMaxRange > 0:
         for op in init_params.values():
-            op._min = op.value*(1 + minMaxRange)
-            op._max = op.value*(1 - minMaxRange)
+            op._min = op.value*(1 - minMaxRange)
+            op._max = op.value*(1 + minMaxRange)
     
     # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
     writeInitParams(init_params, paramsFile = paramsFile)
@@ -590,6 +593,7 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
 
 overwriteOptParamFile = True
 overWriteDsinTemplate = True
+updateStartValues = True
 
 # DSFILEIN = None
 # OPTOUTPUTFILEIN = 'OutputListingMain.txt'
@@ -601,9 +605,9 @@ USEPSO =  False
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
-    # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
+    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.1)
     # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
-    writeInitStatesFromDsin(dsFileIn="dsin.txt")
+    # writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')
     print('Done, Johne')

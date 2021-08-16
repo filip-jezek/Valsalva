@@ -51112,19 +51112,20 @@ P_hs_plus_dist"),
           parameter Real endTime=120;
           parameter Real stepInterval=0.01;
           inner Components.Settings settings(
+            initByPressure=false,
             veins_delayed_activation=false,
             baro_tau_s(displayUnit="s") = 93,
-            heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 3.196880e+03,
-            heart_vntr_D_0_maxAct=1.249063e-03,
-            heart_vntr_TS_maxAct(displayUnit="s") = 1.477405e-02,
-            heart_vntr_TR_maxAct(displayUnit="s") = 6.597690e-02,
-            eta_vc=3.151054e-01,
-            tissues_eta_Ra=3.845225e+00,
-            tissues_eta_Rv=2.662500e+00,
-            tissues_eta_C=5.808013e-01,
-            tissues_chi_Ra(displayUnit="1") = 2.731250e+01,
-            tissues_chi_Rv=3.306250e+01,
-            tissues_chi_C=2.362500e-01,
+            heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 4.600005e+03,
+            heart_vntr_D_0_maxAct=1.225000e-03,
+            heart_vntr_TS_maxAct(displayUnit="s") = 1.047740e-01,
+            heart_vntr_TR_maxAct(displayUnit="s") = 7.597690e-02,
+            eta_vc=2.101054e-01,
+            tissues_eta_Ra=3.145225e+00,
+            tissues_eta_Rv=2.806250e+00,
+            tissues_eta_C=5.708013e-01,
+            tissues_chi_Ra(displayUnit="1") = 2.481250e+01,
+            tissues_chi_Rv=1.384375e+01,
+            tissues_chi_C=-3.125000e-02,
             V_PV_init=0,
             heart_R_LA(displayUnit="(mmHg.s)/ml") = 1.655068e+06,
             heart_R_vlv(displayUnit="(mmHg.s)/ml") = 7.723515e+05,
@@ -51151,7 +51152,6 @@ P_hs_plus_dist"),
             chi_phi=0.7,
             heart_R_RA(displayUnit="(dyn.s)/cm5") = settings.heart_R_LA,
             pulm_q_nom_maxq(displayUnit="l/min") = 0.00033333333333333,
-            initByPressure=false,
             veins_UseNonLinearVeins=true,
             veins_linearE_rel=765,
             veins_linearV0_rel=0.793,
@@ -51319,11 +51319,7 @@ P_hs_plus_dist"),
 
         model CombinedModels_FMUs_ExceptBaseline
           extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime=
-                 0, fmi_StopTime=60),
-              settings(                    tissues_chi_Ra =          1.331250e+01,
-              tissues_chi_Rv=5.0625,
-              tissues_chi_C=0.05625,
-              baro_tau_s=93));
+                 0, fmi_StopTime=60));
         end CombinedModels_FMUs_ExceptBaseline;
 
         model CombinedModels_FMUs_ExceptBaselineExercise
@@ -51331,6 +51327,18 @@ P_hs_plus_dist"),
             useExercise=false,        useBaseline=false, exercise(fmi_StartTime=
                  0, fmi_StopTime=30));
         end CombinedModels_FMUs_ExceptBaselineExercise;
+
+        model TestFMU
+          Exercise.CVS_exercise cVS_exercise
+            annotation (Placement(transformation(extent={{-80,0},{-60,20}})));
+          ADAN_0main_SystemicTree_Exercise_CVS_0exercise_fmu_black_box
+            aDAN_0main_SystemicTree_Exercise_CVS_0exercise_fmu_black_box
+            annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+          annotation (
+            Icon(coordinateSystem(preserveAspectRatio=false)),
+            Diagram(coordinateSystem(preserveAspectRatio=false)),
+            experiment(StopTime=50, __Dymola_Algorithm="Cvode"));
+        end TestFMU;
       end CombinedModel;
 
       package AdditionalOutputs
@@ -51832,7 +51840,8 @@ P_hs_plus_dist"),
 
       model CVS_baseline "Just a baseline wrapper"
         import ADAN_main;
-        extends ADAN_main.SystemicTree.CardiovascularSystem;
+        extends ADAN_main.SystemicTree.CardiovascularSystem(useAutonomousPhi(y=
+                false));
       //   (
       //     heartComponent(valveInertia_Mitral(enabled=false)),
       //     settings(heart_vntr_TS=0.1, heart_atr_TS=0.08),

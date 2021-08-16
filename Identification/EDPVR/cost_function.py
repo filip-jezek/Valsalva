@@ -16,9 +16,9 @@ def getObjectives(vars_set):
 
     objectives = []
     o = fun_lib.ObjectiveVar('Error', value = max(vars_set['err']), costFunctionType=fun_lib.CostFunctionType.DistanceFromZero)
-    max(vars_set['err'])
-    fun_lib.findLowestIndex(vars_set('ventricles.V_LV'))
-    o = fun_lib.ObjectiveVar('Error', value = max(vars_set['err']), costFunctionType=fun_lib.CostFunctionType.Ignore)
+    # max(vars_set['err'])
+    # fun_lib.findLowestIndex(vars_set['ventricles.V_LV'])
+    # o = fun_lib.ObjectiveVar('Error', value = max(vars_set['err']), costFunctionType=fun_lib.CostFunctionType.Ignore)
     objectives.append(o)
 
     return objectives
