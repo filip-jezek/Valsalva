@@ -79,8 +79,8 @@ def getObjectives(vars_set):
 
     time = vars_set['time']
 
-    steady1 = 20
-    steady2 = 40
+    steady1 = 10
+    steady2 = 20
     interval = fun_lib.findInterval(time[0] + steady1-3, time[0] + steady1, time)
 
     # interval for averaging
@@ -122,7 +122,7 @@ def getObjectives(vars_set):
             # RHC
             ('BPs', max(vars_set['brachial_pressure'][interval])/mmHg2SI, 153, None, 1),
             ('BPd', min(vars_set['brachial_pressure'][interval])/mmHg2SI, 83, None, 1),
-            ('BPk', numpy.mean(vars_set['renal_capillary'][interval]) /mmHg2SI, 20, None, 1, 1/mmHg2SI),
+            # ('BPk', numpy.mean(vars_set['renal_capillary'][interval]) /mmHg2SI, 20, None, 1, 1/mmHg2SI),
             ('Ppas', numpy.max(vars_set['P_pa'][interval])/mmHg2SI, 29, None, 5),
             ('Ppad', numpy.min(vars_set['P_pa'][interval])/mmHg2SI, 14, None, 5),
             ('Ppv', numpy.mean(vars_set['P_pv'][interval])/mmHg2SI, 13, None, 1),
