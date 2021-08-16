@@ -12267,7 +12267,7 @@ double initialValue(12138,6)
   1   280   # settings.heart_R_vlv
  -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_AV
- -1  1.6550680000000000E+06       0                 1.0000000000000000E+100
+ -1 %settings.heart_R_LA% 0.0 1e+100
   1   280   # settings.heart_R_LA
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.heart_R_RA
@@ -12411,9 +12411,9 @@ double initialValue(12138,6)
   1   280   # settings.blood_rho
  -1 %settings.chi_phi% 0.0 0.0
   1   280   # settings.chi_phi
- -1  2.4812500000000000E+01       0                       0                
+ -1 %settings.tissues_chi_Ra% 0.0 0.0
   1   280   # settings.tissues_chi_Ra
- -1  1.3843750000000000E+01       0                       0                
+ -1 %settings.tissues_chi_Rv% 0.0 0.0
   1   280   # settings.tissues_chi_Rv
  -1 -3.1250000000000000E-02       0                       0                
   1   280   # settings.tissues_chi_C

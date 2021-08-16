@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(12138,100)
+char initialName(12143,100)
 settings.phi0
 settings.height
 settings.weight
@@ -12241,19 +12241,24 @@ phi_fixed1.duration
 phi_fixed1.y
 phi_fixed1.offset
 phi_fixed1.startTime
+CO_backflow_acc
+der(CO_backflow_acc)
+CO_backflow
+regurgitation_frac
+Goff
 
-double initialValue(12138,6)
+double initialValue(12143,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7000000000000000E+00       0                 1.0000000000000000E+100
   1   280   # settings.height
  -1      80                       0                 1.0000000000000000E+100
   1   280   # settings.weight
- -1      65                       0                       0                
+ -1      54                       0                       0                
   1   280   # settings.age
- -1  1.1666666666667000E+00       0                       0                
+ -1  9.0000000000000002E-01       0                       0                
   1   280   # settings.HR_nominal
- -1  1.6000000000000001E+00       0                       0                
+ -1  1.0666666666667000E+00       0                       0                
   1   280   # settings.HR_max
  -1      24                       0                       0                
   1   280   # settings.BMI
@@ -12261,13 +12266,13 @@ double initialValue(12138,6)
   6   256   # settings.BSA
   0       0                       0                       0                
   6   257   # settings.initByPressure
- -1 1.987499E-4 -0.01 1e+100
+ -1 %settings.V_PV_init% -0.01 1e+100
   1   280   # settings.V_PV_init
- -1 95217.63 0.0 1e+100
+ -1 %settings.heart_R_vlv% 0.0 1e+100
   1   280   # settings.heart_R_vlv
  -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_AV
- -1  1.6550680000000000E+06       0                 1.0000000000000000E+100
+ -1 %settings.heart_R_LA% 0.0 1e+100
   1   280   # settings.heart_R_LA
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.heart_R_RA
@@ -12283,7 +12288,7 @@ double initialValue(12138,6)
   1   280   # settings.heart_vntr_D_0
  -1  1.2250000000000000E-03       0                       0                
   1   280   # settings.heart_vntr_D_0_maxAct
- -1 1430.4132 0.0 0.0
+ -1 %settings.heart_vntr_D_A% 0.0 0.0
   1   280   # settings.heart_vntr_D_A
  -1  4.6000050000000001E+03       0                       0                
   1   280   # settings.heart_vntr_D_A_maxAct
@@ -12307,9 +12312,9 @@ double initialValue(12138,6)
   1   280   # settings.heart_atr_TS
  -1  2.6312500000000000E-01       0                       0                
   1   280   # settings.heart_atr_TR
- -1  8.1300813008130079E-01       0                       0                
+ -1  8.5365853658536583E-01       0                       0                
   1   280   # settings.heart_vntr_xi_Vw
- -1 0.83562505 0.0 0.0
+ -1 %settings.heart_vntr_xi_AmRef% 0.0 0.0
   1   280   # settings.heart_vntr_xi_AmRef
  -1       5                       0                       0                
   1   280   # settings.heart_vntr_k_passive
@@ -12329,7 +12334,7 @@ double initialValue(12138,6)
   1   280   # settings.syst_abd_P_th_ratio
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
- -1 1.0020165 0.0 0.0
+ -1 %settings.syst_art_k_E% 0.0 0.0
   1   280   # settings.syst_art_k_E
   0       1                       0                       0                
   6   257   # settings.syst_art_UseVasoconstrictionEffect
@@ -12337,9 +12342,9 @@ double initialValue(12138,6)
   1   280   # settings.eta_vc
  -1       1                       0                       0                
   1   280   # settings.syst_tissues_hydrostaticLevel_correction
- -1 4.20233024E8 0.0 1e+100
+ -1 %settings.syst_TPR% 0.0 1e+100
   1   280   # settings.syst_TPR
- -1 5.958773 0.0 0.0
+ -1 %settings.syst_TR_frac% 0.0 0.0
   1   280   # settings.syst_TR_frac
   0       0                       0                       0                
   6   256   # settings.tissues_Pa_nom
@@ -12409,11 +12414,11 @@ double initialValue(12138,6)
   1   280   # settings.blood_mu
  -1    1050                       0                       0                
   1   280   # settings.blood_rho
- -1 0.255 0.0 0.0
+ -1 %settings.chi_phi% 0.0 0.0
   1   280   # settings.chi_phi
- -1  2.4812500000000000E+01       0                       0                
+ -1 %settings.tissues_chi_Ra% 0.0 0.0
   1   280   # settings.tissues_chi_Ra
- -1  1.3843750000000000E+01       0                       0                
+ -1 %settings.tissues_chi_Rv% 0.0 0.0
   1   280   # settings.tissues_chi_Rv
  -1 -3.1250000000000000E-02       0                       0                
   1   280   # settings.tissues_chi_C
@@ -12451,7 +12456,7 @@ double initialValue(12138,6)
   1   280   # settings.pulm_CO_target
  -1  3.1942059999999999E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1 1.6351982E-9 0.0 0.0
+ -1 %settings.pulm_C_PA% 0.0 0.0
   1   280   # settings.pulm_C_PA
  -1  1.3332238741500000E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom
@@ -35343,8 +35348,8 @@ double initialValue(12138,6)
   6   256   # heartComponent.aorticValve.passableVariable
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.aorticValve._Gon
- -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
-  1   280   # heartComponent.aorticValve._Goff
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.aorticValve._Goff
  -1       0                       0                 1.0000000000000000E+100
   1   280   # heartComponent.aorticValve.Pknee
   0       0                       0                       0                
@@ -36519,6 +36524,16 @@ double initialValue(12138,6)
   6   256   # phi_fixed1.offset
  -1      20                       0                       0                
   1   280   # phi_fixed1.startTime
+ -1       0                       0                 1.0000000000000000E+100
+  2   280   # CO_backflow_acc
+  0       0                       0                       0                
+  3   256   # der(CO_backflow_acc)
+  0       0                       0                 1.0000000000000000E+100
+  6   328   # CO_backflow
+  0       0                       0                       0                
+  6   320   # regurgitation_frac
+ -1  2.5002100000000000E-09       0                 1.0000000000000000E+100
+  1   280   # Goff
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -36565,7 +36580,7 @@ double initialValue(12138,6)
 #   Which variables will be important for initialization and continue
 #   is indicated by value in column 6 & dsStartMasks.
 #
-char initialDescription(12138,232)
+char initialDescription(12143,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -48704,4 +48719,9 @@ Duration of ramp (= 0.0 gives a Step) [s]
 Connector of Real output signal [1]
 Offset of output signal y [1]
 Output y = offset for time < startTime [s]
+[m3|ml]
+[m3/s]
+[m3|ml]
+Shall be around 20% [1|%]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
 
