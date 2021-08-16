@@ -580,7 +580,7 @@ def prepareIdent(overrideFracs = False, regenerateParamsFromDsin = False, storeO
     
     # writes the params with its initial value for simpler usage of other scripts, e.g. SA postprocessing
     if overrideFracs:
-        writeInitParams(init_params, paramsFile=paramsFile, step_frac_override=0.1, ident_frac_override=0.5)
+        writeInitParams(init_params, paramsFile=paramsFile, step_frac_override=0.01, ident_frac_override=0.9)
     else:
         writeInitParams(init_params, paramsFile=paramsFile)
 
@@ -595,18 +595,18 @@ overwriteOptParamFile = True
 overWriteDsinTemplate = True
 updateStartValues = True
 
-# DSFILEIN = None
-# OPTOUTPUTFILEIN = 'OutputListingMain.txt'
+DSFILEIN = None
+OPTOUTPUTFILEIN = 'OutputListingMain.txt'
 
-DSFILEIN = 'dsin.txt'
-OPTOUTPUTFILEIN = None
+# DSFILEIN = 'dsin.txt'
+# OPTOUTPUTFILEIN = None
 
 USEPSO =  False
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.1)
-    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
+    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
     # writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')

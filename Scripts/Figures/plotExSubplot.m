@@ -37,6 +37,7 @@ pow_lv = dymget(dl, 'heartComponent.ventricles.power_LV');
 % pow_rv = h5read(dl, '/heartComponent/ventricles/power_RV');
 vlv = dymget(dl, 'V_LV')/ml2SI;
 
+hr = dymget(dl, 'HR')*60;
 co = dymget(dl, 'CO')/mlPmin2SI;
 q_ex = dymget(dl, 'q_exercised_avg')/mlPmin2SI;
 
@@ -51,7 +52,7 @@ ts = 35;
 te = 36.6;
 td = te - ts;
 diffs = [1; find( diff(el) > 0)];
-
+t_ax = [];
 set_ef = [];
 set_edv = [];
 set_pow_lvs = [];
@@ -65,6 +66,7 @@ set_q_corv = [];
 % set_pow_rv = [];
 set_co = [];
 set_q_ex = [];
+set_hr = [];
 
 
 for i = 1:size(diffs)
@@ -74,6 +76,9 @@ for i = 1:size(diffs)
     i_e = find(time > time(diffs(i)) + te, 1);
 %     t = time - time(i_s);
     i_int = [i_s:i_e];
+    if size(i_int, 2) == 0
+        continue;
+    end
     if i == 9
         t = time - time(i_s);
         i_int90 = i_int;
@@ -82,6 +87,7 @@ for i = 1:size(diffs)
 %     plot(vrv(i_s:i_e), prv(i_s:i_e))
 %     plot(vla(i_s:i_e), pla(i_s:i_e))
     
+    t_ax = [t_ax, mean(el(i_int))];
     sv =  max(vlv(i_s:i_e)) -  min(vlv(i_s:i_e));
     set_ef = [set_ef, sv / max(vlv(i_s:i_e))];
     set_edv = [set_edv, min(vlv(i_s:i_e))];
@@ -95,6 +101,7 @@ for i = 1:size(diffs)
     set_q_ex = [set_q_ex, mean(q_ex(i_int))];
     set_q_corv = [set_q_corv, mean(q_corv(i_int))];
     set_pvc = [set_pvc, mean(pvc(i_int))];
+    set_hr = [set_hr, mean(hr(i_int))];
 end
 
 s.ef = set_ef;
@@ -103,7 +110,9 @@ s.q_c = set_q_corv;
 s.pvc = set_pvc;
 s.pcwp = set_pw;
 s.co = set_co;
-s.pa = set_pa_m
+s.pa = set_pa_m;
+s.hr = hr;
+s.t_ax = t_ax;
 % plot([0:10:100], edv, 'b*-')
 % plot([0:10:100], pow_rvs, 'r*-')
 % plot([0:10:100], pow_lvs, 'b*-')
@@ -113,7 +122,7 @@ s.pa = set_pa_m
 %%
 hold on;
 title(tit, 'interpreter', 'None')
-t_ax = [0:10:100];
+% t_ax = [0:10:100];
 gf = fill([t_ax, fliplr(t_ax)], [set_pa_s, fliplr(set_pa_d)], color_lb,'EdgeColor',color_lb);
 
 gpm = plot(t_ax, set_pa_m, 'x-', 'LineWidth', 1, 'Color', color_b);
@@ -137,4 +146,3 @@ if drawLegend
     leg = legend([gf, gpm, gco, gqe], 'PA', 'PA mean', 'CO', 'Q Ex','Location', 'NorthEast', 'Orientation', 'Horizontal');
     leg.ItemTokenSize = [20, 150];
 end
-s.t_ax = t_ax;
