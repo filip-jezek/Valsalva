@@ -91,6 +91,6 @@ def generateModel(modelName, pack):
 
 if __name__ is '__main__':
     pack = readOutputListing('OutputListingMain.txt')
-    generateModel('OlufsenTriSeg', pack)
+    generateModel('SimpleExercise_ident', pack)
     print("Done, JOne!")
     

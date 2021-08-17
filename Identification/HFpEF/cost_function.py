@@ -79,12 +79,15 @@ def getObjectives(vars_set):
 
     time = vars_set['time']
 
-    steady1 = 10
-    steady2 = 20
+    steady1 = 15
+    steady2 = 30
+    steady3 = 45
     interval = fun_lib.findInterval(time[0] + steady1-3, time[0] + steady1, time)
 
     # interval for averaging
     interval_ex = fun_lib.findInterval(time[0] + steady2-3, time[0] + steady2, time)
+    # max exercise
+    interval_mex = fun_lib.findInterval(time[0] + steady3-3, time[0] + steady3, time)
     # to observe how much the baseline fluctuates
     # steady_interval = fun_lib.findInterval(time[-1] - 30, time[-1] -5, time)
 
@@ -137,8 +140,18 @@ def getObjectives(vars_set):
             ('Ppv_Ex', numpy.mean(vars_set['P_pv'][interval_ex])/mmHg2SI, 23, None, 1),
             ('SP_RV_Ex', numpy.max(vars_set['heartComponent.ventricles.P_RV'][interval_ex])/mmHg2SI, 45, None, 5),
             ('DP_RV_Ex', numpy.min(vars_set['P_sv'][interval_ex])/mmHg2SI, 6, None, 1),
-            ('CO_Ex', numpy.mean(vars_set['CO'][interval_ex]) /lpm2SI, 11.5, None, 2),
+            ('CO_Ex', numpy.mean(vars_set['CO'][interval_ex]) /lpm2SI, 11.5, None, 0.1),
           
+            # Max exercise
+            ('BPs_mEx', max(vars_set['brachial_pressure'][interval_mex])/mmHg2SI, 163, None, 1),
+            ('BPd_mEx', min(vars_set['brachial_pressure'][interval_mex])/mmHg2SI, 113, None, 1),
+            ('Ppas_mEx', numpy.max(vars_set['P_pa'][interval_mex])/mmHg2SI, 57, None, 5),
+            ('Ppad_mEx', numpy.min(vars_set['P_pa'][interval_mex])/mmHg2SI, 37, None, 5),
+            ('Ppv_mEx', numpy.mean(vars_set['P_pv'][interval_mex])/mmHg2SI, 25, None, 1),
+            ('SP_RV_mEx', numpy.max(vars_set['heartComponent.ventricles.P_RV'][interval_mex])/mmHg2SI, 45, None, 0),
+            ('DP_RV_mEx', numpy.min(vars_set['P_sv'][interval_mex])/mmHg2SI, 6, None, 0),
+            ('CO_mEx', numpy.mean(vars_set['CO'][interval_mex]) /lpm2SI, 14.5, None, 0),
+
             # # general assumptions
             ('PWV', pwv, None, [8, 50], 0)            
             ]

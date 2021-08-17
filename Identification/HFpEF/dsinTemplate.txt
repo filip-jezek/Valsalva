@@ -9,9 +9,9 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-      20                   # StopTime     Time at which integration stops
-       0                   # Increment    Communication step size, if > 0
-    5000                   # nInterval    Number of communication intervals, if > 0
+      45                   # StopTime     Time at which integration stops
+  1.0000000000000000E-02   # Increment    Communication step size, if > 0
+       0                   # nInterval    Number of communication intervals, if > 0
   1.0000000000000000E-08   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
        0                   # MaxFixedStep Maximum step size of fixed step size
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(781,61)
+char initialName(863,61)
 settings.phi0
 settings.height
 settings.weight
@@ -819,48 +819,85 @@ renal_capillary
 P_pa
 P_pv
 P_sv
-exercise.height
-exercise.offset
-exercise.startTime
+condExercise.u
+condExercise.offset
+condExercise.startTime
+condExercise.const1.k
+condExercise.switch1.u1
+condExercise.switch1.u2
+condExercise.switch1.y
+condExercise.disconnected
+condExercise.disconnectedValue
+condExercise.myDelay.delayTime
+condExercise.myDelay.delayEnabled
+condExercise.delayTransport_Enabled
+condExercise.delayTransport_Time
+condExercise.delayIntegral_Enabled
+condExercise.delayInt_Act
+condExercise.delayInt_Relax
+condExercise.limiter.uMax
+condExercise.limiter.uMin
+condExercise.limiter.strict
+condExercise.limiter.homotopyType
+condExercise.uMax
+condExercise.uMin
+condExercise.gain.k
+condExercise.gain.y
+condExercise.UseAdditionalInput
+condExercise.phi0
+condExercise.phi_gain
+condExercise.add3_1.k1
+condExercise.add3_1.k2
+condExercise.const_offset
+condExercise.integralActRelaxDelay.delayEnabled
+condExercise.integralActRelaxDelay.phi0
+condExercise.integralActRelaxDelay.delayTimeAct
+condExercise.integralActRelaxDelay.delayTimeRelax
+condExercise.showLimiterLine
 heartRate_simple.phi
 heartRate_simple.phi0
 heartRate_simple.HR_max
 heartRate_simple.HR_nom
 heartRate_simple.eta_HR
 volume_total
-condSystemicPhi.const1.k
-condSystemicPhi.switch1.u1
-condSystemicPhi.switch1.u2
-condSystemicPhi.switch1.y
-condSystemicPhi.disconnected
-condSystemicPhi.UseAdditionalInput
-condSystemicPhi.disconnectedValue
-condSystemicPhi.myDelay.delayTime
-condSystemicPhi.myDelay.delayEnabled
-condSystemicPhi.delayTransport_Enabled
-condSystemicPhi.delayTransport_Time
-condSystemicPhi.delayIntegral_Enabled
-condSystemicPhi.delayInt_Act
-condSystemicPhi.delayInt_Relax
-condSystemicPhi.limiter.uMax
-condSystemicPhi.limiter.uMin
-condSystemicPhi.limiter.strict
-condSystemicPhi.limiter.homotopyType
-condSystemicPhi.uMax
-condSystemicPhi.uMin
-condSystemicPhi.gain.k
-condSystemicPhi.gain.y
-condSystemicPhi.phi0
-condSystemicPhi.phi_gain
-condSystemicPhi.add3_1.k1
-condSystemicPhi.add3_1.k2
-condSystemicPhi.const_offset
-condSystemicPhi.integralActRelaxDelay.delayEnabled
-condSystemicPhi.integralActRelaxDelay.phi0
-condSystemicPhi.integralActRelaxDelay.delayTimeAct
-condSystemicPhi.integralActRelaxDelay.delayTimeRelax
-condSystemicPhi.showLimiterLine
+condHR.offset
+condHR.startTime
+condHR.const1.k
+condHR.switch1.u1
+condHR.switch1.u2
+condHR.switch1.y
+condHR.disconnected
+condHR.disconnectedValue
+condHR.myDelay.delayTime
+condHR.myDelay.delayEnabled
+condHR.delayTransport_Enabled
+condHR.delayTransport_Time
+condHR.delayIntegral_Enabled
+condHR.delayInt_Act
+condHR.delayInt_Relax
+condHR.limiter.uMax
+condHR.limiter.uMin
+condHR.limiter.strict
+condHR.limiter.homotopyType
+condHR.uMax
+condHR.uMin
+condHR.gain.k
+condHR.gain.y
+condHR.UseAdditionalInput
+condHR.phi0
+condHR.phi_gain
+condHR.add3_1.k1
+condHR.add3_1.k2
+condHR.const_offset
+condHR.integralActRelaxDelay.delayEnabled
+condHR.integralActRelaxDelay.phi0
+condHR.integralActRelaxDelay.delayTimeAct
+condHR.integralActRelaxDelay.delayTimeRelax
+condHR.showLimiterLine
 sigma_act0
+exercise.height
+exercise.offset
+exercise.startTime
 EDPVRnorm_V.mmHg2SI
 EDPVRnorm_V.ml2SI
 EDPVRnorm_V.V_m
@@ -875,17 +912,62 @@ EDPVRnorm_V._EDP
 EDPVRnorm_V.A_n
 EDPVRnorm_V.B_n
 EDPVRnorm_V.useVolumeInput
-step.height
+step.u
 step.y
 step.offset
 step.startTime
+step.const1.k
+step.switch1.u1
+step.switch1.u2
+step.switch1.y
+step.disconnected
+step.disconnectedValue
+step.myDelay.delayTime
+step.myDelay.delayEnabled
+step.delayTransport_Enabled
+step.delayTransport_Time
+step.delayIntegral_Enabled
+step.delayInt_Act
+step.delayInt_Relax
+step.limiter.uMax
+step.limiter.uMin
+step.limiter.strict
+step.limiter.homotopyType
+step.uMax
+step.uMin
+step.gain.k
+step.gain.y
+step.UseAdditionalInput
+step.phi0
+step.phi_gain
+step.add3_1.k1
+step.add3_1.k2
+step.const_offset
+step.integralActRelaxDelay.delayEnabled
+step.integralActRelaxDelay.phi0
+step.integralActRelaxDelay.delayTimeAct
+step.integralActRelaxDelay.delayTimeRelax
+step.showLimiterLine
 inotropy_factor
 calcium_factor
 pulmonaryR_factor
 venoconstrictionFactor
 vasodilatationFactor
+exercise1.height
+exercise1.y
+exercise1.offset
+exercise1.startTime
+step1.height
+step1.y
+step1.offset
+step1.startTime
+step2.height
+step2.offset
+step2.startTime
+HR_20w
+PhiStep
 
-double initialValue(781,6)
+double initialValue(863,6)
  -1       0                       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -896,7 +978,7 @@ double initialValue(781,6)
   1   280   # settings.age
  -1  1.1666666666667000E+00       0                       0                
   1   280   # settings.HR_nominal
- -1  1.6000000000000001E+00       0                       0                
+ -1  1.8500000000000001E+00       0                       0                
   1   280   # settings.HR_max
  -1      24                       0                       0                
   1   280   # settings.BMI
@@ -912,8 +994,8 @@ double initialValue(781,6)
   1   280   # settings.heart_R_AV
  -1  1.6550680000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
-  0       0                       0                 1.0000000000000000E+100
-  6   256   # settings.heart_R_RA
+ -1 %settings.heart_R_RA% 0.0 1e+100
+  1   280   # settings.heart_R_RA
  -1   50000                       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_A_vis
  -1   10678                       0                       0                
@@ -1052,8 +1134,8 @@ double initialValue(781,6)
   1   280   # settings.blood_mu
  -1    1050                       0                       0                
   1   280   # settings.blood_rho
- -1 %settings.chi_phi% 0.0 0.0
-  1   280   # settings.chi_phi
+ 0 %settings.chi_phi% 0.0 0.0
+  6   256   # settings.chi_phi
  -1  2.4812500000000000E+01       0                       0                
   1   280   # settings.tissues_chi_Ra
  -1  1.3843750000000000E+01       0                       0                
@@ -1100,7 +1182,7 @@ double initialValue(781,6)
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
- -1  1.0197530000000000E+07       0                 1.0000000000000000E+100
+ -1 %settings.pulm_R% 0.0 1e+100
   1   280   # settings.pulm_R
  -1  3.3333333333333002E-04       0                       0                
   1   280   # settings.pulm_q_nom_maxq
@@ -2196,8 +2278,8 @@ double initialValue(781,6)
   1   280   # systemic_TriSeg._CO_target
  -1      60                       0                       0                
   1   280   # systemic_TriSeg._HR
- -1  6.5000000000000002E-02       0                       0                
-  1   280   # systemic_TriSeg._C_Ao
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg._C_Ao
   0       0                       0                       0                
   6   256   # systemic_TriSeg._C_SA
  -1     350                       0                       0                
@@ -2319,11 +2401,75 @@ double initialValue(781,6)
   0       0                       0                       0                
   4   256   # P_sv
   0       0                       0                       0                
-  6   256   # exercise.height
+  6   320   # condExercise.u
  -1       0                       0                       0                
-  1   280   # exercise.offset
- -1      10                       0                       0                
-  1   280   # exercise.startTime
+  1   280   # condExercise.offset
+ -1       0                       0                       0                
+  1   280   # condExercise.startTime
+  0       1                       0                       0                
+  6   256   # condExercise.const1.k
+  0       0                       0                       0                
+  6   320   # condExercise.switch1.u1
+  0       0                       0                       0                
+  6   257   # condExercise.switch1.u2
+  0       0                       0                       0                
+  6   320   # condExercise.switch1.y
+ -1       0                       0                       0                
+  1   281   # condExercise.disconnected
+ -1       0                       0                       0                
+  1   280   # condExercise.disconnectedValue
+  0       1                       0                       0                
+  6   256   # condExercise.myDelay.delayTime
+  0       0                       0                       0                
+  6   257   # condExercise.myDelay.delayEnabled
+  0       0                       0                       0                
+  6   257   # condExercise.delayTransport_Enabled
+ -1       0                       0                       0                
+  1   280   # condExercise.delayTransport_Time
+  0       0                       0                       0                
+  6   257   # condExercise.delayIntegral_Enabled
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # condExercise.delayInt_Act
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # condExercise.delayInt_Relax
+  0       1                       0                       0                
+  6   256   # condExercise.limiter.uMax
+  0       0                       0                       0                
+  6   256   # condExercise.limiter.uMin
+  0       0                       0                       0                
+  6   257   # condExercise.limiter.strict
+  0       2                       1                       4                
+  6   258   # condExercise.limiter.homotopyType
+ -1  9.9999999999999995E+59       0                       0                
+  1   280   # condExercise.uMax
+  0       0                       0                       0                
+  6   256   # condExercise.uMin
+  0       1                       0                       0                
+  6   256   # condExercise.gain.k
+  0       0                       0                       0                
+  6   320   # condExercise.gain.y
+  0       1                       0                       0                
+  6   257   # condExercise.UseAdditionalInput
+ -1       0                       0                       0                
+  1   280   # condExercise.phi0
+ -1       1                       0                       0                
+  1   280   # condExercise.phi_gain
+ -1       1                       0                       0                
+  1   280   # condExercise.add3_1.k1
+ -1       1                       0                       0                
+  1   280   # condExercise.add3_1.k2
+  0       0                       0                       0                
+  6   256   # condExercise.const_offset
+  0       0                       0                       0                
+  6   257   # condExercise.integralActRelaxDelay.delayEnabled
+  0       0                       0                       0                
+  6   256   # condExercise.integralActRelaxDelay.phi0
+  0       0                       0                       0                
+  6   256   # condExercise.integralActRelaxDelay.delayTimeAct
+  0       0                       0                       0                
+  6   256   # condExercise.integralActRelaxDelay.delayTimeRelax
+  0       0                       0                       0                
+  6  1281   # condExercise.showLimiterLine
   0       0                       0                       0                
   6   320   # heartRate_simple.phi
   0       0                       0                       0                
@@ -2336,72 +2482,82 @@ double initialValue(781,6)
   6   256   # heartRate_simple.eta_HR
   0       0                       0                 1.0000000000000000E+100
   6   256   # volume_total
-  0       1                       0                       0                
-  6   256   # condSystemicPhi.const1.k
-  0       0                       0                       0                
-  6   320   # condSystemicPhi.switch1.u1
-  0       0                       0                       0                
-  6   257   # condSystemicPhi.switch1.u2
-  0       0                       0                       0                
-  6   320   # condSystemicPhi.switch1.y
  -1       0                       0                       0                
-  1   281   # condSystemicPhi.disconnected
+  1   280   # condHR.offset
+ -1       0                       0                       0                
+  1   280   # condHR.startTime
   0       1                       0                       0                
-  6   257   # condSystemicPhi.UseAdditionalInput
+  6   256   # condHR.const1.k
+  0       0                       0                       0                
+  6   320   # condHR.switch1.u1
+  0       0                       0                       0                
+  6   257   # condHR.switch1.u2
+  0       0                       0                       0                
+  6   320   # condHR.switch1.y
+ -1       0                       0                       0                
+  1   281   # condHR.disconnected
  -1  2.5000000000000000E-01       0                       0                
-  1   280   # condSystemicPhi.disconnectedValue
+  1   280   # condHR.disconnectedValue
   0       1                       0                       0                
-  6   256   # condSystemicPhi.myDelay.delayTime
+  6   256   # condHR.myDelay.delayTime
   0       0                       0                       0                
-  6   257   # condSystemicPhi.myDelay.delayEnabled
+  6   257   # condHR.myDelay.delayEnabled
   0       0                       0                       0                
-  6   257   # condSystemicPhi.delayTransport_Enabled
+  6   257   # condHR.delayTransport_Enabled
   0       0                       0                       0                
-  6   256   # condSystemicPhi.delayTransport_Time
+  6   256   # condHR.delayTransport_Time
   0       0                       0                       0                
-  6   257   # condSystemicPhi.delayIntegral_Enabled
+  6   257   # condHR.delayIntegral_Enabled
   0       0                       0                       0                
-  6   256   # condSystemicPhi.delayInt_Act
+  6   256   # condHR.delayInt_Act
  -1  1.0000000000000000E-03       0                       0                
-  1   280   # condSystemicPhi.delayInt_Relax
+  1   280   # condHR.delayInt_Relax
   0       1                       0                       0                
-  6   256   # condSystemicPhi.limiter.uMax
+  6   256   # condHR.limiter.uMax
   0       0                       0                       0                
-  6   256   # condSystemicPhi.limiter.uMin
+  6   256   # condHR.limiter.uMin
   0       0                       0                       0                
-  6   257   # condSystemicPhi.limiter.strict
+  6   257   # condHR.limiter.strict
   0       2                       1                       4                
-  6   258   # condSystemicPhi.limiter.homotopyType
+  6   258   # condHR.limiter.homotopyType
  -1  9.9999999999999995E+59       0                       0                
-  1   280   # condSystemicPhi.uMax
+  1   280   # condHR.uMax
   0       0                       0                       0                
-  6   256   # condSystemicPhi.uMin
+  6   256   # condHR.uMin
   0       1                       0                       0                
-  6   256   # condSystemicPhi.gain.k
+  6   256   # condHR.gain.k
   0       0                       0                       0                
-  6   320   # condSystemicPhi.gain.y
+  6   320   # condHR.gain.y
+  0       1                       0                       0                
+  6   257   # condHR.UseAdditionalInput
  -1       0                       0                       0                
-  1   280   # condSystemicPhi.phi0
+  1   280   # condHR.phi0
  -1       0                       0                       0                
-  1   280   # condSystemicPhi.phi_gain
+  1   280   # condHR.phi_gain
  -1       1                       0                       0                
-  1   280   # condSystemicPhi.add3_1.k1
+  1   280   # condHR.add3_1.k1
  -1       1                       0                       0                
-  1   280   # condSystemicPhi.add3_1.k2
+  1   280   # condHR.add3_1.k2
   0       0                       0                       0                
-  6   256   # condSystemicPhi.const_offset
+  6   256   # condHR.const_offset
   0       0                       0                       0                
-  6   257   # condSystemicPhi.integralActRelaxDelay.delayEnabled
+  6   257   # condHR.integralActRelaxDelay.delayEnabled
   0       0                       0                       0                
-  6   256   # condSystemicPhi.integralActRelaxDelay.phi0
+  6   256   # condHR.integralActRelaxDelay.phi0
   0       0                       0                       0                
-  6   256   # condSystemicPhi.integralActRelaxDelay.delayTimeAct
+  6   256   # condHR.integralActRelaxDelay.delayTimeAct
   0       0                       0                       0                
-  6   256   # condSystemicPhi.integralActRelaxDelay.delayTimeRelax
+  6   256   # condHR.integralActRelaxDelay.delayTimeRelax
   0       0                       0                       0                
-  6  1281   # condSystemicPhi.showLimiterLine
+  6  1281   # condHR.showLimiterLine
  -1 %sigma_act0% 0.0 0.0
   1   280   # sigma_act0
+  0       0                       0                       0                
+  6   256   # exercise.height
+ -1       0                       0                       0                
+  1   280   # exercise.offset
+ -1      15                       0                       0                
+  1   280   # exercise.startTime
   0  1.3332200000000000E+02       0                       0                
   6   256   # EDPVRnorm_V.mmHg2SI
   0  9.9999999999999995E-07       0                 1.0000000000000000E+100
@@ -2430,14 +2586,78 @@ double initialValue(781,6)
   1   280   # EDPVRnorm_V.B_n
   0       1                       0                       0                
   6   257   # EDPVRnorm_V.useVolumeInput
- -1       1                       0                       0                
-  1   280   # step.height
+  0       0                       0                       0                
+  6   320   # step.u
   0       0                       0                       0                
   6   320   # step.y
  -1       0                       0                       0                
   1   280   # step.offset
- -1      10                       0                       0                
+ -1       0                       0                       0                
   1   280   # step.startTime
+  0       1                       0                       0                
+  6   256   # step.const1.k
+  0       0                       0                       0                
+  6   320   # step.switch1.u1
+  0       0                       0                       0                
+  6   257   # step.switch1.u2
+  0       0                       0                       0                
+  6   320   # step.switch1.y
+ -1       0                       0                       0                
+  1   281   # step.disconnected
+ -1       0                       0                       0                
+  1   280   # step.disconnectedValue
+  0       1                       0                       0                
+  6   256   # step.myDelay.delayTime
+  0       0                       0                       0                
+  6   257   # step.myDelay.delayEnabled
+  0       0                       0                       0                
+  6   257   # step.delayTransport_Enabled
+ -1       0                       0                       0                
+  1   280   # step.delayTransport_Time
+  0       0                       0                       0                
+  6   257   # step.delayIntegral_Enabled
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # step.delayInt_Act
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # step.delayInt_Relax
+  0       1                       0                       0                
+  6   256   # step.limiter.uMax
+  0       0                       0                       0                
+  6   256   # step.limiter.uMin
+  0       0                       0                       0                
+  6   257   # step.limiter.strict
+  0       2                       1                       4                
+  6   258   # step.limiter.homotopyType
+ -1  9.9999999999999995E+59       0                       0                
+  1   280   # step.uMax
+  0       0                       0                       0                
+  6   256   # step.uMin
+  0       1                       0                       0                
+  6   256   # step.gain.k
+  0       0                       0                       0                
+  6   320   # step.gain.y
+  0       1                       0                       0                
+  6   257   # step.UseAdditionalInput
+ -1  2.5000000000000000E-01       0                       0                
+  1   280   # step.phi0
+ -1       1                       0                       0                
+  1   280   # step.phi_gain
+ -1       1                       0                       0                
+  1   280   # step.add3_1.k1
+ -1       1                       0                       0                
+  1   280   # step.add3_1.k2
+  0       0                       0                       0                
+  6   256   # step.const_offset
+  0       0                       0                       0                
+  6   257   # step.integralActRelaxDelay.delayEnabled
+  0       0                       0                       0                
+  6   256   # step.integralActRelaxDelay.phi0
+  0       0                       0                       0                
+  6   256   # step.integralActRelaxDelay.delayTimeAct
+  0       0                       0                       0                
+  6   256   # step.integralActRelaxDelay.delayTimeRelax
+  0       0                       0                       0                
+  6  1281   # step.showLimiterLine
  -1 %inotropy_factor% 0.0 0.0
   1   280   # inotropy_factor
  -1       5                       0                       0                
@@ -2448,6 +2668,32 @@ double initialValue(781,6)
   1   280   # venoconstrictionFactor
  -1 %vasodilatationFactor% 0.0 0.0
   1   280   # vasodilatationFactor
+  0       0                       0                       0                
+  6   256   # exercise1.height
+  0       0                       0                       0                
+  6   320   # exercise1.y
+ -1       0                       0                       0                
+  1   280   # exercise1.offset
+ -1      30                       0                       0                
+  1   280   # exercise1.startTime
+  0       0                       0                       0                
+  6   256   # step1.height
+  0       0                       0                       0                
+  6   320   # step1.y
+ -1       0                       0                       0                
+  1   280   # step1.offset
+ -1      30                       0                       0                
+  1   280   # step1.startTime
+  0       0                       0                       0                
+  6   256   # step2.height
+ -1       0                       0                       0                
+  1   280   # step2.offset
+ -1      15                       0                       0                
+  1   280   # step2.startTime
+ -1  1.6000000000000001E+00       0                       0                
+  1   280   # HR_20w
+  0       0                       0                       0                
+  6   256   # PhiStep
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -2494,7 +2740,7 @@ double initialValue(781,6)
 #   Which variables will be important for initialization and continue
 #   is indicated by value in column 6 & dsStartMasks.
 #
-char initialDescription(781,186)
+char initialDescription(863,186)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -2508,7 +2754,7 @@ Volume adjustment [m3|ml]
 Open valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
 Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/ml]
 Resistance of left atrium [(Pa.s)/m3|(mmHg.s)/ml]
-Resistance of the right atrium [(Pa.s)/m3|(dyn.s)/cm5]
+Resistance of the right atrium [(Pa.s)/m3|(mmHg.s)/ml]
 Viscoelastic resistance of the atria [(Pa.s)/m3|(dyn.s)/cm5]
 Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
 For Smith heart - linear dependency of active elastance on phi [1|%]
@@ -3211,21 +3457,14 @@ Fake value, just for ident [Pa|mmHg]
 [Pa|mmHg]
 [Pa|mmHg]
 [Pa|mmHg]
-Height of step [1]
-Offset of output signal y [1]
+Connector of Real input signal [1]
+Offset of output signal y
 Output y = offset for time < startTime [s]
-[1|%]
-[1|%]
-[Hz|1/min]
-[Hz|1/min]
-
-[m3|ml]
 Constant output value [1]
 Connector of first Real input signal [1]
 Connector of Boolean input signal [:#(type=Boolean)]
 Connector of Real output signal [1]
 When true, the parameter value is used as fixed output [:#(type=Boolean)]
-Use another input [:#(type=Boolean)]
 output for disconnected = true. Use SI units! [1]
 Delay time of output with respect to input signal [s]
 [:#(type=Boolean)]
@@ -3242,6 +3481,47 @@ Upper limits of input signals [1]
 Lower limits of input signals [1]
 Gain value multiplied with input signal [1]
 Output signal connector [1]
+Use another input [:#(type=Boolean)]
+Default phi0 [1]
+Phi Gain multiplier [1]
+Gain of input signal 1
+Gain of input signal 2
+[1]
+[:#(type=Boolean)]
+[1|%]
+Delay time of output with respect to input signal for activation [s]
+Delay time of output with respect to input signal for activation [s]
+[:#(type=Boolean)]
+[1|%]
+[1|%]
+[Hz|1/min]
+[Hz|1/min]
+
+[m3|ml]
+Offset of output signal y
+Output y = offset for time < startTime [s]
+Constant output value [1]
+Connector of first Real input signal [1]
+Connector of Boolean input signal [:#(type=Boolean)]
+Connector of Real output signal [1]
+When true, the parameter value is used as fixed output [:#(type=Boolean)]
+output for disconnected = true. Use SI units! [1]
+Delay time of output with respect to input signal [s]
+[:#(type=Boolean)]
+Enable pure constant transport delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Enable assymetrical integral delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Delay time of output with respect to input signal for activation [s]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+= true, if strict limits with noEvent(..) [:#(type=Boolean)]
+Simplified model for homotopy-based initialization [:#(type=Modelica.Blocks.Types.LimiterHomotopy)]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+Gain value multiplied with input signal [1]
+Output signal connector [1]
+Use another input [:#(type=Boolean)]
 Default phi0 [1]
 Phi Gain multiplier [1]
 Gain of input signal 1
@@ -3253,6 +3533,9 @@ Delay time of output with respect to input signal for activation [s]
 Delay time of output with respect to input signal for activation [s]
 [:#(type=Boolean)]
 mmHg 
+Height of step [1]
+Offset of output signal y [1]
+Output y = offset for time < startTime [s]
 [Pa|mmHg]
 [m3|ml]
 [m3|ml]
@@ -3267,13 +3550,58 @@ mmHg
 
 
 [:#(type=Boolean)]
-Height of step
-Connector of Real output signal
+Connector of Real input signal [1]
+Connector of Real output signal [1]
 Offset of output signal y
 Output y = offset for time < startTime [s]
+Constant output value [1]
+Connector of first Real input signal [1]
+Connector of Boolean input signal [:#(type=Boolean)]
+Connector of Real output signal [1]
+When true, the parameter value is used as fixed output [:#(type=Boolean)]
+output for disconnected = true. Use SI units! [1]
+Delay time of output with respect to input signal [s]
+[:#(type=Boolean)]
+Enable pure constant transport delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Enable assymetrical integral delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Delay time of output with respect to input signal for activation [s]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+= true, if strict limits with noEvent(..) [:#(type=Boolean)]
+Simplified model for homotopy-based initialization [:#(type=Modelica.Blocks.Types.LimiterHomotopy)]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+Gain value multiplied with input signal [1]
+Output signal connector [1]
+Use another input [:#(type=Boolean)]
+Default phi0 [1]
+Phi Gain multiplier [1]
+Gain of input signal 1
+Gain of input signal 2
+[1]
+[:#(type=Boolean)]
+[1|%]
+Delay time of output with respect to input signal for activation [s]
+Delay time of output with respect to input signal for activation [s]
+[:#(type=Boolean)]
 
 
 Scaling multiplier of u, because y=yBase*(1 + scalingFactor*u_)
 Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)
 Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)
+Height of step [1]
+Connector of Real output signal [1]
+Offset of output signal y [1]
+Output y = offset for time < startTime [s]
+Height of step [1]
+Connector of Real output signal [1]
+Offset of output signal y [1]
+Output y = offset for time < startTime [s]
+Height of step [1]
+Offset of output signal y [1]
+Output y = offset for time < startTime [s]
+[Hz|1/min]
+[1]
 

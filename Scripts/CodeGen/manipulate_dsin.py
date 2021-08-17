@@ -595,17 +595,17 @@ overwriteOptParamFile = True
 overWriteDsinTemplate = True
 updateStartValues = True
 
-DSFILEIN = None
-OPTOUTPUTFILEIN = 'OutputListingMain.txt'
+# DSFILEIN = None
+# OPTOUTPUTFILEIN = 'OutputListingMain.txt'
 
-# DSFILEIN = 'dsin.txt'
-# OPTOUTPUTFILEIN = None
+DSFILEIN = 'dsin.txt'
+OPTOUTPUTFILEIN = None
 
 USEPSO =  False
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
-    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.1)
+    # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.1)
     prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
     # writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
