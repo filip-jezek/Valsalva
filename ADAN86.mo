@@ -28957,17 +28957,16 @@ P_hs_plus_dist"),
           model Renal_P_Int_i
               "Rewritten from Dan's source in steady state, converted to SI units, divided to one kidney model only. leaking urine!"
             import Physiolibrary.Types.*;
+            extends Vessel_modules.Auxiliary.PartialSystemicElement(
+                final UseInertance=false, final LimitBackflow = false);
 
             // adjustment to fit within the infrastructure
-            parameter Real Ra = 0, Rv = 0, thoracic_pressure_ratio = 0, I = 0, C = 0, zpv = 0, nominal_pressure = 0;
+          //  parameter Real Ra = 0, Rv = 0, thoracic_pressure_ratio = 0, I = 0, C = 0, zpv = 0, nominal_pressure = 0;
             parameter Boolean UseOuter_thoracic_pressure = false;
             parameter Real phi_delayed = 0 "A dummy parameter to allow inheritance from unrelated parent";
 
             Pressure p = P_CKIDNEY;
             Pressure p_C = P_GLOMER;
-            VolumeFlowRate q_in = F_K1;
-
-            Volume volume = V_AKIDNEY + V_VKIDNEY;
 
             constant Real mmHg2SI(unit="Pa") = 133.322;
             constant Real ml2SI(unit="m3") = 1e-6;
@@ -29016,9 +29015,6 @@ P_hs_plus_dist"),
             parameter Real D0=10 "TODO";
             parameter Boolean leakUrine = false "If true, leaks the urine from the organism. Total volume decreases then!!";
 
-            Physiolibrary.Types.Pressure p_out "venous pressure output";
-            Physiolibrary.Types.Pressure p_in "Arterial pressure input";
-
             // State Variables
             Volume V_AKIDNEY;
             Volume V_VKIDNEY(start=5*ml2SI);
@@ -29047,17 +29043,12 @@ P_hs_plus_dist"),
             Real T_total=T_pass_aff + A_myo*T_a_max;
             Real A_myo_inf=1/(1 + exp(-Ctone0*T_total + Ctone1));
 
-            ADAN_main.Components.Interfaces.HydraulicPort_a_leveled port_a
-              annotation (Placement(transformation(extent={{-110,-10},{-90,10}})));
-            ADAN_main.Components.Interfaces.HydraulicPort_b_leveled port_b
-              annotation (Placement(transformation(extent={{90,-10},{110,10}})));
           initial equation
           //  V_AKIDNEY = V_VKIDNEY;
           equation
-            port_a.pressure =p_in;
-            port_b.pressure =p_out;
-              port_a.q = F_K1;
-              port_b.q = -F_K4;
+            volume = V_AKIDNEY + V_VKIDNEY;
+            q_in = F_K1;
+            q_out = -F_K4;
 
             der(V_AKIDNEY) = F_K1 - F_K2;
             der(V_VKIDNEY) = F_K3 - F_K4;
@@ -29070,6 +29061,47 @@ P_hs_plus_dist"),
 
           end Renal;
 
+          package Splanchnic
+            model Splanchnic_circulation
+                extends Vessel_modules.Auxiliary.PartialSystemicElement(
+                  final UseInertance=false, final LimitBackflow = false);
+              Interfaces.LeveledPressureFlowConverter
+                leveledPressureFlowConverter(useLevel=false) annotation (
+                  Placement(transformation(extent={{-74,-4},{-82,4}})));
+              Interfaces.LeveledPressureFlowConverter
+                leveledPressureFlowConverter1(useLevel=false)
+                annotation (Placement(transformation(extent={{76,-4},{84,4}})));
+              Physiolibrary.Hydraulic.Components.Resistor resistor annotation (
+                  Placement(transformation(extent={{-56,-10},{-36,10}})));
+              Physiolibrary.Hydraulic.Components.ElasticVessel elasticVessel
+                annotation (Placement(transformation(extent={{-10,6},{10,26}})));
+              Physiolibrary.Hydraulic.Components.Resistor resistor1 annotation
+                (Placement(transformation(extent={{20,-10},{40,10}})));
+            equation
+              volume = 0;
+              connect(leveledPressureFlowConverter.leveledPort_b, port_a)
+                annotation (Line(
+                  points={{-82,0},{-100,0}},
+                  color={162,29,33},
+                  thickness=0.5));
+              connect(leveledPressureFlowConverter1.leveledPort_b, port_b)
+                annotation (Line(
+                  points={{84,0},{100,0}},
+                  color={162,29,33},
+                  thickness=0.5));
+              connect(leveledPressureFlowConverter.port_a, resistor.q_in)
+                annotation (Line(
+                  points={{-74,0},{-56,0}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(resistor.q_out, elasticVessel.q_in) annotation (Line(
+                  points={{-36,0},{0,0},{0,16}},
+                  color={0,0,0},
+                  thickness=1));
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                    coordinateSystem(preserveAspectRatio=false)));
+            end Splanchnic_circulation;
+          end Splanchnic;
         end Organs;
       end Systemic;
 
@@ -39923,7 +39955,7 @@ P_hs_plus_dist"),
                     vasodilatationFactor)),
             settings(phi0=0,
               HR_nominal=1.1666666666667,
-              HR_max=1.6,
+              HR_max=1.85,
               heart_vntr_xi_Vw=(100/123),
               chi_phi=0.2),
             redeclare Components.Subsystems.Baroreflex.HeartRate_HRMinMax
@@ -39942,9 +39974,14 @@ P_hs_plus_dist"),
             "Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)";
           parameter Real vasodilatationFactor=2
             "Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)";
+
+          parameter Physiolibrary.Types.Frequency HR_20w(displayUnit="1/min")=1.6;
+          parameter Real PhiStep = (HR_20w - settings.HR_nominal) / (settings.HR_max - settings.HR_nominal);
+
         equation
           connect(step.y, condSystemicPhi.u1) annotation (Line(points={{75,-8},{56,-8},{
-                  56,-3.55556},{50.88,-3.55556}}, color={0,0,127}));
+                  56,-3.55556},
+                   {50.88,-3.55556}}, color={0,0,127}));
           annotation (experiment(
               StopTime=20,
               Interval=0.02,
