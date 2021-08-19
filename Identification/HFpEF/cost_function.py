@@ -121,20 +121,20 @@ def getObjectives(vars_set):
         # MRI
             ('ESV', numpy.min(vars_set['V_LV'][interval])/ml2SI, 51, None, 3),
             ('EDV', numpy.max(vars_set['V_LV'][interval])/ml2SI, 133, None, 3),
-            ('CO', numpy.mean(vars_set['CO'][interval]) /lpm2SI, 5.87, None, 0.1),
+            ('CO', numpy.mean(vars_set['CO'][interval]) /lpm2SI, 5.87, None, 0.05),
             # RHC
-            ('BPs', max(vars_set['brachial_pressure'][interval])/mmHg2SI, 153, None, 1),
-            ('BPd', min(vars_set['brachial_pressure'][interval])/mmHg2SI, 83, None, 1),
+            ('BPs', max(vars_set['brachial_pressure'][interval])/mmHg2SI, 153, None, 0.5),
+            ('BPd', min(vars_set['brachial_pressure'][interval])/mmHg2SI, 83, None, 0.5),
             # ('BPk', numpy.mean(vars_set['renal_capillary'][interval]) /mmHg2SI, 20, None, 1, 1/mmHg2SI),
             ('Ppas', numpy.max(vars_set['P_pa'][interval])/mmHg2SI, 29, None, 5),
             ('Ppad', numpy.min(vars_set['P_pa'][interval])/mmHg2SI, 14, None, 5),
-            ('Ppv', numpy.mean(vars_set['P_pv'][interval])/mmHg2SI, 13, None, 1),
+            ('Ppv', numpy.mean(vars_set['P_pv'][interval])/mmHg2SI, 13, None, 0.5),
             ('P_SRV', numpy.max(vars_set['heartComponent.ventricles.P_RV'][interval])/mmHg2SI, 32, None, 5),
             ('P_sv', numpy.min(vars_set['P_sv'][interval])/mmHg2SI, 4, None, 1),
             
             # 20W exercise
             ('BPs_Ex', max(vars_set['brachial_pressure'][interval_ex])/mmHg2SI, 159, None, 1),
-            ('BPd_Ex', min(vars_set['brachial_pressure'][interval_ex])/mmHg2SI, 82, None, 1),
+            ('BPd_Ex', min(vars_set['brachial_pressure'][interval_ex])/mmHg2SI, 82, None, 2),
             ('Ppas_Ex', numpy.max(vars_set['P_pa'][interval_ex])/mmHg2SI, 42, None, 5),
             ('Ppad_Ex', numpy.min(vars_set['P_pa'][interval_ex])/mmHg2SI, 26, None, 5),
             ('Ppv_Ex', numpy.mean(vars_set['P_pv'][interval_ex])/mmHg2SI, 23, None, 1),
@@ -143,11 +143,11 @@ def getObjectives(vars_set):
             ('CO_Ex', numpy.mean(vars_set['CO'][interval_ex]) /lpm2SI, 11.5, None, 0.1),
           
             # Max exercise
-            ('BPs_mEx', max(vars_set['brachial_pressure'][interval_mex])/mmHg2SI, 163, None, 1),
-            ('BPd_mEx', min(vars_set['brachial_pressure'][interval_mex])/mmHg2SI, 113, None, 1),
+            ('BPs_mEx', max(vars_set['brachial_pressure'][interval_mex])/mmHg2SI, 163, None, 2),
+            ('BPd_mEx', min(vars_set['brachial_pressure'][interval_mex])/mmHg2SI, 113, None, 4),
             ('Ppas_mEx', numpy.max(vars_set['P_pa'][interval_mex])/mmHg2SI, 57, None, 5),
             ('Ppad_mEx', numpy.min(vars_set['P_pa'][interval_mex])/mmHg2SI, 37, None, 5),
-            ('Ppv_mEx', numpy.mean(vars_set['P_pv'][interval_mex])/mmHg2SI, 25, None, 1),
+            ('Ppv_mEx', numpy.mean(vars_set['P_pv'][interval_mex])/mmHg2SI, 25, None, 2),
             ('SP_RV_mEx', numpy.max(vars_set['heartComponent.ventricles.P_RV'][interval_mex])/mmHg2SI, 45, None, 0),
             ('DP_RV_mEx', numpy.min(vars_set['P_sv'][interval_mex])/mmHg2SI, 6, None, 0),
             ('CO_mEx', numpy.mean(vars_set['CO'][interval_mex]) /lpm2SI, 14.5, None, 0),
