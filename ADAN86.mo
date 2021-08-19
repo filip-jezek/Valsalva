@@ -791,6 +791,7 @@ type"),       Text(
 
       model ConditionalConnection "Debug or experimental switch for intercepting the through signal. Does not affect the signal at all by default."
         extends Modelica.Blocks.Interfaces.SISO;
+        extends Modelica.Blocks.Interfaces.SignalSource;
         Modelica.Blocks.Sources.Constant const1(k=disconnectedValue)
           annotation (Placement(transformation(extent={{-6,-48},{-22,-34}})));
         Modelica.Blocks.Logical.Switch switch1
@@ -806,8 +807,6 @@ type"),       Text(
             -10},{70,10}})));
 */
       parameter Boolean disconnected=false   "When true, the parameter value is used as fixed output" annotation(choices(checkBox=true));
-
-      parameter Boolean UseAdditionalInput =  false "Use another input";
       parameter Real disconnectedValue = 0 "output for disconnected = true. Use SI units!" annotation(Dialog(enable = disconnected));
         MyDelay myDelay(delayTime=delayTransport_Time, delayEnabled=
               delayTransport_Enabled)
@@ -837,6 +836,7 @@ type"),       Text(
         Modelica.Blocks.Sources.Constant const_shiftOffset(k=const_offset)
                     if not UseAdditionalInput
           annotation (Placement(transformation(extent={{-98,24},{-82,38}})));
+      parameter Boolean UseAdditionalInput =  false "Use another input" annotation(choices(checkBox=true));
         parameter Real phi0=0.25 "Default phi0";
         parameter Real phi_gain=1 "Phi Gain multiplier";
         Modelica.Blocks.Math.Add         add3_1
@@ -844,7 +844,8 @@ type"),       Text(
         Modelica.Blocks.Interfaces.RealInput
                   u1 if UseAdditionalInput
                     "Connector of Real input signal" annotation (Placement(
-              transformation(extent={{-142,70},{-102,110}})));
+              transformation(extent={{-140,80},{-100,120}}),iconTransformation(extent={{-140,80},
+                  {-100,120}})));
         parameter Real const_offset=-(phi_gain - 1)*phi0 annotation(Dialog(enable = not UseAdditionalInput));
         IntegralActRelaxDelay integralActRelaxDelay(
           delayEnabled=delayIntegral_Enabled,
@@ -875,8 +876,8 @@ type"),       Text(
         connect(const_shiftOffset.y, add3_1.u1) annotation (Line(points={{-81.2,
                 31},{-68,31},{-68,12.2},{-57.6,12.2}},
                                             color={0,0,127}));
-        connect(u1, add3_1.u1) annotation (Line(points={{-122,90},{-68,90},{-68,
-                12.2},{-57.6,12.2}},
+        connect(u1, add3_1.u1) annotation (Line(points={{-120,100},{-68,100},{-68,12.2},
+                {-57.6,12.2}},
                              color={0,0,127}));
         connect(integralActRelaxDelay.y, myDelay.u)
           annotation (Line(points={{30,0},{38,0}}, color={0,0,127}));
@@ -884,7 +885,7 @@ type"),       Text(
           annotation (Line(points={{61,0},{68,0}}, color={0,0,127}));
         annotation (Diagram(coordinateSystem(extent={{-100,-100},{100,100}})),
                                                                            Icon(
-              coordinateSystem(extent={{-100,-80},{100,100}}),
+              coordinateSystem(extent={{-100,-100},{100,100}}),
                                                             graphics={
               Rectangle(
                 extent={{-60,20},{60,-40}},
@@ -39642,6 +39643,7 @@ P_hs_plus_dist"),
 
     package Exercise
       model partialCVS
+        extends Physiolibrary.Icons.CardioVascular;
         replaceable Components.Subsystems.Heart.Heart_TriSegMechanics heartComponent
           annotation (
             choicesAllMatching=true, Placement(transformation(extent={{8,-10},{-12,10}})));
@@ -39784,7 +39786,11 @@ P_hs_plus_dist"),
             points={{34,52},{46,52},{46,10},{8,10}},
             color={0,0,0},
             thickness=1));
-        annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics
+              ={Text(
+                extent={{-100,-100},{100,100}},
+                textColor={0,0,0},
+                textString="S")}),                                     Diagram(
               coordinateSystem(preserveAspectRatio=false)));
       end partialCVS;
 
@@ -39834,14 +39840,9 @@ P_hs_plus_dist"),
             R_pa_visc(enable=false),
             R_pv_visc(enable=false),
             proportionalFactor(scalingFactor=0.5, u0=0)));
-        replaceable
-        Components.Signals.Stepping  exercise(
-          startTime=10,
-          interval=10,
-          increment(displayUnit="1") = 0.1,
-          maxVal(displayUnit="1") = 1) constrainedby
-          Modelica.Blocks.Interfaces.SignalSource
-          annotation (Placement(transformation(extent={{-60,80},{-40,100}})),
+        Components.Signals.ConditionalConnection
+                                     condExercise
+          annotation (Placement(transformation(extent={{-40,100},{-20,80}})),
             choicesAllMatching=true);
         replaceable
         Components.Subsystems.Baroreflex.HeartRate_simple heartRate_simple(H0(
@@ -39853,30 +39854,39 @@ P_hs_plus_dist"),
 
         Physiolibrary.Types.Volume volume_total=pulmonaryTriSeg.volume +
             systemic_TriSeg.volume + heartComponent.volume;
-        Components.Signals.ConditionalConnection condSystemicPhi(
+        Components.Signals.ConditionalConnection condHR(
           disconnectedValue=0.25,
           disconnected=false,
           delayTransport_Enabled=false,
           delayTransport_Time=settings.Td_phi_syst,
           delayIntegral_Enabled=false,
           delayInt_Act=settings.Td_phi_syst,
-          phi0=settings.phi0) annotation (Placement(transformation(extent={{50,4},{
-                  42,-4}})));
+          phi0=settings.phi0)
+          annotation (Placement(transformation(extent={{50,4},{42,-4}})));
         parameter Real sigma_act0=7.5*96 "mmHg ";
+        replaceable
+        Components.Signals.Stepping  exercise(
+          startTime=10,
+          interval=10,
+          increment(displayUnit="1") = 0.1,
+          maxVal(displayUnit="1") = 1) constrainedby Modelica.Blocks.Interfaces.SignalSource
+          annotation (Placement(transformation(extent={{-72,80},{-52,100}})),
+            choicesAllMatching=true);
       equation
         connect(heartComponent.frequency_input, heartRate_simple.HR)
           annotation (Line(points={{8,0},{19.92,0}}, color={0,0,127}));
-        connect(heartComponent.phi, exercise.y) annotation (Line(points={{8,6},
-                {60,6},{60,90},{-39,90}}, color={0,0,127}));
-        connect(systemic_TriSeg.phi_input, exercise.y) annotation (Line(points={{0,44},
-                {-8,44},{-8,90},{-39,90}}, color={0,0,127}));
-        connect(pulmonaryTriSeg.phi_input, exercise.y) annotation (Line(points={{-16,-56},
-                {-8,-56},{-8,90},{-39,90}}, color={0,0,127}));
-        connect(heartRate_simple.phi, condSystemicPhi.y) annotation (Line(
-              points={{28,0},{38.7,0},{38.7,0.444444},{41.6,0.444444}}, color={
-                0,0,127}));
-        connect(condSystemicPhi.u, exercise.y) annotation (Line(points={{50.8,
-                0.444444},{60,0.444444},{60,90},{-39,90}}, color={0,0,127}));
+        connect(heartComponent.phi, condExercise.y) annotation (Line(points={{8,6},{60,6},
+                {60,90},{-19,90}},        color={0,0,127}));
+        connect(systemic_TriSeg.phi_input, condExercise.y) annotation (Line(points={{0,44},{
+                -8,44},{-8,90},{-19,90}},  color={0,0,127}));
+        connect(pulmonaryTriSeg.phi_input, condExercise.y) annotation (Line(points={{-16,-56},
+                {-8,-56},{-8,90},{-19,90}}, color={0,0,127}));
+        connect(heartRate_simple.phi, condHR.y) annotation (Line(points={{28,0},{38.7,
+                0},{38.7,0},{41.6,0}}, color={0,0,127}));
+        connect(condHR.u, condExercise.y) annotation (Line(points={{50.8,0},{60,0},{60,90},
+                {-19,90}}, color={0,0,127}));
+        connect(condExercise.u, exercise.y)
+          annotation (Line(points={{-42,90},{-51,90}}, color={0,0,127}));
         annotation (experiment(
             StopTime=20,
             __Dymola_NumberOfIntervals=5000,
@@ -39888,7 +39898,6 @@ P_hs_plus_dist"),
         extends SimpleExercise(heartComponent(ventricles(
               redeclare model VentricleWall =
                   ADAN_main.Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWall_LumensOriginalEDPVR,
-
               LV_wall(
                 k_passive=settings.heart_vntr_k_passive,
                 SLrest=settings.heart_vntr_SLrest,
@@ -39906,8 +39915,11 @@ P_hs_plus_dist"),
                 SLrest=settings.heart_vntr_SLrest,
                 SLcollagen=settings.heart_vntr_SLcollagen,
                 PConcollagen=settings.heart_vntr_PConcollagen,
-                PExpcollagen=settings.heart_vntr_PExpcollagen))), redeclare
+                PExpcollagen=settings.heart_vntr_PExpcollagen)),
+            aorticValve(calculateAdditionalMetrics=true),
+            mitralValve(calculateAdditionalMetrics=true)),        redeclare
             Modelica.Blocks.Sources.Step exercise(startTime=20));
+
         Modelica.Blocks.Sources.RealExpression realExpression(y=heartComponent.ventricles.V_LV)
           annotation (Placement(transformation(extent={{28,-106},{48,-86}})));
         Components.Subsystems.Heart.Data.EDPVRnorm
@@ -39929,7 +39941,9 @@ P_hs_plus_dist"),
       package Identification
         model SimpleExercise_ident
           extends SimpleExerciseEDPVR(
-            condSystemicPhi(UseAdditionalInput=true, phi0=0,
+            condHR(
+              UseAdditionalInput=true,
+              phi0=0,
               phi_gain=0),
             redeclare Modelica.Blocks.Sources.Step exercise(height=settings.chi_phi,
                 startTime=10),
@@ -39950,10 +39964,15 @@ P_hs_plus_dist"),
                   inotropy_factor=inotropy_factor,
                   calcium_factor=calcium_factor))),
             pulmonaryTriSeg(proportionalFactor(scalingFactor=pulmonaryR_factor)),
-            systemic_TriSeg(inverseProportionalFactor1(scalingFactor=
-                    venoconstrictionFactor), inverseProportionalFactor2(scalingFactor=
-                    vasodilatationFactor)),
-            settings(phi0=0,
+
+            systemic_TriSeg(
+              _C_Ao=0.65*settings.syst_art_k_E,
+              _C_SA=1.65*settings.syst_art_k_E,
+              inverseProportionalFactor1(scalingFactor=venoconstrictionFactor),
+
+              inverseProportionalFactor2(scalingFactor=vasodilatationFactor)),
+            settings(
+              phi0=0,
               HR_nominal=1.1666666666667,
               HR_max=1.85,
               heart_vntr_xi_Vw=(100/123),
@@ -39979,15 +39998,76 @@ P_hs_plus_dist"),
           parameter Real PhiStep = (HR_20w - settings.HR_nominal) / (settings.HR_max - settings.HR_nominal);
 
         equation
-          connect(step.y, condSystemicPhi.u1) annotation (Line(points={{75,-8},{56,-8},{
-                  56,-3.55556},
-                   {50.88,-3.55556}}, color={0,0,127}));
+          connect(step.y, condHR.u1) annotation (Line(points={{75,-8},{56,-8},{
+                  56,-4},{50,-4}}, color={0,0,127}));
           annotation (experiment(
               StopTime=20,
               Interval=0.02,
               Tolerance=1e-08,
               __Dymola_Algorithm="Cvode"));
         end SimpleExercise_ident;
+
+        model SimpleCirculation_HFpEF7 "Resulting fit to HFpEF7, Generated by PostProcess/postprocess_optim.py optimized at Aug 16 22:25:29 CEST 2021
+ with cost 2.314029 lowest at run 1292"
+          extends
+            ADAN_main.SimpleCirculation.Exercise.Identification.SimpleExercise_ident(
+            pulmonaryTriSeg(c_pa(
+              Compliance =                      2.964495e-08)),
+            settings(
+              heart_R_LA=1655068,
+              heart_R_RA(displayUnit="(mmHg.s)/ml") = 1655068,
+              heart_vntr_xi_AmRef=0.86375,
+              V_PV_init=0.0002079688,
+              chi_phi=0.2,
+              syst_art_k_E=0.728125),
+            systemic_TriSeg(
+              _R_SA =                 1.099994e+00),
+              sigma_act0 = 8.686250e+02,
+              inotropy_factor = 2.500000e-01,
+              pulmonaryR_factor = 3.028124e+00,
+              venoconstrictionFactor = 7.332812e+00,
+              vasodilatationFactor = 1.717188e+00,
+            heartComponent(mitralValve(calculateAdditionalMetrics=true)));
+
+
+          annotation ();
+        end SimpleCirculation_HFpEF7;
+
+        model SimpleCirculation_HFpEF7_MaxEx
+          extends SimpleCirculation_HFpEF7(condExercise(UseAdditionalInput=true, phi0=0),
+              redeclare Components.Signals.ConditionalConnection step(
+                UseAdditionalInput=true),
+            settings(HR_max=1.85, chi_phi=PhiStep),
+            exercise(startTime=15));
+          Modelica.Blocks.Sources.Step exercise1(height=1 - settings.chi_phi,
+              startTime=30)
+            annotation (Placement(transformation(extent={{-80,50},{-60,70}})),
+              choicesAllMatching=true);
+          replaceable Modelica.Blocks.Sources.Step step1(height=1 - PhiStep,
+              startTime=30)                                           constrainedby
+            Modelica.Blocks.Sources.Step            annotation (Placement(transformation(extent={{78,18},
+                    {98,38}})),     choicesAllMatching=true);
+          replaceable Modelica.Blocks.Sources.Step step2(height=PhiStep,
+              startTime=15)                                           constrainedby
+            Modelica.Blocks.Sources.Step            annotation (Placement(transformation(extent={{76,-60},
+                    {96,-40}})),    choicesAllMatching=true);
+
+          parameter Physiolibrary.Types.Frequency HR_20w(displayUnit="1/min")=1.6;
+          parameter Real PhiStep = (HR_20w - settings.HR_nominal) / (settings.HR_max - settings.HR_nominal);
+
+        equation
+          connect(condExercise.u1, exercise1.y)
+            annotation (Line(points={{-42,80},{-42,60},{-59,60}}, color={0,0,127}));
+          connect(step2.y, step.u) annotation (Line(points={{97,-50},{112,-50},{112,-8},
+                  {98,-8}}, color={0,0,127}));
+          connect(step1.y, step.u1) annotation (Line(points={{99,28},{120,28},{120,2},{98,
+                  2}}, color={0,0,127}));
+          annotation (experiment(
+              StopTime=45,
+              Interval=0.01,
+              Tolerance=1e-08,
+              __Dymola_Algorithm="Cvode"));
+        end SimpleCirculation_HFpEF7_MaxEx;
       end Identification;
     end Exercise;
   end SimpleCirculation;
@@ -51943,19 +52023,20 @@ P_hs_plus_dist"),
           parameter Real endTime=120;
           parameter Real stepInterval=0.01;
           inner Components.Settings settings(
+            initByPressure=false,
             veins_delayed_activation=false,
             baro_tau_s(displayUnit="s") = 93,
-            heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 3.196880e+03,
-            heart_vntr_D_0_maxAct=1.249063e-03,
-            heart_vntr_TS_maxAct(displayUnit="s") = 1.477405e-02,
-            heart_vntr_TR_maxAct(displayUnit="s") = 6.597690e-02,
-            eta_vc=3.151054e-01,
-            tissues_eta_Ra=3.845225e+00,
-            tissues_eta_Rv=2.662500e+00,
-            tissues_eta_C=5.808013e-01,
-            tissues_chi_Ra(displayUnit="1") = 2.731250e+01,
-            tissues_chi_Rv=3.306250e+01,
-            tissues_chi_C=2.362500e-01,
+            heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 4.600005e+03,
+            heart_vntr_D_0_maxAct=1.225000e-03,
+            heart_vntr_TS_maxAct(displayUnit="s") = 1.047740e-01,
+            heart_vntr_TR_maxAct(displayUnit="s") = 7.597690e-02,
+            eta_vc=2.101054e-01,
+            tissues_eta_Ra=3.145225e+00,
+            tissues_eta_Rv=2.806250e+00,
+            tissues_eta_C=5.708013e-01,
+            tissues_chi_Ra(displayUnit="1") = 2.481250e+01,
+            tissues_chi_Rv=1.384375e+01,
+            tissues_chi_C=-3.125000e-02,
             V_PV_init=0,
             heart_R_LA(displayUnit="(mmHg.s)/ml") = 1.655068e+06,
             heart_R_vlv(displayUnit="(mmHg.s)/ml") = 7.723515e+05,
@@ -51982,7 +52063,6 @@ P_hs_plus_dist"),
             chi_phi=0.7,
             heart_R_RA(displayUnit="(dyn.s)/cm5") = settings.heart_R_LA,
             pulm_q_nom_maxq(displayUnit="l/min") = 0.00033333333333333,
-            initByPressure=false,
             veins_UseNonLinearVeins=true,
             veins_linearE_rel=765,
             veins_linearV0_rel=0.793,
@@ -52150,11 +52230,7 @@ P_hs_plus_dist"),
 
         model CombinedModels_FMUs_ExceptBaseline
           extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime=
-                 0, fmi_StopTime=60),
-              settings(                    tissues_chi_Ra =          1.331250e+01,
-              tissues_chi_Rv=5.0625,
-              tissues_chi_C=0.05625,
-              baro_tau_s=93));
+                 0, fmi_StopTime=60));
         end CombinedModels_FMUs_ExceptBaseline;
 
         model CombinedModels_FMUs_ExceptBaselineExercise
@@ -52162,6 +52238,18 @@ P_hs_plus_dist"),
             useExercise=false,        useBaseline=false, exercise(fmi_StartTime=
                  0, fmi_StopTime=30));
         end CombinedModels_FMUs_ExceptBaselineExercise;
+
+        model TestFMU
+          Exercise.CVS_exercise cVS_exercise
+            annotation (Placement(transformation(extent={{-80,0},{-60,20}})));
+          ADAN_0main_SystemicTree_Exercise_CVS_0exercise_fmu_black_box
+            aDAN_0main_SystemicTree_Exercise_CVS_0exercise_fmu_black_box
+            annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
+          annotation (
+            Icon(coordinateSystem(preserveAspectRatio=false)),
+            Diagram(coordinateSystem(preserveAspectRatio=false)),
+            experiment(StopTime=50, __Dymola_Algorithm="Cvode"));
+        end TestFMU;
       end CombinedModel;
 
       package AdditionalOutputs
@@ -52663,7 +52751,8 @@ P_hs_plus_dist"),
 
       model CVS_baseline "Just a baseline wrapper"
         import ADAN_main;
-        extends ADAN_main.SystemicTree.CardiovascularSystem;
+        extends ADAN_main.SystemicTree.CardiovascularSystem(useAutonomousPhi(y=
+                false));
       //   (
       //     heartComponent(valveInertia_Mitral(enabled=false)),
       //     settings(heart_vntr_TS=0.1, heart_atr_TS=0.08),
