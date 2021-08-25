@@ -10351,8 +10351,8 @@ Kalecky")}), experiment(
             phi0=settings.phi0,
             D_A=settings.heart_atr_D_A,
             D_A_maxAct=settings.heart_atr_D_A,
-            D_0=settings.heart_vntr_D_0,
-            D_0_maxAct=settings.heart_vntr_D_0_maxAct)
+            D_0=settings.heart_atr_D_0,
+            D_0_maxAct=settings.heart_atr_D_0)
             annotation (Placement(transformation(extent={{-54,22},{-34,42}})));
         equation
           connect(sa_node.t0,calciumMechanics. t0)
@@ -29076,8 +29076,8 @@ P_hs_plus_dist"),
                   Placement(transformation(extent={{-56,-10},{-36,10}})));
               Physiolibrary.Hydraulic.Components.ElasticVessel elasticVessel
                 annotation (Placement(transformation(extent={{-10,6},{10,26}})));
-              Physiolibrary.Hydraulic.Components.Resistor resistor1 annotation
-                (Placement(transformation(extent={{20,-10},{40,10}})));
+              Physiolibrary.Hydraulic.Components.Resistor resistor1 annotation (
+                 Placement(transformation(extent={{20,-10},{40,10}})));
             equation
               volume = 0;
               connect(leveledPressureFlowConverter.leveledPort_b, port_a)
@@ -29102,6 +29102,94 @@ P_hs_plus_dist"),
               annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end Splanchnic_circulation;
+
+            model Ascites
+              "Ascites build up model by Levitt and Levitt (PMID 22453061)"
+
+
+              Real J_L=max(0,L_L*(P_L - P_A - P_Break)) "LIver leak";
+              Real J_lymph=max(0, L_Y*(P_A - P_RA + P_min)) "Lymph flow";
+              Real J_I = L_T*((P_C - P_A) - (Pi_P - Pi_A));
+              //  Real J_I = L_I*((P_I - P_A) - (Pi_I - Pi_A)) equation 4
+
+              Real P_L = (P_P + P_HV)/2 "Liver pressure";
+              Boolean ascites;
+              Real P_HV(start = 4) "Hepatic vein pressure";
+              Real P_A( start = 2) "Peritonela pressure";
+              Real P_P "Portal vein pressure, use PV wedge";
+              Real P_C( start = 9) "Intestinal capillary pressure";
+              parameter Real P_Break = 8;
+              parameter Real P_RA = 2;
+              parameter Real P_HPVG= 4;
+              parameter Real P_min = 2;
+              parameter Real L_L=10.3 "Conductance of ruptured liver lymphatics ml/h/mmHg";
+              parameter Real L_Y=7.86 "ml/h/mmHg";
+              parameter Real L_T=6.25 "Intestinal Blood to peritoneal conductance ml/h/mmHg";
+              parameter Real L_I=2*L_T "ml/h/mmHg";
+              parameter Real L_C=2*L_T "ml/h/mmHg";
+
+              parameter Real V_min = 100 "ml";
+              parameter Real D= 0.8 "L/mmHg";
+              parameter Real D_I= 133  "mL/mmHg";
+              parameter Real V_I1 = 100 "ml";
+              parameter Real V_I2 = 50 "ml";
+              parameter Real Perm = 2 "ml/h";
+              parameter Real L_YI = 18 "ml/h/mmHg";
+              parameter Real m = 0.8 "";
+
+              Real Pi_P( start = 25);
+              Real Pi_I(start = 18);
+              Real Pi_A;
+
+              Real J_C = L_C* (P_C - P_I) - (Pi_P - Pi_I);
+
+              Real P_I "Intestinal pressure";
+
+              Real J_ILymph = max(0, P_I - P_A)*L_YI;
+              Real J_Ca =  Perm*(Pi_P - Pi_I) "Capillary leak";
+
+
+              Real V=V_min + D*(P_A - P_min);
+              Real V_I;
+              Real Amt_A "peritoneal Protein amount ";
+              Real Amt_I "Intestinal Protein amount ";
+              parameter Real F_L = 5*0.1 "Nominal liver blood flow";
+              parameter Real R_L = P_HPVG/F_L "Normal liver resistance";
+
+            equation
+              ascites = P_A > P_RA + 2;
+              if ascites then
+                P_HV = P_RA + 2;
+                P_P = P_RA + F_L*R_L + 2;
+                P_C = P_RA + F_L*R_L + 5;
+              else
+                P_HV = P_A;
+                P_P = P_A + F_L*R_L;
+                P_C = P_A - 2 + F_L*R_L +5;
+              end if;
+               //   P_I = P_A;
+
+              Pi_I = Pi_P + P_A  - P_C "Equation 3";
+              // if P_A > P_RA - P_min
+              //   J_lymph = L_Y*(P_A - P_RA + P_min);
+              // else
+              //   J_lymph = 0;
+              // end if;
+
+              if V_I < V_I2 then
+                P_I = P_A + (V_I2 - V_I1)/D_I;
+              else
+                P_I = P_A + (V_I - V_I1)/D_I;
+              end if;
+
+
+              der(V) = J_I + J_L - J_lymph;
+              der(Amt_A) = m*Pi_P*J_L - Pi_A*J_lymph;
+              der(V_I) = J_C + J_ILymph - J_I;
+              der(Amt_I) = J_Ca - Pi_I *J_ILymph;
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                    coordinateSystem(preserveAspectRatio=false)));
+            end Ascites;
           end Splanchnic;
         end Organs;
       end Systemic;
@@ -39649,7 +39737,7 @@ P_hs_plus_dist"),
             choicesAllMatching=true, Placement(transformation(extent={{8,-10},{-12,10}})));
         Components.Subsystems.Pulmonary.PulmonaryTriSeg pulmonaryTriSeg
           annotation (Placement(transformation(extent={{4,-58},{-16,-38}})));
-        Components.Subsystems.Systemic.Systemic_TriSeg systemic_TriSeg
+        replaceable Components.Subsystems.Systemic.Systemic_TriSeg systemic_TriSeg
           annotation (Placement(transformation(extent={{-42,42},{34,72}})));
 
 
@@ -39786,8 +39874,8 @@ P_hs_plus_dist"),
             points={{34,52},{46,52},{46,10},{8,10}},
             color={0,0,0},
             thickness=1));
-        annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics
-              ={Text(
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
+                Text(
                 extent={{-100,-100},{100,100}},
                 textColor={0,0,0},
                 textString="S")}),                                     Diagram(
@@ -39796,8 +39884,8 @@ P_hs_plus_dist"),
 
       model SimpleExercise
         extends partialCVS(
-          redeclare
-            Components.Subsystems.Heart.Heart_TriSegMechanics_LumensExercise
+          redeclare replaceable
+                        Components.Subsystems.Heart.Heart_TriSegMechanics_LumensExercise
             heartComponent(
             UseThoracic_PressureInput=false,
             class_name="L EX",
@@ -39938,6 +40026,16 @@ P_hs_plus_dist"),
             __Dymola_Algorithm="Cvode"));
       end SimpleExerciseEDPVR;
 
+      model SimpleExercise_Olufsen
+        extends SimpleExercise(
+          redeclare Components.Subsystems.Heart.Heart_TriSegMechanicsSimple
+            heartComponent(
+            UseThoracic_PressureInput=false,
+            aorticValve(calculateAdditionalMetrics=true),
+            mitralValve(calculateAdditionalMetrics=true)),
+          settings(phi0=0));
+      end SimpleExercise_Olufsen;
+
       package Identification
         model SimpleExercise_ident
           extends SimpleExerciseEDPVR(
@@ -39964,12 +40062,10 @@ P_hs_plus_dist"),
                   inotropy_factor=inotropy_factor,
                   calcium_factor=calcium_factor))),
             pulmonaryTriSeg(proportionalFactor(scalingFactor=pulmonaryR_factor)),
-
             systemic_TriSeg(
               _C_Ao=0.65*settings.syst_art_k_E,
               _C_SA=1.65*settings.syst_art_k_E,
               inverseProportionalFactor1(scalingFactor=venoconstrictionFactor),
-
               inverseProportionalFactor2(scalingFactor=vasodilatationFactor)),
             settings(
               phi0=0,
@@ -39982,6 +40078,7 @@ P_hs_plus_dist"),
               phi0=settings.phi0,
               HR_max=settings.HR_max,
               HR_nom=settings.HR_nominal));
+
           replaceable Modelica.Blocks.Sources.Step step(startTime=10) constrainedby
             Modelica.Blocks.Interfaces.SignalSource annotation (Placement(transformation(extent={{96,
                     -18},{76,2}})), choicesAllMatching=true);
@@ -39999,7 +40096,8 @@ P_hs_plus_dist"),
 
         equation
           connect(step.y, condHR.u1) annotation (Line(points={{75,-8},{56,-8},{
-                  56,-4},{50,-4}}, color={0,0,127}));
+                  56,-4},{50.8,-4}},
+                                   color={0,0,127}));
           annotation (experiment(
               StopTime=20,
               Interval=0.02,
@@ -40068,6 +40166,83 @@ P_hs_plus_dist"),
               Tolerance=1e-08,
               __Dymola_Algorithm="Cvode"));
         end SimpleCirculation_HFpEF7_MaxEx;
+
+        model SimpleExercise_Olufsen_ident
+          extends SimpleExercise_Olufsen(
+            condHR(
+              UseAdditionalInput=true,
+              phi0=0,
+              phi_gain=0),
+            redeclare Modelica.Blocks.Sources.Step exercise(height=0.2,
+                startTime=15),
+            pulmonaryTriSeg(proportionalFactor(scalingFactor=pulmonaryR_factor)),
+            systemic_TriSeg(
+              _C_Ao=0.65*settings.syst_art_k_E,
+              _C_SA=1.65*settings.syst_art_k_E,
+              inverseProportionalFactor1(scalingFactor=venoconstrictionFactor),
+              inverseProportionalFactor2(scalingFactor=vasodilatationFactor)),
+            settings(
+              phi0=0,
+              HR_nominal=1.1666666666667,
+              HR_max=1.85,
+              heart_R_LA=1655068,
+              heart_R_RA=1241.4029122117,
+              heart_vntr_xi_Vw=(100/123),
+              chi_phi=0.4),
+            redeclare Components.Subsystems.Baroreflex.HeartRate_HRMinMax
+              heartRate_simple(
+              phi0=settings.phi0,
+              HR_max=settings.HR_max,
+              HR_nom=settings.HR_nominal),
+            condExercise(UseAdditionalInput=true, phi0=0));
+
+          replaceable Components.Signals.ConditionalConnection step(
+            startTime=0,
+            UseAdditionalInput=true,
+            phi0=0)                                                               constrainedby
+            Modelica.Blocks.Interfaces.SignalSource annotation (Placement(transformation(extent={{96,
+                    -18},{76,2}})), choicesAllMatching=true);
+        //  parameter Real inotropy_factor=2.5;
+        //  parameter Real calcium_factor=5;
+          parameter Real pulmonaryR_factor=0.5
+            "Scaling multiplier of u, because y=yBase*(1 + scalingFactor*u_)";
+          parameter Real venoconstrictionFactor=2
+            "Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)";
+          parameter Real vasodilatationFactor=2
+            "Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)";
+
+          parameter Physiolibrary.Types.Frequency HR_20w(displayUnit="1/min")=1.6;
+          parameter Real PhiStep = (HR_20w - settings.HR_nominal) / (settings.HR_max - settings.HR_nominal);
+
+          Modelica.Blocks.Sources.Step exercise1(height=settings.chi_phi - 0.2,
+                                                                              startTime=
+               30)
+            annotation (Placement(transformation(extent={{-84,48},{-64,68}})),
+              choicesAllMatching=true);
+          replaceable Modelica.Blocks.Sources.Step step1(height=1 - PhiStep, startTime=30)
+                                                                      constrainedby
+            Modelica.Blocks.Sources.Step            annotation (Placement(transformation(extent={{76,12},
+                    {96,32}})),     choicesAllMatching=true);
+          replaceable Modelica.Blocks.Sources.Step step2(height=PhiStep, startTime=15)
+                                                                      constrainedby
+            Modelica.Blocks.Sources.Step            annotation (Placement(transformation(extent={{76,-44},
+                    {96,-24}})),    choicesAllMatching=true);
+
+        equation
+          connect(step.y, condHR.u1) annotation (Line(points={{75,-8},{56,-8},{56,-4},{50.8,
+                  -4}},            color={0,0,127}));
+          connect(condExercise.u1,exercise1. y)
+            annotation (Line(points={{-42,80},{-42,58},{-63,58}}, color={0,0,127}));
+          connect(step1.y, step.u1) annotation (Line(points={{97,22},{106,22},{106,2},{98,
+                  2}}, color={0,0,127}));
+          connect(step2.y, step.u) annotation (Line(points={{97,-34},{106,-34},{106,-8},
+                  {98,-8}}, color={0,0,127}));
+          annotation (experiment(
+              StopTime=45,
+              Interval=0.02,
+              Tolerance=1e-08,
+              __Dymola_Algorithm="Cvode"));
+        end SimpleExercise_Olufsen_ident;
       end Identification;
     end Exercise;
   end SimpleCirculation;
@@ -41172,17 +41347,21 @@ P_hs_plus_dist"),
             points={{-10,-52},{0,-52},{0,-32},{-10,-32}},
             color={0,0,0},
             thickness=1));
-        connect(condHRPhi.y, heartRate.phi) annotation (Line(points={{43.4,-32},
-                {30,-32},{30,-32},{18,-32}},color={0,0,127}));
+        connect(condHRPhi.y, heartRate.phi) annotation (Line(points={{43.4,
+                -31.4075},{30,-31.4075},{30,-32},{18,-32}},
+                                            color={0,0,127}));
         connect(heartRate.HR, heartComponent.frequency_input)
           annotation (Line(points={{5.88,-32},{2,-32},{2,-22},{-10,-22}},
                                                            color={0,0,127}));
         connect(thoracic_pressure_ramp.y,condTP_PC. u) annotation (Line(points={{-79,-62},
-                {-74,-62},{-74,-56},{-70.4,-56}}, color={0,0,127}));
+                {-74,-62},{-74,-55.3333},{-70.4,-55.3333}},
+                                                  color={0,0,127}));
         connect(condTP_PC.y, heartComponent.thoracic_pressure_input) annotation (Line(
-              points={{-54.3,-56},{-20,-56},{-20,-32}}, color={0,0,127}));
+              points={{-54.3,-55.3333},{-20,-55.3333},{-20,-32}},
+                                                        color={0,0,127}));
         connect(SystemicComponent.phi_input, condSystemicPhi.y) annotation (Line(
-              points={{-16,20},{14,20},{14,20},{43.4,20}}, color={0,0,127}));
+              points={{-16,20},{14,20},{14,20.5556},{43.4,20.5556}},
+                                                           color={0,0,127}));
         connect(useAutonomousPhi.y,switch1. u2) annotation (Line(points={{-5,78},{14.3,
                 78}},                    color={255,0,255}));
         connect(SystemicComponent.phi_baroreflex, switch1.u1) annotation (Line(points={{-27.4,
@@ -41191,22 +41370,29 @@ P_hs_plus_dist"),
                 90},{4,90},{4,86},{10,86},{10,85.8},{14.3,85.8}},
                                     color={0,0,127}));
         connect(condHeartPhi.y, heartComponent.phi) annotation (Line(points={{43.4,
-                -16},{16,-16},{16,-16},{-10,-16}},    color={0,0,127}));
+                -15.4075},{16,-15.4075},{16,-16},{-10,-16}},
+                                                      color={0,0,127}));
         connect(switch1.y, condHRPhi.u) annotation (Line(points={{36.725,78},{
-                80,78},{80,-32},{57.2,-32}}, color={0,0,127}));
+                80,78},{80,-31.4075},{57.2,-31.4075}},
+                                             color={0,0,127}));
         connect(switch1.y, condSystemicPhi.u) annotation (Line(points={{36.725,
-                78},{80,78},{80,20},{57.2,20}}, color={0,0,127}));
+                78},{80,78},{80,20.5556},{57.2,20.5556}},
+                                                color={0,0,127}));
         connect(switch1.y, condHeartPhi.u) annotation (Line(points={{36.725,78},
-                {80,78},{80,-16},{57.2,-16}}, color={0,0,127}));
+                {80,78},{80,-15.4075},{57.2,-15.4075}},
+                                              color={0,0,127}));
         connect(condTP_IP.y, pulmonaryComponent.thoracic_pressure) annotation (Line(
-              points={{-54.3,-76},{-40,-76},{-40,-62},{-20,-62}}, color={0,0,127}));
+              points={{-54.3,-75.3333},{-40,-75.3333},{-40,-62},{-20,-62}},
+                                                                  color={0,0,127}));
         connect(condTP_IP.u, thoracic_pressure_ramp.y) annotation (Line(points={{-70.4,
-                -76},{-74,-76},{-74,-62},{-79,-62}},           color={0,0,127}));
+                -75.3333},{-74,-75.3333},{-74,-62},{-79,-62}}, color={0,0,127}));
         connect(condTP_EP1.y, SystemicComponent.thoracic_pressure_input)
-          annotation (Line(points={{-54.3,-38},{-46,-38},{-46,20},{-34,20}},
+          annotation (Line(points={{-54.3,-37.3333},{-46,-37.3333},{-46,20},{
+                -34,20}},
               color={0,0,127}));
-        connect(condTP_EP1.u, condTP_PC.u) annotation (Line(points={{-70.4,-38},
-                {-74,-38},{-74,-56},{-70.4,-56}}, color={0,0,127}));
+        connect(condTP_EP1.u, condTP_PC.u) annotation (Line(points={{-70.4,
+                -37.3333},{-74,-37.3333},{-74,-55.3333},{-70.4,-55.3333}},
+                                                  color={0,0,127}));
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)),
           experiment(
@@ -41317,13 +41503,15 @@ P_hs_plus_dist"),
             points={{-14,-52},{-8,-52},{-8,-32},{-16,-32}},
             color={0,0,0},
             thickness=1));
-        connect(condHRPhi.y, heartRate.phi) annotation (Line(points={{43.4,-32},
-                {26,-32},{26,-30},{14,-30}},color={0,0,127}));
+        connect(condHRPhi.y, heartRate.phi) annotation (Line(points={{43.4,
+                -31.4075},{26,-31.4075},{26,-30},{14,-30}},
+                                            color={0,0,127}));
         connect(heartRate.HR, heartComponent.frequency_input)
           annotation (Line(points={{1.88,-30},{-16,-30},{-16,-22}},
                                                            color={0,0,127}));
         connect(SystemicComponent.phi_input, condSystemicPhi.y) annotation (Line(
-              points={{-16,20},{14,20},{14,20},{43.4,20}}, color={0,0,127}));
+              points={{-16,20},{14,20},{14,20.5556},{43.4,20.5556}},
+                                                           color={0,0,127}));
         connect(useAutonomousPhi.y,switch1. u2) annotation (Line(points={{-5,78},{14.3,
                 78}},                    color={255,0,255}));
         connect(SystemicComponent.phi_baroreflex, switch1.u1) annotation (Line(points=
@@ -41332,13 +41520,17 @@ P_hs_plus_dist"),
                 90},{4,90},{4,86},{10,86},{10,85.8},{14.3,85.8}},
                                     color={0,0,127}));
         connect(condHeartPhi.y, heartComponent.phi) annotation (Line(points={{43.4,
-                -16},{-6,-16}},                       color={0,0,127}));
+                -15.4075},{8,-15.4075},{8,-16},{-16,-16}},
+                                                      color={0,0,127}));
         connect(switch1.y, condHRPhi.u) annotation (Line(points={{36.725,78},{
-                80,78},{80,-32},{57.2,-32}}, color={0,0,127}));
+                80,78},{80,-31.4075},{57.2,-31.4075}},
+                                             color={0,0,127}));
         connect(switch1.y, condSystemicPhi.u) annotation (Line(points={{36.725,
-                78},{80,78},{80,20},{57.2,20}}, color={0,0,127}));
+                78},{80,78},{80,20.5556},{57.2,20.5556}},
+                                                color={0,0,127}));
         connect(switch1.y, condHeartPhi.u) annotation (Line(points={{36.725,78},
-                {80,78},{80,-16},{57.2,-16}}, color={0,0,127}));
+                {80,78},{80,-15.4075},{57.2,-15.4075}},
+                                              color={0,0,127}));
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)),
           experiment(
@@ -41843,6 +42035,9 @@ P_hs_plus_dist"),
           "Pressure in systemic vena cava";
 
         Physiolibrary.Types.Volume totalVolume=SystemicComponent.total_volume +
+            heartComponent.volume + pulmonaryComponent.volume
+          "For debug purposes, should be constant (up to numerical precision)";
+        Physiolibrary.Types.Volume stressedVolume=SystemicComponent.total_volume - SystemicComponent.zpv_arterial - SystemicComponent.zpv_peripheral - SystemicComponent.zpv_venous +
             heartComponent.volume + pulmonaryComponent.volume
           "For debug purposes, should be constant (up to numerical precision)";
 
