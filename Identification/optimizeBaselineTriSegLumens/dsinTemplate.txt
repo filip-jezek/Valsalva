@@ -36339,7 +36339,7 @@ double initialValue(12140,6)
   6   256   # condSystemicPhi.const_shiftOffset.k
   0       1                       0                       0                
   6   257   # switch1.u2
-  0       1                       0                       0                
+  0       0                       0                       0                
   6   257   # useAutonomousPhi.y
   0       0                       0                       0                
   6   256   # condHeartPhi.y

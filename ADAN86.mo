@@ -8776,6 +8776,7 @@ type"),       Text(
             parameter Physiolibrary.Types.Volume V_RV_start=0.0001;
             output Physiolibrary.Types.Pressure EDP_err = if EDPVRnorm_V.EDP > 0 then (EDPVRnorm_V.EDP - ventricles.P_LV)^2 else 0;
             Real err;
+            parameter Real stopErrTime = 1;
             inner Settings            settings(
               initByPressure=false,
               veins_delayed_activation=false,
@@ -8849,7 +8850,8 @@ type"),       Text(
               veins_C_phi=0.09)
               annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
           equation
-            der(err) = EDP_err;
+
+            der(err) = if time < stopErrTime then EDP_err else 0;
 
             connect(ventricles.thoracic_pressure_input, P0.y)
               annotation (Line(points={{-2,-8},{-2,-51}}, color={0,0,127}));
@@ -28980,7 +28982,7 @@ P_hs_plus_dist"),
             parameter Real halving = 0.5 "halving of volumes to divide for two kidneys";
 
             // Adjustble Parameters
-            parameter VolumeFlowRate Q_ra=2.68E-06*halving;
+            parameter VolumeFlowRate Q_ra=2.68E-06 "Minimal GFR generating urine";
             parameter Real KfL=2e-9*halving "filtration coeffcicient, m3/Pa, for rat 0.0024203*ml2SI/mmHg2SI";
             parameter Real Cpass0=100*mmHg2SI "Pa*micron";
             parameter Real Cpass1=4.8703;
@@ -51786,8 +51788,8 @@ P_hs_plus_dist"),
               tissues_chi_Ra=settings.tissues_chi_Ra,
               tissues_chi_Rv=settings.tissues_chi_Rv,
               tissues_chi_C=settings.tissues_chi_C),
-            fmi_StartTime=100,
-            fmi_StopTime=120,
+            fmi_StartTime=0,
+            fmi_StopTime=60,
             fmi_NumberOfSteps=steps,
             fmi_forceShutDownAtStopTime=true) if useExercise
             annotation (Placement(transformation(extent={{38,42},{58,62}})));
@@ -52193,8 +52195,7 @@ P_hs_plus_dist"),
         end CombinedModels_FMUs_BaselineValsalvaTilt_BaselineExercise;
 
         model CombinedModels_FMUs_ExceptBaseline
-          extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime=
-                 0, fmi_StopTime=60));
+          extends CombinedModels_FMUs(useBaseline=false);
         end CombinedModels_FMUs_ExceptBaseline;
 
         model CombinedModels_FMUs_ExceptBaselineExercise
@@ -52214,6 +52215,27 @@ P_hs_plus_dist"),
             Diagram(coordinateSystem(preserveAspectRatio=false)),
             experiment(StopTime=50, __Dymola_Algorithm="Cvode"));
         end TestFMU;
+
+        model CombinedModels_FMUs_All
+          extends CombinedModels_FMUs(
+            tilt(heartComponent(aorticValve(
+                    _Ron(displayUnit="(Pa.s)/m3") = _Ron))),
+            exercise(heartComponent(aorticValve(
+                    _Ron(displayUnit="(Pa.s)/m3") = _Ron))),
+            valsalva(heartComponent(aorticValve(
+                    _Ron(displayUnit="(Pa.s)/m3") = _Ron))),
+            baseline(heartComponent(aorticValve(
+                    _Ron(displayUnit="(Pa.s)/m3") = _Ron))));
+          Components.Subsystems.Heart.Testers.TestEDPVR_fit EDPVR(
+            k_passive=settings.heart_vntr_k_passive,
+            SLcollagen=settings.heart_vntr_SLcollagen,
+            PConcollagen=settings.heart_vntr_PConcollagen,
+            PExpcollagen=settings.heart_vntr_PExpcollagen)
+            annotation (Placement(transformation(extent={{20,-20},{40,0}})));
+          parameter
+            ADAN_0main_SystemicTree_Tilt_CVS_0tiltable_fmu_black_box.importedFMUTypes.Physiolibrary_Types_HydraulicResistance
+            _Ron=797188.6 "forward state resistance";
+        end CombinedModels_FMUs_All;
       end CombinedModel;
 
       package AdditionalOutputs
@@ -53707,16 +53729,17 @@ P_hs_plus_dist"),
             period(displayUnit="s") = 160,
             nperiod=1,
             offset=settings.chi_phi*(1 - settings.phi0) + settings.phi0,
-            startTime=30),
+            startTime(displayUnit="s") = 30),
           useAutonomousPhi(y=false),
           heartComponent(aorticValve(_Ron(displayUnit="(mmHg.s)/ml")=
                 1333223.87415)));
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           offset=settings.chi_phi,
-          startTime=30,
+          startTime(displayUnit="s") = 30,
           height=1 - settings.chi_phi,
-          duration=1) constrainedby Modelica.Blocks.Interfaces.SO
+          duration(displayUnit="s") = 1)
+                      constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
         output Modelica.Units.SI.Time TEjection=heartComponent.aorticValve.Ts;
         output Modelica.Units.SI.Time TFilling=heartComponent.mitralValve.Ts;
@@ -59108,7 +59131,7 @@ P_hs_plus_dist"),
             annotation (Line(points={{-84,-8},{-112,-8},{-112,-13}},   color={0,
                   0,127}));
           connect(flowMeasure.q_out, heartComponent.sv) annotation (Line(
-              points={{-74,4},{24,4},{24,-16.4},{-16,-16.4}},
+              points={{-74,4},{24,4},{24,-12},{-16,-12}},
               color={0,0,0},
               thickness=1));
           connect(volumeInfusionRamp.y, unlimitedPump.solutionFlow) annotation (
@@ -61244,7 +61267,8 @@ P_hs_plus_dist"),
 <p>Generated from <a href=\"https://models.cellml.org/workspace/4ac\">https://models.cellml.org/workspace/4ac</a> Revision: b580e909bfa88dbf598e9fd1f4b15024e676e9b6 from Date: 2019-04-08 8:13:36 AM, Message: tuning the param for veins</p>
 </html>"));
   end SystemicTree;
-  annotation (preferredView="info",uses(Modelica(version="4.0.0"), Physiolibrary(version="2.4.1")),
+  annotation (preferredView="info",uses(Modelica(version="4.0.0"), Physiolibrary(version="2.4.1"),
+      NXT_Lymphatics(version="0.9")),
                        experiment(
       StopTime=60,
       __Dymola_NumberOfIntervals=1500,

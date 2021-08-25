@@ -31,6 +31,8 @@ with open('OutputListingMain.txt') as file:
 param_names = {}
 data_begin = False
 sensitivity_list = []
+variances = {}
+
 for line in lines:
 
     # prepare the header
@@ -53,17 +55,25 @@ for line in lines:
             param_cur_val = float(cols[col_num])
             cost = float(cols[3])
             run = int(cols[0])
+
+            def addToVariances():
+                if param_short_name not in variances:
+                    variances[param_short_name] = []
+                variances[param_short_name].append(cost)
+                
             # absolute values to counter negative parameters
             # 1/1000 tolerance of numeric precision
             if param_cur_val > param_def_val + abs(param_def_val)*0.001:
                 sa_tup = (param_short_name + '+', cost, param_cur_val, run)
                 sensitivity_list.append(sa_tup)
+                addToVariances()
                 break
                 # print(param_name + " is bigger")
 
             elif param_cur_val < param_def_val - abs(param_def_val)*0.001:
                 sa_tup = (param_short_name + '-', cost, param_cur_val, run)
                 sensitivity_list.append(sa_tup)
+                addToVariances()
                 break
                 # print(param_name + " is smaller")
             else:
@@ -71,7 +81,9 @@ for line in lines:
                 pass
 
 s_mean = numpy.median([k[1] for k in sensitivity_list])
-if defaultCosts is None:
+if defaultCosts is None and 'dummy' in variances:
+    defaultCosts = sum(variances['dummy'])/len(variances['dummy'])
+elif defaultCosts is None:
     defaultCosts = numpy.min([k[1] for k in sensitivity_list])
 
 def printLine(line:tuple):
@@ -94,6 +106,10 @@ with open('sa_runs.csv', 'w') as file:
     lines = '\n'.join(list(map(lambda l:'%d, %s, %.3e, %.6f, %.2f' % (l[3], l[0], l[2], l[1], 100*l[1]/defaultCosts), sensitivity_list)))
     file.writelines(lines)
 
+with open('sa_variances.csv', 'w') as file:
+    file.write('# param, var\n')
+    lines = '\n'.join(list(map(lambda v:'%s, %0.1e' % (v[0], 10*max((abs(v[1][0] - defaultCosts), abs(v[1][1]-defaultCosts)))/defaultCosts), variances.items())))
+    file.writelines(lines)
 # sort by costs
 sensitivity_list.sort(key = lambda x: x[1])
 num_to_plot = 50

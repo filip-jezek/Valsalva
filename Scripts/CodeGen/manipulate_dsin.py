@@ -560,6 +560,9 @@ def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False
 
     if minMaxRange > 0:
         for op in init_params.values():
+            if op._min is not None and op.value == 0:
+                # when we start from zero, do not reset the value
+                continue
             op._min = op.value*(1 - minMaxRange)
             op._max = op.value*(1 + minMaxRange)
     
@@ -605,8 +608,8 @@ USEPSO =  False
 
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
-    # prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.1)
-    prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
+    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.1)
+    # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
     # writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')
     # writeTunableParamsFromDsin('params_settings.txt', filter='settings.')

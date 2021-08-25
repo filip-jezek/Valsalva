@@ -41,7 +41,7 @@ def plotObjectives(vars_set, interval, objectives):
 
 def getObjectives(vars_set):
 
-    fun_lib.checkSimulationLength(vars_set['time'][-1],60, penalty=1000)
+    fun_lib.checkSimulationLength(vars_set['time'][-1],30, penalty=1000)
 
     # Pa = vars_set['Systemic#1.aortic_arch_C2.port_a.pressure']
     # Pa = vars_set['Pa']

@@ -113,7 +113,8 @@ def getObjectives(vars_set:dict):
             all_objectives.append(o)
             return
 
-        vars_set['__plot_axes'] = ax[axes_num]
+        if len(ax) > axes_num:
+            vars_set['__plot_axes'] = ax[axes_num]
         axes_num = axes_num + 1
         cf = importCostFunction(vars_set['__root_path'] + 'Identification\\' + cost_func_folder)
         # mapped_vars = mapVarSet(vars_set, mapping)
@@ -126,7 +127,7 @@ def getObjectives(vars_set:dict):
         for o in objectives:
             fun_lib.unifyCostFunc(o)
 
-        cost = fun_lib.countTotalWeightedCost(objectives)
+        cost = fun_lib.countTotalSumCost(objectives)
         costObjective = ObjectiveVar(name, value=cost, costFunctionType=CostFunctionType.DistanceFromZero, weight=weight)
         # add it to the set
         cost_objectives.append(costObjective)
@@ -137,14 +138,18 @@ def getObjectives(vars_set:dict):
             o.name = name + '.' + o.name
             o.weight = weight * o.weight
             return o
-
+        # print("cost is %f but sum is %f" % (costObjective.cost(), fun_lib.countTotalSumCost(map(sumObjectives, objectives))))
         all_objectives.extend(map(sumObjectives, objectives))
 
+    # for dummy use 
+    # fun_lib.countTotalSumCost(cost_objectives[1:4])
+    combinedWeigth = 1/52.32
     # they append inside
-    buildCostObjective('baseline', 'optimizeBaselineTriSegLumens', 1)
-    buildCostObjective('tilt', 'optimizeTilt', 1)
-    buildCostObjective('exercise', 'MaxExercise', 1)
-    buildCostObjective('valsalva', 'valsalva', 1)
+    buildCostObjective('baseline', 'optimizeBaselineTriSegLumens', 1/2.42) #1/0.285085
+    buildCostObjective('tilt', 'optimizeTilt', combinedWeigth)
+    buildCostObjective('exercise', 'MaxExercise', combinedWeigth)
+    buildCostObjective('valsalva', 'valsalva', combinedWeigth)
+    buildCostObjective('EDPVR', 'EDPVR', 1/7335.694336)
     
     # def plotObjectives():
     #     fignums = plt.get_fignums()
