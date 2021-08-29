@@ -1,0 +1,3763 @@
+#1
+char Aclass(3,24)
+Adymosim
+1.4
+Modelica experiment file
+
+
+#    Experiment parameters
+double experiment(7,1)
+       0                   # StartTime    Time at which integration starts
+                           #              (and linearization and trimming time)
+      45                   # StopTime     Time at which integration stops
+       0                   # Increment    Communication step size, if > 0
+    5000                   # nInterval    Number of communication intervals, if > 0
+  1.0000000000000000E-08   # Tolerance    Relative precision of signals for
+                           #              simulation, linearization and trimming
+       0                   # MaxFixedStep Maximum step size of fixed step size
+                           #              integrators, if > 0.0
+      29                   # Algorithm    Integration algorithm as integer (1...28)
+                           #
+                           #             | model|       |        | dense | state |
+                           # Algorithm   | typ  | stiff | order  | output| event |
+                           # ------------+------+-------+--------+-------+-------+
+                           #  1 | deabm  |  ode |   no  |  1-12  |  yes  |   no  |
+                           #  2 | lsode1 |  ode |   no  |  1-12  |  yes  |   no  |
+                           #  3 | lsode2 |  ode |  yes  |  1-5   |  yes  |   no  |
+                           #  4 | lsodar |  ode |  both |1-12,1-5|  yes  |  yes  |
+                           #  5 | dopri5 |  ode |   no  |   5    |   no  |   no  |
+                           #  6 | dopri8 |  ode |   no  |   8    |   no  |   no  |
+                           #  7 | grk4t  |  ode |  yes  |   4    |   no  |   no  |
+                           #  8 | dassl  |  dae |  yes  |  1-5   |  yes  |  yes  |
+                           #  9 | odassl | hdae |  yes  |  1-5   |  yes  |  yes  |
+                           # 10 | mexx   | hdae |   no  |  2-24  |   no  |   no  |
+                           # 11 | euler  |  ode |   no  |   1    |   no  |  yes  |
+                           # 12 | rkfix2 |  ode |   no  |   2    |   no  |  yes  |
+                           # 13 | rkfix3 |  ode |   no  |   3    |   no  |  yes  |
+                           # 14 | rkfix4 |  ode |   no  |   4    |   no  |  yes  |
+                           #>=14| others |  ode |yes/no |  2-5   |   yes |  yes  |
+                           # ---+--------+------+-------+--------+-------+-------+
+                           # euler and rkfix have fixed stepsize.
+
+
+#    Method tuning parameters
+double method(27,1)
+       1                   # grid     type of communication time grid, defined by
+                           #          = 1: equidistant points ("Increment/nInterval")
+                           #          = 2: vector of grid points ("tgrid")
+                           #          = 3: variable step integrator (automatically)
+                           #          = 4: model (call of "increment" in Dymola, e.g.
+                           #                      incr=Time > 2 then 0 else 0.1
+                           #                      dummy=increment(incr))
+                           #          grid = 1,3 is stopped by "StopTime"
+                           #          grid = 2   is stopped by "tgrid(last)"
+                           #          grid = 4   runs forever (stopped by model)
+       1                   # nt       Use every NT time instant, if grid = 3
+       3                   # dense    1/2/3 restart/step/interpolate GRID points
+ 0
+       1                   # evu      0/1 U-discontinuity does not/trigger events
+       0                   # evuord       U-discontinuity order to consider (0,1,...)
+       0                   # error    0/1/2 One message/warning/error messages
+       0                   # jac      0/1 Compute jacobian numerically/by BLOCKJ
+       0                   # xd0c     0/1 Compute/set XD0
+       0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
+       0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
+       0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
+  3.2768000000000000E+05   # debug    flags for debug information (1<<0 uses pdebug) 
+     100                   # pdebug       priority of debug information (1...100)
+       0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
+       0                   # ordmax   Maximum allowed integration order, if > 0
+       0                   # hmax     Maximum absolute stepsize, if > 0
+       0                   # hmin     Minimum absolute stepsize, if > 0 (use with care!)
+       0                   # h0       Stepsize to be attempted on first step, if > 0
+  2.0000000000000000E-14   # teps     Bound to check, if 2 equal time instants
+  1.0000000000000000E-10   # eveps    Hysteresis epsilon at event points
+      20                   # eviter   Maximum number of event iterations
+  9.9999999999999995E-07   # delaym   Minimum time increment in delay buffers
+       1                   # fexcep   0/1 floating exception crashes/stops dymosim
+       1                   # tscale   clock-time = tscale*simulation-time, if grid = 5
+                           #          > 1: simulation too slow
+                           #          = 1: simulation-time = real-time
+                           #          < 1: simulation too fast
+       1                   # shared   (not used)
+    2473                   # memkey   (not used)
+
+
+#    Output parameters
+int settings(13,1)
+ 0                         # lprec    0/1 do not/store result data in double
+ 1                         # lx       0/1 do not/store x  (state variables)
+ 1                         # lxd      0/1 do not/store xd (derivative of states)
+ 1                         # lu       0/1 do not/store u  (input     signals)
+ 1                         # ly       0/1 do not/store y  (output    signals)
+ 1                         # lz       0/1 do not/store z  (indicator signals)
+ 1                         # lw       0/1 do not/store w  (auxiliary signals)
+ 1                         # la       0/1 do not/store a  (alias     signals)
+ 1                         # lperf    0/1 do not/store performance indicators
+ 0
+ 1                         # lres     0/1 do not/store results on result file
+ 0                         # lshare   0/1 do not/store info data for shared memory on dsshare.txt
+ 1                         # lform    0/1 ASCII/Matlab-binary storage format of results
+                           #              (for simulation/linearization; not for trimming)
+
+
+#    Names of initial variables
+char initialName(902,62)
+settings.phi0
+settings.height
+settings.weight
+settings.age
+settings.HR_nominal
+settings.HR_max
+settings.BMI
+settings.BSA
+settings.initByPressure
+settings.V_PV_init
+settings.heart_R_vlv
+settings.heart_R_AV
+settings.heart_R_LA
+settings.heart_R_RA
+settings.heart_R_A_vis
+settings.heart_I_A
+settings.heart_alphaE
+settings.heart_gammaE
+settings.heart_vntr_D_0
+settings.heart_vntr_D_0_maxAct
+settings.heart_vntr_D_A
+settings.heart_vntr_D_A_maxAct
+settings.heart_vntr_TS
+settings.heart_vntr_TS_maxAct
+settings.heart_vntr_TR
+settings.heart_vntr_TR_maxAct
+settings.heart_vntr_Tact
+settings.heart_vntr_Tact_maxAct
+settings.heart_atr_D_0
+settings.heart_atr_D_A
+settings.heart_atr_TS
+settings.heart_atr_TR
+settings.heart_vntr_xi_Vw
+settings.heart_vntr_xi_AmRef
+settings.heart_vntr_k_passive
+settings.heart_vntr_Lsref
+settings.heart_vntr_L0
+settings.heart_vntr_SLcollagen
+settings.heart_vntr_SLrest
+settings.heart_vntr_PConcollagen
+settings.heart_vntr_PExpcollagen
+settings.syst_abd_P_th_ratio
+settings.systemic_limitExternalPressure
+settings.syst_art_k_E
+settings.syst_art_UseVasoconstrictionEffect
+settings.eta_vc
+settings.syst_tissues_hydrostaticLevel_correction
+settings.syst_TPR
+settings.syst_TR_frac
+settings.tissues_Pa_nom
+settings.tissues_P_nom
+settings.tissues_Pv_nom
+settings.tissues_ZPV_nom
+settings.tissues_SV_nom
+settings.tissues_CO_nom
+settings.tissues_eta_Ra
+settings.tissues_tau_R
+settings.tissues_eta_Rv
+settings.UseNonLinear_TissuesCompliance
+settings.tissues_UseStraighteningReaction2Phi
+settings.tissues_V_max_breakPoint_Frac
+settings.tissues_eta_C
+settings.tissues_gamma
+settings.veins_UseNonLinearVeins
+settings.veins_linearE_rel
+settings.veins_linearV0_rel
+settings.veins_UsePhiEffect
+settings.veins_C_phi
+settings.veins_ZPV_phi
+settings.veins_gamma
+settings.veins_alpha
+settings.veins_phi_no
+settings.veins_delayed_activation
+settings.veins_activation_tau
+settings.veins_relaxation_tau
+settings.veins_diameter_correction
+settings.veins_ignoreViscosityResistance
+settings.vessel_a
+settings.vessel_b
+settings.vessel_c
+settings.vessel_d
+settings.blood_mu
+settings.blood_rho
+settings.chi_phi
+settings.tissues_chi_Ra
+settings.tissues_chi_Rv
+settings.tissues_chi_C
+settings.veins_chi_pump
+settings.eta_adenosine
+settings.baro_hr_delay
+settings.baro_useAbsolutePressureTerm
+settings.baro_d0
+settings.baro_tau_s
+settings.baro_a
+settings.baro_b
+settings.baro_f0
+settings.baro_xi_delta0
+settings.baro_delta0_aor
+settings.baro_delta0_car
+settings.baro_g
+settings.baro_fsn
+settings.baro_f1
+settings.pulm_CO_target
+settings.pulm_C_PV
+settings.pulm_C_PA
+settings.pulm_P_PV_nom
+settings.pulm_V_PV_start
+settings.pulm_R
+settings.pulm_q_nom_maxq
+settings.pulm_R_exp
+settings.pulm_PV_R_vis
+settings.pulm_tp_pleural_frac
+settings.hideSystemic
+settings.hidePulmonary
+settings.hideHeart
+settings.hideLevel0
+settings.hideLevel1
+settings.EvaluateFunctionalParams
+settings.dummy
+settings.experimental_zpv_factor
+settings.experimental_C_factor
+settings.experimental_L0
+settings.Td_phi_syst
+settings.Td_phi_hr
+settings.Td_phi_heart
+heartComponent.UseFrequencyInput
+heartComponent.UseThoracic_PressureInput
+heartComponent.UsePhiInput
+heartComponent.HR
+heartComponent.sv.q
+heartComponent.pv.q
+heartComponent.pa.q
+heartComponent.sa.pressure
+heartComponent.P0.k
+heartComponent.tricuspidValve.q_in.pressure
+heartComponent.tricuspidValve.q_in.q
+heartComponent.tricuspidValve.q_out.pressure
+heartComponent.tricuspidValve.dp
+heartComponent.tricuspidValve.useChatteringProtection
+heartComponent.tricuspidValve.chatteringProtectionTime
+heartComponent.tricuspidValve.lastChange
+heartComponent.tricuspidValve.open
+heartComponent.tricuspidValve.passableVariable
+heartComponent.tricuspidValve._Gon
+heartComponent.tricuspidValve._Goff
+heartComponent.tricuspidValve.Pknee
+heartComponent.tricuspidValve.useLimitationInputs
+heartComponent.tricuspidValve.unitPressure
+heartComponent.tricuspidValve.unitFlow
+heartComponent.tricuspidValve._Ron
+heartComponent.pulmonaryValve.dp
+heartComponent.pulmonaryValve.useChatteringProtection
+heartComponent.pulmonaryValve.chatteringProtectionTime
+heartComponent.pulmonaryValve.lastChange
+heartComponent.pulmonaryValve.open
+heartComponent.pulmonaryValve.passableVariable
+heartComponent.pulmonaryValve._Gon
+heartComponent.pulmonaryValve._Goff
+heartComponent.pulmonaryValve.Pknee
+heartComponent.pulmonaryValve.useLimitationInputs
+heartComponent.pulmonaryValve.unitPressure
+heartComponent.pulmonaryValve.unitFlow
+heartComponent.pulmonaryValve._Ron
+heartComponent.pulmonaryValve.calculateAdditionalMetrics
+heartComponent.pulmonaryValve.useCycleInput
+heartComponent.pulmonaryValve.Pout_pulse
+heartComponent.pulmonaryValve.Pout_max
+heartComponent.pulmonaryValve.Pout_min
+heartComponent.pulmonaryValve.BP_max
+heartComponent.pulmonaryValve.der(BP_max)
+heartComponent.pulmonaryValve.BP_min
+heartComponent.pulmonaryValve.der(BP_min)
+heartComponent.pulmonaryValve.Pmax
+heartComponent.pulmonaryValve.tau
+heartComponent.pulmonaryValve.epsTime
+heartComponent.pulmonaryValve.Ts
+heartComponent.pulmonaryValve.Td
+heartComponent.pulmonaryValve.T0
+heartComponent.pulmonaryValve.T0_cycle
+heartComponent.pulmonaryValve.CO_acc
+heartComponent.pulmonaryValve.der(CO_acc)
+heartComponent.pulmonaryValve.CO
+heartComponent.mitralValve.q_in.pressure
+heartComponent.mitralValve.q_out.pressure
+heartComponent.mitralValve.dp
+heartComponent.mitralValve.useChatteringProtection
+heartComponent.mitralValve.chatteringProtectionTime
+heartComponent.mitralValve.lastChange
+heartComponent.mitralValve.open
+heartComponent.mitralValve.passableVariable
+heartComponent.mitralValve._Gon
+heartComponent.mitralValve._Goff
+heartComponent.mitralValve.Pknee
+heartComponent.mitralValve.useLimitationInputs
+heartComponent.mitralValve.unitPressure
+heartComponent.mitralValve.unitFlow
+heartComponent.mitralValve._Ron
+heartComponent.mitralValve.calculateAdditionalMetrics
+heartComponent.mitralValve.useCycleInput
+heartComponent.mitralValve.Pout_pulse
+heartComponent.mitralValve.Pout_max
+heartComponent.mitralValve.Pout_min
+heartComponent.mitralValve.BP_max
+heartComponent.mitralValve.der(BP_max)
+heartComponent.mitralValve.BP_min
+heartComponent.mitralValve.der(BP_min)
+heartComponent.mitralValve.Pmax
+heartComponent.mitralValve.tau
+heartComponent.mitralValve.epsTime
+heartComponent.mitralValve.Ts
+heartComponent.mitralValve.Td
+heartComponent.mitralValve.T0
+heartComponent.mitralValve.T0_cycle
+heartComponent.mitralValve.CO_acc
+heartComponent.mitralValve.der(CO_acc)
+heartComponent.mitralValve.CO
+heartComponent.aorticValve.dp
+heartComponent.aorticValve.useChatteringProtection
+heartComponent.aorticValve.chatteringProtectionTime
+heartComponent.aorticValve.lastChange
+heartComponent.aorticValve.open
+heartComponent.aorticValve.passableVariable
+heartComponent.aorticValve._Gon
+heartComponent.aorticValve._Goff
+heartComponent.aorticValve.Pknee
+heartComponent.aorticValve.useLimitationInputs
+heartComponent.aorticValve.unitPressure
+heartComponent.aorticValve.unitFlow
+heartComponent.aorticValve._Ron
+heartComponent.aorticValve.calculateAdditionalMetrics
+heartComponent.aorticValve.useCycleInput
+heartComponent.aorticValve.Pout_pulse
+heartComponent.aorticValve.Pout_max
+heartComponent.aorticValve.Pout_min
+heartComponent.aorticValve.BP_max
+heartComponent.aorticValve.der(BP_max)
+heartComponent.aorticValve.BP_min
+heartComponent.aorticValve.der(BP_min)
+heartComponent.aorticValve.Pmax
+heartComponent.aorticValve.tau
+heartComponent.aorticValve.epsTime
+heartComponent.aorticValve.Ts
+heartComponent.aorticValve.Td
+heartComponent.aorticValve.T0
+heartComponent.aorticValve.T0_cycle
+heartComponent.aorticValve.CO_acc
+heartComponent.aorticValve.der(CO_acc)
+heartComponent.aorticValve.CO
+heartComponent.r_SystemicVenousInflow.dp
+heartComponent.r_SystemicVenousInflow.enable
+heartComponent.r_SystemicVenousInflow.useConductanceInput
+heartComponent.r_SystemicVenousInflow.Conductance
+heartComponent.r_SystemicVenousInflow.resistance
+heartComponent.r_SystemicVenousInflow.Resistance
+heartComponent.r_SystemicVenousInflow.conditionalConductance
+heartComponent.r_PulmonaryVenousInflow.dp
+heartComponent.r_PulmonaryVenousInflow.enable
+heartComponent.r_PulmonaryVenousInflow.useConductanceInput
+heartComponent.r_PulmonaryVenousInflow.Conductance
+heartComponent.r_PulmonaryVenousInflow.resistance
+heartComponent.r_PulmonaryVenousInflow.Resistance
+heartComponent.r_PulmonaryVenousInflow.conditionalConductance
+heartComponent.ventricles.port_rv.pressure
+heartComponent.ventricles.port_lv.pressure
+heartComponent.ventricles.thoracic_pressure_input
+heartComponent.ventricles.volumeLimiterLV
+heartComponent.ventricles.volumeLimiterRV
+heartComponent.ventricles.LV_wall.ym
+heartComponent.ventricles.LV_wall.der(ym)
+heartComponent.ventricles.LV_wall.D
+heartComponent.ventricles.LV_wall.UseFrequencyInput
+heartComponent.ventricles.LV_wall.UseCardiacCycleInput
+heartComponent.ventricles.LV_wall.Vw
+heartComponent.ventricles.LV_wall.Amref
+heartComponent.ventricles.LV_wall.Lsref
+heartComponent.ventricles.LV_wall.L0
+heartComponent.ventricles.LV_wall.k_passive
+heartComponent.ventricles.LV_wall.k_passive_negative
+heartComponent.ventricles.LV_wall.phi0
+heartComponent.ventricles.LV_wall.LSEiso
+heartComponent.ventricles.LV_wall.SLrest
+heartComponent.ventricles.LV_wall.SLcollagen
+heartComponent.ventricles.LV_wall.PConcollagen
+heartComponent.ventricles.LV_wall.PExpcollagen
+heartComponent.ventricles.LV_wall.contractilityFraction
+heartComponent.ventricles.LV_wall.Tm
+heartComponent.ventricles.LV_wall.Tx
+heartComponent.ventricles.LV_wall.Ty
+heartComponent.ventricles.LV_wall.Vm
+heartComponent.ventricles.LV_wall.Am
+heartComponent.ventricles.LV_wall.Cm
+heartComponent.ventricles.LV_wall.z
+heartComponent.ventricles.LV_wall.epsf
+heartComponent.ventricles.LV_wall.SLo
+heartComponent.ventricles.LV_wall.SL
+heartComponent.ventricles.LV_wall.der(SL)
+heartComponent.ventricles.LV_wall.sinalpha
+heartComponent.ventricles.LV_wall.alpha
+heartComponent.ventricles.LV_wall.vmax
+heartComponent.ventricles.LV_wall.sigma_collagen
+heartComponent.ventricles.LV_wall.sigmapas
+heartComponent.ventricles.LV_wall.sigmaact
+heartComponent.ventricles.LV_wall.sigmaM
+heartComponent.ventricles.SEP_wall.UseFrequencyInput
+heartComponent.ventricles.SEP_wall.UseCardiacCycleInput
+heartComponent.ventricles.SEP_wall.Vw
+heartComponent.ventricles.SEP_wall.Amref
+heartComponent.ventricles.SEP_wall.Lsref
+heartComponent.ventricles.SEP_wall.L0
+heartComponent.ventricles.SEP_wall.k_passive
+heartComponent.ventricles.SEP_wall.k_passive_negative
+heartComponent.ventricles.SEP_wall.phi0
+heartComponent.ventricles.SEP_wall.LSEiso
+heartComponent.ventricles.SEP_wall.SLrest
+heartComponent.ventricles.SEP_wall.SLcollagen
+heartComponent.ventricles.SEP_wall.PConcollagen
+heartComponent.ventricles.SEP_wall.PExpcollagen
+heartComponent.ventricles.SEP_wall.contractilityFraction
+heartComponent.ventricles.SEP_wall.Tm
+heartComponent.ventricles.SEP_wall.Tx
+heartComponent.ventricles.SEP_wall.Ty
+heartComponent.ventricles.SEP_wall.Vm
+heartComponent.ventricles.SEP_wall.Am
+heartComponent.ventricles.SEP_wall.Cm
+heartComponent.ventricles.SEP_wall.z
+heartComponent.ventricles.SEP_wall.epsf
+heartComponent.ventricles.SEP_wall.SLo
+heartComponent.ventricles.SEP_wall.SL
+heartComponent.ventricles.SEP_wall.der(SL)
+heartComponent.ventricles.SEP_wall.sinalpha
+heartComponent.ventricles.SEP_wall.alpha
+heartComponent.ventricles.SEP_wall.vmax
+heartComponent.ventricles.SEP_wall.sigma_collagen
+heartComponent.ventricles.SEP_wall.sigmapas
+heartComponent.ventricles.SEP_wall.sigmaact
+heartComponent.ventricles.SEP_wall.sigmaM
+heartComponent.ventricles.RV_wall.UseFrequencyInput
+heartComponent.ventricles.RV_wall.UseCardiacCycleInput
+heartComponent.ventricles.RV_wall.Vw
+heartComponent.ventricles.RV_wall.Amref
+heartComponent.ventricles.RV_wall.Lsref
+heartComponent.ventricles.RV_wall.L0
+heartComponent.ventricles.RV_wall.k_passive
+heartComponent.ventricles.RV_wall.k_passive_negative
+heartComponent.ventricles.RV_wall.phi0
+heartComponent.ventricles.RV_wall.LSEiso
+heartComponent.ventricles.RV_wall.SLrest
+heartComponent.ventricles.RV_wall.SLcollagen
+heartComponent.ventricles.RV_wall.PConcollagen
+heartComponent.ventricles.RV_wall.PExpcollagen
+heartComponent.ventricles.RV_wall.contractilityFraction
+heartComponent.ventricles.RV_wall.Tm
+heartComponent.ventricles.RV_wall.Tx
+heartComponent.ventricles.RV_wall.Ty
+heartComponent.ventricles.RV_wall.Vm
+heartComponent.ventricles.RV_wall.Am
+heartComponent.ventricles.RV_wall.Cm
+heartComponent.ventricles.RV_wall.z
+heartComponent.ventricles.RV_wall.epsf
+heartComponent.ventricles.RV_wall.SLo
+heartComponent.ventricles.RV_wall.SL
+heartComponent.ventricles.RV_wall.der(SL)
+heartComponent.ventricles.RV_wall.sinalpha
+heartComponent.ventricles.RV_wall.alpha
+heartComponent.ventricles.RV_wall.vmax
+heartComponent.ventricles.RV_wall.sigma_collagen
+heartComponent.ventricles.RV_wall.sigmapas
+heartComponent.ventricles.RV_wall.sigmaact
+heartComponent.ventricles.RV_wall.sigmaM
+heartComponent.ventricles.calciumMechanics.usePhiInput
+heartComponent.ventricles.calciumMechanics.phi0
+heartComponent.ventricles.calciumMechanics.t0_delay
+heartComponent.ventricles.calciumMechanics.t0_delay_maxAct
+heartComponent.ventricles.calciumMechanics.t0_delay_coeff
+heartComponent.ventricles.calciumMechanics.t0_delay_phi
+heartComponent.ventricles.calciumMechanics.tm
+heartComponent.ventricles.calciumMechanics.time0
+heartComponent.ventricles.calciumMechanics.D_0
+heartComponent.ventricles.calciumMechanics.D_0_maxAct
+heartComponent.ventricles.calciumMechanics.D_0_coeff
+heartComponent.ventricles.calciumMechanics.D_0_phi
+heartComponent.ventricles.calciumMechanics.D_A
+heartComponent.ventricles.calciumMechanics.D_A_maxAct
+heartComponent.ventricles.calciumMechanics.D_A_coeff
+heartComponent.ventricles.calciumMechanics.D_A_phi
+heartComponent.ventricles.calciumMechanics.TS
+heartComponent.ventricles.calciumMechanics.TS_maxAct
+heartComponent.ventricles.calciumMechanics.TS_coeff
+heartComponent.ventricles.calciumMechanics.TS_phi
+heartComponent.ventricles.calciumMechanics.TR
+heartComponent.ventricles.calciumMechanics.TR_phi
+heartComponent.ventricles.calciumMechanics.TR_coeff
+heartComponent.ventricles.calciumMechanics.TR_maxAct
+heartComponent.ventricles.calciumMechanics.systolicContraction
+heartComponent.ventricles.calciumMechanics.systolicRelaxation
+heartComponent.ventricles.calciumMechanics.D_rel
+heartComponent.ventricles.V_min
+heartComponent.ventricles._P_LV
+heartComponent.ventricles._P_RV
+heartComponent.ventricles._V_LV
+heartComponent.ventricles._V_RV
+heartComponent.ventricles.V_LV
+heartComponent.ventricles.der(V_LV)
+heartComponent.ventricles.V_RV
+heartComponent.ventricles.der(V_RV)
+heartComponent.ventricles.P_LV
+heartComponent.ventricles.P_RV
+heartComponent.ventricles.currentWork_LV
+heartComponent.ventricles.der(currentWork_LV)
+heartComponent.ventricles.power_LV
+heartComponent.ventricles.currentWork_RV
+heartComponent.ventricles.der(currentWork_RV)
+heartComponent.ventricles.power_RV
+heartComponent.ventricles.t0
+heartComponent.ventricles.xm_LV
+heartComponent.ventricles.xm_SEP
+heartComponent.ventricles.xm_RV
+heartComponent.ventricles.e
+heartComponent.ventricles.eps
+heartComponent.ventricles.Tysq
+heartComponent.ra.port_a.pressure
+heartComponent.ra.enabled
+heartComponent.ra.D
+heartComponent.ra.E
+heartComponent.ra.volume
+heartComponent.ra.der(volume)
+heartComponent.ra.zpv
+heartComponent.ra.volume_min
+heartComponent.ra.thoracic_pressure_inside
+heartComponent.ra.currentWork
+heartComponent.ra.der(currentWork)
+heartComponent.ra.work
+heartComponent.ra.contractilityFraction
+heartComponent.ra.enableCollagen
+heartComponent.ra.V0_col
+heartComponent.ra.s
+heartComponent.ra.P_c
+heartComponent.la.port_a.pressure
+heartComponent.la.enabled
+heartComponent.la.E
+heartComponent.la.volume
+heartComponent.la.der(volume)
+heartComponent.la.zpv
+heartComponent.la.volume_min
+heartComponent.la.thoracic_pressure_inside
+heartComponent.la.currentWork
+heartComponent.la.der(currentWork)
+heartComponent.la.work
+heartComponent.la.contractilityFraction
+heartComponent.la.enableCollagen
+heartComponent.la.V0_col
+heartComponent.la.s
+heartComponent.la.P_c
+heartComponent.volume
+heartComponent.idealValve_deactivable.dp
+heartComponent.idealValve_deactivable.open
+heartComponent.idealValve_deactivable.passableVariable
+heartComponent.idealValve_deactivable._Gon
+heartComponent.idealValve_deactivable._Goff
+heartComponent.idealValve_deactivable.Pknee
+heartComponent.idealValve_deactivable.useLimitationInputs
+heartComponent.idealValve_deactivable.unitPressure
+heartComponent.idealValve_deactivable.unitFlow
+heartComponent.idealValve_deactivable1.dp
+heartComponent.idealValve_deactivable1.open
+heartComponent.idealValve_deactivable1.passableVariable
+heartComponent.idealValve_deactivable1._Gon
+heartComponent.idealValve_deactivable1._Goff
+heartComponent.idealValve_deactivable1.Pknee
+heartComponent.idealValve_deactivable1.useLimitationInputs
+heartComponent.idealValve_deactivable1.unitPressure
+heartComponent.idealValve_deactivable1.unitFlow
+heartComponent.resistor.dp
+heartComponent.resistor.enable
+heartComponent.resistor.useConductanceInput
+heartComponent.resistor.Conductance
+heartComponent.resistor.resistance
+heartComponent.resistor.Resistance
+heartComponent.resistor.conditionalConductance
+heartComponent.resistor1.dp
+heartComponent.resistor1.enable
+heartComponent.resistor1.useConductanceInput
+heartComponent.resistor1.Conductance
+heartComponent.resistor1.resistance
+heartComponent.resistor1.Resistance
+heartComponent.resistor1.conditionalConductance
+heartComponent.sa_node.t0
+heartComponent.sa_node.t0_last
+heartComponent.sa_node.HR_true
+heartComponent.sa_node.cardiac_cycle
+heartComponent.sa_node.der(cardiac_cycle)
+heartComponent.sa_node.beat
+heartComponent.sa_node.beats
+heartComponent.sa_node.usePhiInput
+heartComponent.sa_node.time0
+heartComponent.calciumMechanics.usePhiInput
+heartComponent.calciumMechanics.phi0
+heartComponent.calciumMechanics.t0_delay
+heartComponent.calciumMechanics.t0_delay_maxAct
+heartComponent.calciumMechanics.t0_delay_coeff
+heartComponent.calciumMechanics.t0_delay_phi
+heartComponent.calciumMechanics.tm
+heartComponent.calciumMechanics.time0
+heartComponent.calciumMechanics.D_0
+heartComponent.calciumMechanics.D_0_maxAct
+heartComponent.calciumMechanics.D_0_coeff
+heartComponent.calciumMechanics.D_0_phi
+heartComponent.calciumMechanics.D_A
+heartComponent.calciumMechanics.D_A_maxAct
+heartComponent.calciumMechanics.D_A_coeff
+heartComponent.calciumMechanics.D_A_phi
+heartComponent.calciumMechanics.TS
+heartComponent.calciumMechanics.TS_maxAct
+heartComponent.calciumMechanics.TS_coeff
+heartComponent.calciumMechanics.TS_phi
+heartComponent.calciumMechanics.TR
+heartComponent.calciumMechanics.TR_phi
+heartComponent.calciumMechanics.TR_coeff
+heartComponent.calciumMechanics.TR_maxAct
+heartComponent.calciumMechanics.systolicContraction
+heartComponent.calciumMechanics.systolicRelaxation
+heartComponent.calciumMechanics.D_rel
+heartComponent.pericardium.p_out
+heartComponent.pericardium.enabled
+heartComponent.pericardium.V0
+heartComponent.pericardium.s
+heartComponent.add.k1
+heartComponent.add.k2
+heartComponent.valveInertia_aortic.dp
+heartComponent.valveInertia_aortic.volumeFlow_start
+heartComponent.valveInertia_aortic.I
+heartComponent.valveInertia_aortic.R
+heartComponent.valveInertia_aortic.enabled
+heartComponent.valveInertia_aortic.l
+heartComponent.valveInertia_aortic.D
+heartComponent.valveInertia_aortic.A_ind
+heartComponent.valveInertia_aortic.A
+heartComponent.valveInertia_Mitral.dp
+heartComponent.valveInertia_Mitral.volumeFlow_start
+heartComponent.valveInertia_Mitral.I
+heartComponent.valveInertia_Mitral.R
+heartComponent.valveInertia_Mitral.enabled
+heartComponent.valveInertia_Mitral.l
+heartComponent.valveInertia_Mitral.D
+heartComponent.valveInertia_Mitral.A_ind
+heartComponent.valveInertia_Mitral.A
+heartComponent.valveInertia_pulmonary.dp
+heartComponent.valveInertia_pulmonary.volumeFlow_start
+heartComponent.valveInertia_pulmonary.I
+heartComponent.valveInertia_pulmonary.R
+heartComponent.valveInertia_pulmonary.enabled
+heartComponent.valveInertia_pulmonary.l
+heartComponent.valveInertia_pulmonary.D
+heartComponent.valveInertia_pulmonary.A_ind
+heartComponent.valveInertia_pulmonary.A
+pulmonaryTriSeg.UsePhi_Input
+pulmonaryTriSeg.UseThoracic_PressureInput
+pulmonaryTriSeg.deadVolume
+pulmonaryTriSeg._thoracic_pressure
+pulmonaryTriSeg.volume
+pulmonaryTriSeg.phi_input1
+pulmonaryTriSeg.UseAdenosineInput
+pulmonaryTriSeg.r_pa.q_in.q
+pulmonaryTriSeg.r_pa.dp
+pulmonaryTriSeg.r_pa.enable
+pulmonaryTriSeg.r_pa.useConductanceInput
+pulmonaryTriSeg.r_pa.Conductance
+pulmonaryTriSeg.r_pa.resistance
+pulmonaryTriSeg.r_pa.c
+pulmonaryTriSeg.r_pa.Resistance
+pulmonaryTriSeg.r_pa.conditionalConductance
+pulmonaryTriSeg.c_pa.volume_start
+pulmonaryTriSeg.c_pa.excessVolume
+pulmonaryTriSeg.c_pa.useV0Input
+pulmonaryTriSeg.c_pa.ZeroPressureVolume
+pulmonaryTriSeg.c_pa.useComplianceInput
+pulmonaryTriSeg.c_pa.Compliance
+pulmonaryTriSeg.c_pa.useExternalPressureInput
+pulmonaryTriSeg.c_pa.ExternalPressure
+pulmonaryTriSeg.c_pa.volume
+pulmonaryTriSeg.c_pa.der(volume)
+pulmonaryTriSeg.c_pa.excessVolume_min
+pulmonaryTriSeg.c_pa.MinimalCollapsingPressure
+pulmonaryTriSeg.c_pa.CollapsingPressureVolume
+pulmonaryTriSeg.c_pa.a
+pulmonaryTriSeg.c_pv.volume_start
+pulmonaryTriSeg.c_pv.excessVolume
+pulmonaryTriSeg.c_pv.useV0Input
+pulmonaryTriSeg.c_pv.ZeroPressureVolume
+pulmonaryTriSeg.c_pv.useComplianceInput
+pulmonaryTriSeg.c_pv.Compliance
+pulmonaryTriSeg.c_pv.useExternalPressureInput
+pulmonaryTriSeg.c_pv.ExternalPressure
+pulmonaryTriSeg.c_pv.volume
+pulmonaryTriSeg.c_pv.der(volume)
+pulmonaryTriSeg.c_pv.excessVolume_min
+pulmonaryTriSeg.c_pv.MinimalCollapsingPressure
+pulmonaryTriSeg.c_pv.CollapsingPressureVolume
+pulmonaryTriSeg.c_pv.a
+pulmonaryTriSeg.hydraulicConductance.k
+pulmonaryTriSeg.phi_factor.u
+pulmonaryTriSeg.phi_factor.y
+pulmonaryTriSeg.phi_factor.phi0
+pulmonaryTriSeg.phi_factor.eta
+pulmonaryTriSeg.fraction.k
+pulmonaryTriSeg.R_pv_visc.dp
+pulmonaryTriSeg.R_pv_visc.enable
+pulmonaryTriSeg.R_pv_visc.useConductanceInput
+pulmonaryTriSeg.R_pv_visc.Conductance
+pulmonaryTriSeg.R_pv_visc.resistance
+pulmonaryTriSeg.R_pv_visc.Resistance
+pulmonaryTriSeg.R_pv_visc.conditionalConductance
+pulmonaryTriSeg.R_pa_visc.dp
+pulmonaryTriSeg.R_pa_visc.enable
+pulmonaryTriSeg.R_pa_visc.useConductanceInput
+pulmonaryTriSeg.R_pa_visc.Conductance
+pulmonaryTriSeg.R_pa_visc.resistance
+pulmonaryTriSeg.R_pa_visc.Resistance
+pulmonaryTriSeg.R_pa_visc.conditionalConductance
+pulmonaryTriSeg.normalization.NormalValue
+pulmonaryTriSeg.normalization.enabled
+pulmonaryTriSeg.normalization.effect
+pulmonaryTriSeg.UseCondFracInput
+pulmonaryTriSeg.proportionalFactor.scalingFactor
+pulmonaryTriSeg.proportionalFactor.u0
+pulmonaryTriSeg.proportionalFactor.enabled
+pulmonaryTriSeg.proportionalFactor.effect
+pulmonaryTriSeg.conductance0.k
+systemic_TriSeg.Tilt
+systemic_TriSeg.P_th
+systemic_TriSeg.outer_pressure
+systemic_TriSeg.Exercise
+systemic_TriSeg.adenosine
+systemic_TriSeg.UseBaroreflexOutput
+systemic_TriSeg.UseThoracic_PressureInput
+systemic_TriSeg.UseOuter_PressureInput
+systemic_TriSeg.UsePhi_Input
+systemic_TriSeg.UseTiltInput
+systemic_TriSeg.UseExerciseInput
+systemic_TriSeg.UseAdenosineInput
+systemic_TriSeg.r_ao.q_in.q
+systemic_TriSeg.r_ao.q_out.pressure
+systemic_TriSeg.r_ao.dp
+systemic_TriSeg.r_ao.enable
+systemic_TriSeg.r_ao.useConductanceInput
+systemic_TriSeg.r_ao.Conductance
+systemic_TriSeg.r_ao.resistance
+systemic_TriSeg.r_ao.Resistance
+systemic_TriSeg.r_ao.conditionalConductance
+systemic_TriSeg.r_sa.q_in.q
+systemic_TriSeg.r_sa.dp
+systemic_TriSeg.r_sa.enable
+systemic_TriSeg.r_sa.useConductanceInput
+systemic_TriSeg.r_sa.Conductance
+systemic_TriSeg.r_sa.resistance
+systemic_TriSeg.r_sa.c
+systemic_TriSeg.r_sa.Resistance
+systemic_TriSeg.r_sa.conditionalConductance
+systemic_TriSeg.c_ao.volume_start
+systemic_TriSeg.c_ao.excessVolume
+systemic_TriSeg.c_ao.useV0Input
+systemic_TriSeg.c_ao.ZeroPressureVolume
+systemic_TriSeg.c_ao.useComplianceInput
+systemic_TriSeg.c_ao.Compliance
+systemic_TriSeg.c_ao.useExternalPressureInput
+systemic_TriSeg.c_ao.ExternalPressure
+systemic_TriSeg.c_ao.volume
+systemic_TriSeg.c_ao.der(volume)
+systemic_TriSeg.c_ao.excessVolume_min
+systemic_TriSeg.c_ao.MinimalCollapsingPressure
+systemic_TriSeg.c_ao.CollapsingPressureVolume
+systemic_TriSeg.c_ao.a
+systemic_TriSeg.c_sa.q_in.pressure
+systemic_TriSeg.c_sa.volume_start
+systemic_TriSeg.c_sa.excessVolume
+systemic_TriSeg.c_sa.useV0Input
+systemic_TriSeg.c_sa.ZeroPressureVolume
+systemic_TriSeg.c_sa.useComplianceInput
+systemic_TriSeg.c_sa.Compliance
+systemic_TriSeg.c_sa.useExternalPressureInput
+systemic_TriSeg.c_sa.ExternalPressure
+systemic_TriSeg.c_sa.volume
+systemic_TriSeg.c_sa.der(volume)
+systemic_TriSeg.c_sa.excessVolume_min
+systemic_TriSeg.c_sa.MinimalCollapsingPressure
+systemic_TriSeg.c_sa.CollapsingPressureVolume
+systemic_TriSeg.c_sa.c
+systemic_TriSeg.c_sa.a
+systemic_TriSeg.c_sv.volume_start
+systemic_TriSeg.c_sv.excessVolume
+systemic_TriSeg.c_sv.useV0Input
+systemic_TriSeg.c_sv.ZeroPressureVolume
+systemic_TriSeg.c_sv.useComplianceInput
+systemic_TriSeg.c_sv.Compliance
+systemic_TriSeg.c_sv.useExternalPressureInput
+systemic_TriSeg.c_sv.ExternalPressure
+systemic_TriSeg.c_sv.volume
+systemic_TriSeg.c_sv.der(volume)
+systemic_TriSeg.c_sv.excessVolume_min
+systemic_TriSeg.c_sv.MinimalCollapsingPressure
+systemic_TriSeg.c_sv.CollapsingPressureVolume
+systemic_TriSeg.c_sv.c
+systemic_TriSeg.c_sv.a
+systemic_TriSeg._CO_target
+systemic_TriSeg._HR
+systemic_TriSeg._C_Ao
+systemic_TriSeg._C_SA
+systemic_TriSeg._C_SV
+systemic_TriSeg._R_Ao
+systemic_TriSeg._R_SA
+systemic_TriSeg._R_tAo
+systemic_TriSeg._R_tSA
+systemic_TriSeg.C_Ao
+systemic_TriSeg.C_SA
+systemic_TriSeg.C_SV
+systemic_TriSeg.R_Ao
+systemic_TriSeg.R_SA
+systemic_TriSeg.R_tAo
+systemic_TriSeg.R_tSA
+systemic_TriSeg.r_tAo.dp
+systemic_TriSeg.r_tAo.enable
+systemic_TriSeg.r_tAo.useConductanceInput
+systemic_TriSeg.r_tAo.Conductance
+systemic_TriSeg.r_tAo.resistance
+systemic_TriSeg.r_tAo.Resistance
+systemic_TriSeg.r_tAo.conditionalConductance
+systemic_TriSeg.r_tsa.dp
+systemic_TriSeg.r_tsa.enable
+systemic_TriSeg.r_tsa.useConductanceInput
+systemic_TriSeg.r_tsa.Conductance
+systemic_TriSeg.r_tsa.resistance
+systemic_TriSeg.r_tsa.Resistance
+systemic_TriSeg.r_tsa.conditionalConductance
+systemic_TriSeg.volume
+systemic_TriSeg.c_sv0.k
+systemic_TriSeg.c_sa0.k
+systemic_TriSeg.inverseProportionalFactor.scalingFactor
+systemic_TriSeg.inverseProportionalFactor.enabled
+systemic_TriSeg.inverseProportionalFactor.effect
+systemic_TriSeg.inverseProportionalFactor1.scalingFactor
+systemic_TriSeg.inverseProportionalFactor1.enabled
+systemic_TriSeg.inverseProportionalFactor1.effect
+systemic_TriSeg.r_sa0.k
+systemic_TriSeg.inverseProportionalFactor2.y
+systemic_TriSeg.inverseProportionalFactor2.scalingFactor
+systemic_TriSeg.inverseProportionalFactor2.enabled
+systemic_TriSeg.inverseProportionalFactor2.effect
+brachial_pressure
+brachial_pressure_mean
+brachial_pressure_systolic
+brachial_pressure_systolic_i
+der(brachial_pressure_systolic_i)
+brachial_pressure_diastolic
+brachial_pressure_diastolic_i
+der(brachial_pressure_diastolic_i)
+brachial_pressure_int
+der(brachial_pressure_int)
+SV
+SV_i
+der(SV_i)
+tau
+HR
+CO
+V_LV
+renal_capillary
+P_pa
+P_pv
+P_sv
+condExercise.u
+condExercise.offset
+condExercise.startTime
+condExercise.const1.k
+condExercise.switch1.u1
+condExercise.switch1.u2
+condExercise.switch1.y
+condExercise.disconnected
+condExercise.disconnectedValue
+condExercise.myDelay.delayTime
+condExercise.myDelay.delayEnabled
+condExercise.delayTransport_Enabled
+condExercise.delayTransport_Time
+condExercise.delayIntegral_Enabled
+condExercise.delayInt_Act
+condExercise.delayInt_Relax
+condExercise.limiter.uMax
+condExercise.limiter.uMin
+condExercise.limiter.strict
+condExercise.limiter.homotopyType
+condExercise.uMax
+condExercise.uMin
+condExercise.gain.k
+condExercise.gain.y
+condExercise.UseAdditionalInput
+condExercise.phi0
+condExercise.phi_gain
+condExercise.add3_1.k1
+condExercise.add3_1.k2
+condExercise.const_offset
+condExercise.integralActRelaxDelay.delayEnabled
+condExercise.integralActRelaxDelay.phi0
+condExercise.integralActRelaxDelay.delayTimeAct
+condExercise.integralActRelaxDelay.delayTimeRelax
+condExercise.showLimiterLine
+heartRate_simple.phi
+heartRate_simple.phi0
+heartRate_simple.HR_max
+heartRate_simple.HR_nom
+heartRate_simple.eta_HR
+volume_total
+condHR.offset
+condHR.startTime
+condHR.const1.k
+condHR.switch1.u1
+condHR.switch1.u2
+condHR.switch1.y
+condHR.disconnected
+condHR.disconnectedValue
+condHR.myDelay.delayTime
+condHR.myDelay.delayEnabled
+condHR.delayTransport_Enabled
+condHR.delayTransport_Time
+condHR.delayIntegral_Enabled
+condHR.delayInt_Act
+condHR.delayInt_Relax
+condHR.limiter.uMax
+condHR.limiter.uMin
+condHR.limiter.strict
+condHR.limiter.homotopyType
+condHR.uMax
+condHR.uMin
+condHR.gain.k
+condHR.gain.y
+condHR.UseAdditionalInput
+condHR.phi0
+condHR.phi_gain
+condHR.add3_1.k1
+condHR.add3_1.k2
+condHR.const_offset
+condHR.integralActRelaxDelay.delayEnabled
+condHR.integralActRelaxDelay.phi0
+condHR.integralActRelaxDelay.delayTimeAct
+condHR.integralActRelaxDelay.delayTimeRelax
+condHR.showLimiterLine
+sigma_act0
+exercise.height
+exercise.offset
+exercise.startTime
+step.u
+step.y
+step.offset
+step.startTime
+step.const1.k
+step.switch1.u1
+step.switch1.u2
+step.switch1.y
+step.disconnected
+step.disconnectedValue
+step.myDelay.delayTime
+step.myDelay.delayEnabled
+step.delayTransport_Enabled
+step.delayTransport_Time
+step.delayIntegral_Enabled
+step.delayInt_Act
+step.delayInt_Relax
+step.limiter.uMax
+step.limiter.uMin
+step.limiter.strict
+step.limiter.homotopyType
+step.uMax
+step.uMin
+step.gain.k
+step.gain.y
+step.UseAdditionalInput
+step.phi0
+step.phi_gain
+step.add3_1.k1
+step.add3_1.k2
+step.const_offset
+step.integralActRelaxDelay.delayEnabled
+step.integralActRelaxDelay.phi0
+step.integralActRelaxDelay.delayTimeAct
+step.integralActRelaxDelay.delayTimeRelax
+step.showLimiterLine
+pulmonaryR_factor
+venoconstrictionFactor
+vasodilatationFactor
+HR_20w
+PhiStep
+exercise1.height
+exercise1.y
+exercise1.offset
+exercise1.startTime
+maxHR.height
+maxHR.y
+maxHR.offset
+maxHR.startTime
+midHR.height
+midHR.offset
+midHR.startTime
+midExerciseLevel
+CPUtime
+EventCounter
+
+double initialValue(902,6)
+ -1       0                       0                       0                
+  1   280   # settings.phi0
+ -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
+  1   280   # settings.height
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # settings.weight
+ -1      35                       0                       0                
+  1   280   # settings.age
+ -1  1.0666666666667000E+00       0                       0                
+  1   280   # settings.HR_nominal
+ -1  3.1666666666666998E+00       0                       0                
+  1   280   # settings.HR_max
+ -1      24                       0                       0                
+  1   280   # settings.BMI
+  0       0                       0                       0                
+  6   256   # settings.BSA
+ -1       0                       0                       0                
+  1   281   # settings.initByPressure
+ -1 %settings.V_PV_init% -0.01 1e+100
+  1   280   # settings.V_PV_init
+ -1  7.7235150000000000E+05       0                 1.0000000000000000E+100
+  1   280   # settings.heart_R_vlv
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # settings.heart_R_AV
+ -1 %settings.heart_R_LA% 0.0 1e+100
+  1   280   # settings.heart_R_LA
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # settings.heart_R_RA
+ -1   50000                       0                 1.0000000000000000E+100
+  1   280   # settings.heart_R_A_vis
+ -1   10678                       0                       0                
+  1   280   # settings.heart_I_A
+ -1       0                       0                  1.3300000000000001E+00
+  1   280   # settings.heart_alphaE
+ -1       0                       0                  1.3300000000000001E+00
+  1   280   # settings.heart_gammaE
+ -1 %settings.heart_vntr_D_0% 0.0 0.0
+  1   280   # settings.heart_vntr_D_0
+ -1  1.2250000000000000E-03       0                       0                
+  1   280   # settings.heart_vntr_D_0_maxAct
+ -1 %settings.heart_vntr_D_A% 0.0 0.0
+  1   280   # settings.heart_vntr_D_A
+ -1 %settings.heart_vntr_D_A_maxAct% 0.0 0.0
+  1   280   # settings.heart_vntr_D_A_maxAct
+ -1 %settings.heart_vntr_TS% 0.0 0.0
+  1   280   # settings.heart_vntr_TS
+ -1 %settings.heart_vntr_TS_maxAct% 0.0 0.0
+  1   280   # settings.heart_vntr_TS_maxAct
+ -1 %settings.heart_vntr_TR% 0.0 0.0
+  1   280   # settings.heart_vntr_TR
+ -1 %settings.heart_vntr_TR_maxAct% 0.0 0.0
+  1   280   # settings.heart_vntr_TR_maxAct
+ -1  8.0000000000000002E-02       0                       0                
+  1   280   # settings.heart_vntr_Tact
+ -1  8.0000000000000002E-02       0                       0                
+  1   280   # settings.heart_vntr_Tact_maxAct
+ -1 %settings.heart_atr_D_0% 0.0 0.0
+  1   280   # settings.heart_atr_D_0
+ -1 %settings.heart_atr_D_A% 0.0 0.0
+  1   280   # settings.heart_atr_D_A
+ -1  8.0000000000000002E-02       0                       0                
+  1   280   # settings.heart_atr_TS
+ -1  2.6312500000000000E-01       0                       0                
+  1   280   # settings.heart_atr_TR
+ -1  8.1300813008130079E-01       0                       0                
+  1   280   # settings.heart_vntr_xi_Vw
+ -1       1                       0                       0                
+  1   280   # settings.heart_vntr_xi_AmRef
+ -1       5                       0                       0                
+  1   280   # settings.heart_vntr_k_passive
+ -1  1.8999999999999999E+00       0                       0                
+  1   280   # settings.heart_vntr_Lsref
+ -1  1.6000000000000001E+00       0                       0                
+  1   280   # settings.heart_vntr_L0
+ -1  2.0874999999999999E+00       0                       0                
+  1   280   # settings.heart_vntr_SLcollagen
+ -1  1.5100000000000000E+00       0                       0                
+  1   280   # settings.heart_vntr_SLrest
+ -1  2.6428120000000000E+01       0                       0                
+  1   280   # settings.heart_vntr_PConcollagen
+ -1  2.4812500000000002E+00       0                       0                
+  1   280   # settings.heart_vntr_PExpcollagen
+ -1  8.0000000000000004E-01       0                       0                
+  1   280   # settings.syst_abd_P_th_ratio
+  0       1                       0                       0                
+  6   257   # settings.systemic_limitExternalPressure
+ -1 %settings.syst_art_k_E% 0.0 0.0
+  1   280   # settings.syst_art_k_E
+ -1       1                       0                       0                
+  1   281   # settings.syst_art_UseVasoconstrictionEffect
+ -1  2.1010540000000000E-01       0                       0                
+  1   280   # settings.eta_vc
+ -1       1                       0                       0                
+  1   280   # settings.syst_tissues_hydrostaticLevel_correction
+ -1  1.2873330000000000E+08       0                 1.0000000000000000E+100
+  1   280   # settings.syst_TPR
+ -1  5.2277100000000001E+00       0                       0                
+  1   280   # settings.syst_TR_frac
+  0       0                       0                       0                
+  6   256   # settings.tissues_Pa_nom
+ -1  2.6664477483000001E+03       0                       0                
+  1   280   # settings.tissues_P_nom
+  0       0                       0                       0                
+  6   256   # settings.tissues_Pv_nom
+ -1  2.1012399999999999E-03       0                 1.0000000000000000E+100
+  1   280   # settings.tissues_ZPV_nom
+ -1  6.9499999999999998E-04       0                 1.0000000000000000E+100
+  1   280   # settings.tissues_SV_nom
+ -1  1.0500000000000000E-04       0                       0                
+  1   280   # settings.tissues_CO_nom
+ -1  3.1452249999999999E+00       0                       0                
+  1   280   # settings.tissues_eta_Ra
+ -1       0                       0                       0                
+  1   280   # settings.tissues_tau_R
+ -1  2.8062499999999999E+00       0                       0                
+  1   280   # settings.tissues_eta_Rv
+ -1       1                       0                       0                
+  1   281   # settings.UseNonLinear_TissuesCompliance
+ -1       1                       0                       0                
+  1   281   # settings.tissues_UseStraighteningReaction2Phi
+ -1  9.9999999999999995E-07       0                       0                
+  1   280   # settings.tissues_V_max_breakPoint_Frac
+ -1  5.7080129999999996E-01       0                       0                
+  1   280   # settings.tissues_eta_C
+ -1  5.0000000000000000E-01       0                       0                
+  1   280   # settings.tissues_gamma
+ -1       1                       0                       0                
+  1   281   # settings.veins_UseNonLinearVeins
+ -1     765                       0                       0                
+  1   280   # settings.veins_linearE_rel
+ -1  7.9300000000000004E-01       0                       0                
+  1   280   # settings.veins_linearV0_rel
+ -1       1                       0                       0                
+  1   281   # settings.veins_UsePhiEffect
+ -1  8.9999999999999997E-02       0                       0                
+  1   280   # settings.veins_C_phi
+ -1       0                       0                       0                
+  1   280   # settings.veins_ZPV_phi
+ -1  5.0000000000000000E-01       0                       0                
+  1   280   # settings.veins_gamma
+ -1       5                       0                       0                
+  1   280   # settings.veins_alpha
+ -1  2.0000000000000001E-01       0                       0                
+  1   280   # settings.veins_phi_no
+ -1       0                       0                       0                
+  1   281   # settings.veins_delayed_activation
+ -1       1                       0                       0                
+  1   280   # settings.veins_activation_tau
+ -1      10                       0                       0                
+  1   280   # settings.veins_relaxation_tau
+ -1  1.5000000000000000E+00       0                       0                
+  1   280   # settings.veins_diameter_correction
+ -1       1                       0                       0                
+  1   281   # settings.veins_ignoreViscosityResistance
+ -1  2.8020000000000000E-01       0                       0                
+  1   280   # settings.vessel_a
+ -1 -5.0530000000000001E+02       0                       0                
+  1   280   # settings.vessel_b
+ -1  1.3239999999999999E-01       0                       0                
+  1   280   # settings.vessel_c
+ -1 -1.1140000000000001E+01       0                       0                
+  1   280   # settings.vessel_d
+ -1  4.0000000000000001E-03       0                       0                
+  1   280   # settings.blood_mu
+ -1    1050                       0                       0                
+  1   280   # settings.blood_rho
+ -1       1                       0                       0                
+  1   280   # settings.chi_phi
+ -1  2.4812500000000000E+01       0                       0                
+  1   280   # settings.tissues_chi_Ra
+ -1  1.3843750000000000E+01       0                       0                
+  1   280   # settings.tissues_chi_Rv
+ -1 -3.1250000000000000E-02       0                       0                
+  1   280   # settings.tissues_chi_C
+ -1       0                       0                       0                
+  1   280   # settings.veins_chi_pump
+ -1       0                       0                       0                
+  1   280   # settings.eta_adenosine
+ -1       0                       0                       0                
+  1   280   # settings.baro_hr_delay
+ -1       0                       0                       0                
+  1   281   # settings.baro_useAbsolutePressureTerm
+ -1  1.5000000000000000E+00       0                       0                
+  1   280   # settings.baro_d0
+ -1      93                       0                       0                
+  1   280   # settings.baro_tau_s
+ -1  6.5100000000000005E-02       0                       0                
+  1   280   # settings.baro_a
+ -1  2.0039999999999999E-01       0                       0                
+  1   280   # settings.baro_b
+ -1     300                       0                       0                
+  1   280   # settings.baro_f0
+ -1  2.6879999999999998E-01       0                       0                
+  1   280   # settings.baro_xi_delta0
+ -1  5.9999999999999998E-01       0                       0                
+  1   280   # settings.baro_delta0_aor
+ -1  5.5000000000000004E-01       0                       0                
+  1   280   # settings.baro_delta0_car
+ -1  6.0625799999999996E-01       0                       0                
+  1   280   # settings.baro_g
+ -1  3.5533333299999997E-02       0                       0                
+  1   280   # settings.baro_fsn
+ -1  3.5000000000000001E-03       0                       0                
+  1   280   # settings.baro_f1
+ -1  8.0833333333332999E-05       0                       0                
+  1   280   # settings.pulm_CO_target
+ -1  3.1942059999999999E-07       0                       0                
+  1   280   # settings.pulm_C_PV
+ -1  1.6351890000000001E-08       0                       0                
+  1   280   # settings.pulm_C_PA
+ -1  1.3332238741500000E+03       0                       0                
+  1   280   # settings.pulm_P_PV_nom
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # settings.pulm_V_PV_start
+ -1 %settings.pulm_R% 0.0 1e+100
+  1   280   # settings.pulm_R
+ -1  3.3333333333333002E-04       0                       0                
+  1   280   # settings.pulm_q_nom_maxq
+ -1  9.1500000000000004E-01       0                       0                
+  1   280   # settings.pulm_R_exp
+ -1  1.0000000000000000E+06       0                 1.0000000000000000E+100
+  1   280   # settings.pulm_PV_R_vis
+ -1       1                       0                       0                
+  1   280   # settings.pulm_tp_pleural_frac
+ -1       0                       0                       0                
+  1   281   # settings.hideSystemic
+ -1       0                       0                       0                
+  1   281   # settings.hidePulmonary
+ -1       0                       0                       0                
+  1   281   # settings.hideHeart
+ -1       0                       0                       0                
+  1   281   # settings.hideLevel0
+ -1       0                       0                       0                
+  1   281   # settings.hideLevel1
+ -1       1                       0                       0                
+  1   281   # settings.EvaluateFunctionalParams
+ -1       2                       0                       0                
+  1   280   # settings.dummy
+ -1  5.0000000000000000E-01       0                       0                
+  1   280   # settings.experimental_zpv_factor
+ -1       1                       0                       0                
+  1   280   # settings.experimental_C_factor
+ -1  9.0700000000000003E-01       0                       0                
+  1   280   # settings.experimental_L0
+ -1       0                       0                       0                
+  1   280   # settings.Td_phi_syst
+ -1       0                       0                       0                
+  1   280   # settings.Td_phi_hr
+ -1       0                       0                       0                
+  1   280   # settings.Td_phi_heart
+  0       1                       0                       0                
+  6   257   # heartComponent.UseFrequencyInput
+  0       0                       0                       0                
+  6   257   # heartComponent.UseThoracic_PressureInput
+  0       1                       0                       0                
+  6   257   # heartComponent.UsePhiInput
+ -1       1                       0                       0                
+  1   280   # heartComponent.HR
+  0       0                       0                       0                
+  6   388   # heartComponent.sv.q
+  0       0                       0                       0                
+  6   388   # heartComponent.pv.q
+  0       0                       0                       0                
+  6   388   # heartComponent.pa.q
+  0       0                       0                       0                
+  6   260   # heartComponent.sa.pressure
+ -1       0                       0                       0                
+  1   280   # heartComponent.P0.k
+  0       0                       0                       0                
+  6   260   # heartComponent.tricuspidValve.q_in.pressure
+  0       0                       0                       0                
+  6   388   # heartComponent.tricuspidValve.q_in.q
+  0       0                       0                       0                
+  6   260   # heartComponent.tricuspidValve.q_out.pressure
+  0       0                       0                       0                
+  6   256   # heartComponent.tricuspidValve.dp
+  0       0                       0                       0                
+  6   257   # heartComponent.tricuspidValve.useChatteringProtection
+ -1  1.0000000000000000E-02       0                       0                
+  1   280   # heartComponent.tricuspidValve.chatteringProtectionTime
+  0       0                       0                       0                
+  6   328   # heartComponent.tricuspidValve.lastChange
+  0       1                       0                       0                
+  6   353   # heartComponent.tricuspidValve.open
+  0       0                       0                       0                
+  6   256   # heartComponent.tricuspidValve.passableVariable
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.tricuspidValve._Gon
+ -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
+  1   280   # heartComponent.tricuspidValve._Goff
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # heartComponent.tricuspidValve.Pknee
+  0       0                       0                       0                
+  6   769   # heartComponent.tricuspidValve.useLimitationInputs
+  0       1                       0                       0                
+  6  1280   # heartComponent.tricuspidValve.unitPressure
+  0       1                       0                       0                
+  6  1280   # heartComponent.tricuspidValve.unitFlow
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.tricuspidValve._Ron
+  0       0                       0                       0                
+  6   256   # heartComponent.pulmonaryValve.dp
+  0       0                       0                       0                
+  6   257   # heartComponent.pulmonaryValve.useChatteringProtection
+ -1  1.0000000000000000E-02       0                       0                
+  1   280   # heartComponent.pulmonaryValve.chatteringProtectionTime
+  0       0                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.lastChange
+  0       1                       0                       0                
+  6   353   # heartComponent.pulmonaryValve.open
+  0       0                       0                       0                
+  6   256   # heartComponent.pulmonaryValve.passableVariable
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.pulmonaryValve._Gon
+ -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
+  1   280   # heartComponent.pulmonaryValve._Goff
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # heartComponent.pulmonaryValve.Pknee
+  0       0                       0                       0                
+  6   769   # heartComponent.pulmonaryValve.useLimitationInputs
+  0       1                       0                       0                
+  6  1280   # heartComponent.pulmonaryValve.unitPressure
+  0       1                       0                       0                
+  6  1280   # heartComponent.pulmonaryValve.unitFlow
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.pulmonaryValve._Ron
+  0       0                       0                       0                
+  6   769   # heartComponent.pulmonaryValve.calculateAdditionalMetrics
+  0       1                       0                       0                
+  6   769   # heartComponent.pulmonaryValve.useCycleInput
+  0       0                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.Pout_pulse
+  0       0                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.Pout_max
+  0       0                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.Pout_min
+ -1       0                       0                       0                
+  2   280   # heartComponent.pulmonaryValve.BP_max
+  0       0                       0                       0                
+  3   256   # heartComponent.pulmonaryValve.der(BP_max)
+ -1   26600                       0                       0                
+  2   280   # heartComponent.pulmonaryValve.BP_min
+  0       0                       0                       0                
+  3   256   # heartComponent.pulmonaryValve.der(BP_min)
+ -1   39996                       0                       0                
+  1   280   # heartComponent.pulmonaryValve.Pmax
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # heartComponent.pulmonaryValve.tau
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # heartComponent.pulmonaryValve.epsTime
+  0       1                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.Ts
+  0       0                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.Td
+  0       0                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.T0
+  0   -1000                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.T0_cycle
+ -1       0                       0                 1.0000000000000000E+100
+  2   280   # heartComponent.pulmonaryValve.CO_acc
+  0       0                       0                       0                
+  3   256   # heartComponent.pulmonaryValve.der(CO_acc)
+  0       0                       0                       0                
+  6   328   # heartComponent.pulmonaryValve.CO
+  0       0                       0                       0                
+  6   260   # heartComponent.mitralValve.q_in.pressure
+  0       0                       0                       0                
+  6   260   # heartComponent.mitralValve.q_out.pressure
+  0       0                       0                       0                
+  6   256   # heartComponent.mitralValve.dp
+  0       0                       0                       0                
+  6   257   # heartComponent.mitralValve.useChatteringProtection
+ -1  1.0000000000000000E-02       0                       0                
+  1   280   # heartComponent.mitralValve.chatteringProtectionTime
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.lastChange
+  0       1                       0                       0                
+  6   353   # heartComponent.mitralValve.open
+  0       0                       0                       0                
+  6   256   # heartComponent.mitralValve.passableVariable
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.mitralValve._Gon
+ -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
+  1   280   # heartComponent.mitralValve._Goff
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # heartComponent.mitralValve.Pknee
+  0       0                       0                       0                
+  6   769   # heartComponent.mitralValve.useLimitationInputs
+  0       1                       0                       0                
+  6  1280   # heartComponent.mitralValve.unitPressure
+  0       1                       0                       0                
+  6  1280   # heartComponent.mitralValve.unitFlow
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.mitralValve._Ron
+  0       1                       0                       0                
+  6   769   # heartComponent.mitralValve.calculateAdditionalMetrics
+  0       1                       0                       0                
+  6   769   # heartComponent.mitralValve.useCycleInput
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.Pout_pulse
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.Pout_max
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.Pout_min
+ -1       0                       0                       0                
+  2   280   # heartComponent.mitralValve.BP_max
+  0       0                       0                       0                
+  3   256   # heartComponent.mitralValve.der(BP_max)
+ -1   26600                       0                       0                
+  2   280   # heartComponent.mitralValve.BP_min
+  0       0                       0                       0                
+  3   256   # heartComponent.mitralValve.der(BP_min)
+ -1   39996                       0                       0                
+  1   280   # heartComponent.mitralValve.Pmax
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # heartComponent.mitralValve.tau
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # heartComponent.mitralValve.epsTime
+  0       1                       0                       0                
+  6   328   # heartComponent.mitralValve.Ts
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.Td
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.T0
+  0   -1000                       0                       0                
+  6   328   # heartComponent.mitralValve.T0_cycle
+ -1       0                       0                 1.0000000000000000E+100
+  2   280   # heartComponent.mitralValve.CO_acc
+  0       0                       0                       0                
+  3   256   # heartComponent.mitralValve.der(CO_acc)
+  0       0                       0                       0                
+  6   328   # heartComponent.mitralValve.CO
+  0       0                       0                       0                
+  6   256   # heartComponent.aorticValve.dp
+  0       0                       0                       0                
+  6   257   # heartComponent.aorticValve.useChatteringProtection
+ -1  1.0000000000000000E-02       0                       0                
+  1   280   # heartComponent.aorticValve.chatteringProtectionTime
+  0       0                       0                       0                
+  6   328   # heartComponent.aorticValve.lastChange
+  0       1                       0                       0                
+  6   353   # heartComponent.aorticValve.open
+  0       0                       0                       0                
+  6   256   # heartComponent.aorticValve.passableVariable
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.aorticValve._Gon
+ -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
+  1   280   # heartComponent.aorticValve._Goff
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # heartComponent.aorticValve.Pknee
+  0       0                       0                       0                
+  6   769   # heartComponent.aorticValve.useLimitationInputs
+  0       1                       0                       0                
+  6  1280   # heartComponent.aorticValve.unitPressure
+  0       1                       0                       0                
+  6  1280   # heartComponent.aorticValve.unitFlow
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.aorticValve._Ron
+  0       1                       0                       0                
+  6   769   # heartComponent.aorticValve.calculateAdditionalMetrics
+  0       1                       0                       0                
+  6   769   # heartComponent.aorticValve.useCycleInput
+  0       0                       0                       0                
+  6   328   # heartComponent.aorticValve.Pout_pulse
+  0       0                       0                       0                
+  6   328   # heartComponent.aorticValve.Pout_max
+  0       0                       0                       0                
+  6   328   # heartComponent.aorticValve.Pout_min
+ -1       0                       0                       0                
+  2   280   # heartComponent.aorticValve.BP_max
+  0       0                       0                       0                
+  3   256   # heartComponent.aorticValve.der(BP_max)
+ -1   26600                       0                       0                
+  2   280   # heartComponent.aorticValve.BP_min
+  0       0                       0                       0                
+  3   256   # heartComponent.aorticValve.der(BP_min)
+ -1   39996                       0                       0                
+  1   280   # heartComponent.aorticValve.Pmax
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # heartComponent.aorticValve.tau
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # heartComponent.aorticValve.epsTime
+  0       1                       0                       0                
+  6   328   # heartComponent.aorticValve.Ts
+  0       0                       0                       0                
+  6   328   # heartComponent.aorticValve.Td
+  0       0                       0                       0                
+  6   328   # heartComponent.aorticValve.T0
+  0   -1000                       0                       0                
+  6   328   # heartComponent.aorticValve.T0_cycle
+ -1       0                       0                 1.0000000000000000E+100
+  2   280   # heartComponent.aorticValve.CO_acc
+  0       0                       0                       0                
+  3   256   # heartComponent.aorticValve.der(CO_acc)
+  0       0                       0                       0                
+  6   328   # heartComponent.aorticValve.CO
+  0       0                       0                       0                
+  6   256   # heartComponent.r_SystemicVenousInflow.dp
+  0       1                       0                       0                
+  6   769   # heartComponent.r_SystemicVenousInflow.enable
+  0       0                       0                       0                
+  6   769   # heartComponent.r_SystemicVenousInflow.useConductanceInput
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.r_SystemicVenousInflow.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.r_SystemicVenousInflow.resistance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.r_SystemicVenousInflow.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # heartComponent.r_SystemicVenousInflow.conditionalConductance
+  0       0                       0                       0                
+  6   256   # heartComponent.r_PulmonaryVenousInflow.dp
+  0       1                       0                       0                
+  6   769   # heartComponent.r_PulmonaryVenousInflow.enable
+  0       0                       0                       0                
+  6   769   # heartComponent.r_PulmonaryVenousInflow.useConductanceInput
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.r_PulmonaryVenousInflow.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.r_PulmonaryVenousInflow.resistance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.r_PulmonaryVenousInflow.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # heartComponent.r_PulmonaryVenousInflow.conditionalConductance
+  0       0                       0                       0                
+  6   260   # heartComponent.ventricles.port_rv.pressure
+  0       0                       0                       0                
+  6   260   # heartComponent.ventricles.port_lv.pressure
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.thoracic_pressure_input
+  0       1                       0                       0                
+  6   321   # heartComponent.ventricles.volumeLimiterLV
+  0       1                       0                       0                
+  6   321   # heartComponent.ventricles.volumeLimiterRV
+ -1  3.5001300000000000E+00       0                       0                
+  2   280   # heartComponent.ventricles.LV_wall.ym
+  0       0                       0                       0                
+  3   256   # heartComponent.ventricles.LV_wall.der(ym)
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.D
+  0       0                       0                       0                
+  6   257   # heartComponent.ventricles.LV_wall.UseFrequencyInput
+  0       0                       0                       0                
+  6   257   # heartComponent.ventricles.LV_wall.UseCardiacCycleInput
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.Vw
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.Amref
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.Lsref
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.L0
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.k_passive
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.k_passive_negative
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.phi0
+ -1  4.0000000000000001E-02       0                       0                
+  1   280   # heartComponent.ventricles.LV_wall.LSEiso
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.SLrest
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.SLcollagen
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.PConcollagen
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.PExpcollagen
+ -1       1                       0                       0                
+  1   280   # heartComponent.ventricles.LV_wall.contractilityFraction
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.Tm
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.Tx
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.Ty
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.Vm
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.Am
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.Cm
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.z
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.epsf
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.SLo
+ -1  2.2999999999999998E+00       0                       0                
+  2   280   # heartComponent.ventricles.LV_wall.SL
+  0       0                       0                       0                
+  3   256   # heartComponent.ventricles.LV_wall.der(SL)
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.sinalpha
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.alpha
+ -1       7                       0                       0                
+  1   280   # heartComponent.ventricles.LV_wall.vmax
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.sigma_collagen
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.sigmapas
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.sigmaact
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.sigmaM
+  0       0                       0                       0                
+  6   257   # heartComponent.ventricles.SEP_wall.UseFrequencyInput
+  0       0                       0                       0                
+  6   257   # heartComponent.ventricles.SEP_wall.UseCardiacCycleInput
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.Vw
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.Amref
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.Lsref
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.L0
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.k_passive
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.k_passive_negative
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.phi0
+ -1  4.0000000000000001E-02       0                       0                
+  1   280   # heartComponent.ventricles.SEP_wall.LSEiso
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.SLrest
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.SLcollagen
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.PConcollagen
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.PExpcollagen
+ -1       1                       0                       0                
+  1   280   # heartComponent.ventricles.SEP_wall.contractilityFraction
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.Tm
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.Tx
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.Ty
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.Vm
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.Am
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.Cm
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.z
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.epsf
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.SLo
+ -1  2.2999999999999998E+00       0                       0                
+  2   280   # heartComponent.ventricles.SEP_wall.SL
+  0       0                       0                       0                
+  3   256   # heartComponent.ventricles.SEP_wall.der(SL)
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.sinalpha
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.alpha
+ -1       7                       0                       0                
+  1   280   # heartComponent.ventricles.SEP_wall.vmax
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.sigma_collagen
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.sigmapas
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.sigmaact
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.sigmaM
+  0       0                       0                       0                
+  6   257   # heartComponent.ventricles.RV_wall.UseFrequencyInput
+  0       0                       0                       0                
+  6   257   # heartComponent.ventricles.RV_wall.UseCardiacCycleInput
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.Vw
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.Amref
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.Lsref
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.L0
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.k_passive
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.k_passive_negative
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.phi0
+ -1  4.0000000000000001E-02       0                       0                
+  1   280   # heartComponent.ventricles.RV_wall.LSEiso
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.SLrest
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.SLcollagen
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.PConcollagen
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.PExpcollagen
+ -1       1                       0                       0                
+  1   280   # heartComponent.ventricles.RV_wall.contractilityFraction
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.Tm
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.Tx
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.Ty
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.Vm
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.Am
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.Cm
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.z
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.epsf
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.SLo
+ -1  2.2999999999999998E+00       0                       0                
+  2   280   # heartComponent.ventricles.RV_wall.SL
+  0       0                       0                       0                
+  3   256   # heartComponent.ventricles.RV_wall.der(SL)
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.sinalpha
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.alpha
+ -1       7                       0                       0                
+  1   280   # heartComponent.ventricles.RV_wall.vmax
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.sigma_collagen
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.sigmapas
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.sigmaact
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.sigmaM
+  0       1                       0                       0                
+  6   257   # heartComponent.ventricles.calciumMechanics.usePhiInput
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.phi0
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.t0_delay
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.t0_delay_maxAct
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.t0_delay_coeff
+  0       0                       0                       0                
+  6   320   # heartComponent.ventricles.calciumMechanics.t0_delay_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.tm
+  0 -9.9999999999999995E+59       0                       0                
+  6   328   # heartComponent.ventricles.calciumMechanics.time0
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.D_0
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.D_0_maxAct
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.D_0_coeff
+  0       0                       0                       0                
+  6   320   # heartComponent.ventricles.calciumMechanics.D_0_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.D_A
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.D_A_maxAct
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.D_A_coeff
+  0       0                       0                       0                
+  6   320   # heartComponent.ventricles.calciumMechanics.D_A_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.TS
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.TS_maxAct
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.TS_coeff
+  0       0                       0                       0                
+  6   320   # heartComponent.ventricles.calciumMechanics.TS_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.TR
+  0       0                       0                       0                
+  6   320   # heartComponent.ventricles.calciumMechanics.TR_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.TR_coeff
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.TR_maxAct
+  0       0                       0                       0                
+  6   321   # heartComponent.ventricles.calciumMechanics.systolicContraction
+  0       0                       0                       0                
+  6   321   # heartComponent.ventricles.calciumMechanics.systolicRelaxation
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.calciumMechanics.D_rel
+ -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
+  1   280   # heartComponent.ventricles.V_min
+  0       0                       0                       0                
+  6   768   # heartComponent.ventricles._P_LV
+  0       0                       0                       0                
+  6   768   # heartComponent.ventricles._P_RV
+  0       0                       0                       0                
+  6   768   # heartComponent.ventricles._V_LV
+  0       0                       0                       0                
+  6   768   # heartComponent.ventricles._V_RV
+ -1  1.4999999999999999E-04       0                 1.0000000000000000E+100
+  2   280   # heartComponent.ventricles.V_LV
+  0       0                       0                       0                
+  3   256   # heartComponent.ventricles.der(V_LV)
+ -1  1.4999999999999999E-04       0                 1.0000000000000000E+100
+  2   280   # heartComponent.ventricles.V_RV
+  0       0                       0                       0                
+  3   256   # heartComponent.ventricles.der(V_RV)
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.P_LV
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.P_RV
+ -1       0                       0                       0                
+  2   280   # heartComponent.ventricles.currentWork_LV
+  0       0                       0                       0                
+  3   256   # heartComponent.ventricles.der(currentWork_LV)
+  0       0                       0                       0                
+  6   328   # heartComponent.ventricles.power_LV
+ -1       0                       0                       0                
+  2   280   # heartComponent.ventricles.currentWork_RV
+  0       0                       0                       0                
+  3   256   # heartComponent.ventricles.der(currentWork_RV)
+  0       0                       0                       0                
+  6   328   # heartComponent.ventricles.power_RV
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.t0
+  0 -4.6627000000000001E+00       0                       0                
+  6   288   # heartComponent.ventricles.xm_LV
+  0  2.9034800000000001E+00       0                       0                
+  6   288   # heartComponent.ventricles.xm_SEP
+  0  6.2634400000000001E+00       0                       0                
+  6   288   # heartComponent.ventricles.xm_RV
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.e
+ -1  9.9999999999999995E-07       0                       0                
+  1   280   # heartComponent.ventricles.eps
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.Tysq
+  0       0                       0                       0                
+  6   260   # heartComponent.ra.port_a.pressure
+  0       1                       0                       0                
+  6   257   # heartComponent.ra.enabled
+  0       0                       0                       0                
+  6   256   # heartComponent.ra.D
+  0       0                       0                       0                
+  6   256   # heartComponent.ra.E
+ -1  1.0000000000000000E-04       0                 1.0000000000000000E+100
+  2   280   # heartComponent.ra.volume
+  0       0                       0                       0                
+  3   256   # heartComponent.ra.der(volume)
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # heartComponent.ra.zpv
+ -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
+  1   280   # heartComponent.ra.volume_min
+  0       0                       0                       0                
+  6   256   # heartComponent.ra.thoracic_pressure_inside
+ -1       0                       0                       0                
+  2   280   # heartComponent.ra.currentWork
+  0       0                       0                       0                
+  3   256   # heartComponent.ra.der(currentWork)
+  0       0                       0                       0                
+  6   328   # heartComponent.ra.work
+ -1       1                       0                       0                
+  1   280   # heartComponent.ra.contractilityFraction
+ -1       0                       0                       0                
+  1   281   # heartComponent.ra.enableCollagen
+ -1  1.0000000000000000E-04       0                 1.0000000000000000E+100
+  1   280   # heartComponent.ra.V0_col
+ -1      10                       0                       0                
+  1   280   # heartComponent.ra.s
+  0       0                       0                       0                
+  6   256   # heartComponent.ra.P_c
+  0       0                       0                       0                
+  6   260   # heartComponent.la.port_a.pressure
+  0       1                       0                       0                
+  6   257   # heartComponent.la.enabled
+  0       0                       0                       0                
+  6   256   # heartComponent.la.E
+ -1  1.0000000000000000E-04       0                 1.0000000000000000E+100
+  2   280   # heartComponent.la.volume
+  0       0                       0                       0                
+  3   256   # heartComponent.la.der(volume)
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # heartComponent.la.zpv
+ -1  5.0000000000000004E-06       0                 1.0000000000000000E+100
+  1   280   # heartComponent.la.volume_min
+  0       0                       0                       0                
+  6   256   # heartComponent.la.thoracic_pressure_inside
+ -1       0                       0                       0                
+  2   280   # heartComponent.la.currentWork
+  0       0                       0                       0                
+  3   256   # heartComponent.la.der(currentWork)
+  0       0                       0                       0                
+  6   328   # heartComponent.la.work
+ -1       1                       0                       0                
+  1   280   # heartComponent.la.contractilityFraction
+ -1       0                       0                       0                
+  1   281   # heartComponent.la.enableCollagen
+ -1  1.0000000000000000E-04       0                 1.0000000000000000E+100
+  1   280   # heartComponent.la.V0_col
+ -1      10                       0                       0                
+  1   280   # heartComponent.la.s
+  0       0                       0                       0                
+  6   256   # heartComponent.la.P_c
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.volume
+  0       0                       0                       0                
+  6   256   # heartComponent.idealValve_deactivable.dp
+  0       1                       0                       0                
+  6   353   # heartComponent.idealValve_deactivable.open
+  0       0                       0                       0                
+  6   256   # heartComponent.idealValve_deactivable.passableVariable
+ -1  1.2501026264094000E-02       0                 1.0000000000000000E+100
+  1   280   # heartComponent.idealValve_deactivable._Gon
+ -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
+  1   280   # heartComponent.idealValve_deactivable._Goff
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # heartComponent.idealValve_deactivable.Pknee
+  0       0                       0                       0                
+  6   769   # heartComponent.idealValve_deactivable.useLimitationInputs
+  0       1                       0                       0                
+  6  1280   # heartComponent.idealValve_deactivable.unitPressure
+  0       1                       0                       0                
+  6  1280   # heartComponent.idealValve_deactivable.unitFlow
+  0       0                       0                       0                
+  6   256   # heartComponent.idealValve_deactivable1.dp
+  0       1                       0                       0                
+  6   353   # heartComponent.idealValve_deactivable1.open
+  0       0                       0                       0                
+  6   256   # heartComponent.idealValve_deactivable1.passableVariable
+ -1  1.2501026264094000E-02       0                 1.0000000000000000E+100
+  1   280   # heartComponent.idealValve_deactivable1._Gon
+ -1  1.2501026264094000E-12       0                 1.0000000000000000E+100
+  1   280   # heartComponent.idealValve_deactivable1._Goff
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # heartComponent.idealValve_deactivable1.Pknee
+  0       0                       0                       0                
+  6   769   # heartComponent.idealValve_deactivable1.useLimitationInputs
+  0       1                       0                       0                
+  6  1280   # heartComponent.idealValve_deactivable1.unitPressure
+  0       1                       0                       0                
+  6  1280   # heartComponent.idealValve_deactivable1.unitFlow
+  0       0                       0                       0                
+  6   256   # heartComponent.resistor.dp
+  0       1                       0                       0                
+  6   769   # heartComponent.resistor.enable
+  0       0                       0                       0                
+  6   769   # heartComponent.resistor.useConductanceInput
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.resistor.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.resistor.resistance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.resistor.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # heartComponent.resistor.conditionalConductance
+  0       0                       0                       0                
+  6   256   # heartComponent.resistor1.dp
+  0       1                       0                       0                
+  6   769   # heartComponent.resistor1.enable
+  0       0                       0                       0                
+  6   769   # heartComponent.resistor1.useConductanceInput
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.resistor1.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.resistor1.resistance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.resistor1.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # heartComponent.resistor1.conditionalConductance
+  0       0                       0                       0                
+  6   256   # heartComponent.sa_node.t0
+  0       1                       0                       0                
+  6   328   # heartComponent.sa_node.t0_last
+  0       1                       0                       0                
+  6   328   # heartComponent.sa_node.HR_true
+ -1       0                       0                       0                
+  2   280   # heartComponent.sa_node.cardiac_cycle
+  0       0                       0                       0                
+  3   256   # heartComponent.sa_node.der(cardiac_cycle)
+  0       0                       0                       0                
+  6   321   # heartComponent.sa_node.beat
+  0       0                       0                       0                
+  6   330   # heartComponent.sa_node.beats
+  0       0                       0                       0                
+  6   257   # heartComponent.sa_node.usePhiInput
+  0      -1                       0                       0                
+  6   328   # heartComponent.sa_node.time0
+  0       1                       0                       0                
+  6   257   # heartComponent.calciumMechanics.usePhiInput
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.phi0
+ -1       0                       0                       0                
+  1   280   # heartComponent.calciumMechanics.t0_delay
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.t0_delay_maxAct
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.t0_delay_coeff
+  0       0                       0                       0                
+  6   320   # heartComponent.calciumMechanics.t0_delay_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.tm
+  0 -9.9999999999999995E+59       0                       0                
+  6   328   # heartComponent.calciumMechanics.time0
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.D_0
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.D_0_maxAct
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.D_0_coeff
+  0       0                       0                       0                
+  6   320   # heartComponent.calciumMechanics.D_0_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.D_A
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.D_A_maxAct
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.D_A_coeff
+  0       0                       0                       0                
+  6   320   # heartComponent.calciumMechanics.D_A_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.TS
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.TS_maxAct
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.TS_coeff
+  0       0                       0                       0                
+  6   320   # heartComponent.calciumMechanics.TS_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.TR
+  0       0                       0                       0                
+  6   320   # heartComponent.calciumMechanics.TR_phi
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.TR_coeff
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.TR_maxAct
+  0       0                       0                       0                
+  6   321   # heartComponent.calciumMechanics.systolicContraction
+  0       0                       0                       0                
+  6   321   # heartComponent.calciumMechanics.systolicRelaxation
+  0       0                       0                       0                
+  6   256   # heartComponent.calciumMechanics.D_rel
+  0       0                       0                       0                
+  6   256   # heartComponent.pericardium.p_out
+ -1       1                       0                       0                
+  1   281   # heartComponent.pericardium.enabled
+ -1  8.0000000000000004E-04       0                 1.0000000000000000E+100
+  1   280   # heartComponent.pericardium.V0
+ -1      10                       0                       0                
+  1   280   # heartComponent.pericardium.s
+ -1       1                       0                       0                
+  1   280   # heartComponent.add.k1
+ -1       1                       0                       0                
+  1   280   # heartComponent.add.k2
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_aortic.dp
+ -1  2.9999999999999999E-01       0                       0                
+  1   280   # heartComponent.valveInertia_aortic.volumeFlow_start
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_aortic.I
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.valveInertia_aortic.R
+  0       0                       0                       0                
+  6   769   # heartComponent.valveInertia_aortic.enabled
+ -1  1.0000000000000000E-02       0                       0                
+  1   280   # heartComponent.valveInertia_aortic.l
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_aortic.D
+ -1  2.0000000000000001E-04       0                       0                
+  1   280   # heartComponent.valveInertia_aortic.A_ind
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_aortic.A
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_Mitral.dp
+ -1  2.9999999999999999E-01       0                       0                
+  1   280   # heartComponent.valveInertia_Mitral.volumeFlow_start
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_Mitral.I
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.valveInertia_Mitral.R
+  0       0                       0                       0                
+  6   769   # heartComponent.valveInertia_Mitral.enabled
+ -1  1.0000000000000000E-02       0                       0                
+  1   280   # heartComponent.valveInertia_Mitral.l
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_Mitral.D
+ -1  5.2999999999999998E-04       0                       0                
+  1   280   # heartComponent.valveInertia_Mitral.A_ind
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_Mitral.A
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_pulmonary.dp
+ -1  2.9999999999999999E-01       0                       0                
+  1   280   # heartComponent.valveInertia_pulmonary.volumeFlow_start
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_pulmonary.I
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # heartComponent.valveInertia_pulmonary.R
+  0       0                       0                       0                
+  6   769   # heartComponent.valveInertia_pulmonary.enabled
+ -1  1.0000000000000000E-02       0                       0                
+  1   280   # heartComponent.valveInertia_pulmonary.l
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_pulmonary.D
+ -1  2.5999999999999998E-04       0                       0                
+  1   280   # heartComponent.valveInertia_pulmonary.A_ind
+  0       0                       0                       0                
+  6   256   # heartComponent.valveInertia_pulmonary.A
+  0       1                       0                       0                
+  6   257   # pulmonaryTriSeg.UsePhi_Input
+  0       0                       0                       0                
+  6   257   # pulmonaryTriSeg.UseThoracic_PressureInput
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.deadVolume
+  0       0                       0                       0                
+  6   256   # pulmonaryTriSeg._thoracic_pressure
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.volume
+  0       0                       0                       0                
+  6  1344   # pulmonaryTriSeg.phi_input1
+  0       0                       0                       0                
+  6   257   # pulmonaryTriSeg.UseAdenosineInput
+  0       0                       0                       0                
+  6   388   # pulmonaryTriSeg.r_pa.q_in.q
+  0       0                       0                       0                
+  6   256   # pulmonaryTriSeg.r_pa.dp
+  0       1                       0                       0                
+  6   769   # pulmonaryTriSeg.r_pa.enable
+  0       1                       0                       0                
+  6   769   # pulmonaryTriSeg.r_pa.useConductanceInput
+  0  9.9999999999999995E+59       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.r_pa.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   320   # pulmonaryTriSeg.r_pa.resistance
+  0  9.9999999999999995E+59       0                 1.0000000000000000E+100
+  6  1344   # pulmonaryTriSeg.r_pa.c
+ -1  6.6661193707499998E+06       0                 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.r_pa.Resistance
+  0  9.9999999999999995E+59       0                 1.0000000000000000E+100
+  6  1280   # pulmonaryTriSeg.r_pa.conditionalConductance
+ -1  3.4999999999999997E-05       0                 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.c_pa.volume_start
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.c_pa.excessVolume
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.c_pa.useV0Input
+ -1  9.9999999999999994E-12       0                 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.c_pa.ZeroPressureVolume
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.c_pa.useComplianceInput
+ -1 %pulmonaryTriSeg.c_pa.Compliance% 0.0 0.0
+  1   280   # pulmonaryTriSeg.c_pa.Compliance
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.c_pa.useExternalPressureInput
+ -1       0                       0                       0                
+  1   280   # pulmonaryTriSeg.c_pa.ExternalPressure
+ -1       0                       0                 1.0000000000000000E+100
+  2   272   # pulmonaryTriSeg.c_pa.volume
+  0       0                       0                       0                
+  3   256   # pulmonaryTriSeg.c_pa.der(volume)
+  0       0                 -9.9999999999999995E+59 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.c_pa.excessVolume_min
+ -1 -1.0132500000000000E+05 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.c_pa.MinimalCollapsingPressure
+ -1  9.9999999999999998E-13 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.c_pa.CollapsingPressureVolume
+  0       0                       0                       0                
+  6  1280   # pulmonaryTriSeg.c_pa.a
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.c_pv.volume_start
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.c_pv.excessVolume
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.c_pv.useV0Input
+ -1       0                       0                 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.c_pv.ZeroPressureVolume
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.c_pv.useComplianceInput
+ -1  1.8751539396140999E-07       0                       0                
+  1   280   # pulmonaryTriSeg.c_pv.Compliance
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.c_pv.useExternalPressureInput
+ -1       0                       0                       0                
+  1   280   # pulmonaryTriSeg.c_pv.ExternalPressure
+ -1       0                       0                 1.0000000000000000E+100
+  2   272   # pulmonaryTriSeg.c_pv.volume
+  0       0                       0                       0                
+  3   256   # pulmonaryTriSeg.c_pv.der(volume)
+  0       0                 -9.9999999999999995E+59 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.c_pv.excessVolume_min
+ -1 -1.0132500000000000E+05 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.c_pv.MinimalCollapsingPressure
+ -1  9.9999999999999998E-13 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.c_pv.CollapsingPressureVolume
+  0       0                       0                       0                
+  6  1280   # pulmonaryTriSeg.c_pv.a
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.hydraulicConductance.k
+  0       0                       0                       0                
+  6   320   # pulmonaryTriSeg.phi_factor.u
+  0       0                       0                       0                
+  6   320   # pulmonaryTriSeg.phi_factor.y
+ -1       0                       0                       0                
+  1   280   # pulmonaryTriSeg.phi_factor.phi0
+ -1       1                       0                       0                
+  1   280   # pulmonaryTriSeg.phi_factor.eta
+ -1       0                       0                       0                
+  1   280   # pulmonaryTriSeg.fraction.k
+  0       0                       0                       0                
+  6   256   # pulmonaryTriSeg.R_pv_visc.dp
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.R_pv_visc.enable
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.R_pv_visc.useConductanceInput
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.R_pv_visc.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.R_pv_visc.resistance
+ -1       1                       0                 1.0000000000000000E+100
+  1   280   # pulmonaryTriSeg.R_pv_visc.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # pulmonaryTriSeg.R_pv_visc.conditionalConductance
+  0       0                       0                       0                
+  6   256   # pulmonaryTriSeg.R_pa_visc.dp
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.R_pa_visc.enable
+  0       0                       0                       0                
+  6   769   # pulmonaryTriSeg.R_pa_visc.useConductanceInput
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.R_pa_visc.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.R_pa_visc.resistance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # pulmonaryTriSeg.R_pa_visc.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # pulmonaryTriSeg.R_pa_visc.conditionalConductance
+ -1       1                       0                       0                
+  1   280   # pulmonaryTriSeg.normalization.NormalValue
+ -1       1                       0                       0                
+  1   281   # pulmonaryTriSeg.normalization.enabled
+  0       0                       0                       0                
+  6   256   # pulmonaryTriSeg.normalization.effect
+  0       0                       0                       0                
+  6   257   # pulmonaryTriSeg.UseCondFracInput
+  0       0                       0                       0                
+  6   256   # pulmonaryTriSeg.proportionalFactor.scalingFactor
+ -1       0                       0                       0                
+  1   280   # pulmonaryTriSeg.proportionalFactor.u0
+ -1       1                       0                       0                
+  1   281   # pulmonaryTriSeg.proportionalFactor.enabled
+  0       0                       0                       0                
+  6   320   # pulmonaryTriSeg.proportionalFactor.effect
+ -1       1                       0                       0                
+  1   280   # pulmonaryTriSeg.conductance0.k
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.Tilt
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.P_th
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.outer_pressure
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.Exercise
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.adenosine
+  0       0                       0                       0                
+  6   257   # systemic_TriSeg.UseBaroreflexOutput
+  0       0                       0                       0                
+  6   257   # systemic_TriSeg.UseThoracic_PressureInput
+  0       0                       0                       0                
+  6   257   # systemic_TriSeg.UseOuter_PressureInput
+  0       1                       0                       0                
+  6   257   # systemic_TriSeg.UsePhi_Input
+  0       0                       0                       0                
+  6   257   # systemic_TriSeg.UseTiltInput
+  0       0                       0                       0                
+  6   257   # systemic_TriSeg.UseExerciseInput
+  0       0                       0                       0                
+  6   257   # systemic_TriSeg.UseAdenosineInput
+  0       0                       0                       0                
+  6   388   # systemic_TriSeg.r_ao.q_in.q
+  0       0                       0                       0                
+  6   260   # systemic_TriSeg.r_ao.q_out.pressure
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.r_ao.dp
+  0       1                       0                       0                
+  6   769   # systemic_TriSeg.r_ao.enable
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.r_ao.useConductanceInput
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_ao.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_ao.resistance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_ao.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # systemic_TriSeg.r_ao.conditionalConductance
+  0       0                       0                       0                
+  6   388   # systemic_TriSeg.r_sa.q_in.q
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.r_sa.dp
+  0       1                       0                       0                
+  6   769   # systemic_TriSeg.r_sa.enable
+  0       1                       0                       0                
+  6   769   # systemic_TriSeg.r_sa.useConductanceInput
+  0  9.9999999999999995E+59       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_sa.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   320   # systemic_TriSeg.r_sa.resistance
+  0  9.9999999999999995E+59       0                 1.0000000000000000E+100
+  6  1344   # systemic_TriSeg.r_sa.c
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_sa.Resistance
+  0  9.9999999999999995E+59       0                 1.0000000000000000E+100
+  6  1280   # systemic_TriSeg.r_sa.conditionalConductance
+ -1  6.0000000000000002E-05       0                 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_ao.volume_start
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.c_ao.excessVolume
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.c_ao.useV0Input
+ -1  9.9999999999999994E-12       0                 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_ao.ZeroPressureVolume
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.c_ao.useComplianceInput
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.c_ao.Compliance
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.c_ao.useExternalPressureInput
+ -1       0                       0                       0                
+  1   280   # systemic_TriSeg.c_ao.ExternalPressure
+ -1       0                       0                 1.0000000000000000E+100
+  2   272   # systemic_TriSeg.c_ao.volume
+  0       0                       0                       0                
+  3   256   # systemic_TriSeg.c_ao.der(volume)
+  0       0                 -9.9999999999999995E+59 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.c_ao.excessVolume_min
+ -1 -1.0132500000000000E+05 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_ao.MinimalCollapsingPressure
+ -1  9.9999999999999998E-13 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_ao.CollapsingPressureVolume
+  0       0                       0                       0                
+  6  1280   # systemic_TriSeg.c_ao.a
+  0       0                       0                       0                
+  6   260   # systemic_TriSeg.c_sa.q_in.pressure
+ -1  2.0000000000000001E-04       0                 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_sa.volume_start
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.c_sa.excessVolume
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.c_sa.useV0Input
+ -1  9.9999999999999994E-12       0                 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_sa.ZeroPressureVolume
+  0       1                       0                       0                
+  6   769   # systemic_TriSeg.c_sa.useComplianceInput
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.c_sa.Compliance
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.c_sa.useExternalPressureInput
+ -1       0                       0                       0                
+  1   280   # systemic_TriSeg.c_sa.ExternalPressure
+ -1       0                       0                 1.0000000000000000E+100
+  2   272   # systemic_TriSeg.c_sa.volume
+  0       0                       0                       0                
+  3   256   # systemic_TriSeg.c_sa.der(volume)
+  0       0                 -9.9999999999999995E+59 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.c_sa.excessVolume_min
+ -1 -1.0132500000000000E+05 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_sa.MinimalCollapsingPressure
+ -1  9.9999999999999998E-13 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_sa.CollapsingPressureVolume
+  0       0                       0                       0                
+  6  1344   # systemic_TriSeg.c_sa.c
+  0       0                       0                       0                
+  6  1280   # systemic_TriSeg.c_sa.a
+ -1  1.1750000000000000E-03       0                 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_sv.volume_start
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.c_sv.excessVolume
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.c_sv.useV0Input
+ -1  9.9999999999999994E-12       0                 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_sv.ZeroPressureVolume
+  0       1                       0                       0                
+  6   769   # systemic_TriSeg.c_sv.useComplianceInput
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.c_sv.Compliance
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.c_sv.useExternalPressureInput
+ -1       0                       0                       0                
+  1   280   # systemic_TriSeg.c_sv.ExternalPressure
+ -1       0                       0                 1.0000000000000000E+100
+  2   272   # systemic_TriSeg.c_sv.volume
+  0       0                       0                       0                
+  3   256   # systemic_TriSeg.c_sv.der(volume)
+  0       0                 -9.9999999999999995E+59 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.c_sv.excessVolume_min
+ -1 -1.0132500000000000E+05 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_sv.MinimalCollapsingPressure
+ -1  9.9999999999999998E-13 -9.9999999999999995E+59 1.0000000000000000E+100
+  1   280   # systemic_TriSeg.c_sv.CollapsingPressureVolume
+  0       0                       0                       0                
+  6  1344   # systemic_TriSeg.c_sv.c
+  0       0                       0                       0                
+  6  1280   # systemic_TriSeg.c_sv.a
+ -1    4850                       0                       0                
+  1   280   # systemic_TriSeg._CO_target
+ -1      60                       0                       0                
+  1   280   # systemic_TriSeg._HR
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg._C_Ao
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg._C_SA
+ -1     350                       0                       0                
+  1   280   # systemic_TriSeg._C_SV
+ -1  1.0000000000000000E-02       0                       0                
+  1   280   # systemic_TriSeg._R_Ao
+ -1 %systemic_TriSeg._R_SA% 0.0 0.0
+  1   280   # systemic_TriSeg._R_SA
+ -1  2.0000000000000000E-03       0                       0                
+  1   280   # systemic_TriSeg._R_tAo
+ -1  5.0000000000000003E-02       0                       0                
+  1   280   # systemic_TriSeg._R_tSA
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.C_Ao
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.C_SA
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.C_SV
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.R_Ao
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.R_SA
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.R_tAo
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.R_tSA
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.r_tAo.dp
+  0       1                       0                       0                
+  6   769   # systemic_TriSeg.r_tAo.enable
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.r_tAo.useConductanceInput
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_tAo.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_tAo.resistance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_tAo.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # systemic_TriSeg.r_tAo.conditionalConductance
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.r_tsa.dp
+  0       1                       0                       0                
+  6   769   # systemic_TriSeg.r_tsa.enable
+  0       0                       0                       0                
+  6   769   # systemic_TriSeg.r_tsa.useConductanceInput
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_tsa.Conductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_tsa.resistance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_tsa.Resistance
+  0       0                       0                 1.0000000000000000E+100
+  6  1280   # systemic_TriSeg.r_tsa.conditionalConductance
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.volume
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.c_sv0.k
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.c_sa0.k
+ -1       3                       0                       0                
+  1   280   # systemic_TriSeg.inverseProportionalFactor.scalingFactor
+ -1       1                       0                       0                
+  1   281   # systemic_TriSeg.inverseProportionalFactor.enabled
+  0       0                       0                       0                
+  6   320   # systemic_TriSeg.inverseProportionalFactor.effect
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.inverseProportionalFactor1.scalingFactor
+ -1       1                       0                       0                
+  1   281   # systemic_TriSeg.inverseProportionalFactor1.enabled
+  0       0                       0                       0                
+  6   320   # systemic_TriSeg.inverseProportionalFactor1.effect
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # systemic_TriSeg.r_sa0.k
+  0       0                       0                       0                
+  6   320   # systemic_TriSeg.inverseProportionalFactor2.y
+  0       0                       0                       0                
+  6   256   # systemic_TriSeg.inverseProportionalFactor2.scalingFactor
+ -1       1                       0                       0                
+  1   281   # systemic_TriSeg.inverseProportionalFactor2.enabled
+  0       0                       0                       0                
+  6   320   # systemic_TriSeg.inverseProportionalFactor2.effect
+  0       0                       0                       0                
+  4   256   # brachial_pressure
+  0       0                       0                       0                
+  4   328   # brachial_pressure_mean
+  0       0                       0                       0                
+  4   328   # brachial_pressure_systolic
+ -1       0                       0                       0                
+  2   280   # brachial_pressure_systolic_i
+  0       0                       0                       0                
+  3   256   # der(brachial_pressure_systolic_i)
+  0       0                       0                       0                
+  4   328   # brachial_pressure_diastolic
+ -1       0                       0                       0                
+  2   280   # brachial_pressure_diastolic_i
+  0       0                       0                       0                
+  3   256   # der(brachial_pressure_diastolic_i)
+ -1       0                       0                       0                
+  2   280   # brachial_pressure_int
+  0       0                       0                       0                
+  3   256   # der(brachial_pressure_int)
+  0       0                       0                 1.0000000000000000E+100
+  4   328   # SV
+ -1       0                       0                 1.0000000000000000E+100
+  2   280   # SV_i
+  0       0                       0                       0                
+  3   256   # der(SV_i)
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # tau
+  0       1                       0                       0                
+  4   320   # HR
+  0       0                       0                       0                
+  4   328   # CO
+  0  1.4999999999999999E-04       0                 1.0000000000000000E+100
+  4   256   # V_LV
+  0  2.6664400000000001E+03       0                       0                
+  4   256   # renal_capillary
+  0       0                       0                       0                
+  4   256   # P_pa
+  0       0                       0                       0                
+  4   256   # P_pv
+  0       0                       0                       0                
+  4   256   # P_sv
+  0       0                       0                       0                
+  6   320   # condExercise.u
+ -1       0                       0                       0                
+  1   280   # condExercise.offset
+ -1       0                       0                       0                
+  1   280   # condExercise.startTime
+  0       1                       0                       0                
+  6   256   # condExercise.const1.k
+  0       0                       0                       0                
+  6   320   # condExercise.switch1.u1
+  0       0                       0                       0                
+  6   257   # condExercise.switch1.u2
+  0       0                       0                       0                
+  6   320   # condExercise.switch1.y
+ -1       0                       0                       0                
+  1   281   # condExercise.disconnected
+ -1       0                       0                       0                
+  1   280   # condExercise.disconnectedValue
+  0       1                       0                       0                
+  6   256   # condExercise.myDelay.delayTime
+  0       0                       0                       0                
+  6   257   # condExercise.myDelay.delayEnabled
+  0       0                       0                       0                
+  6   257   # condExercise.delayTransport_Enabled
+ -1       0                       0                       0                
+  1   280   # condExercise.delayTransport_Time
+  0       0                       0                       0                
+  6   257   # condExercise.delayIntegral_Enabled
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # condExercise.delayInt_Act
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # condExercise.delayInt_Relax
+  0       1                       0                       0                
+  6   256   # condExercise.limiter.uMax
+  0       0                       0                       0                
+  6   256   # condExercise.limiter.uMin
+  0       0                       0                       0                
+  6   257   # condExercise.limiter.strict
+  0       2                       1                       4                
+  6   258   # condExercise.limiter.homotopyType
+ -1  9.9999999999999995E+59       0                       0                
+  1   280   # condExercise.uMax
+  0       0                       0                       0                
+  6   256   # condExercise.uMin
+  0       1                       0                       0                
+  6   256   # condExercise.gain.k
+  0       0                       0                       0                
+  6   320   # condExercise.gain.y
+  0       1                       0                       0                
+  6   257   # condExercise.UseAdditionalInput
+ -1       0                       0                       0                
+  1   280   # condExercise.phi0
+ -1       1                       0                       0                
+  1   280   # condExercise.phi_gain
+ -1       1                       0                       0                
+  1   280   # condExercise.add3_1.k1
+ -1       1                       0                       0                
+  1   280   # condExercise.add3_1.k2
+  0       0                       0                       0                
+  6   256   # condExercise.const_offset
+  0       0                       0                       0                
+  6   257   # condExercise.integralActRelaxDelay.delayEnabled
+  0       0                       0                       0                
+  6   256   # condExercise.integralActRelaxDelay.phi0
+  0       0                       0                       0                
+  6   256   # condExercise.integralActRelaxDelay.delayTimeAct
+  0       0                       0                       0                
+  6   256   # condExercise.integralActRelaxDelay.delayTimeRelax
+  0       0                       0                       0                
+  6  1281   # condExercise.showLimiterLine
+  0       0                       0                       0                
+  6   320   # heartRate_simple.phi
+  0       0                       0                       0                
+  6   256   # heartRate_simple.phi0
+  0       0                       0                       0                
+  6   256   # heartRate_simple.HR_max
+  0       0                       0                       0                
+  6   256   # heartRate_simple.HR_nom
+  0       0                       0                       0                
+  6   256   # heartRate_simple.eta_HR
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # volume_total
+ -1       0                       0                       0                
+  1   280   # condHR.offset
+ -1       0                       0                       0                
+  1   280   # condHR.startTime
+  0       1                       0                       0                
+  6   256   # condHR.const1.k
+  0       0                       0                       0                
+  6   320   # condHR.switch1.u1
+  0       0                       0                       0                
+  6   257   # condHR.switch1.u2
+  0       0                       0                       0                
+  6   320   # condHR.switch1.y
+ -1       0                       0                       0                
+  1   281   # condHR.disconnected
+ -1  2.5000000000000000E-01       0                       0                
+  1   280   # condHR.disconnectedValue
+  0       1                       0                       0                
+  6   256   # condHR.myDelay.delayTime
+  0       0                       0                       0                
+  6   257   # condHR.myDelay.delayEnabled
+  0       0                       0                       0                
+  6   257   # condHR.delayTransport_Enabled
+  0       0                       0                       0                
+  6   256   # condHR.delayTransport_Time
+  0       0                       0                       0                
+  6   257   # condHR.delayIntegral_Enabled
+  0       0                       0                       0                
+  6   256   # condHR.delayInt_Act
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # condHR.delayInt_Relax
+  0       1                       0                       0                
+  6   256   # condHR.limiter.uMax
+  0       0                       0                       0                
+  6   256   # condHR.limiter.uMin
+  0       0                       0                       0                
+  6   257   # condHR.limiter.strict
+  0       2                       1                       4                
+  6   258   # condHR.limiter.homotopyType
+ -1  9.9999999999999995E+59       0                       0                
+  1   280   # condHR.uMax
+  0       0                       0                       0                
+  6   256   # condHR.uMin
+  0       1                       0                       0                
+  6   256   # condHR.gain.k
+  0       0                       0                       0                
+  6   320   # condHR.gain.y
+  0       1                       0                       0                
+  6   257   # condHR.UseAdditionalInput
+ -1       0                       0                       0                
+  1   280   # condHR.phi0
+ -1       0                       0                       0                
+  1   280   # condHR.phi_gain
+ -1       1                       0                       0                
+  1   280   # condHR.add3_1.k1
+ -1       1                       0                       0                
+  1   280   # condHR.add3_1.k2
+  0       0                       0                       0                
+  6   256   # condHR.const_offset
+  0       0                       0                       0                
+  6   257   # condHR.integralActRelaxDelay.delayEnabled
+  0       0                       0                       0                
+  6   256   # condHR.integralActRelaxDelay.phi0
+  0       0                       0                       0                
+  6   256   # condHR.integralActRelaxDelay.delayTimeAct
+  0       0                       0                       0                
+  6   256   # condHR.integralActRelaxDelay.delayTimeRelax
+  0       0                       0                       0                
+  6  1281   # condHR.showLimiterLine
+ -1     720                       0                       0                
+  1   280   # sigma_act0
+  0       0                       0                       0                
+  6   256   # exercise.height
+ -1       0                       0                       0                
+  1   280   # exercise.offset
+ -1      15                       0                       0                
+  1   280   # exercise.startTime
+  0       0                       0                       0                
+  6   320   # step.u
+  0       0                       0                       0                
+  6   320   # step.y
+ -1       0                       0                       0                
+  1   280   # step.offset
+ -1       0                       0                       0                
+  1   280   # step.startTime
+  0       1                       0                       0                
+  6   256   # step.const1.k
+  0       0                       0                       0                
+  6   320   # step.switch1.u1
+  0       0                       0                       0                
+  6   257   # step.switch1.u2
+  0       0                       0                       0                
+  6   320   # step.switch1.y
+ -1       0                       0                       0                
+  1   281   # step.disconnected
+ -1       0                       0                       0                
+  1   280   # step.disconnectedValue
+  0       1                       0                       0                
+  6   256   # step.myDelay.delayTime
+  0       0                       0                       0                
+  6   257   # step.myDelay.delayEnabled
+  0       0                       0                       0                
+  6   257   # step.delayTransport_Enabled
+ -1       0                       0                       0                
+  1   280   # step.delayTransport_Time
+  0       0                       0                       0                
+  6   257   # step.delayIntegral_Enabled
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # step.delayInt_Act
+ -1  1.0000000000000000E-03       0                       0                
+  1   280   # step.delayInt_Relax
+  0       1                       0                       0                
+  6   256   # step.limiter.uMax
+  0       0                       0                       0                
+  6   256   # step.limiter.uMin
+  0       0                       0                       0                
+  6   257   # step.limiter.strict
+  0       2                       1                       4                
+  6   258   # step.limiter.homotopyType
+ -1  9.9999999999999995E+59       0                       0                
+  1   280   # step.uMax
+  0       0                       0                       0                
+  6   256   # step.uMin
+  0       1                       0                       0                
+  6   256   # step.gain.k
+  0       0                       0                       0                
+  6   320   # step.gain.y
+  0       1                       0                       0                
+  6   257   # step.UseAdditionalInput
+ -1       0                       0                       0                
+  1   280   # step.phi0
+ -1       1                       0                       0                
+  1   280   # step.phi_gain
+ -1       1                       0                       0                
+  1   280   # step.add3_1.k1
+ -1       1                       0                       0                
+  1   280   # step.add3_1.k2
+  0       0                       0                       0                
+  6   256   # step.const_offset
+  0       0                       0                       0                
+  6   257   # step.integralActRelaxDelay.delayEnabled
+  0       0                       0                       0                
+  6   256   # step.integralActRelaxDelay.phi0
+  0       0                       0                       0                
+  6   256   # step.integralActRelaxDelay.delayTimeAct
+  0       0                       0                       0                
+  6   256   # step.integralActRelaxDelay.delayTimeRelax
+  0       0                       0                       0                
+  6  1281   # step.showLimiterLine
+ -1 %pulmonaryR_factor% 0.0 0.0
+  1   280   # pulmonaryR_factor
+ -1 %venoconstrictionFactor% 0.0 0.0
+  1   280   # venoconstrictionFactor
+ -1 %vasodilatationFactor% 0.0 0.0
+  1   280   # vasodilatationFactor
+ -1  2.5499999999999998E+00       0                       0                
+  1   280   # HR_20w
+  0       0                       0                       0                
+  6   256   # PhiStep
+  0       0                       0                       0                
+  6   256   # exercise1.height
+  0       0                       0                       0                
+  6   320   # exercise1.y
+ -1       0                       0                       0                
+  1   280   # exercise1.offset
+ -1      30                       0                       0                
+  1   280   # exercise1.startTime
+  0       0                       0                       0                
+  6   256   # maxHR.height
+  0       0                       0                       0                
+  6   320   # maxHR.y
+ -1       0                       0                       0                
+  1   280   # maxHR.offset
+ -1      30                       0                       0                
+  1   280   # maxHR.startTime
+  0       0                       0                       0                
+  6   256   # midHR.height
+ -1       0                       0                       0                
+  1   280   # midHR.offset
+ -1      15                       0                       0                
+  1   280   # midHR.startTime
+ -1  6.9999999999999996E-01       0                       0                
+  1   280   # midExerciseLevel
+  0       0                       0                       0                
+  4   256   # CPUtime
+  0       0                       0                       0                
+  4   256   # EventCounter
+
+
+# Matrix with 6 columns defining the initial value calculation
+# (columns 5 and 6 are not utilized for the calculation but are
+#  reported by dymosim via dymosim -i for user convenience):
+#
+# column 1: Type of initial value
+#           = -2: special case: for continuing simulation (column 2 = value)
+#           = -1: fixed value (column 2 = fixed value)
+#           =  0: free value, i.e., no restriction (column 2 = initial value)
+#           >  0: desired value (column 1 = weight for optimization
+#                                column 2 = desired value)
+#                 use weight=1, since automatic scaling usually
+#                 leads to equally weighted terms
+# column 2: fixed, free or desired value according to column 1.
+# column 3: Minimum value (ignored, if Minimum >= Maximum).
+# column 4: Maximum value (ignored, if Minimum >= Maximum).
+#           Minimum and maximum restrict the search range in initial
+#           value calculation. They might also be used for scaling.
+# column 5: Category of variable.
+#           = 1: parameter.
+#           = 2: state.
+#           = 3: state derivative.
+#           = 4: output.
+#           = 5: input.
+#           = 6: auxiliary variable.
+# column 6: Data type of variable and flags according to dsBaseType
+#  <value>&3= 0: real.
+#  <value>&3= 1: boolean.
+#  <value>&3= 2: integer.
+#
+# Initial values are calculated according to the following procedure:
+#
+# Initial values are calculated according to the following procedure:
+#
+# - If parameters, states and inputs are FIXED, and other variables
+#   are FREE, the initialization is performed in the normal way.
+#
+# - If parameters and inputs are FIXED, and all other variables
+#   have special case for continue (-2 in 1st column), or FREE
+#   the initialization is ignored and variables are set to these values.
+#   This is intended to continue the simulation.
+#
+#   Which variables will be important for initialization and continue
+#   is indicated by value in column 6 & dsStartMasks.
+#
+char initialDescription(902,186)
+Baseline resting phi [1|%]
+Subject's height for scaling vessel lengths [m|cm]
+Subject's weight [kg]
+
+Resting heart rate (at phi0) [Hz|1/min]
+maximal heart rate [Hz|1/min]
+[kg/m2]
+Du Bois formula for body surface area [1]
+Use nominal pressure to initialize vessel volume. False to use volume directly [:#(type=Boolean)]
+Volume adjustment [m3|ml]
+Open valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
+Open aortic valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
+Resistance of left atrium [(Pa.s)/m3|(mmHg.s)/ml]
+Resistance of the right atrium [(Pa.s)/m3|(mmHg.s)/ml]
+Viscoelastic resistance of the atria [(Pa.s)/m3|(mmHg.s)/ml]
+Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
+For Smith heart - linear dependency of active elastance on phi [1|%]
+For Smith heart - linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi [1|%]
+nominal driving elastance offset [mmHg/um] [Pa/m3]
+Driving elastance offset at maximal activation [mmHg/um] [Pa/m3]
+Amplitude of resting elastance (nominal 2*7.5*120) [mmHg/um] [Pa/m3]
+Amplitude of ventricular elastance at maximal activation (nominal 30.25*7.5*120)[mmHg/um] [Pa/m3|Pa/m3]
+nominal systolic contraction time [s|s]
+nominal systolic contraction time at maximal activation. Default holds the the same fraction of the cardiac cycle. [s|s]
+Systolic relaxation time [s|s]
+minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
+Time delay between atrial and ventricle cycles [s|s]
+Time from start of the atrial cycle at maximal activation [s|s]
+nominal driving elastance offset [Pa/m3|mmHg/ml]
+Atrial elastance peak - Maximal elastance 0.05 + 0.15 mmhg/ml [Pa/m3|mmHg/ml]
+nominal atrial contraction time [s|s]
+nominal atrial relaxation time [s|s]
+Factor affecting ventricular walls volume [1|%]
+Factor affecting ventricular diameters [1|%]
+Steepness of passive tension to volume coeff. Affects diastolic compliance.
+Reference SL, [um] []
+zero tension sarcomere length [um] []
+minimal length to apply collagen force [um] []
+Resting sarcomere length [um] []
+
+
+fraction of thoracic pressure in the abdominal cavity [1|%]
+Limit Pext in large arteries, tissues and veins, when they are already empty [:#(type=Boolean)]
+Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
+Change compliance of large arteries by phi and exercise [:#(type=Boolean)]
+Effect fraction of arterial vasoconstriction on arterial compliance [1|%]
+Lenghten the body to observe some reaction to tilt [1|%]
+Systemic total peripheral resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Tissue resistance Ra to Rv ratio, affecting intra tissue pressure [1|1]
+Nominal arterial pressure for initialization and calculation of arterioles resistance [Pa|mmHg]
+Tissues and small arteries and veins nominal pressure. Used for calculation of arteriole and venule resistances and tissues compliance [Pa|mmHg]
+Venous pressure used for initialization and calculation of tissue venules resistances [Pa|mmHg]
+Tissues and small arteries and veins nominal pressure. Used for calculation of tissues total volume [m3|ml]
+Tissues and small arteries and veins nominal stressed volume. Used for calculation of nominal tissues compliance [m3|ml]
+Nominal flow through systemic tissues. Used for calculation of arteriole and venule resistances. [m3/s|ml/min]
+Factor affecting arterioles resistance in tissues [1|%]
+Integrative time constant for delaying the phi effect on arterioles resistance [s|s]
+Exponential factor affecting venules resistance [1|%]
+Use nonlinear tissues PV chars, using the log Vmax suggested by Hardy and collins and used in Pstras 2017 [:#(type=Boolean)]
+Use V_n dependency on phi (instead of V_u and V_max as used in Pstras) [:#(type=Boolean)]
+Fraction of V_Max, that sets the point for changing exponential to linear PV characteristics. E.g. V_max = 500ml, frac = 1% > exponential up to 495ml, linear after [1|%]
+Effect of sympathetic activation (phi) on tissue's compliance [1|%]
+Nonlinear tissues compliance steepness to set Vmax. Vmax = Vn + gamma*(Vn - zpv) [1|%]
+Use nonlinear compliance model in all large veins [:#(type=Boolean)]
+Venous linear compliance relative to v0 [Pa/m6], only if using linear veins [Pa]
+Venous zero pressure volume [m3], only if using linear veins [1]
+Use venoconstriction in all large veins [:#(type=Boolean)]
+Phi effect on linear veins compliance [1|%]
+Phi effect on linear veins ZPV [1|%]
+Fraction of minimal collapsing diameter to nominal diameter [1|%]
+ONLY for unused alpha-based tension model> how many times the tension is larger for maximal activation from resting activation at nominal diameter [1|%]
+Offset of nonlinear phi adjustment, i.e. largest phi, that produces zero activation
+[:#(type=Boolean)]
+Integration delay for venous tone activation [s|s]
+Integration delay for venous tone activation [s|s]
+Venous diameter enlargement to correspond to the arterial side [1|%]
+Ignore viscoelastic resistance in all large veins (negligible, but computation-heavy) [:#(type=Boolean)]
+
+[m-1]
+
+[m-1]
+[J.s.m-3]
+[J.s2.m-5]
+Exercise level [1|%]
+Exercise effect factor on arterial tissue resistance [1|1]
+Exercise effect factor on venous tissue resistance [1|%]
+Effect of exercise induced relaxation on tissue compliance [1|%]
+Pumping factor simulating contraction of large veins [1|%]
+Effect of adenosine on total peripheral resistance [1|%]
+Delay between phi and HR [s|min]
+Use absolute distention term instead being relative to pulse pressure only [:#(type=Boolean)]
+Relative absolute term multiplicator - not used in pure pulse-pressure- sensitive abroreflex
+Time constant of baroreflex moving setpoint [s|s]
+
+
+Base firing frequency
+Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account. Used for identification single parameter instead of two separately.
+delta0 threshold for aortic sensor
+delta0 threshold for carotid sensor - 0.55 (Kosinski)
+Aortic / carotid sensor weight ratio [1] [1|%]
+rising factor of the sympathetic activation phi [Hz] [Hz|1/min]
+decrease factor of the phi
+mL/min [m3/s|ml/min]
+Pulmonary venous compliance [m3/Pa|ml/mmHg]
+Pulmonary arterial compliance, CO_target/15/_HR mL/mmHg [m3/Pa|ml/mmHg]
+Nominal pressure for pulmonary volume [Pa|mmHg]
+Initial volume of pulmonary veins, with regards to compliance and V_PV_init [m3|ml]
+Pulmonary vasculature resistance, mmHg*sec/mL  [(Pa.s)/m3|(Pa.s)/m3]
+Flow at which the resistance is halved [m3/s|l/min]
+Pulmonary vasculature nonlinear resistance exponent, as in dp = R*e^(exp). Not used when pulm_q_nom_maxq is used
+Pulmonary veins viscoelastic resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Pressure drop of airway pressure applied to heart and systemic due to pleural sac as a fraction of thoracic pressure [1|%]
+Suppress writing output from systemic circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from pulmonary circulation, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output from heart, unless allowed by low level variables [:#(type=Boolean)]
+Suppress writing output of non-physiological variables, used for debugging the model. [:#(type=Boolean)]
+Suppress writing output of physiological, but non-important variables, used for deeper insight. [:#(type=Boolean)]
+Calculate some additional variables out of the results (e.g. CO, SV, EDV..). Disable for faster simulation. [:#(type=Boolean)]
+Dummy parameter not bound anywhere
+A fraction of venous nominal diameter which creates ZPV for linear veins [1|%]
+A fraction of nominal C [1|%]
+
+[s]
+[s]
+[s]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Heart rate, when not specified externally [Hz|1/min]
+Volume flow [m3/s|ml/min]
+Volume flow [m3/s|ml/min]
+Volume flow [m3/s|ml/min]
+Pressure [Pa|mmHg]
+Constant Pressure output value [Pa|mmHg]
+Pressure [Pa|mmHg]
+Volume flow [m3/s|ml/min]
+Pressure [Pa|mmHg]
+Pressure gradient [Pa|mmHg]
+[:#(type=Boolean)]
+Minimal period of time, in which a closed valve stays closed [s|ms]
+[s|min]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Pressure gradient [Pa|mmHg]
+[:#(type=Boolean)]
+Minimal period of time, in which a closed valve stays closed [s|ms]
+[s|min]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
+[:#(type=Boolean)]
+Use any signal of beating cycle which resets to zero for precise calculations of throughput [:#(type=Boolean)]
+Difference between max and min output pressure (e.g. pulse pressure) [Pa|mmHg]
+Maximal pressure at outflow during open valve (e.g. Systolic pressure) [Pa|mmHg]
+Minimal pressure at outflow during closed valve (e.g. diastolic pressure) [Pa|mmHg]
+[Pa|mmHg]
+[Pa/s]
+[Pa|mmHg]
+[Pa/s]
+Maximal possible Pout_min pressure (start point for calculations) [Pa|mmHg]
+Integration costant for min-max calculations [s|min]
+Reset offset after cycle start. We better not use 0 for numerical issues. [s|min]
+True time of cardiologic systole (duration of open valve) [s|min]
+True time of cardiologic diastole (duration of closed valve) [s|min]
+Time since opening (begin of cardiologic systole) [s|min]
+Time of beggining of current cardiac cycle. May be same as T0, when the cardiacCycleOutput is not specified. [s|min]
+Accumulated volume since valve closing [m3|ml]
+der(Accumulated volume since valve closing) [m3/s]
+[m3/s|ml/min]
+Pressure [Pa|mmHg]
+Pressure [Pa|mmHg]
+Pressure gradient [Pa|mmHg]
+[:#(type=Boolean)]
+Minimal period of time, in which a closed valve stays closed [s|ms]
+[s|min]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
+[:#(type=Boolean)]
+Use any signal of beating cycle which resets to zero for precise calculations of throughput [:#(type=Boolean)]
+Difference between max and min output pressure (e.g. pulse pressure) [Pa|mmHg]
+Maximal pressure at outflow during open valve (e.g. Systolic pressure) [Pa|mmHg]
+Minimal pressure at outflow during closed valve (e.g. diastolic pressure) [Pa|mmHg]
+[Pa|mmHg]
+[Pa/s]
+[Pa|mmHg]
+[Pa/s]
+Maximal possible Pout_min pressure (start point for calculations) [Pa|mmHg]
+Integration costant for min-max calculations [s|min]
+Reset offset after cycle start. We better not use 0 for numerical issues. [s|min]
+True time of cardiologic systole (duration of open valve) [s|min]
+True time of cardiologic diastole (duration of closed valve) [s|min]
+Time since opening (begin of cardiologic systole) [s|min]
+Time of beggining of current cardiac cycle. May be same as T0, when the cardiacCycleOutput is not specified. [s|min]
+Accumulated volume since valve closing [m3|ml]
+der(Accumulated volume since valve closing) [m3/s]
+[m3/s|ml/min]
+Pressure gradient [Pa|mmHg]
+[:#(type=Boolean)]
+Minimal period of time, in which a closed valve stays closed [s|ms]
+[s|min]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|ml/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+forward state resistance [(Pa.s)/m3|(mmHg.min)/ml]
+[:#(type=Boolean)]
+Use any signal of beating cycle which resets to zero for precise calculations of throughput [:#(type=Boolean)]
+Difference between max and min output pressure (e.g. pulse pressure) [Pa|mmHg]
+Maximal pressure at outflow during open valve (e.g. Systolic pressure) [Pa|mmHg]
+Minimal pressure at outflow during closed valve (e.g. diastolic pressure) [Pa|mmHg]
+[Pa|mmHg]
+[Pa/s]
+[Pa|mmHg]
+[Pa/s]
+Maximal possible Pout_min pressure (start point for calculations) [Pa|mmHg]
+Integration costant for min-max calculations [s|min]
+Reset offset after cycle start. We better not use 0 for numerical issues. [s|min]
+True time of cardiologic systole (duration of open valve) [s|min]
+True time of cardiologic diastole (duration of closed valve) [s|min]
+Time since opening (begin of cardiologic systole) [s|min]
+Time of beggining of current cardiac cycle. May be same as T0, when the cardiacCycleOutput is not specified. [s|min]
+Accumulated volume since valve closing [m3|ml]
+der(Accumulated volume since valve closing) [m3/s]
+[m3/s|ml/min]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Pressure [Pa|mmHg]
+Pressure [Pa|mmHg]
+[Pa|mmHg]
+When true, it limits outflow from the ventricle to maintain minimal ventricular volume. [:#(type=Boolean)]
+When true, it limits outflow from the ventricle to maintain minimal ventricular volume. [:#(type=Boolean)]
+
+
+Connector of driving function input signal. It might be calcium concentration or whatever appropriate. [Pa/m3]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Heart wall volumes (mL)
+midwall reference surface area, cm^2
+ Resting SL, um
+micron
+mmHg / um
+mmHg / um
+[1|%]
+Length of isometrically stressed series elastic element [micron] []
+microns
+threshold for collagen activation, [um] []
+contriubtion of collagen [1] []
+contriubtion of collagen [1] []
+[1|%]
+Represenattive midwall tension [mmHg.cm] []
+Axial midwall component
+Radial midwall component
+Volume of spherical cap, formed by midwall surface of wall segment
+Midwall surface area of curved wall segment
+Curvature of midwall surface (reciprocal of radius) 
+Ratio of wall thickness to midwall radius of curvature of curved wall segment
+Natural myofiber strain
+Sarcomere length, um
+Length of sarcomere contractile element, um
+der(Length of sarcomere contractile element, um)
+
+[rad|deg]
+Sarcomere shortening velocity with zero load micron/sec
+
+Passive tension [mmHg] []
+Active tension [mmHg] []
+Total tension [mmHg] []
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Heart wall volumes (mL)
+midwall reference surface area, cm^2
+ Resting SL, um
+micron
+mmHg / um
+mmHg / um
+[1|%]
+Length of isometrically stressed series elastic element [micron] []
+microns
+threshold for collagen activation, [um] []
+contriubtion of collagen [1] []
+contriubtion of collagen [1] []
+[1|%]
+Represenattive midwall tension [mmHg.cm] []
+Axial midwall component
+Radial midwall component
+Volume of spherical cap, formed by midwall surface of wall segment
+Midwall surface area of curved wall segment
+Curvature of midwall surface (reciprocal of radius) 
+Ratio of wall thickness to midwall radius of curvature of curved wall segment
+Natural myofiber strain
+Sarcomere length, um
+Length of sarcomere contractile element, um
+der(Length of sarcomere contractile element, um)
+
+[rad|deg]
+Sarcomere shortening velocity with zero load micron/sec
+
+Passive tension [mmHg] []
+Active tension [mmHg] []
+Total tension [mmHg] []
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Heart wall volumes (mL)
+midwall reference surface area, cm^2
+ Resting SL, um
+micron
+mmHg / um
+mmHg / um
+[1|%]
+Length of isometrically stressed series elastic element [micron] []
+microns
+threshold for collagen activation, [um] []
+contriubtion of collagen [1] []
+contriubtion of collagen [1] []
+[1|%]
+Represenattive midwall tension [mmHg.cm] []
+Axial midwall component
+Radial midwall component
+Volume of spherical cap, formed by midwall surface of wall segment
+Midwall surface area of curved wall segment
+Curvature of midwall surface (reciprocal of radius) 
+Ratio of wall thickness to midwall radius of curvature of curved wall segment
+Natural myofiber strain
+Sarcomere length, um
+Length of sarcomere contractile element, um
+der(Length of sarcomere contractile element, um)
+
+[rad|deg]
+Sarcomere shortening velocity with zero load micron/sec
+
+Passive tension [mmHg] []
+Active tension [mmHg] []
+Total tension [mmHg] []
+[:#(type=Boolean)]
+[1|%]
+Delay of contraction after SA node  [s]
+Delay of contraction after SA node  [s]
+delay activation slope coefficient
+Systolic delay varying on phi [s]
+Time since beggining of the (delayed) systole [s]
+time of the last beat [s]
+Offset for activation function at rest [Pa/m3|mmHg/ml]
+Offset for activation function at maximal activation [Pa/m3|mmHg/ml]
+Inotropic effect on driving offset coefficient. Automatically calculated
+D_0 but with phi effect included [Pa/m3|mmHg/ml]
+Peak amplitude at rest [Pa/m3|mmHg/ml]
+Peak amplitude at maximal activation [Pa/m3|mmHg/ml]
+Slope of max amplitude change for activation. Calculated from nominal and max active
+[Pa/m3|mmHg/ml]
+nominal systolic contraction time [s]
+nominal systolic contraction at maximal activation [s]
+
+[s]
+Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication [s]
+systolic relaxation time at current phi
+Lusitropic relaxation slope dependent on phi linearly. Given by k_tr_min
+minimal time for muscle relaxation at maximal activation. Guessed value [s|s]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+D relative to resting D_A to compare timings [1|%]
+[m3|ml]
+
+
+
+
+[m3|ml]
+[m3/s]
+[m3|ml]
+[m3/s]
+[Pa|mmHg]
+[Pa|mmHg]
+[J]
+[W]
+[W|kcal/min]
+[J]
+[W]
+[W|kcal/min]
+time since start of the current cardiac cycle [s|min]
+LV heart geometry variable, cm
+septum heart geometry variable, cm
+RV heart geometry variable, cm
+
+
+
+Pressure [Pa|mmHg]
+Atria enabled. False means thay are disabled and are therefore not filling nor pulsing [:#(type=Boolean)]
+Driving function fro activation of the atrial muscles [Pa/m3]
+[Pa/m3|mmHg/ml]
+[m3|ml]
+[m3/s]
+Zero pressure volume [m3|ml]
+Volume limiter for external pressures [m3|ml]
+limiting external pressure for small or negative volumes [Pa|mmHg]
+[J]
+[W]
+[J]
+[1|%]
+Enab;e nonlinear collagen force, effectively limiting atrial volume [:#(type=Boolean)]
+minimal volume to produce collagen pressure [m3|ml]
+exponential steepness of stiffness
+[Pa|mmHg]
+Pressure [Pa|mmHg]
+Atria enabled. False means thay are disabled and are therefore not filling nor pulsing [:#(type=Boolean)]
+[Pa/m3|mmHg/ml]
+[m3|ml]
+[m3/s]
+Zero pressure volume [m3|ml]
+Volume limiter for external pressures [m3|ml]
+limiting external pressure for small or negative volumes [Pa|mmHg]
+[J]
+[W]
+[J]
+[1|%]
+Enab;e nonlinear collagen force, effectively limiting atrial volume [:#(type=Boolean)]
+minimal volume to produce collagen pressure [m3|ml]
+exponential steepness of stiffness
+[Pa|mmHg]
+[m3|ml]
+Pressure gradient [Pa|mmHg]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+Pressure gradient [Pa|mmHg]
+Switching state [:#(type=Boolean)]
+Auxiliary variable for actual position on the ideal diode characteristic [1]
+Forward state-on conductance (open valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Backward state-off conductance (closed valve conductance) [m3/(Pa.s)|l/(mmHg.min)]
+Forward threshold pressure [Pa|mmHg]
+=true, if Gon and Goff are from inputs [:#(type=Boolean)]
+[Pa|mmHg]
+[m3/s|ml/min]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(dyn.s)/cm5]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(dyn.s)/cm5]
+[m3/(Pa.s)|ml/(mmHg.min)]
+time since start of cardiac cycle [s]
+length of the last cardiac cycle [s|min]
+Heart rate calculated from true systolic intervals [Hz|1/min]
+Fraction of the cycle length [1|%]
+der(Fraction of the cycle length) [s-1]
+True for beat begining [:#(type=Boolean)]
+[:#(type=Integer)]
+[:#(type=Boolean)]
+[s]
+[:#(type=Boolean)]
+[1|%]
+Delay of contraction after SA node  [s]
+Delay of contraction after SA node  [s]
+delay activation slope coefficient
+Systolic delay varying on phi [s]
+Time since beggining of the (delayed) systole [s]
+time of the last beat [s]
+Offset for activation function at rest [Pa/m3|mmHg/ml]
+Offset for activation function at maximal activation [Pa/m3|mmHg/ml]
+Inotropic effect on driving offset coefficient. Automatically calculated
+D_0 but with phi effect included [Pa/m3|mmHg/ml]
+Peak amplitude at rest [Pa/m3|mmHg/ml]
+Peak amplitude at maximal activation [Pa/m3|mmHg/ml]
+Slope of max amplitude change for activation. Calculated from nominal and max active
+[Pa/m3|mmHg/ml]
+nominal systolic contraction time [s]
+nominal systolic contraction at maximal activation [s]
+
+[s]
+Systolic relaxation time, value from Benjamin E. Randall's implementation of Olufsen's model, personal communication [s]
+systolic relaxation time at current phi
+Lusitropic relaxation slope dependent on phi linearly. Given by k_tr_min
+minimal time for muscle relaxation at maximal activation. Guessed value [s|min]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+D relative to resting D_A to compare timings [1|%]
+[Pa]
+enable the pericardium [:#(type=Boolean)]
+minimalvolume to produce additional pressure [m3|ml]
+exponential steepness of stiffness
+Gain of input signal 1 [1]
+Gain of input signal 2 [1]
+Pressure gradient [Pa|mmHg]
+Volumetric flow start value [m3/s|ml/min]
+Inertance [Pa.s2/m3|mmHg.min2/ml]
+optional additional resistance [(Pa.s)/m3|(mmHg.min)/ml]
+false for direct throughput, i.e. no inertance or resistance are applied [:#(type=Boolean)]
+length of the orifice (or the 'action cone') [m|cm]
+inner valvular diameter [m|cm]
+Indexed valvular diameter per body size, cm2/m2 [m2|cm2]
+[m2|cm2]
+Pressure gradient [Pa|mmHg]
+Volumetric flow start value [m3/s|ml/min]
+Inertance [Pa.s2/m3|mmHg.min2/ml]
+optional additional resistance [(Pa.s)/m3|(mmHg.min)/ml]
+false for direct throughput, i.e. no inertance or resistance are applied [:#(type=Boolean)]
+length of the orifice (or the 'action cone') [m|cm]
+inner valvular diameter [m|cm]
+Indexed valvular diameter per body size, cm2/m2 [m2|cm2]
+[m2|cm2]
+Pressure gradient [Pa|mmHg]
+Volumetric flow start value [m3/s|ml/min]
+Inertance [Pa.s2/m3|mmHg.min2/ml]
+optional additional resistance [(Pa.s)/m3|(mmHg.min)/ml]
+false for direct throughput, i.e. no inertance or resistance are applied [:#(type=Boolean)]
+length of the orifice (or the 'action cone') [m|cm]
+inner valvular diameter [m|cm]
+Indexed valvular diameter per body size, cm2/m2 [m2|cm2]
+[m2|cm2]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Additional buffer for pulmonary venous pool to apply volume additions or subtractions without running to negative volumes. Gets subtracked from the total blood volume eventually. [m3|ml]
+[Pa|mmHg]
+[m3|ml]
+[1|%]
+[:#(type=Boolean)]
+Volume flow [m3/s|ml/min]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.s)/ml]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Volume start value [m3|ml]
+Additional volume, that generate pressure [m3|ml]
+=true, if zero-pressure-volume input is used [:#(type=Boolean)]
+Maximal volume, that does not generate pressure if useV0Input=false [m3|ml]
+=true, if compliance input is used [:#(type=Boolean)]
+Compliance if useComplianceInput=false [m3/Pa|ml/mmHg]
+=true, if external pressure input is used [:#(type=Boolean)]
+External pressure. Set zero if internal pressure is relative to external. Valid only if useExternalPressureInput=false. [Pa|mmHg]
+[m3|ml]
+[m3/s]
+Minimal pressure below zeroPressureVolume [m3|ml]
+[Pa|mmHg]
+Maximal volume, which generate negative collapsing pressure [m3|ml]
+[Pa|mmHg]
+Volume start value [m3|m3]
+Additional volume, that generate pressure [m3|ml]
+=true, if zero-pressure-volume input is used [:#(type=Boolean)]
+Maximal volume, that does not generate pressure if useV0Input=false [m3|ml]
+=true, if compliance input is used [:#(type=Boolean)]
+Compliance if useComplianceInput=false [m3/Pa|ml/mmHg]
+=true, if external pressure input is used [:#(type=Boolean)]
+External pressure. Set zero if internal pressure is relative to external. Valid only if useExternalPressureInput=false. [Pa|mmHg]
+[m3|ml]
+[m3/s]
+Minimal pressure below zeroPressureVolume [m3|ml]
+[Pa|mmHg]
+Maximal volume, which generate negative collapsing pressure [m3|ml]
+[Pa|mmHg]
+Constant HydraulicConductance output value [m3/(Pa.s)|ml/(mmHg.min)]
+[m4.kg-1.s]
+[m4.kg-1.s]
+[1|%]
+Factor to multiply the relative phi [1|%]
+Constant Fraction output value [1|%]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Normal value of u, because y=(u/NormalValue)*yBase.
+disabled => y=yBase [:#(type=Boolean)]
+[1|%]
+Use conductance modifier input [:#(type=Boolean)]
+Scaling multiplier of u, because y=yBase*(1 + scalingFactor*u_)
+shift of u, as u_ = u-u0 [1]
+disabled => y=yBase [:#(type=Boolean)]
+[1|%]
+Constant Fraction output value [1|%]
+[rad|deg]
+Thoracic pressure, developed by the airway pressure. Might affect also abdominal cavity. [Pa|mmHg]
+[Pa|mmHg]
+[1|%]
+[1|%]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+[:#(type=Boolean)]
+Volume flow [m3/s|ml/min]
+Pressure [Pa|mmHg]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Volume flow [m3/s|ml/min]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Volume start value [m3|ml]
+Additional volume, that generate pressure [m3|ml]
+=true, if zero-pressure-volume input is used [:#(type=Boolean)]
+Maximal volume, that does not generate pressure if useV0Input=false [m3|ml]
+=true, if compliance input is used [:#(type=Boolean)]
+Compliance if useComplianceInput=false [m3/Pa|ml/mmHg]
+=true, if external pressure input is used [:#(type=Boolean)]
+External pressure. Set zero if internal pressure is relative to external. Valid only if useExternalPressureInput=false. [Pa|mmHg]
+[m3|ml]
+[m3/s]
+Minimal pressure below zeroPressureVolume [m3|ml]
+[Pa|mmHg]
+Maximal volume, which generate negative collapsing pressure [m3|ml]
+[Pa|mmHg]
+Pressure [Pa|mmHg]
+Volume start value [m3|ml]
+Additional volume, that generate pressure [m3|ml]
+=true, if zero-pressure-volume input is used [:#(type=Boolean)]
+Maximal volume, that does not generate pressure if useV0Input=false [m3|ml]
+=true, if compliance input is used [:#(type=Boolean)]
+Compliance if useComplianceInput=false [m3/Pa|ml/mmHg]
+=true, if external pressure input is used [:#(type=Boolean)]
+External pressure. Set zero if internal pressure is relative to external. Valid only if useExternalPressureInput=false. [Pa|Pa]
+[m3|ml]
+[m3/s]
+Minimal pressure below zeroPressureVolume [m3|ml]
+[Pa|mmHg]
+Maximal volume, which generate negative collapsing pressure [m3|ml]
+[m3/Pa|ml/mmHg]
+[Pa|mmHg]
+Volume start value [m3|ml]
+Additional volume, that generate pressure [m3|ml]
+=true, if zero-pressure-volume input is used [:#(type=Boolean)]
+Maximal volume, that does not generate pressure if useV0Input=false [m3|ml]
+=true, if compliance input is used [:#(type=Boolean)]
+Compliance if useComplianceInput=false [m3/Pa|ml/mmHg]
+=true, if external pressure input is used [:#(type=Boolean)]
+External pressure. Set zero if internal pressure is relative to external. Valid only if useExternalPressureInput=false. [Pa|Pa]
+[m3|ml]
+[m3/s]
+Minimal pressure below zeroPressureVolume [m3|ml]
+[Pa|mmHg]
+Maximal volume, which generate negative collapsing pressure [m3|ml]
+[m3/Pa|ml/mmHg]
+[Pa|mmHg]
+mL/min
+
+Proximal aortic compliance, mL/mmHg
+Systemic arterial compliance, mL/mmHg
+Systemic venous compliance, mL/mmHg  DAB 10/7/2018
+resistance of aorta , mmHg*sec/mL
+mmHg*sec/mL Systemic vasculature resistance, mmHg*sec/mL
+
+
+[m3/Pa|ml/mmHg]
+[m3/Pa|ml/mmHg]
+[m3/Pa|ml/mmHg]
+[(Pa.s)/m3|(mmHg.min)/ml]
+[(Pa.s)/m3|(mmHg.min)/ml]
+[(Pa.s)/m3|(mmHg.min)/ml]
+[(Pa.s)/m3|(mmHg.min)/ml]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
+[m3/(Pa.s)|ml/(mmHg.min)]
+Pressure gradient [Pa|mmHg]
+if false, no resistance is used [:#(type=Boolean)]
+=true, if external conductance value is used [:#(type=Boolean)]
+Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
+Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
+Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
+[m3/(Pa.s)|ml/(mmHg.min)]
+[m3|ml]
+Constant HydraulicCompliance output value [m3/Pa|ml/mmHg]
+Constant HydraulicCompliance output value [m3/Pa|ml/mmHg]
+Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)
+disabled => y=yBase [:#(type=Boolean)]
+[1|%]
+Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)
+disabled => y=yBase [:#(type=Boolean)]
+[1|%]
+Hydraulic resistance [(Pa.s)/m3|(mmHg.s)/ml]
+[Pa.m-3.s]
+Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)
+disabled => y=yBase [:#(type=Boolean)]
+[1|%]
+[Pa|mmHg]
+[Pa|mmHg]
+[Pa|mmHg]
+[Pa|mmHg]
+[Pa/s]
+[Pa|mmHg]
+[Pa|mmHg]
+[Pa/s]
+integration of pressure to find the true mean [Pa.s]
+der(integration of pressure to find the true mean) [Pa]
+Stroke volume [m3|ml]
+[m3|ml]
+[m3/s]
+Integration costant for min-max calculations [s|min]
+[Hz|1/min]
+[m3/s|l/min]
+[m3|ml]
+Fake value, just for ident [Pa|mmHg]
+[Pa|mmHg]
+[Pa|mmHg]
+[Pa|mmHg]
+Connector of Real input signal [1]
+Offset of output signal y
+Output y = offset for time < startTime [s]
+Constant output value [1]
+Connector of first Real input signal [1]
+Connector of Boolean input signal [:#(type=Boolean)]
+Connector of Real output signal [1]
+When true, the parameter value is used as fixed output [:#(type=Boolean)]
+output for disconnected = true. Use SI units! [1]
+Delay time of output with respect to input signal [s]
+[:#(type=Boolean)]
+Enable pure constant transport delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Enable assymetrical integral delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Delay time of output with respect to input signal for activation [s]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+= true, if strict limits with noEvent(..) [:#(type=Boolean)]
+Simplified model for homotopy-based initialization [:#(type=Modelica.Blocks.Types.LimiterHomotopy)]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+Gain value multiplied with input signal [1]
+Output signal connector [1]
+Use another input [:#(type=Boolean)]
+Default phi0 [1]
+Phi Gain multiplier [1]
+Gain of input signal 1
+Gain of input signal 2
+[1]
+[:#(type=Boolean)]
+[1|%]
+Delay time of output with respect to input signal for activation [s]
+Delay time of output with respect to input signal for activation [s]
+[:#(type=Boolean)]
+[1|%]
+[1|%]
+[Hz|1/min]
+[Hz|1/min]
+
+[m3|ml]
+Offset of output signal y
+Output y = offset for time < startTime [s]
+Constant output value [1]
+Connector of first Real input signal [1]
+Connector of Boolean input signal [:#(type=Boolean)]
+Connector of Real output signal [1]
+When true, the parameter value is used as fixed output [:#(type=Boolean)]
+output for disconnected = true. Use SI units! [1]
+Delay time of output with respect to input signal [s]
+[:#(type=Boolean)]
+Enable pure constant transport delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Enable assymetrical integral delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Delay time of output with respect to input signal for activation [s]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+= true, if strict limits with noEvent(..) [:#(type=Boolean)]
+Simplified model for homotopy-based initialization [:#(type=Modelica.Blocks.Types.LimiterHomotopy)]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+Gain value multiplied with input signal [1]
+Output signal connector [1]
+Use another input [:#(type=Boolean)]
+Default phi0 [1]
+Phi Gain multiplier [1]
+Gain of input signal 1
+Gain of input signal 2
+[1]
+[:#(type=Boolean)]
+[1|%]
+Delay time of output with respect to input signal for activation [s]
+Delay time of output with respect to input signal for activation [s]
+[:#(type=Boolean)]
+mmHg 
+Height of step [1]
+Offset of output signal y [1]
+Output y = offset for time < startTime [s]
+Connector of Real input signal [1]
+Connector of Real output signal [1]
+Offset of output signal y
+Output y = offset for time < startTime [s]
+Constant output value [1]
+Connector of first Real input signal [1]
+Connector of Boolean input signal [:#(type=Boolean)]
+Connector of Real output signal [1]
+When true, the parameter value is used as fixed output [:#(type=Boolean)]
+output for disconnected = true. Use SI units! [1]
+Delay time of output with respect to input signal [s]
+[:#(type=Boolean)]
+Enable pure constant transport delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Enable assymetrical integral delay [:#(type=Boolean)]
+Delay time of output with respect to input signal [s]
+Delay time of output with respect to input signal for activation [s]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+= true, if strict limits with noEvent(..) [:#(type=Boolean)]
+Simplified model for homotopy-based initialization [:#(type=Modelica.Blocks.Types.LimiterHomotopy)]
+Upper limits of input signals [1]
+Lower limits of input signals [1]
+Gain value multiplied with input signal [1]
+Output signal connector [1]
+Use another input [:#(type=Boolean)]
+Default phi0 [1]
+Phi Gain multiplier [1]
+Gain of input signal 1
+Gain of input signal 2
+[1]
+[:#(type=Boolean)]
+[1|%]
+Delay time of output with respect to input signal for activation [s]
+Delay time of output with respect to input signal for activation [s]
+[:#(type=Boolean)]
+Scaling multiplier of u, because y=yBase*(1 + scalingFactor*u_)
+Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)
+Scaling multiplier of u, because y=yBase/(1 + scalingFactor*u)
+[Hz|1/min]
+[1]
+Height of step [1]
+Connector of Real output signal [1]
+Offset of output signal y [1]
+Output y = offset for time < startTime [s]
+Height of step [1]
+Connector of Real output signal [1]
+Offset of output signal y [1]
+Output y = offset for time < startTime [s]
+Height of step [1]
+Offset of output signal y [1]
+Output y = offset for time < startTime [s]
+Height of mid exercise level step [1]
+[s]
+
+
