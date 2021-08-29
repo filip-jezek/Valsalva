@@ -150,7 +150,7 @@ def getObjectives(vars_set):
             ('Ppv_Ex', numpy.mean(vars_set['P_pv'][interval_ex])/mmHg2SI, 19.4, None, 1),
             ('CO_Ex', numpy.mean(vars_set['CO'][interval_ex]) /lpm2SI, 16.1, None, 0.1),
             ('ESV_Ex', numpy.min(vars_set['V_LV'][interval_ex])/ml2SI, 30, None, 5),
-            ('Ts_Ex', max(vars_set['heartComponent.aorticValve.Ts'][interval])*1000, 196, None, 20),
+            ('Ts_Ex', max(vars_set['heartComponent.aorticValve.Ts'][interval_ex])*1000, 196, None, 20),
           
             # Max exercise
             # ('BPs_mEx', max(vars_set['brachial_pressure'][interval_mex])/mmHg2SI, 163, None, 2),
