@@ -79,9 +79,9 @@ def getObjectives(vars_set):
 
     time = vars_set['time']
 
-    steady1 = 15
-    steady2 = 30
-    steady3 = 45
+    steady1 = 30
+    steady2 = 45
+    steady3 = 60
     interval = fun_lib.findInterval(time[0] + steady1-3, time[0] + steady1, time)
 
     # interval for averaging

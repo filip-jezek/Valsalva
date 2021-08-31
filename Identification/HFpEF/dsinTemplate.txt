@@ -9,9 +9,9 @@ Modelica experiment file
 double experiment(7,1)
        0                   # StartTime    Time at which integration starts
                            #              (and linearization and trimming time)
-      45                   # StopTime     Time at which integration stops
-  2.0000000000000000E-02   # Increment    Communication step size, if > 0
-       0                   # nInterval    Number of communication intervals, if > 0
+      60                   # StopTime     Time at which integration stops
+       0                   # Increment    Communication step size, if > 0
+    5000                   # nInterval    Number of communication intervals, if > 0
   1.0000000000000000E-08   # Tolerance    Relative precision of signals for
                            #              simulation, linearization and trimming
        0                   # MaxFixedStep Maximum step size of fixed step size
@@ -63,7 +63,7 @@ double method(27,1)
        0                   # f3       0/1 Ignore/use F3 of HDAE (= index 1)
        0                   # f4       0/1 Ignore/use F4 of HDAE (= index 2)
        0                   # f5       0/1 Ignore/use F5 of HDAE (= invar.)
-  3.2768000000000000E+05   # debug    flags for debug information (1<<0 uses pdebug) 
+       0                   # debug    flags for debug information (1<<0 uses pdebug) 
      100                   # pdebug       priority of debug information (1...100)
        0                   # fmax     Maximum number of evaluations of BLOCKF, if > 0
        0                   # ordmax   Maximum allowed integration order, if > 0
@@ -90,10 +90,10 @@ int settings(13,1)
  1                         # lxd      0/1 do not/store xd (derivative of states)
  1                         # lu       0/1 do not/store u  (input     signals)
  1                         # ly       0/1 do not/store y  (output    signals)
- 1                         # lz       0/1 do not/store z  (indicator signals)
+ 0                         # lz       0/1 do not/store z  (indicator signals)
  1                         # lw       0/1 do not/store w  (auxiliary signals)
  1                         # la       0/1 do not/store a  (alias     signals)
- 1                         # lperf    0/1 do not/store performance indicators
+ 0                         # lperf    0/1 do not/store performance indicators
  0
  1                         # lres     0/1 do not/store results on result file
  0                         # lshare   0/1 do not/store info data for shared memory on dsshare.txt
@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(901,62)
+char initialName(889,62)
 settings.phi0
 settings.height
 settings.weight
@@ -355,14 +355,12 @@ heartComponent.r_SystemicVenousInflow.dp
 heartComponent.r_SystemicVenousInflow.enable
 heartComponent.r_SystemicVenousInflow.useConductanceInput
 heartComponent.r_SystemicVenousInflow.Conductance
-heartComponent.r_SystemicVenousInflow.resistance
 heartComponent.r_SystemicVenousInflow.Resistance
 heartComponent.r_SystemicVenousInflow.conditionalConductance
 heartComponent.r_PulmonaryVenousInflow.dp
 heartComponent.r_PulmonaryVenousInflow.enable
 heartComponent.r_PulmonaryVenousInflow.useConductanceInput
 heartComponent.r_PulmonaryVenousInflow.Conductance
-heartComponent.r_PulmonaryVenousInflow.resistance
 heartComponent.r_PulmonaryVenousInflow.Resistance
 heartComponent.r_PulmonaryVenousInflow.conditionalConductance
 heartComponent.ventricles.port_rv.pressure
@@ -579,14 +577,12 @@ heartComponent.resistor.dp
 heartComponent.resistor.enable
 heartComponent.resistor.useConductanceInput
 heartComponent.resistor.Conductance
-heartComponent.resistor.resistance
 heartComponent.resistor.Resistance
 heartComponent.resistor.conditionalConductance
 heartComponent.resistor1.dp
 heartComponent.resistor1.enable
 heartComponent.resistor1.useConductanceInput
 heartComponent.resistor1.Conductance
-heartComponent.resistor1.resistance
 heartComponent.resistor1.Resistance
 heartComponent.resistor1.conditionalConductance
 heartComponent.sa_node.t0
@@ -670,7 +666,6 @@ pulmonaryTriSeg.r_pa.dp
 pulmonaryTriSeg.r_pa.enable
 pulmonaryTriSeg.r_pa.useConductanceInput
 pulmonaryTriSeg.r_pa.Conductance
-pulmonaryTriSeg.r_pa.resistance
 pulmonaryTriSeg.r_pa.c
 pulmonaryTriSeg.r_pa.Resistance
 pulmonaryTriSeg.r_pa.conditionalConductance
@@ -712,14 +707,12 @@ pulmonaryTriSeg.R_pv_visc.dp
 pulmonaryTriSeg.R_pv_visc.enable
 pulmonaryTriSeg.R_pv_visc.useConductanceInput
 pulmonaryTriSeg.R_pv_visc.Conductance
-pulmonaryTriSeg.R_pv_visc.resistance
 pulmonaryTriSeg.R_pv_visc.Resistance
 pulmonaryTriSeg.R_pv_visc.conditionalConductance
 pulmonaryTriSeg.R_pa_visc.dp
 pulmonaryTriSeg.R_pa_visc.enable
 pulmonaryTriSeg.R_pa_visc.useConductanceInput
 pulmonaryTriSeg.R_pa_visc.Conductance
-pulmonaryTriSeg.R_pa_visc.resistance
 pulmonaryTriSeg.R_pa_visc.Resistance
 pulmonaryTriSeg.R_pa_visc.conditionalConductance
 pulmonaryTriSeg.normalization.NormalValue
@@ -749,7 +742,6 @@ systemic_TriSeg.r_ao.dp
 systemic_TriSeg.r_ao.enable
 systemic_TriSeg.r_ao.useConductanceInput
 systemic_TriSeg.r_ao.Conductance
-systemic_TriSeg.r_ao.resistance
 systemic_TriSeg.r_ao.Resistance
 systemic_TriSeg.r_ao.conditionalConductance
 systemic_TriSeg.r_sa.q_in.q
@@ -757,7 +749,6 @@ systemic_TriSeg.r_sa.dp
 systemic_TriSeg.r_sa.enable
 systemic_TriSeg.r_sa.useConductanceInput
 systemic_TriSeg.r_sa.Conductance
-systemic_TriSeg.r_sa.resistance
 systemic_TriSeg.r_sa.c
 systemic_TriSeg.r_sa.Resistance
 systemic_TriSeg.r_sa.conditionalConductance
@@ -826,14 +817,12 @@ systemic_TriSeg.r_tAo.dp
 systemic_TriSeg.r_tAo.enable
 systemic_TriSeg.r_tAo.useConductanceInput
 systemic_TriSeg.r_tAo.Conductance
-systemic_TriSeg.r_tAo.resistance
 systemic_TriSeg.r_tAo.Resistance
 systemic_TriSeg.r_tAo.conditionalConductance
 systemic_TriSeg.r_tsa.dp
 systemic_TriSeg.r_tsa.enable
 systemic_TriSeg.r_tsa.useConductanceInput
 systemic_TriSeg.r_tsa.Conductance
-systemic_TriSeg.r_tsa.resistance
 systemic_TriSeg.r_tsa.Resistance
 systemic_TriSeg.r_tsa.conditionalConductance
 systemic_TriSeg.volume
@@ -995,17 +984,16 @@ exercise1.height
 exercise1.y
 exercise1.offset
 exercise1.startTime
-step1.height
-step1.y
-step1.offset
-step1.startTime
-step2.height
-step2.offset
-step2.startTime
-CPUtime
-EventCounter
+maxHR.height
+maxHR.y
+maxHR.offset
+maxHR.startTime
+midHR.height
+midHR.offset
+midHR.startTime
+midExerciseLevel
 
-double initialValue(901,6)
+double initialValue(889,6)
  -1       0                       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -1028,9 +1016,9 @@ double initialValue(901,6)
   1   280   # settings.V_PV_init
  -1  7.7235150000000000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
- -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
-  1   280   # settings.heart_R_AV
- -1  1.6550680000000000E+06       0                 1.0000000000000000E+100
+  0       0                       0                 1.0000000000000000E+100
+  6   256   # settings.heart_R_AV
+ -1  1.6002430000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
  -1 %settings.heart_R_RA% 0.0 1e+100
   1   280   # settings.heart_R_RA
@@ -1062,9 +1050,9 @@ double initialValue(901,6)
   1   280   # settings.heart_vntr_Tact
  -1  8.0000000000000002E-02       0                       0                
   1   280   # settings.heart_vntr_Tact_maxAct
- -1  2.6513640000000000E+07       0                       0                
+ -1  2.9165000000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_0
- -1  7.6213570000000000E+07       0                       0                
+ -1  4.6264030000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_A
  -1  8.0000000000000002E-02       0                       0                
   1   280   # settings.heart_atr_TS
@@ -1511,8 +1499,6 @@ double initialValue(901,6)
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.r_SystemicVenousInflow.Conductance
   0       0                       0                 1.0000000000000000E+100
-  6   256   # heartComponent.r_SystemicVenousInflow.resistance
-  0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.r_SystemicVenousInflow.Resistance
   0       0                       0                 1.0000000000000000E+100
   6  1280   # heartComponent.r_SystemicVenousInflow.conditionalConductance
@@ -1524,8 +1510,6 @@ double initialValue(901,6)
   6   769   # heartComponent.r_PulmonaryVenousInflow.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.r_PulmonaryVenousInflow.Conductance
-  0       0                       0                 1.0000000000000000E+100
-  6   256   # heartComponent.r_PulmonaryVenousInflow.resistance
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.r_PulmonaryVenousInflow.Resistance
   0       0                       0                 1.0000000000000000E+100
@@ -1959,8 +1943,6 @@ double initialValue(901,6)
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.resistor.Conductance
   0       0                       0                 1.0000000000000000E+100
-  6   256   # heartComponent.resistor.resistance
-  0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.resistor.Resistance
   0       0                       0                 1.0000000000000000E+100
   6  1280   # heartComponent.resistor.conditionalConductance
@@ -1972,8 +1954,6 @@ double initialValue(901,6)
   6   769   # heartComponent.resistor1.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.resistor1.Conductance
-  0       0                       0                 1.0000000000000000E+100
-  6   256   # heartComponent.resistor1.resistance
   0       0                       0                 1.0000000000000000E+100
   6   256   # heartComponent.resistor1.Resistance
   0       0                       0                 1.0000000000000000E+100
@@ -2140,8 +2120,6 @@ double initialValue(901,6)
   6   769   # pulmonaryTriSeg.r_pa.useConductanceInput
   0  9.9999999999999995E+59       0                 1.0000000000000000E+100
   6   256   # pulmonaryTriSeg.r_pa.Conductance
-  0       0                       0                 1.0000000000000000E+100
-  6   320   # pulmonaryTriSeg.r_pa.resistance
   0  9.9999999999999995E+59       0                 1.0000000000000000E+100
   6  1344   # pulmonaryTriSeg.r_pa.c
  -1  6.6661193707499998E+06       0                 1.0000000000000000E+100
@@ -2224,8 +2202,6 @@ double initialValue(901,6)
   6   769   # pulmonaryTriSeg.R_pv_visc.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
   6   256   # pulmonaryTriSeg.R_pv_visc.Conductance
-  0       0                       0                 1.0000000000000000E+100
-  6   256   # pulmonaryTriSeg.R_pv_visc.resistance
  -1       1                       0                 1.0000000000000000E+100
   1   280   # pulmonaryTriSeg.R_pv_visc.Resistance
   0       0                       0                 1.0000000000000000E+100
@@ -2238,8 +2214,6 @@ double initialValue(901,6)
   6   769   # pulmonaryTriSeg.R_pa_visc.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
   6   256   # pulmonaryTriSeg.R_pa_visc.Conductance
-  0       0                       0                 1.0000000000000000E+100
-  6   256   # pulmonaryTriSeg.R_pa_visc.resistance
   0       0                       0                 1.0000000000000000E+100
   6   256   # pulmonaryTriSeg.R_pa_visc.Resistance
   0       0                       0                 1.0000000000000000E+100
@@ -2299,8 +2273,6 @@ double initialValue(901,6)
   0       0                       0                 1.0000000000000000E+100
   6   256   # systemic_TriSeg.r_ao.Conductance
   0       0                       0                 1.0000000000000000E+100
-  6   256   # systemic_TriSeg.r_ao.resistance
-  0       0                       0                 1.0000000000000000E+100
   6   256   # systemic_TriSeg.r_ao.Resistance
   0       0                       0                 1.0000000000000000E+100
   6  1280   # systemic_TriSeg.r_ao.conditionalConductance
@@ -2314,8 +2286,6 @@ double initialValue(901,6)
   6   769   # systemic_TriSeg.r_sa.useConductanceInput
   0  9.9999999999999995E+59       0                 1.0000000000000000E+100
   6   256   # systemic_TriSeg.r_sa.Conductance
-  0       0                       0                 1.0000000000000000E+100
-  6   320   # systemic_TriSeg.r_sa.resistance
   0  9.9999999999999995E+59       0                 1.0000000000000000E+100
   6  1344   # systemic_TriSeg.r_sa.c
   0       0                       0                 1.0000000000000000E+100
@@ -2453,8 +2423,6 @@ double initialValue(901,6)
   0       0                       0                 1.0000000000000000E+100
   6   256   # systemic_TriSeg.r_tAo.Conductance
   0       0                       0                 1.0000000000000000E+100
-  6   256   # systemic_TriSeg.r_tAo.resistance
-  0       0                       0                 1.0000000000000000E+100
   6   256   # systemic_TriSeg.r_tAo.Resistance
   0       0                       0                 1.0000000000000000E+100
   6  1280   # systemic_TriSeg.r_tAo.conditionalConductance
@@ -2466,8 +2434,6 @@ double initialValue(901,6)
   6   769   # systemic_TriSeg.r_tsa.useConductanceInput
   0       0                       0                 1.0000000000000000E+100
   6   256   # systemic_TriSeg.r_tsa.Conductance
-  0       0                       0                 1.0000000000000000E+100
-  6   256   # systemic_TriSeg.r_tsa.resistance
   0       0                       0                 1.0000000000000000E+100
   6   256   # systemic_TriSeg.r_tsa.Resistance
   0       0                       0                 1.0000000000000000E+100
@@ -2694,11 +2660,11 @@ double initialValue(901,6)
   6  1281   # condHR.showLimiterLine
  -1     720                       0                       0                
   1   280   # sigma_act0
- -1  2.0000000000000001E-01       0                       0                
-  1   280   # exercise.height
+  0       0                       0                       0                
+  6   256   # exercise.height
  -1       0                       0                       0                
   1   280   # exercise.offset
- -1      15                       0                       0                
+ -1      30                       0                       0                
   1   280   # exercise.startTime
   0       0                       0                       0                
   6   320   # step.u
@@ -2788,26 +2754,24 @@ double initialValue(901,6)
   6   320   # exercise1.y
  -1       0                       0                       0                
   1   280   # exercise1.offset
- -1      30                       0                       0                
+ -1      45                       0                       0                
   1   280   # exercise1.startTime
   0       0                       0                       0                
-  6   256   # step1.height
+  6   256   # maxHR.height
   0       0                       0                       0                
-  6   320   # step1.y
+  6   320   # maxHR.y
  -1       0                       0                       0                
-  1   280   # step1.offset
+  1   280   # maxHR.offset
+ -1      45                       0                       0                
+  1   280   # maxHR.startTime
+  0       0                       0                       0                
+  6   256   # midHR.height
+ -1       0                       0                       0                
+  1   280   # midHR.offset
  -1      30                       0                       0                
-  1   280   # step1.startTime
-  0       0                       0                       0                
-  6   256   # step2.height
- -1       0                       0                       0                
-  1   280   # step2.offset
- -1      15                       0                       0                
-  1   280   # step2.startTime
-  0       0                       0                       0                
-  4   256   # CPUtime
-  0       0                       0                       0                
-  4   256   # EventCounter
+  1   280   # midHR.startTime
+ -1  2.0000000000000001E-01       0                       0                
+  1   280   # midExerciseLevel
 
 
 # Matrix with 6 columns defining the initial value calculation
@@ -2854,7 +2818,7 @@ double initialValue(901,6)
 #   Which variables will be important for initialization and continue
 #   is indicated by value in column 6 & dsStartMasks.
 #
-char initialDescription(901,186)
+char initialDescription(889,186)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -2866,10 +2830,10 @@ Du Bois formula for body surface area [1]
 Use nominal pressure to initialize vessel volume. False to use volume directly [:#(type=Boolean)]
 Volume adjustment [m3|ml]
 Open valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
-Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/ml]
+Open aortic valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
 Resistance of left atrium [(Pa.s)/m3|(mmHg.s)/ml]
-Resistance of the right atrium [(Pa.s)/m3|(dyn.s)/cm5]
-Viscoelastic resistance of the atria [(Pa.s)/m3|(dyn.s)/cm5]
+Resistance of the right atrium [(Pa.s)/m3|(mmHg.s)/ml]
+Viscoelastic resistance of the atria [(Pa.s)/m3|(mmHg.s)/ml]
 Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
 For Smith heart - linear dependency of active elastance on phi [1|%]
 For Smith heart - linear dependency of passive elastances (given by nominal pressure Pi0lv, Pi0rv) on phi [1|%]
@@ -3107,14 +3071,12 @@ Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
 Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
 Pressure [Pa|mmHg]
@@ -3331,14 +3293,12 @@ Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(dyn.s)/cm5]
 [m3/(Pa.s)|ml/(mmHg.min)]
 Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(dyn.s)/cm5]
 [m3/(Pa.s)|ml/(mmHg.min)]
 time since start of cardiac cycle [s]
@@ -3422,7 +3382,6 @@ Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.s)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
@@ -3464,14 +3423,12 @@ Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
 [m3/(Pa.s)|ml/(mmHg.min)]
 Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(Pa.s)/m3]
 [m3/(Pa.s)|ml/(mmHg.min)]
 Normal value of u, because y=(u/NormalValue)*yBase.
@@ -3501,7 +3458,6 @@ Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
 Volume flow [m3/s|ml/min]
@@ -3509,7 +3465,6 @@ Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
@@ -3578,14 +3533,12 @@ Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
 Pressure gradient [Pa|mmHg]
 if false, no resistance is used [:#(type=Boolean)]
 =true, if external conductance value is used [:#(type=Boolean)]
 Hydraulic conductance if useConductanceInput=false [m3/(Pa.s)|ml/(mmHg.min)]
-Informative resistance value [(Pa.s)/m3|(mmHg.min)/ml]
 Hydraulic conductance if useConductanceInput=false [(Pa.s)/m3|(mmHg.min)/ml]
 [m3/(Pa.s)|ml/(mmHg.min)]
 [m3|ml]
@@ -3623,7 +3576,7 @@ Fake value, just for ident [Pa|mmHg]
 [Pa|mmHg]
 [Pa|mmHg]
 [Pa|mmHg]
-Connector of Real input signal
+Connector of Real input signal [1]
 Offset of output signal y
 Output y = offset for time < startTime [s]
 Constant output value [1]
@@ -3646,7 +3599,7 @@ Simplified model for homotopy-based initialization [:#(type=Modelica.Blocks.Type
 Upper limits of input signals [1]
 Lower limits of input signals [1]
 Gain value multiplied with input signal [1]
-Output signal connector
+Output signal connector [1]
 Use another input [:#(type=Boolean)]
 Default phi0 [1]
 Phi Gain multiplier [1]
@@ -3699,8 +3652,8 @@ Delay time of output with respect to input signal for activation [s]
 Delay time of output with respect to input signal for activation [s]
 [:#(type=Boolean)]
 mmHg 
-Height of step
-Offset of output signal y
+Height of step [1]
+Offset of output signal y [1]
 Output y = offset for time < startTime [s]
 Connector of Real input signal [1]
 Connector of Real output signal [1]
@@ -3754,6 +3707,5 @@ Output y = offset for time < startTime [s]
 Height of step [1]
 Offset of output signal y [1]
 Output y = offset for time < startTime [s]
-[s]
-
+Height of mid exercise level step [1]
 
