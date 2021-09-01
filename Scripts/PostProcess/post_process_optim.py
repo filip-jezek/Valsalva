@@ -103,8 +103,11 @@ def plotOptim(pack):
             continue
         lb = numpy.min(v)
         ub = numpy.max(v)
-
-        v_r = list((n-lb)/(ub - lb) for n in v)
+        if lb == ub:
+            v_r = list(0.5 for n in v)
+        else:
+            v_r = list((n-lb)/(ub - lb) for n in v)
+        
 
         host.plot(v_r)
 

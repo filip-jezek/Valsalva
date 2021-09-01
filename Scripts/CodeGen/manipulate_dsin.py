@@ -554,7 +554,7 @@ def prepareSA(paramsFile = 'params_for_SA.txt', regenerateParamsFromDsin = False
    
     # generate the params_for_SA.txt parameters list, which may be further edited.
     if regenerateParamsFromDsin:
-        writeTunableParamsFromDsin(paramsFile)
+        writeTunableParamsFromDsin(paramsFile, filter=FILTER)
 
     init_params = getInitParams(dsFileIn='dsin.txt', paramsFile=paramsFile)
 
@@ -606,9 +606,11 @@ OPTOUTPUTFILEIN = None
 
 USEPSO =  False
 
+FILTER = '' #'settings.'
+
 def run():
     # writeTunableParamsFromDsin('params_all.txt', filter='')
-    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.1)
+    prepareSA(regenerateParamsFromDsin=False, minMaxRange=0.05)
     # prepareIdent(overrideFracs=False, regenerateParamsFromDsin=False, storeOnlyOutputs = False)
     # writeInitStatesFromDsin(dsFileIn="dsin.txt")
     # writeTunableParamsFromDsin('params_all.txt', filter='')

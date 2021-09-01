@@ -354,7 +354,7 @@ def calculateEA(q_mv,cc, time, interval, A_length = 0.2):
     A_i = numpy.argmax(q_mv[A_start_i:A_end_i]) + A_start_i
     A = q_mv[A_i]
     # find the saddle - its between start of the cycle and maximal A flow
-    q_sad = numpy.min(q_mv[A_start_i:A_i])
+    q_sad = numpy.min(q_mv[A_start_i:A_i + 1])
 
     # find the max peak in the interval - that is the E peak
     # E_max_i = numpy.argmax(q_mv[interval]) + interval[0]
