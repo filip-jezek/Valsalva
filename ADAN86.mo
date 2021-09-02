@@ -8025,6 +8025,105 @@ type"),       Text(
                     textString="Pericardium")}),                           Diagram(
                   coordinateSystem(preserveAspectRatio=false)));
           end PericardiumPressure;
+
+          model Driving_Olsen
+
+          // Heart rate
+          Real HR = 68/60; // Heart rate
+
+          // Activation, global
+          parameter Modelica.Units.SI.Time Atact(displayUnit="ms")=0.01
+                                                      " Timing of atrial activation within cycle";
+          parameter Modelica.Units.SI.Time Aup(displayUnit="ms")=0.1
+                                                     " Duration of upstroke of atrial activation";
+          parameter Modelica.Units.SI.Time Aactdur(displayUnit="ms")=0.3
+                                                         " Duration of atrial activation";
+          parameter Modelica.Units.SI.Time Adown(displayUnit="ms")=0.16
+                                                       " Duration of downstroke of atrial activation";
+
+          parameter Real PRRRrel = 0.05 " Regression of PR change vs. RR change";
+           // Ref: Subject-specific heart rate dependency of electrocardiographic QT, PQ, and QRS intervals.
+           // Malik M1, Hnatkova K, Sisakova M, Schmidt G.
+          parameter Modelica.Units.SI.Time LVdelay0(displayUnit="ms")=0.17
+                                                          " Delay btw. atria and LV at HR 60";
+          Real LVdelay = LVdelay0 + PRRRrel*((1/HR)-1) " Delay btw atria and LV with HR dependence";
+          Real LVtact = Atact + LVdelay " Timing of LV activation within cycle";
+          parameter Modelica.Units.SI.Time LVup(displayUnit="ms")=0.255
+                                                      " Duration of upstroke of LV activation - no relation with HR (J Electrocardiol. 2008 Nov-Dec;41(6):491-7. doi: 10.1016/j.jelectrocard.2008.06.022. Epub 2008 Sep 24.";
+          parameter Modelica.Units.SI.Time LVactdur0(displayUnit="ms")=0.564
+                                                           " Duration of LV activation at HR 60";
+          parameter Real LVdownpart=0.5                      " Duration of downstroke of LV activation as fraction of total duration";
+          Real LVactdur = LVactdur0*(((1)/HR)^(1/3)) " Duration of LV activation, HR dependent";
+          // Ref: Fridericia LS (1920). "The duration of systole in the electrocardiogram of normal subjects and of patients with heart disease". Acta Medica Scandinavica (53): 469â€“486.
+          Real LVdown = LVactdur*LVdownpart " Duration of downstroke of LV activation";
+
+          parameter Modelica.Units.SI.Time RVdelay0(displayUnit="ms")=0.186
+                                                          " Delay btw. atria and RV at HR 60";
+          Real RVdelay = RVdelay0+ PRRRrel *((1/HR)-1) " Delay btw atria and LV, HR dependent";
+          Real RVtact = Atact + RVdelay " Timing of RV activation within cycle";
+          parameter Modelica.Units.SI.Time RVup(displayUnit="ms")=0.221
+                                                      " Duration of upstroke of RV activation";
+          parameter Modelica.Units.SI.Time RVactdur0(displayUnit="ms")=0.585
+                                                           " Duration of RV activation at HR 60";
+            parameter Real RVdownpart=0.5
+              " Duration of downstroke of RV activation as fraction of total duration";
+            Real RVactdur=RVactdur0*((1/HR)^(1/3))
+              " Duration of RV activation, HR dependent, Fridericia";
+            Real RVdown=RVactdur*RVdownpart " Duration of downstroke of RV activation";
+          Real PI = Modelica.Constants.pi;
+
+          // Cycle variables
+           Real CycleL = 1/HR;    // Cycle length
+           Real CycleCt = floor((time)/CycleL); // Cycle count
+           Real tcycle = time-CycleCt*CycleL; // Time within cycle
+           Real tcycle2 = tcycle+CycleL;  // overlapping time into next cycle
+
+          // Atria activation function
+           Real Aact = if (tcycle < Atact or tcycle > Atact+Aactdur) then 0 else
+               (if (tcycle <= Atact+Aup) then (1-cos((tcycle-Atact)*PI/Aup))/2 else
+               (if (tcycle <= Atact+Aactdur-Adown) then 1 else
+                (1+cos((tcycle-(Atact+Aactdur-Adown))/(Adown)*PI))/2));
+
+           Real LVact =        if (tcycle<LVtact) then
+               (if  (tcycle2 > LVtact+LVactdur or CycleCt == 0) then 0 else
+                  noEvent(if (tcycle2 <= LVtact+LVup) then 1 else
+                    (if (tcycle2 <= LVtact+LVactdur-LVdown) then 2 else 3)))
+           else
+               (if  (tcycle > LVtact+LVactdur) then 4 else
+                 noEvent(if (tcycle <= LVtact+LVup) then 5 else
+                   (if (tcycle <= LVtact+LVactdur-LVdown) then 6 else 7)));
+
+                // LV activation (including septum)
+          //  Real LVact =        if (tcycle<LVtact) then
+          //      (if  (tcycle2 > LVtact+LVactdur or CycleCt == 0) then 0 else
+          //         (if (tcycle2 <= LVtact+LVup) then (sin((tcycle2-LVtact)*(PI/2)/LVup)) else
+          //           (if (tcycle2 <= LVtact+LVactdur-LVdown) then 1 else
+          //              (1+cos((tcycle2-(LVtact+LVactdur-LVdown))/(LVdown)*PI))/2)))
+          //  else
+          //      0;
+
+          //      (if  (tcycle > LVtact+LVactdur) then 0 else
+          //        (if (tcycle <= LVtact+LVup) then (sin((tcycle-LVtact)*(PI/2)/LVup)) else
+          //          (if (tcycle <= LVtact+LVactdur-LVdown)then  1 else
+          /*                                                (1+cos((tcycle-(LVtact+LVactdur-LVdown))/(LVdown)*PI))/2))); 
+// RV activation
+        Real RVact        = if (tcycle<RVtact)
+   (if  (tcycle2 > RVtact+RVactdur or CycleCt = 0) then 0 else
+     (if (tcycle2 <= RVtact+RVup) then (sin((tcycle2-RVtact)*(PI/2)/RVup)) else
+     (if (tcycle2 <= RVtact+RVactdur-RVdown) then 1 else                                        
+                                                (1+cos((tcycle2-(RVtact+RVactdur-RVdown))/(RVdown)*PI))/2)))
+                        else 
+   (if  (tcycle > RVtact+RVactdur) then 0 else
+     (if (tcycle <= RVtact+RVup) then (sin((tcycle-RVtact)*(PI/2)/RVup)) else
+     (if (tcycle <= RVtact+RVactdur-RVdown) then 1 else                                        
+                                                (1+cos((tcycle-(RVtact+RVactdur-RVdown))/(RVdown)*PI))/2))); 
+*/
+          // Pseudo-ECG
+          //  Real pECG =  20*(-(LVact-0.5)^2+0.25)
+          //     + 4*(-(Aact-0.5)^2+0.25);
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end Driving_Olsen;
         end Auxiliary;
 
         package Testers
@@ -8776,7 +8875,6 @@ type"),       Text(
             parameter Physiolibrary.Types.Volume V_RV_start=0.0001;
             output Physiolibrary.Types.Pressure EDP_err = if EDPVRnorm_V.EDP > 0 then (EDPVRnorm_V.EDP - ventricles.P_LV)^2 else 0;
             Real err;
-            parameter Real stopErrTime = 1;
             inner Settings            settings(
               initByPressure=false,
               veins_delayed_activation=false,
@@ -8850,8 +8948,7 @@ type"),       Text(
               veins_C_phi=0.09)
               annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
           equation
-
-            der(err) = if time < stopErrTime then EDP_err else 0;
+            der(err) = EDP_err;
 
             connect(ventricles.thoracic_pressure_input, P0.y)
               annotation (Line(points={{-2,-8},{-2,-51}}, color={0,0,127}));
@@ -28981,7 +29078,7 @@ P_hs_plus_dist"),
             parameter Real halving = 0.5 "halving of volumes to divide for two kidneys";
 
             // Adjustble Parameters
-            parameter VolumeFlowRate Q_ra=2.68E-06 "Minimal GFR generating urine";
+            parameter VolumeFlowRate Q_ra=2.68E-06*halving;
             parameter Real KfL=2e-9*halving "filtration coeffcicient, m3/Pa, for rat 0.0024203*ml2SI/mmHg2SI";
             parameter Real Cpass0=100*mmHg2SI "Pa*micron";
             parameter Real Cpass1=4.8703;
@@ -39839,6 +39936,7 @@ P_hs_plus_dist"),
           tissues_tau_R(displayUnit="s") = 0,
           veins_C_phi=0.09)
           annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+          output Physiolibrary.Types.Volume totalVolume = systemic_TriSeg.volume + pulmonaryTriSeg.volume + heartComponent.volume;
       equation
         der(SV_i) = -heartComponent.sa.q;
         der(brachial_pressure_systolic_i)*tau = max(brachial_pressure  - brachial_pressure_systolic_i, 0);
@@ -40175,7 +40273,8 @@ P_hs_plus_dist"),
               UseAdditionalInput=true,
               phi0=0,
               phi_gain=0),
-            redeclare Modelica.Blocks.Sources.Step exercise(height=
+            redeclare replaceable
+                      Modelica.Blocks.Sources.Step exercise(height=
                   midExerciseLevel, startTime=15),
             pulmonaryTriSeg(proportionalFactor(scalingFactor=pulmonaryR_factor)),
             systemic_TriSeg(
@@ -40221,8 +40320,8 @@ P_hs_plus_dist"),
             annotation (Placement(transformation(extent={{-84,48},{-64,68}})),
               choicesAllMatching=true);
           replaceable Modelica.Blocks.Sources.Step maxHR(height=1 - PhiStep,
-              startTime=30)                                           constrainedby
-            Modelica.Blocks.Sources.Step            annotation (Placement(transformation(extent={{76,12},
+              startTime=30) constrainedby
+            Modelica.Blocks.Interfaces.SignalSource annotation (Placement(transformation(extent={{76,12},
                     {96,32}})),     choicesAllMatching=true);
           replaceable Modelica.Blocks.Sources.Step midHR(height=PhiStep,
               startTime=15)                                           constrainedby
@@ -40254,33 +40353,34 @@ P_hs_plus_dist"),
             settings(HR_nominal=1.1666666666667, HR_max=1.85));
         end SEO_HFpEFIdent;
 
-        model SEO_HFpEFIdent_opt "Generated by PostProcess/postprocess_optim.py optimized at Aug 25 22:42:19 CEST 2021
- with cost 5.196371 lowest at run 11548"
+        model SEO_HFpEFIdent_opt "Generated by PostProcess/postprocess_optim.py optimized at Aug 30 23:02:46 CEST 2021
+ with cost 5.260474 lowest at run 4845"
           extends SEO_HFpEFIdent(
             pulmonaryTriSeg(c_pa(
-              Compliance =                      3.589387e-08)),
+              Compliance =                      3.227861e-08)),
             settings(
-              heart_vntr_xi_AmRef=0.9421876,
-              V_PV_init=4.9375e-05,
-              chi_phi=0.4,
-              pulm_R =          1.062107e+07,
-              heart_R_RA=462.6399,
-              syst_art_k_E=0.5246707,
-              heart_vntr_D_0 =          8.187553e+01,
-              heart_vntr_D_A =          2.390720e+03,
-              heart_vntr_TS =          2.312500e-01,
-              heart_vntr_TR =          2.556250e-01,
+              heart_vntr_xi_AmRef =          9.560941e-01,
+              V_PV_init =          2.031250e-05,
+              chi_phi =          2.500000e-01,
+              pulm_R =          1.007988e+07,
+              heart_R_RA =          4.626399e+02,
+              syst_art_k_E =          5.434207e-01,
+              heart_vntr_D_0 =          7.914933e+01,
+              heart_vntr_D_A =          2.452439e+03,
+              heart_vntr_TS =          2.293750e-01,
+              heart_vntr_TR =          2.873438e-01,
               heart_vntr_D_A_maxAct =          5.059380e+03,
               heart_vntr_TS_maxAct =          1.152428e-01,
               heart_vntr_TR_maxAct =          8.347690e-02),
             systemic_TriSeg(
-              _R_SA =                 1.099044e+00),
-              pulmonaryR_factor = 2.812500e-01,
-              venoconstrictionFactor = 1.113125e+01,
-              vasodilatationFactor = 4.237500e+00);
+              _R_SA =                 1.084116e+00),
+              pulmonaryR_factor = 1.093750e-02,
+              venoconstrictionFactor = 1.056720e+01,
+              vasodilatationFactor = 3.768750e+00);
+
 
           annotation (experiment(
-              StopTime=45,
+              StopTime=60,
               __Dymola_NumberOfIntervals=5000,
               Tolerance=1e-08,
               __Dymola_Algorithm="Cvode"));
@@ -40307,44 +40407,80 @@ P_hs_plus_dist"),
 
         model SEO_ident_norm_opt "Generated by PostProcess/postprocess_optim.py optimized at Aug 30 11:25:49 CEST 2021
  with cost 6.666571 lowest at run 232"
-        extends SEO_ident_Norm(
-          settings(
-            heart_R_LA =          1.600243e+06,
-            syst_art_k_E =          5.746707e-01,
-            heart_vntr_D_0 =          1.655760e+01,
-            heart_vntr_D_A =          1.921970e+03,
-            heart_vntr_TS =          3.220313e-01,
-            heart_vntr_TR =          4.434375e-01,
-            heart_vntr_D_A_maxAct =          5.059380e+03,
-            heart_vntr_TS_maxAct =          6.555525e-02,
-            heart_vntr_TR_maxAct =          1.128519e-01,
-            heart_atr_D_0 =          2.916500e+07,
-            heart_atr_D_A =          4.626403e+07,
-            pulm_R =          4.244419e+06,
-            V_PV_init =          1.473440e-04),
-          pulmonaryTriSeg(c_pa(
-            Compliance =                      1.934298e-10)),
-          systemic_TriSeg(
-            _R_SA =                 1.015000e+00),
-            pulmonaryR_factor = 8.093750e-01,
-            venoconstrictionFactor = 3.887497e+00,
-            vasodilatationFactor = 1.856250e+00,
-          exercise(startTime=30),
-          exercise1(startTime=45),
-          maxHR(startTime=45),
-          midHR(startTime=30));
+          extends SEO_ident_Norm(
+            settings(
+              heart_R_LA =          1.600243e+06,
+              syst_art_k_E =          5.746707e-01,
+              heart_vntr_D_0 =          1.655760e+01,
+              heart_vntr_D_A =          1.921970e+03,
+              heart_vntr_TS =          3.220313e-01,
+              heart_vntr_TR =          4.434375e-01,
+              heart_vntr_D_A_maxAct =          5.059380e+03,
+              heart_vntr_TS_maxAct =          6.555525e-02,
+              heart_vntr_TR_maxAct =          1.128519e-01,
+              heart_atr_D_0 =          2.916500e+07,
+              heart_atr_D_A =          4.626403e+07,
+              pulm_R =          4.244419e+06,
+              V_PV_init =          1.473440e-04),
+            pulmonaryTriSeg(c_pa(
+              Compliance =                      1.934298e-10)),
+            systemic_TriSeg(
+              _R_SA =                 1.015000e+00),
+              pulmonaryR_factor = 8.093750e-01,
+              venoconstrictionFactor = 3.887497e+00,
+              vasodilatationFactor = 1.856250e+00,
+            exercise(startTime=30),
+            exercise1(startTime=45),
+            maxHR(startTime=45),
+            midHR(startTime=30));
 
-        annotation (experiment(
-            StopTime=45,
-            __Dymola_NumberOfIntervals=5000,
-            Tolerance=1e-08,
-            __Dymola_Algorithm="Cvode"));
+            Real HR_plot;
+
+        equation
+         if time > maxHR.startTime + 14 then
+           HR_plot =  settings.HR_max;
+         elseif time > maxHR.startTime - 1 then
+           HR_plot =  HR_20w;
+         elseif time > midHR.startTime - 1 then
+           HR_plot = settings.HR_nominal;
+         else
+           HR_plot = 0;
+         end if;
+
+
+
+          annotation (experiment(
+              StopTime=60,
+              __Dymola_NumberOfIntervals=5000,
+              Tolerance=1e-08,
+              __Dymola_Algorithm="Cvode"));
         end SEO_ident_norm_opt;
-
-        model SEO_ident_norm_opt_test
-          extends SEO_ident_norm_opt;
-        end SEO_ident_norm_opt_test;
       end Identification;
+
+      package StepUp
+        model SEO_stepUp
+          extends Identification.SEO_ident_norm_opt(
+            redeclare Components.Signals.Stepping exercise(
+              startTime=30,
+              interval=15,
+              increment=0.1,
+              maxVal=1.01),
+            exercise1(height=0),
+            condHR(UseAdditionalInput=false, phi_gain=1));
+        end SEO_stepUp;
+
+        model SEO_HFpEF_stepUp
+          extends Identification.SEO_HFpEFIdent_opt(
+            redeclare Components.Signals.Stepping exercise(
+              startTime=30,
+              interval=15,
+              increment=0.05,
+              maxVal=0.5),
+            exercise1(height=0),
+            condHR(UseAdditionalInput=false, phi_gain=1),
+            settings(HR_max=3.9));
+        end SEO_HFpEF_stepUp;
+      end StepUp;
     end Exercise;
   end SimpleCirculation;
 
@@ -52118,8 +52254,8 @@ P_hs_plus_dist"),
               tissues_chi_Ra=settings.tissues_chi_Ra,
               tissues_chi_Rv=settings.tissues_chi_Rv,
               tissues_chi_C=settings.tissues_chi_C),
-            fmi_StartTime=0,
-            fmi_StopTime=60,
+            fmi_StartTime=100,
+            fmi_StopTime=120,
             fmi_NumberOfSteps=steps,
             fmi_forceShutDownAtStopTime=true) if useExercise
             annotation (Placement(transformation(extent={{38,42},{58,62}})));
@@ -52525,7 +52661,8 @@ P_hs_plus_dist"),
         end CombinedModels_FMUs_BaselineValsalvaTilt_BaselineExercise;
 
         model CombinedModels_FMUs_ExceptBaseline
-          extends CombinedModels_FMUs(useBaseline=false);
+          extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime=
+                 0, fmi_StopTime=60));
         end CombinedModels_FMUs_ExceptBaseline;
 
         model CombinedModels_FMUs_ExceptBaselineExercise
@@ -52545,27 +52682,6 @@ P_hs_plus_dist"),
             Diagram(coordinateSystem(preserveAspectRatio=false)),
             experiment(StopTime=50, __Dymola_Algorithm="Cvode"));
         end TestFMU;
-
-        model CombinedModels_FMUs_All
-          extends CombinedModels_FMUs(
-            tilt(heartComponent(aorticValve(
-                    _Ron(displayUnit="(Pa.s)/m3") = _Ron))),
-            exercise(heartComponent(aorticValve(
-                    _Ron(displayUnit="(Pa.s)/m3") = _Ron))),
-            valsalva(heartComponent(aorticValve(
-                    _Ron(displayUnit="(Pa.s)/m3") = _Ron))),
-            baseline(heartComponent(aorticValve(
-                    _Ron(displayUnit="(Pa.s)/m3") = _Ron))));
-          Components.Subsystems.Heart.Testers.TestEDPVR_fit EDPVR(
-            k_passive=settings.heart_vntr_k_passive,
-            SLcollagen=settings.heart_vntr_SLcollagen,
-            PConcollagen=settings.heart_vntr_PConcollagen,
-            PExpcollagen=settings.heart_vntr_PExpcollagen)
-            annotation (Placement(transformation(extent={{20,-20},{40,0}})));
-          parameter
-            ADAN_0main_SystemicTree_Tilt_CVS_0tiltable_fmu_black_box.importedFMUTypes.Physiolibrary_Types_HydraulicResistance
-            _Ron=797188.6 "forward state resistance";
-        end CombinedModels_FMUs_All;
       end CombinedModel;
 
       package AdditionalOutputs
@@ -54059,17 +54175,16 @@ P_hs_plus_dist"),
             period(displayUnit="s") = 160,
             nperiod=1,
             offset=settings.chi_phi*(1 - settings.phi0) + settings.phi0,
-            startTime(displayUnit="s") = 30),
+            startTime=30),
           useAutonomousPhi(y=false),
           heartComponent(aorticValve(_Ron(displayUnit="(mmHg.s)/ml")=
                 1333223.87415)));
 
         replaceable Modelica.Blocks.Sources.Ramp Exercise(
           offset=settings.chi_phi,
-          startTime(displayUnit="s") = 30,
+          startTime=30,
           height=1 - settings.chi_phi,
-          duration(displayUnit="s") = 1)
-                      constrainedby Modelica.Blocks.Interfaces.SO
+          duration=1) constrainedby Modelica.Blocks.Interfaces.SO
           annotation (Placement(transformation(extent={{-100,52},{-80,72}})));
         output Modelica.Units.SI.Time TEjection=heartComponent.aorticValve.Ts;
         output Modelica.Units.SI.Time TFilling=heartComponent.mitralValve.Ts;
@@ -59461,7 +59576,7 @@ P_hs_plus_dist"),
             annotation (Line(points={{-84,-8},{-112,-8},{-112,-13}},   color={0,
                   0,127}));
           connect(flowMeasure.q_out, heartComponent.sv) annotation (Line(
-              points={{-74,4},{24,4},{24,-12},{-16,-12}},
+              points={{-74,4},{24,4},{24,-16.4},{-16,-16.4}},
               color={0,0,0},
               thickness=1));
           connect(volumeInfusionRamp.y, unlimitedPump.solutionFlow) annotation (
@@ -61597,8 +61712,7 @@ P_hs_plus_dist"),
 <p>Generated from <a href=\"https://models.cellml.org/workspace/4ac\">https://models.cellml.org/workspace/4ac</a> Revision: b580e909bfa88dbf598e9fd1f4b15024e676e9b6 from Date: 2019-04-08 8:13:36 AM, Message: tuning the param for veins</p>
 </html>"));
   end SystemicTree;
-  annotation (preferredView="info",uses(Modelica(version="4.0.0"), Physiolibrary(version="2.4.1"),
-      NXT_Lymphatics(version="0.9")),
+  annotation (preferredView="info",uses(Modelica(version="4.0.0"), Physiolibrary(version="2.4.1")),
                        experiment(
       StopTime=60,
       __Dymola_NumberOfIntervals=1500,
