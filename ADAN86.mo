@@ -4144,14 +4144,14 @@ type"),       Text(
             "Model enhanced timings to allow for stepping up HR and missing equation for HRo"
             parameter Boolean fixedActivation = false;
             parameter Real fixedActValue = 0;
+            parameter Boolean useAlternativeDur = false "Use alternative calculation of activation duration";
+            parameter Modelica.Units.SI.Duration BombBase = 361.1e-3 "Base for bombardinis slope";
           // Heart rate
             parameter Boolean HR_stepUp=false;
             parameter Real stepUpLength = 10;
-            parameter Physiolibrary.Types.Frequency HRo0_ref(displayUnit=
-                  "1/min")=1.0333333333333
+            parameter Physiolibrary.Types.Frequency HRo0_ref(displayUnit="1/min")=1.0333333333333
               "Reference cycle length for scaling the timing";
-            parameter Physiolibrary.Types.Frequency HRo0(displayUnit="1/min")=
-              1.0333333333333;
+            parameter Physiolibrary.Types.Frequency HRo0(displayUnit="1/min")=1.0333333333333;
             Physiolibrary.Types.Frequency HRo "Olsen's heart rate";
             Physiolibrary.Types.Fraction cycleScale=HRo0_ref/HRo;
           // Activation, global
@@ -4177,7 +4177,7 @@ type"),       Text(
           parameter Modelica.Units.SI.Time LVactdur0(displayUnit="ms")=0.571
                                                            " Duration of LV activation at HR 60";
           parameter Real LVdownpart=0.5                      " Duration of downstroke of LV activation as fraction of total duration";
-            Real LVactdur=LVactdur0*(((1)/HRo)^(1/3))
+            Real LVactdur=if useAlternativeDur then (-1.079*(HRo*60) + BombBase*1000)/1000 else LVactdur0*(((1)/HRo)^(1/3))
               " Duration of LV activation, HR dependent";
           // Ref: Fridericia LS (1920). "The duration of systole in the electrocardiogram of normal subjects and of patients with heart disease". Acta Medica Scandinavica (53): 469â€“486.
           Real LVdown = LVactdur*LVdownpart " Duration of downstroke of LV activation";
@@ -4193,7 +4193,7 @@ type"),       Text(
                                                            " Duration of RV activation at HR 60";
             parameter Real RVdownpart=0.5
               " Duration of downstroke of RV activation as fraction of total duration";
-            Real RVactdur=RVactdur0*((1/HRo)^(1/3))
+            Real RVactdur=if useAlternativeDur then (-1.079*(HRo*60) + BombBase*1000)/1000 else RVactdur0*((1/HRo)^(1/3))
               " Duration of RV activation, HR dependent, Fridericia";
             Real RVdown=RVactdur*RVdownpart " Duration of downstroke of RV activation";
           Real PI = Modelica.Constants.pi;
@@ -4776,18 +4776,14 @@ type"),       Text(
           model System_OlsenSIUnits
             extends partialDriving_Olsen(t0(start=0));
             parameter Real rho=1060 " kg/m^3, // Density of blood";
-            parameter Physiolibrary.Types.HydraulicCompliance C_ao(displayUnit=
-                  "ml/mmHg")=8.1231668664085e-09
-                                     "mL/mmHg,  // Aortic compliance";
-            parameter Physiolibrary.Types.HydraulicCompliance C_vc(displayUnit=
-                  "ml/mmHg")=3.0002463033826e-07
-                                     "mL/mmHg,  // Vena cava compliance";
-            parameter Physiolibrary.Types.HydraulicCompliance C_pa(displayUnit=
-                  "ml/mmHg")=2.7752278306289e-08
-                                     "mL/mmHg,  // Pulmonary artery compliance";
-            parameter Physiolibrary.Types.HydraulicCompliance C_pve(displayUnit
-                ="ml/mmHg")=1.1250923637685e-07
-                                     "mL/mmHg,  // Pulmonary veins compliance";
+            parameter Physiolibrary.Types.HydraulicCompliance C_ao(displayUnit="ml/mmHg")=
+               8.1231668664085e-09   "mL/mmHg,  // Aortic compliance";
+            parameter Physiolibrary.Types.HydraulicCompliance C_vc(displayUnit="ml/mmHg")=
+               3.0002463033826e-07   "mL/mmHg,  // Vena cava compliance";
+            parameter Physiolibrary.Types.HydraulicCompliance C_pa(displayUnit="ml/mmHg")=
+               2.7752278306289e-08   "mL/mmHg,  // Pulmonary artery compliance";
+            parameter Physiolibrary.Types.HydraulicCompliance C_pve(displayUnit="ml/mmHg")=
+               1.1250923637685e-07   "mL/mmHg,  // Pulmonary veins compliance";
             //   Unstressed volumes
             parameter Physiolibrary.Types.Volume V0_ao=0
               "mL,   // Aorta unstressed volume";
@@ -4798,44 +4794,34 @@ type"),       Text(
             parameter Physiolibrary.Types.Volume V0_pve=0
               "mL,   // Pulmonary veins unstressed volume";
             //   Inertances
-            parameter Physiolibrary.Types.HydraulicInertance L_ao(displayUnit=
-                  "mmHg.s2/ml")=1333223.87415
-                               "mmHg*s^2*mL^(-1), // Aorta inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_pa(displayUnit=
-                  "mmHg.s2/ml")=1333223.87415
-                               "mmHg*s^2*mL^(-1), // Pulmonary artery inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_vc(displayUnit=
-                  "mmHg.s2/ml")=1333223.87415
-                               "mmHg*s^2*mL^(-1), // Vena cava inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_pve(displayUnit=
-                  "mmHg.s2/ml")=1333223.87415
-                               "mmHg*s^2*mL^(-1), // Pulmonary veins inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_ao(displayUnit="mmHg.s2/ml")=
+               1333223.87415   "mmHg*s^2*mL^(-1), // Aorta inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_pa(displayUnit="mmHg.s2/ml")=
+               1333223.87415   "mmHg*s^2*mL^(-1), // Pulmonary artery inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_vc(displayUnit="mmHg.s2/ml")=
+               1333223.87415   "mmHg*s^2*mL^(-1), // Vena cava inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_pve(displayUnit="mmHg.s2/ml")=
+               1333223.87415   "mmHg*s^2*mL^(-1), // Pulmonary veins inertance";
 
             //   Resistances
-            parameter Physiolibrary.Types.HydraulicResistance R_vc(displayUnit=
-                  "(mmHg.s)/ml")=133322.387415
-                               "mmHg*s*mL^(-1), // Vena cava resistance";
-            parameter Physiolibrary.Types.HydraulicResistance R_pve(displayUnit
-                ="(mmHg.s)/ml")=133322.387415
-                               "mmHg*s*mL^(-1), // Pulmonary veins resistance";
+            parameter Physiolibrary.Types.HydraulicResistance R_vc(displayUnit="(mmHg.s)/ml")=
+               133322.387415   "mmHg*s*mL^(-1), // Vena cava resistance";
+            parameter Physiolibrary.Types.HydraulicResistance R_pve(displayUnit="(mmHg.s)/ml")=
+               133322.387415   "mmHg*s*mL^(-1), // Pulmonary veins resistance";
             // Vascular resistances
-            parameter Physiolibrary.Types.HydraulicResistance SVR(displayUnit=
-                  "(mmHg.s)/ml")=160920121.60991
-                                 "mmHg*s*mL^(-1),  // Systemic vascular resistance";
-            parameter Physiolibrary.Types.HydraulicResistance PVR(displayUnit=
-                  "(mmHg.s)/ml")=10012511.294867
-                                 "mmHg*s*mL^(-1),  // Pulmonary vascular resistance";
+            parameter Physiolibrary.Types.HydraulicResistance SVR(displayUnit="(mmHg.s)/ml")=
+               160920121.60991   "mmHg*s*mL^(-1),  // Systemic vascular resistance";
+            parameter Physiolibrary.Types.HydraulicResistance PVR(displayUnit="(mmHg.s)/ml")=
+               10012511.294867   "mmHg*s*mL^(-1),  // Pulmonary vascular resistance";
 
             // Valves
 
             //   Valve areas
             parameter Physiolibrary.Types.Area AVAopen=0.00035
               "cm^2,  // Aortic valve area (when open)";
-            parameter Physiolibrary.Types.Area AVAclosed(displayUnit="cm2")=
-              1e-07
+            parameter Physiolibrary.Types.Area AVAclosed(displayUnit="cm2")=1e-07
               "cm^2,  // (when closed)";
-            parameter Physiolibrary.Types.Area MVAopen(displayUnit="cm2")=
-              0.0004
+            parameter Physiolibrary.Types.Area MVAopen(displayUnit="cm2")=0.0004
               "cm^2,   // Mitral valve area (when open)";
             parameter Physiolibrary.Types.Area MVAclosed=1e-07 "cm^2,  // (when closed)";
             parameter Physiolibrary.Types.Area PVAopen=0.00035
@@ -4847,30 +4833,25 @@ type"),       Text(
 
             // Chambers
             //   Inertances
-            parameter Physiolibrary.Types.HydraulicInertance L_lvot(displayUnit
-                ="mmHg.s2/ml")=133322.387415
-                               "mmHg*s^2*mL^(-1),  // LVOT inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_rvot(displayUnit
-                ="mmHg.s2/ml")=133322.387415
-                               "mmHg*s^2*mL^(-1),  // RVOT inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_la(displayUnit=
-                  "mmHg.s2/ml")=13332.2387415
-                               "mmHg*s^2*mL^(-1), // Left atrium inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_ra(displayUnit=
-                  "mmHg.s2/ml")=13332.2387415
-                               "mmHg*s^2*mL^(-1), // Right atrium inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_lvot(displayUnit="mmHg.s2/ml")=
+               133322.387415   "mmHg*s^2*mL^(-1),  // LVOT inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_rvot(displayUnit="mmHg.s2/ml")=
+               133322.387415   "mmHg*s^2*mL^(-1),  // RVOT inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_la(displayUnit="mmHg.s2/ml")=
+               13332.2387415   "mmHg*s^2*mL^(-1), // Left atrium inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_ra(displayUnit="mmHg.s2/ml")=
+               13332.2387415   "mmHg*s^2*mL^(-1), // Right atrium inertance";
 
-            parameter Physiolibrary.Types.HydraulicInertance L_sept(displayUnit
-                ="mmHg.s2/ml")=33330.59685375
-                                "mmHg*s^2*mL^(-1), // Septal displacement inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_sept(displayUnit="mmHg.s2/ml")=
+               33330.59685375   "mmHg*s^2*mL^(-1), // Septal displacement inertance";
 
             parameter Real Lm_ym=0.2 "g/m,   // Junction circle inertial component";
             parameter Real damp_ym=60  "N*s*m^(-1)*cm^(-1),   // Damping component";
 
             // LV - active myofiber properties (intercepts of assumed linear force-velocity relationship)
-            parameter Modelica.Units.SI.Stress LV_smax(displayUnit="kPa")=
-              134000
+            parameter Modelica.Units.SI.Stress LV_smax(displayUnit="kPa")=134000
               "kPa, // Maximal active myofiber stress (at zero velocity)";
+
             parameter Real LV_dedtmax=-3
               "1/s, // Maximal myofiber strain rate (at zero afterload)";
 
@@ -4886,15 +4867,13 @@ type"),       Text(
             // in mice. A lower value gives more realistic results in this model.
 
             // RV - active myofiber properties
-            parameter Physiolibrary.Types.Pressure RV_smax(displayUnit="kPa")=
-              70000
-              "kPa, // Maximal active myofiber stress";
+            parameter Physiolibrary.Types.Pressure RV_smax(displayUnit="kPa")=70000
+              "kPa, // Maximal active myofiber stress at nominal";
             parameter Real RV_dedtmax=-3 "1/s, // Maximal myofiber strain rate";
 
             // RV - passive myofiber properties
             //   For extension above slack length and compression below slack length (assuming symmetric passive properties)
-            parameter Physiolibrary.Types.Pressure RV_k(displayUnit="kPa")=4000
-                                                                                  "kPa, ";
+            parameter Physiolibrary.Types.Pressure RV_k(displayUnit="kPa")=4000   "kPa, ";
             parameter Real RV_a=11 "dimensionless,";
             //   Viscosity
             parameter Real RV_visc=1.5e3 "kPa*s, // viscosity (stress per strain rate)";
@@ -4961,28 +4940,23 @@ type"),       Text(
             // LA
             parameter Physiolibrary.Types.Volume V0_la=2e-05
               "mL, // LA equilibrium volume";
-            parameter Physiolibrary.Types.HydraulicCompliance C_la(displayUnit=
-                  "ml/mmHg")=6.0004926067653e-08
-                                     "mL/mmHg, // LA compliance";
-            parameter Physiolibrary.Types.Pressure P_maxla(displayUnit="mmHg")=
-              799.93432449
+            parameter Physiolibrary.Types.HydraulicCompliance C_la(displayUnit="ml/mmHg")=
+               6.0004926067653e-08   "mL/mmHg, // LA compliance";
+            parameter Physiolibrary.Types.Pressure P_maxla(displayUnit="mmHg")=799.93432449
               "mmHg, // Force of atrial contraction";
 
             // RA
             parameter Physiolibrary.Types.Volume V0_ra=2e-05
               "mL, // RA equilibrium volume";
-            parameter Physiolibrary.Types.HydraulicCompliance C_ra(displayUnit=
-                  "ml/mmHg")=6.0004926067653e-08
-                                     "mL/mmHg, // RA compliance";
-            parameter Physiolibrary.Types.Pressure P_maxra(displayUnit="mmHg")=
-              533.28954966
+            parameter Physiolibrary.Types.HydraulicCompliance C_ra(displayUnit="ml/mmHg")=
+               6.0004926067653e-08   "mL/mmHg, // RA compliance";
+            parameter Physiolibrary.Types.Pressure P_maxra(displayUnit="mmHg")=533.28954966
               "mmHg, // Force of RA contraction";
 
             // Pericardium
             parameter Physiolibrary.Types.Volume V0_peri=0.000599
               "mL,  // Pericardium equilibrium volume";
-            parameter Physiolibrary.Types.Pressure k_peri(displayUnit="mmHg")=
-              133.322387415
+            parameter Physiolibrary.Types.Pressure k_peri(displayUnit="mmHg")=133.322387415
               "mmHg,  // Compliance curve constant";
             parameter Real a_peri=0.017e6 "mL^(-1), // Compliance curve constant";
             parameter Physiolibrary.Types.Volume V_perifl=1e-05
@@ -5340,11 +5314,11 @@ type"),       Text(
               LV_dedtmax))*tanh((LW_e - e0)*3)));
 
             Sept_s_act = LVact*(if (Sept_dedt >= 0) then (LV_smax*tanh((Sept_e - e0)*3))
-               else (if (Sept_dedt < LV_dedtmax) then 0 else (LV_smax - LV_smax*(
+               else (if (Sept_dedt < LV_dedtmax) then 0 else (LV_smax - LV_smax_phi*(
               Sept_dedt/LV_dedtmax))*tanh((Sept_e - e0)*3)));
 
             RW_s_act = RVact*(if (RW_dedt >= 0) then (RV_smax*tanh((RW_e - e0)*3)) else (
-              if (RW_dedt < RV_dedtmax) then 0 else (RV_smax - RV_smax*(RW_dedt/
+              if (RW_dedt < RV_dedtmax) then 0 else (RV_smax - RV_smax_phi*(RW_dedt/
               RV_dedtmax))*tanh((RW_e - e0)*3)));
 
             // Fiber stress, passive components
@@ -5493,35 +5467,30 @@ type"),       Text(
             parameter Boolean deactivateHeart = false;
             parameter Boolean closeValves = false;
 
+
             parameter Real rho=1060 " kg/m^3, // Density of blood";
             parameter Physiolibrary.Types.Pressure mmHg2SI=133.322387415;
             parameter Physiolibrary.Types.VolumeFlowRate mls2SI=1e-06;
 
             //   Resistances
-            parameter Physiolibrary.Types.HydraulicResistance R_vc(displayUnit=
-                  "(mmHg.s)/ml")=133322.387415
-                               "mmHg*s*mL^(-1), // Vena cava resistance";
-            parameter Physiolibrary.Types.HydraulicResistance R_pve(displayUnit
-                ="(mmHg.s)/ml")=133322.387415
-                               "mmHg*s*mL^(-1), // Pulmonary veins resistance";
+            parameter Physiolibrary.Types.HydraulicResistance R_vc(displayUnit="(mmHg.s)/ml")=
+               133322.387415   "mmHg*s*mL^(-1), // Vena cava resistance";
+            parameter Physiolibrary.Types.HydraulicResistance R_pve(displayUnit="(mmHg.s)/ml")=
+               133322.387415   "mmHg*s*mL^(-1), // Pulmonary veins resistance";
             //   Inertances
-            parameter Physiolibrary.Types.HydraulicInertance L_vc(displayUnit=
-                  "mmHg.s2/ml")=1333223.87415
-                               "mmHg*s^2*mL^(-1), // Vena cava inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_pve(displayUnit=
-                  "mmHg.s2/ml")=1333223.87415
-                               "mmHg*s^2*mL^(-1), // Pulmonary veins inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_vc(displayUnit="mmHg.s2/ml")=
+               1333223.87415   "mmHg*s^2*mL^(-1), // Vena cava inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_pve(displayUnit="mmHg.s2/ml")=
+               1333223.87415   "mmHg*s^2*mL^(-1), // Pulmonary veins inertance";
 
             // Valves
 
             //   Valve areas
             parameter Physiolibrary.Types.Area AVAopen=0.00035
               "cm^2,  // Aortic valve area (when open)";
-            parameter Physiolibrary.Types.Area AVAclosed(displayUnit="cm2")=
-              1e-07
+            parameter Physiolibrary.Types.Area AVAclosed(displayUnit="cm2")=1e-07
               "cm^2,  // (when closed)";
-            parameter Physiolibrary.Types.Area MVAopen(displayUnit="cm2")=
-              0.0004
+            parameter Physiolibrary.Types.Area MVAopen(displayUnit="cm2")=0.0004
               "cm^2,   // Mitral valve area (when open)";
             parameter Physiolibrary.Types.Area MVAclosed=1e-07 "cm^2,  // (when closed)";
             parameter Physiolibrary.Types.Area PVAopen=0.00035
@@ -5533,30 +5502,29 @@ type"),       Text(
 
             // Chambers
             //   Inertances
-            parameter Physiolibrary.Types.HydraulicInertance L_lvot(displayUnit
-                ="mmHg.s2/ml")=133322.387415
-                               "mmHg*s^2*mL^(-1),  // LVOT inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_rvot(displayUnit
-                ="mmHg.s2/ml")=133322.387415
-                               "mmHg*s^2*mL^(-1),  // RVOT inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_la(displayUnit=
-                  "mmHg.s2/ml")=13332.2387415
-                               "mmHg*s^2*mL^(-1), // Left atrium inertance";
-            parameter Physiolibrary.Types.HydraulicInertance L_ra(displayUnit=
-                  "mmHg.s2/ml")=13332.2387415
-                               "mmHg*s^2*mL^(-1), // Right atrium inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_lvot(displayUnit="mmHg.s2/ml")=
+               133322.387415   "mmHg*s^2*mL^(-1),  // LVOT inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_rvot(displayUnit="mmHg.s2/ml")=
+               133322.387415   "mmHg*s^2*mL^(-1),  // RVOT inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_la(displayUnit="mmHg.s2/ml")=
+               13332.2387415   "mmHg*s^2*mL^(-1), // Left atrium inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_ra(displayUnit="mmHg.s2/ml")=
+               13332.2387415   "mmHg*s^2*mL^(-1), // Right atrium inertance";
 
-            parameter Physiolibrary.Types.HydraulicInertance L_sept(displayUnit
-                ="mmHg.s2/ml")=33330.59685375
-                                "mmHg*s^2*mL^(-1), // Septal displacement inertance";
+            parameter Physiolibrary.Types.HydraulicInertance L_sept(displayUnit="mmHg.s2/ml")=
+               33330.59685375   "mmHg*s^2*mL^(-1), // Septal displacement inertance";
 
             parameter Real Lm_ym=0.2 "g/m,   // Junction circle inertial component";
             parameter Real damp_ym=60  "N*s*m^(-1)*cm^(-1),   // Damping component";
 
             // LV - active myofiber properties (intercepts of assumed linear force-velocity relationship)
-            parameter Modelica.Units.SI.Stress LV_smax(displayUnit="kPa")=
-              134000
+            parameter Physiolibrary.Types.Fraction eta_smax = 0 "Inotropic increase in contractility at max exercise";
+
+            parameter Modelica.Units.SI.Stress LV_smax(displayUnit="kPa")=134000
               "kPa, // Maximal active myofiber stress (at zero velocity)";
+            Physiolibrary.Types.Pressure LV_smax_phi(displayUnit="kPa")=LV_smax*(1 + eta_smax*phi)
+              "kPa, // Maximal active myofiber stress on eta";
+
             parameter Real LV_dedtmax=-3
               "1/s, // Maximal myofiber strain rate (at zero afterload)";
 
@@ -5573,15 +5541,16 @@ type"),       Text(
             // in mice. A lower value gives more realistic results in this model.
 
             // RV - active myofiber properties
-            parameter Physiolibrary.Types.Pressure RV_smax(displayUnit="kPa")=
-              70000
+            parameter Physiolibrary.Types.Pressure RV_smax(displayUnit="kPa")=70000
               "kPa, // Maximal active myofiber stress";
+            Physiolibrary.Types.Pressure RV_smax_phi(displayUnit="kPa")=RV_smax*(1 + eta_smax*phi)
+              "kPa, // Maximal active myofiber stress on eta";
+
             parameter Real RV_dedtmax=-3 "1/s, // Maximal myofiber strain rate";
 
             // RV - passive myofiber properties
             //   For extension above slack length and compression below slack length (assuming symmetric passive properties)
-            parameter Physiolibrary.Types.Pressure RV_k(displayUnit="kPa")=4000
-                                                                                  "kPa, ";
+            parameter Physiolibrary.Types.Pressure RV_k(displayUnit="kPa")=4000   "kPa, ";
             parameter Real RV_a=11 "dimensionless,";
             //   Viscosity
             parameter Real RV_visc=1.5e3
@@ -5649,28 +5618,23 @@ type"),       Text(
             // LA
             parameter Physiolibrary.Types.Volume V0_la=2e-05
               "mL, // LA equilibrium volume";
-            parameter Physiolibrary.Types.HydraulicCompliance C_la(displayUnit=
-                  "ml/mmHg")=6.0004926067653e-08
-                                     "mL/mmHg, // LA compliance";
-            parameter Physiolibrary.Types.Pressure P_maxla(displayUnit="mmHg")=
-              799.93432449
+            parameter Physiolibrary.Types.HydraulicCompliance C_la(displayUnit="ml/mmHg")=
+               6.0004926067653e-08   "mL/mmHg, // LA compliance";
+            parameter Physiolibrary.Types.Pressure P_maxla(displayUnit="mmHg")=799.93432449
               "mmHg, // Force of atrial contraction";
 
             // RA
             parameter Physiolibrary.Types.Volume V0_ra=2e-05
               "mL, // RA equilibrium volume";
-            parameter Physiolibrary.Types.HydraulicCompliance C_ra(displayUnit=
-                  "ml/mmHg")=6.0004926067653e-08
-                                     "mL/mmHg, // RA compliance";
-            parameter Physiolibrary.Types.Pressure P_maxra(displayUnit="mmHg")=
-              533.28954966
+            parameter Physiolibrary.Types.HydraulicCompliance C_ra(displayUnit="ml/mmHg")=
+               6.0004926067653e-08   "mL/mmHg, // RA compliance";
+            parameter Physiolibrary.Types.Pressure P_maxra(displayUnit="mmHg")=533.28954966
               "mmHg, // Force of RA contraction";
 
             // Pericardium
             parameter Physiolibrary.Types.Volume V0_peri=0.000599
               "mL,  // Pericardium equilibrium volume";
-            parameter Physiolibrary.Types.Pressure k_peri(displayUnit="mmHg")=
-              133.322387415
+            parameter Physiolibrary.Types.Pressure k_peri(displayUnit="mmHg")=133.322387415
               "mmHg,  // Compliance curve constant";
             parameter Real a_peri=0.017e6 "mL^(-1), // Compliance curve constant";
             parameter Physiolibrary.Types.Volume V_perifl=1e-05
@@ -6045,16 +6009,16 @@ type"),       Text(
             // Note that max strain rate for this assumption is different from
             // and lower than Vmax estimated when using the hyperbolic Hill equation.
             // ref. Circ Res. 1991 Feb;68(2):588-96. Sarcomere dynamics in cat cardiac trabeculae. de Tombe PP1, ter Keurs HE.
-            LW_s_act = LVact*(if (LW_dedt > 0) then (LV_smax*tanh((LW_e - e0)*3)) else (
-              if (LW_dedt < LV_dedtmax) then 0 else (LV_smax - LV_smax*(LW_dedt/
+            LW_s_act = LVact*(if (LW_dedt > 0) then (LV_smax_phi*tanh((LW_e - e0)*3)) else (
+              if (LW_dedt < LV_dedtmax) then 0 else (LV_smax_phi - LV_smax_phi*(LW_dedt/
               LV_dedtmax))*tanh((LW_e - e0)*3)));
 
-            Sept_s_act = LVact*(if (Sept_dedt >= 0) then (LV_smax*tanh((Sept_e - e0)*3))
-               else (if (Sept_dedt < LV_dedtmax) then 0 else (LV_smax - LV_smax*(
+            Sept_s_act = LVact*(if (Sept_dedt >= 0) then (LV_smax_phi*tanh((Sept_e - e0)*3))
+               else (if (Sept_dedt < LV_dedtmax) then 0 else (LV_smax_phi - LV_smax_phi*(
               Sept_dedt/LV_dedtmax))*tanh((Sept_e - e0)*3)));
 
-            RW_s_act = RVact*(if (RW_dedt >= 0) then (RV_smax*tanh((RW_e - e0)*3)) else (
-              if (RW_dedt < RV_dedtmax) then 0 else (RV_smax - RV_smax*(RW_dedt/
+            RW_s_act = RVact*(if (RW_dedt >= 0) then (RV_smax_phi*tanh((RW_e - e0)*3)) else (
+              if (RW_dedt < RV_dedtmax) then 0 else (RV_smax_phi - RV_smax_phi*(RW_dedt/
               RV_dedtmax))*tanh((RW_e - e0)*3)));
 
             // Fiber stress, passive components
@@ -44076,7 +44040,14 @@ P_hs_plus_dist"),
       model SimpleExercise_Olsen
         extends SimpleExercise(redeclare
             Components.Subsystems.Heart.Olsen.Heart_Olsen_base heartComponent(
-              UseThoracic_PressureInput=false), condExercise(disconnected=true));
+            useAlternativeDur=true,
+              UseThoracic_PressureInput=false,
+            eta_smax=2.5),                      condExercise(disconnected=false),
+          systemicComponent(_C_Ao=0.45, _C_SA=1.05),
+          settings(phi0=0, V_PV_init=-0.0001),
+          redeclare Components.Subsystems.Baroreflex.HeartRate_HRMinMax
+            heartRate_simple(phi0=0, HR_max=3.3333333333333),
+          exercise(startTime=20, interval=20));
 
       Physiolibrary.Types.Pressure P_LV = heartComponent.P_lvw;
       Physiolibrary.Types.Pressure P_RV = heartComponent.P_rvw;
@@ -44087,6 +44058,37 @@ P_hs_plus_dist"),
       Physiolibrary.Types.Volume V_RA = heartComponent.V_ra;
 
       // Physiolibrary.Types.Volume totalVolume = systemic_TriSeg.volume + pulmonaryTriSeg.volume + V_LV + V_RV + V_RA + V_LA;
+        Modelica.Units.SI.Time t_av_o "Time of av opening";
+        Modelica.Units.SI.Duration t_av_d(start=0.1) "Duration of av opening";
+        Modelica.Units.SI.Time t_mv_o "Time of mv opening";
+        Modelica.Units.SI.Duration t_mv_d(start = 0.1) "Duration of av opening";
+
+      Physiolibrary.Types.Fraction av_of = t_av_d*heartComponent.HR_true "Aortic valve open fraction";
+      Physiolibrary.Types.Fraction mv_of = t_mv_d*heartComponent.HR_true "Mitral valve as fraction of open to cardiac cycle";
+      Modelica.Units.SI.Duration cycle_length = 1/max(1e-3,HR) "Duration of cardiac cycle";
+      Modelica.Units.SI.Duration diastolic_d = (1/heartComponent.HR_true-t_av_d) "Cardiologic diastole duration";
+      Physiolibrary.Types.Fraction diastolic_f = diastolic_d*heartComponent.HR_true "Diastolic fraction";
+      Modelica.Units.SI.Duration t_dur = 8.22*(1/HR*100)^(1/3)/100 "Acitvation duration as in Fridericia 1920 (Q-P waves difference)";
+      Modelica.Units.SI.Duration t_sys_Bomba = (-1.079*(HR*60) + 361.1)/1000 "Systolic time fitted to Bombardini 2008";
+      equation
+        when heartComponent.Q_av > 0 then
+          t_av_o = time;
+        end when;
+        when heartComponent.Q_mv > 0 then
+          t_mv_o = time;
+        end when;
+        when heartComponent.Q_av < 0 then
+          t_av_d = time -t_av_o;
+        end when;
+        when heartComponent.Q_mv < 0 then
+          t_mv_d = time - t_mv_o;
+        end when;
+
+        annotation (experiment(
+            StopTime=220,
+            __Dymola_NumberOfIntervals=5000,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Dassl"));
       end SimpleExercise_Olsen;
 
       model SimpleExercise_Olsen2
