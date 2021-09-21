@@ -432,7 +432,6 @@ package ADAN_main
       parameter Real baro_b=0.2004 annotation(Dialog(tab="Baroreflex",   group="Afferent baroreceptors"));
       parameter Real baro_f0=300 "Base firing frequency" annotation(Dialog(tab="Baroreflex",   group="Afferent baroreceptors"));
 
-
       parameter Real baro_xi_delta0=0.25
         "Multiplicator factor for fine tuning baroreceptors delta0 to take its different compliance into account. Used for identification single parameter instead of two separately."
           annotation(Dialog(tab="Baroreflex",   group="Afferent baroreceptors"));
@@ -483,8 +482,6 @@ package ADAN_main
     //     "Pressure drop of airway pressure applied to heart and systemic due to pleural sac"
     //     annotation(Dialog(tab="Pulmonary",   group="General"));
 
-
-
     // OTHER - Limit result set
       parameter Boolean hideSystemic = false "Suppress writing output from systemic circulation, unless allowed by low level variables"
         annotation(choices(checkBox=true), Dialog(tab = "Other", group = "Hide results from dataset"));
@@ -501,7 +498,6 @@ package ADAN_main
         annotation(choices(checkBox=true), Dialog(tab = "Other", group = "Other"));
       parameter Real dummy = 1 "Dummy parameter not bound anywhere"
           annotation(choices(checkBox=true), Dialog(tab = "Other", group = "Other"));
-
 
       parameter Fraction experimental_zpv_factor=0.5   "A fraction of venous nominal diameter which creates ZPV for linear veins" annotation(Dialog(tab="Other"));
       parameter Fraction experimental_C_factor=1   "A fraction of nominal C" annotation(Dialog(tab="Other"));
@@ -919,7 +915,6 @@ type"),       Text(
         parameter Modelica.Units.SI.Time delayTime(start=1)
           "Delay time of output with respect to input signal";
         parameter Boolean delayEnabled=false;
-
 
         //  parameter Physiolibrary.Types.Time phiDelay = 0;
         //  Physiolibrary.Types.RealIO.FractionInput phi_in annotation (Placement(
@@ -1430,7 +1425,6 @@ type"),       Text(
       block Stepping "Constant steps up"
         extends Modelica.Blocks.Interfaces.SignalSource(y(start = offset));
 
-
         parameter Modelica.Units.SI.Time startTime=0;
         parameter Modelica.Units.SI.Time interval=1;
 
@@ -1450,7 +1444,6 @@ type"),       Text(
           y_ = min(pre(y) + increment, maxVal);
           t0 = if y < maxVal then time else pre(t0);
         end when;
-
 
         when time > startTime - interval/2 and time > pre(t0) + interval/2 then
           plot_Step = y_ + increment/2;
@@ -1830,7 +1823,6 @@ type"),       Text(
 
         Physiolibrary.Types.Pressure Pout=q_out.pressure "Pressure at outflow";
 
-
         parameter Physiolibrary.Types.Time tau = 1e-3 "Integration costant for min-max calculations";
         parameter Physiolibrary.Types.Time epsTime = 1e-3 "Reset offset after cycle start. We better not use 0 for numerical issues.";
         Physiolibrary.Types.Time Ts(start = 1) "True time of cardiologic systole (duration of open valve)";
@@ -2115,7 +2107,6 @@ type"),       Text(
           V0 = 0)
           annotation (Placement(transformation(extent={{-50,32},{-30,52}})));
 
-
       protected
         Physiolibrary.Types.Pressure ep;
       equation
@@ -2184,7 +2175,6 @@ type"),       Text(
         Physiolibrary.Types.Pressure p(nominal=1000) "middle pressure (at joint of viscous forces)";
         parameter Physiolibrary.Types.Pressure nominal_pressure=133.32 annotation(Evaluate=false);
 
-
         parameter Real k=C/(V_maxExponential - V_n)
           "For Pstras non-linear PV characteristics. For gamma = 0.0003750308";
         parameter Physiolibrary.Types.Volume V_maxExponential(nominal=1e-9) = V_n + (
@@ -2208,10 +2198,8 @@ type"),       Text(
           ep=ExternalPressure;
         end if;
 
-
         der(volume) =q_in.q;
         q_in.pressure = p + ep;
-
 
           // my expression based on straightening
           if noEvent(volume < volume_linearBreakpoint) then
@@ -2349,7 +2337,6 @@ type"),       Text(
 
         model TestPVChars
 
-
         Physiolibrary.Types.Pressure p_transm;
         Physiolibrary.Types.Pressure nt = exp(-kappa*(volume./V0-1));
         Physiolibrary.Types.Volume volume(start = 150e-6);
@@ -2439,7 +2426,6 @@ type"),       Text(
         parameter Physiolibrary.Types.Volume volume_full =   400;
         parameter Physiolibrary.Types.Pressure p_transm_full = 20*133.32;
 
-
         Real kappa "Steepness of the negative exponential is defined by ZPV";
         Real gamma(start = 10) "steepness of the overfilled exponential";
 
@@ -2484,7 +2470,6 @@ type"),       Text(
       // p_transm = tan(gamma*(volume-V0)./(Vmax-V0)) + P0;
 
       // p_transm = P0*volume./V0 - exp(-kappa*(volume./V0-1));
-
 
         // define the kappa
         P0*zpv/V0 = exp(-kappa*(zpv/V0-1));
@@ -2605,8 +2590,6 @@ type"),       Text(
       //    R_nom = R_nom_fixed;
         //end if;
 
-
-
       //   // we must allow also negative flows
       //   // linear flow under the limit, also
       //    if noEvent(dp >= 0 and abs(q_in.q) > maxLinearFlow) then
@@ -2663,7 +2646,6 @@ type"),       Text(
         parameter Physiolibrary.Types.Area A = A_ind*settings.BSA;
     //     parameter Physiolibrary.Types.HydraulicResistance R = 8*3.14*l*settings.blood_mu/A;
         //parameter Physiolibrary.Types.HydraulicInertance I = settings.blood_rho*l/(3.14*D^2/4);
-
 
     end ValveInertia;
 
@@ -2802,12 +2784,10 @@ type"),       Text(
         //   end when;
         //
 
-
         //   when time > resetAt then
         //     reinit(fiSN, fiSN_start);
         //   end when;
           der(phi_mean)*tau_mean = phi - phi_mean;
-
 
         //   // TODO get rid of this!
         //   if time < 60 then
@@ -3889,8 +3869,8 @@ type"),       Text(
                    100000)
               annotation (Placement(transformation(extent={{-20,-10},{0,10}})));
             Heart.Olsen.Pulmonary_Oslen
-                                      pulmonary_Oslen(UseThoracic_PressureInput
-                =false)
+                                      pulmonary_Oslen(UseThoracic_PressureInput=
+                 false)
               annotation (Placement(transformation(extent={{16,-60},{36,-40}})));
             Basic.Resistor_NonLinear resistor_NonLinear1(R_nom_fixed(
                   displayUnit="(dyn.s)/cm5") = 100000)
@@ -5467,7 +5447,6 @@ type"),       Text(
             parameter Boolean deactivateHeart = false;
             parameter Boolean closeValves = false;
 
-
             parameter Real rho=1060 " kg/m^3, // Density of blood";
             parameter Physiolibrary.Types.Pressure mmHg2SI=133.322387415;
             parameter Physiolibrary.Types.VolumeFlowRate mls2SI=1e-06;
@@ -6103,12 +6082,11 @@ type"),       Text(
             extends Systemic.partialSystemic;
             Physiolibrary.Types.VolumeFlowRate Q_vc = -port_b.q, Q_av = port_a.q;
 
-
              parameter Physiolibrary.Types.HydraulicCompliance  C_vc(
                 displayUnit="ml/mmHg")=3.0002463033826e-07                  "mL/mmHg,  // Vena cava compliance";
 
-             parameter Physiolibrary.Types.HydraulicCompliance C_ao(displayUnit
-                ="ml/mmHg")=8.1231668664085e-09                               "mL/mmHg,  // Aortic compliance";
+             parameter Physiolibrary.Types.HydraulicCompliance C_ao(displayUnit=
+                 "ml/mmHg")=8.1231668664085e-09                               "mL/mmHg,  // Aortic compliance";
           //   Unstressed volumes
              parameter Physiolibrary.Types.Volume V0_ao =   0 "mL,   // Aorta unstressed volume";
              parameter Physiolibrary.Types.Volume V0_vc =   0 "mL,   // Vena cava unstressed volume";
@@ -6119,14 +6097,13 @@ type"),       Text(
                   "mmHg.s2/ml")=1333223.87415                              "mmHg*s^2*mL^(-1), // Vena cava inertance";
 
           //   Resistances
-             parameter Physiolibrary.Types.HydraulicResistance R_vc(displayUnit
-                ="(mmHg.s)/ml")=133322.387415                                 "mmHg*s*mL^(-1), // Vena cava resistance";
+             parameter Physiolibrary.Types.HydraulicResistance R_vc(displayUnit=
+                 "(mmHg.s)/ml")=133322.387415                                 "mmHg*s*mL^(-1), // Vena cava resistance";
           // Vascular resistances
              parameter Physiolibrary.Types.HydraulicResistance SVR(displayUnit=
                   "(mmHg.s)/ml")=160920121.60991                            "mmHg*s*mL^(-1),  // Systemic vascular resistance";
 
           // Valves
-
 
           parameter Physiolibrary.Types.Volume V_aoinit=0.0001                  "mL ,                        // Aorta initial volume";
           parameter Physiolibrary.Types.Volume V_vcinit=0.000123                "mL ,                        // Vena cava initial volume";
@@ -6163,7 +6140,6 @@ type"),       Text(
           //  Physiolibrary.Types.VolumeFlowRate Q_mv "  mL/s,   // Flow through mitral valve";
           //  Physiolibrary.Types.VolumeFlowRate Q_av "  mL/s,   // Flow through aortic valve";
            Physiolibrary.Types.VolumeFlowRate Q_ao "  mL/s,   // Flow from aorta to vena cava";
-
 
           initial equation
           // -----------------------------------------------------------------------------
@@ -6644,8 +6620,6 @@ type"),       Text(
           V_rv  = V_rvinit;
           V_la  = V_lainit;
           V_ra  = V_rainit;
-
-
 
           Q_sept   = 0;
 
@@ -7436,7 +7410,6 @@ type"),       Text(
             parameter Physiolibrary.Types.HydraulicResistance PVR(displayUnit="(mmHg.s)/ml")=
                10012511.294867   "mmHg*s*mL^(-1),  // Pulmonary vascular resistance";
 
-
             Physiolibrary.Types.VolumeFlowRate Q_pva = port_a.q
               " mL/s,   // Flow through pulmonary valve";
             Physiolibrary.Types.VolumeFlowRate Q_pve = - port_b.q
@@ -7468,8 +7441,8 @@ type"),       Text(
               annotation (Placement(transformation(extent={{-36,34},{40,64}})));
             Pulmonary_Oslen pulmonary_Oslen annotation (Placement(
                   transformation(extent={{14,-68},{-6,-48}})));
-            outer Settings settings annotation (Placement(transformation(extent
-                    ={{-102,80},{-82,100}})));
+            outer Settings settings annotation (Placement(transformation(extent=
+                     {{-102,80},{-82,100}})));
             Physiolibrary.Types.Constants.FrequencyConst HR0(k(displayUnit=
                     "1/min") = 1.0333333333333)
               annotation (Placement(transformation(extent={{44,-18},{36,-10}})));
@@ -7646,7 +7619,6 @@ type"),       Text(
             parameter Real s = 10 "exponential steepness of stiffness";
             Physiolibrary.Types.Pressure P_c = if enableCollagen then exp(s*(volume/V0_col - 1)) else 0;
           equation
-
 
             // since the flow is derivation of volume, we have already differentiated it
             der(currentWork) =port_a.pressure*port_a.q;
@@ -8210,7 +8182,6 @@ type"),       Text(
             Physiolibrary.Types.Pressure Plv = lvflow.pressure - Pperi;
             Physiolibrary.Types.Pressure Plv_passive=(1 - D)*Pi0lv*(exp(
                 PhiEffect_passEl*lambdalv*(V_LV - Vsept)) - 1);
-
 
           //             Physiolibrary.Types.Volume ESV_LV;
           //             Physiolibrary.Types.Volume ESV_RV;
@@ -9673,7 +9644,6 @@ type"),       Text(
               Boolean stepCycle(start=true, fixed=true)
                 "Change denote start of new cardiac cycle";
 
-
               Physiolibrary.Types.Time cycleDuration = 1/heart_rate;
             equation
 
@@ -9790,7 +9760,6 @@ type"),       Text(
               parameter Physiolibrary.Types.HydraulicElastance D_A_maxAct=26664477.483 "Peak amplitude at maximal activation";
               Real D_A_coeff "Slope of max amplitude change for activation. Calculated from nominal and max active";
               Physiolibrary.Types.HydraulicElastance D_A_phi = D_A*(1 + D_A_coeff*(phi_ - phi0));
-
 
               parameter Real TS=0.1 "nominal systolic contraction time";
               parameter Real TS_maxAct=0.1
@@ -9922,7 +9891,6 @@ type"),       Text(
               parameter Real PConcollagen=0.01 "contriubtion of collagen [1]";
               parameter Real PExpcollagen=70 "contriubtion of collagen [1]";
               parameter Physiolibrary.Types.Fraction contractilityFraction=1;
-
 
               Real Tm "Represenattive midwall tension [mmHg.cm]";
               Real Tx=Tm*2*xm*ym/(xm^2 + ym^2) "Axial midwall component";
@@ -10262,7 +10230,6 @@ type"),       Text(
               Real sigmaM=sigmaact + sigmapas;
               // equilibrium of forces at junction circle already in base class
 
-
               Physiolibrary.Types.RealIO.FractionInput phi_input
                 annotation (Placement(transformation(extent={{-20,-20},{20,20}},
                     rotation=270,
@@ -10437,7 +10404,6 @@ type"),       Text(
               // parameter Real k_passive=50 "mN / mm^2 / micro";
               // parameter Real L0=0.907 "micron";
 
-
               // Triseg parameters
               parameter Real Lsref=1.9 "Resting SL, micron";
               parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
@@ -10471,7 +10437,6 @@ type"),       Text(
               // contriubtion of collagen (??)
               parameter Real PExpcollagen=70;
               // expresion of collagen (??), unitless
-
 
               // Collagen force
               Real sigma_collagen=if (SLo > SLcollagen) then PConcollagen*(exp(PExpcollagen*
@@ -10910,7 +10875,6 @@ type"),       Text(
                   Placement(transformation(extent={{-120,-20},{-80,20}}),
                     iconTransformation(extent={{-120,0},{-80,40}})));
 
-
               Real ptrans_LV=2*LV_wall.Tx/ym annotation (HideResult=true);
               Real ptrans_RV=2*RV_wall.Tx/ym annotation (HideResult=true);
 
@@ -11034,9 +10998,7 @@ type"),       Text(
                     ym=ym),
                 redeclare Driving_Calcium calciumMechanics);
 
-
             equation
-
 
               annotation (Icon(coordinateSystem(preserveAspectRatio=false),
                     graphics={Text(
@@ -11087,7 +11049,6 @@ type"),       Text(
             //   parameter Physiolibrary.Types.Fraction k_passive_factor=1
             //     "Factor affecting diastolic compliance";
             equation
-
 
               annotation (Icon(coordinateSystem(preserveAspectRatio=false),
                     graphics={Text(
@@ -11246,7 +11207,6 @@ type"),       Text(
               //     "Factor affecting diastolic compliance";
             equation
 
-
               annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={Text(
                       extent={{-40,60},{50,-78}},
                       lineColor={0,0,0},
@@ -11402,7 +11362,6 @@ type"),       Text(
 
               PLV = P_LV;
 
-
               annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={Text(
                       extent={{-40,60},{50,-78}},
                       lineColor={0,0,0},
@@ -11426,7 +11385,6 @@ type"),       Text(
 
                       parameter Time ts_a1 = 0.1 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
                       parameter Real ts_a2 = 0.2 "Part of calculation for t_systole = a1 + a2*period. Guessed from Bombardino 2008 doi:10.1186/1476-7120-6-15";
-
 
             parameter Real A=1 "Multiplier of driving function";
             Real B= 60/HP;
@@ -12491,10 +12449,8 @@ type"),       Text(
           Physiolibrary.Types.Constants.FractionConst phi0(k=settings.phi0) if not UsePhiInput
             annotation (Placement(transformation(extent={{-90,76},{-82,84}})));
 
-
           outer Settings settings
             annotation (Placement(transformation(extent={{-80,80},{-60,100}})));
-
 
               Physiolibrary.Types.Frequency HR_true;
               Physiolibrary.Types.Volume V_LV;
@@ -13668,6 +13624,7 @@ Kalecky")}), experiment(
                 extent={{-5,-5},{5,5}},
                 rotation=90,
                 origin={10,-70})));
+
         equation
           volume =ra.volume + la.volume + ventricles.V_LV + ventricles.V_RV;
 
@@ -14085,8 +14042,13 @@ Kalecky")}), experiment(
                 extent={{10,-10},{-10,10}},
                 rotation=180,
                 origin={84,60})));
+
         equation
           volume = ra.volume + la.volume + ventricles.V_LV + ventricles.V_RV;
+          beat = sa_node.beat;
+          V_LV = ventricles.V_LV;
+          HR_true = sa_node.HR_true;
+
           connect(tricuspidValve.q_in, r_SystemicVenousInflow.q_out)
             annotation (Line(
               points={{-6,60},{-68,60}},
@@ -14391,7 +14353,6 @@ Kalecky")}), experiment(
 
             Physiolibrary.Types.RealIO.VolumeOutput volumeOut = EDV if not useVolumeInput
               annotation (Placement(transformation(extent={{-120,-80},{-80,-40}})));
-
 
           constant Physiolibrary.Types.Pressure mmHg2SI = 133.322;
           constant Physiolibrary.Types.Volume ml2SI = 1e-6;
@@ -14726,7 +14687,6 @@ compliance
             Physiolibrary.Types.Pressure external_pressure_outside "externally applied pressure - either thoracic or the other one";
             Physiolibrary.Types.Pressure external_pressure_inside "Internal effect of externally applied pressure. Might be lower as the vessel is close to empty.";
 
-
             outer Physiolibrary.Types.Fraction Exercise "Exercise intensity input to the whole systemic circulation";
             parameter Boolean UseExercise = false "True, when this particular tissue is doing exercise" annotation(choices(checkBox=true));
             parameter Physiolibrary.Types.Fraction exercise_ratio=1 "Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated" annotation (Dialog(enable=UseExercise));
@@ -14807,7 +14767,6 @@ compliance
               external_pressure_inside = external_pressure_outside;
             end if;
 
-
               annotation (Icon(coordinateSystem(extent={{-100,-20},{100,20}}), graphics={
                   Rectangle(extent={{-100,20},{100,-20}}, lineColor={28,108,200},
                     fillColor={255,255,255},
@@ -14869,7 +14828,6 @@ compliance
                   height/2);
               Modelica.Units.SI.Height height=sin(_tilt)*sinAlpha*l
                 "Actual height of the vessel depends on tilt and sinAlpha";
-
 
            parameter Real E(unit = "Pa") = 4e5 "Elasticity"  annotation (Dialog(tab = "General", group = "Vessel properties", enable = not UseNonLinearCompliance));
               parameter Modelica.Units.SI.Length l=1e-2 "Segment length"
@@ -15275,7 +15233,6 @@ P_hs/2")}));
             //       A = A_n;
             //     end if;
             equation
-
 
               // V =p/max(1e-6, E_lin_rel)*V_0 + v0_lin_rel*V_0;
 
@@ -16187,7 +16144,6 @@ P_hs/2")}));
           else
             volume = max((p_C)  *compliance + zpv - iabp_volume, 0);
           end if;
-
 
           if UseInertance then
             der(q_in) = (p_in_hs-p_out_hs-R*q_in)/I;
@@ -20536,8 +20492,6 @@ P_hs_plus_dist"),
           parameter Boolean UseExerciseInput = false annotation(choices(checkBox=true));
           parameter Boolean UseAdenosineInput = false annotation(choices(checkBox=true));
 
-
-
           Modelica.Blocks.Interfaces.RealInput tilt_input = Tilt if UseTiltInput annotation (Placement(
               transformation(extent={{-340,-68},{-300,-28}}),
                                                             iconTransformation(extent={{20,-100},
@@ -23927,10 +23881,8 @@ P_hs_plus_dist"),
               ExternalPressure(displayUnit="Pa"))
             annotation (Placement(transformation(extent={{-150,8},{-130,28}})));
 
-
           parameter Real _CO_target=4850 "mL/min";
           parameter Real _HR=60;
-
 
           parameter Real _C_Ao=0.7*_CO_target/50/_HR
             "Proximal aortic compliance, mL/mmHg";
@@ -24103,7 +24055,6 @@ P_hs_plus_dist"),
             c_sv(volume_start=vfactor*4.8e-06),
             c_sa(volume_start=vfactor*3e-06),
             c_ao(volume_start=vfactor*1e-06));
-
 
             parameter Physiolibrary.Types.Fraction vfactor = 0.732;
         //
@@ -32408,7 +32359,6 @@ P_hs_plus_dist"),
               parameter Modelica.Units.SI.Time tau_R_K_afferent=60
                 "Time constant in seconds";
 
-
             parameter Real D0=10 "TODO";
 
             Physiolibrary.Types.Pressure p_out "venous pressure output";
@@ -32726,7 +32676,6 @@ P_hs_plus_dist"),
               // der(V_I) = dV_I;
               // der(Amt_I) = dAmt_I;
 
-
               annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end Ascites;
@@ -32810,8 +32759,6 @@ P_hs_plus_dist"),
             //
                  J_I = L_T*((P_C - P_A) - (Pi_P - Pi_A)) "Eq. 18";
 
-
-
               // der(V) = J_I + J_L - J_lymph;
             //   der(Amt_A) = m*Pi_P*J_L - Pi_A*J_lymph;
             //   der(V_I) = J_C - J_ILymph - J_I;
@@ -32864,7 +32811,6 @@ P_hs_plus_dist"),
                                 iconTransformation(extent={{-100,-100},{-80,-80}})));
 
           output Physiolibrary.Types.VolumeFlowRate lymph_flow               "normal Lymphatic flow per day is 5.787037037037e-08";
-
 
         parameter Real p1 =   6.443e-09;
         parameter Real p2 =   4.159e-05;
@@ -33121,8 +33067,6 @@ P_hs_plus_dist"),
           RealIO.VolumeFlowRateOutput lymph_diff = if timeSpedUp > lymphaticsSettleTime then (J1_s - J3 - reintroduceFraction*lymphDrain)*speedUpFact else 0 annotation (Placement(transformation(extent={{80,-100},
                     {100,-80}}),iconTransformation(extent={{92,-46},{112,-26}})));
 
-
-
           Modelica.Units.SI.Time time_speedUp=speedUpFact "Speed-up factor";
           Modelica.Units.SI.Time timeSpedUp;
           Volume volume = v_isf + v_lymph;
@@ -33182,9 +33126,7 @@ P_hs_plus_dist"),
             drain_stopped = true;
           end when;
 
-
           Vr = p1*x.^2 + p2*x + p3 + 1/(1+exp(-k*breakpoint))*breakpoint;
-
 
           der(v_isf)/speedUpFact = J1_s - J2;
           der(v_lymph)/speedUpFact = J2 - J3 - lymphDrain;
@@ -33366,7 +33308,6 @@ P_hs_plus_dist"),
           der(epi_a)*tau = coronaryLayer_SubEpicardium.q - epi_a;
 
           der(q_avg)*tau = port_a.q - q_avg;
-
 
           connect(coronaryLayer_SubEpicardium.port_a, coronaryLayer_Mid.port_a)
             annotation (Line(
@@ -33927,7 +33868,6 @@ P_hs_plus_dist"),
       final constant Real mmHg2SI = 133.32;
       final constant Real ml_per_mmhg2SI = 1e-6/133.32;
       final constant Real mmHgSec_per_ml2SI = 133.32*1e6;
-
 
       annotation (Icon(graphics={
           Polygon(
@@ -38642,7 +38582,6 @@ P_hs_plus_dist"),
       Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume1(P=u_v)
         annotation (Placement(transformation(extent={{0,0},{-20,20}})));
 
-
             parameter Physiolibrary.Types.Pressure u_a = 13300;
             parameter Physiolibrary.Types.Pressure u_v = 1000;
             parameter Physiolibrary.Types.VolumeFlowRate v =  8.3e-5;
@@ -39662,7 +39601,6 @@ P_hs_plus_dist"),
     model testPVchars
       extends ADAN_main.Components.Subsystems.Systemic.partialSystemic;
 
-
     //   parameter Physiolibrary.Types.HydraulicCompliance totalCompliance=4.5003694550739e-07;
       parameter Physiolibrary.Types.Volume totalVolume=908e-6;
       parameter Physiolibrary.Types.Fraction thisVolumeFraction = superior_vena_cava_C88.compliant_vessel.V0/totalVolume;
@@ -39673,9 +39611,7 @@ P_hs_plus_dist"),
        Real dP=der(superior_vena_cava_C88.compliant_vessel.p);
        Real dV = der(superior_vena_cava_C88.compliant_vessel.V);
 
-
     //  Physiolibrary.Types.Fraction phi_norm = phi_ramp.y "Normalized phi value to 1 by phi0 if UsePhi_input = true or by 0.25 otherwise";
-
 
       Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(
           usePressureInput=true)
@@ -40215,7 +40151,6 @@ P_hs_plus_dist"),
         veins_activation_tau=0)
         annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
     equation
-
 
       chi_phi*(1 - phi0) + phi0 = HR_BC.phi;
 
@@ -43365,7 +43300,6 @@ P_hs_plus_dist"),
           __Dymola_Algorithm="Cvode"));
     end simplestVS_components;
 
-
     end Valsalva;
 
     package Exercise
@@ -43378,7 +43312,6 @@ P_hs_plus_dist"),
           annotation (Placement(transformation(extent={{4,-58},{-16,-38}})));
         replaceable Components.Subsystems.Systemic.Systemic_TriSeg systemicComponent
           annotation (Placement(transformation(extent={{-42,42},{34,72}})));
-
 
         output Physiolibrary.Types.Pressure brachial_pressure=systemicComponent.c_ao.q_in.pressure;
       output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
@@ -43677,7 +43610,6 @@ P_hs_plus_dist"),
             mitralValve(calculateAdditionalMetrics=true)),
           settings(phi0=0));
 
-
       end SimpleExercise_Olufsen;
 
       package Identification
@@ -43689,7 +43621,6 @@ P_hs_plus_dist"),
               _C_Ao=0.65*settings.syst_art_k_E,
               _C_SA=1.65*settings.syst_art_k_E,
               inverseProportionalFactor1(scalingFactor=venoconstrictionFactor),
-
               inverseProportionalFactor2(scalingFactor=vasodilatationFactor)),
             condHR(
               UseAdditionalInput=true,
@@ -43771,7 +43702,6 @@ P_hs_plus_dist"),
             vasodilatationFactor=1.717188e+00,
             heartComponent(mitralValve(calculateAdditionalMetrics=true)));
 
-
           annotation ();
         end SimpleCirculation_HFpEF7;
 
@@ -43819,7 +43749,6 @@ P_hs_plus_dist"),
               _C_Ao=0.65*settings.syst_art_k_E,
               _C_SA=1.65*settings.syst_art_k_E,
               inverseProportionalFactor1(scalingFactor=venoconstrictionFactor),
-
               inverseProportionalFactor2(scalingFactor=vasodilatationFactor)),
             condHR(
               UseAdditionalInput=true,
@@ -43921,7 +43850,6 @@ P_hs_plus_dist"),
             venoconstrictionFactor=1.056720e+01,
             vasodilatationFactor=3.768750e+00);
 
-
           annotation (experiment(
               StopTime=60,
               __Dymola_NumberOfIntervals=5000,
@@ -43987,8 +43915,6 @@ P_hs_plus_dist"),
          else
            HR_plot = 0;
          end if;
-
-
 
           annotation (experiment(
               StopTime=60,
@@ -45896,7 +45822,6 @@ P_hs_plus_dist"),
             heartComponent.volume + pulmonaryComponent.volume
           "For debug purposes, should be constant (up to numerical precision)";
 
-
         output Modelica.Units.SI.Length speedSegmentLength=SystemicComponent.common_carotid_L48_A.l
              + SystemicComponent.common_carotid_L48_B.l + SystemicComponent.common_carotid_L48_C.l
              + SystemicComponent.common_carotid_L48_D.l + SystemicComponent.aortic_arch_C64.l
@@ -45921,7 +45846,6 @@ P_hs_plus_dist"),
              + SystemicComponent.abdominal_aorta_C164.l + SystemicComponent.abdominal_aorta_C176.l
              + SystemicComponent.abdominal_aorta_C188.l + SystemicComponent.abdominal_aorta_C192.l
           "Length of the whole aorta for comparison to body size";
-
 
       //     Modelica.SIunits.Weight weight(start = 70) "Body weight estimated from height and BMI";
         Modelica.Units.SI.Height height(start=1.7)
@@ -51604,8 +51528,6 @@ P_hs_plus_dist"),
               // heart_drive_TS_maxAct =          1.223990e-01,
               // heart_drive_TR_maxAct =          1.106879e-01,
 
-
-
           annotation (experiment(
               StopTime=30,
               Interval=0.01,
@@ -51755,7 +51677,6 @@ P_hs_plus_dist"),
             startTime=20)
             "Phi for when the model is not using the autonomous feedback phi from baroreflex"
             annotation (Placement(transformation(extent={{106,-34},{86,-14}})));
-
 
           Physiolibrary.Types.Volume CO_backflow_acc;
         Physiolibrary.Types.Volume CO_backflow;
@@ -51987,7 +51908,6 @@ P_hs_plus_dist"),
 
         end OlufsenTriSeg_optimized2;
 
-
       model OlufsenTriSeg_optimized3 "Generated by PostProcess/postprocess_optim.py optimized at Sep 10 22:37:00 CEST 2020
  with cost 0.000023 lowest at run 1381"
         extends SingleModelRun.ReoptimizeBaseline3(
@@ -52040,7 +51960,6 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end OlufsenTriSeg_optimized4;
-
 
         model experiment
           extends OlufsenTriSeg_optimized3(
@@ -52154,7 +52073,6 @@ P_hs_plus_dist"),
                 coordinateSystem(preserveAspectRatio=false)));
         end OptimizedValsalva;
 
-
       model OlufsenTriSeg_optimized "Generated by PostProcess/postprocess_optim.py optimized at Oct 31 12:36:27 CET 2020
  with cost 0.068118 lowest at run 2417"
         extends ADAN_main.SystemicTree.Baseline.CVS_baseline(
@@ -52197,7 +52115,6 @@ P_hs_plus_dist"),
               heart_vntr_D_0= 13.54688,
               heart_vntr_D_A= 2709.218,
               heart_vntr_Tact =  7.500000e-02));
-
 
         end CVS_baseline_optimized;
 
@@ -55667,7 +55584,6 @@ P_hs_plus_dist"),
         model CombinedModels_FMUs
           "All model variants combined for identification by importing FMU2 CS to have separate solver events"
 
-
           parameter Boolean useBaseline = true;
           parameter Boolean useTilt = true;
           parameter Boolean useExercise = true;
@@ -55682,7 +55598,6 @@ P_hs_plus_dist"),
                                   */
                                             // test
             /* from TriSegOptimizedBaseline */
-
 
           // Fill settings with rubbish and replace the path
           // use a regex find '(\w+)\s?=\s?[0-9e\-.]+' and replace with \1=settings.\1
@@ -56324,7 +56239,6 @@ P_hs_plus_dist"),
           der(CVP)*tau_int = -CVP + P_sv;
           der(PCWP)*tau_int = - PCWP + P_pv;
 
-
           when heartComponent.sa_node.beat then
             PAPs = PAPs_i;
             PAPd = PAPd_i;
@@ -56378,6 +56292,20 @@ P_hs_plus_dist"),
               __Dymola_Algorithm="Cvode"));
         end CVS_fit;
       end AdditionalOutputs;
+
+      package HF "Heart failures"
+        model HFpEF
+          extends CardiovascularSystem(
+            useAutonomousPhi(y=false),
+            settings(heart_vntr_xi_AmRef=0.7),
+            heartComponent(
+              ra(enableCollagen=true, V0_col=6e-05),
+              la(enableCollagen=true, V0_col=6e-05),
+              ventricles(RV_wall(Amref=heart_vntr_xi_AmRef_RV*110))));
+          parameter Real heart_vntr_xi_AmRef_RV=1
+            "midwall reference surface area for right ventricle only, cm^2";
+        end HFpEF;
+      end HF;
     end Identification;
 
     package Baseline
@@ -63143,7 +63071,6 @@ P_hs_plus_dist"),
           parameter Real RV_PConcollagen_f=1.0                                     "contriubtion of collagen [1]";
           parameter Real RV_PExpcollagen_f=1.0                                     "contriubtion of collagen [1]";
 
-
           parameter Physiolibrary.Types.Fraction LVfunctionFraction=1 "Reducing LV and LA contractility, incl. the maximal one";
           parameter Physiolibrary.Types.Fraction RVfunctionFraction=1 "Reducing RV and RA contractility, incl. the maximal one";
 
@@ -63672,7 +63599,6 @@ P_hs_plus_dist"),
               useAutonomousPhi(y=true),
               phi_fixed(nperiod=0, offset=settings.phi0));
 
-
             replaceable Components.Signals.Stepping Exercise(
               startTime=30,
               interval=40,
@@ -63690,7 +63616,6 @@ P_hs_plus_dist"),
               annotation (Placement(transformation(extent={{-20,98},{0,118}})));
           equation
             der(q_exercised_avg)*5 = q_exercised - q_exercised_avg;
-
 
             connect(gain.y,add. u2)
               annotation (Line(points={{-47,102},{-34,102},{-34,102},{-22,102}},
@@ -63948,7 +63873,6 @@ P_hs_plus_dist"),
               annotation (Placement(transformation(extent={{10,-80},{30,-60}})));
           equation
             der(q_exercised_avg)*5 = q_exercised - q_exercised_avg;
-
 
             connect(gain.y,add. u2)
               annotation (Line(points={{-47,102},{-34,102},{-34,102},{-22,102}},
@@ -64887,7 +64811,6 @@ P_hs_plus_dist"),
         Physiolibrary.Hydraulic.Sensors.PressureMeasure p_venous
           annotation (Placement(transformation(extent={{30,-60},{50,-40}})));
 
-
       output Physiolibrary.Types.Pressure brachial_pressure=p_arterial.pressure;
 
       output Physiolibrary.Types.Pressure brachial_pressure_mean(start = 0);
@@ -64915,7 +64838,6 @@ P_hs_plus_dist"),
 
         Physiolibrary.Types.Volume heartPulmonaryVolume=
             heartComponent.volume + pulmonaryComponent.volume;
-
 
         output Physiolibrary.Types.Pressure P_LA = heartComponent.mitralValve.q_in.pressure
           "Pressure in left atria";
@@ -64948,7 +64870,6 @@ P_hs_plus_dist"),
           brachial_pressure_mean = brachial_pressure_int/heartComponent.sa_node.t0_last;
           reinit(brachial_pressure_int, 0);
         end when;
-
 
         connect(inflowResistance1.q_out, venousSetPressure.y) annotation (Line(
             points={{24,-80},{24,-90},{60,-90}},
