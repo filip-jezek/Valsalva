@@ -14722,6 +14722,7 @@ compliance
               "Forward threshold pressure" annotation (Dialog(enable=LimitBackflow));
             Boolean open(start = true);
             Physiolibrary.Types.Pressure dp_valve=p_out -p_out_valved;
+            parameter Physiolibrary.Types.Volume zpv = 0 "Zero-pressure volume" annotation (Dialog(tab = "General", group = "Calculated parameters"));
             protected
             constant Physiolibrary.Types.Pressure unitPressure=1;
             constant Physiolibrary.Types.VolumeFlowRate unitFlow=1;
@@ -14808,7 +14809,7 @@ compliance
 
           partial model PartialSystemicVessel
             "Base model for all systemic arteries and veins"
-            extends PartialSystemicElement;
+            extends PartialSystemicElement(zpv = l*Modelica.Constants.pi*(r^2));
               outer Modelica.Units.SI.Angle Tilt;
             outer Physiolibrary.Types.Fraction Exercise;
 
@@ -14847,7 +14848,7 @@ compliance
             parameter Physiolibrary.Types.HydraulicResistance R_vis=0.01/C "Viscoleastic resistance of the vessel wall (Voigt model) eq from (Safaei 2018)"  annotation (Dialog(                 group=
                     "Calculated parameters"));
 
-            parameter Physiolibrary.Types.Volume zpv = l*Modelica.Constants.pi*(r^2) "Zero-pressure volume" annotation (Dialog(tab = "General", group = "Calculated parameters"));
+          //   parameter Physiolibrary.Types.Volume zpv = l*Modelica.Constants.pi*(r^2) "Zero-pressure volume" annotation (Dialog(tab = "General", group = "Calculated parameters"));
             Physiolibrary.Types.RealIO.FractionOutput distentionFraction = sqrt(max(volume, 0))/sqrt(distentionBase)
            if UseDistentionOutput "Outputs distention from default, for usage by a baroreceptor" annotation (Placement(transformation(extent={{76,10},{96,
                       30}}), iconTransformation(extent={{-20,-20},{20,20}},
@@ -16227,7 +16228,7 @@ P_hs/2")}));
           parameter Physiolibrary.Types.HydraulicInertance I_e=I*1e-6 "Optional venule intertance";
           parameter Physiolibrary.Types.HydraulicResistance Rv "venule resistance";
 
-          parameter Physiolibrary.Types.Volume zpv=0 "Zero-pressure volume";
+        //   parameter Physiolibrary.Types.Volume zpv=0 "Zero-pressure volume";
           parameter Physiolibrary.Types.Pressure nominal_pressure=settings.tissues_P_nom;
           Physiolibrary.Types.Pressure p_C(
             start=nominal_pressure,
@@ -20758,7 +20759,7 @@ P_hs_plus_dist"),
               I = tissueParameters.I_renal_L166,
               C = tissueParameters.C_renal_L166,
               zpv =  tissueParameters.Zpv_renal_L166,
-            nominal_pressure=tissueParameters.tissue_pressure)
+            nominal_pressure=tissueParameters.tissue_pressure) constrainedby Vessel_modules.Auxiliary.PartialSystemicElement
           annotation (Placement(transformation(extent={{35,-67},{55,-62}})));
           replaceable
           Systemic_tissue renal_R178(
@@ -20767,7 +20768,7 @@ P_hs_plus_dist"),
               I = tissueParameters.I_renal_R178,
               C = tissueParameters.C_renal_R178,
               zpv =  tissueParameters.Zpv_renal_R178,
-            nominal_pressure=tissueParameters.tissue_pressure)
+            nominal_pressure=tissueParameters.tissue_pressure) constrainedby Vessel_modules.Auxiliary.PartialSystemicElement
           annotation (Placement(transformation(extent={{35,37},{55,42}})));
           Systemic_artery common_iliac_R216(
             l=systemicParameters.l_common_iliac_R216,
@@ -32417,7 +32418,7 @@ P_hs_plus_dist"),
               "Rewritten from Dan's source in steady state, converted to SI units, divided to one kidney model only. leaking urine!"
             import Physiolibrary.Types.*;
             extends Vessel_modules.Auxiliary.PartialSystemicElement(
-                final UseInertance=false, final LimitBackflow = false);
+                final UseInertance=false, final LimitBackflow = false, zpv = 0);
 
             // adjustment to fit within the infrastructure
           //  parameter Real Ra = 0, Rv = 0, thoracic_pressure_ratio = 0, I = 0, C = 0, zpv = 0, nominal_pressure = 0;
@@ -32507,7 +32508,7 @@ P_hs_plus_dist"),
           equation
             volume = V_AKIDNEY + V_VKIDNEY;
             q_in = F_K1;
-            q_out = -F_K4;
+            q_out = F_K4;
 
             der(V_AKIDNEY) = F_K1 - F_K2;
             der(V_VKIDNEY) = F_K3 - F_K4;
@@ -56305,6 +56306,224 @@ P_hs_plus_dist"),
           parameter Real heart_vntr_xi_AmRef_RV=1
             "midwall reference surface area for right ventricle only, cm^2";
         end HFpEF;
+
+        model TestIdent
+          HFpEF CVS annotation (Placement(transformation(extent={{-100,80},{-80,
+                    100}})));
+          Signals.Max EDV(holdTime=steadyTime)
+            annotation (Placement(transformation(extent={{20,80},{40,100}})));
+          Modelica.Blocks.Sources.RealExpression realExpression(y=CVS.V_LV)
+            annotation (Placement(transformation(extent={{-14,80},{6,100}})));
+          parameter Modelica.Units.SI.Time steadyTime=10
+            "Time, when the step is triggered";
+          Signals.Min ESV(holdTime=steadyTime)
+            annotation (Placement(transformation(extent={{20,52},{40,72}})));
+          Modelica.Blocks.Sources.RealExpression realExpression1(y=CVS.V_LV)
+            annotation (Placement(transformation(extent={{-14,52},{6,72}})));
+          Modelica.Blocks.Sources.RealExpression realExpression2(y=CVS.CO)
+            annotation (Placement(transformation(extent={{-14,26},{6,46}})));
+          Signals.MeanValue meanValue(holdTime=steadyTime)
+            annotation (Placement(transformation(extent={{20,26},{40,46}})));
+          Modelica.Blocks.Sources.RealExpression BPs(y=CVS.brachial_pressure_systolic)
+            annotation (Placement(transformation(extent={{-14,-4},{6,16}})));
+          Modelica.Blocks.Sources.RealExpression BPd(y=CVS.brachial_pressure_diastolic)
+            annotation (Placement(transformation(extent={{-14,-32},{6,-12}})));
+          Signals.Max Ppas(holdTime=steadyTime)
+            annotation (Placement(transformation(extent={{60,-2},{80,18}})));
+          Modelica.Blocks.Sources.RealExpression realExpression3(y=CVS.P_pa)
+            annotation (Placement(transformation(extent={{26,-2},{46,18}})));
+          Signals.Min Ppad(holdTime=steadyTime)
+            annotation (Placement(transformation(extent={{60,-30},{80,-10}})));
+          Modelica.Blocks.Sources.RealExpression realExpression4(y=CVS.P_pa)
+            annotation (Placement(transformation(extent={{26,-30},{46,-10}})));
+          Modelica.Blocks.Sources.RealExpression realExpression5(y=CVS.P_pv)
+            annotation (Placement(transformation(extent={{-14,-60},{6,-40}})));
+          Signals.MeanValue Pw(holdTime=steadyTime)
+            annotation (Placement(transformation(extent={{20,-60},{40,-40}})));
+          Signals.Max P_RVs(holdTime=steadyTime, integrateAndDerive=true)
+            annotation (Placement(transformation(extent={{-72,-54},{-52,-34}})));
+          Modelica.Blocks.Sources.RealExpression realExpression6(y=CVS.heartComponent.ventricles.P_RV)
+            annotation (Placement(transformation(extent={{-142,-54},{-122,-34}})));
+          Signals.Min P_RVd(holdTime=steadyTime, integrateAndDerive=true)
+            annotation (Placement(transformation(extent={{-72,-82},{-52,-62}})));
+          Modelica.Blocks.Sources.RealExpression realExpression7(y=CVS.heartComponent.ventricles.P_RV)
+            annotation (Placement(transformation(extent={{-142,-82},{-122,-62}})));
+        equation
+          connect(meanValue.u, realExpression2.y)
+            annotation (Line(points={{18,36},{7,36}}, color={0,0,127}));
+          connect(realExpression1.y, ESV.u)
+            annotation (Line(points={{7,62},{18,62}}, color={0,0,127}));
+          connect(realExpression.y, EDV.u)
+            annotation (Line(points={{7,90},{18,90}}, color={0,0,127}));
+          connect(realExpression3.y, Ppas.u)
+            annotation (Line(points={{47,8},{58,8}}, color={0,0,127}));
+          connect(realExpression4.y, Ppad.u)
+            annotation (Line(points={{47,-20},{58,-20}}, color={0,0,127}));
+          connect(Pw.u, realExpression5.y)
+            annotation (Line(points={{18,-50},{7,-50}}, color={0,0,127}));
+          connect(realExpression6.y, P_RVs.u)
+            annotation (Line(points={{-121,-44},{-74,-44}}, color={0,0,127}));
+          connect(realExpression7.y, P_RVd.u)
+            annotation (Line(points={{-121,-72},{-74,-72}}, color={0,0,127}));
+          annotation (
+            Icon(coordinateSystem(preserveAspectRatio=false)),
+            Diagram(coordinateSystem(preserveAspectRatio=false)),
+            experiment(
+              StopTime=15,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end TestIdent;
+
+        record Prep
+          extends Optimization.Internal.Version.Current.ModelOptimizationSetup(
+            modelName="ADAN_main.SystemicTree.Identification.HF.TestIdent",
+            plotScript="",
+            saveSetup=true,
+            saveSetupFilename="OptimizationLastRunModel.mo",
+            convertSetup=false,
+            askForTunerReUse=true,
+            tuner=Optimization.Internal.Version.Current.Tuner(
+                        UseTunerMatrixForDiscreteValues=false,
+                        tunerParameters={
+                  Optimization.Internal.Version.Current.TunerParameter(
+                          name="",
+                          active=true,
+                          Value=0.0,
+                          scaleToBounds=false,
+                          min=-10.0,
+                          max=10.0,
+                          equidistant=0,
+                          discreteValues=fill(0.0, 0),
+                          unit="")},
+                        tunerMatrix=fill(
+                          0.0,
+                          0,
+                          1)),
+            criteria={Optimization.Internal.Version.Current.Criterion(
+                        name="",
+                        active=true,
+                        usage=Optimization.Internal.Version.Current.Types.CriterionUsage.Minimize,
+                        demand=1.0,
+                        unit="")},
+            preferences=Optimization.Internal.Version.Current.Preferences(
+                        optimizationOptions=
+                  Optimization.Internal.Version.Current.OptimizationOptions(
+                          method=Optimization.Internal.Version.Current.Types.OptimizationMethod.sqp,
+                          ObjectiveFunctionType=Optimization.Internal.Version.Current.Types.ObjectiveFunctionType.Max,
+                          OptTol=0.001,
+                          maxEval=1000,
+                          GridBlock=50,
+                          evalBestFinal=false,
+                          saveBest=true,
+                          saveHistory=true,
+                          listFilename="OptimizationLog.log",
+                          listOn=true,
+                          listOnline=true,
+                          listIncrement=100,
+                          numberOfShownDigits=3,
+                          onPlace=true,
+                          listTuners=true,
+                          GaPopSize=10,
+                          GaNGen=100),
+                        simulationOptions=
+                  Optimization.Internal.Version.Current.SimulationOptions(
+                          startTime=0.0,
+                          stopTime=1.0,
+                          outputInterval=0.0,
+                          numberOfIntervals=500,
+                          integrationMethod=Optimization.Internal.Version.Current.Types.IntegrationMethod.Dassl,
+                          integrationTolerance=0.001,
+                          fixedStepSize=0.0,
+                          autoLoadResults=true,
+                          useDsFinal=true,
+                          translateModel=false,
+                          setCriteriaSimulationFailed=true,
+                          CriteriaSimulationFailedValue=1000000.0,
+                          simulationMode=Optimization.Internal.Version.Current.Types.SimulationMode.Single,
+                          parallelizationMode=Optimization.Internal.Version.Current.Types.ParallelizationMode.None,
+                          numberOfThreads=0,
+                          copyFiles=fill("", 0)),
+                        sensitivityOptions=
+                  Optimization.Internal.Version.Current.SensitivityOptions(
+                          TypeOfSensitivityComputation=Optimization.Internal.Version.Current.Types.SensitivityMethod.ExternalDifferencesSymmetric,
+                          automaticSensitivityTolerance=true,
+                          sensitivityTolerance=1E-06)));
+        end Prep;
+
+        package Results
+          model HFpEF_optimized "Generated by PostProcess/postprocess_optim.py optimized at Sep 21 21:34:43 CEST 2021
+ with cost 0.000450 lowest at run 1407"
+            extends HFpEF( settings(
+                baro_tau_s=6,
+                baro_f1=3.8e-03,
+                pulm_C_PA=4.82832e-09,
+                syst_TPR=155666800,
+                heart_vntr_xi_AmRef=0.8717188,
+                pulm_R =          4.737510e+07,
+                syst_art_k_E=1.499671,
+                heart_vntr_D_A =          1.095408e+03,
+                V_PV_init=0.0009357812),
+                heart_vntr_xi_AmRef_RV = 4.743750e-01,
+              useAutonomousPhi(y=true));
+
+          end HFpEF_optimized;
+
+          model Renals_HFpEF
+            extends Variations.Renals.CardiovascularSystem_Renals_ss(
+            settings(
+                baro_tau_s=6,
+                baro_f1=3.8e-03,
+                pulm_C_PA=4.82832e-09,
+                syst_TPR=155666800,
+                heart_vntr_xi_AmRef=0.8717188,
+                pulm_R =          4.737510e+07,
+                syst_art_k_E=1.499671,
+                heart_vntr_D_A =          1.095408e+03,
+                V_PV_init=0.0009357812),
+              useAutonomousPhi(y=true),
+            heartComponent(
+                ra(enableCollagen=true, V0_col=6e-05),
+                la(enableCollagen=true, V0_col=6e-05),
+                ventricles(RV_wall(Amref=heart_vntr_xi_AmRef_RV*110))));
+
+            parameter Real heart_vntr_xi_AmRef_RV=4.743750e-01
+              "midwall reference surface area for right ventricle only, cm^2";
+            annotation (experiment(
+                StopTime=600,
+                Interval=0.04,
+                Tolerance=1e-06,
+                __Dymola_Algorithm="Cvode"));
+          end Renals_HFpEF;
+
+          model HFpEF_exercise
+            extends HFpEF_optimized(SystemicComponent(UseBaroreflexOutput=false,
+                  UseExerciseInput=true));
+                        Components.Signals.Stepping  Exercise(
+              startTime=40,
+              interval=40,
+              increment=0.1,
+              maxVal=1)
+              annotation (Placement(transformation(extent={{-100,56},{-80,76}})));
+            Modelica.Blocks.Math.Gain gain(k=0.75)
+              annotation (Placement(transformation(extent={{-66,36},{-46,56}})));
+            Modelica.Blocks.Math.Add add
+              annotation (Placement(transformation(extent={{-18,42},{2,62}})));
+          equation
+            connect(Exercise.y, SystemicComponent.exercise_input) annotation (Line(
+                  points={{-79,66},{-34,66},{-34,36},{-28,36}}, color={0,0,127}));
+            connect(Exercise.y,gain. u) annotation (Line(points={{-79,66},{-76,
+                    66},{-76,46},{-68,46}},
+                                        color={0,0,127}));
+            connect(gain.y,add. u2)
+              annotation (Line(points={{-45,46},{-20,46}}, color={0,0,127}));
+            connect(phi_fixed.y,add. u1) annotation (Line(points={{-35,84},{-32,
+                    84},{-32,58},{-20,58}},
+                                        color={0,0,127}));
+            connect(add.y, switch1.u1) annotation (Line(points={{3,52},{10,52},
+                    {10,70.2},{14.3,70.2}},
+                                        color={0,0,127}));
+          end HFpEF_exercise;
+        end Results;
       end HF;
     end Identification;
 
@@ -62807,7 +63026,7 @@ P_hs_plus_dist"),
 
       package Renals
         model CardiovascularSystem_Renals
-          extends CardiovascularSystem(
+          extends Auxiliary.partialCVS_outputs(
             SystemicComponent(
               useCapillaryPressureOutputs=true,
               redeclare
@@ -62885,11 +63104,15 @@ P_hs_plus_dist"),
                 abdominal_aorta_C192(q_in(start = 2.0241987e-05, fixed = true), volume(start = 1.0117922e-05, fixed = true)),
                 celiac_trunk_C116(volume(start = 0.0003475803, fixed = true), phi_delayed(start = 0.2530279, fixed = true)),
                 renal_L166(
+                volume(fixed=false),
                 tau_R_K_afferent=10,
-                           V_AKIDNEY(start = 4.5052993e-06, fixed = true), V_VKIDNEY(start = 4.606398e-06, fixed = true), A_myo(start = 0.3026051, fixed = true), D_aff(start = 9.311087, fixed = true)),
+                V_AKIDNEY(start=4.5052993e-06, fixed=true),
+                V_VKIDNEY(start=4.606398e-06, fixed=true),                                                                A_myo(start = 0.3026051, fixed = true), D_aff(start = 9.311087, fixed = true)),
                 renal_R178(
+                volume(fixed=false),
                 tau_R_K_afferent=10,
-                           V_AKIDNEY(start = 4.508612e-06, fixed = true), V_VKIDNEY(start = 4.605769e-06, fixed = true), A_myo(start = 0.30246243, fixed = true), D_aff(start = 9.31289, fixed = true)),
+                V_AKIDNEY(start=4.508612e-06, fixed=true),
+                V_VKIDNEY(start=4.605769e-06, fixed=true),                                                               A_myo(start = 0.30246243, fixed = true), D_aff(start = 9.31289, fixed = true)),
                 common_iliac_R216(q_in(start = 1.05641175e-05, fixed = true), volume(start = 8.4538415e-06, fixed = true)),
                 internal_iliac_T1_R218(volume(start = 0.00017084694, fixed = true), phi_delayed(start = 0.2530279, fixed = true)),
                 external_iliac_R220(q_in(start = 5.81231e-06, fixed = true), volume(start = 4.865387e-06, fixed = true)),
@@ -65251,7 +65474,8 @@ P_hs_plus_dist"),
 <p>Generated from <a href=\"https://models.cellml.org/workspace/4ac\">https://models.cellml.org/workspace/4ac</a> Revision: b580e909bfa88dbf598e9fd1f4b15024e676e9b6 from Date: 2019-04-08 8:13:36 AM, Message: tuning the param for veins</p>
 </html>"));
   end SystemicTree;
-  annotation (preferredView="info",uses(Modelica(version="4.0.0"), Physiolibrary(version="2.4.1")),
+  annotation (preferredView="info",uses(Modelica(version="4.0.0"), Physiolibrary(version="2.4.1"),
+      Optimization(version="2.2.5")),
                        experiment(
       StopTime=60,
       __Dymola_NumberOfIntervals=1500,

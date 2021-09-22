@@ -45,7 +45,7 @@ def plotObjectives(vars_set, interval, objectives):
 def getObjectives(vars_set):
     vars_set['__draw_plots'] = False
     
-    fun_lib.checkSimulationLength(vars_set['time'][-1],20, penalty=1000)
+    fun_lib.checkSimulationLength(vars_set['time'][-1],15, penalty=1000)
     # we have 3 intervals
     # baseline resting volumes and CO
     # baseline resting pressures and CO
@@ -79,8 +79,9 @@ def getObjectives(vars_set):
 
     time = vars_set['time']
 
-    steady1 = 20
-    interval = fun_lib.findInterval(time[0] + steady1-3, time[0] + steady1, time)
+    # steady1 = 15
+    # interval = fun_lib.findInterval(time[0] + steady1-3, time[0] + steady1, time)
+    interval = fun_lib.findInterval(time[-1] -3, time[-1], time)
 
     # ratio of CO calculated from LV volumes and other methods.
     # Used to scale the LV volumes to reasonable values
