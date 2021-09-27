@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(12293,100)
+char initialName(12303,100)
 settings.phi0
 settings.height
 settings.weight
@@ -12393,11 +12393,21 @@ simplestLymphaticDynamicSpeedUp.step1.y
 simplestLymphaticDynamicSpeedUp.step1.offset
 simplestLymphaticDynamicSpeedUp.step1.startTime
 pressureMeasure.q_in.q
+LV_stiff
+LV_SLcollagen_f
+LV_PConcollagen_f
+LV_PExpcollagen_f
+RV_stiff
+RV_SLcollagen_f
+RV_PConcollagen_f
+RV_PExpcollagen_f
+LVfunctionFraction
+RVfunctionFraction
 heart_vntr_xi_AmRef_RV
 CPUtime
 EventCounter
 
-double initialValue(12293,6)
+double initialValue(12303,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -12406,7 +12416,7 @@ double initialValue(12293,6)
   6   256   # settings.weight
  -1      35                       0                       0                
   1   280   # settings.age
- -1  1.0666666666667000E+00       0                       0                
+ -1  1.2166666666666670E+00       0                       0                
   1   280   # settings.HR_nominal
  -1  3.1666666666666998E+00       0                       0                
   1   280   # settings.HR_max
@@ -12494,7 +12504,7 @@ double initialValue(12293,6)
   1   280   # settings.syst_tissues_hydrostaticLevel_correction
  -1 %settings.syst_TPR% 0.0 1e+100
   1   280   # settings.syst_TPR
- -1      10                       0                       0                
+ -1  5.2277100000000001E+00       0                       0                
   1   280   # settings.syst_TR_frac
   0       0                       0                       0                
   6   256   # settings.tissues_Pa_nom
@@ -12582,7 +12592,7 @@ double initialValue(12293,6)
   6   257   # settings.baro_useAbsolutePressureTerm
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
- -1       6                       0                       0                
+ -1      10                       0                       0                
   1   280   # settings.baro_tau_s
  -1  6.5100000000000005E-02       0                       0                
   1   280   # settings.baro_a
@@ -12600,7 +12610,7 @@ double initialValue(12293,6)
   1   280   # settings.baro_g
  -1  3.5533333299999997E-02       0                       0                
   1   280   # settings.baro_fsn
- -1  3.8000000000000000E-03       0                       0                
+ -1  3.6250000000000002E-03       0                       0                
   1   280   # settings.baro_f1
  -1  8.0833333333332999E-05       0                       0                
   1   280   # settings.pulm_CO_target
@@ -35656,8 +35666,8 @@ double initialValue(12293,6)
   6   256   # heartComponent.ventricles.LV_wall.PConcollagen
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.PExpcollagen
- -1       1                       0                       0                
-  1   280   # heartComponent.ventricles.LV_wall.contractilityFraction
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.LV_wall.contractilityFraction
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.LV_wall.Tm
   0       0                       0                       0                
@@ -35722,8 +35732,8 @@ double initialValue(12293,6)
   6   256   # heartComponent.ventricles.SEP_wall.PConcollagen
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.PExpcollagen
- -1       1                       0                       0                
-  1   280   # heartComponent.ventricles.SEP_wall.contractilityFraction
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.SEP_wall.contractilityFraction
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.SEP_wall.Tm
   0       0                       0                       0                
@@ -35788,8 +35798,8 @@ double initialValue(12293,6)
   6   256   # heartComponent.ventricles.RV_wall.PConcollagen
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.PExpcollagen
- -1       1                       0                       0                
-  1   280   # heartComponent.ventricles.RV_wall.contractilityFraction
+  0       0                       0                       0                
+  6   256   # heartComponent.ventricles.RV_wall.contractilityFraction
   0       0                       0                       0                
   6   256   # heartComponent.ventricles.RV_wall.Tm
   0       0                       0                       0                
@@ -35950,8 +35960,8 @@ double initialValue(12293,6)
   3   256   # heartComponent.ra.der(currentWork)
   0       0                       0                       0                
   6   328   # heartComponent.ra.work
- -1       1                       0                       0                
-  1   280   # heartComponent.ra.contractilityFraction
+  0       0                       0                       0                
+  6   256   # heartComponent.ra.contractilityFraction
  -1       1                       0                       0                
   1   281   # heartComponent.ra.enableCollagen
  -1  6.0000000000000002E-05       0                 1.0000000000000000E+100
@@ -35982,8 +35992,8 @@ double initialValue(12293,6)
   3   256   # heartComponent.la.der(currentWork)
   0       0                       0                       0                
   6   328   # heartComponent.la.work
- -1       1                       0                       0                
-  1   280   # heartComponent.la.contractilityFraction
+  0       0                       0                       0                
+  6   256   # heartComponent.la.contractilityFraction
  -1       1                       0                       0                
   1   281   # heartComponent.la.enableCollagen
  -1  6.0000000000000002E-05       0                 1.0000000000000000E+100
@@ -36978,8 +36988,28 @@ double initialValue(12293,6)
   6   256   # simplestLymphaticDynamicSpeedUp.step1.startTime
   0       0                       0                       0                
   6   388   # pressureMeasure.q_in.q
- -1 %heart_vntr_xi_AmRef_RV% 0.0 0.0
-  1   280   # heart_vntr_xi_AmRef_RV
+ -1       1                       0                       0                
+  1   280   # LV_stiff
+ -1       1                       0                       0                
+  1   280   # LV_SLcollagen_f
+ -1       1                       0                       0                
+  1   280   # LV_PConcollagen_f
+ -1       1                       0                       0                
+  1   280   # LV_PExpcollagen_f
+ -1       1                       0                       0                
+  1   280   # RV_stiff
+ -1       1                       0                       0                
+  1   280   # RV_SLcollagen_f
+ -1       1                       0                       0                
+  1   280   # RV_PConcollagen_f
+ -1       1                       0                       0                
+  1   280   # RV_PExpcollagen_f
+ -1 %LVfunctionFraction% 0.0 0.0
+  1   280   # LVfunctionFraction
+ -1       1                       0                       0                
+  1   280   # RVfunctionFraction
+  0       0                       0                       0                
+  6   256   # heart_vntr_xi_AmRef_RV
   0       0                       0                       0                
   4   256   # CPUtime
   0       0                       0                       0                
@@ -37030,7 +37060,7 @@ double initialValue(12293,6)
 #   Which variables will be important for initialization and continue
 #   is indicated by value in column 6 & dsStartMasks.
 #
-char initialDescription(12293,232)
+char initialDescription(12303,232)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -49321,7 +49351,17 @@ Connector of Real output signal
 Offset of output signal y
 Output y = offset for time < startTime [s]
 Volume flow [m3/s|ml/min]
-midwall reference surface area for right ventricle only, cm^2
+Stiffening factor
+threshold for collagen activation, [um] []
+contriubtion of collagen [1] []
+contriubtion of collagen [1] []
+Stiffening factor
+threshold for collagen activation, [um] []
+contriubtion of collagen [1] []
+contriubtion of collagen [1] []
+Reducing LV and LA contractility, incl. the maximal one [1|%]
+Reducing RV and RA contractility, incl. the maximal one [1|%]
+midwall reference surface area for right ventricle only, cm^2 [1]
 [s]
 
 

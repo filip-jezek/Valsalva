@@ -1,0 +1,9 @@
+# name, value, [min, max, step]
+settings.pulm_C_PA,1.635189e-08,0.050332509566498e-09,7.695631768176351e-08,2.89219e-09
+settings.syst_TPR,128733300.0,15859970.0,1041606630.0,1287333.0
+settings.heart_vntr_xi_AmRef,1.0,0.09999999999999998,1.9,0.01
+settings.pulm_R,10197530.0,177777.0,112172830.0,501975.3
+settings.syst_art_k_E,0.4402957,0.01,5,0.1
+settings.heart_vntr_D_A,1298.533,500,30000,50
+settings.V_PV_init,0.0,-1e-3,1e-3,10e-6
+LVfunctionFraction,1.0, 0.1, 1, 0.05
