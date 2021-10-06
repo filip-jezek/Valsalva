@@ -32565,7 +32565,7 @@ P_hs_plus_dist"),
             model Ascites
               "Ascites build up model by Levitt and Levitt (PMID 22453061)"
 
-              parameter Boolean steadyState = true;
+              parameter Boolean steadyState = false;
 
               Real J_L=max(0,L_L*(P_L - P_A - P_Break)) "LIver leak, eq. 19";
               Real J_lymph= max(0, L_Y*(P_A - P_RA + P_min)) "Lymph flow, eq. 20";
@@ -32583,8 +32583,8 @@ P_hs_plus_dist"),
               Real P_I "Intestinal pressure";
 
               parameter Real P_Break = 8 "mmHg";
-              parameter Real P_RA = 2 "mmHg";
-              parameter Real P_HPVG= 4 "mmHg";
+              parameter Real P_RA = 5 "mmHg";
+              parameter Real P_HPVG= 16 "mmHg";
               parameter Real P_min = 2 "mmHg";
               parameter Real L_L=10.3 "Conductance of ruptured liver lymphatics ml/h/mmHg";
               parameter Real L_Y=7.86 "ml/h/mmHg";
@@ -32615,15 +32615,15 @@ P_hs_plus_dist"),
               // time-varying
               Real V(start= 200)=V_min + D*(P_A - P_min) "Eq. 24";
               Real V_I(start = 60);
-              Real Amt_A = Pi_A * V "peritoneal Protein amount ";
-              Real Amt_I = Pi_I * V_I "Intestinal Protein amount ";
+              Real Amt_A = Pi_A / V "peritoneal Protein amount ";
+              Real Amt_I = Pi_I / V_I "Intestinal Protein amount ";
 
               Real dV;
               Real dV_I;
               Real dAmt_A;
               Real dAmt_I;
             equation
-              if ascites then
+              if not ascites then
                 P_HV = P_RA + 2;
                 P_P = P_RA + F_L*R_L + 2 "Eq.23";
                 //P_C = P_RA + F_L*R_L + 5;
@@ -32683,7 +32683,8 @@ P_hs_plus_dist"),
 
             model AscitesSS
               "Ascites build up model by Levitt and Levitt (PMID 22453061)"
-            //
+              //
+              constant Real h2min = 1/60;
                Real J_L=max(0,L_L*(P_L - P_A - P_Break)) "LIver leak, eq. 19";
                Real J_lymph= max(0,L_Y*(P_A - P_RA + P_min)) "Lymph flow, eq. 20";
                Real J_I;
@@ -32703,9 +32704,9 @@ P_hs_plus_dist"),
                parameter Real P_RA = 2 "mmHg";
                Real P_HPVG = time "4 mmHg";
                parameter Real P_min = 2 "mmHg";
-               parameter Real L_L=10.3 "Conductance of ruptured liver lymphatics ml/h/mmHg";
-               parameter Real L_Y=7.86 "ml/h/mmHg";
-               parameter Real L_T=6.25 "Intestinal Blood to peritoneal conductance ml/h/mmHg";
+               parameter Real L_L=10.3*h2min "Conductance of ruptured liver lymphatics ml/h/mmHg";
+               parameter Real L_Y=7.86*h2min "ml/h/mmHg";
+               parameter Real L_T=6.25*h2min "Intestinal Blood to peritoneal conductance ml/h/mmHg";
             //   parameter Real L_I=2*L_T "ml/h/mmHg";
             //   parameter Real L_C=2*L_T "ml/h/mmHg";
             //
@@ -32729,8 +32730,8 @@ P_hs_plus_dist"),
             //   // time-varying
                Real V(start= 200)=V_min + D*(P_A - P_min) "Eq. 24";
             //
-               Real dV;
-               Real dAmt_A;
+             //  Real dV;
+              // Real dAmt_A;
             equation
                if not ascites then
                  P_HV = P_RA + 2;
@@ -32748,14 +32749,14 @@ P_hs_plus_dist"),
             //
                P_HPVG = P_P - P_HV;
             //
-               dV = J_I + J_L - J_lymph "Eq. 21";
-               dAmt_A = m*Pi_P*(J_I + J_L) - Pi_A*J_lymph "Eq. 22";
+               J_lymph = J_I + J_L "Eq. 21";
+               Pi_A*J_lymph = m*Pi_P*(J_L) "Eq. 22";
             //
             //     Pi_I = Pi_P + P_A  - P_C "Equation 3";
-                 dV = 0 "Eq. 21";
+                 //dV = 0 "Eq. 21";
             //     J_lymph=J_I + J_L "Eq. 21";
             //     //dV_I = 0;
-                 dAmt_A = 0 "Eq. 22";
+                // dAmt_A = 0 "Eq. 22";
             //     //dAmt_I = 0;
             //
                  J_I = L_T*((P_C - P_A) - (Pi_P - Pi_A)) "Eq. 18";
@@ -32772,8 +32773,8 @@ P_hs_plus_dist"),
               annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                     coordinateSystem(preserveAspectRatio=false)),
                 experiment(
-                  StartTime=1,
-                  StopTime=14,
+                  StartTime=6,
+                  StopTime=25,
                   __Dymola_Algorithm="Dassl"));
             end AscitesSS;
           end Splanchnic;
@@ -32901,6 +32902,51 @@ P_hs_plus_dist"),
                 Tolerance=1e-07,
                 __Dymola_Algorithm="Dassl"));
           end LymphaticTest;
+
+          model testBasicLymphatics
+            BasicLymphatics basicLymphatics(
+              nc=nc,
+              resistor(Resistance(displayUnit="(mmHg.min)/l") = 15998686.4898),
+              capillaryMembrane(cond(displayUnit="ml/(mmHg.day)")=
+                  3.4725072955817e-10),
+              unlimitedPump(useSolutionFlowInput=false, SolutionFlow(
+                    displayUnit="l/day") = 4.6296296296296e-08),
+              speedUpCommand(speedUp=if time > 100 then 60 else 3600),
+              pumpPressureHead(p_head=3199.73729796),
+              iSFOsm(useOsmolarityInput=true),
+              resistor1(Resistance(displayUnit="(mmHg.min)/ml")=
+                  7999343244.900001*(10/2.7777)),
+              osmolarities(P_oncotic(displayUnit="mmHg") = 2533.13),
+              unlimitedVolume(usePressureInput=false, P=533.28954966),
+              elasticVessel(volume_start=0.0005, Compliance(displayUnit=
+                      "l/mmHg") = 3.7503078792283e-07),
+              booleanExpression(y=time > 100))
+              annotation (Placement(transformation(extent={{-20,0},{0,20}})));
+
+            Modelica.Blocks.Sources.RealExpression realExpression(y=20/mmHg2SI)
+              annotation (Placement(transformation(extent={{-84,2},{-64,22}})));
+            parameter Physiolibrary.Types.Pressure mmHg2SI(displayUnit="Pa")=1/
+              133.322387415
+              "Value of Real output";
+            parameter Integer nc=1;
+            Modelica.Blocks.Routing.Replicator replicator
+              annotation (Placement(transformation(extent={{-54,2},{-34,22}})));
+            Modelica.Blocks.Sources.RealExpression realExpression1(y=4/mmHg2SI)
+              annotation (Placement(transformation(extent={{40,0},{20,20}})));
+          equation
+            connect(realExpression.y, replicator.u)
+              annotation (Line(points={{-63,12},{-56,12}}, color={0,0,127}));
+            connect(basicLymphatics.capillaryPressures, replicator.y)
+              annotation (Line(points={{-19.6,11.6},{-33,12}}, color={0,0,127}));
+            connect(realExpression1.y, basicLymphatics.p_vc) annotation (Line(
+                  points={{19,10},{19,11.6},{-0.4,11.6}}, color={0,0,127}));
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)),
+              experiment(
+                StopTime=2400,
+                Tolerance=1e-06,
+                __Dymola_Algorithm="Dassl"));
+          end testBasicLymphatics;
         end Testers;
 
         model DynamicLymphatics
@@ -33143,6 +33189,7 @@ P_hs_plus_dist"),
         //     capillaryPressures_mean[i];
           end for;
 
+
         //   der(p_vc_mean)*tau = p_vc - p_vc_mean;
         // J1_s = sum(J1);
 
@@ -33222,6 +33269,450 @@ P_hs_plus_dist"),
                   textString="VC")}),                                    Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end SimplestLymphaticDynamicSpeedUp;
+
+        model BasicLymphatics
+          "A object-oriented implementation of SimplestLymphatics"
+          extends Physiolibrary.Icons.Lymph;
+
+          parameter Integer nc = 1;
+           Physiolibrary.Types.RealIO.PressureInput
+                                capillaryPressures[nc] annotation (Placement(transformation(extent={{-112,
+                    -10},{-92,10}}),
+                                 iconTransformation(extent={{-106,6},{-86,26}})));
+          Physiolibrary.Types.RealIO.PressureInput
+                               p_vc "vena cava pressure"
+                                                        annotation (Placement(transformation(extent={{192,0},
+                    {212,20}}), iconTransformation(extent={{106,6},{86,26}})));
+          Auxiliary.ISF iSF(useVariableSpeedUp=true)
+            annotation (Placement(transformation(extent={{0,0},{20,20}})));
+          Physiolibrary.Osmotic.Components.Membrane capillaryMembrane[nc](
+              useHydraulicPressureInputs=true)
+            annotation (Placement(transformation(extent={{-70,90},{-50,70}})));
+          Physiolibrary.Hydraulic.Components.Resistor resistor(Resistance=
+                7999343244.9)
+            annotation (Placement(transformation(extent={{60,0},{80,20}})));
+            Auxiliary.ElasticVesselSpeedUp elasticVessel(useVariableSpeedUp=true)
+            annotation (Placement(transformation(extent={{86,0},{106,20}})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedVolume unlimitedVolume(
+              usePressureInput=true)
+            annotation (Placement(transformation(extent={{190,0},{170,20}})));
+          Physiolibrary.Osmotic.Sources.UnlimitedSolution iSFOsm[nc](
+              useOsmolarityInput=true)
+            annotation (Placement(transformation(extent={{20,70},{0,90}})));
+          Physiolibrary.Osmotic.Sensors.FlowMeasure capFlowMeasure[nc]
+            annotation (Placement(transformation(extent={{-30,70},{-10,90}})));
+          Physiolibrary.Osmotic.Sources.UnlimitedSolution bloodOsm[nc](Osm=
+                osm_plasma)
+            annotation (Placement(transformation(extent={{-100,70},{-80,90}})));
+          Modelica.Blocks.Routing.Replicator replicator(nout=nc)
+            annotation (Placement(transformation(extent={{-54,40},{-44,52}})));
+          Modelica.Blocks.Sources.RealExpression iSFPressureConst
+            annotation (Placement(transformation(extent={{-86,35},{-66,57}})));
+          Modelica.Blocks.Math.MultiSum multiSum(nu=nc) annotation (Placement(
+                transformation(
+                extent={{-6,-6},{6,6}},
+                rotation=270,
+                origin={-20,50})));
+          Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(
+              useSolutionFlowInput=true)
+            annotation (Placement(transformation(extent={{-30,0},{-10,20}})));
+          Physiolibrary.Hydraulic.Components.PumpPressureHead pumpPressureHead(p_head=2666.4477483)
+            annotation (Placement(transformation(extent={{28,0},{48,20}})));
+          Physiolibrary.Hydraulic.Sensors.FlowMeasure flowMeasure
+            annotation (Placement(transformation(extent={{142,20},{162,0}})));
+          Auxiliary.SpeedUpCommand speedUpCommand(speedUp=if time > 10 then 60 else 60000)
+            annotation (Placement(transformation(extent={{0,38},{20,58}})));
+          Auxiliary.Osmolarities osmolarities
+            annotation (Placement(transformation(extent={{60,70},{40,90}})));
+          parameter Physiolibrary.Types.Osmolarity osm_plasma=280
+            "Fixed osmolarity at port if useOsmolarityInput=false";
+          Modelica.Blocks.Routing.Replicator replicator1(nout=nc)
+            annotation (Placement(transformation(extent={{34,76},{26,84}})));
+          Physiolibrary.Hydraulic.Components.Resistor resistor1(Resistance=
+                7999343244.9)
+            annotation (Placement(transformation(extent={{114,0},{134,20}})));
+          Auxiliary.Averager averager[nc] annotation (Placement(transformation(
+                extent={{-10,-10},{10,10}},
+                rotation=90,
+                origin={-92,28})));
+          Modelica.Blocks.Math.Add add(k1=-1) annotation (Placement(
+                transformation(extent={{-38,-30},{-58,-10}})));
+          Modelica.Blocks.Logical.Switch switch1 annotation (Placement(
+                transformation(extent={{-74,-60},{-94,-40}})));
+          Modelica.Blocks.Sources.BooleanExpression booleanExpression(y=time >
+                10) annotation (Placement(transformation(extent={{-38,-60},{-58,
+                    -40}})));
+          Physiolibrary.Types.Constants.VolumeFlowRateConst volumeFlowRate(k=0)
+            annotation (Placement(transformation(extent={{-50,-66},{-58,-58}})));
+          Physiolibrary.Types.RealIO.VolumeFlowRateOutput dLymphFlow
+            "Difference of lymphatic inflow/outflow, i.e. volume stolen from circulation"
+            annotation (Placement(transformation(extent={{-100,-60},{-120,-40}})));
+        equation
+
+          connect(elasticVessel.q_in, resistor.q_out) annotation (Line(
+              points={{96,10},{80,10}},
+              color={0,0,0},
+              thickness=1));
+          connect(unlimitedVolume.pressure, p_vc)
+            annotation (Line(points={{190,10},{202,10}},      color={0,0,127}));
+          connect(bloodOsm.port, capillaryMembrane.q_in) annotation (Line(
+              points={{-80,80},{-70,80}},
+              color={127,127,0},
+              thickness=1));
+          connect(capillaryMembrane.q_out, capFlowMeasure.q_in) annotation (Line(
+              points={{-50,80},{-30,80}},
+              color={127,127,0},
+              thickness=1));
+          connect(capFlowMeasure.q_out, iSFOsm.port) annotation (Line(
+              points={{-10,80},{0,80}},
+              color={127,127,0},
+              thickness=1));
+          connect(replicator.y, capillaryMembrane.hydraulicPressureOut) annotation (
+              Line(points={{-43.5,46},{-40,46},{-40,60},{-52,60},{-52,72}}, color={0,0,127}));
+          connect(iSFPressureConst.y, replicator.u)
+            annotation (Line(points={{-65,46},{-55,46}}, color={0,0,127}));
+          connect(capFlowMeasure.volumeFlowRate, multiSum.u)
+            annotation (Line(points={{-20,72},{-20,56}}, color={0,0,127}));
+          connect(unlimitedPump.q_out, iSF.port_a) annotation (Line(
+              points={{-10,10},{10,10}},
+              color={0,0,0},
+              thickness=1));
+          connect(multiSum.y, unlimitedPump.solutionFlow)
+            annotation (Line(points={{-20,42.98},{-20,17}}, color={0,0,127}));
+          connect(iSF.port_a, pumpPressureHead.q_in) annotation (Line(
+              points={{10,10},{28,10}},
+              color={0,0,0},
+              thickness=1));
+          connect(pumpPressureHead.q_out, resistor.q_in) annotation (Line(
+              points={{48,10},{60,10}},
+              color={0,0,0},
+              thickness=1));
+          connect(unlimitedVolume.y, flowMeasure.q_out) annotation (Line(
+              points={{170,10},{162,10}},
+              color={0,0,0},
+              thickness=1));
+          connect(speedUpCommand.y, elasticVessel.speedUpCoeff)
+            annotation (Line(points={{21,48},{88,48},{88,18}}, color={0,0,127}));
+          connect(iSF.speedUpCoeff, elasticVessel.speedUpCoeff) annotation (Line(points=
+                 {{2,18},{2,30},{40,30},{40,48},{88,48},{88,18}}, color={0,0,127}));
+          connect(iSFOsm.osmolarity, replicator1.y)
+            annotation (Line(points={{20,80},{25.6,80}}, color={0,0,127}));
+          connect(osmolarities.osmolarity, replicator1.u)
+            annotation (Line(points={{40,80},{34.8,80}}, color={0,0,127}));
+          connect(flowMeasure.q_in, resistor1.q_out) annotation (Line(
+              points={{142,10},{134,10}},
+              color={0,0,0},
+              thickness=1));
+          connect(resistor1.q_in, elasticVessel.q_in) annotation (Line(
+              points={{114,10},{96,10}},
+              color={0,0,0},
+              thickness=1));
+          connect(capillaryPressures, averager.u) annotation (Line(points={{
+                  -102,0},{-92,0},{-92,16}}, color={0,0,127}));
+          connect(averager.y, capillaryMembrane.hydraulicPressureIn)
+            annotation (Line(points={{-92,39},{-92,60},{-68,60},{-68,72}},
+                color={0,0,127}));
+          connect(multiSum.y, add.u1) annotation (Line(points={{-20,42.98},{-20,
+                  22},{-32,22},{-32,-14},{-36,-14}}, color={0,0,127}));
+          connect(flowMeasure.volumeFlow, add.u2) annotation (Line(points={{152,
+                  -2},{152,-26},{-36,-26}}, color={0,0,127}));
+          connect(switch1.u1, add.y) annotation (Line(points={{-72,-42},{-72,
+                  -20},{-59,-20}}, color={0,0,127}));
+          connect(switch1.u2, booleanExpression.y)
+            annotation (Line(points={{-72,-50},{-59,-50}}, color={255,0,255}));
+          connect(volumeFlowRate.y, switch1.u3) annotation (Line(points={{-59,
+                  -62},{-66,-62},{-66,-58},{-72,-58}}, color={0,0,127}));
+          connect(switch1.y, dLymphFlow)
+            annotation (Line(points={{-95,-50},{-110,-50}}, color={0,0,127}));
+          annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                coordinateSystem(preserveAspectRatio=false)));
+        end BasicLymphatics;
+
+        package Auxiliary
+          model partialConditionalSpeed
+            Modelica.Blocks.Interfaces.RealInput speedUpCoeff = speed*timeUnit
+              if useVariableSpeedUp                                                 annotation (Placement(
+                  transformation(extent={{-120,70},{-80,110}}),  iconTransformation(
+                    extent={{-100,60},{-60,100}})));
+            parameter Boolean useVariableSpeedUp=false  annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="Speed"));
+            parameter Modelica.Units.SI.Time speedUp = 1 "A time coefficient"  annotation (Dialog(enable=not useV0Input));
+          protected
+            Physiolibrary.Types.Fraction speed "A speed-up coefficient to 1s" annotation(HideResult=true);
+            constant Modelica.Units.SI.Time timeUnit = 1;
+          equation
+
+            if not useVariableSpeedUp then
+              speed*timeUnit = speedUp;
+            end if;
+
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={Text(
+                    extent={{-100,100},{100,160}},
+                    textColor={238,46,47},
+                    textString="%speedUp",
+                    visible=DynamicSelect(true, speedUp <> 1 or not useVariableSpeedUp))}),          Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end partialConditionalSpeed;
+
+          model ISF "A basic ISF volume-pressure characteristics"
+            extends Physiolibrary.Icons.ElasticBalloon;
+            extends partialConditionalSpeed;
+            import Physiolibrary.Types.Volume;
+            import Physiolibrary.Types.Pressure;
+            import Physiolibrary.Types.Fraction;
+            Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a port_a annotation (
+                Placement(transformation(extent={{-272,-48},{-252,-28}}),
+                  iconTransformation(extent={{-10,-10},{10,10}})));
+
+
+          output Pressure p_isf(displayUnit="mmHg")
+              "Default 10mmHg in healthy individual";
+          parameter Real p1 =   6.443e-09;
+          parameter Real p2 =   4.159e-05;
+          parameter Real p3 =       1.045;
+          parameter Real a =        1.06;
+          parameter Real b =  -5.451e-05;
+          parameter Real c =     -0.7703;
+          parameter Real d =  -0.0007743;
+          parameter Real k = 100;
+          parameter Pressure p_int_diff=1866.51342381;
+          Pressure x= p_isf   - p_int_diff;
+
+          // 1/(1+exp(-k*breakpoint))*breakpoint is numerically more stable than max(breakpoint) with minor error, given k large enough
+          output Fraction Vr(start = 1) = p1*x.^2 + p2*x + p3 + 1/(1+exp(-k*breakpoint))*breakpoint "Relative volume change";
+          Real breakpoint = (a*exp(b*x) + c*exp(d*x));
+
+          parameter Volume V_normal=0.07 annotation(Evaluate=false);
+          Volume v_isf(start = V_normal)= V_normal*Vr;
+          output Volume V_excess(min = -1) = V_normal*(Vr -1);
+
+          equation
+            der(v_isf)/speed = port_a.q;
+            port_a.pressure = x;
+
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
+                  Line(
+                    points={{-100,-80},{-20,-66},{34,-60},{82,76}},
+                    color={0,0,0},
+                    smooth=Smooth.Bezier,
+                    thickness=0.5),
+                  Text(
+                    extent={{-100,-100},{100,-140}},
+                    textColor={28,108,200},
+                    textString="ISF"),
+                  Text(
+                    extent={{-102,116},{98,-4}},
+                    textColor={0,0,0},
+                    textString="G")}),                                     Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end ISF;
+
+          model ElasticVesselSpeedUp
+            "Elastic container for blood vessels, bladder, lumens with the speedUp functionality"
+           extends Physiolibrary.Icons.ElasticBalloon;
+           extends partialConditionalSpeed;
+          // extends SteadyStates.Interfaces.SteadyState(state_start=volume_start, storeUnit="ml");
+            Physiolibrary.Hydraulic.Interfaces.HydraulicPort_a q_in
+              annotation (Placement(transformation(extent={{-14,-14},{14,14}})));
+            parameter Physiolibrary.Types.Volume volume_start=1e-11 "Volume start value"
+              annotation (Dialog(group="Initialization"));                                 //default = 1e-5 ml
+            Physiolibrary.Types.Volume excessVolume
+              "Additional volume, that generate pressure";
+
+             parameter Boolean useV0Input = false
+              "=true, if zero-pressure-volume input is used"
+              annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
+
+             parameter Physiolibrary.Types.Volume ZeroPressureVolume=1e-11
+              "Maximal volume, that does not generate pressure if useV0Input=false"
+              annotation (Dialog(enable=not useV0Input)); //default = 1e-5 ml
+
+             Physiolibrary.Types.RealIO.VolumeInput zeroPressureVolume(start=
+                  ZeroPressureVolume)=zpv if useV0Input annotation (Placement(
+                  transformation(
+                  extent={{-20,-20},{20,20}},
+                  rotation=270,
+                  origin={-80,80})));
+            parameter Boolean useComplianceInput = false
+              "=true, if compliance input is used"
+              annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
+            parameter Physiolibrary.Types.HydraulicCompliance Compliance=1
+              "Compliance if useComplianceInput=false" annotation (Dialog(enable=not
+                    useComplianceInput), HideResult=useComplianceInput);
+
+            Physiolibrary.Types.RealIO.HydraulicComplianceInput compliance(start=
+                  Compliance)=c if useComplianceInput annotation (Placement(
+                  transformation(
+                  extent={{-20,-20},{20,20}},
+                  rotation=270,
+                  origin={0,80})));
+            parameter Boolean useExternalPressureInput = false
+              "=true, if external pressure input is used"
+              annotation(Evaluate=true, HideResult=true, choices(checkBox=true),Dialog(group="External inputs/outputs"));
+            parameter Physiolibrary.Types.Pressure ExternalPressure=0
+              "External pressure. Set zero if internal pressure is relative to external. Valid only if useExternalPressureInput=false."
+              annotation (Dialog(enable=not useExternalPressureInput), HideResult=
+                  useExternalPressureInput);
+
+            Physiolibrary.Types.RealIO.PressureInput externalPressure(start=
+                  ExternalPressure)=ep if useExternalPressureInput annotation (Placement(
+                  transformation(
+                  extent={{-20,-20},{20,20}},
+                  rotation=270,
+                  origin={80,80})));
+
+            Physiolibrary.Types.RealIO.VolumeOutput volume(start=volume_start, fixed=true)
+              annotation (Placement(transformation(
+                  extent={{-20,-20},{20,20}},
+                  rotation=270,
+                  origin={0,-100}), iconTransformation(
+                  extent={{-20,-20},{20,20}},
+                  rotation=270,
+                  origin={60,-100})));
+             parameter Physiolibrary.Types.Volume excessVolume_min(min = -Modelica.Constants.inf) = 0 "Minimal pressure below zeroPressureVolume" annotation(Evaluate = true);
+            parameter Physiolibrary.Types.Pressure MinimalCollapsingPressure(min=-
+                  Modelica.Constants.inf)=-101325;
+              parameter Physiolibrary.Types.Volume CollapsingPressureVolume(min=-Modelica.Constants.inf)=
+               1e-12 "Maximal volume, which generate negative collapsing pressure";
+                                                                             //default = 1e-6 ml
+
+          protected
+            Physiolibrary.Types.Volume zpv;
+            Physiolibrary.Types.HydraulicCompliance c;
+            Physiolibrary.Types.Pressure ep;
+            parameter Physiolibrary.Types.Pressure a=MinimalCollapsingPressure/log(
+                Modelica.Constants.eps);
+
+          equation
+            if not useV0Input then
+              zpv=ZeroPressureVolume;
+            end if;
+            if not useComplianceInput then
+              c=Compliance;
+            end if;
+            if not useExternalPressureInput then
+              ep=ExternalPressure;
+            end if;
+            excessVolume = max(excessVolume_min, volume - zpv);
+            q_in.pressure =
+            smooth(0,
+              if noEvent(volume>CollapsingPressureVolume) then
+                (excessVolume/c + ep)
+               else
+                 (a*log(max(Modelica.Constants.eps,volume/CollapsingPressureVolume)) + ep));
+            //then: normal physiological state
+            //else: abnormal collapsing state
+
+            //Collapsing state: the max function prevents the zero or negative input to logarithm, the logarithm brings more negative pressure for smaller volume
+            //However this collapsing is limited with numerical precission, which is reached relatively soon.
+
+            der(volume)/speed =  q_in.q;
+            assert(volume>=-Modelica.Constants.eps,"Collapsing of vessels are not supported!", AssertionLevel.warning);
+           annotation (
+              Icon(coordinateSystem(preserveAspectRatio=false,extent={{-100,-100},{
+                      100,100}}), graphics={Text(
+                    extent={{-318,-140},{160,-100}},
+                    textString="%name",
+                    lineColor={0,0,255})}),        Documentation(revisions="<html>
+<p><i>2009-2014 - </i>Marek Matejak, Charles University, Prague, Czech Republic</p>
+<ul>
+<li>initial implementation </li>
+</ul>
+<p>4.5.2015 - Tom&aacute;&scaron; Kulh&aacute;nek, Charles University, Prague, Czech Republic</p>
+<ul>
+<li>fix of external pressure</li>
+</ul>
+</html>",       info="<html>
+<p>Pressure can be generated by an elastic tissue surrounding some accumulated volume. Typically there is a threshold volume, below which the relative pressure is equal to external pressure and the wall of the blood vessels is not stressed. But if the volume rises above this value, the pressure increases proportionally. The slope in this pressure-volume characteristic is called &ldquo;Compliance&rdquo;.</p>
+<ul>
+<li>Increassing volume above ZeroPressureVolume (V0) generate positive pressure (greater than external pressure) lineary dependent on excess volume.</li>
+<li>Decreasing volume below CollapsingPressureVolume (V00) generate negative pressure (lower than external pressure) logarithmicaly dependent on volume.</li>
+<li>Otherwise external pressure is presented as pressure inside ElasticVessel.</li>
+</ul>
+<p><br><img src=\"modelica://Physiolibrary/Resources/Images/UserGuide/ElasticVessel_PV.png\"/></p>
+</html>"));
+          end ElasticVesselSpeedUp;
+
+          model SpeedUpCommand "Creates speed up block"
+            extends Modelica.Blocks.Interfaces.SO;
+
+            Real speedUp = 1.0 annotation (Dialog(group="Time"));
+            Modelica.Units.SI.Time time_spedUp;
+          initial equation
+            time_spedUp = 0;
+          equation
+            der(time_spedUp)= speedUp;
+            y = speedUp;
+
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
+                  Ellipse(extent={{-80,66},{80,-94}}, lineColor={160,160,164}),
+                  Line(points={{0,66},{0,46}}, color={160,160,164}),
+                  Line(points={{80,-14},{60,-14}},
+                                               color={160,160,164}),
+                  Line(points={{0,-94},{0,-74}}, color={160,160,164}),
+                  Line(points={{-80,-14},{-60,-14}},
+                                                 color={160,160,164}),
+                  Line(points={{37,56},{26,36}}, color={160,160,164}),
+                  Line(points={{70,24},{49,12}}, color={160,160,164}),
+                  Line(points={{71,-51},{52,-41}}, color={160,160,164}),
+                  Line(points={{39,-84},{29,-65}}, color={160,160,164}),
+                  Line(points={{-39,-84},{-29,-66}}, color={160,160,164}),
+                  Line(points={{-71,-51},{-50,-40}}, color={160,160,164}),
+                  Line(points={{-71,23},{-54,14}}, color={160,160,164}),
+                  Line(points={{-38,56},{-28,37}}, color={160,160,164}),
+                  Line(
+                    points={{0,-14},{-50,36}},
+                    thickness=0.5),
+                  Line(
+                    points={{0,-14},{40,-14}},
+                    thickness=0.5),
+                  Line(
+                    points={{-40,36},{10,36}},
+                    color={0,0,0},
+                    thickness=1),
+                  Line(
+                    points={{-10,46},{10,36},{-10,28}},
+                    color={0,0,0},
+                    thickness=1),
+                  Text(
+                    extent={{-100,60},{100,100}},
+                    textColor={0,0,0},
+                    textString="x %speedUp")}),                            Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end SpeedUpCommand;
+
+          model Osmolarities
+            parameter Physiolibrary.Types.Osmolarity osm_plasma(displayUnit="mosm/l")=280
+              "Plasmatic osmolarity";
+              Physiolibrary.Types.RealIO.OsmolarityOutput
+                                         osmolarity=osm_ISF
+              annotation (Placement(transformation(extent={{80,-20},{120,20}})));
+
+            Physiolibrary.Types.Osmolarity osm_ISF= osm_plasma - alb_plasma + alb_isf
+              "Interstitial osmolarity";
+            Physiolibrary.Types.Concentration alb_plasma;
+            constant Real alb_weight = 66.5 "kDa";
+            parameter Real alb_plasma_gram_dL = 4;
+            Physiolibrary.Types.Concentration alb_isf;
+            parameter Physiolibrary.Types.Temperature T=310.15;
+            Physiolibrary.Types.Pressure op_p = osm_plasma *(Modelica.Constants.R*T);
+            Physiolibrary.Types.Pressure op_isf = osm_ISF *(Modelica.Constants.R*T);
+            parameter Physiolibrary.Types.Pressure P_oncotic(displayUnit="mmHg")=-2399.8;
+          equation
+            P_oncotic = op_p - op_isf;
+            alb_plasma_gram_dL = alb_plasma*alb_weight;
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end Osmolarities;
+
+          model Averager
+            extends Modelica.Blocks.Interfaces.SISO;
+
+          equation
+            y = u;
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end Averager;
+        end Auxiliary;
       end Lymphatic;
 
       package Coronary
@@ -56846,12 +57337,12 @@ P_hs_plus_dist"),
                     phi_delayed(start=0.25398996, fixed=true)),
                 external_iliac_R220(q_in(start=1.7702856e-05, fixed=true),
                     volume(start=4.045334e-06, fixed=true)),
-                femoral_R222(q_in(start=1.686487e-05, fixed=true), volume(start
-                      =1.1607631e-06, fixed=true)),
+                femoral_R222(q_in(start=1.686487e-05, fixed=true), volume(start=
+                       1.1607631e-06, fixed=true)),
                 profundus_T2_R224(volume(start=0.00020343311, fixed=true),
                     phi_delayed(start=0.25398996, fixed=true)),
-                femoral_R226(q_in(start=7.886071e-06, fixed=true), volume(start
-                      =9.738395e-06, fixed=true)),
+                femoral_R226(q_in(start=7.886071e-06, fixed=true), volume(start=
+                       9.738395e-06, fixed=true)),
                 popliteal_R228(q_in(start=3.9689075e-06, fixed=true), volume(
                       start=3.0222595e-06, fixed=true)),
                 anterior_tibial_T3_R230(volume(start=2.647671e-05, fixed=true),
@@ -56872,8 +57363,8 @@ P_hs_plus_dist"),
                       start=1.1607073e-06, fixed=true)),
                 profundus_T2_L202(volume(start=0.00020342926, fixed=true),
                     phi_delayed(start=0.25398996, fixed=true)),
-                femoral_L204(q_in(start=7.852791e-06, fixed=true), volume(start
-                      =9.738032e-06, fixed=true)),
+                femoral_L204(q_in(start=7.852791e-06, fixed=true), volume(start=
+                       9.738032e-06, fixed=true)),
                 popliteal_L206(q_in(start=3.9592437e-06, fixed=true), volume(
                       start=3.022141e-06, fixed=true)),
                 anterior_tibial_T3_L208(volume(start=2.6476337e-05, fixed=true),
@@ -56890,8 +57381,8 @@ P_hs_plus_dist"),
                       start=1.8397766e-06, fixed=true)),
                 axillary_R32(q_in(start=4.1040753e-06, fixed=true), volume(
                       start=2.2218364e-06, fixed=true)),
-                brachial_R34(q_in(start=3.993061e-06, fixed=true), volume(start
-                      =3.3058927e-06, fixed=true)),
+                brachial_R34(q_in(start=3.993061e-06, fixed=true), volume(start=
+                       3.3058927e-06, fixed=true)),
                 ulnar_T2_R36(q_in(start=2.1440717e-06, fixed=true), volume(
                       start=2.0363568e-07, fixed=true)),
                 ulnar_T2_R42(volume(start=6.130898e-05, fixed=true),
@@ -56902,10 +57393,10 @@ P_hs_plus_dist"),
                       start=3.2620298e-06, fixed=true)),
                 subclavian_L78(q_in(start=4.3453138e-06, fixed=true), volume(
                       start=1.3892857e-06, fixed=true)),
-                axillary_L80(q_in(start=4.249386e-06, fixed=true), volume(start
-                      =2.2216582e-06, fixed=true)),
-                brachial_L82(q_in(start=4.017329e-06, fixed=true), volume(start
-                      =1.099547e-06, fixed=true)),
+                axillary_L80(q_in(start=4.249386e-06, fixed=true), volume(start=
+                       2.2216582e-06, fixed=true)),
+                brachial_L82(q_in(start=4.017329e-06, fixed=true), volume(start=
+                       1.099547e-06, fixed=true)),
                 ulnar_T2_L84(q_in(start=2.1337796e-06, fixed=true), volume(
                       start=2.0354602e-07, fixed=true)),
                 ulnar_T2_L90(volume(start=6.1326406e-05, fixed=true),
@@ -56947,32 +57438,23 @@ P_hs_plus_dist"),
                 vertebral_R272(volume(start=6.688504e-05, fixed=true),
                     phi_delayed(start=0.25398996, fixed=true)),
                 superior_vena_cava_C2(volume(start=7.4766513e-06, fixed=true)),
-
                 superior_vena_cava_C88(volume(start=1.2883735e-05, fixed=true)),
-
                 inferior_vena_cava_C8(volume(start=1.1212831e-05, fixed=true)),
-
                 hepatic_vein_T1_C10(volume(start=4.3960827e-06, fixed=true)),
                 inferior_vena_cava_C12(volume(start=3.0418576e-05, fixed=true)),
-
                 inferior_vena_cava_C16(volume(start=2.3918017e-05, fixed=true)),
-
                 renal_vein_T1_R18(volume(start=7.0465157e-06, fixed=true)),
                 inferior_vena_cava_C20(volume(start=1.6686745e-06, fixed=true)),
-
                 renal_vein_T1_L22(volume(start=6.2257327e-06, fixed=true)),
                 inferior_vena_cava_C24(volume(start=6.654219e-05, fixed=true)),
-
                 common_iliac_vein_L56(volume(start=1.6324575e-05, fixed=true),
                     open(start=true, fixed=true)),
                 common_iliac_vein_R26(volume(start=1.5005204e-05, fixed=true),
                     open(start=true, fixed=true)),
                 external_iliac_vein_R28(volume(start=2.1883745e-06, fixed=true)),
-
                 internal_iliac_vein_T1_R30(volume(start=9.357332e-06, fixed=
                         true)),
                 external_iliac_vein_R32(volume(start=2.5380397e-05, fixed=true)),
-
                 femoral_vein_R34(volume(start=1.1032927e-06, fixed=true)),
                 femoral_vein_R38(volume(start=8.744703e-06, fixed=true)),
                 profunda_femoris_vein_T2_R40(volume(start=2.4125393e-05, fixed=
@@ -56986,11 +57468,9 @@ P_hs_plus_dist"),
                 posterior_tibial_vein_T6_R54(volume(start=5.817426e-06, fixed=
                         true)),
                 external_iliac_vein_L58(volume(start=2.191054e-06, fixed=true)),
-
                 internal_iliac_vein_T1_L60(volume(start=9.624412e-06, fixed=
                         true)),
                 external_iliac_vein_L62(volume(start=2.4917354e-05, fixed=true)),
-
                 femoral_vein_L64(volume(start=1.2898208e-06, fixed=true)),
                 femoral_vein_L68(volume(start=8.744715e-06, fixed=true)),
                 profunda_femoris_vein_T2_L70(volume(start=2.412532e-05, fixed=
@@ -57009,7 +57489,6 @@ P_hs_plus_dist"),
                         true), open(start=true, fixed=true)),
                 vertebral_vein_R92(volume(start=9.473472e-06, fixed=true)),
                 brachiocephalic_vein_R94(volume(start=3.4339926e-06, fixed=true)),
-
                 subclavian_vein_R96(volume(start=1.6697036e-06, fixed=true)),
                 internal_jugular_vein_R122(volume(start=6.5991306e-05, fixed=
                         true)),
@@ -57101,6 +57580,7 @@ P_hs_plus_dist"),
                 J1s_s(start=-8.2473667e-10, fixed=true),
                 t0(start=0.09, fixed=true)),
               settings(V_PV_init=0));
+
           end Renals_HFpEF_ss;
 
           model Renals_HFrEF_ss
@@ -57182,8 +57662,8 @@ P_hs_plus_dist"),
                     phi_delayed(start=0.25291628, fixed=true)),
                 external_iliac_R220(q_in(start=7.0220176e-06, fixed=true),
                     volume(start=3.974004e-06, fixed=true)),
-                femoral_R222(q_in(start=7.684947e-06, fixed=true), volume(start
-                      =1.1408945e-06, fixed=true)),
+                femoral_R222(q_in(start=7.684947e-06, fixed=true), volume(start=
+                       1.1408945e-06, fixed=true)),
                 profundus_T2_R224(volume(start=0.00019549955, fixed=true),
                     phi_delayed(start=0.25291628, fixed=true)),
                 femoral_R226(q_in(start=-4.873822e-07, fixed=true), volume(
@@ -57204,8 +57684,8 @@ P_hs_plus_dist"),
                     phi_delayed(start=0.25291628, fixed=true)),
                 external_iliac_L198(q_in(start=7.0139668e-06, fixed=true),
                     volume(start=3.9737274e-06, fixed=true)),
-                femoral_L200(q_in(start=7.676092e-06, fixed=true), volume(start
-                      =1.1408127e-06, fixed=true)),
+                femoral_L200(q_in(start=7.676092e-06, fixed=true), volume(start=
+                       1.1408127e-06, fixed=true)),
                 profundus_T2_L202(volume(start=0.00019549667, fixed=true),
                     phi_delayed(start=0.25291628, fixed=true)),
                 femoral_L204(q_in(start=-4.9054063e-07, fixed=true), volume(
@@ -57283,32 +57763,23 @@ P_hs_plus_dist"),
                 vertebral_R272(volume(start=6.427275e-05, fixed=true),
                     phi_delayed(start=0.25291628, fixed=true)),
                 superior_vena_cava_C2(volume(start=7.1820823e-06, fixed=true)),
-
                 superior_vena_cava_C88(volume(start=1.2376118e-05, fixed=true)),
-
                 inferior_vena_cava_C8(volume(start=1.0771059e-05, fixed=true)),
-
                 hepatic_vein_T1_C10(volume(start=4.222901e-06, fixed=true)),
                 inferior_vena_cava_C12(volume(start=2.9219955e-05, fixed=true)),
-
                 inferior_vena_cava_C16(volume(start=2.297543e-05, fixed=true)),
-
                 renal_vein_T1_R18(volume(start=6.7688834e-06, fixed=true)),
                 inferior_vena_cava_C20(volume(start=1.6029128e-06, fixed=true)),
-
                 renal_vein_T1_L22(volume(start=5.9804665e-06, fixed=true)),
                 inferior_vena_cava_C24(volume(start=6.3918385e-05, fixed=true)),
-
                 common_iliac_vein_L56(volume(start=1.5678288e-05, fixed=true),
                     open(start=false, fixed=true)),
                 common_iliac_vein_R26(volume(start=1.4411381e-05, fixed=true),
                     open(start=false, fixed=true)),
                 external_iliac_vein_R28(volume(start=2.1017672e-06, fixed=true)),
-
                 internal_iliac_vein_T1_R30(volume(start=8.987353e-06, fixed=
                         true)),
                 external_iliac_vein_R32(volume(start=2.4374945e-05, fixed=true)),
-
                 femoral_vein_R34(volume(start=1.0595832e-06, fixed=true)),
                 femoral_vein_R38(volume(start=8.398117e-06, fixed=true)),
                 profunda_femoris_vein_T2_R40(volume(start=2.3175684e-05, fixed=
@@ -57322,11 +57793,9 @@ P_hs_plus_dist"),
                 posterior_tibial_vein_T6_R54(volume(start=5.590646e-06, fixed=
                         true)),
                 external_iliac_vein_L58(volume(start=2.1043072e-06, fixed=true)),
-
                 internal_iliac_vein_T1_L60(volume(start=9.243735e-06, fixed=
                         true)),
                 external_iliac_vein_L62(volume(start=2.392991e-05, fixed=true)),
-
                 femoral_vein_L64(volume(start=1.2387036e-06, fixed=true)),
                 femoral_vein_L68(volume(start=8.398012e-06, fixed=true)),
                 profunda_femoris_vein_T2_L70(volume(start=2.3175357e-05, fixed=
@@ -57345,12 +57814,10 @@ P_hs_plus_dist"),
                     open(start=false, fixed=true)),
                 vertebral_vein_R92(volume(start=9.099018e-06, fixed=true)),
                 brachiocephalic_vein_R94(volume(start=3.296887e-06, fixed=true)),
-
                 subclavian_vein_R96(volume(start=1.6030402e-06, fixed=true)),
                 internal_jugular_vein_R122(volume(start=6.335571e-05, fixed=
                         true)),
                 external_jugular_vein_R98(volume(start=4.412933e-06, fixed=true)),
-
                 subclavian_vein_R100(volume(start=6.555959e-06, fixed=true)),
                 axillary_vein_R102(volume(start=2.3035007e-05, fixed=true)),
                 brachial_vein_R104(volume(start=4.426071e-06, fixed=true)),
@@ -57437,6 +57904,7 @@ P_hs_plus_dist"),
                 J1s_s(start=-4.5752632e-10, fixed=true),
                 t0(start=0.089999996, fixed=true)),
               settings(V_PV_init=0));
+
           end Renals_HFrEF_ss;
         end SS;
       end HF;
