@@ -23,7 +23,7 @@ exclude_filter = [] # ['Ra_phi', 'v_in', 'A']
 # mid-cycle to avoid event collision during initialization 
 steadyStateAt = 600
 resetVPV = True
-mat_file_path = 'ss.mat' # or none to detect automatically
+mat_file_path = 'CVS_baseline_overload.mat' # or none to detect automatically
 
 # get the main and path
 if '.' in base_model_full_path:
