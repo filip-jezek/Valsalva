@@ -9,7 +9,7 @@ L2SI = 1e-3
 LpD2SI = 1/(1000*60*60*24)
 vol_norm = 3.697 # L
 
-hftypes = ['CVS_nobaro_LV100_', 'CVS_nobaro_LV50_', 'CVS_nobaro_LV25_']
+hftypes = ['CVS_baro_LV100_', 'CVSslr_baro_LV100_']
 # hftypes = ['CVS_nobaro_Lumens_LV100_', 'CVS_nobaro_Lumens_LV50_', 'CVS_nobaro_Lumens_LV25_']
 
 for hftype in hftypes:
@@ -33,13 +33,13 @@ for hftype in hftypes:
 
     exp_range = range(0, len(filenames))
 
-    s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {EDV}, {BPm}, {BPs}, {BPd}, {Qlymph}, {Vint_r},{Vint_excess}, {ESP}, {EDP}, {Pwr_RV}, {Pwr_LV}\n'
+    s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {EDV}, {BPm}, {BPs}, {BPd}, {Qlymph}, {Vint_r},{Vint_excess}, {ESP}, {EDP}, {Pwr_RV}, {Pwr_LV}, {dCar_d}, {dAor_d}\n'
     result_set = []
 
     outputFile = 'VolLoad_result_%s.csv' % hftype
     with open(outputFile, 'w') as file:
     # with open('CHF_VolumeLoading.csv', 'w') as file:    
-        file.write(s.format(f_LV = 'f_LV', vol = 'vol', time = 'time', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO', EF = 'EF', EDV = 'EDV', CVP = 'CVP', PCWP = 'PCWP', BPm = 'BPm', BPs = 'BPs', BPd = 'BPd', Qlymph = 'Qlymph', Vint_r= 'V_Isf_Rel', Vint_excess = 'V_Isf_Exc', ESP = 'ESP', EDP = 'EDP', Pwr_LV = 'Pwr_LV', Pwr_RV = 'Pwr_RV'))
+        file.write(s.format(f_LV = 'f_LV', vol = 'vol', time = 'time', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO', EF = 'EF', EDV = 'EDV', CVP = 'CVP', PCWP = 'PCWP', BPm = 'BPm', BPs = 'BPs', BPd = 'BPd', Qlymph = 'Qlymph', Vint_r= 'V_Isf_Rel', Vint_excess = 'V_Isf_Exc', ESP = 'ESP', EDP = 'EDP', Pwr_LV = 'Pwr_LV', Pwr_RV = 'Pwr_RV', dCar_d = 'dCar_d', dAor_d = 'dAor_d'))
 
         for i in exp_range:
             # if hftype == '':
@@ -122,9 +122,12 @@ for hftype in hftypes:
             co = np.mean(datafile.data('CO')[mean_rng])*1000*60
             cvp = np.mean(datafile.data('P_sv')[mean_rng])/mmHg2SI
             hr = np.mean(datafile.data('HR')[mean_rng])*60
+            dcar_d = np.max(datafile.data('SystemicComponent.baroreflex_system.carotid_distention')[mean_rng]) - np.min(datafile.data('SystemicComponent.baroreflex_system.carotid_distention')[mean_rng])
+            daor_d = np.max(datafile.data('SystemicComponent.baroreflex_system.aortic_distention')[mean_rng]) - np.min(datafile.data('SystemicComponent.baroreflex_system.aortic_distention')[mean_rng])
+            
             t = time[-1]
 
-            ws = s.format(f_LV = imp_coeff, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR = hr, CO = co, CVP = cvp, PCWP = pcwp, EF = ef, EDV = edv, BPm = BPm, BPs = BPs, BPd = BPd, Qlymph = lymph_q, Vint_r=vi_r, Vint_excess = vi_e,  ESP = esp, EDP = edp, Pwr_LV = Pwr_LV, Pwr_RV = Pwr_RV)
+            ws = s.format(f_LV = imp_coeff, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR = hr, CO = co, CVP = cvp, PCWP = pcwp, EF = ef, EDV = edv, BPm = BPm, BPs = BPs, BPd = BPd, Qlymph = lymph_q, Vint_r=vi_r, Vint_excess = vi_e,  ESP = esp, EDP = edp, Pwr_LV = Pwr_LV, Pwr_RV = Pwr_RV, dCar_d = dcar_d, dAor_d = daor_d)
 
             file.write(ws)
             file.flush()
