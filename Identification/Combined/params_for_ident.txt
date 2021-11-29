@@ -1,12 +1,12 @@
 # name, value, [min, max, step]
-settings.heart_vntr_D_A_maxAct,3196.88,1500.0,12000.0,200.0
-settings.heart_vntr_D_0_maxAct,0.001249063,1e-5,0.01,2e-05
-settings.heart_vntr_TS_maxAct,0.01477405,0.01,0.5,0.01
-settings.heart_vntr_TR_maxAct,0.0659769,0.01,0.5,0.01
-settings.eta_vc,0.3151054,0.07372455,1,0.01
-settings.tissues_eta_Ra,3.845225,0.1,4,0.1
-settings.tissues_eta_Rv,2.6625,0,4,0.1
-settings.tissues_eta_C,0.5808013,0.01,1,0.01
-settings.tissues_chi_Ra,13.3125,0.01,50,1
-settings.tissues_chi_Rv,5.0625,0.01,50,1
-settings.tissues_chi_C,0.05625,-10,10,0.01
+settings.heart_vntr_D_A_maxAct,4600.005,1500.0,12000.0,200.0
+settings.heart_vntr_D_0_maxAct,0.001225,1e-5,0.01,2e-05
+settings.heart_vntr_TS_maxAct,0.104774,0.01,0.5,0.01
+settings.heart_vntr_TR_maxAct,0.0759769,0.01,0.5,0.01
+settings.eta_vc,0.2101054,0.07372455,1,0.01
+settings.tissues_eta_Ra,3.145225,0.1,4,0.1
+settings.tissues_eta_Rv,2.80625,0,4,0.1
+settings.tissues_eta_C,0.5708013,0.01,1,0.01
+settings.tissues_chi_Ra,24.8125,0.01,50,1
+settings.tissues_chi_Rv,13.84375,0.01,50,1
+settings.tissues_chi_C,-0.03125,-10,10,0.01
