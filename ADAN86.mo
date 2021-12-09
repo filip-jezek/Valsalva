@@ -5502,6 +5502,7 @@ type"),       Text(
           end System_OlsenSIUnits_PAHEx;
 
           model Heart_Olsen_base "Olsens heart, equation based. Implemented from Olsen 2021, PMID 34448636"
+            import Signals;
             extends partialDriving_Olsen(t0(start=0));
             extends partialHeart;
 
@@ -5830,6 +5831,18 @@ type"),       Text(
             Physiolibrary.Types.Velocity d_Sept_ym
               "  cm/s;   // Change in junction radius diameter";
 
+            Signals.Power power_LV(
+              HR=HRo,
+              p=P_lvw,
+              v=V_LV,
+              beat=beat)
+              annotation (Placement(transformation(extent={{-20,20},{0,40}})));
+            Signals.Power power_RV(
+              HR=HRo,
+              p=P_rvw,
+              v=V_rv,
+              beat=beat)
+              annotation (Placement(transformation(extent={{-20,-20},{0,0}})));
           protected
             Physiolibrary.Types.RealIO.FrequencyOutput HRinner "Frequency constant"
               annotation (Placement(transformation(extent={{-61,-1},{-59,1}})));
@@ -7502,7 +7515,7 @@ type"),       Text(
               annotation (Placement(transformation(extent={{12,-26},{-8,-6}})));
             Systemic_Olsen systemic_Olsen
               annotation (Placement(transformation(extent={{-36,34},{40,64}})));
-            Pulmonary_Oslen pulmonary_Oslen(V_pve(start=150 + settings.V_PV_init))
+            Pulmonary_Oslen pulmonary_Oslen(V_pve(start=150e-6 + settings.V_PV_init))
                                             annotation (Placement(
                   transformation(extent={{14,-68},{-6,-48}})));
             outer Settings settings annotation (Placement(transformation(extent=
@@ -7514,16 +7527,21 @@ type"),       Text(
                     "1/min") = 1)
               annotation (Placement(transformation(extent={{76,-16},{68,-8}})));
             Signals.Dashboard dashboard(
-              realExpression(y=heart_Olsen_base.Q_av),
-              realExpression1(y=systemic_Olsen.P_ao),
-              realExpression2(y=pulmonary_Oslen.P_pve),
-              tau=5,
-              realExpression3(y=systemic_Olsen.volume + heart_Olsen_base.volume
-                     + pulmonary_Oslen.volume),
-              continuousMeanValue(reset=false),
-              realExpression4(y=heart_Olsen_base.P_lvw),
-              zOH(reset=heart_Olsen_base.Q_mv < 0)) annotation (Placement(
-                  transformation(extent={{-100,-100},{-80,-80}})));
+              V0=0.0007811,
+              Q_mv=heart_Olsen_base.Q_mv,
+              totalVolume=systemic_Olsen.volume + heart_Olsen_base.volume +
+                  pulmonary_Oslen.volume,
+              P_pv=pulmonary_Oslen.port_b.pressure,
+              P_LV=heart_Olsen_base.P_lvw,
+              V_LV=heart_Olsen_base.V_LV,
+              P_sv=systemic_Olsen.port_b.pressure,
+              HR=heart_Olsen_base.HRo,
+              power_LV=heart_Olsen_base.power_LV.power,
+              power_RV=heart_Olsen_base.power_RV.power,
+              beat=heart_Olsen_base.beat,
+              mitral_closing=heart_Olsen_base.Q_mv < 0,
+              BP=systemic_Olsen.P_ao)
+              annotation (Placement(transformation(extent={{-100,-100},{-80,-80}})));
           equation
             connect(heart_Olsen_base.sa, systemic_Olsen.port_a) annotation (
                 Line(
@@ -56291,7 +56309,8 @@ P_hs_plus_dist"),
 
         model CombinedModels_FMUs_ExceptBaseline
           extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime=
-                 0, fmi_StopTime=60));
+                 0, fmi_StopTime=60),
+            settings(baro_fsn=settings.baro_f1*10 - 1e-4));
         end CombinedModels_FMUs_ExceptBaseline;
 
         model CombinedModels_FMUs_ExceptBaselineExercise
@@ -59999,6 +60018,7 @@ P_hs_plus_dist"),
                 useChatteringProtection=true),
             pulmonaryValve(calculateAdditionalMetrics=true)),
           settings(baro_tau_s=93,
+            baro_fsn(displayUnit="Hz") = settings.baro_f1*10 - 1e-4,
                    dummy=2));
 
       // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
@@ -60017,7 +60037,7 @@ P_hs_plus_dist"),
       //       heart_vntr_L0=1.6)
       replaceable
       Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
-          nperiod=-1,
+          nperiod=1,
           amplitude=40*133.32,
           rising=0.1,
           width=14.8,
@@ -67241,6 +67261,11 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end CorviaShunt;
+
+      model CVS_baroVar
+        extends CardiovascularSystem(settings(baro_fsn(displayUnit="Hz"),
+              baro_f1=3.0e-03));
+      end CVS_baroVar;
     end Experiments;
 
   annotation(preferredView="info",

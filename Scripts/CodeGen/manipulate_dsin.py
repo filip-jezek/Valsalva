@@ -599,10 +599,10 @@ overWriteDsinTemplate = True
 updateStartValues = True
 
 # DSFILEIN = None
-# OPTOUTPUTFILEIN = 'OutputListingMain.txt'
+OPTOUTPUTFILEIN = 'OutputListingMain.txt'
 
 DSFILEIN = 'dsin.txt'
-OPTOUTPUTFILEIN = None
+# OPTOUTPUTFILEIN = None
 
 USEPSO =  False
 
