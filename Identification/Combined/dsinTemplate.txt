@@ -102,7 +102,7 @@ int settings(13,1)
 
 
 #    Names of initial variables
-char initialName(10671,109)
+char initialName(10664,109)
 settings.phi0
 settings.height
 settings.weight
@@ -137,6 +137,7 @@ settings.heart_atr_TS
 settings.heart_atr_TR
 settings.heart_vntr_xi_Vw
 settings.heart_vntr_xi_AmRef
+settings.heart_vntr_xi_AmRef_RV
 settings.heart_vntr_k_passive
 settings.heart_vntr_Lsref
 settings.heart_vntr_L0
@@ -145,6 +146,10 @@ settings.heart_vntr_SLrest
 settings.heart_vntr_PConcollagen
 settings.heart_vntr_PExpcollagen
 settings.starlingFactor_exp
+settings.heartImp_LV_stiff
+settings.heartImp_RV_stiff
+settings.heartImp_LVcont
+settings.heartImp_RVcont
 settings.syst_abd_P_th_ratio
 settings.systemic_limitExternalPressure
 settings.syst_art_k_E
@@ -235,16 +240,6 @@ useExercise
 useValsalva
 exercise.tau
 exercise.tau_gfr
-exercise.LV_stiff
-exercise.LV_SLcollagen_f
-exercise.LV_PConcollagen_f
-exercise.LV_PExpcollagen_f
-exercise.RV_stiff
-exercise.RV_SLcollagen_f
-exercise.RV_PConcollagen_f
-exercise.RV_PExpcollagen_f
-exercise.LVfunctionFraction
-exercise.RVfunctionFraction
 exercise.volumeInfusion
 exercise.settings.phi0
 exercise.settings.height
@@ -284,6 +279,10 @@ exercise.settings.heart_vntr_SLrest
 exercise.settings.heart_vntr_PConcollagen
 exercise.settings.heart_vntr_PExpcollagen
 exercise.settings.starlingFactor_exp
+exercise.settings.heartImp_LV_stiff
+exercise.settings.heartImp_RV_stiff
+exercise.settings.heartImp_LVcont
+exercise.settings.heartImp_RVcont
 exercise.settings.syst_abd_P_th_ratio
 exercise.settings.syst_art_k_E
 exercise.settings.eta_vc
@@ -3413,6 +3412,7 @@ exercise.fmi_xVrs[278]
 exercise.fmi_xVrs[279]
 exercise.fmi_xVrs[280]
 exercise.fmi_xVrs[281]
+exercise.fmi_xVrs[282]
 exercise.fmi_dxVrs[1]
 exercise.fmi_dxVrs[2]
 exercise.fmi_dxVrs[3]
@@ -3694,6 +3694,7 @@ exercise.fmi_dxVrs[278]
 exercise.fmi_dxVrs[279]
 exercise.fmi_dxVrs[280]
 exercise.fmi_dxVrs[281]
+exercise.fmi_dxVrs[282]
 exercise.fmi_yVrs[1]
 exercise.fmi_yVrs[2]
 exercise.fmi_yVrs[3]
@@ -3732,16 +3733,6 @@ exercise.fmi_yVrs[35]
 exercise.fmi_yVrs[36]
 tilt.tau
 tilt.tau_gfr
-tilt.LV_stiff
-tilt.LV_SLcollagen_f
-tilt.LV_PConcollagen_f
-tilt.LV_PExpcollagen_f
-tilt.RV_stiff
-tilt.RV_SLcollagen_f
-tilt.RV_PConcollagen_f
-tilt.RV_PExpcollagen_f
-tilt.LVfunctionFraction
-tilt.RVfunctionFraction
 tilt.volumeInfusion
 tilt.settings.phi0
 tilt.settings.height
@@ -3781,6 +3772,10 @@ tilt.settings.heart_vntr_SLrest
 tilt.settings.heart_vntr_PConcollagen
 tilt.settings.heart_vntr_PExpcollagen
 tilt.settings.starlingFactor_exp
+tilt.settings.heartImp_LV_stiff
+tilt.settings.heartImp_RV_stiff
+tilt.settings.heartImp_LVcont
+tilt.settings.heartImp_RVcont
 tilt.settings.syst_abd_P_th_ratio
 tilt.settings.syst_art_k_E
 tilt.settings.eta_vc
@@ -6916,6 +6911,7 @@ tilt.fmi_xVrs[277]
 tilt.fmi_xVrs[278]
 tilt.fmi_xVrs[279]
 tilt.fmi_xVrs[280]
+tilt.fmi_xVrs[281]
 tilt.fmi_dxVrs[1]
 tilt.fmi_dxVrs[2]
 tilt.fmi_dxVrs[3]
@@ -7196,6 +7192,7 @@ tilt.fmi_dxVrs[277]
 tilt.fmi_dxVrs[278]
 tilt.fmi_dxVrs[279]
 tilt.fmi_dxVrs[280]
+tilt.fmi_dxVrs[281]
 tilt.fmi_yVrs[1]
 tilt.fmi_yVrs[2]
 tilt.fmi_yVrs[3]
@@ -7234,16 +7231,6 @@ tilt.fmi_yVrs[35]
 tilt.fmi_yVrs[36]
 valsalva.tau
 valsalva.tau_gfr
-valsalva.LV_stiff
-valsalva.LV_SLcollagen_f
-valsalva.LV_PConcollagen_f
-valsalva.LV_PExpcollagen_f
-valsalva.RV_stiff
-valsalva.RV_SLcollagen_f
-valsalva.RV_PConcollagen_f
-valsalva.RV_PExpcollagen_f
-valsalva.LVfunctionFraction
-valsalva.RVfunctionFraction
 valsalva.volumeInfusion
 valsalva.settings.phi0
 valsalva.settings.height
@@ -7283,6 +7270,10 @@ valsalva.settings.heart_vntr_SLrest
 valsalva.settings.heart_vntr_PConcollagen
 valsalva.settings.heart_vntr_PExpcollagen
 valsalva.settings.starlingFactor_exp
+valsalva.settings.heartImp_LV_stiff
+valsalva.settings.heartImp_RV_stiff
+valsalva.settings.heartImp_LVcont
+valsalva.settings.heartImp_RVcont
 valsalva.settings.syst_abd_P_th_ratio
 valsalva.settings.syst_art_k_E
 valsalva.settings.eta_vc
@@ -10453,6 +10444,7 @@ valsalva.fmi_xVrs[277]
 valsalva.fmi_xVrs[278]
 valsalva.fmi_xVrs[279]
 valsalva.fmi_xVrs[280]
+valsalva.fmi_xVrs[281]
 valsalva.fmi_dxVrs[1]
 valsalva.fmi_dxVrs[2]
 valsalva.fmi_dxVrs[3]
@@ -10733,6 +10725,7 @@ valsalva.fmi_dxVrs[277]
 valsalva.fmi_dxVrs[278]
 valsalva.fmi_dxVrs[279]
 valsalva.fmi_dxVrs[280]
+valsalva.fmi_dxVrs[281]
 valsalva.fmi_yVrs[1]
 valsalva.fmi_yVrs[2]
 valsalva.fmi_yVrs[3]
@@ -10775,7 +10768,7 @@ stepInterval
 CPUtime
 EventCounter
 
-double initialValue(10671,6)
+double initialValue(10664,6)
  -1  2.5000000000000000E-01       0                       0                
   1   280   # settings.phi0
  -1  1.7132000000000001E+00       0                 1.0000000000000000E+100
@@ -10796,11 +10789,11 @@ double initialValue(10671,6)
   1   281   # settings.initByPressure
  -1       0                 -1.0000000000000000E-02 1.0000000000000000E+100
   1   280   # settings.V_PV_init
- -1  7.7235150000000000E+05       0                 1.0000000000000000E+100
+ -1  7.1820659999999998E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_vlv
- -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
+ -1  2.2693760000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_AV
- -1  1.6550680000000000E+06       0                 1.0000000000000000E+100
+ -1  6.2865800000000000E+05       0                 1.0000000000000000E+100
   1   280   # settings.heart_R_LA
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.heart_R_RA
@@ -10812,19 +10805,19 @@ double initialValue(10671,6)
   1   280   # settings.heart_alphaE
  -1       0                       0                  1.3300000000000001E+00
   1   280   # settings.heart_gammaE
- -1  4.8499999999999996E+00       0                       0                
+ -1  1.2318750000000000E+01       0                       0                
   1   280   # settings.heart_vntr_D_0
  -1 %settings.heart_vntr_D_0_maxAct% 0.0 0.0
   1   280   # settings.heart_vntr_D_0_maxAct
- -1     890                       0                       0                
+ -1  7.9859379999999999E+02       0                       0                
   1   280   # settings.heart_vntr_D_A
  -1 %settings.heart_vntr_D_A_maxAct% 0.0 0.0
   1   280   # settings.heart_vntr_D_A_maxAct
- -1  3.2468750000000002E-01       0                       0                
+ -1  3.2843749999999999E-01       0                       0                
   1   280   # settings.heart_vntr_TS
  -1 %settings.heart_vntr_TS_maxAct% 0.0 0.0
   1   280   # settings.heart_vntr_TS_maxAct
- -1  4.0312500000000001E-01       0                       0                
+ -1  3.1312499999999999E-01       0                       0                
   1   280   # settings.heart_vntr_TR
  -1 %settings.heart_vntr_TR_maxAct% 0.0 0.0
   1   280   # settings.heart_vntr_TR_maxAct
@@ -10832,9 +10825,9 @@ double initialValue(10671,6)
   1   280   # settings.heart_vntr_Tact
  -1  8.0000000000000002E-02       0                       0                
   1   280   # settings.heart_vntr_Tact_maxAct
- -1  2.6513640000000000E+07       0                       0                
+ -1  3.1099160000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_0
- -1  7.6213570000000000E+07       0                       0                
+ -1  9.3356270000000000E+07       0                       0                
   1   280   # settings.heart_atr_D_A
  -1  8.0000000000000002E-02       0                       0                
   1   280   # settings.heart_atr_TS
@@ -10844,6 +10837,8 @@ double initialValue(10671,6)
   1   280   # settings.heart_vntr_xi_Vw
  -1       1                       0                       0                
   1   280   # settings.heart_vntr_xi_AmRef
+  0       0                       0                       0                
+  6   256   # settings.heart_vntr_xi_AmRef_RV
  -1       5                       0                       0                
   1   280   # settings.heart_vntr_k_passive
  -1  1.8999999999999999E+00       0                       0                
@@ -10860,11 +10855,19 @@ double initialValue(10671,6)
   1   280   # settings.heart_vntr_PExpcollagen
  -1  1.2500000000000000E+00       0                       0                
   1   280   # settings.starlingFactor_exp
+ -1       1                       0                       0                
+  1   280   # settings.heartImp_LV_stiff
+ -1       1                       0                       0                
+  1   280   # settings.heartImp_RV_stiff
+ -1       1                       0                       0                
+  1   280   # settings.heartImp_LVcont
+ -1       1                       0                       0                
+  1   280   # settings.heartImp_RVcont
  -1  8.0000000000000004E-01       0                       0                
   1   280   # settings.syst_abd_P_th_ratio
   0       1                       0                       0                
   6   257   # settings.systemic_limitExternalPressure
- -1  4.4029570000000001E-01       0                       0                
+ -1  4.9357689999999999E-01       0                       0                
   1   280   # settings.syst_art_k_E
  -1       1                       0                       0                
   1   281   # settings.syst_art_UseVasoconstrictionEffect
@@ -10872,9 +10875,9 @@ double initialValue(10671,6)
   1   280   # settings.eta_vc
  -1       1                       0                       0                
   1   280   # settings.syst_tissues_hydrostaticLevel_correction
- -1  1.2873330000000000E+08       0                 1.0000000000000000E+100
+ -1  1.2763150000000000E+08       0                 1.0000000000000000E+100
   1   280   # settings.syst_TPR
- -1  5.2277100000000001E+00       0                       0                
+ -1  3.2709020000000000E+00       0                       0                
   1   280   # settings.syst_TR_frac
   0       0                       0                       0                
   6   256   # settings.tissues_Pa_nom
@@ -10986,13 +10989,13 @@ double initialValue(10671,6)
   1   280   # settings.pulm_CO_target
  -1  3.1942059999999999E-07       0                       0                
   1   280   # settings.pulm_C_PV
- -1  1.6351890000000001E-08       0                       0                
+ -1  2.4398769999999998E-08       0                       0                
   1   280   # settings.pulm_C_PA
  -1  1.3332238741500000E+03       0                       0                
   1   280   # settings.pulm_P_PV_nom
   0       0                       0                 1.0000000000000000E+100
   6   256   # settings.pulm_V_PV_start
- -1  1.0197530000000000E+07       0                 1.0000000000000000E+100
+ -1  9.3403640000000000E+06       0                 1.0000000000000000E+100
   1   280   # settings.pulm_R
  -1  3.3333333333333002E-04       0                       0                
   1   280   # settings.pulm_q_nom_maxq
@@ -11040,26 +11043,6 @@ double initialValue(10671,6)
   1   280   # exercise.tau
  -1       3                       0                       0                
   1   280   # exercise.tau_gfr
- -1       1                       0                       0                
-  1   280   # exercise.LV_stiff
- -1       1                       0                       0                
-  1   280   # exercise.LV_SLcollagen_f
- -1       1                       0                       0                
-  1   280   # exercise.LV_PConcollagen_f
- -1       1                       0                       0                
-  1   280   # exercise.LV_PExpcollagen_f
- -1       1                       0                       0                
-  1   280   # exercise.RV_stiff
- -1       1                       0                       0                
-  1   280   # exercise.RV_SLcollagen_f
- -1       1                       0                       0                
-  1   280   # exercise.RV_PConcollagen_f
- -1       1                       0                       0                
-  1   280   # exercise.RV_PExpcollagen_f
- -1       1                       0                       0                
-  1   280   # exercise.LVfunctionFraction
- -1       1                       0                       0                
-  1   280   # exercise.RVfunctionFraction
  -1       0                       0                       0                
   1   280   # exercise.volumeInfusion
   0       0                       0                       0                
@@ -11078,7 +11061,7 @@ double initialValue(10671,6)
   6   256   # exercise.settings.V_PV_init
   0       0                       0                 1.0000000000000000E+100
   6   256   # exercise.settings.heart_R_vlv
- -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
+ -1  2.2693760000000000E+06       0                 1.0000000000000000E+100
   1   280   # exercise.settings.heart_R_AV
   0       0                       0                 1.0000000000000000E+100
   6   256   # exercise.settings.heart_R_LA
@@ -11138,6 +11121,14 @@ double initialValue(10671,6)
   6   256   # exercise.settings.heart_vntr_PExpcollagen
  -1  1.2500000000000000E+00       0                       0                
   1   280   # exercise.settings.starlingFactor_exp
+ -1       1                       0                       0                
+  1   280   # exercise.settings.heartImp_LV_stiff
+ -1       1                       0                       0                
+  1   280   # exercise.settings.heartImp_RV_stiff
+ -1       1                       0                       0                
+  1   280   # exercise.settings.heartImp_LVcont
+ -1       1                       0                       0                
+  1   280   # exercise.settings.heartImp_RVcont
   0       0                       0                       0                
   6   256   # exercise.settings.syst_abd_P_th_ratio
   0       0                       0                       0                
@@ -16450,7 +16441,7 @@ double initialValue(10671,6)
   1   280   # exercise.heartComponent.add.k2
  -1  2.9999999999999999E-01       0                       0                
   1   280   # exercise.heartComponent.valveInertia_aortic.volumeFlow_start
- -1  1.0000000000000000E-02       0                       0                
+ -1  2.0000000000000000E-02       0                       0                
   1   280   # exercise.heartComponent.valveInertia_aortic.l
  -1  2.0000000000000001E-04       0                       0                
   1   280   # exercise.heartComponent.valveInertia_aortic.A_ind
@@ -17396,6 +17387,8 @@ double initialValue(10671,6)
   1  1306   # exercise.fmi_xVrs[280]
  -1  3.3554712000000000E+07       0                       0                
   1  1306   # exercise.fmi_xVrs[281]
+ -1  3.3554713000000000E+07       0                       0                
+  1  1306   # exercise.fmi_xVrs[282]
  -1  5.8720256000000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[1]
  -1  5.8720256100000000E+08       0                       0                
@@ -17924,21 +17917,21 @@ double initialValue(10671,6)
   1  1306   # exercise.fmi_dxVrs[263]
  -1  5.8720282300000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[264]
- -1  3.1876736800000000E+08       0                       0                
+ -1  5.8720282400000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[265]
  -1  3.1876736900000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[266]
- -1  5.8720282600000000E+08       0                       0                
+ -1  3.1876737000000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[267]
  -1  5.8720282700000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[268]
  -1  5.8720282800000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[269]
- -1  3.1876737300000000E+08       0                       0                
+ -1  5.8720282900000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[270]
- -1  3.1876737400000000E+08       0                       0                
+ -1  5.8720283000000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[271]
- -1  5.8720283100000000E+08       0                       0                
+ -1  3.1876737500000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[272]
  -1  5.8720283200000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[273]
@@ -17954,10 +17947,12 @@ double initialValue(10671,6)
   1  1306   # exercise.fmi_dxVrs[278]
  -1  5.8720283800000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[279]
- -1  3.1876738300000000E+08       0                       0                
+ -1  5.8720283900000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[280]
- -1  5.8720284000000000E+08       0                       0                
+ -1  3.1876738400000000E+08       0                       0                
   1  1306   # exercise.fmi_dxVrs[281]
+ -1  5.8720284100000000E+08       0                       0                
+  1  1306   # exercise.fmi_dxVrs[282]
  -1  3.3554432000000000E+08       0                       0                
   1  1306   # exercise.fmi_yVrs[1]
  -1  3.3554432100000000E+08       0                       0                
@@ -18034,26 +18029,6 @@ double initialValue(10671,6)
   1   280   # tilt.tau
  -1       3                       0                       0                
   1   280   # tilt.tau_gfr
- -1       1                       0                       0                
-  1   280   # tilt.LV_stiff
- -1       1                       0                       0                
-  1   280   # tilt.LV_SLcollagen_f
- -1       1                       0                       0                
-  1   280   # tilt.LV_PConcollagen_f
- -1       1                       0                       0                
-  1   280   # tilt.LV_PExpcollagen_f
- -1       1                       0                       0                
-  1   280   # tilt.RV_stiff
- -1       1                       0                       0                
-  1   280   # tilt.RV_SLcollagen_f
- -1       1                       0                       0                
-  1   280   # tilt.RV_PConcollagen_f
- -1       1                       0                       0                
-  1   280   # tilt.RV_PExpcollagen_f
- -1       1                       0                       0                
-  1   280   # tilt.LVfunctionFraction
- -1       1                       0                       0                
-  1   280   # tilt.RVfunctionFraction
  -1       0                       0                       0                
   1   280   # tilt.volumeInfusion
   0       0                       0                       0                
@@ -18072,7 +18047,7 @@ double initialValue(10671,6)
   6   256   # tilt.settings.V_PV_init
   0       0                       0                 1.0000000000000000E+100
   6   256   # tilt.settings.heart_R_vlv
- -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
+ -1  2.2693760000000000E+06       0                 1.0000000000000000E+100
   1   280   # tilt.settings.heart_R_AV
   0       0                       0                 1.0000000000000000E+100
   6   256   # tilt.settings.heart_R_LA
@@ -18132,6 +18107,14 @@ double initialValue(10671,6)
   6   256   # tilt.settings.heart_vntr_PExpcollagen
  -1  1.2500000000000000E+00       0                       0                
   1   280   # tilt.settings.starlingFactor_exp
+ -1       1                       0                       0                
+  1   280   # tilt.settings.heartImp_LV_stiff
+ -1       1                       0                       0                
+  1   280   # tilt.settings.heartImp_RV_stiff
+ -1       1                       0                       0                
+  1   280   # tilt.settings.heartImp_LVcont
+ -1       1                       0                       0                
+  1   280   # tilt.settings.heartImp_RVcont
   0       0                       0                       0                
   6   256   # tilt.settings.syst_abd_P_th_ratio
   0       0                       0                       0                
@@ -23442,7 +23425,7 @@ double initialValue(10671,6)
   1   280   # tilt.heartComponent.add.k2
  -1  2.9999999999999999E-01       0                       0                
   1   280   # tilt.heartComponent.valveInertia_aortic.volumeFlow_start
- -1  1.0000000000000000E-02       0                       0                
+ -1  2.0000000000000000E-02       0                       0                
   1   280   # tilt.heartComponent.valveInertia_aortic.l
  -1  2.0000000000000001E-04       0                       0                
   1   280   # tilt.heartComponent.valveInertia_aortic.A_ind
@@ -24402,6 +24385,8 @@ double initialValue(10671,6)
   1  1306   # tilt.fmi_xVrs[279]
  -1  3.3554711000000000E+07       0                       0                
   1  1306   # tilt.fmi_xVrs[280]
+ -1  3.3554712000000000E+07       0                       0                
+  1  1306   # tilt.fmi_xVrs[281]
  -1  5.8720256000000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[1]
  -1  5.8720256100000000E+08       0                       0                
@@ -24930,21 +24915,21 @@ double initialValue(10671,6)
   1  1306   # tilt.fmi_dxVrs[263]
  -1  5.8720282300000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[264]
- -1  3.1876736800000000E+08       0                       0                
+ -1  5.8720282400000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[265]
  -1  3.1876736900000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[266]
- -1  5.8720282600000000E+08       0                       0                
+ -1  3.1876737000000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[267]
  -1  5.8720282700000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[268]
  -1  5.8720282800000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[269]
- -1  3.1876737300000000E+08       0                       0                
+ -1  5.8720282900000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[270]
- -1  3.1876737400000000E+08       0                       0                
+ -1  5.8720283000000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[271]
- -1  5.8720283100000000E+08       0                       0                
+ -1  3.1876737500000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[272]
  -1  5.8720283200000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[273]
@@ -24960,8 +24945,10 @@ double initialValue(10671,6)
   1  1306   # tilt.fmi_dxVrs[278]
  -1  5.8720283800000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[279]
- -1  3.1876738300000000E+08       0                       0                
+ -1  5.8720283900000000E+08       0                       0                
   1  1306   # tilt.fmi_dxVrs[280]
+ -1  3.1876738400000000E+08       0                       0                
+  1  1306   # tilt.fmi_dxVrs[281]
  -1  3.3554432000000000E+08       0                       0                
   1  1306   # tilt.fmi_yVrs[1]
  -1  3.3554432100000000E+08       0                       0                
@@ -25038,26 +25025,6 @@ double initialValue(10671,6)
   1   280   # valsalva.tau
  -1       3                       0                       0                
   1   280   # valsalva.tau_gfr
- -1       1                       0                       0                
-  1   280   # valsalva.LV_stiff
- -1       1                       0                       0                
-  1   280   # valsalva.LV_SLcollagen_f
- -1       1                       0                       0                
-  1   280   # valsalva.LV_PConcollagen_f
- -1       1                       0                       0                
-  1   280   # valsalva.LV_PExpcollagen_f
- -1       1                       0                       0                
-  1   280   # valsalva.RV_stiff
- -1       1                       0                       0                
-  1   280   # valsalva.RV_SLcollagen_f
- -1       1                       0                       0                
-  1   280   # valsalva.RV_PConcollagen_f
- -1       1                       0                       0                
-  1   280   # valsalva.RV_PExpcollagen_f
- -1       1                       0                       0                
-  1   280   # valsalva.LVfunctionFraction
- -1       1                       0                       0                
-  1   280   # valsalva.RVfunctionFraction
  -1       0                       0                       0                
   1   280   # valsalva.volumeInfusion
   0       0                       0                       0                
@@ -25076,7 +25043,7 @@ double initialValue(10671,6)
   6   256   # valsalva.settings.V_PV_init
   0       0                       0                 1.0000000000000000E+100
   6   256   # valsalva.settings.heart_R_vlv
- -1  7.9718859999999998E+05       0                 1.0000000000000000E+100
+ -1  2.2693760000000000E+06       0                 1.0000000000000000E+100
   1   280   # valsalva.settings.heart_R_AV
   0       0                       0                 1.0000000000000000E+100
   6   256   # valsalva.settings.heart_R_LA
@@ -25136,6 +25103,14 @@ double initialValue(10671,6)
   6   256   # valsalva.settings.heart_vntr_PExpcollagen
  -1  1.2500000000000000E+00       0                       0                
   1   280   # valsalva.settings.starlingFactor_exp
+ -1       1                       0                       0                
+  1   280   # valsalva.settings.heartImp_LV_stiff
+ -1       1                       0                       0                
+  1   280   # valsalva.settings.heartImp_RV_stiff
+ -1       1                       0                       0                
+  1   280   # valsalva.settings.heartImp_LVcont
+ -1       1                       0                       0                
+  1   280   # valsalva.settings.heartImp_RVcont
   0       0                       0                       0                
   6   256   # valsalva.settings.syst_abd_P_th_ratio
   0       0                       0                       0                
@@ -30442,7 +30417,7 @@ double initialValue(10671,6)
   1   280   # valsalva.heartComponent.add.k2
  -1  2.9999999999999999E-01       0                       0                
   1   280   # valsalva.heartComponent.valveInertia_aortic.volumeFlow_start
- -1  1.0000000000000000E-02       0                       0                
+ -1  2.0000000000000000E-02       0                       0                
   1   280   # valsalva.heartComponent.valveInertia_aortic.l
  -1  2.0000000000000001E-04       0                       0                
   1   280   # valsalva.heartComponent.valveInertia_aortic.A_ind
@@ -30662,7 +30637,7 @@ double initialValue(10671,6)
   1   280   # valsalva.thoracic_pressure_ramp.falling
  -1      60                  9.9999999999999997E-61 1.0000000000000000E+100
   1   280   # valsalva.thoracic_pressure_ramp.period
- -1      -1                       0                       0                
+ -1       2                       0                       0                
   1   282   # valsalva.thoracic_pressure_ramp.nperiod
  -1       0                       0                       0                
   1   280   # valsalva.thoracic_pressure_ramp.offset
@@ -31476,6 +31451,8 @@ double initialValue(10671,6)
   1  1306   # valsalva.fmi_xVrs[279]
  -1  3.3554711000000000E+07       0                       0                
   1  1306   # valsalva.fmi_xVrs[280]
+ -1  3.3554712000000000E+07       0                       0                
+  1  1306   # valsalva.fmi_xVrs[281]
  -1  5.8720256000000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[1]
  -1  5.8720256100000000E+08       0                       0                
@@ -32004,21 +31981,21 @@ double initialValue(10671,6)
   1  1306   # valsalva.fmi_dxVrs[263]
  -1  5.8720282300000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[264]
- -1  3.1876736800000000E+08       0                       0                
+ -1  5.8720282400000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[265]
  -1  3.1876736900000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[266]
- -1  5.8720282600000000E+08       0                       0                
+ -1  3.1876737000000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[267]
  -1  5.8720282700000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[268]
  -1  5.8720282800000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[269]
- -1  3.1876737300000000E+08       0                       0                
+ -1  5.8720282900000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[270]
- -1  3.1876737400000000E+08       0                       0                
+ -1  5.8720283000000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[271]
- -1  5.8720283100000000E+08       0                       0                
+ -1  3.1876737500000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[272]
  -1  5.8720283200000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[273]
@@ -32034,8 +32011,10 @@ double initialValue(10671,6)
   1  1306   # valsalva.fmi_dxVrs[278]
  -1  5.8720283800000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[279]
- -1  3.1876738300000000E+08       0                       0                
+ -1  5.8720283900000000E+08       0                       0                
   1  1306   # valsalva.fmi_dxVrs[280]
+ -1  3.1876738400000000E+08       0                       0                
+  1  1306   # valsalva.fmi_dxVrs[281]
  -1  3.3554432000000000E+08       0                       0                
   1  1306   # valsalva.fmi_yVrs[1]
  -1  3.3554432100000000E+08       0                       0                
@@ -32164,7 +32143,7 @@ double initialValue(10671,6)
 #   Which variables will be important for initialization and continue
 #   is indicated by value in column 6 & dsStartMasks.
 #
-char initialDescription(10671,186)
+char initialDescription(10664,186)
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
 Subject's weight [kg]
@@ -32175,9 +32154,9 @@ maximal heart rate [Hz|1/min]
 Du Bois formula for body surface area
 Use nominal pressure to initialize vessel volume. False to use volume directly [:#(type=Boolean)]
 Volume adjustment [m3|ml]
-Open valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
-Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Resistance of left atrium [(Pa.s)/m3|(mmHg.s)/ml]
+Open valve resistance [(Pa.s)/m3|(mmHg.min)/l]
+Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/l]
+Resistance of left atrium [(Pa.s)/m3|(mmHg.min)/l]
 Resistance of the right atrium [(Pa.s)/m3|(dyn.s)/cm5]
 Viscoelastic resistance of the atria [(Pa.s)/m3|(dyn.s)/cm5]
 Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
@@ -32199,6 +32178,7 @@ nominal atrial contraction time [s|s]
 nominal atrial relaxation time [s|s]
 Factor affecting ventricular walls volume [1|%]
 Factor affecting ventricular diameters [1|%]
+modifier to RV midwall reference surface area, cm^2 [1|%]
 Steepness of passive tension to volume coeff. Affects diastolic compliance.
 Reference SL, [um] []
 zero tension sarcomere length [um] []
@@ -32207,6 +32187,10 @@ Resting sarcomere length [um] []
 
 
 
+Stiffening factor
+Stiffening factor
+Reducing LV and LA contractility, incl. the maximal one [1|%]
+Reducing RV and RA contractility, incl. the maximal one [1|%]
 fraction of thoracic pressure in the abdominal cavity [1|%]
 Limit Pext in large arteries, tissues and veins, when they are already empty [:#(type=Boolean)]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
@@ -32266,7 +32250,7 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [Hz|1/min]
+rising factor of the sympathetic activation phi [Hz] [Hz|Hz]
 decrease factor of the phi
 mL/min [m3/s|ml/min]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
@@ -32297,16 +32281,6 @@ A fraction of nominal C [1|%]
 [:#(type=Boolean)]
 Integration costant for min-max calculations [s|min]
 
-Stiffening factor
-threshold for collagen activation, [um] []
-contriubtion of collagen [1] []
-contriubtion of collagen [1] []
-Stiffening factor
-threshold for collagen activation, [um] []
-contriubtion of collagen [1] []
-contriubtion of collagen [1] []
-Reducing LV and LA contractility, incl. the maximal one [|%]
-Reducing RV and RA contractility, incl. the maximal one [|%]
 Height of ramps [m3/s|ml/min]
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
@@ -32315,9 +32289,9 @@ Resting heart rate (at phi0) [s-1|1/min]
 maximal heart rate [s-1|1/min]
 [kg/m2]
 Volume adjustment [m3|ml]
-Open valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
-Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Resistance of left atrium [(Pa.s)/m3|(mmHg.s)/ml]
+Open valve resistance [(Pa.s)/m3|(mmHg.min)/l]
+Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/l]
+Resistance of left atrium [(Pa.s)/m3|(mmHg.min)/l]
 Viscoelastic resistance of the atria [(Pa.s)/m3|(dyn.s)/cm5]
 Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
 For Smith heart - linear dependency of active elastance on phi [1|%]
@@ -32346,6 +32320,10 @@ Resting sarcomere length [um] []
 
 
 
+Stiffening factor
+Stiffening factor
+Reducing LV and LA contractility, incl. the maximal one [|%]
+Reducing RV and RA contractility, incl. the maximal one [|%]
 fraction of thoracic pressure in the abdominal cavity [1|%]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
 Effect fraction of arterial vasoconstriction on arterial compliance [1|%]
@@ -32392,7 +32370,7 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [s-1|1/min]
+rising factor of the sympathetic activation phi [Hz] [s-1|Hz]
 decrease factor of the phi
 mL/min [m3/s|ml/min]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
@@ -35792,18 +35770,10 @@ relative tolerance for the internal solver of the fmu
 [:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
+[:#(type=Integer)]
+[:#(type=Integer)]
 Integration costant for min-max calculations [s|min]
 
-Stiffening factor
-threshold for collagen activation, [um] []
-contriubtion of collagen [1] []
-contriubtion of collagen [1] []
-Stiffening factor
-threshold for collagen activation, [um] []
-contriubtion of collagen [1] []
-contriubtion of collagen [1] []
-Reducing LV and LA contractility, incl. the maximal one [|%]
-Reducing RV and RA contractility, incl. the maximal one [|%]
 Height of ramps [m3/s|ml/min]
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
@@ -35812,9 +35782,9 @@ Resting heart rate (at phi0) [s-1|1/min]
 maximal heart rate [s-1|1/min]
 [kg/m2]
 Volume adjustment [m3|ml]
-Open valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
-Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Resistance of left atrium [(Pa.s)/m3|(mmHg.s)/ml]
+Open valve resistance [(Pa.s)/m3|(mmHg.min)/l]
+Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/l]
+Resistance of left atrium [(Pa.s)/m3|(mmHg.min)/l]
 Viscoelastic resistance of the atria [(Pa.s)/m3|(dyn.s)/cm5]
 Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
 For Smith heart - linear dependency of active elastance on phi [1|%]
@@ -35843,6 +35813,10 @@ Resting sarcomere length [um] []
 
 
 
+Stiffening factor
+Stiffening factor
+Reducing LV and LA contractility, incl. the maximal one [|%]
+Reducing RV and RA contractility, incl. the maximal one [|%]
 fraction of thoracic pressure in the abdominal cavity [1|%]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
 Effect fraction of arterial vasoconstriction on arterial compliance [1|%]
@@ -35889,7 +35863,7 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [s-1|1/min]
+rising factor of the sympathetic activation phi [Hz] [s-1|Hz]
 decrease factor of the phi
 mL/min [m3/s|ml/min]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
@@ -39294,18 +39268,10 @@ relative tolerance for the internal solver of the fmu
 [:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
+[:#(type=Integer)]
+[:#(type=Integer)]
 Integration costant for min-max calculations [s|min]
 
-Stiffening factor
-threshold for collagen activation, [um] []
-contriubtion of collagen [1] []
-contriubtion of collagen [1] []
-Stiffening factor
-threshold for collagen activation, [um] []
-contriubtion of collagen [1] []
-contriubtion of collagen [1] []
-Reducing LV and LA contractility, incl. the maximal one [|%]
-Reducing RV and RA contractility, incl. the maximal one [|%]
 Height of ramps [m3/s|ml/min]
 Baseline resting phi [1|%]
 Subject's height for scaling vessel lengths [m|cm]
@@ -39314,9 +39280,9 @@ Resting heart rate (at phi0) [s-1|1/min]
 maximal heart rate [s-1|1/min]
 [kg/m2]
 Volume adjustment [m3|ml]
-Open valve resistance [(Pa.s)/m3|(mmHg.s)/ml]
-Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/ml]
-Resistance of left atrium [(Pa.s)/m3|(mmHg.s)/ml]
+Open valve resistance [(Pa.s)/m3|(mmHg.min)/l]
+Open aortic valve resistance [(Pa.s)/m3|(mmHg.min)/l]
+Resistance of left atrium [(Pa.s)/m3|(mmHg.min)/l]
 Viscoelastic resistance of the atria [(Pa.s)/m3|(dyn.s)/cm5]
 Inertance of the atrial inflow [Pa.s2/m3|mmHg.min2/ml]
 For Smith heart - linear dependency of active elastance on phi [1|%]
@@ -39345,6 +39311,10 @@ Resting sarcomere length [um] []
 
 
 
+Stiffening factor
+Stiffening factor
+Reducing LV and LA contractility, incl. the maximal one [|%]
+Reducing RV and RA contractility, incl. the maximal one [|%]
 fraction of thoracic pressure in the abdominal cavity [1|%]
 Adjustment of systemic arterial elasticity to fit normal arterial pressures [1|%]
 Effect fraction of arterial vasoconstriction on arterial compliance [1|%]
@@ -39391,7 +39361,7 @@ Multiplicator factor for fine tuning baroreceptors delta0 to take its different 
 delta0 threshold for aortic sensor
 delta0 threshold for carotid sensor - 0.55 (Kosinski)
 Aortic / carotid sensor weight ratio [1] [1|%]
-rising factor of the sympathetic activation phi [Hz] [s-1|1/min]
+rising factor of the sympathetic activation phi [Hz] [s-1|Hz]
 decrease factor of the phi
 mL/min [m3/s|ml/min]
 Pulmonary venous compliance [m3/Pa|ml/mmHg]
@@ -42235,6 +42205,8 @@ relative tolerance for the internal solver of the fmu
 
 [s]
 
+[:#(type=Integer)]
+[:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
 [:#(type=Integer)]
