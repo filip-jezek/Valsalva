@@ -10965,7 +10965,7 @@ double initialValue(10664,6)
   1   281   # settings.baro_useAbsolutePressureTerm
  -1  1.5000000000000000E+00       0                       0                
   1   280   # settings.baro_d0
- -1      93                       0                       0                
+ -1      10                       0                       0                
   1   280   # settings.baro_tau_s
  -1  6.5100000000000005E-02       0                       0                
   1   280   # settings.baro_a
@@ -30637,7 +30637,7 @@ double initialValue(10664,6)
   1   280   # valsalva.thoracic_pressure_ramp.falling
  -1      60                  9.9999999999999997E-61 1.0000000000000000E+100
   1   280   # valsalva.thoracic_pressure_ramp.period
- -1       2                       0                       0                
+ -1       1                       0                       0                
   1   282   # valsalva.thoracic_pressure_ramp.nperiod
  -1       0                       0                       0                
   1   280   # valsalva.thoracic_pressure_ramp.offset
