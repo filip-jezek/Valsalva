@@ -598,11 +598,13 @@ overwriteOptParamFile = True
 overWriteDsinTemplate = True
 updateStartValues = True
 
-# DSFILEIN = None
-# OPTOUTPUTFILEIN = 'OutputListingMain.txt'
+DSFILEIN = None
+OPTOUTPUTFILEIN = None
+
+
 
 DSFILEIN = 'dsin.txt'
-OPTOUTPUTFILEIN = None
+OPTOUTPUTFILEIN = 'OutputListingMain.txt'
 
 USEPSO =  False
 

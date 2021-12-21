@@ -9,7 +9,7 @@ L2SI = 1e-3
 LpD2SI = 1/(1000*60*60*24)
 vol_norm = 3.697 # L
 
-hftypes = ['CVS_baro_LV100_', 'CVSslr_baro_LV100_']
+hftypes = ['CVS_Ols_nobaro_LV100_']
 # hftypes = ['CVS_nobaro_Lumens_LV100_', 'CVS_nobaro_Lumens_LV50_', 'CVS_nobaro_Lumens_LV25_']
 
 for hftype in hftypes:

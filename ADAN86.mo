@@ -269,6 +269,9 @@ package ADAN_main
       parameter Physiolibrary.Types.Fraction heart_vntr_xi_AmRef=1
         "Factor affecting ventricular diameters"
         annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
+      parameter Physiolibrary.Types.Fraction heart_vntr_xi_AmRef_RV=heart_vntr_xi_AmRef
+        "modifier to RV midwall reference surface area, cm^2" annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
+
       parameter Real heart_vntr_k_passive=21.9
         "Steepness of passive tension to volume coeff. Affects diastolic compliance."
         annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
@@ -279,6 +282,16 @@ package ADAN_main
       parameter Real heart_vntr_PConcollagen=19.0 annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
       parameter Real heart_vntr_PExpcollagen=2.93 annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
       parameter Real starlingFactor_exp = 1 annotation(Dialog(tab="Heart",   group="TriSegOttesen ventricles"));
+
+      parameter Real heartImp_LV_stiff=1.0 "Stiffening factor" annotation(Dialog(tab="Heart Imp",   group="Heart impairments"));
+      parameter Real heartImp_RV_stiff=1.0 "Stiffening factor" annotation(Dialog(tab="Heart Imp",   group="Heart impairments"));
+      parameter Physiolibrary.Types.Fraction heartImp_LVcont=1
+        "Reducing LV and LA contractility, incl. the maximal one" annotation(Dialog(tab="Heart Imp",   group=
+              "Heart impairments"));
+      parameter Physiolibrary.Types.Fraction heartImp_RVcont=1
+        "Reducing RV and RA contractility, incl. the maximal one" annotation(Dialog(tab="Heart Imp",   group=
+              "Heart impairments"));
+
       // SYSTEMIC
       // general
       parameter Physiolibrary.Types.Fraction syst_abd_P_th_ratio=0.8
@@ -2649,6 +2662,132 @@ type"),       Text(
 
     end ValveInertia;
 
+      model VolumeRegulation
+
+        Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(
+            useSolutionFlowInput=true, SolutionFlow(displayUnit="ml/min") = 1e-06)
+          annotation (Placement(transformation(extent={{-18,-60},{2,-40}})));
+        Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump1(
+            useSolutionFlowInput=true)
+          annotation (Placement(transformation(extent={{-18,-84},{2,-64}})));
+        Physiolibrary.Hydraulic.Components.ElasticVessel addedVolume(volume_start=
+              settings.V_PV_init)
+          annotation (Placement(transformation(extent={{6,-84},{26,-64}})));
+        Physiolibrary.Hydraulic.Sensors.FlowMeasure flowMeasure
+          annotation (Placement(transformation(extent={{10,-40},{30,-60}})));
+        inner Components.Settings settings(
+          heart_vntr_D_0=4.85,
+          starlingFactor_exp=1.25,
+          heart_vntr_D_A=890.0,
+          V_PV_init=0,
+          baro_f1=3.625e-03,
+          baro_tau_s(displayUnit="s") = 10,
+          veins_delayed_activation=false,
+          heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 4.600005e+03,
+          heart_vntr_D_0_maxAct=1.225000e-03,
+          heart_vntr_TS_maxAct(displayUnit="s") = 1.047740e-01,
+          heart_vntr_TR_maxAct(displayUnit="s") = 7.597690e-02,
+          eta_vc=2.101054e-01,
+          tissues_eta_Ra=3.145225e+00,
+          tissues_eta_Rv=2.806250e+00,
+          tissues_eta_C=5.708013e-01,
+          tissues_chi_Ra(displayUnit="1") = 2.481250e+01,
+          tissues_chi_Rv=1.384375e+01,
+          tissues_chi_C=-3.125000e-02,
+          heart_R_LA(displayUnit="(mmHg.s)/ml") = 1.655068e+06,
+          heart_R_vlv(displayUnit="(mmHg.s)/ml") = 7.723515e+05,
+          heart_vntr_TS=3.246875e-01,
+          heart_vntr_TR(displayUnit="s") = 4.031250e-01,
+          heart_atr_D_0=2.651364e+07,
+          heart_atr_D_A=7.621357e+07,
+          syst_TPR=1.287333e+08,
+          syst_TR_frac(displayUnit="1") = 5.227710e+00,
+          pulm_C_PA=1.635189e-08,
+          pulm_R(displayUnit="(Pa.s)/m3") = 1.019753e+07,
+          heart_vntr_k_passive=5.000000e+00,
+          heart_vntr_SLcollagen=2.087500e+00,
+          heart_vntr_PConcollagen=2.642812e+01,
+          heart_vntr_PExpcollagen=2.481250e+00,
+          heart_atr_TS=0.08,
+          dummy=2,
+          baro_fsn(displayUnit="1/min") = 0.0355333333,
+          syst_art_k_E=0.4402957,
+          HR_max=3.1666666666667,
+          chi_phi=0.7,
+          heart_R_RA(displayUnit="(dyn.s)/cm5") = settings.heart_R_LA,
+          pulm_q_nom_maxq(displayUnit="l/min") = 0.00033333333333333,
+          initByPressure=false,
+          veins_UseNonLinearVeins=true,
+          veins_linearE_rel=765,
+          veins_linearV0_rel=0.793,
+          veins_activation_tau=1,
+          heart_vntr_Tact_maxAct=8.000000e-02,
+          heart_vntr_Lsref=1.9,
+          heart_atr_TR=2.631250e-01,
+          heart_vntr_Tact=8.000000e-02,
+          syst_tissues_hydrostaticLevel_correction=1,
+          tissues_SV_nom=0.000695,
+          pulm_C_PV=3.194206e-07,
+          syst_abd_P_th_ratio=0.8,
+          heart_R_A_vis(displayUnit="(dyn.s)/cm5") = 50000,
+          heart_vntr_L0=1.6,
+          pulm_P_PV_nom=1333.22387415,
+          height=1.7132,
+          tissues_CO_nom=0.000105,
+          EvaluateFunctionalParams=true,
+          HR_nominal=1.0666666666667,
+          UseNonLinear_TissuesCompliance=true,
+          baro_g=0.606258,
+          baro_useAbsolutePressureTerm=false,
+          baro_xi_delta0=2.688000e-01,
+          pulm_R_exp=9.150000e-01,
+          syst_art_UseVasoconstrictionEffect=true,
+          tissues_UseStraighteningReaction2Phi=true,
+          tissues_ZPV_nom=0.00210124,
+          tissues_gamma=0.5,
+          tissues_tau_R(displayUnit="s") = 0,
+          veins_C_phi=0.09)
+          annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+        parameter Physiolibrary.Types.VolumeFlowRate volumeInfusion(displayUnit="ml/min")=
+           0                                                            "Height of ramps";
+        Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b q_out annotation (
+            Placement(transformation(rotation=0, extent={{90,10},{110,30}})));
+        Modelica.Blocks.Continuous.LimPID PID1(
+          controllerType=Modelica.Blocks.Types.SimpleController.PI,
+          yMax=10e-6,
+          yMin=1e-6)
+          annotation (Placement(transformation(extent={{-68,-10},{-48,10}})));
+        Physiolibrary.Types.RealIO.PressureInput p_measured
+          "measured pressure" annotation (Placement(transformation(extent={{-120,
+                  -20},{-80,20}})));
+        Physiolibrary.Types.RealIO.PressureInput p_target "target pressure"
+          annotation (Placement(transformation(extent={{-120,-120},{-80,-80}})));
+        Modelica.Blocks.Math.Gain inverseGain(k=-1)
+          annotation (Placement(transformation(extent={{-34,-10},{-14,10}})));
+      equation
+        connect(addedVolume.q_in,unlimitedPump1. q_out) annotation (Line(
+            points={{16,-74},{2,-74}},
+            color={0,0,0},
+            thickness=1));
+        connect(unlimitedPump.q_out,flowMeasure. q_in) annotation (Line(
+            points={{2,-50},{10,-50}},
+            color={0,0,0},
+            thickness=1));
+        connect(flowMeasure.volumeFlow,unlimitedPump1. solutionFlow)
+          annotation (Line(points={{20,-62},{-8,-62},{-8,-67}},      color={0,
+                0,127}));
+        connect(q_out, flowMeasure.q_out)
+          annotation (Line(points={{100,20},{82,20},{82,-50},{30,-50}},
+                                                      color={0,0,0}));
+        connect(p_measured, PID1.u_s)
+          annotation (Line(points={{-100,0},{-70,0}}, color={0,0,127}));
+        connect(PID1.u_m, p_target) annotation (Line(points={{-58,-12},{-58,
+                -100},{-100,-100}}, color={0,0,127}));
+        connect(PID1.y, inverseGain.u)
+          annotation (Line(points={{-47,0},{-36,0}}, color={0,0,127}));
+        connect(inverseGain.y, unlimitedPump.solutionFlow) annotation (Line(
+              points={{-13,0},{-8,0},{-8,-43}}, color={0,0,127}));
+      end VolumeRegulation;
     end Basic;
 
     package Subsystems
@@ -2801,12 +2940,12 @@ type"),       Text(
         end Baroreflex;
 
         partial model partialHeartRate "Base replaceable model to calculate heart rate from sympathetic activation"
-
+          parameter Boolean useFractionInput = true;
           Physiolibrary.Types.RealIO.FrequencyOutput HR annotation (Placement(
                 transformation(extent={{90,-10},{110,10}}), iconTransformation(extent={{92,-10},
                     {112,10}})));
           Physiolibrary.Types.RealIO.FractionInput
-                                               phi annotation (Placement(transformation(
+                                               phi if useFractionInput annotation (Placement(transformation(
                   extent={{-120,-20},{-80,20}}),iconTransformation(extent={{-120,-20},{-80,
                     20}})));
 
@@ -2827,6 +2966,8 @@ type"),       Text(
           annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                 coordinateSystem(preserveAspectRatio=false)));
         end HeartRate_simple;
+
+
 
         model HeartRate_HRMinMax "Extesion to use parametrization using resting at maximal HR"
           extends partialHeartRate;
@@ -2855,6 +2996,23 @@ type"),       Text(
         //   HR =HR_nom*(1 + eta_HR*(phi_avg - phi0));
 
         end HeartRate_HRMinMax;
+
+        model HeartRate_PrescribedTable
+        extends partialHeartRate( final useFractionInput = false);
+        Modelica.Blocks.Sources.TimeTable timeTable(table=heartRateTimeTable)
+          annotation (Placement(transformation(extent={{-10,30},{10,50}})));
+        parameter Real heartRateTimeTable[:,2]=[0,85.92844974; 20,86.38841567; 40,87.00170358;
+            60,87.97274276; 80,92.82793867; 100,97.52981261]
+               "Table matrix (time = first column; e.g., table=[0, 0; 1, 1; 2, 4])";
+        Modelica.Blocks.Math.Gain gain(k=ConversionToHz)
+          annotation (Placement(transformation(extent={{42,30},{62,50}})));
+        parameter Real ConversionToHz=1/60 "Use 1 for direct table input in Hz";
+        equation
+        connect(timeTable.y, gain.u)
+          annotation (Line(points={{11,40},{40,40}}, color={0,0,127}));
+        connect(gain.y, HR) annotation (Line(points={{63,40},{86,40},{86,0},{100,0}},
+              color={0,0,127}));
+        end HeartRate_PrescribedTable;
 
         model Baroreflex_Kosinksi "Baroreflex system as in Kosinksi et al 2018"
           extends partialBaroreflex;
@@ -3870,6 +4028,16 @@ type"),       Text(
               maxLinearFlow(displayUnit="l/min") = 1.6666666666667e-05),
             R_pv_visc(Resistance=settings.pulm_PV_R_vis));
 
+          Physiolibrary.Hydraulic.Interfaces.HydraulicPort_b PV_cannula
+            if usePVCannula annotation (Placement(transformation(extent={{50,
+                    -110},{70,-90}}), iconTransformation(extent={{50,-110},{70,
+                    -90}})));
+          parameter Boolean usePVCannula=false;
+        equation
+          connect(c_pv.q_in, PV_cannula) annotation (Line(
+              points={{60,-50},{60,-100}},
+              color={0,0,0},
+              thickness=1));
           annotation (Icon(graphics={Line(
                   points={{-64,-38},{-4,-38},{16,22}},
                   color={0,0,0},
@@ -5477,8 +5645,10 @@ type"),       Text(
           end System_OlsenSIUnits_PAHEx;
 
           model Heart_Olsen_base "Olsens heart, equation based. Implemented from Olsen 2021, PMID 34448636"
+            import Signals;
             extends partialDriving_Olsen(t0(start=0));
             extends partialHeart;
+
             parameter Boolean deactivateHeart = false;
             parameter Boolean closeValves = false;
 
@@ -5804,6 +5974,18 @@ type"),       Text(
             Physiolibrary.Types.Velocity d_Sept_ym
               "  cm/s;   // Change in junction radius diameter";
 
+            Signals.Power power_LV(
+              HR=HRo,
+              p=P_lvw,
+              v=V_LV,
+              beat=beat)
+              annotation (Placement(transformation(extent={{-20,20},{0,40}})));
+            Signals.Power power_RV(
+              HR=HRo,
+              p=P_rvw,
+              v=V_rv,
+              beat=beat)
+              annotation (Placement(transformation(extent={{-20,-20},{0,0}})));
           protected
             Physiolibrary.Types.RealIO.FrequencyOutput HRinner "Frequency constant"
               annotation (Placement(transformation(extent={{-61,-1},{-59,1}})));
@@ -6115,6 +6297,7 @@ type"),       Text(
 
           model Systemic_Olsen
             extends Systemic.partialSystemic;
+            Physiolibrary.Types.Volume volume = V_ao + V_vc;
             Physiolibrary.Types.VolumeFlowRate Q_vc = -port_b.q, Q_av = port_a.q;
 
              parameter Physiolibrary.Types.HydraulicCompliance  C_vc(
@@ -7465,6 +7648,7 @@ type"),       Text(
           end Pulmonary_Oslen;
 
           model OlsenCirculation
+            import Signals;
             Heart_Olsen_base heart_Olsen_base(
               HR_stepUp=false,
               UseFrequencyInput=true,
@@ -7474,7 +7658,8 @@ type"),       Text(
               annotation (Placement(transformation(extent={{12,-26},{-8,-6}})));
             Systemic_Olsen systemic_Olsen
               annotation (Placement(transformation(extent={{-36,34},{40,64}})));
-            Pulmonary_Oslen pulmonary_Oslen annotation (Placement(
+            Pulmonary_Oslen pulmonary_Oslen(V_pve(start=150e-6 + settings.V_PV_init))
+                                            annotation (Placement(
                   transformation(extent={{14,-68},{-6,-48}})));
             outer Settings settings annotation (Placement(transformation(extent=
                      {{-102,80},{-82,100}})));
@@ -7484,6 +7669,22 @@ type"),       Text(
             Physiolibrary.Types.Constants.FractionConst  HR1(k(displayUnit=
                     "1/min") = 1)
               annotation (Placement(transformation(extent={{76,-16},{68,-8}})));
+            Signals.Dashboard dashboard(
+              V0=0.0007811,
+              Q_mv=heart_Olsen_base.Q_mv,
+              totalVolume=systemic_Olsen.volume + heart_Olsen_base.volume +
+                  pulmonary_Oslen.volume,
+              P_pv=pulmonary_Oslen.port_b.pressure,
+              P_LV=heart_Olsen_base.P_lvw,
+              V_LV=heart_Olsen_base.V_LV,
+              P_sv=systemic_Olsen.port_b.pressure,
+              HR=heart_Olsen_base.HRo,
+              power_LV=heart_Olsen_base.power_LV.power,
+              power_RV=heart_Olsen_base.power_RV.power,
+              beat=heart_Olsen_base.beat,
+              mitral_closing=heart_Olsen_base.Q_mv < 0,
+              BP=systemic_Olsen.P_ao)
+              annotation (Placement(transformation(extent={{-100,-100},{-80,-80}})));
           equation
             connect(heart_Olsen_base.sa, systemic_Olsen.port_a) annotation (
                 Line(
@@ -7514,6 +7715,7 @@ type"),       Text(
               Icon(coordinateSystem(preserveAspectRatio=false)),
               Diagram(coordinateSystem(preserveAspectRatio=false)),
               experiment(
+                StopTime=30,
                 Interval=0.002,
                 Tolerance=1e-07,
                 __Dymola_Algorithm="Cvode"));
@@ -14733,44 +14935,44 @@ compliance
             outer Physiolibrary.Types.Pressure P_th "Thoracic (airway) pressure, used as outer pressure.";
             outer Physiolibrary.Types.Pressure outer_pressure "Optional other external pressure (e.g. applied on limbs)";
             parameter Physiolibrary.Types.Fraction thoracic_pressure_ratio=1 "Optional Ratio for thoracic pressure, e.g. for abdominal cavity" annotation (Dialog(enable=UseOuter_thoracic_pressure));
-            Physiolibrary.Types.Pressure external_pressure_outside "externally applied pressure - either thoracic or the other one";
-            Physiolibrary.Types.Pressure external_pressure_inside "Internal effect of externally applied pressure. Might be lower as the vessel is close to empty.";
+            Physiolibrary.Types.Pressure external_pressure_outside "externally applied pressure - either thoracic or the other one" annotation(HideResult = settings.hideLevel0);
+            Physiolibrary.Types.Pressure external_pressure_inside "Internal effect of externally applied pressure. Might be lower as the vessel is close to empty." annotation(HideResult = settings.hideLevel0);
 
             outer Physiolibrary.Types.Fraction Exercise "Exercise intensity input to the whole systemic circulation";
             parameter Boolean UseExercise = false "True, when this particular tissue is doing exercise" annotation(choices(checkBox=true));
             parameter Physiolibrary.Types.Fraction exercise_ratio=1 "Excercise intensity ratio of this particular tissue - e.g. some tissue could be only halfway activated" annotation (Dialog(enable=UseExercise));
-            Physiolibrary.Types.Fraction exercise "Actual exercise fraction for this particular tissue";
+            Physiolibrary.Types.Fraction exercise "Actual exercise fraction for this particular tissue" annotation(HideResult = settings.hideLevel0);
 
             Physiolibrary.Types.Pressure p_in=port_a.pressure
-              "Input pressure";
+              "Input pressure" annotation(HideResult = settings.hideLevel1);
               Physiolibrary.Types.VolumeFlowRate q_in=port_a.q
-                "Input flow (measured in normal blood flow direction)";
+                "Input flow (measured in normal blood flow direction)" annotation(HideResult = settings.hideLevel1);
 
             Physiolibrary.Types.Pressure p_out_valved= port_b.pressure
-              "Output pressure, able to be shut by a checkvalve.";
+              "Output pressure, able to be shut by a checkvalve." annotation(HideResult = settings.hideLevel0);
             // Physiolibrary.Types.VolumeFlowRate q_out_valved= - port_b.q
             //   "Output flow (positive in normal blood flow direction), able to be closed by a checkvalve.";
 
             Physiolibrary.Types.Pressure p_out
-              "Output pressure (measured in normal blood flow direction)";
+              "Output pressure (measured in normal blood flow direction)" annotation(HideResult = settings.hideLevel0);
               Physiolibrary.Types.VolumeFlowRate q_out=-port_b.q
-                "Output flow (positive in normal blood flow direction).";
+                "Output flow (positive in normal blood flow direction)." annotation(HideResult = settings.hideLevel0);
 
-            Physiolibrary.Types.Volume volume(nominal = 1e-9) "Actual volume";
+            Physiolibrary.Types.Volume volume(nominal = 1e-9) "Actual volume" annotation(HideResult = settings.hideLevel1);
             parameter Physiolibrary.Types.Volume V_min = 1e-6 "Minimal volume for limiting effects (e.g. collapsing, external pressure..)";
 
           // CHECKVALVE FUNCTIONALITY
 
             Real passableVariable(start=0, final unit="1")
-              "Auxiliary variable for actual position on the ideal diode characteristic" annotation(HideResult = not LimitBackflow);
+              "Auxiliary variable for actual position on the ideal diode characteristic" annotation(HideResult = not LimitBackflow or settings.hideLevel0);
             parameter Physiolibrary.Types.HydraulicResistance R_on(final min=0, displayUnit="l/(mmHg.min)") = 0
               "Forward state-on conductance (open valve resistance)" annotation (Dialog(enable=LimitBackflow));
             parameter Physiolibrary.Types.HydraulicConductance G_off(final min=0, displayUnit="l/(mmHg.min)") = 1.2501026264094e-12
               "Backward state-off conductance (closed valve conductance)" annotation (Dialog(enable=LimitBackflow));
             parameter Physiolibrary.Types.Pressure Pknee(final min=0) = 0
               "Forward threshold pressure" annotation (Dialog(enable=LimitBackflow));
-            Boolean open(start = true);
-            Physiolibrary.Types.Pressure dp_valve=p_out -p_out_valved;
+            Boolean open(start = true) annotation(HideResult = settings.hideLevel0);
+            Physiolibrary.Types.Pressure dp_valve=p_out -p_out_valved annotation(HideResult = settings.hideLevel0);
             parameter Physiolibrary.Types.Volume zpv = 0 "Zero-pressure volume" annotation (Dialog(tab = "General", group = "Calculated parameters"));
             protected
             constant Physiolibrary.Types.Pressure unitPressure=1;
@@ -14869,15 +15071,15 @@ compliance
             parameter Real sinAlpha=0   "Sin of vessel orientation angle, 0 being supine, 1 being up, -1 aiming down. Used even for custom tilt input."  annotation (Dialog(tab = "General", group = "Orientations", enabled = not UseSinAlphaInput));
             parameter Boolean UseDistentionOutput = false "Provides relative distention fraction output, otherwise hidden and not calculated" annotation(choices(checkBox=true));
             parameter Physiolibrary.Types.Volume distentionBase = l*Modelica.Constants.pi*(r^2) annotation (enable = UseDistentionOutput);
-            Physiolibrary.Types.Pressure P_hs = height*settings.blood_rho*Modelica.Constants.g_n "Hydrostatic pressure of whole vessel at actual orientation";
+            Physiolibrary.Types.Pressure P_hs = height*settings.blood_rho*Modelica.Constants.g_n "Hydrostatic pressure of whole vessel at actual orientation" annotation(HideResult = settings.hideLevel1);
             Physiolibrary.Types.Pressure p_in_hs=p_in - P_hs/2
-              "input pressure including the hydrostatic pressure";
+              "input pressure including the hydrostatic pressure" annotation(HideResult = settings.hideLevel0);
             Physiolibrary.Types.Pressure p_out_hs=p_out + P_hs/2
-              "Output pressure including the hydrostatic pressure";
+              "Output pressure including the hydrostatic pressure" annotation(HideResult = settings.hideLevel0);
               Modelica.Units.SI.Position hydrostatic_level=(port_a.position +
-                  height/2);
+                  height/2) annotation(HideResult = settings.hideLevel0);
               Modelica.Units.SI.Height height=sin(_tilt)*sinAlpha*l
-                "Actual height of the vessel depends on tilt and sinAlpha";
+                "Actual height of the vessel depends on tilt and sinAlpha" annotation(HideResult = settings.hideLevel0);
 
            parameter Real E(unit = "Pa") = 4e5 "Elasticity"  annotation (Dialog(tab = "General", group = "Vessel properties", enable = not UseNonLinearCompliance));
               parameter Modelica.Units.SI.Length l=1e-2 "Segment length"
@@ -16171,12 +16373,12 @@ P_hs/2")}));
 
           Physiolibrary.Types.Pressure p_C(
             start=10000.0,
-            fixed=settings.initByPressure) "Pressure of elastic compartment";
+            fixed=settings.initByPressure) "Pressure of elastic compartment" annotation(HideResult = settings.hideLevel1);
 
-          Physiolibrary.Types.HydraulicCompliance compliance "Real compliance after all effects";
-          Physiolibrary.Types.Fraction r_phi = r*(1 - settings.eta_vc*(phi - phi0)) "Radius depends on sympathetic activation phi";
+          Physiolibrary.Types.HydraulicCompliance compliance "Real compliance after all effects" annotation(HideResult = settings.hideLevel0);
+          Physiolibrary.Types.Fraction r_phi = r*(1 - settings.eta_vc*(phi - phi0)) "Radius depends on sympathetic activation phi" annotation(HideResult = settings.hideLevel0);
 
-          Physiolibrary.Types.Fraction _iabp;
+          Physiolibrary.Types.Fraction _iabp annotation(HideResult = settings.hideLevel0);
         equation
           if not UseIABPInput then
             _iabp = 0;
@@ -16614,8 +16816,8 @@ P_hs_plus_dist"),
             phi = phi)
             annotation (Placement(transformation(extent={{-50,32},{-30,52}})));
 
-        Physiolibrary.Types.Pressure p_vol = R_vis*q_diff;
-        Physiolibrary.Types.VolumeFlowRate q_diff = (q_in - q_out);
+        Physiolibrary.Types.Pressure p_vol = R_vis*q_diff annotation(HideResult = settings.hideLevel0);
+        Physiolibrary.Types.VolumeFlowRate q_diff = (q_in - q_out) annotation(HideResult = settings.hideLevel0);
         equation
 
           if E == 0 or not UseInertance then
@@ -21488,13 +21690,15 @@ P_hs_plus_dist"),
             l(displayUnit="cm") = 0.108,
             E(displayUnit="Pa") = 4.00E+05,
             r=3.73E-03) annotation (Placement(transformation(extent={{9,47},{29,52}})));
+          replaceable
           Systemic_tissue splanchnic_tissue(
             Ra=tissueParameters.Ra_splachnic_tissue,
             Rv=tissueParameters.Rv_splachnic_tissue,
             I=tissueParameters.I_splachnic_tissue,
             C=tissueParameters.C_splachnic_tissue,
             zpv=tissueParameters.Zpv_splachnic_tissue,
-            nominal_pressure=tissueParameters.tissue_pressure)
+            nominal_pressure=tissueParameters.tissue_pressure) constrainedby
+            Vessel_modules.Auxiliary.PartialSystemicElement
             annotation (Placement(transformation(extent={{35,47},{55,52}})));
           Systemic_vein splanchnic_vein(l=1.00E-01, r=7.50E-03)
             annotation (Placement(transformation(extent={{60,47},{80,52}})));
@@ -32589,7 +32793,7 @@ P_hs_plus_dist"),
             parameter Real Cact1=0.98321;
             parameter Real Cact2=0.42164;
             parameter Real Ctone0=0.0078167/mmHg2SI "1/mmHg/micron";
-            parameter Real Ctone1=4.2021;
+            parameter Real Ctone1=4.2021 "TODO: dependent on the phi?";
 
             // Fixed Parameters
             parameter Physiolibrary.Types.Mass weight=70 "body mass, kilograms";
@@ -32624,7 +32828,10 @@ P_hs_plus_dist"),
             Real A_myo(start=0.3) "TODO";
             Real D_aff(start=9.5) "Diameter of afferent resistance. Relative to D0";
 
-            HydraulicResistance R_K_afferent=R_K_a0*(D0/D_aff)^4;
+            parameter Boolean UsePhiOnResistance = true annotation (Evaluate = true);
+            HydraulicResistance R_K_a = if UsePhiOnResistance then R_K_a0*(1 + (phi - settings.phi0)) else R_K_a0;
+            HydraulicResistance R_K_afferent=R_K_a*(D0/D_aff)^4;
+
             Pressure P_AKIDNEY(start=90*mmHg2SI) = V_AKIDNEY/C_AKIDNEY;
             Pressure P_CKIDNEY=V_VKIDNEY/C_VKIDNEY;
             VolumeFlowRate F_K1=(p_in - P_AKIDNEY)/R_AKIDNEY;
@@ -32656,7 +32863,7 @@ P_hs_plus_dist"),
             der(V_AKIDNEY) = F_K1 - F_K2;
             der(V_VKIDNEY) = F_K3 - F_K4;
             der(A_myo) = (A_myo_inf - A_myo)/tau_R_K_afferent;
-            der(D_aff) = (P_AKIDNEY*D_aff/2 - T_total)/P_AKIDNEY;
+            der(D_aff) = (P_AKIDNEY*D_aff/2 - T_total)/tau_R_K_afferent;
 
             annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                   coordinateSystem(preserveAspectRatio=false)));
@@ -32665,23 +32872,37 @@ P_hs_plus_dist"),
           end Renal;
 
           package Splanchnic
-            model Splanchnic_circulation
+            model Splanchnic_circulation "Linear Splanchnic circulation with extra volume"
                 extends Vessel_modules.Auxiliary.PartialSystemicElement(
                   final UseInertance=false, final LimitBackflow = false);
+
+              parameter Real phi_delayed = 0;
+              Physiolibrary.Types.Pressure p = Cliver.q_in.pressure;
+
               Interfaces.LeveledPressureFlowConverter
                 leveledPressureFlowConverter(useLevel=false) annotation (
                   Placement(transformation(extent={{-74,-4},{-82,4}})));
               Interfaces.LeveledPressureFlowConverter
                 leveledPressureFlowConverter1(useLevel=false)
                 annotation (Placement(transformation(extent={{76,-4},{84,4}})));
-              Physiolibrary.Hydraulic.Components.Resistor resistor annotation (
-                  Placement(transformation(extent={{-56,-10},{-36,10}})));
-              Physiolibrary.Hydraulic.Components.ElasticVessel elasticVessel
-                annotation (Placement(transformation(extent={{-10,6},{10,26}})));
-              Physiolibrary.Hydraulic.Components.Resistor resistor1 annotation (
-                 Placement(transformation(extent={{20,-10},{40,10}})));
+
+
+            Physiolibrary.Hydraulic.Components.Resistor splanchnic(Resistance=7999343244.900001*(93/500))
+              annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
+            Physiolibrary.Hydraulic.Components.Resistor HV(Resistance(
+                    displayUnit="(mmHg.min)/l") = 79993432.449)
+              annotation (Placement(transformation(extent={{40,-10},{60,10}})));
+            Physiolibrary.Hydraulic.Components.ElasticVessel Cliver(
+                volume_start=0.001,
+                ZeroPressureVolume=0.0003,
+                Compliance=7.500615758456563e-09*(600/8),
+                useExternalPressureInput=true)
+              annotation (Placement(transformation(extent={{-10,10},{10,30}})));
+              Modelica.Blocks.Sources.RealExpression realExpression(y=
+                    external_pressure_outside)
+                annotation (Placement(transformation(extent={{-36,24},{-16,44}})));
             equation
-              volume = 0;
+              volume = Cliver.volume;
               connect(leveledPressureFlowConverter.leveledPort_b, port_a)
                 annotation (Line(
                   points={{-82,0},{-100,0}},
@@ -32692,15 +32913,25 @@ P_hs_plus_dist"),
                   points={{84,0},{100,0}},
                   color={162,29,33},
                   thickness=0.5));
-              connect(leveledPressureFlowConverter.port_a, resistor.q_in)
-                annotation (Line(
-                  points={{-74,0},{-56,0}},
+              connect(leveledPressureFlowConverter.port_a, splanchnic.q_in) annotation (
+                  Line(
+                  points={{-74,0},{-60,0}},
                   color={0,0,0},
                   thickness=1));
-              connect(resistor.q_out, elasticVessel.q_in) annotation (Line(
-                  points={{-36,0},{0,0},{0,16}},
+              connect(splanchnic.q_out, Cliver.q_in) annotation (Line(
+                  points={{-40,0},{0,0},{0,20}},
                   color={0,0,0},
                   thickness=1));
+              connect(HV.q_in, Cliver.q_in) annotation (Line(
+                  points={{40,0},{0,0},{0,20}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(HV.q_out, leveledPressureFlowConverter1.port_a) annotation (Line(
+                  points={{60,0},{76,0}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(realExpression.y, Cliver.externalPressure)
+                annotation (Line(points={{-15,34},{8,34},{8,28}}, color={0,0,127}));
               annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
                     coordinateSystem(preserveAspectRatio=false)));
             end Splanchnic_circulation;
@@ -45624,9 +45855,10 @@ P_hs_plus_dist"),
 
   package SystemicTree
 
-    model CardiovascularSystem "Base class for all use cases, including calibrated model in steadz state with all outputs"
+    model CardiovascularSystem "Base class for all use cases, including calibrated model in steadz state with all outputs. Intended to be an empty placeholder only for extending"
     //   extends ADAN_main.SystemicTree.Variations.Renals.Renals_HF_nobaro1_4_baro;
-     extends Auxiliary.partialCVS_optimized_ss;
+     // extends Auxiliary.partialCVS_optimized_ss;
+     extends ADAN_main.SystemicTree.Identification.SteadyState.Baseline_renals_optim;
 
       annotation (experiment(
           StopTime=60,
@@ -45959,20 +46191,22 @@ P_hs_plus_dist"),
       end partialCVS_EDPVR;
 
       model partialCVS_optimized
+
         extends partialCVS_EDPVR(settings(
+            heart_vntr_D_A_maxAct =          3.200005e+03,
+            heart_vntr_D_0_maxAct =          1.005000e-03,
+            heart_vntr_TS_maxAct =          1.647740e-01,
+            heart_vntr_TR_maxAct =          6.597690e-02,
+            eta_vc =          3.501054e-01,
+            baro_f1 =          3.028125e-03,
+            tissues_eta_Ra =          3.945225e+00,
+            tissues_eta_Rv =          3.206250e+00,
+            tissues_eta_C =          9.908013e-01,
+            tissues_chi_Ra =          2.681250e+01,
+            tissues_chi_Rv =          2.084375e+01,
+            tissues_chi_C =          1.687500e-01,
             veins_delayed_activation=false,
             baro_tau_s(displayUnit="s") = 93,
-            heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 4.600005e+03,
-            heart_vntr_D_0_maxAct=1.225000e-03,
-            heart_vntr_TS_maxAct(displayUnit="s") = 1.047740e-01,
-            heart_vntr_TR_maxAct(displayUnit="s") = 7.597690e-02,
-            eta_vc=2.101054e-01,
-            tissues_eta_Ra=3.145225e+00,
-            tissues_eta_Rv=2.806250e+00,
-            tissues_eta_C=5.708013e-01,
-            tissues_chi_Ra(displayUnit="1") = 2.481250e+01,
-            tissues_chi_Rv=1.384375e+01,
-            tissues_chi_C=-3.125000e-02,
             V_PV_init=0,
             heart_R_LA(displayUnit="(mmHg.s)/ml") = 1.655068e+06,
             heart_R_vlv(displayUnit="(mmHg.s)/ml") = 7.723515e+05,
@@ -45991,7 +46225,6 @@ P_hs_plus_dist"),
             heart_vntr_PConcollagen=2.642812e+01,
             heart_vntr_PExpcollagen=2.481250e+00,
             heart_atr_TS=0.08,
-            baro_f1=3.5e-03,
             dummy=2,
             baro_fsn(displayUnit="1/min") = 0.0355333333,
             syst_art_k_E=0.4402957,
@@ -46452,7 +46685,7 @@ P_hs_plus_dist"),
         output Physiolibrary.Types.Pressure P_sv = SystemicComponent.port_b.pressure
           "Pressure in systemic vena cava";
 
-        Physiolibrary.Types.Volume totalVolume=SystemicComponent.total_volume +
+        output Physiolibrary.Types.Volume totalVolume=SystemicComponent.total_volume +
             heartComponent.volume + pulmonaryComponent.volume
           "For debug purposes, should be constant (up to numerical precision)";
         Physiolibrary.Types.Volume stressedVolume=SystemicComponent.total_volume - SystemicComponent.zpv_arterial - SystemicComponent.zpv_peripheral - SystemicComponent.zpv_venous +
@@ -46509,6 +46742,8 @@ P_hs_plus_dist"),
         output Physiolibrary.Types.Pressure EDP
           "Closing pressure of the mitral valve - end diastolic pressure";
           output Physiolibrary.Types.Fraction EF = (EDV-ESV)/max(1e-5, EDV);
+        output Modelica.Units.SI.Power LVPwr = heartComponent.ventricles.power_LV;
+        output Modelica.Units.SI.Power RVPwr = heartComponent.ventricles.power_RV;
 
       // Get pressures and volumes of all tissues to check the characteristics
       //   Physiolibrary.Types.Pressure tissuePressures[:] = {
@@ -46679,22 +46914,21 @@ P_hs_plus_dist"),
 
       end partialCVS_outputs;
 
-      model SimpleExercise_ident_optimized "Generated by PostProcess/postprocess_optim.py optimized at Nov 22 14:40:27 CET 2021
- with cost 1.087745 lowest at run 135"
-        extends ADAN_main.SystemicTree.Variations.Renals.Renals_HF_nobaro_baro(settings(
-            heart_vntr_D_A_maxAct =          3.400005e+03,
-            heart_vntr_D_0_maxAct =          1.285000e-03,
-            heart_vntr_TS_maxAct =          1.047740e-01,
-            heart_vntr_TR_maxAct =          4.597690e-02,
-            eta_vc =          2.701054e-01,
-            tissues_eta_Ra =          3.245225e+00,
-            tissues_eta_Rv =          1.806250e+00,
-            tissues_eta_C =          4.608013e-01,
-            tissues_chi_Ra =          2.181250e+01,
-            tissues_chi_Rv =          1.384375e+01,
-            tissues_chi_C =          -8.125000e-02));
+      model partialCVSbaseline
+        "Base class for all use cases, including calibrated model in steadz state with all outputs"
+      //   extends ADAN_main.SystemicTree.Variations.Renals.Renals_HF_nobaro1_4_baro;
+       // extends Auxiliary.partialCVS_optimized_ss;
+       extends ADAN_main.SystemicTree.Variations.Renals.Renals_HF_nobaro_baro(
+            heartComponent(aorticValve(_Ron(displayUnit="(Pa.s)/m3") = 797188.6),
+              valveInertia_aortic(enabled=true, l=0.02)));
 
-      end SimpleExercise_ident_optimized;
+        annotation (experiment(
+            StopTime=60,
+            Interval=0.01,
+            Tolerance=1e-06,
+            __Dymola_Algorithm="Cvode"), __OpenModelica_simulationFlags(lv=
+                "LOG_STATS", s="cvode"));
+      end partialCVSbaseline;
     end Auxiliary;
 
     package Obsolete
@@ -52003,7 +52237,7 @@ P_hs_plus_dist"),
         end TestRun;
 
         model OptimizeBaseline
-          extends Auxiliary.partialCVS_optimized_ss(useAutonomousPhi(y=false),
+          extends Auxiliary.partialCVS_optimized_ss(useAutonomousPhi(y=true),
             settings(
               HR_max=3.1666666666667,
               chi_phi=0.7,
@@ -52355,6 +52589,10 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end HFpEf5;
+
+        model CVS_baseline_nobaro
+          extends CardiovascularSystem(useAutonomousPhi(y=false));
+        end CVS_baseline_nobaro;
       end SingleModelRun;
 
       package Results
@@ -53156,6 +53394,31 @@ P_hs_plus_dist"),
               Tolerance=1e-06,
               __Dymola_Algorithm="Cvode"));
         end HFpEF7_run2;
+
+        model SimpleExercise_ident_optimized "Generated by PostProcess/postprocess_optim.py optimized at Dec 10 14:38:22 CET 2021
+ with cost 0.046760 lowest at run 2578"
+          extends ADAN_main.SystemicTree.Auxiliary.partialCVSbaseline( settings(
+              V_PV_init=0,
+              heart_R_AV(displayUnit="(mmHg.min)/l") = 2269376,
+              heart_R_LA(displayUnit="(mmHg.min)/l") = 628658,
+              heart_R_vlv(displayUnit="(mmHg.min)/l") = 718206.6,
+              heart_vntr_D_0 =          1.231875e+01,
+              heart_vntr_D_A =          7.985938e+02,
+              heart_vntr_TS =          3.284375e-01,
+              heart_vntr_TR =          3.131250e-01,
+              heart_atr_D_0=31099160,
+              heart_atr_D_A=93356270,
+              syst_TPR=127631500,
+              syst_TR_frac =          3.270902e+00,
+              baro_fsn(displayUnit="Hz") = settings.baro_f1*10.23 - 0.00043,
+              baro_f1=0.003625,
+              pulm_C_PA=2.439877e-08,
+              pulm_R =          9.340364e+06,
+              syst_art_k_E=0.4935769),               heartComponent(aorticValve(_Ron(
+                    displayUnit="(Pa.s)/m3") = settings.heart_R_AV)),
+            useAutonomousPhi(y=true));
+
+        end SimpleExercise_ident_optimized;
       end Results;
 
       package SteadyState "Contains steady state initialization"
@@ -55711,6 +55974,186 @@ P_hs_plus_dist"),
                 c_pv(volume(start = 3.655380e-04 + V_PV_init, fixed = true))),
               settings(V_PV_init = 0));
         end CVS_reoptimizeBaseline7_init;
+
+        model Baseline_renals_optim
+          "Steady state initialization from 2021-12-13 12:39:02.627037 at time 600.0"
+          extends
+            ADAN_main.SystemicTree.Identification.Results.SimpleExercise_ident_optimized(
+              SystemicComponent(
+                baroreflex_system(
+                  baroreflex(phi_mean(start = 0.24996968, fixed = true), phi(start = 0.25456366, fixed = true), f1_adj(start = 0.004159404, fixed = true)),
+                  baroreceptor_aortic(fbr_auc(start = 17.45957, fixed = true), fbr_int(start = 17.460196, fixed = true), epsilon(start = 1.4768478, fixed = true), s(start = 0.8109881, fixed = true)),
+                  baroreceptor_carotid(fbr_auc(start = 9.300182, fixed = true), fbr_int(start = 9.299916, fixed = true), epsilon(start = 1.1527392, fixed = true), s(start = 0.8993876, fixed = true))),
+                ascending_aorta_A(q(start = 3.2319583e-06, fixed = true), vol1(start = 6.2168424e-06, fixed = true), vol2(start = 6.2171102e-06, fixed = true)),
+                ascending_aorta_B(q_in(start = 6.4679202e-06, fixed = true), volume(start = 2.1709084e-05, fixed = true)),
+                ascending_aorta_C(q_in(start = 9.891012e-06, fixed = true), volume(start = 2.0091069e-05, fixed = true)),
+                ascending_aorta_D(q_in(start = 1.5355288e-05, fixed = true), volume(start = 1.8355648e-05, fixed = true)),
+                aortic_arch_C2(q_in(start = 2.0306006e-05, fixed = true), volume(start = 1.6805763e-05, fixed = true)),
+                brachiocephalic_trunk_C4(q_in(start = -4.1144352e-07, fixed = true), volume(start = 1.1533095e-05, fixed = true)),
+                aortic_arch_C46(q_in(start = 2.520495e-05, fixed = true), volume(start = 9.967224e-06, fixed = true)),
+                aortic_arch_C64(q_in(start = 2.91268e-05, fixed = true), volume(start = 6.847489e-06, fixed = true)),
+                aortic_arch_C94(q_in(start = 2.8808014e-05, fixed = true), volume(start = 3.7698836e-05, fixed = true)),
+                thoracic_aorta_C96(q_in(start = 3.8074944e-05, fixed = true), volume(start = 6.787807e-06, fixed = true)),
+                thoracic_aorta_C100(q_in(start = 3.9695446e-05, fixed = true), volume(start = 5.226205e-06, fixed = true)),
+                thoracic_aorta_C104(q_in(start = 4.092112e-05, fixed = true), volume(start = 9.865647e-06, fixed = true)),
+                thoracic_aorta_C108(q_in(start = 4.3151027e-05, fixed = true), volume(start = 3.2437158e-06, fixed = true)),
+                thoracic_aorta_C112(q_in(start = 4.3873486e-05, fixed = true), volume(start = 5.4194043e-05, fixed = true)),
+                abdominal_aorta_C114(q_in(start = 5.0961557e-05, fixed = true), volume(start = 1.1224439e-06, fixed = true)),
+                abdominal_aorta_C136(q_in(start = 4.0704956e-05, fixed = true), volume(start = 4.7183025e-06, fixed = true)),
+                abdominal_aorta_C164(q_in(start = 3.4030545e-05, fixed = true), volume(start = 1.401464e-06, fixed = true)),
+                abdominal_aorta_C176(q_in(start = 2.6745762e-05, fixed = true), volume(start = 3.7730147e-06, fixed = true)),
+                abdominal_aorta_C188(q_in(start = 1.963234e-05, fixed = true), volume(start = 1.51774e-05, fixed = true)),
+                abdominal_aorta_C192(q_in(start = 2.102125e-05, fixed = true), volume(start = 9.483545e-06, fixed = true)),
+                celiac_trunk_C116(volume(start = 0.00036527094, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                renal_L166(V_AKIDNEY(start = 4.402374e-06, fixed = true), V_VKIDNEY(start = 3.91048e-06, fixed = true), A_myo(start = 0.2930409, fixed = true), D_aff(start = 9.436119, fixed = true)),
+                renal_R178(V_AKIDNEY(start = 4.4057215e-06, fixed = true), V_VKIDNEY(start = 3.909827e-06, fixed = true), A_myo(start = 0.2928858, fixed = true), D_aff(start = 9.438078, fixed = true)),
+                common_iliac_R216(q_in(start = 1.0911112e-05, fixed = true), volume(start = 7.965109e-06, fixed = true)),
+                internal_iliac_T1_R218(volume(start = 0.00017956304, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                external_iliac_R220(q_in(start = 6.0912844e-06, fixed = true), volume(start = 4.7006242e-06, fixed = true)),
+                femoral_R222(q_in(start = 6.284537e-06, fixed = true), volume(start = 1.3459914e-06, fixed = true)),
+                profundus_T2_R224(volume(start = 0.00020591824, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                femoral_R226(q_in(start = 1.4589756e-07, fixed = true), volume(start = 1.1255112e-05, fixed = true)),
+                popliteal_R228(q_in(start = 1.3257044e-06, fixed = true), volume(start = 3.4660989e-06, fixed = true)),
+                anterior_tibial_T3_R230(volume(start = 2.6758249e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                popliteal_R232(q_in(start = 8.753512e-07, fixed = true), volume(start = 1.7825963e-07, fixed = true)),
+                tibiofibular_trunk_R234(q_in(start = 8.857246e-07, fixed = true), volume(start = 7.248119e-07, fixed = true)),
+                posterior_tibial_T4_R236(volume(start = 2.9437919e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                common_iliac_L194(q_in(start = 1.0869194e-05, fixed = true), volume(start = 7.6169567e-06, fixed = true)),
+                internal_iliac_T1_L196(volume(start = 0.00017956387, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                external_iliac_L198(q_in(start = 6.0400876e-06, fixed = true), volume(start = 4.7001527e-06, fixed = true)),
+                femoral_L200(q_in(start = 6.2391086e-06, fixed = true), volume(start = 1.3458576e-06, fixed = true)),
+                profundus_T2_L202(volume(start = 0.00020591903, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                femoral_L204(q_in(start = 1.061986e-07, fixed = true), volume(start = 1.1253952e-05, fixed = true)),
+                popliteal_L206(q_in(start = 1.3143429e-06, fixed = true), volume(start = 3.4657498e-06, fixed = true)),
+                anterior_tibial_T3_L208(volume(start = 2.6758407e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                popliteal_L210(q_in(start = 8.734266e-07, fixed = true), volume(start = 1.7824946e-07, fixed = true)),
+                tibiofibular_trunk_L212(q_in(start = 8.8405113e-07, fixed = true), volume(start = 7.2479315e-07, fixed = true)),
+                posterior_tibial_T4_L214(volume(start = 2.9438104e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                subclavian_R28(q_in(start = 2.333124e-06, fixed = true), volume(start = 1.7851049e-06, fixed = true)),
+                subclavian_R30(q_in(start = 9.141178e-07, fixed = true), volume(start = 2.3668474e-06, fixed = true)),
+                axillary_R32(q_in(start = 1.4441762e-06, fixed = true), volume(start = 2.758259e-06, fixed = true)),
+                brachial_R34(q_in(start = 2.035717e-06, fixed = true), volume(start = 4.0666887e-06, fixed = true)),
+                ulnar_T2_R36(q_in(start = 1.592763e-06, fixed = true), volume(start = 2.2600882e-07, fixed = true)),
+                ulnar_T2_R42(volume(start = 6.1703315e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                radial_T1_R44(volume(start = 5.031901e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                subclavian_L66(q_in(start = 2.1098008e-06, fixed = true), volume(start = 4.269545e-06, fixed = true)),
+                subclavian_L78(q_in(start = 1.2130323e-06, fixed = true), volume(start = 1.767348e-06, fixed = true)),
+                axillary_L80(q_in(start = 1.5813272e-06, fixed = true), volume(start = 2.7599679e-06, fixed = true)),
+                brachial_L82(q_in(start = 2.692707e-06, fixed = true), volume(start = 1.3519715e-06, fixed = true)),
+                ulnar_T2_L84(q_in(start = 1.5874244e-06, fixed = true), volume(start = 2.2584398e-07, fixed = true)),
+                ulnar_T2_L90(volume(start = 6.168134e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                radial_T1_L92(volume(start = 5.329875e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                common_carotid_R6_A(q_in(start = 2.1119769e-07, fixed = true), volume(start = 4.1899884e-06, fixed = true)),
+                common_carotid_R6_B(q_in(start = 1.6281941e-06, fixed = true), volume(start = 3.5809355e-06, fixed = true)),
+                common_carotid_R6_C(q_in(start = 2.8441996e-06, fixed = true), volume(start = 2.685923e-06, fixed = true)),
+                internal_carotid_R8_A(q_in(start = 1.7479218e-06, fixed = true), volume(start = 1.1754518e-06, fixed = true)),
+                internal_carotid_R8_B(q_in(start = 1.8998805e-06, fixed = true), volume(start = 7.4846054e-07, fixed = true)),
+                internal_carotid_R8_C(volume(start = 7.352709e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                external_carotid_T2_R26(volume(start = 7.3683725e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                common_carotid_L48_A(q_in(start = -1.2899004e-06, fixed = true), volume(start = 4.54401e-06, fixed = true)),
+                common_carotid_L48_B(q_in(start = 1.9909697e-07, fixed = true), volume(start = 3.9926626e-06, fixed = true)),
+                common_carotid_L48_C(q_in(start = 1.5406481e-06, fixed = true), volume(start = 3.5465957e-06, fixed = true)),
+                common_carotid_L48_D(q_in(start = 2.7524704e-06, fixed = true), volume(start = 2.8782729e-06, fixed = true)),
+                internal_carotid_L50_A(q_in(start = 1.7402537e-06, fixed = true), volume(start = 1.1753693e-06, fixed = true)),
+                internal_carotid_L50_B(q_in(start = 1.896037e-06, fixed = true), volume(start = 7.4841483e-07, fixed = true)),
+                internal_carotid_L50_C(volume(start = 7.3529096e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                external_carotid_T2_L62(volume(start = 7.368296e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                vertebral_L2(volume(start = 6.776998e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                vertebral_R272(volume(start = 6.777278e-05, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                superior_vena_cava_C2(volume(start = 2.8647733e-06, fixed = true)),
+                superior_vena_cava_C88(volume(start = 4.9365317e-06, fixed = true)),
+                inferior_vena_cava_C8(volume(start = 4.2967667e-06, fixed = true)),
+                hepatic_vein_T1_C10(volume(start = 1.6848544e-06, fixed = true)),
+                inferior_vena_cava_C12(volume(start = 1.1658071e-05, fixed = true)),
+                inferior_vena_cava_C16(volume(start = 9.167686e-06, fixed = true)),
+                renal_vein_T1_R18(volume(start = 2.7020494e-06, fixed = true)),
+                inferior_vena_cava_C20(volume(start = 6.3959834e-07, fixed = true)),
+                renal_vein_T1_L22(volume(start = 2.387829e-06, fixed = true)),
+                inferior_vena_cava_C24(volume(start = 2.550169e-05, fixed = true)),
+                common_iliac_vein_L56(volume(start = 6.256652e-06, fixed = true), open(start = true, fixed = true)),
+                common_iliac_vein_R26(volume(start = 5.7509783e-06, fixed = true), open(start = true, fixed = true)),
+                external_iliac_vein_R28(volume(start = 8.3875074e-07, fixed = true)),
+                internal_iliac_vein_T1_R30(volume(start = 3.5908229e-06, fixed = true)),
+                external_iliac_vein_R32(volume(start = 9.723727e-06, fixed = true)),
+                femoral_vein_R34(volume(start = 4.2269045e-07, fixed = true)),
+                femoral_vein_R38(volume(start = 3.3501153e-06, fixed = true)),
+                profunda_femoris_vein_T2_R40(volume(start = 9.3346825e-06, fixed = true)),
+                femoral_vein_R42(volume(start = 2.3620385e-05, fixed = true)),
+                femoral_vein_R46(volume(start = 1.3008773e-06, fixed = true)),
+                popliteal_vein_R48(volume(start = 5.299695e-06, fixed = true)),
+                anterior_tibial_vein_T4_R50(volume(start = 2.3505786e-06, fixed = true)),
+                popliteal_vein_R52(volume(start = 1.1793006e-06, fixed = true)),
+                posterior_tibial_vein_T6_R54(volume(start = 2.522306e-06, fixed = true)),
+                external_iliac_vein_L58(volume(start = 8.3977903e-07, fixed = true)),
+                internal_iliac_vein_T1_L60(volume(start = 3.693425e-06, fixed = true)),
+                external_iliac_vein_L62(volume(start = 9.546534e-06, fixed = true)),
+                femoral_vein_L64(volume(start = 4.941631e-07, fixed = true)),
+                femoral_vein_L68(volume(start = 3.350211e-06, fixed = true)),
+                profunda_femoris_vein_T2_L70(volume(start = 9.335182e-06, fixed = true)),
+                femoral_vein_L72(volume(start = 2.3621795e-05, fixed = true)),
+                femoral_vein_L76(volume(start = 1.3009476e-06, fixed = true)),
+                popliteal_vein_L78(volume(start = 5.3001213e-06, fixed = true)),
+                anterior_tibial_vein_T4_L80(volume(start = 2.3506752e-06, fixed = true)),
+                popliteal_vein_L82(volume(start = 1.1794037e-06, fixed = true)),
+                posterior_tibial_vein_T6_L84(volume(start = 2.5226468e-06, fixed = true)),
+                brachiocephalic_vein_R90(volume(start = 5.7620773e-06, fixed = true), open(start = false, fixed = true)),
+                brachiocephalic_vein_L124(volume(start = 1.08228105e-05, fixed = true), open(start = false, fixed = true)),
+                vertebral_vein_R92(volume(start = 3.653847e-06, fixed = true)),
+                brachiocephalic_vein_R94(volume(start = 1.3062565e-06, fixed = true)),
+                subclavian_vein_R96(volume(start = 6.351788e-07, fixed = true)),
+                internal_jugular_vein_R122(volume(start = 2.5091458e-05, fixed = true)),
+                external_jugular_vein_R98(volume(start = 1.7938646e-06, fixed = true)),
+                subclavian_vein_R100(volume(start = 2.5979737e-06, fixed = true)),
+                axillary_vein_R102(volume(start = 9.133151e-06, fixed = true)),
+                brachial_vein_R104(volume(start = 1.9267204e-06, fixed = true)),
+                brachial_vein_R114(volume(start = 1.7536273e-06, fixed = true)),
+                brachial_vein_R108(volume(start = 2.6907279e-07, fixed = true)),
+                ulnar_vein_T7_R110(volume(start = 2.6400596e-06, fixed = true)),
+                brachial_vein_R118(volume(start = 1.7089114e-07, fixed = true)),
+                radial_vein_T3_R120(volume(start = 2.0314494e-06, fixed = true)),
+                vertebral_vein_L126(volume(start = 3.419889e-06, fixed = true)),
+                brachiocephalic_vein_L128(volume(start = 6.6162613e-07, fixed = true)),
+                subclavian_vein_L130(volume(start = 5.661296e-07, fixed = true)),
+                internal_jugular_vein_L156(volume(start = 1.5263338e-05, fixed = true)),
+                external_jugular_vein_L132(volume(start = 1.7612657e-06, fixed = true)),
+                subclavian_vein_L134(volume(start = 2.537613e-06, fixed = true)),
+                axillary_vein_L136(volume(start = 9.256961e-06, fixed = true)),
+                brachial_vein_L138(volume(start = 1.9296458e-06, fixed = true)),
+                brachial_vein_L148(volume(start = 1.7675119e-06, fixed = true)),
+                brachial_vein_L142(volume(start = 2.694894e-07, fixed = true)),
+                ulnar_vein_T7_L144(volume(start = 2.6456673e-06, fixed = true)),
+                brachial_vein_L152(volume(start = 1.7235504e-07, fixed = true)),
+                radial_vein_T3_L154(volume(start = 2.0957336e-06, fixed = true)),
+                mesenteric_artery(q_in(start = 7.234383e-06, fixed = true), volume(start = 6.362749e-06, fixed = true)),
+                splanchnic_tissue(volume(start = 0.0002649702, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                splanchnic_vein(volume(start = 1.4043073e-05, fixed = true)),
+                coronary_arteries(q_in(start = 2.5180716e-06, fixed = true), volume(start = 3.6479207e-08, fixed = true)),
+                cardiac_tissue(volume(start = 0.000117654, fixed = true), phi_delayed(start = 0.2540449, fixed = true)),
+                coronary_veins(volume(start = 5.4612364e-08, fixed = true)),
+                brachial_L82_HeartLevel(q_in(start = 2.1482708e-06, fixed = true), volume(start = 2.7183012e-06, fixed = true))),
+              heartComponent(
+                tricuspidValve(open(start = false, fixed = true)),
+                pulmonaryValve(open(start = true, fixed = true), BP_max(start = 0.0, fixed = true), BP_min(start = 26600.0, fixed = true), CO_acc(start = 0.0, fixed = true)),
+                mitralValve(open(start = false, fixed = true), BP_max(start = 1048.1007, fixed = true), BP_min(start = 1136.824, fixed = true), CO_acc(start = 1.492538e-05, fixed = true)),
+                aorticValve(open(start = false, fixed = true), BP_max(start = 0.0, fixed = true), BP_min(start = 11518.0625, fixed = true), CO_acc(start = -2.1981539e-09, fixed = true)),
+                ventricles(
+                  LV_wall(ym(start = 3.5694704, fixed = true), SL(start = 2.1688263, fixed = true)),
+                  SEP_wall(SL(start = 2.177227, fixed = true)),
+                  RV_wall(SL(start = 2.152234, fixed = true)),
+                  calciumMechanics(tm(start = 0.09276072, fixed = true)), V_LV(start = 0.00014926316, fixed = true), V_RV(start = 0.00014292021, fixed = true), currentWork_LV(start = -0.012757437, fixed = true), currentWork_RV(start = -0.0028703595, fixed = true)),
+                ra(volume(start = 5.507521e-06, fixed = true), currentWork(start = 11.678347, fixed = true)),
+                la(volume(start = 1.2868401e-05, fixed = true), currentWork(start = 2.1097147, fixed = true)),
+                idealValve_deactivable(open(start = false, fixed = true)),
+                idealValve_deactivable1(open(start = false, fixed = true)),
+                sa_node(t0(start = 0.17276073, fixed = true), cardiac_cycle(start = 0.18534014, fixed = true))),
+              pulmonaryComponent(
+                c_pa(volume(start = 3.0113339e-05, fixed = true)),
+                c_pv(volume(start = 2.331198e-03 + settings.V_PV_init, fixed = true))),
+              simplestLymphaticDynamicSpeedUp(p_vc_mean(start = 404.71158, fixed = true), J1_s(start = 9.2475005e-08, fixed = true), v_isf(start = 0.07065872, fixed = true), v_lymph(start = 0.0010376032, fixed = true), timeSpedUp(start = 2160600.0, fixed = true), q_int(start = 0.07053858, fixed = true), v_drained(start = 0.0, fixed = true), p_vc_s(start = 37.602303, fixed = true), J1s_s(start = 8.168187e-09, fixed = true), t0(start = 0.09, fixed = true)),
+              addedVolume(volume(start = 0.0, fixed = true)),
+              settings(V_PV_init = 0));
+          annotation (conversion(noneFromVersion=""));
+        end Baseline_renals_optim;
       end SteadyState;
 
       package CombinedModel
@@ -56642,46 +57085,48 @@ P_hs_plus_dist"),
           parameter Real endTime=120;
           parameter Real stepInterval=0.01;
           inner Components.Settings settings(
-            initByPressure=false,
+            V_PV_init=0,
+            heart_R_AV(displayUnit="(mmHg.min)/l") = 2269376,
+            heart_R_LA(displayUnit="(mmHg.min)/l") = 628658,
+            heart_R_vlv(displayUnit="(mmHg.min)/l") = 718206.6,
+            heart_vntr_D_0=1.231875e+01,
+            heart_vntr_D_A=7.985938e+02,
+            heart_vntr_TS=3.284375e-01,
+            heart_vntr_TR(displayUnit="s") = 3.131250e-01,
+            heart_atr_D_0=31099160,
+            heart_atr_D_A=93356270,
+            syst_TPR=127631500,
+            syst_TR_frac(displayUnit="1") = 3.270902e+00,
+            baro_fsn(displayUnit="Hz") = settings.baro_f1*10.23 - 0.00043,
+            pulm_C_PA=2.439877e-08,
+            pulm_R(displayUnit="(Pa.s)/m3") = 9.340364e+06,
+            syst_art_k_E=0.4935769,
+            baro_tau_s(displayUnit="s") = 10,
+            starlingFactor_exp=1.25,
+            baro_f1=3.625e-03,
             veins_delayed_activation=false,
-            baro_tau_s(displayUnit="s") = 93,
             heart_vntr_D_A_maxAct(displayUnit="Pa/m3") = 4.600005e+03,
             heart_vntr_D_0_maxAct=1.225000e-03,
             heart_vntr_TS_maxAct(displayUnit="s") = 1.047740e-01,
             heart_vntr_TR_maxAct(displayUnit="s") = 7.597690e-02,
-            eta_vc=2.101054e-01,
-            tissues_eta_Ra=3.145225e+00,
-            tissues_eta_Rv=2.806250e+00,
-            tissues_eta_C=5.708013e-01,
+            eta_vc=0.2101054,
+            tissues_eta_Ra=3.145225,
+            tissues_eta_Rv=2.80625,
+            tissues_eta_C=0.5708013,
             tissues_chi_Ra(displayUnit="1") = 2.481250e+01,
-            tissues_chi_Rv=1.384375e+01,
-            tissues_chi_C=-3.125000e-02,
-            V_PV_init=0,
-            heart_R_LA(displayUnit="(mmHg.s)/ml") = 1.655068e+06,
-            heart_R_vlv(displayUnit="(mmHg.s)/ml") = 7.723515e+05,
-            heart_vntr_D_0=7.479470e+00,
-            heart_vntr_D_A=1.298533e+03,
-            heart_vntr_TS=3.246875e-01,
-            heart_vntr_TR(displayUnit="s") = 4.031250e-01,
-            heart_atr_D_0=2.651364e+07,
-            heart_atr_D_A=7.621357e+07,
-            syst_TPR=1.287333e+08,
-            syst_TR_frac(displayUnit="1") = 5.227710e+00,
-            pulm_C_PA=1.635189e-08,
-            pulm_R(displayUnit="(Pa.s)/m3") = 1.019753e+07,
+            tissues_chi_Rv=13.84375,
+            tissues_chi_C=-0.03125,
             heart_vntr_k_passive=5.000000e+00,
             heart_vntr_SLcollagen=2.087500e+00,
             heart_vntr_PConcollagen=2.642812e+01,
             heart_vntr_PExpcollagen=2.481250e+00,
             heart_atr_TS=0.08,
-            baro_f1=3.5e-03,
             dummy=2,
-            baro_fsn(displayUnit="1/min") = 0.0355333333,
-            syst_art_k_E=0.4402957,
             HR_max=3.1666666666667,
             chi_phi=0.7,
             heart_R_RA(displayUnit="(dyn.s)/cm5") = settings.heart_R_LA,
             pulm_q_nom_maxq(displayUnit="l/min") = 0.00033333333333333,
+            initByPressure=false,
             veins_UseNonLinearVeins=true,
             veins_linearE_rel=765,
             veins_linearV0_rel=0.793,
@@ -56849,7 +57294,9 @@ P_hs_plus_dist"),
 
         model CombinedModels_FMUs_ExceptBaseline
           extends CombinedModels_FMUs(useBaseline=false, exercise(fmi_StartTime=
-                 0, fmi_StopTime=60));
+                 0, fmi_StopTime=60),
+            settings(baro_fsn=settings.baro_f1*10 - 1e-4),
+            valsalva(thoracic_pressure_ramp(nperiod=2)));
         end CombinedModels_FMUs_ExceptBaseline;
 
         model CombinedModels_FMUs_ExceptBaselineExercise
@@ -60551,6 +60998,36 @@ P_hs_plus_dist"),
 </html>"));
         end CVS_valsalva_overshootDecay;
 
+        model CVS_valsalva_splanchnicVol
+          extends CVS_valsalva(SystemicComponent(tissueParameters(
+                  qf_splachnic_tissue=0.18), redeclare
+                Components.Subsystems.Systemic.Organs.Splanchnic.Splanchnic_circulation
+                splanchnic_tissue(volume(start=0.001, fixed=false))),
+              thoracic_pressure_ramp(startTime=60));
+          annotation (experiment(
+              StopTime=100,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_valsalva_splanchnicVol;
+
+        model CVS_valsalva_splanchnicVolBaro
+          extends CVS_valsalva(
+            thoracic_pressure_ramp(startTime=60),
+            SystemicComponent(splanchnic_tissue(
+                volume(start=0.0009),
+                C=5.6254618188424e-07,
+                Ra(displayUnit="(mmHg.min)/l") = 1487877843.5514,
+                Rv(displayUnit="(mmHg.min)/l") = 79993432.449,
+                nominal_pressure=1333.22387415)),
+            useAutonomousPhi(y=true));
+          annotation (experiment(
+              StopTime=100,
+              Interval=0.02,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end CVS_valsalva_splanchnicVolBaro;
+
         model CVS_valsalva_longbaro
           import ADAN_main;
 
@@ -60657,12 +61134,17 @@ P_hs_plus_dist"),
         extends ADAN_main.SystemicTree.CardiovascularSystem(
           useAutonomousPhi(y=true),
           SystemicComponent(UseThoracic_PressureInput=true, baroreflex_system(
-                baroreflex(phi(fixed=false)))),
+                baroreflex(phi(fixed=false))),
+            renal_L166(tau_R_K_afferent=60),
+            renal_R178(tau_R_K_afferent=60)),
           pulmonaryComponent(UseThoracic_PressureInput=true),
           heartComponent(UseThoracic_PressureInput=true, aorticValve(
                 useChatteringProtection=true),
             pulmonaryValve(calculateAdditionalMetrics=true)),
           settings(baro_tau_s=93,
+            baro_fsn(displayUnit="Hz"),
+            hideLevel0=true,
+            hideLevel1=true,
                    dummy=2));
 
       // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
@@ -60681,7 +61163,7 @@ P_hs_plus_dist"),
       //       heart_vntr_L0=1.6)
       replaceable
       Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
-          nperiod=-1,
+          nperiod=2,
           amplitude=40*133.32,
           rising=0.1,
           width=14.8,
@@ -65132,7 +65614,8 @@ P_hs_plus_dist"),
             settings(baro_tau_s=10),
             useAutonomousPhi(y=true));
 
-           Real eGFR = 1e6*60*SystemicComponent.renal_L166.GFR*2/settings.BSA "estimate of total GFR (ml/min/m2)";
+           Real eGFR = 1e6*60*SystemicComponent.renal_L166.GFR*2/settings.BSA
+            "estimate of total GFR (ml/min/m2)";
            Real eGFR_m "Mean total GFR scaled to BSA";
            parameter Real tau_gfr = 3;
 
@@ -65362,46 +65845,36 @@ P_hs_plus_dist"),
         model Renals_HF "A general heart failure model"
           extends CardiovascularSystem_Renals_ss(
             heartComponent(ventricles(
-                LV_wall(contractilityFraction=LVfunctionFraction,
-                k_passive=settings.heart_vntr_k_passive*LV_stiff,
-                SLcollagen=settings.heart_vntr_SLcollagen*LV_SLcollagen_f,
-                PConcollagen=settings.heart_vntr_PConcollagen*
-                    LV_PConcollagen_f,
-                PExpcollagen=settings.heart_vntr_PExpcollagen*
-                    LV_PExpcollagen_f),
+                LV_wall(contractilityFraction=settings.heartImp_LVcont,
+                k_passive=settings.heart_vntr_k_passive*settings.heartImp_LV_stiff),
                 RV_wall(
-                  Amref=heart_vntr_xi_AmRef_RV*110,
-                        contractilityFraction=RVfunctionFraction,
-                k_passive=settings.heart_vntr_k_passive*RV_stiff,
-                SLcollagen=settings.heart_vntr_SLcollagen*RV_SLcollagen_f,
-                PConcollagen=settings.heart_vntr_PConcollagen*
-                    RV_PConcollagen_f,
-                PExpcollagen=settings.heart_vntr_PExpcollagen*
-                    RV_PExpcollagen_f),
-                SEP_wall(contractilityFraction=(LVfunctionFraction +
-                      RVfunctionFraction)/2,
-                              k_passive=settings.heart_vntr_k_passive*(LV_stiff/2 + RV_stiff/2),
-                SLcollagen=settings.heart_vntr_SLcollagen*(LV_SLcollagen_f /2 + RV_SLcollagen_f /2),
-                PConcollagen=settings.heart_vntr_PConcollagen*(LV_PConcollagen_f /2 + RV_PConcollagen_f /2),
-                PExpcollagen=settings.heart_vntr_PExpcollagen*(LV_PExpcollagen_f /2 + RV_PExpcollagen_f/2))),
-              ra(contractilityFraction=RVfunctionFraction),
-              la(contractilityFraction=LVfunctionFraction)), useAutonomousPhi(y=
+                  Amref=settings.heart_vntr_xi_AmRef_RV*110,
+                        contractilityFraction=settings.heartImp_RVcont,
+                k_passive=settings.heart_vntr_k_passive*settings.heartImp_RV_stiff),
+                SEP_wall(contractilityFraction=(settings.heartImp_LVcont +settings.heartImp_RVcont)
+                                               /2,
+                      k_passive=settings.heart_vntr_k_passive*(settings.heartImp_RV_stiff/2 + settings.heartImp_RV_stiff/2))),
+              ra(contractilityFraction=settings.heartImp_LVcont),
+              la(contractilityFraction=settings.heartImp_RVcont)), useAutonomousPhi(y=
                  true));
-          parameter Real LV_stiff=1.0                            "Stiffening factor";
-          parameter Real LV_SLcollagen_f=1.0                                   "threshold for collagen activation, [um]";
-          parameter Real LV_PConcollagen_f=1.0                                     "contriubtion of collagen [1]";
-          parameter Real LV_PExpcollagen_f=1.0                                     "contriubtion of collagen [1]";
-
-          parameter Real RV_stiff=1.0                            "Stiffening factor";
-          parameter Real RV_SLcollagen_f=1.0                                   "threshold for collagen activation, [um]";
-          parameter Real RV_PConcollagen_f=1.0                                     "contriubtion of collagen [1]";
-          parameter Real RV_PExpcollagen_f=1.0                                     "contriubtion of collagen [1]";
-
-          parameter Physiolibrary.Types.Fraction LVfunctionFraction=1 "Reducing LV and LA contractility, incl. the maximal one";
-          parameter Physiolibrary.Types.Fraction RVfunctionFraction=1 "Reducing RV and RA contractility, incl. the maximal one";
-
-          parameter Real heart_vntr_xi_AmRef_RV=settings.heart_vntr_xi_AmRef
-            "modifier to RV midwall reference surface area, cm^2";
+                 // MOVED ALL TO THE SETTINGS.
+        //   parameter Real LV_stiff=1.0 "Stiffening factor";
+        //   parameter Real LV_SLcollagen_f=1.0 "threshold for collagen activation, [um]";
+        //   parameter Real LV_PConcollagen_f=1.0 "contriubtion of collagen [1]";
+        //   parameter Real LV_PExpcollagen_f=1.0 "contriubtion of collagen [1]";
+        //
+        //   parameter Real RV_stiff=1.0 "Stiffening factor";
+        //   parameter Real RV_SLcollagen_f=1.0 "threshold for collagen activation, [um]";
+        //   parameter Real RV_PConcollagen_f=1.0 "contriubtion of collagen [1]";
+        //   parameter Real RV_PExpcollagen_f=1.0 "contriubtion of collagen [1]";
+        //
+        //   parameter Physiolibrary.Types.Fraction LVfunctionFraction=1
+        //     "Reducing LV and LA contractility, incl. the maximal one";
+        //   parameter Physiolibrary.Types.Fraction RVfunctionFraction=1
+        //     "Reducing RV and RA contractility, incl. the maximal one";
+        //
+        //   parameter Real heart_vntr_xi_AmRef_RV=settings.heart_vntr_xi_AmRef
+        //     "modifier to RV midwall reference surface area, cm^2";
         end Renals_HF;
 
         model Renals_VolumeLoad
@@ -66827,10 +67300,11 @@ P_hs_plus_dist"),
         model Renals_HF_nobaro
           extends Renals_HF(
             settings(
-              heart_vntr_D_0=5.0,
-              starlingFactor_exp=1.2,
-              heart_vntr_D_A=850.0),
-            useAutonomousPhi(y=false));
+              heart_vntr_D_0=4.85,
+              starlingFactor_exp=1.25,
+              heart_vntr_D_A=890.0,
+              baro_tau_s=93),
+            useAutonomousPhi(y=true));
           Physiolibrary.Hydraulic.Sources.UnlimitedPump
                                                   unlimitedPump(useSolutionFlowInput=true,
               SolutionFlow(displayUnit="ml/min") = 1e-06)
@@ -66851,7 +67325,7 @@ P_hs_plus_dist"),
             "Phi for when the model is not using the autonomous feedback phi from baroreflex"
             annotation (Placement(transformation(extent={{-142,10},{-122,30}})));
           parameter Physiolibrary.Types.VolumeFlowRate volumeInfusion(
-              displayUnit="ml/min")=1.6666666666667e-05                   "Height of ramps";
+              displayUnit="ml/min")=0 "Height of ramps";
         equation
           connect(addedVolume.q_in,unlimitedPump1. q_out) annotation (Line(
               points={{-88,-24},{-102,-24}},
@@ -66873,7 +67347,9 @@ P_hs_plus_dist"),
         end Renals_HF_nobaro;
 
         model Renals_HF_nobaro_baro
-          extends Renals_HF_nobaro(useAutonomousPhi(y=true));
+          extends Renals_HF_nobaro(useAutonomousPhi(y=true),
+            volumeInfusionRamp(height=-volumeInfusion, offset=volumeInfusion),
+            settings(baro_tau_s=10));
         end Renals_HF_nobaro_baro;
 
         model Renals_HF_nobaro1_4
@@ -66891,6 +67367,51 @@ P_hs_plus_dist"),
         model Renals_HF_nobaro1_4_baro
           extends Renals_HF_nobaro1_4(useAutonomousPhi(y=true));
         end Renals_HF_nobaro1_4_baro;
+
+        model Renals_HF_nobaro_VL
+          "Volume loading to get better adjustment of starling curve"
+          extends Renals_HF_nobaro(volumeInfusion=3.3333333333333e-06);
+              parameter Physiolibrary.Types.Pressure EDP_break=6666.11937075;
+
+        equation
+          when time > 20 and EDP > EDP_break then
+            terminate("Thats it");
+          end when;
+          annotation (experiment(
+              StopTime=600,
+              Interval=0.04,
+              Tolerance=1e-06,
+              __Dymola_Algorithm="Cvode"));
+        end Renals_HF_nobaro_VL;
+
+        model Renals_HF_nobaro_prescribedHR
+          extends Renals_HF_nobaro(volumeInfusion=0, pulmonaryComponent(
+                usePVCannula=true));
+          Components.Basic.VolumeRegulation volumeRegulation(PID1(
+              k(unit="1") = 1e-3,
+              Ti=3,
+              yMax=1e-5,
+              yMin=-1e-4)) annotation (Placement(transformation(extent={{-74,-88},
+                    {-54,-68}})));
+          Modelica.Blocks.Sources.RealExpression targetPressure(y=P_pv)
+            annotation (Placement(transformation(extent={{-108,-80},{-88,-60}})));
+          Physiolibrary.Types.Constants.PressureConst P0(k=2666.4477483)
+            annotation (Placement(transformation(extent={{4,-4},{-4,4}},
+                rotation=180,
+                origin={-98,-92})));
+        equation
+          connect(targetPressure.y, volumeRegulation.p_measured) annotation (
+              Line(points={{-87,-70},{-80,-70},{-80,-78},{-74,-78}}, color={0,0,
+                  127}));
+          connect(volumeRegulation.p_target, P0.y) annotation (Line(points={{
+                  -74,-88},{-88,-88},{-88,-92},{-93,-92}}, color={0,0,127}));
+          connect(volumeRegulation.q_out, pulmonaryComponent.PV_cannula)
+            annotation (Line(
+              points={{-54,-76},{-30,-76},{-30,-62}},
+              color={0,0,0},
+              thickness=1));
+        end Renals_HF_nobaro_prescribedHR;
+
       end Renals;
 
       package Figures
@@ -67731,6 +68252,40 @@ P_hs_plus_dist"),
             Tolerance=1e-06,
             __Dymola_Algorithm="Cvode"));
       end CorviaShunt;
+
+      model CVS_baroVar
+        extends CardiovascularSystem(settings(baro_fsn(displayUnit="Hz"),
+              baro_f1=3.0e-03));
+      end CVS_baroVar;
+
+      package VolumeCompensation
+        model VolumeLoading
+          extends CardiovascularSystem(
+            volumeInfusion(displayUnit="ml/min") = 5e-07,
+                                       pulmonaryComponent(usePVCannula=false),
+              useAutonomousPhi(y=true),
+            volumeInfusionRamp(
+              height=volumeInfusion,
+              offset=0,
+              startTime=400),
+            settings(
+              heartImp_LVcont=0.8,
+              hideSystemic=false,
+              hidePulmonary=true,
+              hideHeart=true,
+              hideLevel0=true,
+              hideLevel1=true));
+
+        parameter Physiolibrary.Types.Pressure PA_cutOff=12932.271579255
+                                                              "Brachial Pressure to terminate the simulation";
+                                          parameter Modelica.Units.SI.Time time_cutoff=400;
+
+        equation
+         if time_cutoff > 0 and time > time_cutoff and brachial_pressure_mean > PA_cutOff then
+           terminate("Pressure is already too high");
+         end if;
+        end VolumeLoading;
+      end VolumeCompensation;
     end Experiments;
 
   annotation(preferredView="info",
