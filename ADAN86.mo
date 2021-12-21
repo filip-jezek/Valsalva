@@ -1877,7 +1877,7 @@ type"),       Text(
           Ts = time - T0;
         end when;
 
-        when calculateAdditionalMetrics and not initial() and time > epsTime and cc < epsTime then
+        when calculateAdditionalMetrics and not initial() and time >= epsTime and cc < epsTime then
           // this launches when the signal resets. We better not use 0 for possible numerical issues. 1ms distance from beggining of cardiac cycle must be satisfactory.
           // The T0 signal is not precise, as the valves might be chattering
           // the CO calculation threats with division by zero, so we better start after time = 0
@@ -3348,26 +3348,30 @@ type"),       Text(
         model Baroreflex_Longterm "Long-term baroreflex, identified after long-term resetting of the Kosinksi"
           import Signals;
           extends partialBaroreflex;
-          Boolean beat = mod(time, 1) > 0;
-          Signals.Max max1
+          Boolean beat = sample(0, 1) "reset condition, e.g. 'mod(time, 1) > 0'" annotation (Dialog(group="Dynamic reset"));
+          Signals.MaxZOH
+                      maxZOH(reset=beat)
             annotation (Placement(transformation(extent={{-20,-14},{0,6}})));
-          Signals.Min min1
+          Signals.MinZOH
+                      minZOH(reset=beat)
             annotation (Placement(transformation(extent={{-20,-40},{0,-20}})));
           Modelica.Blocks.Math.Add add(k2=-1)
             annotation (Placement(transformation(extent={{8,-28},{28,-8}})));
+          Signals.ContinuousMeanValue continuousMeanValue
+            annotation (Placement(transformation(extent={{38,-28},{58,-8}})));
         equation
           // identified by matlab curve fit of long-term distention difference
-
-         // dmax =
-          phiOutput = (0.04637) / (aortic_distention + 0.05604);
-          connect(aortic_distention, min1.u) annotation (Line(points={{-32,-16},
-                  {-32,-30},{-22,-30}}, color={0,0,127}));
-          connect(aortic_distention, max1.u) annotation (Line(points={{-32,-16},
-                  {-28,-16},{-28,-4},{-22,-4}}, color={0,0,127}));
-          connect(max1.y, add.u1)
+          phiOutput = (0.04637) / (continuousMeanValue.y + 0.05604);
+          connect(aortic_distention, minZOH.u)
+            annotation (Line(points={{-32,-16},{-32,-30},{-22,-30}}, color={0,0,127}));
+          connect(aortic_distention, maxZOH.u) annotation (Line(points={{-32,-16},{-28,-16},
+                  {-28,-4},{-22,-4}}, color={0,0,127}));
+          connect(maxZOH.y, add.u1)
             annotation (Line(points={{1,-4},{6,-4},{6,-12}}, color={0,0,127}));
-          connect(add.u2, min1.y) annotation (Line(points={{6,-24},{6,-44},{0,
-                  -44},{0,-34},{1,-34},{1,-30}}, color={0,0,127}));
+          connect(add.u2, minZOH.y) annotation (Line(points={{6,-24},{6,-44},{0,-44},{0,
+                  -34},{1,-34},{1,-30}}, color={0,0,127}));
+          connect(add.y, continuousMeanValue.u)
+            annotation (Line(points={{29,-18},{36,-18}}, color={0,0,127}));
         end Baroreflex_Longterm;
       end Baroreflex;
 
@@ -20567,8 +20571,10 @@ P_hs_plus_dist"),
           outer Settings settings annotation (Placement(transformation(extent={{
                     -318,180},{-298,200}})));
 
+          replaceable
           Baroreflex.Baroreflex_Kosinksi baroreflex_system
-            if UseBaroreflexOutput annotation (Placement(transformation(
+            if UseBaroreflexOutput constrainedby Baroreflex.partialBaroreflex
+                                   annotation (Placement(transformation(
                   rotation=0, extent={{-242,142},{-222,162}})));
           Physiolibrary.Types.RealIO.FractionOutput  phi_baroreflex
          if UseBaroreflexOutput                         annotation (Placement(
@@ -32334,19 +32340,109 @@ P_hs_plus_dist"),
             end testRenal_;
 
             model testRenal
-              Renal renal(halving=0.5)
+              import Signals;
+              Renal renal(
+                halving=1,
+                Q_ra(displayUnit="m3/s") = 0.0230e-6,
+                KfL=0.0024203e-6/133.322,
+                weight=0.29,
+                BVo=2.61e-05,
+                COo(displayUnit="m3/s") = 1.2414e-6,
+                V_VKIDNEY(start=5e-08),
+                R_K_afferent(displayUnit="(mmHg.s)/ml"))
                 annotation (Placement(transformation(extent={{-20,-20},{0,0}})));
               Physiolibrary.Hydraulic.Sources.UnlimitedVolume pArt(P=13332.2387415)
-                annotation (Placement(transformation(extent={{-60,-20},{-40,0}})));
+                annotation (Placement(transformation(extent={{-82,-20},{-62,0}})));
               Physiolibrary.Hydraulic.Sources.UnlimitedVolume pVen(P=666.611937075)
                 annotation (Placement(transformation(extent={{40,-20},{20,0}})));
+              Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter
+                annotation (Placement(transformation(extent={{-44,-14},{-36,-6}})));
+              Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter1
+                annotation (Placement(transformation(extent={{16,-14},{8,-6}})));
+              Renal renal_puls(
+                halving=1,
+                Q_ra(displayUnit="m3/s") = 0.0230e-6,
+                KfL=0.0024203e-6/133.322,
+                weight=0.29,
+                BVo=2.61e-05,
+                COo(displayUnit="m3/s") = 1.2414e-6,
+                V_VKIDNEY(start=5e-08),
+                R_K_afferent(displayUnit="(mmHg.s)/ml"))
+                annotation (Placement(transformation(extent={{-20,-90},{0,-70}})));
+              Physiolibrary.Hydraulic.Sources.UnlimitedVolume pArt1(usePressureInput=true,
+                  P(displayUnit="Pa") = 13332.2387415)
+                annotation (Placement(transformation(extent={{-82,-90},{-62,-70}})));
+              Physiolibrary.Hydraulic.Sources.UnlimitedVolume pVen1(P=666.611937075)
+                annotation (Placement(transformation(extent={{40,-90},{20,-70}})));
+              Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter2
+                annotation (Placement(transformation(extent={{-44,-84},{-36,-76}})));
+              Interfaces.LeveledPressureFlowConverter leveledPressureFlowConverter3
+                annotation (Placement(transformation(extent={{16,-84},{8,-76}})));
+              Modelica.Blocks.Sources.Sine sine(
+                amplitude=20*133.322,
+                f=1,
+                offset=pArt.P,
+                startTime=0)
+                annotation (Placement(transformation(extent={{-118,-60},{-98,-40}})));
+              Signals.ContinuousMeanValue AVG_P_glomer(reset=time > 90, tau=60)
+                annotation (Placement(transformation(extent={{100,-40},{120,-20}})));
+              Modelica.Blocks.Sources.RealExpression realExpression(y=renal_puls.P_GLOMER)
+                annotation (Placement(transformation(extent={{66,-40},{86,-20}})));
+              Signals.ContinuousMeanValue AVG_GFR(reset=time > 90, tau=60)
+                  annotation (Placement(transformation(extent={{100,-70},{120,-50}})));
+              Modelica.Blocks.Sources.RealExpression realExpression1(y=renal_puls.GFR)
+                annotation (Placement(transformation(extent={{66,-70},{86,-50}})));
             equation
-              connect(renal.port_a, pArt.y) annotation (Line(points={{-20,-10},{-40,-10}}));
-              connect(renal.port_b, pVen.y) annotation (Line(points={{0,-10},{20,-10}}));
+              connect(renal.port_a, leveledPressureFlowConverter.leveledPort_b) annotation (
+                 Line(
+                  points={{-20,-10},{-36,-10}},
+                  color={162,29,33},
+                  thickness=0.5));
+              connect(pArt.y, leveledPressureFlowConverter.port_a) annotation (Line(
+                  points={{-62,-10},{-44,-10}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(renal.port_b, leveledPressureFlowConverter1.leveledPort_b)
+                annotation (Line(
+                  points={{0,-10},{8,-10}},
+                  color={162,29,33},
+                  thickness=0.5));
+              connect(pVen.y, leveledPressureFlowConverter1.port_a) annotation (Line(
+                  points={{20,-10},{16,-10}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(renal_puls.port_a, leveledPressureFlowConverter2.leveledPort_b)
+                annotation (Line(
+                  points={{-20,-80},{-36,-80}},
+                  color={162,29,33},
+                  thickness=0.5));
+              connect(pArt1.y, leveledPressureFlowConverter2.port_a) annotation (Line(
+                  points={{-62,-80},{-44,-80}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(renal_puls.port_b, leveledPressureFlowConverter3.leveledPort_b)
+                annotation (Line(
+                  points={{0,-80},{8,-80}},
+                  color={162,29,33},
+                  thickness=0.5));
+              connect(pVen1.y, leveledPressureFlowConverter3.port_a) annotation (Line(
+                  points={{20,-80},{16,-80}},
+                  color={0,0,0},
+                  thickness=1));
+              connect(pArt1.pressure, sine.y) annotation (Line(points={{-82,-80},{-90,-80},{
+                      -90,-50},{-97,-50}}, color={0,0,127}));
+              connect(realExpression.y, AVG_P_glomer.u)
+                annotation (Line(points={{87,-30},{98,-30}}, color={0,0,127}));
+                connect(realExpression1.y, AVG_GFR.u) annotation (Line(points={
+                        {87,-60},{98,-60}}, color={0,0,127}));
               annotation (
                 Icon(coordinateSystem(preserveAspectRatio=false)),
                 Diagram(coordinateSystem(preserveAspectRatio=false)),
-                experiment(StopTime=500, __Dymola_Algorithm="Dassl"));
+                experiment(
+                    StopTime=400,
+                    Interval=0.05,
+                    Tolerance=1e-06,
+                    __Dymola_Algorithm="Cvode"));
             end testRenal;
             end Test;
 
@@ -32959,7 +33055,8 @@ P_hs_plus_dist"),
               unlimitedPump(useSolutionFlowInput=false, SolutionFlow(
                     displayUnit="l/day") = 4.6296296296296e-08),
               speedUpCommand(speedUp=if time > 100 then 60 else 3600),
-              pumpPressureHead(p_head=3199.73729796),
+              pumpPressureHead(p_head0=
+                                      3199.73729796),
               iSFOsm(useOsmolarityInput=true),
               resistor1(Resistance(displayUnit="(mmHg.min)/ml")=
                   7999343244.900001*(10/2.7777)),
@@ -33363,7 +33460,8 @@ P_hs_plus_dist"),
           Physiolibrary.Hydraulic.Sources.UnlimitedPump unlimitedPump(
               useSolutionFlowInput=true)
             annotation (Placement(transformation(extent={{-30,0},{-10,20}})));
-          Physiolibrary.Hydraulic.Components.PumpPressureHead pumpPressureHead(p_head=2666.4477483)
+          Physiolibrary.Hydraulic.Components.PumpPressureHead pumpPressureHead(
+              p_head0=2666.4477483)
             annotation (Placement(transformation(extent={{28,0},{48,20}})));
           Physiolibrary.Hydraulic.Sensors.FlowMeasure flowMeasure
             annotation (Placement(transformation(extent={{142,20},{162,0}})));
@@ -45980,19 +46078,6 @@ P_hs_plus_dist"),
             resistor1(enable=false)),
           useAutonomousPhi(y=true),
           SystemicComponent(
-            baroreflex_system(
-              baroreflex(
-                phi_mean(start=0.24970344, fixed=true),
-                phi(start=0.24585241, fixed=true),
-                f1_adj(start=0.0030635502, fixed=true)),
-              baroreceptor_aortic(
-                fbr_int(start=17.603256, fixed=true),
-                epsilon(start=1.5282549, fixed=true),
-                s(start=0.8055929, fixed=true)),
-              baroreceptor_carotid(
-                fbr_int(start=9.66313, fixed=true),
-                epsilon(start=1.1712315, fixed=true),
-                s(start=0.8933484, fixed=true))),
             ascending_aorta_A(
               q(start=3.8719095e-06, fixed=true),
               vol1(start=8.070678e-06, fixed=true),
@@ -46304,6 +46389,19 @@ P_hs_plus_dist"),
             R_pv_visc(enable=false)),
           settings(initByPressure=false));
 
+      // baroreflex_system(
+      //         baroreflex(
+      //           phi_mean(start=0.24970344, fixed=true),
+      //           phi(start=0.24585241, fixed=true),
+      //           f1_adj(start=0.0030635502, fixed=true)),
+      //         baroreceptor_aortic(
+      //           fbr_int(start=17.603256, fixed=true),
+      //           epsilon(start=1.5282549, fixed=true),
+      //           s(start=0.8055929, fixed=true)),
+      //         baroreceptor_carotid(
+      //           fbr_int(start=9.66313, fixed=true),
+      //           epsilon(start=1.1712315, fixed=true),
+      //           s(start=0.8933484, fixed=true))),
       end partialCVS_optimized_ss;
 
       model partialCVS_outputs "Add additional outputs to the base model. Avoid any modification to prevent conflicts during diamond inheritance."
@@ -46581,6 +46679,22 @@ P_hs_plus_dist"),
 
       end partialCVS_outputs;
 
+      model SimpleExercise_ident_optimized "Generated by PostProcess/postprocess_optim.py optimized at Nov 22 14:40:27 CET 2021
+ with cost 1.087745 lowest at run 135"
+        extends ADAN_main.SystemicTree.Variations.Renals.Renals_HF_nobaro_baro(settings(
+            heart_vntr_D_A_maxAct =          3.400005e+03,
+            heart_vntr_D_0_maxAct =          1.285000e-03,
+            heart_vntr_TS_maxAct =          1.047740e-01,
+            heart_vntr_TR_maxAct =          4.597690e-02,
+            eta_vc =          2.701054e-01,
+            tissues_eta_Ra =          3.245225e+00,
+            tissues_eta_Rv =          1.806250e+00,
+            tissues_eta_C =          4.608013e-01,
+            tissues_chi_Ra =          2.181250e+01,
+            tissues_chi_Rv =          1.384375e+01,
+            tissues_chi_C =          -8.125000e-02));
+
+      end SimpleExercise_ident_optimized;
     end Auxiliary;
 
     package Obsolete
@@ -58471,6 +58585,16 @@ P_hs_plus_dist"),
                   {-26,-82},{-26,-84},{10,-84},{10,-86}},
                                                    color={0,0,127}));
         end CVS_StepVolumeOverload;
+
+        model CVS_baseline_longbaro "With long-term baroreflex control"
+          extends CVS_baseline(
+            SystemicComponent(redeclare
+                Components.Subsystems.Baroreflex.Baroreflex_Longterm
+                baroreflex_system(beat=heartComponent.sa_node.beat)),
+            useAutonomousPhi(y=true),
+            settings(V_PV_init=0),
+            pulmonaryComponent(deadVolume=0));
+        end CVS_baseline_longbaro;
       end Experiments;
 
       model CVS_baseline "Just a baseline wrapper"
@@ -60426,6 +60550,102 @@ P_hs_plus_dist"),
 <p>This model simulates Valsalva maneuver, based on the normal resting supine case</p>
 </html>"));
         end CVS_valsalva_overshootDecay;
+
+        model CVS_valsalva_longbaro
+          import ADAN_main;
+
+            //   settings(V_PV_init=1e-06*(-1297.5 + 200), pulm_C_PV=3.7503078792283e-07),
+            // pulmonaryComponent(c_pv(volume_start=65e-6 + 2000e-6 + settings.V_PV_init +
+            //         200e-6))
+          extends ADAN_main.SystemicTree.CardiovascularSystem(
+            useAutonomousPhi(y=true),
+            SystemicComponent(UseThoracic_PressureInput=true, baroreflex_system(
+                  baroreflex(phi(fixed=false)))),
+            pulmonaryComponent(UseThoracic_PressureInput=true),
+            heartComponent(UseThoracic_PressureInput=true, aorticValve(
+                  useChatteringProtection=true),
+              pulmonaryValve(calculateAdditionalMetrics=true)),
+            settings(baro_tau_s=93,
+                     dummy=2));
+
+        // ADAN_main.SystemicTree.Identification.Results.Experiments.CVS_baseline(
+        //     useAutonomousPhi(y=true),
+        //     heartComponent(
+        //       ra(enabled=false),
+        //       la(enabled=false),
+        //       ventricles(
+        //         LV_wall(L0=1.6),
+        //         SEP_wall(L0=1.6),
+        //         RV_wall(L0=1.6))),
+        //     settings(
+        //       V_PV_init=0.00035,
+        //       heart_R_vlv(displayUnit="(Pa.s)/m3"),
+        //       heart_R_LA(displayUnit="(mmHg.min)/l") = 3199737.29796,
+        //       heart_vntr_L0=1.6)
+        replaceable
+        Modelica.Blocks.Sources.Trapezoid thoracic_pressure_ramp(
+            nperiod=-1,
+            amplitude=40*133.32,
+            rising=0.1,
+            width=14.8,
+            falling=0.1,
+            period=60,
+            startTime=20)   constrainedby Modelica.Blocks.Sources.Trapezoid
+            annotation (Placement(transformation(extent={{-100,-70},{-80,-50}})));
+          ADAN_main.Components.Signals.ConditionalConnection
+                                                   condTP_PC(
+            disconnected=false,
+            disconnectedValue=0,
+            phi_gain=settings.pulm_tp_pleural_frac,
+            const_offset=0) "Thoracic pressure effect on pericardium."
+            annotation (Placement(transformation(extent={{-69,-59.333},{-55,
+                    -47.333}})));
+          ADAN_main.Components.Signals.ConditionalConnection
+                                                   condTP_IP(
+            disconnected=false,
+            disconnectedValue=0,
+            phi0=0,
+            phi_gain=1,
+            const_offset=0)
+            "Thoracic pressure effect on intra-pleural circulatory (i.e. lung tissue only)"
+            annotation (Placement(transformation(extent={{-69,-79.333},{-55,
+                    -67.333}})));
+          ADAN_main.Components.Signals.ConditionalConnection
+                                                   condTP_EP1(
+            disconnected=false,
+            disconnectedValue=0,
+            phi_gain=settings.pulm_tp_pleural_frac,
+            const_offset=0) "Thoracic pressure effect on extra-pleural circulatory"
+            annotation (Placement(transformation(extent={{-69,-41.333},{-55,
+                    -29.3333}})));
+        equation
+          connect(thoracic_pressure_ramp.y,condTP_PC. u) annotation (Line(points={{-79,-60},
+                  {-74,-60},{-74,-53.333},{-70.4,-53.333}},
+                                                    color={0,0,127}));
+          connect(condTP_PC.y, heartComponent.thoracic_pressure_input) annotation (Line(
+                points={{-54.3,-53.333},{-26,-53.333},{-26,-32}},
+                                                          color={0,0,127}));
+          connect(condTP_IP.y, pulmonaryComponent.thoracic_pressure) annotation (Line(
+                points={{-54.3,-73.333},{-40,-73.333},{-40,-62},{-24,-62}},
+                                                                    color={0,0,127}));
+          connect(condTP_IP.u,thoracic_pressure_ramp. y) annotation (Line(points={{-70.4,
+                  -73.333},{-74,-73.333},{-74,-60},{-79,-60}},   color={0,0,127}));
+          connect(condTP_EP1.y, SystemicComponent.thoracic_pressure_input)
+            annotation (Line(points={{-54.3,-35.3332},{-46,-35.3332},{-46,20},{
+                  -34,20}},
+                color={0,0,127}));
+          connect(condTP_EP1.u,condTP_PC. u) annotation (Line(points={{-70.4,
+                  -35.3332},{-74,-35.3332},{-74,-53.333},{-70.4,-53.333}},
+                                                    color={0,0,127}));
+          annotation (experiment(
+              StopTime=60,
+              Interval=0.01,
+              Tolerance=1e-07,
+              __Dymola_Algorithm="Cvode",
+            __OpenModelica_simulationFlags(lv = "LOG_STATS", s = "cvode")), Documentation(info="<html>
+<p>This model simulates Valsalva maneuver, based on the normal resting supine case</p>
+</html>"));
+        end CVS_valsalva_longbaro;
       end Experiments;
 
       model CVS_valsalva
@@ -65165,8 +65385,8 @@ P_hs_plus_dist"),
                 PConcollagen=settings.heart_vntr_PConcollagen*(LV_PConcollagen_f /2 + RV_PConcollagen_f /2),
                 PExpcollagen=settings.heart_vntr_PExpcollagen*(LV_PExpcollagen_f /2 + RV_PExpcollagen_f/2))),
               ra(contractilityFraction=RVfunctionFraction),
-              la(contractilityFraction=LVfunctionFraction)), useAutonomousPhi(y
-                =true));
+              la(contractilityFraction=LVfunctionFraction)), useAutonomousPhi(y=
+                 true));
           parameter Real LV_stiff=1.0                            "Stiffening factor";
           parameter Real LV_SLcollagen_f=1.0                                   "threshold for collagen activation, [um]";
           parameter Real LV_PConcollagen_f=1.0                                     "contriubtion of collagen [1]";
