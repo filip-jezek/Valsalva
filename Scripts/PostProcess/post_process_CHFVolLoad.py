@@ -1,3 +1,4 @@
+from math import nan
 import DyMat
 import numpy as np
 import time as timer
@@ -8,7 +9,7 @@ import os
 # imp_coeff = 1
 
 experiment_type = 'LV'
-exp_range = range(5, 100,5)
+exp_range = range(100, 0,-5)
 imp_coeff = 1
 
 # experiment_type = 'HFpEFDilated_baro'
@@ -36,13 +37,15 @@ bpm_base = 97*mmHg2SI
 startTime = 150
 
 
-s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {EDV}, {BPM}, {Qlymph}, {Vint_r},{Vint_excess}, {ESP}, {EDP}, {comp}, {LVPwr}, {RVPwr}\n'
+# s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {EDV}, {BPM}, {Qlymph}, {Vint_r},{Vint_excess}, {ESP}, {EDP}, {comp}, {LVPwr}, {RVPwr}\n'
+s = '{f_LV}, {vol}, {time}, {eGFR}, {p_int}, {HR}, {CO}, {CVP}, {PCWP}, {EF}, {EDV}, {BPm}, {BPs}, {BPd}, {Qlymph}, {Vint_r},{Vint_excess}, {ESP}, {EDP}, {Pwr_RV}, {Pwr_LV}, {dCar_d}, {dAor_d}\n'
 result_set = []
 
 outputFile = 'VolumeLoading_%s.csv' % experiment_type
 with open(outputFile, 'w') as file:
 # with open('CHF_VolumeLoading.csv', 'w') as file:    
-    file.write(s.format(f_LV = 'f_LV', vol = 'vol [L]', time = 'time [s]', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO [L/min]', EF = 'EF', EDV = 'EDV ml', CVP = 'CVP', PCWP = 'PCWP (mmHg)', BPM = 'maxBP', Qlymph = 'Qlymph [L/day]', Vint_r= 'Relative change to interstitial volume', Vint_excess = 'Excess interstitial volume [L]', ESP = 'ESP', EDP = 'EDP', comp = 'compensated', LVPwr = 'LVPwr', RVPwr = 'RVPwr'))
+    # file.write(s.format(f_LV = 'f_LV', vol = 'vol [L]', time = 'time [s]', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO [L/min]', EF = 'EF', EDV = 'EDV ml', CVP = 'CVP', PCWP = 'PCWP (mmHg)', BPM = 'maxBP', Qlymph = 'Qlymph [L/day]', Vint_r= 'Relative change to interstitial volume', Vint_excess = 'Excess interstitial volume [L]', ESP = 'ESP', EDP = 'EDP', comp = 'compensated', LVPwr = 'LVPwr', RVPwr = 'RVPwr'))
+    file.write(s.format(f_LV = 'f_LV', vol = 'vol', time = 'time', eGFR = 'eGFR', p_int = 'p_int', HR = 'HR', CO = 'CO', EF = 'EF', EDV = 'EDV', CVP = 'CVP', PCWP = 'PCWP', BPm = 'BPm', BPs = 'BPs', BPd = 'BPd', Qlymph = 'Qlymph', Vint_r= 'V_Isf_Rel', Vint_excess = 'V_Isf_Exc', ESP = 'ESP', EDP = 'EDP', Pwr_LV = 'Pwr_LV', Pwr_RV = 'Pwr_RV', dCar_d = 'dCar_d', dAor_d = 'dAor_d'))
 
     for i in exp_range:
         filename = filePattern % (experiment_type, i)
@@ -135,7 +138,8 @@ with open(outputFile, 'w') as file:
         LVPwr = datafile.data('heartComponent.ventricles.power_LV')[i_0]
         RVPwr = datafile.data('heartComponent.ventricles.power_RV')[i_0]
 
-        ws = s.format(f_LV = i*imp_coeff, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR = hr, CO = co, CVP = cvp, PCWP = pcwp, EF = ef, EDV = edv, BPM = bpm[i_bpm]/mmHg2SI, Qlymph = lymph_q, Vint_r=vi_r, Vint_excess = vi_e,  ESP = esp, EDP = edp, comp = comp, LVPwr = LVPwr, RVPwr = RVPwr)
+        # ws = s.format(f_LV = i*imp_coeff, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR = hr, CO = co, CVP = cvp, PCWP = pcwp, EF = ef, EDV = edv, BPM = bpm[i_bpm]/mmHg2SI, Qlymph = lymph_q, Vint_r=vi_r, Vint_excess = vi_e,  ESP = esp, EDP = edp, comp = comp, LVPwr = LVPwr, RVPwr = RVPwr)
+        ws = s.format(f_LV = imp_coeff, vol = vol,  time = t, eGFR = gfr_m, p_int = p_int_m, HR = hr, CO = co, CVP = cvp, PCWP = pcwp, EF = ef, EDV = edv, BPm = bpm[i_bpm]/mmHg2SI, BPs = nan, BPd = nan, Qlymph = lymph_q, Vint_r=vi_r, Vint_excess = vi_e,  ESP = esp, EDP = edp, Pwr_LV = LVPwr, Pwr_RV = RVPwr, dCar_d = nan, dAor_d = nan)
 
         file.write(ws)
         file.flush()
