@@ -19,6 +19,7 @@ for i = 1:size(set, 2),
         plot(s{1}.tab.(var1), s{1}.tab.(var2), s{1}.glyph, 'LineWidth', lw);
         leg{end + 1} = s{1}.title;
     else
+        lc = [0, 0, 0]; % default black color for start
         for j = 1:size(var2, 2),
             leg{end + 1} = [s{1}.title , ' ', var2{j}];
             
@@ -30,7 +31,12 @@ for i = 1:size(set, 2),
 %             else
 %                 g = s{1}.glyph{j};
             end
-            plot(s{1}.tab.(var1), s{1}.tab.(var2{j}), g, 'LineWidth', lw);
+            if j == 1
+                p = plot(s{1}.tab.(var1), s{1}.tab.(var2{j}), g, 'LineWidth', lw);
+                lc = p.Color;
+            else
+                plot(s{1}.tab.(var1), s{1}.tab.(var2{j}), g, 'LineWidth', lw, 'Color', lc);
+            end
         end
     end            
 end

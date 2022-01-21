@@ -138,7 +138,22 @@ setLV100CompensatedExe.glyph = '*-';
 setLV100CompensatedExe.title = '1.0 C_{LV}+EXE';
 
 var_set = {setLV10CompensatedExe, setLV20CompensatedExe, setLV40CompensatedExe, setLV60CompensatedExe, setLV80CompensatedExe, setLV100CompensatedExe};
+var_set = {setLV10CompensatedExe, setLV20CompensatedExe, setLV60CompensatedExe, setLV100CompensatedExe};
 checkAllVarSets(var_set)
+%% Compansated Exercise by failure
+
+setCompensatedExe0.tab = importVolLoadResultFile("..\..\Results\VolLoad_CVS_baroExe_Exe0.mat.csv");
+setCompensatedExe0.glyph = '*-';
+setCompensatedExe0.title = 'LV_{sys, fail} Exe 0';
+
+setCompensatedExe40.tab = importVolLoadResultFile("..\..\Results\VolLoad_CVS_baroExe_Exe40.mat.csv");
+setCompensatedExe40.glyph = '*-';
+setCompensatedExe40.title = 'LV_{sys, fail} Exe 40';
+
+setCompensatedExe80.tab = importVolLoadResultFile("..\..\Results\VolLoad_CVS_baroExe_Exe80.mat.csv");
+setCompensatedExe80.glyph = '*-';
+setCompensatedExe80.title = 'LV_{sys, fail} Exe 80';
+var_set = {setCompensatedExe0, setCompensatedExe40, setCompensatedExe80};
 %% Setting var_set variants
 var_set = {sethfr25, sethfr25b,sethfr50, sethfr50b,setnorm, setnormb};
 
@@ -247,7 +262,9 @@ plotHFVol_draw(var_set, 'dVol', 'SV', prenom);
 plotHFVol_draw(var_set, 'dVol', 'EF', prenom);
 plotHFVol_draw(var_set, 'dVol', 'BPm', prenom);
 plotHFVol_draw(var_set, 'CO', 'CVP', prenom);
-plotHFVol_draw(var_set, 'CO', {'PCWP', 'EDP'}, prenom, {'*:', 'd-'});
+plotHFVol_draw(var_set, 'CO', 'PCWP', prenom);
+plotHFVol_draw(var_set, 'CO', 'EDP', prenom);
+plotHFVol_draw(var_set, 'CO', {'PCWP', 'EDP', 'ESP'}, prenom, {'*:', 'd-', '--'});
 plotHFVol_draw(var_set, 'dPCWP', 'CO', prenom);
 plotHFVol_draw(var_set, 'EDP', 'CO', prenom);
 plotHFVol_draw(var_set, 'dPCWP', 'SVrn', prenom);
@@ -267,7 +284,7 @@ plotHFVol_draw(var_set, 'HR', 'EDP', prenom);
 plotHFVol_draw(var_set, 'dPCWP', 'BPm', prenom);
 plotHFVol_draw(var_set, 'dPCWP', 'HR', prenom);
 plotHFVol_draw(var_set, 'dVol', 'HR', prenom);
-plotHFVol_draw(var_set, 'dVol', {'BPs', 'BPd'}, prenom);
+plotHFVol_draw(var_set, 'CO', {'BPs', 'BPd'}, prenom);
 plotHFVol_draw({setnormSLradj}, 'dVol', 'EDV', prenom);
 plotHFVol_draw(var_set, 'HR', 'CO', prenom);
 plotHFVol_draw(var_set, 'CVP', 'CO', prenom);
@@ -282,7 +299,11 @@ plotHFVol_draw(var_set, 'CO', 'BPs', prenom);
 plotHFVol_draw(var_set, 'dVol', 'VP_r', prenom);
 
 plotHFVol_draw(var_set, 'dVol', 'Pwr_r', prenom);
-plotHFVol_draw(var_set, 'dVol', {'Pwr_LVrn', 'Pwr_RVrn'}, prenom);
+plotHFVol_draw(var_set, 'CO', {'Pwr_LV', 'Pwr_RV'}, prenom, {'+-' ,'x:'});
+plotHFVol_draw(var_set, 'CO', {'Pwr_LVr', 'Pwr_RVr'}, prenom, {'+-' ,'x:'});
+plotHFVol_draw(var_set, 'dVol', {'Pwr_LVr', 'Pwr_RVr'}, prenom, {'+-' ,'x:'});
+plotHFVol_draw(var_set, 'PCWP', {'Pwr_LVr', 'Pwr_RVr'}, prenom, {'+-' ,'x:'});
+plotHFVol_draw(var_set, 'CO', {'Pwr_LVrn', 'Pwr_RVrn'}, prenom, {'+-' ,'x:'});
 plotHFVol_draw(var_set, 'dVol', 'Pwr_LV', 'on Exercise level');
 plotHFVol_draw(var_set, 'dVol', 'Pwr_RV', 'on Exercise level');
 plotHFVol_draw(var_set, 'CO', 'Pwr_RV', 'on Exercise level');
