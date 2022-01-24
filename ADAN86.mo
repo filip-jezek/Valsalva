@@ -11047,6 +11047,124 @@ type"),       Text(
                     coordinateSystem(preserveAspectRatio=false)));
             end VentricleWall_LumensSimpleEDPVR;
 
+            model VentricleWall_LumensSimpleEDPVR21
+              "Lumens model, but with driving directly the mechanical activation,and estimated fit of passive and active tensions"
+              extends partialVentricleWall(
+                  UseCardiacCycleInput=false,
+                  UseFrequencyInput=false);
+              outer Physiolibrary.Types.Fraction phi;
+
+              Real sinalpha = Tx/Tm;
+              Modelica.Units.SI.Angle alpha=asin(sinalpha);
+
+              // Inlcuded in the base class:
+              //   input Real xm;
+              //   input Real ym;
+              //   Modelica.Blocks.Interfaces.RealInput Ca_i "Connector of Calcium input signal"
+              //     annotation (Placement(transformation(extent={{-120,-20},{-80,20}}),
+              //         iconTransformation(extent={{-120,-20},{-80,20}})));
+              //
+              //   parameter Real Vw "Heart wall volumes (mL)";
+              //   parameter Real Amref "midwall reference surface area, cm^2";
+              //   Real Tm;
+              //   Real Tx=Tm*2*xm*ym/(xm^2 + ym^2);
+              //   Real Ty=Tm*(-xm^2 + ym^2)/(xm^2 + ym^2);
+              // // ventricular mechanics
+              // Real Vm=(Modelica.Constants.pi/6)*xm*(xm^2 + 3*ym^2);
+              // Real Am=Modelica.Constants.pi*(xm^2 + ym^2);
+              // Real Cm=2*xm/(xm^2 + ym^2);
+              //
+              // Real z=3*Cm*Vw/(2*Am);
+              // Real epsf=(1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4;
+              // Real SLo(nominal=1e-6) = Lsref*exp(epsf);
+              // Real SL(nominal=1e-6, start=2.3) "sarcomere length, um";
+              // parameter Physiolibrary.Types.Fraction phi0=0.25;
+
+              // Triseg parameters
+
+              parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
+            //   parameter Real sigma_act=7.5*120 "mmHg ";
+            //   parameter Real sigma_act_maxAct = sigma_act "Sigma at maximal activation";
+            //   parameter Physiolibrary.Types.Fraction phi_limit = 0 "Minimal value of phi to drop to. Experimental parameter, try using phi0 here";
+            //   Real sigma_act_coeff "Slope of sigma change for activation. Calculated from nominal and max active";
+            //   Real sigma_act_phi = sigma_act*(1 + sigma_act_coeff*max(phi_limit,phi - phi0));
+
+              // not used in the current version. Using k_passive instead
+            //  parameter Real sigma_pas=7.5*7 "mmHg";
+            //   parameter Real SLrest=1.51 "microns";
+
+              // same parameters as in driving function. Change with care.
+            //   parameter Modelica.SIunits.Time tauD=0.032 "Factor scaling contraction decay time";
+            //   parameter Modelica.SIunits.Time tauR=0.048 "Factor scaling contraction rise time";
+            //   parameter Modelica.SIunits.Time tauSC=0.425 "Factor scaling duration of contraction";
+            //   parameter Real Crest=0.02 "Diastolic resting level of activation";
+
+            //   Real CL=tanh(4*(SL - SLrest)^2) "increase of activation with sarcomere length";
+            //   Real T=tauSC*(0.29 + 0.3*SL) "decrease of activation duration with decrease of sarcomere length";
+            //   Real C(fixed = false) "activation function, related to intracellular calcium conncentration";
+            //   Real dC=CL*drivingInput/tauR + (Crest - C)/(1 + exp((T - cardiac_cycle/
+            //       frequency)/tauD))/tauD;
+
+              // Sliding velocities -- Eq. (B2) Lumens et al.
+              Real dSL=((SLo - SL)/LSEiso - 1)*vmax;
+
+              // moved to base class
+              //  parameter Real L0=0.907 "micron";
+              // parameter Real k_passive=50 "mN / mm^2 / micro";
+              // parameter Real k_passive_negative=50 "mN / mm^2 / micro";
+
+              // Collagen force
+            //   Real sigma_collagen=if (SLo > SLcollagen) then PConcollagen*(exp(PExpcollagen*
+            //       (SLo - SLcollagen)) - 1) else 0;
+             // Real sigma_collagen=max(1e-3, PConcollagen*(exp(PExpcollagen*(SLo - SLcollagen))));
+            // Real sigma_collagen= (PConcollagen * max(0,SLo - SLcollagen))^PExpcollagen;
+
+              // Passive forces (Lumens) do not really work here atm so we are using DAB variant
+              // sigmapas_LV  = sigma_pas*(36*max(0,(epsf_LV-1)^2)  + 0.1*(epsf_LV-1)  + 0.0025*exp(30*epsf_LV) ) ;
+
+              parameter Real k_act = 1;
+              constant Real mmHg2SI = 1/133.322 "mmHg conversion";
+              parameter Real gamma = 6;
+              Real sigmapas = k_passive*(SLo - SLrest)^gamma "Passive tension [mmHg]";
+
+              // Active forces could not go negative
+              Real sigmaact=max(0, contractilityFraction*D*k_act*starlingFactor_1*starlingFactor_2) "Active tension [mmHg]";
+
+              Real starlingFactor = (SL - SLrest)*(SLo  - SL)/LSEiso;
+              parameter Real starlingFactor_exp =  1;
+              Real starlingFactor_1 = starlingFactor_1_base^starlingFactor_exp;
+              Real starlingFactor_1_base = (SL - SLrest)/LSEiso;
+              Real starlingFactor_2 = (SLo  - SL);
+              // (SL - SLrest)
+            //   Real debug_SL = (SL - SLrest);
+            //   Real debug_SLo = (SLo - SL);
+              // Total forces
+              Real sigmaM=sigmaact + sigmapas "Total tension [mmHg]";
+              // equilibrium of forces at junction circle already in base class
+
+            equation
+            //   sigma_act_maxAct = sigma_act*(1 + sigma_act_coeff*(1 - phi0));
+
+              // der(C) = dC;
+            //   C =D;
+              der(SL) = dSL;
+
+              Tm = (Vw*sigmaM/(2*Am))*(1 + (z^2)/3 + (z^4)/5);
+              // Tx and Ty are defined in the parent base class
+              // Real Tx =  Tm*2*xm*ym/(xm^2 + ym^2);
+              // Real Ty =  Tm*(-xm^2 + ym^2)/(xm^2 + ym^2);
+
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={Text(
+                      extent={{-80,-20},{62,40}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="Ls")}),                                    Diagram(
+                    coordinateSystem(preserveAspectRatio=false)));
+            end VentricleWall_LumensSimpleEDPVR21;
+
             partial model partialVentricles_TS
               "Partial ventricles for the TriSeg model variants"
               //  extends ADAN_main.Components.Subsystems.Heart.Auxiliary.partialVentricles;
@@ -12478,10 +12596,11 @@ type"),       Text(
                   volume_start)
               annotation (Placement(transformation(extent={{-10,-90},{10,-70}})));
             parameter Physiolibrary.Types.Volume volume_start=0.0001
-              "Volume start value";
+              "Volume start value" annotation (Evaluate=false);
             parameter Physiolibrary.Types.Volume V_m=0.00015;
             parameter Physiolibrary.Types.Pressure P_m=799.934;
-            parameter Physiolibrary.Types.Volume V_RV_start=0.0001;
+            parameter Physiolibrary.Types.Volume V_RV_start=0.0001
+              annotation (Evaluate=false);
             output Physiolibrary.Types.Pressure EDP_err = if EDPVRnorm_V.EDP > 0 then (EDPVRnorm_V.EDP - ventricles.P_LV)^2 else 0;
             Real err;
             inner Settings            settings(
@@ -12646,13 +12765,187 @@ type"),       Text(
 
           model TestEDPVR_fit_scaled "With scaled ventricles"
             extends TestEDPVR_fit(ventricles(
-                LV_wall(Vw=ventricles.settings.heart_vntr_xi_Vw*89*1.4, Amref=
-                      ventricles.settings.heart_vntr_xi_AmRef*86*1.2),
-                SEP_wall(Vw=ventricles.settings.heart_vntr_xi_Vw*34*1.4, Amref=
-                      ventricles.settings.heart_vntr_xi_AmRef*39*1.2),
-                RV_wall(Vw=ventricles.settings.heart_vntr_xi_Vw*27*1.4, Amref=
-                      ventricles.settings.heart_vntr_xi_AmRef*110*1.2)));
+                redeclare model VentricleWall =
+                    ADAN_main.Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimpleEDPVR21,
+                LV_wall(Vw=parameterEstimation.Vw_lv*1e6, Amref=parameterEstimation.Amref_lv*1e4,
+                  k_passive=parameterEstimation.k_pas_lv/133.322,
+                  k_act=parameterEstimation.k_act_lv/133.322,
+                  starlingFactor_exp=1),
+                SEP_wall(Vw=parameterEstimation.Vw_sep *1e6, Amref=parameterEstimation.Amref_sep*1e4,
+                  k_passive=parameterEstimation.k_pas_lv/133.322,
+                  k_act=parameterEstimation.k_act_lv/133.322,
+                  starlingFactor_exp=1),
+                RV_wall(Vw=parameterEstimation.Vw_rv *1e6, Amref=parameterEstimation.Amref_rv*1e4,
+                  k_passive=parameterEstimation.k_pas_rv/133.322,
+                  k_act=parameterEstimation.k_act_rv/133.322,
+                  starlingFactor_exp=1),
+                calciumMechanics(
+                  t0_delay=1e-9,
+                  t0_delay_maxAct=1e-9,
+                  D_0(displayUnit="Pa/m3") = 1e-9,
+                  D_0_maxAct(displayUnit="Pa/m3") = 1e-9,
+                  D_A(displayUnit="Pa/m3") = 1e-9,
+                  D_A_maxAct(displayUnit="Pa/m3") = 1e-9)));
+
+            ParameterEstimation parameterEstimation(EDV_lv=V_m, EDP_lv=P_m)
+              annotation (Placement(transformation(extent={{-60,60},{-40,80}})));
+            annotation (experiment(
+                StopTime=1.5,
+                __Dymola_NumberOfIntervals=200,
+                Tolerance=1e-06,
+                __Dymola_Algorithm="Cvode"));
           end TestEDPVR_fit_scaled;
+
+          model ParameterEstimation
+            parameter Physiolibrary.Types.Volume EDV_lv=0.000125;
+            parameter Physiolibrary.Types.Volume EDV_rv=0.000125;
+
+            parameter Physiolibrary.Types.Pressure EDP_lv=666.611937075;
+            parameter Physiolibrary.Types.Pressure EDP_rv=EDP_lv*0.25;
+
+            parameter Physiolibrary.Types.Pressure ESP_lv=16665.298426875;
+            parameter Physiolibrary.Types.Pressure ESP_rv=3999.67162245;
+            constant Real pi = Modelica.Constants.pi;
+
+            // EDPVR parameters
+            parameter Real gamma = 6.0;
+            parameter Real R_systolicDisplacement = 0.8;
+            // Sarcomere length parameters (convert from µm to m)
+            parameter Physiolibrary.Types.Length Lsref=2*1e-6;
+            parameter Physiolibrary.Types.Length Lsc0=1.51*1e-6;
+            parameter Physiolibrary.Types.Length Lse_iso=0.04*1e-6;
+
+
+          // Ventricular chamber radius
+          parameter Real r_LV_and_SEP = (EDV_lv * 3 / (4* pi))^(1/3);
+          parameter Real r_RV =         (EDV_rv * 3 / (4* pi))^(1/3);
+
+          // Ventricle radius (chamber radius (r) + wall thickness (h)) where h is
+          // from XXX
+          parameter Real r_h_LV_and_SEP = r_LV_and_SEP + 5 * 1e-3; // m
+          parameter Real r_h_RV =         r_RV + 5 * 1e-3; //m
+
+          // Midwall reference surface area
+          parameter Real Amref_LV_and_SEP = 4 * pi * r_LV_and_SEP^2;
+          parameter Real Am_RV =            4 * pi * r_RV^2;
+
+          parameter Real Amref_lv =  Amref_LV_and_SEP * 2/3; // Assume LV is 2/3 of LV+SEP
+          parameter Real Amref_sep = Amref_LV_and_SEP * 1/3; // Assume SEP is 1/3 of LV+SEP
+          parameter Real Amref_rv =  Am_RV;
+
+          ////   Calculate patient-specific midwall volume (Vw) for LV, SEP, and RV
+
+          // Ventricle volume (chamber + midwall)
+          parameter Real Vw_chamber_LV_and_SEP = 4/3 * pi * r_h_LV_and_SEP^3;
+          parameter Real Vw_chamber_RV =         4/3 * pi * r_h_RV^3;
+
+          // Ventricular midwall volume
+          parameter Real Vw_LV_and_SEP = Vw_chamber_LV_and_SEP - EDV_lv;
+          parameter Real Vw_RV =         Vw_chamber_RV - EDV_rv;
+
+          parameter Real Vw_lv =  Vw_LV_and_SEP * 2/3; // Assume LV is 2/3 of LV+SEP
+          parameter Real Vw_sep = Vw_LV_and_SEP * 1/3; // Assume SEP is 1/3 of LV+SEP
+          parameter Real Vw_rv =  Vw_RV;
+
+          ////   Approximations for initial displacements in diastole
+
+          // Diameter (m)
+          parameter Real d_LV_and_SEP = 2 * r_LV_and_SEP;
+          parameter Real d_RV =         2 * r_RV;
+
+          // Displacements (m)
+          parameter Real xm_lv_d =  d_LV_and_SEP * 2/3; // Assume LV is 2/3 of LV+SEP
+          parameter Real xm_sep_d = d_LV_and_SEP * 1/3; // Assume SEP is 1/3 of LV+SEP
+          parameter Real xm_rv_d =  d_RV;
+          parameter Real ym_d =     r_LV_and_SEP;
+
+          ////     Calculate passive stress parameters (k_pas) for LV and RV in end-diastole
+
+          // Midwall surface area (m^2)
+          parameter Real Am_lv_d =  pi * (xm_lv_d^2  + ym_d^2);
+          parameter Real Am_rv_d =  pi * (xm_rv_d^2  + ym_d^2);
+
+          // Midwall curvature (m^(-1))
+          parameter Real Cm_lv_d =  -2 * xm_lv_d  / (xm_lv_d^2  + ym_d^2);
+          parameter Real Cm_rv_d =  -2 * xm_rv_d  / (xm_rv_d^2  + ym_d^2);
+
+          // Midwall ratio (dimensionless)
+          parameter Real z_lv_d =   3 * Cm_lv_d  * Vw_lv  / (2 * Am_lv_d);
+          parameter Real z_rv_d =   3 * Cm_rv_d  * Vw_rv  / (2 * Am_rv_d);
+
+          // Strain (dimensionless)
+          parameter Real eps_lv_d = 0.5 * log( Am_lv_d  / Amref_lv)   - (1/12) * z_lv_d^2  - 0.019 * z_lv_d^4;
+          parameter Real eps_rv_d = 0.5 * log( Am_rv_d  / Amref_rv)   - (1/12) * z_rv_d^2  - 0.019 * z_rv_d^4;
+
+          // Instantaneous sarcomere length (um)
+          parameter Real Ls_lv_d =  Lsref * exp(eps_lv_d);
+          parameter Real Ls_rv_d =  Lsref * exp(eps_rv_d);
+
+          // Passive stress
+          parameter Real sigma_pas_lv_d = ((Ls_lv_d - Lsc0)/1e-6)^gamma;
+          parameter Real sigma_pas_rv_d = ((Ls_rv_d - Lsc0)/1e-6)^gamma;
+
+          // Dimensionless combination function
+          parameter Real Gamma_lv_d = -(2 / 3) * z_lv_d * (1 + (1 / 3) * z_lv_d^2 + (1 / 5) * z_lv_d^4);
+          parameter Real Gamma_rv_d = -(2 / 3) * z_rv_d * (1 + (1 / 3) * z_rv_d^2 + (1 / 5) * z_rv_d^4);
+
+          // Passive stress scaling parameters (Pa)
+          parameter Physiolibrary.Types.Pressure k_pas_lv = (EDP_lv) / (Gamma_lv_d * sigma_pas_lv_d);
+          parameter Physiolibrary.Types.Pressure k_pas_rv = (EDP_rv) / (Gamma_rv_d * sigma_pas_rv_d);
+
+          ////     Calculate active stress parameters (k_act) for LV and RV in end-systole
+
+          // Assume end-systolic displacements are 80// of end-diastolic values
+          parameter Real xm_lv_s = R_systolicDisplacement * xm_lv_d;
+          parameter Real xm_rv_s = R_systolicDisplacement * xm_rv_d;
+          parameter Real ym_s =    R_systolicDisplacement * ym_d;
+
+          // Midwall surface area (m^2)
+          parameter Real Am_lv_s =  pi * (xm_lv_s^2  + ym_s^2);
+          parameter Real Am_rv_s =  pi * (xm_rv_s^2  + ym_s^2);
+
+          // Midwall curvature (m^(-1))
+          parameter Real Cm_lv_s =  - 2 * xm_lv_s  / (xm_lv_s^2  + ym_s^2);
+          parameter Real Cm_rv_s =  - 2 * xm_rv_s  / (xm_rv_s^2  + ym_s^2);
+
+          // Midwall ratio (dimensionless)
+          parameter Real z_lv_s =   3 * Cm_lv_s  * Vw_lv  / (2 * Am_lv_s);
+          parameter Real z_rv_s =   3 * Cm_rv_s  * Vw_rv  / (2 * Am_rv_s);
+
+          // Strain (dimensionless)
+          parameter Real eps_lv_s = 0.5 * log( Am_lv_s  / Amref_lv)   - (1/12) * z_lv_s^2  - 0.019 * z_lv_s^4;
+          parameter Real eps_rv_s = 0.5 * log( Am_rv_s  / Amref_rv)   - (1/12) * z_rv_s^2  - 0.019 * z_rv_s^4;
+
+          // Instantaneous sarcomere length (um)
+          parameter Real Ls_lv_s =  Lsref * exp(eps_lv_s);
+          parameter Real Ls_rv_s =  Lsref * exp(eps_rv_s);
+
+          // Activation function
+          parameter Real y_v = 1; // set to 1 in systole
+
+          // Active stress
+          parameter Real sigma_act_lv_s = y_v * abs(Ls_lv_s  - Lsc0) / 1e-6;
+          parameter Real sigma_act_rv_s = y_v * abs(Ls_rv_s  - Lsc0) / 1e-6;
+
+          // Dimensionless combination function
+          parameter Real Gamma_lv_s = - (2 / 3) * z_lv_s * (1 + (1 / 3) * z_lv_s^2 + (1 / 5) * z_lv_s^4);
+          parameter Real Gamma_rv_s = - (2 / 3) * z_rv_s * (1 + (1 / 3) * z_rv_s^2 + (1 / 5) * z_rv_s^4);
+
+          // Active stress scaling parameters (Pa)
+          parameter Physiolibrary.Types.Pressure k_act_lv = (ESP_lv) / (Gamma_lv_s * sigma_act_lv_s);
+          parameter Physiolibrary.Types.Pressure k_act_rv = (ESP_rv) / (Gamma_rv_s * sigma_act_rv_s);
+
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end ParameterEstimation;
+
+          model TestEDPVR_fit_scaled_resize
+            extends TestEDPVR_fit_scaled(
+              V_RV_start=volume_start,
+              P_m=666.611937075,
+              V_m=0.000125,
+              volume_start=V_m/2);
+          end TestEDPVR_fit_scaled_resize;
         end Testers;
 
         partial model partialHeart
