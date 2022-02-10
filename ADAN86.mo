@@ -10108,8 +10108,8 @@ type"),       Text(
             end Driving_Olufsen;
 
             partial model partialVentricleWall "base class to be plug-in usable"
-              input Real xm;
-              input Real ym;
+              input Real xm annotation (Dialog(group="Inputs"));
+              input Real ym annotation (Dialog(group="Inputs"));
               Modelica.Blocks.Interfaces.RealInput D
                 "Connector of driving function input signal. It might be calcium concentration or whatever appropriate."
                 annotation (Placement(transformation(extent={{-120,-20},{-80,20}})));
@@ -11739,6 +11739,280 @@ type"),       Text(
                       lineColor={135,135,135},
                       textString="s")}), Diagram(coordinateSystem(preserveAspectRatio=false)));
             end Ventricles_LumensSimplePassiveTensionOutput;
+
+            model FixedVentricleWallIO "base class to be plug-in usable"
+              input Real xm annotation (Dialog(group="Inputs"));
+              input Real ym annotation (Dialog(group="Inputs"));
+
+              Real Vw = 80 "Heart wall volumes (mL)" annotation (Dialog(group="IO"));
+              Real Amref(start=80) = 80 "midwall reference surface area, cm^2"
+                annotation (Dialog(group="IO"));
+              parameter Real Lsref=1.9 " Resting SL, um";
+
+              Real Tm "Represenattive midwall tension [mmHg.cm]";
+              Real Tx=Tm*2*xm*ym/(xm^2 + ym^2) "Axial midwall component";
+              Real Ty=Tm*(-xm^2 + ym^2)/(xm^2 + ym^2) "Radial midwall component";
+              // ventricular mechanics
+              Real Vm=(Modelica.Constants.pi/6)*xm*(xm^2 + 3*ym^2) "Volume of spherical cap, formed by midwall surface of wall segment";
+              Real Am=Modelica.Constants.pi*(xm^2 + ym^2) "Midwall surface area of curved wall segment";
+              Real Cm=2*xm/(xm^2 + ym^2) "Curvature of midwall surface (reciprocal of radius) ";
+
+              Real z=3*Cm*Vw/(2*Am) "Ratio of wall thickness to midwall radius of curvature of curved wall segment";
+              Real epsf=0;//(1/2)*log(Am/Amref) "Natural myofiber strain";
+              Real SLo(nominal=1e-6) = Lsref*exp(epsf) "Sarcomere length, um";
+              Real SL(nominal=1e-6, start=2.3)
+                "Length of sarcomere contractile element, um"
+                annotation (Dialog(group="IO"));
+
+              parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
+              parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
+              parameter Real SLrest=1.51 "microns";
+
+              // Sliding velocities -- Eq. (B2) Lumens et al.
+              Real dSL=((SLo - SL)/LSEiso - 1)*vmax;
+
+              Real k_act=0 annotation (Dialog(group="IO"));
+              constant Real mmHg2SI = 1/133.322 "mmHg conversion";
+              parameter Real gamma = 6;
+              Real k_passive=25 "mmHg / um" annotation (Dialog(group="IO"));
+
+              Real sigmapas = k_passive*(SLo - SLrest)^gamma "Passive tension [mmHg]";
+
+              // Active forces could not go negative
+              Real sigmaact=k_act*starlingFactor_1*starlingFactor_2 "Active tension [mmHg]";
+
+              Real starlingFactor = (SL - SLrest)*(SLo  - SL)/LSEiso;
+              parameter Real starlingFactor_exp =  1;
+              Real starlingFactor_1 = starlingFactor_1_base^starlingFactor_exp;
+              Real starlingFactor_1_base = (SL - SLrest)/LSEiso;
+              Real starlingFactor_2 = (SLo  - SL);
+              // (SL - SLrest)
+            //   Real debug_SL = (SL - SLrest);
+            //   Real debug_SLo = (SLo - SL);
+              // Total forces
+              Real sigmaM=sigmaact + sigmapas "Total tension [mmHg]";
+              // equilibrium of forces at junction circle already in base class
+
+            equation
+            //   sigma_act_maxAct = sigma_act*(1 + sigma_act_coeff*(1 - phi0));
+
+              // der(C) = dC;
+            //   C =D;
+              der(SL) = dSL;
+
+              Tm = (Vw*sigmaM/(2*Am))*(1 + (z^2)/3 + (z^4)/5);
+
+                annotation (Dialog(group="IO"),
+                          Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={
+                    Ellipse(
+                      extent={{-72,80},{80,-72}},
+                      fillColor={162,29,33},
+                      fillPattern=FillPattern.Solid,
+                      pattern=LinePattern.None),
+                    Ellipse(
+                      extent={{-46,54},{54,-46}},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      pattern=LinePattern.None),
+                    Polygon(
+                      points={{2,-2},{-20,80},{100,80},{100,-82},{20,-80},{2,-2}},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      lineColor={0,0,0})}),                                  Diagram(
+                    coordinateSystem(preserveAspectRatio=false)));
+            end FixedVentricleWallIO;
+
+            model FixedVentricles_TSIO
+              "Partial ventricles for the TriSeg model variants"
+              //  extends ADAN_main.Components.Subsystems.Heart.Auxiliary.partialVentricles;
+             // outer Settings settings annotation (Placement(transformation(
+                   //   extent={{-100,80},{-80,100}})));
+
+              replaceable VentricleWall_LumensSimpleEDPVR21_IO LV_wall(
+                xm=xm_LV,
+                ym=ym,
+                Amref=1) annotation (Placement(transformation(extent={{-10,30},
+                        {10,50}})));
+              replaceable VentricleWall_LumensSimpleEDPVR21_IO SEP_wall(
+                xm=xm_SEP,
+                ym=ym,
+                Amref=1) annotation (Placement(transformation(extent={{-10,-10},
+                        {10,10}})));
+              replaceable VentricleWall_LumensSimpleEDPVR21_IO RV_wall(
+                xm=xm_RV,
+                ym=ym,
+                Amref=1) annotation (Placement(transformation(extent={{-10,-50},
+                        {10,-30}})));
+              Real _P_LV annotation (HideResult=true);
+              Real _P_RV annotation (HideResult=true);
+              Real _V_LV annotation (HideResult=true);
+              Real _V_RV annotation (HideResult=true);
+
+              // conversion to SI units
+              Physiolibrary.Types.Volume V_LV(
+                start=200e-6,
+                fixed=true) = 80e-6
+                annotation (Dialog(group="IO"));
+              Physiolibrary.Types.Volume V_RV(start=200e-6, fixed=true) = 60e-6
+                annotation (Dialog(group="IO"));
+              Physiolibrary.Types.Pressure P_LV;
+              Physiolibrary.Types.Pressure P_RV;
+
+              Real ptrans_LV=2*LV_wall.Tx/ym annotation (HideResult=true);
+              Real ptrans_RV=2*RV_wall.Tx/ym annotation (HideResult=true);
+
+              Real xm_LV(start=-4.6627) "LV heart geometry variable, cm";
+              Real xm_SEP(start=2.90348) "septum heart geometry variable, cm";
+              Real xm_RV(start=6.26344) "RV heart geometry variable, cm";
+              Real ym(start=3.50013) "Heart geometry variable, cm";
+
+              Real e;
+              parameter Real eps=1e-6;
+
+              Real Tysq=-1/ym;
+             // Real AmrefRV( start = 80);
+            //  Real AmrefRV_unknwon=AmrefRV "midwall reference surface area, cm^2";
+            equation
+             // der(AmrefRV) = RV_wall.Am - AmrefRV;
+
+              V_LV =_V_LV*Constants.ml2SI;
+              V_RV =_V_RV*Constants.ml2SI;
+              P_LV=_P_LV*Constants.mmHg2SI;
+              P_RV=_P_RV*Constants.mmHg2SI;
+
+              _P_LV = -ptrans_LV;
+              _P_RV = +ptrans_RV;
+
+              //   // TriSeg
+              // _V_LV = - 0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm - LV_wall.Vm;
+              LV_wall.Vm = -0.5*LV_wall.Vw - 0.5*SEP_wall.Vw + SEP_wall.Vm - _V_LV;
+
+              // _V_RV = - 0.5*RV_wall.Vw - 0.5*SEP_wall.Vw - SEP_wall.Vm + RV_wall.Vm;
+              RV_wall.Vm = _V_RV + 0.5*RV_wall.Vw + 0.5*SEP_wall.Vw + SEP_wall.Vm;
+
+              // not as in paper though, but same as in CircAdapt Matlab routine
+              // Lv.Vm= Sv.Vm-Lv.V-0.5*(Lv.VWall+Sv.VWall);
+              // Rv.Vm= Sv.Vm+Rv.V+0.5*(Sv.VWall+Rv.VWall);
+
+              0 = (LV_wall.Tx + SEP_wall.Tx + RV_wall.Tx);
+
+              // This workaround needed because direct enforcement of equality of radial tensions led to numerical crashes in some cases
+              e = (LV_wall.Ty + SEP_wall.Ty + RV_wall.Ty + Tysq);
+              der(LV_wall.ym)*eps = -e;
+
+                annotation (Dialog(group="IO"),
+                          Icon(graphics={
+                              Bitmap(extent={{100,-100},{-100,100}}, fileName=
+                          "modelica://Physiolibrary/Resources/Icons/komoraSrdce.png",
+                      origin={14,22},
+                      rotation=270),
+                              Bitmap(extent={{-106,-100},{106,100}}, fileName=
+                          "modelica://Physiolibrary/Resources/Icons/komoraSrdce.png",
+                      origin={18,-40},
+                      rotation=270)}), experiment(
+                  StopTime=10,
+                  Tolerance=1e-05,
+                  __Dymola_Algorithm="Dassl"));
+            end FixedVentricles_TSIO;
+
+            model VentricleWall_LumensSimpleEDPVR21_IO
+              "Lumens model, but with driving directly the mechanical activation,and estimated fit of passive and active tensions"
+              input Real xm annotation (Dialog(group="Inputs"));
+              input Real ym annotation (Dialog(group="Inputs"));
+              Real D = 0
+                "Connector of driving function input signal. It might be calcium concentration or whatever appropriate."
+                annotation (Dialog(group="IO"));
+
+              Real Vw=0 "Heart wall volumes (mL)" annotation (Dialog(group="IO"));
+              Real Amref=0 "midwall reference surface area, cm^2"
+                annotation (Dialog(group="IO"));
+              parameter Real Lsref=1.9 " Resting SL, um";
+
+              // experimentally moved from child class - Its a bug that it must be here, should be only in LumensSimple
+              parameter Real L0=1.814 "micron";
+              Real k_passive=25 "mmHg / um" annotation (Dialog(group="IO"));
+
+              parameter Real LSEiso=0.04 "Length of isometrically stressed series elastic element [micron]";
+              parameter Real SLrest=1.51 "microns";
+              // Collagen force
+              parameter Real SLcollagen=2.25 "threshold for collagen activation, [um]";
+              parameter Real PConcollagen=0.01 "contriubtion of collagen [1]";
+              parameter Real PExpcollagen=70 "contriubtion of collagen [1]";
+              parameter Physiolibrary.Types.Fraction contractilityFraction=1;
+
+              Real Tm "Represenattive midwall tension [mmHg.cm]";
+              Real Tx=Tm*2*xm*ym/(xm^2 + ym^2) "Axial midwall component";
+              Real Ty=Tm*(-xm^2 + ym^2)/(xm^2 + ym^2) "Radial midwall component";
+              // ventricular mechanics
+              Real Vm=(Modelica.Constants.pi/6)*xm*(xm^2 + 3*ym^2) "Volume of spherical cap, formed by midwall surface of wall segment";
+              Real Am=Modelica.Constants.pi*(xm^2 + ym^2) "Midwall surface area of curved wall segment";
+              Real Cm=2*xm/(xm^2 + ym^2) "Curvature of midwall surface (reciprocal of radius) ";
+
+              Real z=3*Cm*Vw/(2*Am) "Ratio of wall thickness to midwall radius of curvature of curved wall segment";
+              Real epsf=(1/2)*log(Am/Amref) - (1/12)*z^2 - 0.019*z^4 "Natural myofiber strain";
+              Real SLo(nominal=1e-6) = Lsref*exp(epsf) "Sarcomere length, um";
+              Real SL(nominal=1e-6, start=2.3) "Length of sarcomere contractile element, um";
+
+
+              parameter Real vmax=7 "Sarcomere shortening velocity with zero load micron/sec";
+
+              // Sliding velocities -- Eq. (B2) Lumens et al.
+              Real dSL=((SLo - SL)/LSEiso - 1)*vmax;
+
+              Real k_act=1 annotation (Dialog(group="IO"));
+              constant Real mmHg2SI = 1/133.322 "mmHg conversion";
+              parameter Real gamma = 6;
+              Real sigmapas = k_passive*(SLo - SLrest)^gamma "Passive tension [mmHg]";
+
+              // Active forces could not go negative
+              Real sigmaact=max(0, contractilityFraction*D*k_act*starlingFactor_1*starlingFactor_2) "Active tension [mmHg]";
+
+              Real starlingFactor = (SL - SLrest)*(SLo  - SL)/LSEiso;
+              parameter Real starlingFactor_exp =  1;
+              Real starlingFactor_1 = starlingFactor_1_base^starlingFactor_exp;
+              Real starlingFactor_1_base = (SL - SLrest)/LSEiso;
+              Real starlingFactor_2 = (SLo  - SL);
+              // Total forces
+              Real sigmaM=sigmaact + sigmapas "Total tension [mmHg]";
+              // equilibrium of forces at junction circle already in base class
+
+            equation
+
+              der(SL) = dSL;
+
+              Tm = (Vw*sigmaM/(2*Am))*(1 + (z^2)/3 + (z^4)/5);
+
+              annotation (Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={
+                    Ellipse(
+                      extent={{-72,80},{80,-72}},
+                      fillColor={162,29,33},
+                      fillPattern=FillPattern.Solid,
+                      pattern=LinePattern.None),
+                    Ellipse(
+                      extent={{-46,54},{54,-46}},
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      pattern=LinePattern.None),
+                    Polygon(
+                      points={{2,-2},{-20,80},{100,80},{100,-82},{20,-80},{2,-2}},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      lineColor={0,0,0})}),                                  Diagram(
+                    coordinateSystem(preserveAspectRatio=false)),
+                          Icon(coordinateSystem(preserveAspectRatio=false),
+                    graphics={Text(
+                      extent={{-80,-20},{62,40}},
+                      lineColor={0,0,0},
+                      pattern=LinePattern.None,
+                      fillColor={255,255,255},
+                      fillPattern=FillPattern.Solid,
+                      textString="Ls")}),                                    Diagram(
+                    coordinateSystem(preserveAspectRatio=false)));
+            end VentricleWall_LumensSimpleEDPVR21_IO;
           end TriSegMechanics_components;
 
           model Driving_Smith
@@ -11852,6 +12126,65 @@ type"),       Text(
           end PericardiumPressure;
 
         end Auxiliary;
+
+        package Data
+          model EDPVRnorm
+            "Normalized End diastolic pressure volume relationship from Klotz 2006 (10.1152/ajpheart.01240.2005)"
+            Physiolibrary.Types.RealIO.PressureInput pressure = EDP if not useVolumeInput
+             annotation (Placement(transformation(extent={{-120,40},{-80,80}}),
+                  iconTransformation(extent={{-120,40},{-80,80}})));
+
+            Physiolibrary.Types.RealIO.PressureOutput pressureOut = EDP if useVolumeInput
+             annotation (Placement(transformation(extent={{-120,60},{-80,100}}),
+                  iconTransformation(extent={{-120,60},{-80,100}})));
+
+            Physiolibrary.Types.RealIO.VolumeInput volume = EDV if useVolumeInput
+              annotation (Placement(transformation(extent={{-120,-80},{-80,-40}}),
+                  iconTransformation(extent={{-120,-80},{-80,-40}})));
+
+            Physiolibrary.Types.RealIO.VolumeOutput volumeOut = EDV if not useVolumeInput
+              annotation (Placement(transformation(extent={{-120,-60},{-80,-20}}),
+                  iconTransformation(extent={{-120,-60},{-80,-20}})));
+
+          constant Physiolibrary.Types.Pressure mmHg2SI = 133.322;
+          constant Physiolibrary.Types.Volume ml2SI = 1e-6;
+          parameter Physiolibrary.Types.Volume V_m=0.00015;
+          parameter Physiolibrary.Types.Pressure P_m=1066.57909932;
+          parameter Real k = 0.6 - 0.006*P_m/mmHg2SI annotation (Dialog(enable=false));
+          parameter Physiolibrary.Types.Volume V0 = k*V_m annotation (Dialog(enable=false));
+          Physiolibrary.Types.Volume V30;
+          //parameter Physiolibrary.Types.Volume V30=V0 + (V_m_n - V0)/((P_m/A_n/mmHg2SI)^(1/B_n)) annotation (Dialog(enable=false));
+          Real V_m_n = (V_m - V0)/(V30-V0) annotation (Dialog(enable=false));
+          Physiolibrary.Types.Volume EDV;
+          Real _EDV_n = (EDV - V0)/(V30 - V0);
+          Physiolibrary.Types.Pressure EDP;
+          Real _EDP = max(0, EDP/mmHg2SI);
+          parameter Real A_n = 28.2;
+          parameter Real B_n = 2.79;
+          parameter Boolean useVolumeInput = false;
+
+          equation
+           P_m = mmHg2SI * A_n * (V_m_n)^B_n;
+
+            _EDP = A_n*max(0, _EDV_n)^(B_n);
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)));
+          end EDPVRnorm;
+
+          model EDPVRtest
+            EDPVRnorm eDPVRnorm
+              annotation (Placement(transformation(extent={{-10,-6},{10,14}})));
+            Modelica.Blocks.Sources.Ramp Pressure(height=1333.22*4, duration=1)
+              annotation (Placement(transformation(extent={{-70,2},{-50,22}})));
+          equation
+            connect(Pressure.y, eDPVRnorm.pressure) annotation (Line(points={{-49,12},{-16,
+                    12},{-16,10},{-10,10}}, color={0,0,127}));
+            annotation (
+              Icon(coordinateSystem(preserveAspectRatio=false)),
+              Diagram(coordinateSystem(preserveAspectRatio=false)),
+              experiment(Tolerance=1e-07, __Dymola_Algorithm="Cvode"));
+          end EDPVRtest;
+        end Data;
 
         package Testers
           extends Modelica.Icons.ExamplesPackage;
@@ -12764,7 +13097,9 @@ type"),       Text(
           end TestEDPVR_fit_HFpEF3;
 
           model TestEDPVR_fit_scaled "With scaled ventricles"
-            extends TestEDPVR_fit(ventricles(
+            extends TestEDPVR_fit(
+              V_RV_start=5e-05,
+              volume_start=5e-05, ventricles(
                 redeclare model VentricleWall =
                     ADAN_main.Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimpleEDPVR21,
                 LV_wall(Vw=parameterEstimation.Vw_lv*1e6, Amref=parameterEstimation.Amref_lv*1e4,
@@ -12946,6 +13281,874 @@ type"),       Text(
               V_m=0.000125,
               volume_start=V_m/2);
           end TestEDPVR_fit_scaled_resize;
+
+          model ParameterEstimation2
+            parameter Physiolibrary.Types.Volume EDV_lv=0.000125;
+            parameter Physiolibrary.Types.Volume EDV_rv=0.000125;
+
+            parameter Physiolibrary.Types.Pressure EDP_lv=1333.22387415;
+            parameter Physiolibrary.Types.Pressure EDP_rv=1333.22387415;
+
+            parameter Physiolibrary.Types.Pressure ESP_lv=16665.298426875;
+            parameter Physiolibrary.Types.Pressure ESP_rv=3999.67162245;
+            constant Real pi = Modelica.Constants.pi;
+
+            // EDPVR parameters
+            parameter Real gamma = 6.0;
+            parameter Real R_systolicDisplacement = 0.8;
+            // Sarcomere length parameters (convert from µm to m)
+            parameter Physiolibrary.Types.Length Lsref=2*1e-6;
+            parameter Physiolibrary.Types.Length Lsc0=1.51*1e-6;
+            parameter Physiolibrary.Types.Length Lse_iso=0.04*1e-6;
+
+          // Ventricular chamber radius
+          Real r_LV_and_SEP = (eDPVRnorm.V0 * 3 / (4* pi))^(1/3);
+          //Real r_RV;// =         (eDPVRnorm.V0 * 3 / (4* pi))^(1/3);
+
+          // Midwall reference surface area
+           Physiolibrary.Types.Area Amref_LV_and_SEP = 4 * pi * r_LV_and_SEP^2;
+          //Real Am_RV =            4 * pi * r_RV^2;
+
+           Physiolibrary.Types.Area Amref_lv =  Amref_LV_and_SEP * 2/3; // Assume LV is 2/3 of LV+SEP
+           Physiolibrary.Types.Area Amref_sep = Amref_LV_and_SEP * 1/3; // Assume SEP is 1/3 of LV+SEP
+           Physiolibrary.Types.Area Amref_rv( start = 0.01) = Amref_LV_and_SEP*0.8;// = Am_RV;
+          // Real f_amrefRv = Am_RV/Amref_rv;
+          // Real f_amrefRvSqrt = sqrt(Am_RV)/sqrt(Amref_rv);
+          // Real f_rRv = r_RV/r_RV_est;
+          // Real r_RV_est;
+
+
+          ////   Calculate patient-specific midwall volume (Vw) for LV, SEP, and RV
+
+          // Ventricle radius (chamber radius (r) + wall thickness (h)) where h is
+          // from XXX
+          Real r_LV_and_SEP_d = (EDV_lv * 3 / (4* pi))^(1/3);
+          parameter Modelica.Units.SI.Thickness h_LV = 7 * 1e-3;
+          Real r_h_LV_and_SEP_d = r_LV_and_SEP + h_LV; // m
+          //Real r_h_RV =         r_RV + 2 * 1e-3; //m
+
+          // Ventricle volume (chamber + midwall)
+          Physiolibrary.Types.Volume Vw_chamber_LV_and_SEP = 4/3 * pi * r_h_LV_and_SEP_d^3;
+          //Real Vw_chamber_RV =         4/3 * pi * r_h_RV^3;
+
+          // Ventricular midwall volume
+          Physiolibrary.Types.Volume Vw_LV_and_SEP = Vw_chamber_LV_and_SEP - EDV_lv;
+          //Real Vw_RV =         Vw_chamber_RV - EDV_rv;
+
+          Physiolibrary.Types.Volume Vw_lv =  Vw_LV_and_SEP * 2/3; // Assume LV is 2/3 of LV+SEP
+          Physiolibrary.Types.Volume Vw_sep = Vw_LV_and_SEP * 1/3; // Assume SEP is 1/3 of LV+SEP
+          Physiolibrary.Types.Volume Vw_rv(start = 5e-6); //Vw_RV
+
+          ////   Approximations for initial displacements in diastole
+
+          // Diameter (m)
+          Real d_LV_and_SEP_d = 2 * r_LV_and_SEP_d;
+          Real r_RV_d = (EDV_rv * 3 / (4* pi))^(1/3);
+          Real d_RV =         2 * r_RV_d;
+
+          // Displacements (m)
+          Real xm_lv_d =  d_LV_and_SEP_d * 2/3; // Assume LV is 2/3 of LV+SEP
+          // Real xm_sep_d = d_LV_and_SEP_d * 1/3; // Assume SEP is 1/3 of LV+SEP
+          Real xm_rv_d =  d_RV;
+          Real ym_d =     r_LV_and_SEP;
+
+          ////     Calculate passive stress parameters (k_pas) for LV and RV in end-diastole
+
+          // Midwall surface area (m^2)
+           Physiolibrary.Types.Area Am_lv_d =  pi * (xm_lv_d^2  + ym_d^2);
+           Physiolibrary.Types.Area Am_rv_d =  pi * (xm_rv_d^2  + ym_d^2);
+
+          // Midwall curvature (m^(-1))
+          Real Cm_lv_d =  2 * xm_lv_d  / (xm_lv_d^2  + ym_d^2);
+          Real Cm_rv_d =  2 * xm_rv_d  / (xm_rv_d^2  + ym_d^2);
+
+          // Midwall ratio (dimensionless)
+          Real z_lv_d =   3 * Cm_lv_d  * Vw_lv  / (2 * Am_lv_d);
+          Real z_rv_d =   3 * Cm_rv_d  * Vw_rv  / (2 * Am_rv_d);
+
+          // Strain (dimensionless)
+          Real eps_lv_d = 0.5 * log( Am_lv_d  / Amref_lv)   - (1/12) * z_lv_d^2  - 0.019 * z_lv_d^4;
+          Real eps_rv_d = 0.5 * log( Am_rv_d  / Amref_rv)   - (1/12) * z_rv_d^2  - 0.019 * z_rv_d^4;
+
+          // Instantaneous sarcomere length (um)
+          Real Ls_lv_d =  Lsref * exp(eps_lv_d);
+          Real Ls_rv_d =  Lsref * exp(eps_rv_d);
+
+          // Passive stress
+          Real sigma_pas_lv_d = ((Ls_lv_d - Lsc0)/1e-6)^gamma;
+          Real sigma_pas_rv_d = ((Ls_rv_d - Lsc0)/1e-6)^gamma;
+
+          // Dimensionless combination function
+          Real Gamma_lv_d = -(2 / 3) * z_lv_d * (1 + (1 / 3) * z_lv_d^2 + (1 / 5) * z_lv_d^4);
+          Real Gamma_rv_d = -(2 / 3) * z_rv_d * (1 + (1 / 3) * z_rv_d^2 + (1 / 5) * z_rv_d^4);
+
+          // Passive stress scaling parameters (Pa)
+          Physiolibrary.Types.Pressure k_pas_lv = (EDP_lv) / (Gamma_lv_d * sigma_pas_lv_d);
+          Physiolibrary.Types.Pressure k_pas_rv = (EDP_rv) / (Gamma_rv_d * sigma_pas_rv_d);
+
+          ////     Calculate active stress parameters (k_act) for LV and RV in end-systole
+          //
+          // Assume end-systolic displacements are 80// of end-diastolic values
+          // Real xm_lv_s = R_systolicDisplacement * xm_lv_d;
+          // Real xm_rv_s = R_systolicDisplacement * xm_rv_d;
+          // Real ym_s =    R_systolicDisplacement * ym_d;
+          //
+          // Midwall surface area (m^2)
+          // Real Am_lv_s =  pi * (xm_lv_s^2  + ym_s^2);
+          // Real Am_rv_s =  pi * (xm_rv_s^2  + ym_s^2);
+          //
+          // Midwall curvature (m^(-1))
+          // Real Cm_lv_s =  - 2 * xm_lv_s  / (xm_lv_s^2  + ym_s^2);
+          // Real Cm_rv_s =  - 2 * xm_rv_s  / (xm_rv_s^2  + ym_s^2);
+          //
+          // Midwall ratio (dimensionless)
+          // Real z_lv_s =   3 * Cm_lv_s  * Vw_lv  / (2 * Am_lv_s);
+          // Real z_rv_s =   3 * Cm_rv_s  * Vw_rv  / (2 * Am_rv_s);
+          //
+          // Strain (dimensionless)
+          // Real eps_lv_s = 0.5 * log( Am_lv_s  / Amref_lv)   - (1/12) * z_lv_s^2  - 0.019 * z_lv_s^4;
+          // Real eps_rv_s = 0.5 * log( Am_rv_s  / Amref_rv)   - (1/12) * z_rv_s^2  - 0.019 * z_rv_s^4;
+          //
+          // Instantaneous sarcomere length (um)
+          // Real Ls_lv_s =  Lsref * exp(eps_lv_s);
+          // Real Ls_rv_s =  Lsref * exp(eps_rv_s);
+          //
+          // Activation function
+          // Real y_v = 1; // set to 1 in systole
+          //
+          // Active stress
+          // Real sigma_act_lv_s = y_v * abs(Ls_lv_s  - Lsc0) / 1e-6;
+          // Real sigma_act_rv_s = y_v * abs(Ls_rv_s  - Lsc0) / 1e-6;
+          //
+          // Dimensionless combination function
+          // Real Gamma_lv_s = - (2 / 3) * z_lv_s * (1 + (1 / 3) * z_lv_s^2 + (1 / 5) * z_lv_s^4);
+          // Real Gamma_rv_s = - (2 / 3) * z_rv_s * (1 + (1 / 3) * z_rv_s^2 + (1 / 5) * z_rv_s^4);
+          //
+          // Active stress scaling parameters (Pa)
+          // Physiolibrary.Types.Pressure k_act_lv = (ESP_lv) / (Gamma_lv_s * sigma_act_lv_s);
+          // Physiolibrary.Types.Pressure k_act_rv = (ESP_rv) / (Gamma_rv_s * sigma_act_rv_s);
+            Data.EDPVRnorm eDPVRnorm(
+              V_m=EDV_lv,
+              P_m=EDP_lv,            useVolumeInput=true)
+              annotation (Placement(transformation(extent={{-60,40},{-40,60}})));
+            Modelica.Blocks.Sources.RealExpression realExpression(y=EDV_lv)
+              annotation (Placement(transformation(extent={{-96,34},{-76,54}})));
+          equation
+          //   f_amrefRvSqrt = f_rRv;
+            //k_act_rv = k_act_lv;
+            k_pas_lv = k_pas_rv;
+
+            connect(realExpression.y, eDPVRnorm.volume)
+              annotation (Line(points={{-75,44},{-60,44}}, color={0,0,127}));
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)),
+              experiment(
+                StopTime=10,
+                Tolerance=1e-08,
+                __Dymola_Algorithm="Dassl"));
+          end ParameterEstimation2;
+
+          model ParameterEstimation3
+            Auxiliary.TriSegMechanics_components.Ventricles_LumensSimpleEDPVR ventriclesV0(
+              redeclare model VentricleWall =
+                  Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimpleEDPVR21,
+              LV_wall(
+                Vw=Vw_lv/ml2m3,
+                Amref=Amref_lv/cmsq2msq,
+                k_passive=k_passive),
+              SEP_wall(
+                Vw=Vw_sep/ml2m3,
+                Amref=Amref_sep/cmsq2msq,
+                k_passive=k_passive),
+              RV_wall(
+                Vw=Vw_rv/ml2m3,
+                Amref=Amref_rv/cmsq2msq,
+                k_passive=k_passive),
+              V_LV(start=V0),
+              V_RV(start=V0))
+              annotation (Placement(transformation(extent={{34,64},{54,84}})));
+            Auxiliary.TriSegMechanics_components.Ventricles_LumensSimple ventriclesED(
+              redeclare model VentricleWall =
+                  ADAN_main.Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimpleEDPVR21,
+              LV_wall(Vw=Vw_lv/ml2m3, Amref=Amref_lv/cmsq2msq),
+              SEP_wall(Vw=Vw_sep/ml2m3, Amref=Amref_sep/cmsq2msq),
+              RV_wall(Vw=Vw_rv/ml2m3, Amref=Amref_rv/cmsq2msq),
+              V_LV(start=EDV_lv),
+              V_RV(start=EDV_rv))
+              annotation (Placement(transformation(extent={{34,30},{54,50}})));
+
+            Auxiliary.TriSegMechanics_components.Ventricles_LumensSimpleEDPVR ventriclesS(
+              redeclare model VentricleWall =
+                  ADAN_main.Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimpleEDPVR21,
+              LV_wall(Vw=Vw_lv/ml2m3, Amref=Amref_lv/cmsq2msq,
+                k_passive=k_passive),
+              SEP_wall(Vw=Vw_sep/ml2m3, Amref=Amref_sep/cmsq2msq,
+                k_passive=k_passive),
+              RV_wall(Vw=Vw_rv/ml2m3, Amref=Amref_rv/cmsq2msq,
+                k_passive=k_passive),
+              V_LV(start=EDV_lv*b),
+              V_RV(start=EDV_rv*b))
+              annotation (Placement(transformation(extent={{34,-26},{54,-6}})));
+            Physiolibrary.Types.Constants.FractionConst phi0(k=settings.phi0)
+              annotation (Placement(transformation(extent={{-74,54},{-66,62}})));
+            Modelica.Blocks.Sources.Constant const(k=0)
+              annotation (Placement(transformation(extent={{-60,30},{-40,50}})));
+            Physiolibrary.Types.Constants.PressureConst P0(k=0)
+              annotation (Placement(transformation(extent={{4,-4},{-4,4}},
+                  rotation=270,
+                  origin={-6,-20})));
+            parameter Real k_passive=25 "mmHg / um";
+          //// Heart model parameters
+            parameter Physiolibrary.Types.Volume EDV_lv=0.000125;
+            parameter Physiolibrary.Types.Volume EDV_rv=0.000125;
+
+            parameter Physiolibrary.Types.Pressure EDP_lv=1333.22387415;
+            parameter Physiolibrary.Types.Pressure EDP_rv=1333.22387415;
+
+            parameter Physiolibrary.Types.Pressure ESP_lv=16665.298426875;
+            parameter Physiolibrary.Types.Pressure ESP_rv=3999.67162245;
+            constant Real pi = Modelica.Constants.pi;
+
+            // EDPVR parameters
+            parameter Real gamma = 6.0;
+            parameter Real R_systolicDisplacement = 0.8;
+            // Sarcomere length parameters (convert from µm to m)
+            parameter Physiolibrary.Types.Length Lsref=1.9*1e-6;
+            parameter Physiolibrary.Types.Length Lsc0=1.51*1e-6;
+            parameter Physiolibrary.Types.Length Lse_iso=0.04*1e-6;
+
+          // Sarcomere length shortening velocity (convert from µm s^(-1) to m s^(-1))
+          parameter Real v_max =   7 * 1e-6;
+
+          // Unit conversion factor
+          parameter Real nu_SL = 1e6;
+
+          constant Real mmHg2Pa = 133.322;
+          constant Real ml2m3 = 1e-6;
+          constant Real cmsq2msq = 1/10000;
+          constant Real cm2m = 1/100;
+
+          //// Calculate patient-specific parameters
+          // Calculate midwall volume (Vw) and reference midwall surface area (Amref)
+          // for LV, SEP, and RV
+
+          parameter Real a = 1/3; // Assume SEP occupies 1/3 of the LV and SEP compartment volume
+
+          // Wall thickness (m) from XXX
+          parameter Modelica.Units.SI.Thickness h_LV = 8 * 1e-3;
+          parameter Modelica.Units.SI.Thickness h_RV = 2 * 1e-3;
+
+          parameter Physiolibrary.Types.Volume V0 = 70e-6;
+          parameter Physiolibrary.Types.Volume  V0_lv = V0;//EDV_lv * (0.6 - 0.006 * EDP_lv/mmHg2Pa);
+          parameter Physiolibrary.Types.Volume  V0_rv = V0;//EDV_rv * (0.6 - 0.006 * EDP_rv / mmHg2Pa);
+
+
+          // Ventricular lumen radius (m) - lumen is defined as the total volume of
+          // each individual ventricle and the septum
+          parameter Modelica.Units.SI.Radius r_l_LV_and_SEP = (V0_lv * 3 / (4* pi))^(1/3);          //Assume EDV_lv is the total volume of combined  LV and SEP
+          parameter Modelica.Units.SI.Radius r_l_RV_and_SEP = (V0_rv * 3 / (4* pi))^(1/3);    //Assume EDV_rv occupies only 2/3 of the total volume of combined RV and SEP
+
+          // Ventricular compartment radius (m) (lumen radius + h)
+          parameter Modelica.Units.SI.Radius r_c_LV_and_SEP = r_l_LV_and_SEP + h_LV; // m
+          parameter Modelica.Units.SI.Radius r_c_RV_and_SEP = r_l_RV_and_SEP + h_RV; //m
+
+          // Ventricular midwall radius (m) (lumen radius + h/2)
+          parameter Modelica.Units.SI.Radius r_w_LV_and_SEP = r_l_LV_and_SEP + (1/2) * h_LV; // m
+          parameter Modelica.Units.SI.Radius r_w_RV_and_SEP = r_l_RV_and_SEP + (1/2) * h_RV; //m
+
+          // Ventricular compartment volume (m^3)
+          parameter Physiolibrary.Types.Volume V_c_LV_and_SEP = 4/3 * pi * r_c_LV_and_SEP^3;
+          parameter Physiolibrary.Types.Volume V_c_RV_and_SEP = 4/3 * pi * r_c_RV_and_SEP^3;
+
+          // Ventricular midwall volume (m^3)
+          parameter Physiolibrary.Types.Volume Vw_LV_and_SEP = V_c_LV_and_SEP - V0_lv;
+          parameter Physiolibrary.Types.Volume Vw_RV_and_SEP = V_c_RV_and_SEP - V0_rv;
+
+          parameter Physiolibrary.Types.Volume Vw_lv =  Vw_LV_and_SEP * (1 - a);   // Assume LV  is 2/3 of LV+SEP
+          parameter Physiolibrary.Types.Volume Vw_sep = Vw_LV_and_SEP * a;         // Assume SEP is 1/3 of LV+SEP
+          parameter Physiolibrary.Types.Volume Vw_rv =  Vw_RV_and_SEP;             // Assume RV  is 2/3 of RV+SEP
+
+          // Midwall reference surface area (m^2)
+          //parameter Physiolibrary.Types.Area Am_LV_and_SEP = 60e-4; //4 * pi * r_l_LV_and_SEP^2;
+          parameter Physiolibrary.Types.Area Am_LV_and_SEP = 4 * pi * r_l_LV_and_SEP^2;
+          parameter Physiolibrary.Types.Area Am_RV_and_SEP = 4 * pi * r_l_RV_and_SEP^2;
+
+          parameter Physiolibrary.Types.Area Amref_lv =  Am_LV_and_SEP * (1 - a);
+          parameter Physiolibrary.Types.Area Amref_sep = Am_LV_and_SEP * a;
+          parameter Physiolibrary.Types.Area Amref_rv =  Am_RV_and_SEP;
+
+          //// Approximations for initial displacements in diastole
+
+          Modelica.Units.SI.Radius  r_l_LV_and_SEP_d = (EDV_lv * 3 / (4* pi))^(1/3);          //Assume EDV_lv is the total volume of combined  LV and SEP
+          Modelica.Units.SI.Radius  r_l_RV_and_SEP_d = (EDV_rv * 3 / (4* pi))^(1/3);    //Assume EDV_rv occupies only 2/3 of the total volume of combined RV and SEP
+
+          Modelica.Units.SI.Radius  r_w_LV_and_SEP_d = r_l_LV_and_SEP_d + (1/2) * h_LV; // m
+          Modelica.Units.SI.Radius  r_w_RV_and_SEP_d = r_l_RV_and_SEP_d + (1/2) * h_RV; //m
+
+          // Diameter (m)
+          Modelica.Units.SI.Diameter d_LV_and_SEP = 2 * r_w_LV_and_SEP_d;
+          Modelica.Units.SI.Diameter d_RV_and_SEP = 2 * r_w_RV_and_SEP_d;
+
+          parameter Real b = 0.8;
+          Real theta_LV = asin(r_w_RV_and_SEP / sqrt(r_w_RV_and_SEP^2 + r_w_LV_and_SEP^2));
+
+          // Physiolibrary.Types.Length ym_d =     0.03; //r_w_LV_and_SEP * sin(theta_LV); //0.03;//r_w_RV_and_SEP * r_w_LV_and_SEP / sqrt(r_w_RV_and_SEP^2 + r_w_LV_and_SEP^2); //r_w_RV_and_SEP * sin(theta_RV);
+          // Physiolibrary.Types.Length xm_sep_d = ym_d * tan(b * theta_LV);
+          // Physiolibrary.Types.Length xm_lv_d =  d_LV_and_SEP - xm_sep_d;
+          // Physiolibrary.Types.Length xm_rv_d =  d_RV_and_SEP - xm_sep_d; //ym_d * tan(b * (pi/2 - theta_LV));
+
+            Physiolibrary.Types.Length ym_d=ventriclesED.ym*cm2m;
+            Physiolibrary.Types.Length xm_sep_d=ventriclesED.xm_SEP*cm2m;
+            Physiolibrary.Types.Length xm_lv_d=abs(ventriclesED.xm_LV*cm2m);
+            Physiolibrary.Types.Length xm_rv_d=abs(ventriclesED.xm_RV*cm2m);
+
+
+          // // Displacements (m)
+          // xm_lv_d  = d_LV_and_SEP * 2/3; // Assume LV is 2/3 of LV+SEP
+          // xm_sep_d = d_LV_and_SEP * 1/3; // Assume SEP is 1/3 of LV+SEP
+          // xm_rv_d  = d_RV_and_SEP * .85;
+          // ym_d     = r_c_RV_and_SEP * .7;
+
+          //// Calculate passive stress parameters (k_pas) for LV and RV in end-diastole
+
+          // Midwall surface area (m^2)
+          Real Am_lv_d =  pi * (xm_lv_d^2  + ym_d^2);
+          Real Am_rv_d =  pi * (xm_rv_d^2  + ym_d^2);
+
+          // Midwall curvature (m^(-1))
+          Real Cm_lv_d =  -2 * xm_lv_d  / (xm_lv_d^2  + ym_d^2);
+          Real Cm_rv_d =  -2 * xm_rv_d  / (xm_rv_d^2  + ym_d^2);
+
+          // Midwall ratio (dimensionless)
+          Real z_lv_d =   3 * Cm_lv_d  * Vw_lv  / (2 * Am_lv_d);
+          Real z_rv_d =   3 * Cm_rv_d  * Vw_rv  / (2 * Am_rv_d);
+
+          // Strain (dimensionless)
+          Real eps_lv_d = 0.5 * log( Am_lv_d  / Amref_lv)   - (1/12) * z_lv_d^2  - 0.019 * z_lv_d^4;
+          Real eps_rv_d = 0.5 * log( Am_rv_d  / Amref_rv)   - (1/12) * z_rv_d^2  - 0.019 * z_rv_d^4;
+
+          // Instantaneous sarcomere length (um)
+          Real Ls_lv_d =  Lsref * exp(eps_lv_d);
+          Real Ls_rv_d =  Lsref * exp(eps_rv_d);
+
+          // Passive stress
+          Real sigma_pas_lv_d = (nu_SL*(Ls_lv_d - Lsc0))^gamma;
+          Real sigma_pas_rv_d = (nu_SL*(Ls_rv_d - Lsc0))^gamma;
+
+          // Dimensionless combination function
+          Real Gamma_lv_d = -(2 / 3) * z_lv_d * (1 + (1 / 3) * z_lv_d^2 + (1 / 5) * z_lv_d^4);
+          Real Gamma_rv_d = -(2 / 3) * z_rv_d * (1 + (1 / 3) * z_rv_d^2 + (1 / 5) * z_rv_d^4);
+
+          // Passive stress scaling parameters (kPa)
+          Real k_pas_lv = EDP_lv / (Gamma_lv_d * sigma_pas_lv_d);
+          Real k_pas_rv = EDP_rv / (Gamma_rv_d * sigma_pas_rv_d);
+
+          //// Calculate active stress parameters (k_act) for LV and RV in end-systole
+
+          // Assume end-systolic displacements are 80// of end-diastolic values
+          Real xm_lv_s = 0.8* xm_lv_d;
+          Real xm_rv_s = 0.8* xm_rv_d;
+          Real ym_s =    0.8* ym_d;
+
+          // Midwall surface area (m^2)
+          Real Am_lv_s =  pi * (xm_lv_s^2  + ym_s^2);
+          Real Am_rv_s =  pi * (xm_rv_s^2  + ym_s^2);
+
+          // Midwall curvature (m^(-1))
+          Real Cm_lv_s =  - 2 * xm_lv_s  / (xm_lv_s^2  + ym_s^2);
+          Real Cm_rv_s =  - 2 * xm_rv_s  / (xm_rv_s^2  + ym_s^2);
+
+          // Midwall ratio (dimensionless)
+          Real z_lv_s =   3 * Cm_lv_s  * Vw_lv  / (2 * Am_lv_s);
+          Real z_rv_s =   3 * Cm_rv_s  * Vw_rv  / (2 * Am_rv_s);
+
+          // Strain (dimensionless)
+          Real eps_lv_s = 0.5 * log( Am_lv_s  / Amref_lv)   - (1/12) * z_lv_s^2  - 0.019 * z_lv_s^4;
+          Real eps_rv_s = 0.5 * log( Am_rv_s  / Amref_rv)   - (1/12) * z_rv_s^2  - 0.019 * z_rv_s^4;
+
+          // Instantaneous sarcomere length (um)
+          Real Ls_lv_s =  Lsref * exp(eps_lv_s);
+          Real Ls_rv_s =  Lsref * exp(eps_rv_s);
+
+          // Activation function
+          Real y_v = 1; // set to 1 in systole
+
+          // Active stress
+          Real sigma_act_lv_s = y_v * abs(Ls_lv_s  - Lsc0) / 1e-6;
+          Real sigma_act_rv_s = y_v * abs(Ls_rv_s  - Lsc0) / 1e-6;
+
+          // Dimensionless combination function
+          Real Gamma_lv_s = - (2 / 3) * z_lv_s * (1 + (1 / 3) * z_lv_s^2 + (1 / 5) * z_lv_s^4);
+          Real Gamma_rv_s = - (2 / 3) * z_rv_s * (1 + (1 / 3) * z_rv_s^2 + (1 / 5) * z_rv_s^4);
+
+          // Active stress scaling parameters (kPa)
+          Real k_act_lv = ESP_lv / (Gamma_lv_s * sigma_act_lv_s);
+          Real k_act_rv = ESP_rv / (Gamma_rv_s * sigma_act_rv_s);
+
+            Data.EDPVRnorm eDPVRnorm(
+              V_m=EDV_lv,
+              P_m=EDP_lv,
+              useVolumeInput=true)
+              annotation (Placement(transformation(extent={{38,-62},{58,-42}})));
+            Modelica.Blocks.Sources.RealExpression realExpression
+              annotation (Placement(transformation(extent={{-14,-68},{6,-48}})));
+          equation
+            connect(ventriclesED.phi_input, phi0.y)
+              annotation (Line(points={{44,50},{44,58},{-65,58}}, color={0,0,127}));
+            connect(const.y, ventriclesED.t0) annotation (Line(points={{-39,40},{-32,40},{
+                    -32,42},{34,42}}, color={0,0,127}));
+            connect(const.y, ventriclesED.frequency) annotation (Line(points={{-39,40},{-22,
+                    40},{-22,36},{34,36}}, color={0,0,127}));
+            connect(const.y, ventriclesED.cardiac_cycle) annotation (Line(points={{-39,40},
+                    {-22,40},{-22,30},{34,30}}, color={0,0,127}));
+            connect(ventriclesED.thoracic_pressure_input, P0.y) annotation (Line(points={{44,30},
+                    {44,14},{-6,14},{-6,-15}},        color={0,0,127}));
+            connect(ventriclesS.t0, ventriclesED.t0) annotation (Line(points={{34,-14},{22,
+                    -14},{22,42},{34,42}}, color={0,0,127}));
+            connect(ventriclesS.frequency, ventriclesED.frequency) annotation (Line(
+                  points={{34,-20},{20,-20},{20,36},{34,36}}, color={0,0,127}));
+            connect(ventriclesS.cardiac_cycle, ventriclesED.cardiac_cycle) annotation (
+                Line(points={{34,-26},{18,-26},{18,30},{34,30}}, color={0,0,127}));
+            connect(ventriclesS.phi_input, ventriclesED.phi_input)
+              annotation (Line(points={{44,-6},{44,50}}, color={0,0,127}));
+            connect(ventriclesS.thoracic_pressure_input, P0.y) annotation (Line(points={{44,-26},
+                    {44,14},{-6,14},{-6,-15}},               color={0,0,127}));
+            connect(ventriclesV0.t0, ventriclesED.t0) annotation (Line(points={{34,76},{18,
+                    76},{18,42},{34,42}}, color={0,0,127}));
+            connect(ventriclesV0.frequency, ventriclesED.frequency) annotation (Line(
+                  points={{34,70},{16,70},{16,36},{34,36}}, color={0,0,127}));
+            connect(ventriclesV0.cardiac_cycle, ventriclesED.cardiac_cycle) annotation (
+                Line(points={{34,64},{14,64},{14,30},{34,30}}, color={0,0,127}));
+            connect(ventriclesV0.phi_input, ventriclesED.phi_input)
+              annotation (Line(points={{44,84},{44,50}}, color={0,0,127}));
+            connect(ventriclesV0.thoracic_pressure_input, P0.y) annotation (Line(points={{44,64},
+                    {44,14},{-6,14},{-6,-15}},        color={0,0,127}));
+            connect(realExpression.y, eDPVRnorm.volume)
+              annotation (Line(points={{7,-58},{38,-58}}, color={0,0,127}));
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)),
+              experiment(
+                StartTime=60,
+                StopTime=120,
+                __Dymola_Algorithm="Dassl"));
+          end ParameterEstimation3;
+
+          model ParameterEstimation4 "Based on SLo_ED"
+            Auxiliary.TriSegMechanics_components.Ventricles_LumensSimpleEDPVR ventriclesV0(
+              redeclare model VentricleWall =
+                  Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimpleEDPVR21,
+              LV_wall(
+                Vw=Vw_lv/ml2m3,
+                Amref=Amref_lv/cmsq2msq,
+                k_passive=k_passive),
+              SEP_wall(
+                Vw=Vw_sep/ml2m3,
+                Amref=Amref_sep/cmsq2msq,
+                k_passive=k_passive),
+              RV_wall(
+                Vw=Vw_rv/ml2m3,
+                Amref=Amref_rv/cmsq2msq,
+                k_passive=k_passive),
+              V_LV(start=V0),
+              V_RV(start=V0))
+              annotation (Placement(transformation(extent={{34,64},{54,84}})));
+            Auxiliary.TriSegMechanics_components.FixedVentricles_TSIO fixedVentricles_TSIO_check(
+              LV_wall(
+                Vw=Vw_lv/ml2m3,
+                Amref=Amref_lv/cmsq2msq,
+                k_passive=k_passive),
+              SEP_wall(
+                Vw=Vw_sep/ml2m3,
+                Amref=Amref_sep/cmsq2msq,
+                k_passive=k_passive),
+              RV_wall(
+                Vw=Vw_rv/ml2m3,
+                Amref=Amref_rv/cmsq2msq,
+                k_passive=k_passive),
+              V_LV=EDV_lv,
+              V_RV=EDV_rv)
+              annotation (Placement(transformation(extent={{80,80},{100,100}})));
+
+            Auxiliary.TriSegMechanics_components.Ventricles_LumensSimple ventriclesED(
+              redeclare model VentricleWall =
+                  ADAN_main.Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimpleEDPVR21,
+              LV_wall(Vw=Vw_lv/ml2m3, Amref=Amref_lv/cmsq2msq),
+              SEP_wall(Vw=Vw_sep/ml2m3, Amref=Amref_sep/cmsq2msq),
+              RV_wall(Vw=Vw_rv/ml2m3, Amref=Amref_rv/cmsq2msq),
+              V_LV(start=EDV_lv),
+              V_RV(start=EDV_rv))
+              annotation (Placement(transformation(extent={{34,30},{54,50}})));
+
+            Auxiliary.TriSegMechanics_components.Ventricles_LumensSimpleEDPVR ventriclesS(
+              redeclare model VentricleWall =
+                  ADAN_main.Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimpleEDPVR21,
+              LV_wall(Vw=Vw_lv/ml2m3, Amref=Amref_lv/cmsq2msq,
+                k_passive=k_passive),
+              SEP_wall(Vw=Vw_sep/ml2m3, Amref=Amref_sep/cmsq2msq,
+                k_passive=k_passive),
+              RV_wall(Vw=Vw_rv/ml2m3, Amref=Amref_rv/cmsq2msq,
+                k_passive=k_passive),
+              V_LV(start=ESV_lv),
+              V_RV(start=ESV_rv))
+              annotation (Placement(transformation(extent={{36,-26},{56,-6}})));
+            Physiolibrary.Types.Constants.FractionConst phi0(k=settings.phi0)
+              annotation (Placement(transformation(extent={{-74,54},{-66,62}})));
+            Modelica.Blocks.Sources.Constant const(k=0)
+              annotation (Placement(transformation(extent={{-60,30},{-40,50}})));
+            Physiolibrary.Types.Constants.PressureConst P0(k=0)
+              annotation (Placement(transformation(extent={{4,-4},{-4,4}},
+                  rotation=270,
+                  origin={-6,-20})));
+            parameter Real SL = 2.0 "reference sarcomere length";
+            parameter Real k_passive=25 "mmHg / um";
+          //// Heart model parameters
+            parameter Physiolibrary.Types.Volume EDV_lv=0.000125;
+            parameter Physiolibrary.Types.Volume EDV_rv=0.000105;
+
+            parameter Physiolibrary.Types.Volume SV=9e-05;
+
+            parameter Physiolibrary.Types.Volume ESV_lv=EDV_lv - SV;
+            parameter Physiolibrary.Types.Volume ESV_rv=EDV_rv - SV;
+
+
+            parameter Physiolibrary.Types.Pressure EDP_lv(displayUnit="mmHg")=
+              799.934;
+            parameter Physiolibrary.Types.Pressure EDP_rv(displayUnit="mmHg")=
+              533.29;
+
+            parameter Physiolibrary.Types.Pressure ESP_lv=16665.298426875;
+            parameter Physiolibrary.Types.Pressure ESP_rv=3999.67162245;
+            constant Real pi = Modelica.Constants.pi;
+
+            // EDPVR parameters
+            parameter Real gamma = 6.0;
+            parameter Real R_systolicDisplacement = 0.8;
+            // Sarcomere length parameters (convert from µm to m)
+            parameter Physiolibrary.Types.Length Lsref=1.9*1e-6;
+            parameter Physiolibrary.Types.Length Lsc0=1.51*1e-6;
+            parameter Physiolibrary.Types.Length Lse_iso=0.04*1e-6;
+
+          // Sarcomere length shortening velocity (convert from µm s^(-1) to m s^(-1))
+          parameter Real v_max =   7 * 1e-6;
+
+          // Unit conversion factor
+          parameter Real nu_SL = 1e6;
+
+          constant Real mmHg2Pa = 133.322;
+          constant Real ml2m3 = 1e-6;
+          constant Real cmsq2msq = 1/10000;
+          constant Real cm2m = 1/100;
+
+          //// Calculate patient-specific parameters
+          // Calculate midwall volume (Vw) and reference midwall surface area (Amref)
+          // for LV, SEP, and RV
+
+          parameter Real a = 1/3; // Assume SEP occupies 1/3 of the LV and SEP compartment volume
+
+          // Wall thickness (m) from XXX
+          parameter Modelica.Units.SI.Thickness h_LV=8*1e-3;
+          parameter Modelica.Units.SI.Thickness h_RV=2*1e-3;
+
+          parameter Physiolibrary.Types.Volume V0=7e-05;
+          parameter Physiolibrary.Types.Volume  V0_lv = V0;//EDV_lv * (0.6 - 0.006 * EDP_lv/mmHg2Pa);
+          parameter Physiolibrary.Types.Volume  V0_rv = V0;//EDV_rv * (0.6 - 0.006 * EDP_rv / mmHg2Pa);
+
+          // Ventricular lumen radius (m) - lumen is defined as the total volume of
+          // each individual ventricle and the septum
+          parameter Modelica.Units.SI.Radius r_l_LV_and_SEP = (V0_lv * 3 / (4* pi))^(1/3);          //Assume EDV_lv is the total volume of combined  LV and SEP
+          parameter Modelica.Units.SI.Radius r_l_RV_and_SEP = (V0_rv * 3 / (4* pi))^(1/3);    //Assume EDV_rv occupies only 2/3 of the total volume of combined RV and SEP
+
+          // Ventricular compartment radius (m) (lumen radius + h)
+          parameter Modelica.Units.SI.Radius r_c_LV_and_SEP = r_l_LV_and_SEP + h_LV; // m
+          parameter Modelica.Units.SI.Radius r_c_RV_and_SEP = r_l_RV_and_SEP + h_RV; //m
+
+          // Ventricular midwall radius (m) (lumen radius + h/2)
+          parameter Modelica.Units.SI.Radius r_w_LV_and_SEP = r_l_LV_and_SEP + (1/2) * h_LV; // m
+          parameter Modelica.Units.SI.Radius r_w_RV_and_SEP = r_l_RV_and_SEP + (1/2) * h_RV; //m
+
+          // Ventricular compartment volume (m^3)
+          parameter Physiolibrary.Types.Volume V_c_LV_and_SEP = 4/3 * pi * r_c_LV_and_SEP^3;
+          parameter Physiolibrary.Types.Volume V_c_RV_and_SEP = 4/3 * pi * r_c_RV_and_SEP^3;
+
+          // Ventricular midwall volume (m^3)
+          parameter Physiolibrary.Types.Volume Vw_LV_and_SEP = V_c_LV_and_SEP - V0_lv;
+          parameter Physiolibrary.Types.Volume Vw_RV_and_SEP = V_c_RV_and_SEP - V0_rv;
+
+          parameter Physiolibrary.Types.Volume Vw_lv =  Vw_LV_and_SEP * (1 - a);   // Assume LV  is 2/3 of LV+SEP
+          parameter Physiolibrary.Types.Volume Vw_sep = Vw_LV_and_SEP * a;         // Assume SEP is 1/3 of LV+SEP
+          parameter Physiolibrary.Types.Volume Vw_rv =  Vw_RV_and_SEP;             // Assume RV  is 2/3 of RV+SEP
+
+          // Midwall reference surface area (m^2)
+          //parameter Physiolibrary.Types.Area Am_LV_and_SEP = 60e-4; //4 * pi * r_l_LV_and_SEP^2;
+          parameter Physiolibrary.Types.Area Am_LV_and_SEP = 4 * pi * r_l_LV_and_SEP^2;
+          parameter Physiolibrary.Types.Area Am_RV_and_SEP = 4 * pi * r_l_RV_and_SEP^2;
+
+          parameter Physiolibrary.Types.Area Amref_lv =  Am_LV_and_SEP * (1 - a);
+          parameter Physiolibrary.Types.Area Amref_sep = Am_LV_and_SEP * a;
+          parameter Physiolibrary.Types.Area Amref_rv =  Am_RV_and_SEP;
+
+          //// Approximations for initial displacements in diastole
+
+          Modelica.Units.SI.Radius  r_l_LV_and_SEP_d = (EDV_lv * 3 / (4* pi))^(1/3);          //Assume EDV_lv is the total volume of combined  LV and SEP
+          Modelica.Units.SI.Radius  r_l_RV_and_SEP_d = (EDV_rv * 3 / (4* pi))^(1/3);    //Assume EDV_rv occupies only 2/3 of the total volume of combined RV and SEP
+
+          Modelica.Units.SI.Radius  r_w_LV_and_SEP_d = r_l_LV_and_SEP_d + (1/2) * h_LV; // m
+          Modelica.Units.SI.Radius  r_w_RV_and_SEP_d = r_l_RV_and_SEP_d + (1/2) * h_RV; //m
+
+          // Diameter (m)
+          Modelica.Units.SI.Diameter d_LV_and_SEP = 2 * r_w_LV_and_SEP_d;
+          Modelica.Units.SI.Diameter d_RV_and_SEP = 2 * r_w_RV_and_SEP_d;
+
+          parameter Real b = 0.8;
+          Real theta_LV = asin(r_w_RV_and_SEP / sqrt(r_w_RV_and_SEP^2 + r_w_LV_and_SEP^2));
+
+          // Physiolibrary.Types.Length ym_d =     0.03; //r_w_LV_and_SEP * sin(theta_LV); //0.03;//r_w_RV_and_SEP * r_w_LV_and_SEP / sqrt(r_w_RV_and_SEP^2 + r_w_LV_and_SEP^2); //r_w_RV_and_SEP * sin(theta_RV);
+          // Physiolibrary.Types.Length xm_sep_d = ym_d * tan(b * theta_LV);
+          // Physiolibrary.Types.Length xm_lv_d =  d_LV_and_SEP - xm_sep_d;
+          // Physiolibrary.Types.Length xm_rv_d =  d_RV_and_SEP - xm_sep_d; //ym_d * tan(b * (pi/2 - theta_LV));
+
+            Physiolibrary.Types.Length ym_d=ventriclesED.ym*cm2m;
+            Physiolibrary.Types.Length xm_sep_d=ventriclesED.xm_SEP*cm2m;
+            Physiolibrary.Types.Length xm_lv_d=abs(ventriclesED.xm_LV*cm2m);
+            Physiolibrary.Types.Length xm_rv_d=abs(ventriclesED.xm_RV*cm2m);
+
+          // // Displacements (m)
+          // xm_lv_d  = d_LV_and_SEP * 2/3; // Assume LV is 2/3 of LV+SEP
+          // xm_sep_d = d_LV_and_SEP * 1/3; // Assume SEP is 1/3 of LV+SEP
+          // xm_rv_d  = d_RV_and_SEP * .85;
+          // ym_d     = r_c_RV_and_SEP * .7;
+
+          //// Calculate passive stress parameters (k_pas) for LV and RV in end-diastole
+
+          // Midwall surface area (m^2)
+          Real Am_lv_d =  pi * (xm_lv_d^2  + ym_d^2);
+          Real Am_rv_d =  pi * (xm_rv_d^2  + ym_d^2);
+
+          // Midwall curvature (m^(-1))
+          Real Cm_lv_d =  -2 * xm_lv_d  / (xm_lv_d^2  + ym_d^2);
+          Real Cm_rv_d =  -2 * xm_rv_d  / (xm_rv_d^2  + ym_d^2);
+
+          // Midwall ratio (dimensionless)
+          Real z_lv_d =   3 * Cm_lv_d  * Vw_lv  / (2 * Am_lv_d);
+          Real z_rv_d =   3 * Cm_rv_d  * Vw_rv  / (2 * Am_rv_d);
+
+          // Strain (dimensionless)
+          Real eps_lv_d = 0.5 * log( Am_lv_d  / Amref_lv)   - (1/12) * z_lv_d^2  - 0.019 * z_lv_d^4;
+          Real eps_rv_d = 0.5 * log( Am_rv_d  / Amref_rv)   - (1/12) * z_rv_d^2  - 0.019 * z_rv_d^4;
+
+          // Instantaneous sarcomere length (um)
+          Real Ls_lv_d =  Lsref * exp(eps_lv_d);
+          Real Ls_rv_d =  Lsref * exp(eps_rv_d);
+
+          // Passive stress
+          Real sigma_pas_lv_d = (nu_SL*(Ls_lv_d - Lsc0))^gamma;
+          Real sigma_pas_rv_d = (nu_SL*(Ls_rv_d - Lsc0))^gamma;
+
+          // Dimensionless combination function
+          Real Gamma_lv_d = -(2 / 3) * z_lv_d * (1 + (1 / 3) * z_lv_d^2 + (1 / 5) * z_lv_d^4);
+          Real Gamma_rv_d = -(2 / 3) * z_rv_d * (1 + (1 / 3) * z_rv_d^2 + (1 / 5) * z_rv_d^4);
+
+          // Passive stress scaling parameters (kPa)
+          Real k_pas_lv = EDP_lv / (Gamma_lv_d * sigma_pas_lv_d);
+          Real k_pas_rv = EDP_rv / (Gamma_rv_d * sigma_pas_rv_d);
+
+          //// Calculate active stress parameters (k_act) for LV and RV in end-systole
+
+          // Assume end-systolic displacements are 80// of end-diastolic values
+          Real xm_lv_s = 0.8* xm_lv_d;
+          Real xm_rv_s = 0.8* xm_rv_d;
+          Real ym_s =    0.8* ym_d;
+
+          // Midwall surface area (m^2)
+          Real Am_lv_s =  pi * (xm_lv_s^2  + ym_s^2);
+          Real Am_rv_s =  pi * (xm_rv_s^2  + ym_s^2);
+
+          // Midwall curvature (m^(-1))
+          Real Cm_lv_s =  - 2 * xm_lv_s  / (xm_lv_s^2  + ym_s^2);
+          Real Cm_rv_s =  - 2 * xm_rv_s  / (xm_rv_s^2  + ym_s^2);
+
+          // Midwall ratio (dimensionless)
+          Real z_lv_s =   3 * Cm_lv_s  * Vw_lv  / (2 * Am_lv_s);
+          Real z_rv_s =   3 * Cm_rv_s  * Vw_rv  / (2 * Am_rv_s);
+
+          // Strain (dimensionless)
+          Real eps_lv_s = 0.5 * log( Am_lv_s  / Amref_lv)   - (1/12) * z_lv_s^2  - 0.019 * z_lv_s^4;
+          Real eps_rv_s = 0.5 * log( Am_rv_s  / Amref_rv)   - (1/12) * z_rv_s^2  - 0.019 * z_rv_s^4;
+
+          // Instantaneous sarcomere length (um)
+          Real Ls_lv_s =  Lsref * exp(eps_lv_s);
+          Real Ls_rv_s =  Lsref * exp(eps_rv_s);
+
+          // Activation function
+          Real y_v = 1; // set to 1 in systole
+
+          // Active stress
+          Real sigma_act_lv_s = y_v * abs(Ls_lv_s  - Lsc0) / 1e-6;
+          Real sigma_act_rv_s = y_v * abs(Ls_rv_s  - Lsc0) / 1e-6;
+
+          // Dimensionless combination function
+          Real Gamma_lv_s = - (2 / 3) * z_lv_s * (1 + (1 / 3) * z_lv_s^2 + (1 / 5) * z_lv_s^4);
+          Real Gamma_rv_s = - (2 / 3) * z_rv_s * (1 + (1 / 3) * z_rv_s^2 + (1 / 5) * z_rv_s^4);
+
+          // Active stress scaling parameters (kPa)
+          Real k_act_lv = ESP_lv / (Gamma_lv_s * sigma_act_lv_s);
+          Real k_act_rv = ESP_rv / (Gamma_rv_s * sigma_act_rv_s);
+
+            Data.EDPVRnorm eDPVRnorm(
+              V_m=EDV_lv,
+              P_m=EDP_lv,
+              useVolumeInput=true)
+              annotation (Placement(transformation(extent={{38,-62},{58,-42}})));
+            Modelica.Blocks.Sources.RealExpression realExpression(y=V_LV)
+              annotation (Placement(transformation(extent={{-14,-68},{6,-48}})));
+            Auxiliary.TriSegMechanics_components.FixedVentricles_TSIO
+              fixedVentricles_TSIO_AmRef(
+              LV_wall(
+                Vw=Vw_lv/ml2m3,
+                Amref(start=Amref_lv/cmsq2msq) = AmrefLV_d,
+                k_passive=k_passive),
+              SEP_wall(
+                Vw=Vw_sep/ml2m3,
+                Amref(start=Amref_sep/cmsq2msq) = AmrefSEP_d,
+                k_passive=k_passive),
+              RV_wall(
+                Vw=Vw_rv/ml2m3,
+                Amref(start=Amref_rv/cmsq2msq) = AmrefRV_d,
+                k_passive=k_passive),
+              V_LV=EDV_lv,
+              V_RV=EDV_rv)
+              annotation (Placement(transformation(extent={{80,40},{100,60}})));
+
+            parameter Boolean sweep_AmrefSep=false annotation (Dialog(tab="Sweeps"));
+            Real AmrefLV_d;
+            Real AmrefSEP_d=if sweep_AmrefSep then (1 - time/100)*Amref_sep/cmsq2msq
+                 else Amref_sep/cmsq2msq;
+            Real AmrefRV_d;
+            Auxiliary.TriSegMechanics_components.FixedVentricles_TSIO
+              fixedVentricles_TSIO_Kpas(
+              LV_wall(
+                Vw(start=Vw_lv/ml2m3) = VwLV_d,
+                Amref(start=Amref_lv/cmsq2msq) = AmrefLV_d,
+                k_passive=k_pas_d),
+              SEP_wall(
+                Vw(start=Vw_sep/ml2m3) = VwSEP_d,
+                Amref(start=Amref_sep/cmsq2msq) = AmrefSEP_d,
+                k_passive=k_pas_d),
+              RV_wall(
+                Vw(start=Vw_rv/ml2m3) = VwRV_d,
+                Amref(start=Amref_rv/cmsq2msq) = AmrefRV_d,
+                k_passive=k_pas_d),
+              V_LV=EDV_lv,
+              V_RV=EDV_rv)
+              annotation (Placement(transformation(extent={{80,0},{100,20}})));
+            Real VwLV_d=Vw_lv/ml2m3;
+            Real VwSEP_d=Vw_sep/ml2m3;
+            Real VwRV_d;
+            Real k_pas_d;
+          //   Auxiliary.TriSegMechanics_components.FixedVentricles_TSIO
+          //     fixedVentricles_TSIO_Kact(
+          //     LV_wall(
+          //       D=D,
+          //       Vw(start=Vw_lv/ml2m3) = VwLV_s,
+          //       Amref(start=Amref_lv/cmsq2msq) = AmrefLV_d,
+          //       k_passive=k_pas,
+          //       k_act=k_act),
+          //     SEP_wall(
+          //       D=D,
+          //       Vw(start=Vw_sep/ml2m3) = VwSEP_s,
+          //       Amref(start=Amref_sep/cmsq2msq) = AmrefSEP_d,
+          //       k_passive=k_pas,
+          //       k_act=k_act_SEP),
+          //     RV_wall(
+          //       D=D,
+          //       Vw(start=Vw_rv/ml2m3) = VwRV_s,
+          //       Amref(start=Amref_rv/cmsq2msq) = AmrefRV_d,
+          //       k_passive=k_pas,
+          //       k_act=k_act),
+          //     V_LV=ESV_lv,
+          //     V_RV=ESV_rv)
+          //     annotation (Placement(transformation(extent={{80,-32},{100,-12}})));
+            Real D=1
+              "Connector of driving function input signal. It might be calcium concentration or whatever appropriate.";
+            Real k_act( start = 1e3) = if sweep_Kact then 1e4*(1 + time/100) else 1e3;
+            Real VwLV_s = Vw_lv/ml2m3;
+            Real VwSEP_s = Vw_sep/ml2m3;
+            Real VwRV_s = Vw_rv/ml2m3;
+            Real k_act_SEP = k_act;
+           parameter Boolean sweep_Kact=false annotation (Dialog(tab="Sweeps"));
+            Auxiliary.TriSegMechanics_components.FixedVentricles_TSIO fixedVentricles_TSIO_VolumeLoading(
+              LV_wall(
+                Vw=VwLV_d,
+                Amref=AmrefLV_d,
+                k_passive=k_pas_d),
+              SEP_wall(
+                Vw=VwSEP_d,
+                Amref=AmrefSEP_d,
+                k_passive=k_pas_d),
+              RV_wall(
+                Vw=VwRV_d,
+                Amref=AmrefRV_d,
+                k_passive=k_pas_d),
+              V_LV=V_LV,
+              V_RV=V_RV)
+              annotation (Placement(transformation(extent={{40,-100},{60,-80}})));
+           parameter Boolean sweep_Vol=true  annotation (Dialog(tab="Sweeps"));
+           Physiolibrary.Types.Volume V_LV = if sweep_Vol then EDV_lv * (1 + time/100) else EDV_lv;
+           Physiolibrary.Types.Volume V_RV = if sweep_Vol then EDV_rv * (1 + time/100) else EDV_rv;
+
+          equation
+            fixedVentricles_TSIO_AmRef.LV_wall.SL = SL;
+          //  fixedVentricles_TSIO_AmRef.SEP_wall.SLo = SL;
+            fixedVentricles_TSIO_AmRef.RV_wall.SL = SL;
+
+            fixedVentricles_TSIO_Kpas.P_LV = EDP_lv;
+            fixedVentricles_TSIO_Kpas.P_RV = EDP_rv;
+
+          //   fixedVentricles_TSIO_Kact.P_LV = ESP_lv;
+          //   fixedVentricles_TSIO_Kact.P_RV = ESP_rv;
+
+
+            connect(ventriclesED.phi_input, phi0.y)
+              annotation (Line(points={{44,50},{44,58},{-65,58}}, color={0,0,127}));
+            connect(const.y, ventriclesED.t0) annotation (Line(points={{-39,40},{-32,40},{
+                    -32,42},{34,42}}, color={0,0,127}));
+            connect(const.y, ventriclesED.frequency) annotation (Line(points={{-39,40},{-22,
+                    40},{-22,36},{34,36}}, color={0,0,127}));
+            connect(const.y, ventriclesED.cardiac_cycle) annotation (Line(points={{-39,40},
+                    {-22,40},{-22,30},{34,30}}, color={0,0,127}));
+            connect(ventriclesED.thoracic_pressure_input, P0.y) annotation (Line(points={{44,30},
+                    {44,14},{-6,14},{-6,-15}},        color={0,0,127}));
+            connect(ventriclesS.t0, ventriclesED.t0) annotation (Line(points={{36,-14},{22,
+                    -14},{22,42},{34,42}}, color={0,0,127}));
+            connect(ventriclesS.frequency, ventriclesED.frequency) annotation (Line(
+                  points={{36,-20},{20,-20},{20,36},{34,36}}, color={0,0,127}));
+            connect(ventriclesS.cardiac_cycle, ventriclesED.cardiac_cycle) annotation (
+                Line(points={{36,-26},{18,-26},{18,30},{34,30}}, color={0,0,127}));
+            connect(ventriclesS.phi_input, ventriclesED.phi_input)
+              annotation (Line(points={{46,-6},{46,22},{44,22},{44,50}},
+                                                         color={0,0,127}));
+            connect(ventriclesS.thoracic_pressure_input, P0.y) annotation (Line(points={{46,-26},
+                    {46,14},{-6,14},{-6,-15}},               color={0,0,127}));
+            connect(ventriclesV0.t0, ventriclesED.t0) annotation (Line(points={{34,76},{18,
+                    76},{18,42},{34,42}}, color={0,0,127}));
+            connect(ventriclesV0.frequency, ventriclesED.frequency) annotation (Line(
+                  points={{34,70},{16,70},{16,36},{34,36}}, color={0,0,127}));
+            connect(ventriclesV0.cardiac_cycle, ventriclesED.cardiac_cycle) annotation (
+                Line(points={{34,64},{14,64},{14,30},{34,30}}, color={0,0,127}));
+            connect(ventriclesV0.phi_input, ventriclesED.phi_input)
+              annotation (Line(points={{44,84},{44,50}}, color={0,0,127}));
+            connect(ventriclesV0.thoracic_pressure_input, P0.y) annotation (Line(points={{44,64},
+                    {44,14},{-6,14},{-6,-15}},        color={0,0,127}));
+            connect(realExpression.y, eDPVRnorm.volume)
+              annotation (Line(points={{7,-58},{38,-58}}, color={0,0,127}));
+            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+                  coordinateSystem(preserveAspectRatio=false)),
+              experiment(
+                StartTime=-50,
+                StopTime=90,
+                Tolerance=1e-06,
+                __Dymola_Algorithm="Dassl"));
+          end ParameterEstimation4;
         end Testers;
 
         partial model partialHeart
@@ -14883,61 +16086,6 @@ Kalecky")}), experiment(
             annotation (Line(points={{80,-54},{80,-30},{120,-30}}, color={0,0,127}));
         end Heart_TriSegMechanicsSimple_incrRes;
 
-        package Data
-          model EDPVRnorm
-            "Normalized End diastolic pressure volume relationship from Klotz 2006 (10.1152/ajpheart.01240.2005)"
-            Physiolibrary.Types.RealIO.PressureInput pressure = EDP if not useVolumeInput
-             annotation (Placement(transformation(extent={{-120,40},{-80,80}})));
-
-            Physiolibrary.Types.RealIO.PressureOutput pressureOut = EDP if useVolumeInput
-             annotation (Placement(transformation(extent={{-120,40},{-80,80}})));
-
-            Physiolibrary.Types.RealIO.VolumeInput volume = EDV if useVolumeInput
-              annotation (Placement(transformation(extent={{-120,-80},{-80,-40}})));
-
-            Physiolibrary.Types.RealIO.VolumeOutput volumeOut = EDV if not useVolumeInput
-              annotation (Placement(transformation(extent={{-120,-80},{-80,-40}})));
-
-          constant Physiolibrary.Types.Pressure mmHg2SI = 133.322;
-          constant Physiolibrary.Types.Volume ml2SI = 1e-6;
-          parameter Physiolibrary.Types.Volume V_m=0.00015;
-          parameter Physiolibrary.Types.Pressure P_m=1066.57909932;
-          parameter Real k = 0.6 - 0.006*P_m/mmHg2SI annotation (Dialog(enable=false));
-          parameter Physiolibrary.Types.Volume V0 = k*V_m annotation (Dialog(enable=false));
-          Physiolibrary.Types.Volume V30;
-          //parameter Physiolibrary.Types.Volume V30=V0 + (V_m_n - V0)/((P_m/A_n/mmHg2SI)^(1/B_n)) annotation (Dialog(enable=false));
-          Real V_m_n = (V_m - V0)/(V30-V0) annotation (Dialog(enable=false));
-          Physiolibrary.Types.Volume EDV;
-          Real _EDV_n = (EDV - V0)/(V30 - V0);
-          Physiolibrary.Types.Pressure EDP;
-          Real _EDP = max(0, EDP/mmHg2SI);
-          parameter Real A_n = 28.2;
-          parameter Real B_n = 2.79;
-          parameter Boolean useVolumeInput = false;
-
-          equation
-           P_m = mmHg2SI * A_n * (V_m_n)^B_n;
-
-            _EDP = A_n*max(0, _EDV_n)^(B_n);
-            annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
-                  coordinateSystem(preserveAspectRatio=false)));
-          end EDPVRnorm;
-
-          model EDPVRtest
-            EDPVRnorm eDPVRnorm
-              annotation (Placement(transformation(extent={{-10,-6},{10,14}})));
-            Modelica.Blocks.Sources.Ramp Pressure(height=1333.22*4, duration=1)
-              annotation (Placement(transformation(extent={{-70,2},{-50,22}})));
-          equation
-            connect(Pressure.y, eDPVRnorm.pressure) annotation (Line(points={{-49,12},{-16,
-                    12},{-16,10},{-10,10}}, color={0,0,127}));
-            annotation (
-              Icon(coordinateSystem(preserveAspectRatio=false)),
-              Diagram(coordinateSystem(preserveAspectRatio=false)),
-              experiment(Tolerance=1e-07, __Dymola_Algorithm="Cvode"));
-          end EDPVRtest;
-        end Data;
-
         model Heart_4chambers_valves "A 4-chamber surrogate model"
           extends partialHeart(
             UsePhiInput=false,
@@ -15190,6 +16338,38 @@ compliance
           connect(sa_node.t0, ventricles.t0) annotation (Line(points={{-68,40},
                   {-58,40},{-58,-8},{0,-8}}, color={0,0,127}));
         end Heart_TriSegMechanics_LumensExercise;
+
+        model Heart_TriSegMechanicsSimple_EDPVR21
+          "TriSeg with Olufsen driving and calculated EDPVR"
+          extends Heart_TriSegMechanicsSimple(ventricles(
+              redeclare model VentricleWall =
+                  ADAN_main.Components.Subsystems.Heart.Auxiliary.TriSegMechanics_components.VentricleWall_LumensSimpleEDPVR21,
+              LV_wall(Vw=parameterEstimation.Vw_lv*1e6, Amref=parameterEstimation.Amref_lv*1e4,
+                k_passive=parameterEstimation.k_pas_lv/133.322,
+                k_act=parameterEstimation.k_act_lv/133.322,
+                starlingFactor_exp=1),
+              SEP_wall(Vw=parameterEstimation.Vw_sep *1e6, Amref=parameterEstimation.Amref_sep*1e4,
+                k_passive=parameterEstimation.k_pas_lv/133.322,
+                k_act=parameterEstimation.k_act_lv/133.322,
+                starlingFactor_exp=1),
+              RV_wall(Vw=parameterEstimation.Vw_rv *1e6, Amref=parameterEstimation.Amref_rv*1e4,
+                k_passive=parameterEstimation.k_pas_rv/133.322,
+                k_act=parameterEstimation.k_act_rv/133.322,
+                starlingFactor_exp=1),
+              calciumMechanics(
+                t0_delay=1e-9,
+                t0_delay_maxAct=1e-9,
+                D_0(displayUnit="Pa/m3") = 1e-9,
+                D_0_maxAct(displayUnit="Pa/m3") = 1e-9,
+                D_A(displayUnit="Pa/m3") = 1e-9,
+                D_A_maxAct(displayUnit="Pa/m3") = 1e-9)));
+          Testers.ParameterEstimation
+                              parameterEstimation(
+            EDV_lv=0.00015,
+            EDP_lv=799.93432449,
+            Lsref(displayUnit="cm"))
+            annotation (Placement(transformation(extent={{20,80},{40,100}})));
+        end Heart_TriSegMechanicsSimple_EDPVR21;
       end Heart;
 
       package Systemic
@@ -67962,6 +69142,19 @@ P_hs_plus_dist"),
               __Dymola_Algorithm="Cvode"));
         end Test_CVS4ChC;
       end Surrogates;
+
+      package HeartVariations
+        model EDPVR21
+          extends CardiovascularSystem(redeclare
+              Components.Subsystems.Heart.Heart_TriSegMechanicsSimple_EDPVR21
+              heartComponent(UseThoracic_PressureInput=false, ventricles(
+                  calciumMechanics(
+                  t0_delay=0.1,
+                  t0_delay_maxAct=0.1,
+                  D_A=1,
+                  D_A_maxAct=1))), useAutonomousPhi(y=false));
+        end EDPVR21;
+      end HeartVariations;
     end Variations;
 
     package Experiments
