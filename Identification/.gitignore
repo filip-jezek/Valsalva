@@ -1,13 +1,43 @@
+# dsout.out
+# status
+# 	success
+# failure
+# request
+# test
+# stop
+# *.
+# debug.txt
+# dsout.out
+# *.mat
+# *.log
+# *.mo
+# *.txt
+# *.c
+# paramOut.txt
+# GenOpt.log
+# !OutputListingMain.txt
+
+*
+!*/
 schedules/
-dsout.out
-status
-success
-failure
-debug.txt
-dsout.out
-*.mat
-*.log
+.*/
+~*/
+FMU/
+debug/
+
+!*.txt
+*debug.txt
 paramOut.txt
-GenOpt.log
+buildlog.txt
+dsin.txt
+*dsin.txt
+dsout.txt
+dslog.txt
+dsfinal.txt
+_*
+*log.txt
+*Log.txt
 OutputListingAll.txt
-OutputListingMain.txt
+!*.py
+!*.md
+!*.ini
