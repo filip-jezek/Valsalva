@@ -68288,7 +68288,18 @@ P_hs_plus_dist"),
       end VolumeCompensation;
 
       model CPR
-        extends Valsalva.CVS_valsalva(useAutonomousPhi(y = false), thoracic_pressure_ramp(amplitude = 20*133, width = 0.3, period = 1, nperiod = 10, offset = 0, startTime = 60), phi_fixed(amplitude = 0, offset = 1), settings(HR_nominal = 1.6666666666667e-08), condHRPhi(disconnected = true), heartRate(HR_max = settings.HR_nominal, HR_nom = settings.HR_nominal));
+        extends Valsalva.CVS_valsalva(useAutonomousPhi(y = false), thoracic_pressure_ramp(amplitude = 20*133, width = 0.3, period = 1, nperiod = 10, offset = 0, startTime = 60), phi_fixed(amplitude = 0, offset = 1), settings(HR_nominal = 1.6666666666667e-08), condHRPhi(disconnected = true),
+          break heartRate);
+      Modelica.Blocks.Sources.Ramp failingHeartRate(
+          height=-0.999,
+          offset=1,
+          duration=0.1,
+          startTime=5)
+          "Phi for when the model is not using the autonomous feedback phi from baroreflex"
+          annotation (Placement(transformation(extent={{32,-40},{12,-20}})));
+      equation
+        connect(failingHeartRate.y, heartComponent.frequency_input) annotation
+          (Line(points={{11,-30},{-6,-30},{-6,-22},{-16,-22}}, color={0,0,127}));
       end CPR;
     end Experiments;
 
