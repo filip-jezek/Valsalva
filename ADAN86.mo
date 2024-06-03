@@ -68286,6 +68286,10 @@ P_hs_plus_dist"),
          end if;
         end VolumeLoading;
       end VolumeCompensation;
+
+      model CPR
+        extends Valsalva.CVS_valsalva(useAutonomousPhi(y = false), thoracic_pressure_ramp(amplitude = 20*133, width = 0.3, period = 1, nperiod = 10, offset = 0, startTime = 60), phi_fixed(amplitude = 0, offset = 1), settings(HR_nominal = 1.6666666666667e-08), condHRPhi(disconnected = true), heartRate(HR_max = settings.HR_nominal, HR_nom = settings.HR_nominal));
+      end CPR;
     end Experiments;
 
   annotation(preferredView="info",
